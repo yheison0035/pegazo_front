@@ -5,7 +5,7 @@ import { CheckIcon } from "@heroicons/react/24/outline";
 
 import Thead from "./segments/thead";
 import InputFilters from "./segments/InputsFilters";
-import Modal from "./segments/modalAdvisor";
+import ModalAdvisor from "./segments/modalAdvisor";
 import Pagination from "./segments/pagination";
 import Actions from "./segments/actions";
 import ConfirmDeleteModal from "./segments/confirmDeleteModal";
