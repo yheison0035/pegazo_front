@@ -1,0 +1,18 @@
+export const stateCustomer = [
+  "Sin Contactar",
+  "INTENTANDO CONTACTAR",
+  "REPORTADO",
+  "INTERESADO",
+  "CREDIORBE",
+  "PROGRESER",
+  "SUFI",
+  "VANTI",
+  "BBVA",
+  "CAJA SOCIAL",
+  "NU BANK",
+  "ADDI",
+  "BANCO BOGOTÁ",
+  "VEHIGRUPO",
+  "APROBADO OTROS",
+  "VENTA",
+];
