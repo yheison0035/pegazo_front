@@ -8,17 +8,21 @@ export default function ChangeAdvisorModal({
   onClose,
   onSave,
   currentAdvisor,
-  advisors = [],
+  advisors: initialAdvisors = [],
+  loading: initialLoading = false,
 }) {
   const [newAdvisor, setNewAdvisor] = useState('');
+  const [loading, setLoading] = useState(initialLoading);
 
-  if (!isOpen) return null;
-
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!newAdvisor) return;
-    onSave(newAdvisor);
+    setLoading(true);
+    await onSave(newAdvisor);
+    setLoading(false);
     setNewAdvisor('');
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
@@ -31,7 +35,7 @@ export default function ChangeAdvisorModal({
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition"
+            className="text-gray-400 hover:text-gray-600 transition cursor-pointer"
           >
             <XMarkIcon className="w-6 h-6" />
           </button>
@@ -43,7 +47,7 @@ export default function ChangeAdvisorModal({
               Asesor anterior
             </label>
             <div className="w-full bg-gray-100 text-gray-700 px-4 py-2 rounded-lg border border-gray-300">
-              {currentAdvisor || 'No asignado'}
+              {currentAdvisor}
             </div>
           </div>
 
@@ -54,10 +58,11 @@ export default function ChangeAdvisorModal({
             <select
               value={newAdvisor}
               onChange={(e) => setNewAdvisor(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-700 focus:ring-2 focus:ring-green-500 focus:outline-none"
+              disabled={loading}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-700 focus:ring-2 focus:ring-green-500 focus:outline-none disabled:opacity-50"
             >
               <option value="">Seleccione un asesor</option>
-              {advisors.map((advisor) => (
+              {initialAdvisors.map((advisor) => (
                 <option key={advisor.id} value={advisor.id}>
                   {advisor.name}
                 </option>
@@ -69,17 +74,22 @@ export default function ChangeAdvisorModal({
         <div className="flex justify-end mt-6 gap-3">
           <button
             onClick={onClose}
-            className="px-5 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
+            disabled={loading}
+            className="px-5 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition cursor-pointer disabled:opacity-50"
           >
             Volver
           </button>
           <button
             onClick={handleSave}
-            disabled={!newAdvisor}
-            className="inline-flex items-center gap-2 px-4 py-2 mr-2 border border-transparent bg-blue-600 text-white font-medium rounded-lg hover:bg-white hover:text-orange-600 hover:border-orange-600 transition-colors duration-200 cursor-pointer"
+            disabled={!newAdvisor || loading}
+            className="inline-flex items-center gap-2 px-4 py-2 border border-transparent bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors duration-200 cursor-pointer"
           >
-            <CheckCircleIcon className="w-5 h-5" />
-            Guardar
+            {loading ? (
+              <span className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
+            ) : (
+              <CheckCircleIcon className="w-5 h-5" />
+            )}
+            {loading ? 'Guardando...' : 'Guardar'}
           </button>
         </div>
       </div>

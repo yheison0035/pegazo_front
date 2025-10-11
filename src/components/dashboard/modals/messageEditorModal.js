@@ -1,14 +1,47 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import BtnSave from '../buttons/save';
+import useMotivation from '@/lib/api/hooks/useMotivation';
+import AlertModal from './alertModal';
 
-export default function MessageEditorModal({
-  initialMessage,
-  onSave,
-  onClose,
-}) {
-  const [message, setMessage] = useState(initialMessage);
+export default function MessageEditorModal({ onClose }) {
+  const {
+    getMotivationMessage,
+    createMotivation,
+    updateMotivation,
+    loading,
+    error,
+  } = useMotivation();
+  const [alert, setAlert] = useState({ type: '', message: '', url: '' });
+  const [message, setMessage] = useState({
+    title: '',
+    subtitle: '',
+    items: [],
+  });
+
+  useEffect(() => {
+    fetchMessage();
+  }, []);
+
+  const fetchMessage = async () => {
+    try {
+      const { data } = await getMotivationMessage();
+      if (!data || !data[0]) return;
+      const { id = '', title = '', subtitle = '', items = [] } = data[0];
+      setMessage({
+        id,
+        title,
+        subtitle,
+        items,
+      });
+    } catch (err) {
+      setAlert({
+        type: 'error',
+        message: err.message || 'Error cargando motivación.',
+      });
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -17,12 +50,15 @@ export default function MessageEditorModal({
 
   const handleListChange = (index, value) => {
     const updated = [...message.items];
-    updated[index] = value;
+    updated[index] = { description: value };
     setMessage((prev) => ({ ...prev, items: updated }));
   };
 
   const addItem = () => {
-    setMessage((prev) => ({ ...prev, items: [...prev.items, ''] }));
+    setMessage((prev) => ({
+      ...prev,
+      items: [...prev.items, { description: '' }],
+    }));
   };
 
   const removeItem = (index) => {
@@ -32,10 +68,28 @@ export default function MessageEditorModal({
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSave(message);
-    onClose();
+    try {
+      if (message.id) {
+        await updateMotivation(message.id, message);
+        setAlert({
+          type: 'success',
+          message: 'Se actualizo correctamente.',
+        });
+      } else {
+        await createMotivation(message);
+        setAlert({
+          type: 'success',
+          message: 'Se creo correctamente.',
+        });
+      }
+    } catch (err) {
+      setAlert({
+        type: 'error',
+        message: err.message || 'Error guardando datos.',
+      });
+    }
   };
 
   return (
@@ -44,66 +98,84 @@ export default function MessageEditorModal({
 
       <div className="relative bg-white rounded-2xl shadow-2xl max-w-xl w-full p-6 z-10">
         <h2 className="text-xl font-bold text-gray-800 mb-4 text-center">
-          Editar Mensaje Motivacional
+          {message.id
+            ? 'Editar Mensaje Motivacional'
+            : 'Crear Mensaje Motivacional'}
         </h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
-            name="title"
-            value={message.title}
-            onChange={handleChange}
-            placeholder="Título principal"
-            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500"
-          />
-          <input
-            type="text"
-            name="subtitle"
-            value={message.subtitle}
-            onChange={handleChange}
-            placeholder="Subtítulo"
-            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500"
-          />
 
-          <div className="space-y-2">
-            <p className="font-medium text-gray-700">Lista de beneficios:</p>
-            {message.items.map((item, index) => (
-              <div key={index} className="flex gap-2">
-                <input
-                  type="text"
-                  value={item.description}
-                  onChange={(e) => handleListChange(index, e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500"
-                />
-                <button
-                  type="button"
-                  onClick={() => removeItem(index)}
-                  className="text-red-500 hover:text-red-700"
-                >
-                  ✖
-                </button>
-              </div>
-            ))}
-            <button
-              type="button"
-              onClick={addItem}
-              className="px-3 py-1 bg-green-500 text-white rounded-lg text-sm hover:bg-green-600"
-            >
-              + Agregar ítem
-            </button>
-          </div>
+        {loading ? (
+          <p className="text-center text-gray-500">Cargando...</p>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <input
+              type="text"
+              name="title"
+              value={message.title}
+              onChange={handleChange}
+              placeholder="Título principal"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500"
+            />
+            <input
+              type="text"
+              name="subtitle"
+              value={message.subtitle}
+              onChange={handleChange}
+              placeholder="Subtítulo"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500"
+            />
 
-          <div className="flex justify-end gap-2 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
-            >
-              Cancelar
-            </button>
-            <BtnSave />
-          </div>
-        </form>
+            <div className="space-y-2">
+              <p className="font-medium text-gray-700">Lista de beneficios:</p>
+              {message?.items?.map((item, index) => (
+                <div key={index} className="flex gap-2">
+                  <input
+                    type="text"
+                    value={item.description}
+                    onChange={(e) => handleListChange(index, e.target.value)}
+                    placeholder="Escribe un beneficio..."
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeItem(index)}
+                    className="text-red-500 hover:text-red-700 cursor-pointer"
+                  >
+                    ✖
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={addItem}
+                className="px-3 py-1 bg-green-500 text-white rounded-lg text-sm hover:bg-green-600 cursor-pointer"
+              >
+                + Agregar ítem
+              </button>
+            </div>
+
+            {error && (
+              <p className="text-red-500 text-sm text-center">{error}</p>
+            )}
+
+            <div className="flex justify-end gap-2 pt-4">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 cursor-pointer"
+              >
+                Cerrar
+              </button>
+              <BtnSave disabled={loading} />
+            </div>
+          </form>
+        )}
       </div>
+      <AlertModal
+        type={alert.type}
+        message={alert.message}
+        onClose={() => setAlert({ type: '', message: '', url: '' })}
+        url={alert.url}
+      />
     </div>
   );
 }

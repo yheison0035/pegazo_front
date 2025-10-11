@@ -9,7 +9,14 @@ import {
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 
-export default function AlertModal({ type = 'info', message, onClose, url }) {
+export default function AlertModal({
+  type = 'info',
+  message,
+  onClose,
+  url,
+  title,
+  buttonText,
+}) {
   if (!message) return null;
 
   const icons = {
@@ -19,12 +26,14 @@ export default function AlertModal({ type = 'info', message, onClose, url }) {
     info: <InformationCircleIcon className="w-12 h-12 text-blue-500" />,
   };
 
-  const titles = {
+  const defaultTitles = {
     success: 'Éxito',
     error: 'Error',
     warning: 'Advertencia',
     info: 'Información',
   };
+
+  const defaultButtonText = 'Aceptar';
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
@@ -39,18 +48,27 @@ export default function AlertModal({ type = 'info', message, onClose, url }) {
         <div className="flex justify-center mb-4">{icons[type]}</div>
 
         <h3 className="text-xl font-semibold text-gray-800 mb-2">
-          {titles[type]}
+          {title || defaultTitles[type]}
         </h3>
 
         <p className="text-gray-600">{message}</p>
 
         <div className="mt-6">
-          <Link
-            href={url}
-            className="px-6 py-2 bg-orange-500 text-white font-medium rounded-lg shadow hover:bg-orange-600 transition cursor-pointer"
-          >
-            <span>Aceptar</span>
-          </Link>
+          {url ? (
+            <Link
+              href={url}
+              className="px-6 py-2 bg-orange-500 text-white font-medium rounded-lg shadow hover:bg-orange-600 transition cursor-pointer"
+            >
+              {buttonText || defaultButtonText}
+            </Link>
+          ) : (
+            <button
+              onClick={onClose}
+              className="px-6 py-2 bg-orange-500 text-white font-medium rounded-lg shadow hover:bg-orange-600 transition cursor-pointer"
+            >
+              {buttonText || defaultButtonText}
+            </button>
+          )}
         </div>
       </div>
     </div>

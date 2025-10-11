@@ -1,31 +1,39 @@
-import { getRole } from "@/custom/roles";
-import SearchFilter from "./inputSearch/searchFilter";
-import { getWiew } from "@/custom/views";
+import usePermissions from '@/hooks/usePermissions';
+import SearchFilter from './inputSearch/searchFilter';
+import { Roles } from '@/config/roles';
 
 export default function InputFilters({
   rol,
   view,
   filters,
   handleFilterChange,
-  delivered,
 }) {
+  const { canViewAll } = usePermissions();
+
   const allFilters = [
     {
-      name: "advisor",
-      title: "Asesor",
-      show: rol === getRole("ADMIN") && view === getWiew("CUSTOMERS"),
+      name: 'advisor',
+      title: 'Asesor',
+      show:
+        (canViewAll && view === 'customers') ||
+        (view === 'delivered' && rol !== Roles.ASESOR),
     },
-    { name: "name", title: "Nombre", show: true },
-    { name: "email", title: "Correo", show: true },
-    { name: "phone", title: "Teléfono", show: true },
-    { name: "state", title: "Estado", show: view === getWiew("CUSTOMERS") },
+    { name: 'role', title: 'Rol', show: view === 'advisors' },
+    { name: 'name', title: 'Nombre', show: true },
+    {
+      name: 'deliveryDate',
+      title: 'Fecha de Entrega',
+      show: view === 'delivered',
+    },
+    { name: 'plateNumber', title: 'Placa', show: view === 'delivered' },
+    { name: 'email', title: 'Correo', show: true },
+    { name: 'phone', title: 'Teléfono', show: true },
+    { name: 'state', title: 'Estado', show: view === 'customers' },
   ];
 
   return (
     <tr>
-      {rol === getRole("ADMIN") &&
-        view === getWiew("CUSTOMERS") &&
-        !delivered && <th></th>}
+      {canViewAll && view === 'customers' && <th></th>}
 
       {allFilters
         .filter((f) => f.show)
@@ -34,7 +42,7 @@ export default function InputFilters({
             <SearchFilter
               name={name}
               title={title}
-              value={filters[name] || ""}
+              value={filters[name] || ''}
               className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
               handleFilterChange={handleFilterChange}
             />

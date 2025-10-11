@@ -1,55 +1,48 @@
-"use client";
+'use client';
 
-import { useAuth } from "@/context/authContext";
+import { useAuth } from '@/context/authContext';
 import {
   UserGroupIcon,
   UsersIcon,
   ArrowLeftOnRectangleIcon,
   ClipboardDocumentCheckIcon,
-} from "@heroicons/react/24/outline";
+} from '@heroicons/react/24/outline';
 
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export default function NavLinks() {
-  const { usuario, loading } = useAuth();
+  const { usuario, loading, logout } = useAuth();
   const pathname = usePathname();
-  const router = useRouter();
-
-  const handleLogout = () => {
-    localStorage.removeItem("usuario");
-    localStorage.removeItem("hasSeenMotivation");
-    router.push("/CRM");
-  };
 
   if (loading) return null;
   if (!usuario) return null;
 
   const links = [
     {
-      name: "Clientes",
-      href: "/CRM/dashboard/customers",
+      name: 'Clientes',
+      href: '/CRM/dashboard/customers',
       icon: UsersIcon,
-      roles: ["Administrador", "Asesor"],
+      roles: ['SUPER_ADMIN', 'ADMIN', 'COORDINADOR', 'ASESOR'],
     },
     {
-      name: "Asesores",
-      href: "/CRM/dashboard/advisors",
+      name: 'Asesores',
+      href: '/CRM/dashboard/advisors',
       icon: UserGroupIcon,
-      roles: ["Administrador"],
+      roles: ['SUPER_ADMIN', 'ADMIN'],
     },
     {
-      name: "Entregados",
-      href: "/CRM/dashboard/delivered",
+      name: 'Entregados',
+      href: '/CRM/dashboard/delivered',
       icon: ClipboardDocumentCheckIcon,
-      roles: ["Administrador", "Asesor"],
+      roles: ['SUPER_ADMIN', 'ADMIN', 'COORDINADOR', 'ASESOR'],
     },
   ];
 
   return (
     <nav className="flex flex-col w-full px-6 space-y-4">
       {links
-        .filter((link) => link.roles.includes(usuario.rol))
+        .filter((link) => link.roles.includes(usuario.role))
         .map((link) => {
           const LinkIcon = link.icon;
           const isActive = pathname.startsWith(link.href);
@@ -60,8 +53,8 @@ export default function NavLinks() {
               href={link.href}
               className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition ${
                 isActive
-                  ? "bg-sky-100 text-gray-800"
-                  : "text-gray-300 hover:text-white hover:bg-gray-800"
+                  ? 'bg-sky-100 text-gray-800'
+                  : 'text-gray-300 hover:text-white hover:bg-gray-800'
               }`}
             >
               <LinkIcon className="w-6 h-6" />
@@ -71,7 +64,7 @@ export default function NavLinks() {
         })}
 
       <button
-        onClick={handleLogout}
+        onClick={logout}
         className="flex items-center space-x-3 px-3 py-2 rounded-lg transition text-gray-300 hover:text-white hover:bg-gray-800 cursor-pointer"
       >
         <ArrowLeftOnRectangleIcon className="w-6 h-6" />
