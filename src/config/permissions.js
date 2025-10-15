@@ -19,16 +19,6 @@ export const ROLE_PERMISSIONS = {
     canImport: true,
     canAssign: true,
   },
-  COORDINADOR: {
-    canDoEverything: false,
-    canViewAll: true,
-    canCreate: false,
-    canEdit: false,
-    canDelete: false,
-    canExport: false,
-    canImport: true,
-    canAssign: true,
-  },
   ASESOR: {
     canDoEverything: false,
     canViewAll: false,

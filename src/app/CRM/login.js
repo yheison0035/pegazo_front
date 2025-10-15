@@ -26,16 +26,16 @@ export default function Login() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg pb-9 mx-4 sm:mx-auto">
-        <div className="bg-black w-full rounded-t-2xl flex justify-center py-6">
+        <div className="bg-blue-950 w-full rounded-t-2xl flex justify-center py-6">
           <img
-            src="/images/logoMotoRenting.png"
+            src="/images/logo.png"
             alt="Logo MotoRenting"
             className="h-[100px] w-auto"
           />
         </div>
 
         <h1 className="text-xl font-semibold text-gray-800 text-center py-4">
-          CRM - MotoRenting SAS
+          EuropeaTvStore
         </h1>
 
         <form
