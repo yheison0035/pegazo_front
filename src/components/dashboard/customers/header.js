@@ -7,27 +7,26 @@ import {
 import Link from 'next/link';
 
 export default function Header({
-  archivo,
+  typeUrl,
+  type,
+  file,
   handleFileChange,
   handleRemoveFile,
   handleUpload,
 }) {
-  const { canImport, canCreate } = usePermissions();
   return (
     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-      {canCreate && (
-        <Link
-          href="/CRM/dashboard/customers/new"
-          className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm transition"
-        >
-          <PlusIcon className="w-4 h-4" />
-          <span>Agregar cliente</span>
-        </Link>
-      )}
+      <Link
+        href={`/CRM/dashboard/${typeUrl}/new`}
+        className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm transition"
+      >
+        <PlusIcon className="w-4 h-4" />
+        <span>Agregar {type}</span>
+      </Link>
 
-      {canImport && (
+      {type !== 'proveedor' && (
         <>
-          {!archivo ? (
+          {!file ? (
             <label className="flex items-center gap-2 cursor-pointer bg-orange-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-orange-700 transition">
               <DocumentArrowDownIcon className="w-4 h-4" />
               Importar Excel
@@ -41,7 +40,7 @@ export default function Header({
           ) : (
             <div className="flex items-center bg-green-100 border border-green-400 px-4 py-2 rounded-lg">
               <span className="text-green-800 text-sm font-medium truncate max-w-[200px]">
-                {archivo.name}
+                {file.name}
               </span>
               <button
                 onClick={handleRemoveFile}

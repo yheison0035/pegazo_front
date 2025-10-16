@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import useMotivation from '@/lib/api/hooks/useMotivation';
 
 export default function AlertMotivation({ onClose }) {
   const { getMotivationMessage } = useMotivation();
   const [motivationMessage, setMotivationMessage] = useState(null);
 
-  const fetchMessage = async () => {
+  const fetchMessage = useCallback(async () => {
     try {
       const { data } = await getMotivationMessage();
       if (!data || !data[0]) return;
@@ -15,11 +15,11 @@ export default function AlertMotivation({ onClose }) {
     } catch (err) {
       console.error(err);
     }
-  };
+  }, [getMotivationMessage]);
 
   useEffect(() => {
     fetchMessage();
-  }, []);
+  }, [fetchMessage]);
 
   if (!motivationMessage) return null;
 

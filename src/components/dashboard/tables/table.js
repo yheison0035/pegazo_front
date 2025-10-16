@@ -1,37 +1,28 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import Thead from './segments/thead';
 import InputFilters from './segments/InputsFilters';
-import ModalAdvisor from './segments/modalAdvisor';
 import Pagination from './segments/pagination';
-import ChangeAdvisorModal from '../modals/changeAdvisorModal';
-import useCustomers from '@/lib/api/hooks/useCustomers';
+import useCustomers from '@/lib/api/hooks/useProducts';
 import AlertModal from '../modals/alertModal';
 import useUsers from '@/lib/api/hooks/useUsers';
-import AssignAdvisor from './segments/assignAdvisor';
 import ContentData from './segments/contentData';
 import usePermissions from '@/hooks/usePermissions';
 
 const Table = ({ info = [], view, setSelected, rol, fetchData }) => {
   const [filtered, setFiltered] = useState(info);
   const [selectedIds, setSelectedIds] = useState([]);
-  const [selectedAdvisor, setSelectedAdvisor] = useState('');
-  const [showModal, setShowModal] = useState(false);
-  const [showModalChangeAdvisor, setShowModalChangeAdvisor] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [alert, setAlert] = useState({ type: '', message: '', url: '' });
-  const [advisors, setAdvisors] = useState([]);
+  const [users, setUsers] = useState([]);
 
   const { getUsers } = useUsers();
-  const { assignMultipleCustomers, loading, assignAdvisor } = useCustomers();
   const { deleteCustomer, loading: deleting, error } = useCustomers();
-
-  const { canViewAll, canCreate } = usePermissions();
 
   const [filters, setFilters] = useState({
     role: '',
@@ -106,18 +97,18 @@ const Table = ({ info = [], view, setSelected, rol, fetchData }) => {
     setCurrentPage(1);
   }, [filters, info, view]);
 
-  useEffect(() => {
-    canViewAll && canCreate && fetchAdvisors();
-  }, []);
-
-  const fetchAdvisors = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       const { data } = await getUsers();
-      setAdvisors(data);
+      setUsers(data);
     } catch (err) {
       console.error(err);
     }
-  };
+  }, [getUsers]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -157,26 +148,6 @@ const Table = ({ info = [], view, setSelected, rol, fetchData }) => {
     );
   };
 
-  const handleAssignMultiple = async () => {
-    if (!selectedAdvisor || selectedIds.length === 0) return;
-    try {
-      await assignMultipleCustomers(selectedIds, selectedAdvisor);
-      setAlert({
-        type: 'success',
-        message: `Se asignaron ${selectedIds.length} clientes al asesor.`,
-      });
-      setSelectedIds([]);
-      setSelectedAdvisor('');
-      setShowModal(false);
-      await fetchData();
-    } catch (err) {
-      setAlert({
-        type: 'error',
-        message: err.message || 'Error al asignar clientes',
-      });
-    }
-  };
-
   const getCustomerLockState = (index, customer) => {
     if (rol !== 'ASESOR' || view !== 'customers') return false;
     if (customer.comments?.length > 0) return false;
@@ -190,25 +161,6 @@ const Table = ({ info = [], view, setSelected, rol, fetchData }) => {
     return false;
   };
 
-  const handleAssignAdvisor = async (customerId, newAdvisorId) => {
-    try {
-      await assignAdvisor(Number(customerId), Number(newAdvisorId));
-
-      setAlert({
-        type: 'success',
-        message: `Cliente reasignado correctamente al nuevo asesor.`,
-      });
-      await fetchData();
-    } catch (err) {
-      setAlert({
-        type: 'error',
-        message: err.message || 'Error al reasignar asesor',
-      });
-    } finally {
-      setShowModalChangeAdvisor(null);
-    }
-  };
-
   const totalPages = Math.ceil(filtered.length / rowsPerPage);
   const paginatedData = filtered.slice(
     (currentPage - 1) * rowsPerPage,
@@ -217,12 +169,6 @@ const Table = ({ info = [], view, setSelected, rol, fetchData }) => {
 
   return (
     <>
-      <AssignAdvisor
-        rol={rol}
-        view={view}
-        selectedIds={selectedIds}
-        setShowModal={setShowModal}
-      />
       <table className="min-w-full text-sm text-left text-gray-700">
         <Thead rol={rol} view={view} />
 
@@ -248,7 +194,6 @@ const Table = ({ info = [], view, setSelected, rol, fetchData }) => {
             deleteTarget={deleteTarget}
             confirmDelete={confirmDelete}
             deleting={deleting}
-            setShowModalChangeAdvisor={setShowModalChangeAdvisor}
           />
         </tbody>
       </table>
@@ -262,29 +207,6 @@ const Table = ({ info = [], view, setSelected, rol, fetchData }) => {
         setCurrentPage={setCurrentPage}
       />
 
-      {showModal && (
-        <ModalAdvisor
-          selectedAdvisor={selectedAdvisor}
-          setShowModal={setShowModal}
-          setSelectedAdvisor={setSelectedAdvisor}
-          handleAssignMultiple={handleAssignMultiple}
-          loading={loading}
-          advisors={advisors}
-        />
-      )}
-
-      {showModalChangeAdvisor && (
-        <ChangeAdvisorModal
-          isOpen={!!showModalChangeAdvisor}
-          onClose={() => setShowModalChangeAdvisor(null)}
-          onSave={(newAdvisorId) =>
-            handleAssignAdvisor(showModalChangeAdvisor.id, newAdvisorId)
-          }
-          currentAdvisor={showModalChangeAdvisor.advisor?.name || 'Sin Asignar'}
-          advisors={advisors}
-          loading={loading}
-        />
-      )}
       <AlertModal
         type={alert.type}
         message={alert.message}

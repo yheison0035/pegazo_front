@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import useUsers from '@/lib/api/hooks/useUsers';
 
 import DepartaCiudad from '@/components/dashboard/select/depart_ciud';
@@ -17,31 +17,28 @@ export default function CustomerForm({
   setFormData,
   handleReset,
   isLocked = false,
-  newComment,
-  setNewComment,
-  handleAddComment,
   loading,
   mode = 'edit',
 }) {
-  const [advisors, setAdvisors] = useState([]);
   const [states, setStates] = useState([]);
 
-  const { getUsers } = useUsers();
   const { getStates } = useStates();
 
-  const { canViewAll, canAssign } = usePermissions();
+  const fetchStates = useCallback(async () => {
+    try {
+      const data = await getStates();
+      setStates(data);
+    } catch (err) {
+      console.error(err);
+    }
+  }, [getStates]);
 
   useEffect(() => {
-    canViewAll && fetchUsers();
     fetchStates();
-  }, [formData]);
+  }, [formData, fetchStates]);
 
   const handleChange = (e) => {
     let { name, value } = e.target;
-
-    if (name === 'plateNumber') {
-      value = value.toUpperCase();
-    }
 
     setFormData((prev) => ({
       ...prev,
@@ -49,28 +46,6 @@ export default function CustomerForm({
       ...(name === 'department' ? { city: '' } : {}),
     }));
   };
-
-  const fetchUsers = async () => {
-    try {
-      const { data } = await getUsers();
-      setAdvisors(data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const fetchStates = async () => {
-    try {
-      const data = await getStates();
-      setStates(data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const shouldShowDeliveryState = Number(formData.stateId) === 18;
-  const shouldShowPlateNumber =
-    shouldShowDeliveryState && formData.deliveryState === 'ENTREGADO';
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
@@ -103,28 +78,6 @@ export default function CustomerForm({
           </div>
         ))}
 
-        {canAssign && (
-          <div className="flex flex-col">
-            <label className="text-sm font-medium text-gray-700 mb-1">
-              Asignar Asesor
-            </label>
-            <select
-              name="advisorId"
-              value={formData.advisorId || ''}
-              onChange={handleChange}
-              disabled={isLocked}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm shadow-sm 
-                focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
-            >
-              <option value="">Seleccione un asesor</option>
-              {advisors?.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
         <DepartaCiudad
           formData={formData}
           handleChange={handleChange}
@@ -151,56 +104,7 @@ export default function CustomerForm({
             ))}
           </select>
         </div>
-
-        {shouldShowDeliveryState && (
-          <>
-            <div className="flex flex-col">
-              <label className="text-sm font-medium text-gray-700 mb-1">
-                Entregado
-              </label>
-              <select
-                name="deliveryState"
-                value={formData.deliveryState || ''}
-                onChange={handleChange}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm shadow-sm 
-                focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
-                required
-              >
-                <option value="">Seleccione un estado</option>
-                <option value="ENTREGADO">Entregado</option>
-                <option value="PENDIENTE_ENTREGA">Pendiente de Entrega</option>
-              </select>
-            </div>
-
-            {shouldShowPlateNumber && (
-              <div className="flex flex-col">
-                <label className="text-sm font-medium text-gray-700 mb-1">
-                  Número de Placa
-                </label>
-                <input
-                  type="text"
-                  name="plateNumber"
-                  value={formData.plateNumber || ''}
-                  onChange={handleChange}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm shadow-sm focus:outline-none transition focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                  required
-                />
-              </div>
-            )}
-          </>
-        )}
       </div>
-
-      {mode === 'edit' && (
-        <>
-          <AddComment
-            newComment={newComment}
-            setNewComment={setNewComment}
-            handleAddComment={handleAddComment}
-          />
-          <CommentsHistory formData={formData} />
-        </>
-      )}
 
       <div className="flex justify-end mt-6 gap-3">
         <BtnReturn route="/CRM/dashboard/customers" />

@@ -11,30 +11,17 @@ export default function InputFilters({
   const { canViewAll } = usePermissions();
 
   const allFilters = [
-    {
-      name: 'advisor',
-      title: 'Asesor',
-      show:
-        (canViewAll && view === 'customers') ||
-        (view === 'delivered' && rol !== Roles.ASESOR),
-    },
-    { name: 'role', title: 'Rol', show: view === 'advisors' },
-    { name: 'name', title: 'Nombre', show: true },
-    {
-      name: 'deliveryDate',
-      title: 'Fecha de Entrega',
-      show: view === 'delivered',
-    },
-    { name: 'plateNumber', title: 'Placa', show: view === 'delivered' },
-    { name: 'email', title: 'Correo', show: true },
-    { name: 'phone', title: 'Teléfono', show: true },
-    { name: 'state', title: 'Estado', show: view === 'customers' },
+    { name: 'sku', title: 'Código', show: true },
+    { name: 'name', title: 'Nombre Producto', show: true },
+    { name: 'color', title: 'Color', show: true },
+    { name: 'provider', title: 'Proveedor', show: true },
+    { name: 'quantity', title: 'Cantidad', show: true },
+    { name: 'price', title: 'Precio', show: true },
+    { name: 'point', title: 'Punto', show: true },
   ];
 
   return (
     <tr>
-      {canViewAll && view === 'customers' && <th></th>}
-
       {allFilters
         .filter((f) => f.show)
         .map(({ name, title }) => (

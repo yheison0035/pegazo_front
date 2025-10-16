@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import {
   getUsers,
   getUserById,
@@ -16,7 +16,7 @@ export default function useUsers() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const wrap = async (fn, ...args) => {
+  const wrap = useCallback(async (fn, ...args) => {
     setLoading(true);
     setError(null);
     try {
@@ -27,17 +27,35 @@ export default function useUsers() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  const getUsersFn = useCallback(() => wrap(getUsers), [wrap]);
+  const getUserByIdFn = useCallback((id) => wrap(getUserById, id), [wrap]);
+  const createUserFn = useCallback((dto) => wrap(createUser, dto), [wrap]);
+  const updateUserFn = useCallback(
+    (id, dto) => wrap(updateUser, id, dto),
+    [wrap]
+  );
+  const deleteUserFn = useCallback((id) => wrap(deleteUser, id), [wrap]);
+  const toggleUserRoleFn = useCallback(
+    (id) => wrap(toggleUserRole, id),
+    [wrap]
+  );
+  const uploadUserAvatarFn = useCallback(
+    (file) => wrap(uploadUserAvatar, file),
+    [wrap]
+  );
+  const deleteUserAvatarFn = useCallback(() => wrap(deleteUserAvatar), [wrap]);
 
   return {
-    getUsers: () => wrap(getUsers),
-    getUserById: (id) => wrap(getUserById, id),
-    createUser: (dto) => wrap(createUser, dto),
-    updateUser: (id, dto) => wrap(updateUser, id, dto),
-    deleteUser: (id) => wrap(deleteUser, id),
-    toggleUserRole: (id) => wrap(toggleUserRole, id),
-    uploadUserAvatar: (file) => wrap(uploadUserAvatar, file),
-    deleteUserAvatar: () => wrap(deleteUserAvatar),
+    getUsers: getUsersFn,
+    getUserById: getUserByIdFn,
+    createUser: createUserFn,
+    updateUser: updateUserFn,
+    deleteUser: deleteUserFn,
+    toggleUserRole: toggleUserRoleFn,
+    uploadUserAvatar: uploadUserAvatarFn,
+    deleteUserAvatar: deleteUserAvatarFn,
     loading,
     error,
   };

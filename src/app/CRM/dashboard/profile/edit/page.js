@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import AdvisorForm from '@/components/dashboard/form/advisorForm';
 import useUsers from '@/lib/api/hooks/useUsers';
+import UsersForm from '@/components/dashboard/form/usersForm';
 
 export default function EditProfile() {
   const [perfil, setPerfil] = useState({});
@@ -22,7 +22,7 @@ export default function EditProfile() {
   };
 
   return (
-    <AdvisorForm
+    <UsersForm
       mode="edit"
       loading={loading}
       initialData={perfil}

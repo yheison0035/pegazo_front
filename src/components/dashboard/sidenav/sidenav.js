@@ -15,7 +15,7 @@ export default function SideNavigation() {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="md:hidden p-2 m-2 text-white bg-gray-900 rounded cursor-pointer"
+        className="md:hidden p-2 m-2 text-white bg-gray-950 rounded cursor-pointer"
       >
         <Bars3Icon className="w-6 h-6" />
       </button>
@@ -41,7 +41,7 @@ export default function SideNavigation() {
           Editar perfil
         </Link>
         <h6 className="text-sm text-orange-400 font-semibold text-center">
-          {usuario?.role} - {usuario?.name}
+          Bienvenido(a) {usuario?.name}
         </h6>
         <div className="w-full border-t border-gray-700 my-4"></div>
         <NavLinks />

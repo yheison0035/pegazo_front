@@ -19,25 +19,6 @@ export default function Actions({
   const { canAssign, canEdit, canDelete } = usePermissions();
   return (
     <div className="flex justify-center space-x-3">
-      {canAssign && view === 'customers' && (
-        <div className="relative group flex items-center">
-          <button
-            onClick={() => setShowModalChangeAdvisor(info)}
-            disabled={isLocked}
-            className={`${
-              isLocked
-                ? 'text-gray-400 cursor-not-allowed'
-                : 'text-blue-500 hover:text-blue-700'
-            } cursor-pointer`}
-          >
-            <ArrowPathIcon className="w-5 h-5" />
-          </button>
-          <span className="absolute -top-15 left-1/2 -translate-x-1/2 scale-0 group-hover:scale-100 transition bg-black text-white text-xs rounded px-2 py-1 cursor-pointer">
-            Cambiar de Asesor
-          </span>
-        </div>
-      )}
-
       <div className="relative group flex items-center">
         <button
           onClick={() => setSelected(info)}
@@ -55,23 +36,21 @@ export default function Actions({
         </span>
       </div>
 
-      {canEdit && view !== 'delivered' && (
-        <div className="relative group flex items-center">
-          <Link
-            href={isLocked ? '#' : `/CRM/dashboard/${view}/edit/${info.id}`}
-            className={`${
-              isLocked
-                ? 'text-gray-400 cursor-not-allowed'
-                : 'text-green-500 hover:text-green-700'
-            }`}
-          >
-            <PencilIcon className="w-5 h-5" />
-          </Link>
-          <span className="absolute -top-8 left-1/2 -translate-x-1/2 scale-0 group-hover:scale-100 transition bg-black text-white text-xs rounded px-2 py-1">
-            Editar
-          </span>
-        </div>
-      )}
+      <div className="relative group flex items-center">
+        <Link
+          href={isLocked ? '#' : `/CRM/dashboard/${view}/edit/${info.id}`}
+          className={`${
+            isLocked
+              ? 'text-gray-400 cursor-not-allowed'
+              : 'text-green-500 hover:text-green-700'
+          }`}
+        >
+          <PencilIcon className="w-5 h-5" />
+        </Link>
+        <span className="absolute -top-8 left-1/2 -translate-x-1/2 scale-0 group-hover:scale-100 transition bg-black text-white text-xs rounded px-2 py-1">
+          Editar
+        </span>
+      </div>
 
       {canDelete && (
         <div className="relative group flex items-center">

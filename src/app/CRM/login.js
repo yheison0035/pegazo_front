@@ -17,7 +17,7 @@ export default function Login() {
     e.preventDefault();
     try {
       await login(email, password);
-      router.push('/CRM/dashboard/customers');
+      router.push('/CRM/dashboard/sales');
     } catch (err) {
       setError(err.message || 'Error en login');
     }
@@ -35,7 +35,7 @@ export default function Login() {
         </div>
 
         <h1 className="text-xl font-semibold text-gray-800 text-center py-4">
-          EuropeaTvStore
+          EUROPEATVSTORE
         </h1>
 
         <form
@@ -59,7 +59,7 @@ export default function Login() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Ingrese su email"
               required
-              className="w-full px-4 py-2 border text-gray-600 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-transparent placeholder-gray-500"
+              className="w-full px-4 py-2 border text-gray-600 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-950 bg-transparent placeholder-gray-500"
             />
           </div>
 
@@ -80,7 +80,7 @@ export default function Login() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Ingrese su contraseña"
                 required
-                className="w-full px-4 py-2 pr-10 border text-gray-600 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-transparent placeholder-gray-500"
+                className="w-full px-4 py-2 pr-10 border text-gray-600 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-950 bg-transparent placeholder-gray-500"
               />
               <button
                 type="button"
@@ -101,7 +101,7 @@ export default function Login() {
 
           <button
             type="submit"
-            className="block w-full bg-orange-600 text-white font-semibold text-center py-2 mt-6 rounded-lg hover:bg-orange-700 transition duration-200 cursor-pointer"
+            className="block w-full bg-blue-950 text-white font-semibold text-center py-2 mt-6 rounded-lg hover:bg-blue-800 transition duration-200 cursor-pointer"
           >
             Iniciar Sesión
           </button>

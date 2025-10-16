@@ -15,7 +15,7 @@ export default function ViewModal({ data, type, onClose }) {
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
       <div
         className={`bg-white rounded-2xl shadow-2xl w-full relative overflow-hidden ${
-          type === 'advisor' ? 'max-w-2xl' : 'max-w-5xl'
+          type === 'user' ? 'max-w-2xl' : 'max-w-5xl'
         }`}
       >
         <button
@@ -29,7 +29,7 @@ export default function ViewModal({ data, type, onClose }) {
           <h2 className="text-2xl font-bold">
             {isDelivered
               ? 'Detalles de Cliente Entregado'
-              : `Detalles del ${type === 'advisor' ? 'Asesor' : 'Cliente'}`}
+              : `Detalles del ${type === 'user' ? 'Usuario' : 'Cliente'}`}
           </h2>
           <p className="text-sm opacity-80">
             {isDelivered
@@ -40,7 +40,7 @@ export default function ViewModal({ data, type, onClose }) {
 
         <div
           className={`p-6 grid grid-cols-1 gap-8 ${
-            type === 'advisor' ? 'md:grid-cols-2' : 'md:grid-cols-3'
+            type === 'user' ? 'md:grid-cols-2' : 'md:grid-cols-3'
           }`}
         >
           <div className="space-y-3">
@@ -109,14 +109,8 @@ export default function ViewModal({ data, type, onClose }) {
               </p>
             </div>
           </div>
-          {type !== 'advisor' && (
+          {type !== 'user' && (
             <div className="space-y-3">
-              <div>
-                <p className="font-semibold text-gray-700">Asesor asignado</p>
-                <p className="text-gray-500">
-                  {data.advisor?.name || 'Sin asignar'}
-                </p>
-              </div>
               {isDelivered && (
                 <>
                   <div>
@@ -139,7 +133,7 @@ export default function ViewModal({ data, type, onClose }) {
           )}
         </div>
 
-        {type !== 'advisor' && (
+        {type !== 'user' && (
           <div className="border-t p-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-3">
               Historial de comentarios

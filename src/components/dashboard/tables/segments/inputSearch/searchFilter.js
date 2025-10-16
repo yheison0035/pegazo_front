@@ -20,7 +20,7 @@ export default function SearchFilter({
         name={name}
         value={value}
         onChange={handleFilterChange}
-        placeholder={placeholder || `Filtrar por ${title}`}
+        placeholder={placeholder || `Buscar ${title}`}
         className={className}
       />
     </>
