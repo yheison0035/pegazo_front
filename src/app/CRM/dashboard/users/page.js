@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import ViewModal from '../../viewModal';
 import Table from '@/components/dashboard/tables/table';
@@ -8,8 +8,9 @@ import Link from 'next/link';
 import RoleGuard from '@/auth/roleGuard';
 import { useAuth } from '@/context/authContext';
 import MessageEditorModal from '@/components/dashboard/modals/messageEditorModal';
-import { getUsers } from '@/lib/api/users';
 import { Roles } from '@/config/roles';
+import useUsers from '@/lib/api/hooks/useUsers';
+import { getHeaderTableUsers } from '@/lib/api/utils/getHeaderTableUsers';
 
 export default function Users() {
   const [users, setUsers] = useState([]);
@@ -17,18 +18,20 @@ export default function Users() {
   const [showEditor, setShowEditor] = useState(false);
   const { usuario } = useAuth();
 
-  const fetchUsers = async () => {
+  const { getUsers } = useUsers();
+
+  const fetchUsers = useCallback(async () => {
     try {
       const { data } = await getUsers();
       setUsers(data);
     } catch (err) {
       console.error(err);
     }
-  };
+  }, [getUsers]);
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [fetchUsers]);
 
   return (
     <RoleGuard allowedRoles={Object.values(Roles)}>
@@ -58,6 +61,7 @@ export default function Users() {
 
         <div className="overflow-x-auto bg-white shadow-md rounded-lg">
           <Table
+            header={getHeaderTableUsers()}
             info={users}
             view="users"
             setSelected={setSelectedUsers}

@@ -1,25 +1,10 @@
-import usePermissions from '@/hooks/usePermissions';
 import SearchFilter from './inputSearch/searchFilter';
-import { Roles } from '@/config/roles';
 
 export default function InputFilters({
-  rol,
-  view,
+  allFilters,
   filters,
   handleFilterChange,
 }) {
-  const { canViewAll } = usePermissions();
-
-  const allFilters = [
-    { name: 'sku', title: 'Código', show: true },
-    { name: 'name', title: 'Nombre Producto', show: true },
-    { name: 'color', title: 'Color', show: true },
-    { name: 'provider', title: 'Proveedor', show: true },
-    { name: 'quantity', title: 'Cantidad', show: true },
-    { name: 'price', title: 'Precio', show: true },
-    { name: 'point', title: 'Punto', show: true },
-  ];
-
   return (
     <tr>
       {allFilters

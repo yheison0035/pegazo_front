@@ -3,12 +3,12 @@
 import { useState } from 'react';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import { useAuth } from '@/context/authContext';
-import CustomerForm from '@/components/dashboard/form/customerForm';
-import useProducts from '@/lib/api/hooks/useProducts';
+import DinamicForm from '@/components/dashboard/form/DinamicForm';
+import useExpenses from '@/lib/api/hooks/useExpenses';
 
-export default function NewProvider() {
+export default function NewExpense() {
   const { usuario } = useAuth();
-  const { createProduct } = useProducts();
+  const { createExpense } = useExpenses();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -41,30 +41,30 @@ export default function NewProvider() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await createProduct(formData);
+      await createExpense(formData);
       setAlert({
         type: 'success',
-        message: 'Producto creado correctamente.',
-        url: '/CRM/dashboard/inventory',
+        message: 'Gasto creado correctamente.',
+        url: '/CRM/dashboard/expenses',
       });
     } catch (err) {
       setAlert({
         type: 'error',
-        message: err.message || 'Error al crear producto',
+        message: err.message || 'Error al crear gasto',
       });
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-2xl p-8 mt-6 border border-gray-100">
+    <div className="max-w-full mx-auto bg-white shadow-lg rounded-2xl p-8 mt-6 border border-gray-100">
       <h2 className="text-3xl font-bold text-gray-800 mb-2">
-        Crear Producto Nuevo
+        Crear Gasto Nuevo
       </h2>
       <p className="text-sm text-gray-500 mb-6">
-        Ingrese la información del producto para registrar un nuevo producto.
+        Ingrese la información del gasto para registrar un nuevo gasto.
       </p>
 
-      <CustomerForm
+      <DinamicForm
         formData={formData}
         setFormData={setFormData}
         handleSubmit={handleSubmit}

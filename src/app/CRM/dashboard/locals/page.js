@@ -1,0 +1,75 @@
+'use client';
+
+import { useCallback, useEffect, useState } from 'react';
+import { PlusIcon } from '@heroicons/react/24/outline';
+import ViewModal from '../../viewModal';
+import Table from '@/components/dashboard/tables/table';
+import Link from 'next/link';
+import RoleGuard from '@/auth/roleGuard';
+import { useAuth } from '@/context/authContext';
+import { Roles } from '@/config/roles';
+import useLocals from '@/lib/api/hooks/useLocals';
+import { getHeaderTableLocals } from '@/lib/api/utils/locas.config';
+
+export default function Locals() {
+  const [locals, setLocals] = useState([]);
+  const [selectedLocals, setSelectedLocals] = useState(null);
+  const { usuario } = useAuth();
+
+  const { getLocals } = useLocals();
+
+  const fetchLocals = useCallback(async () => {
+    try {
+      const { data } = await getLocals();
+      setLocals(data);
+    } catch (err) {
+      console.error(err);
+    }
+  }, [getLocals]);
+
+  useEffect(() => {
+    fetchLocals();
+  }, [fetchLocals]);
+
+  return (
+    <RoleGuard allowedRoles={Object.values(Roles)}>
+      <div className="w-full p-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
+          <h1 className="text-xl md:text-2xl font-semibold text-gray-800">
+            Listado de Locales
+          </h1>
+
+          <div className="flex gap-2">
+            <Link
+              href="/CRM/dashboard/locals/new"
+              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm transition"
+            >
+              <PlusIcon className="w-4 h-4" />
+              Agregar local
+            </Link>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto bg-white shadow-md rounded-lg">
+          <Table
+            header={getHeaderTableLocals()}
+            info={locals}
+            view="locals"
+            setSelected={setSelectedLocals}
+            rol={usuario?.role}
+            fetchData={fetchLocals}
+            loading={false}
+            error={null}
+          />
+          {selectedLocals && (
+            <ViewModal
+              data={selectedLocals}
+              type="locals"
+              onClose={() => setSelectedLocals(null)}
+            />
+          )}
+        </div>
+      </div>
+    </RoleGuard>
+  );
+}

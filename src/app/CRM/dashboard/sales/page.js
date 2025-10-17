@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import { useAuth } from '@/context/authContext';
-import CustomerForm from '@/components/dashboard/form/customerForm';
+import DinamicForm from '@/components/dashboard/form/DinamicForm';
 import useSales from '@/lib/api/hooks/useSales';
 
 export default function NewSale() {
@@ -56,7 +56,7 @@ export default function NewSale() {
   };
 
   return (
-    <div className="max-w-max mx-auto bg-white shadow-lg rounded-2xl p-8 mt-6 border border-gray-100">
+    <div className="max-w-full mx-auto bg-white shadow-lg rounded-2xl p-8 mt-6 border border-gray-100">
       <h2 className="text-3xl font-bold text-gray-800 mb-2">
         Registrar Nueva Venta
       </h2>
@@ -64,7 +64,7 @@ export default function NewSale() {
         Complete los campos para registrar una nueva venta.
       </p>
 
-      <CustomerForm
+      <DinamicForm
         formData={formData}
         setFormData={setFormData}
         handleSubmit={handleSubmit}

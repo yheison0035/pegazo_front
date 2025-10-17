@@ -4,38 +4,38 @@ import { useState, useEffect, useCallback } from 'react';
 import { redirect, useParams } from 'next/navigation';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import UsersForm from '@/components/dashboard/form/usersForm';
-import useExpenses from '@/lib/api/hooks/useExpenses';
+import useLocals from '@/lib/api/hooks/useLocals';
 
-export default function EditExpense() {
+export default function EditLocal() {
   const { id } = useParams();
-  const [expense, setExpense] = useState(null);
+  const [locals, setLocals] = useState(null);
   const [alert, setAlert] = useState({ type: '', message: '', url: '' });
-  const { getExpenseById, updateExpense, loading } = useExpenses();
+  const { getLocalById, updateLocal, loading } = useLocals();
 
-  const fetchExpense = useCallback(async () => {
+  const fetchLocal = useCallback(async () => {
     if (!id) return;
     try {
-      const { data } = await getExpenseById(Number(id));
-      setExpense(data);
+      const { data } = await getLocalById(Number(id));
+      setLocals(data);
     } catch (err) {
       setAlert({
         type: 'warning',
         message: err.message || 'No tienes permisos',
-        url: '/CRM/dashboard/expenses',
+        url: '/CRM/dashboard/locals',
       });
     }
-  }, [getExpenseById, id]);
+  }, [getLocalById, id]);
 
   useEffect(() => {
-    fetchExpense();
-  }, [fetchExpense]);
+    fetchLocal();
+  }, [fetchLocal]);
 
-  if (!expense)
+  if (!locals)
     return (
       <AlertModal
         type={alert.type}
         message={alert.message}
-        onClose={() => redirect('/CRM/dashboard/expenses')}
+        onClose={() => redirect('/CRM/dashboard/locals')}
         url={alert.url}
       />
     );
@@ -45,8 +45,8 @@ export default function EditExpense() {
       <UsersForm
         mode="edit"
         loading={loading}
-        initialData={expense}
-        onSubmit={(data) => updateExpense(Number(id), data)}
+        initialData={locals}
+        onSubmit={(data) => updateLocal(Number(id), data)}
       />
     </>
   );

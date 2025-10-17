@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { locations } from '@/lib/api/local/locations';
+import { locations } from '@/lib/api/locations';
 
 export default function DepartaCiudad({
   formData,

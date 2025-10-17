@@ -7,6 +7,7 @@ import { useAuth } from '@/context/authContext';
 import useDeliveredSales from '@/lib/api/hooks/useDeliveredSales';
 import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import usePermissions from '@/hooks/usePermissions';
+import { getHeaderTableDeliveredSales } from '@/lib/api/utils/getHeaderTableDeliveredSales';
 
 export default function Delivered_Sales() {
   const [selectedSale, setSelectedSale] = useState(null);
@@ -62,6 +63,7 @@ export default function Delivered_Sales() {
         {error && <p className="text-red-500 text-sm p-4">{error}</p>}
 
         <Table
+          header={getHeaderTableDeliveredSales()}
           info={sales}
           view="delivered_sales"
           setSelected={setSelectedSale}

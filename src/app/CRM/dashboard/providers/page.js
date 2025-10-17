@@ -7,6 +7,7 @@ import Table from '@/components/dashboard/tables/table';
 import Header from '@/components/dashboard/customers/header';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import ViewModal from '../../viewModal';
+import { getHeaderTableProviders } from '@/lib/api/utils/getHeaderTableProviders';
 
 export default function Providers() {
   const [selectedProvider, setSelectedProvider] = useState(null);
@@ -45,6 +46,7 @@ export default function Providers() {
         {error && <p className="text-red-500 text-sm p-4">{error}</p>}
 
         <Table
+          header={getHeaderTableProviders()}
           info={providers || []}
           view="providers"
           setSelected={setSelectedProvider}

@@ -11,16 +11,13 @@ export default function SearchFilter({
 
   return (
     <>
-      <label htmlFor={inputId} className="sr-only">
-        Filtrar por {name}
-      </label>
       <input
         id={inputId}
         type={type}
         name={name}
         value={value}
         onChange={handleFilterChange}
-        placeholder={placeholder || `Buscar ${title}`}
+        placeholder={placeholder || `Filtrar ${title}`}
         className={className}
       />
     </>

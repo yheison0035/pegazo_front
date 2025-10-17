@@ -3,9 +3,9 @@
 import { useAuth } from '@/context/authContext';
 import {
   ArchiveBoxIcon,
+  BuildingOfficeIcon,
   BuildingStorefrontIcon,
   BanknotesIcon,
-  UserGroupIcon,
   ClipboardDocumentCheckIcon,
   ChartBarIcon,
   Cog6ToothIcon,
@@ -28,6 +28,12 @@ export default function NavLinks() {
       name: 'Estadísticas',
       href: '/CRM/dashboard/statistics',
       icon: AdjustmentsHorizontalIcon,
+      roles: ['SUPER_ADMIN', 'ADMIN'],
+    },
+    {
+      name: 'Locales',
+      href: '/CRM/dashboard/locals',
+      icon: BuildingOfficeIcon,
       roles: ['SUPER_ADMIN', 'ADMIN'],
     },
     {

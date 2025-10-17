@@ -7,11 +7,9 @@ import InputFilters from './segments/InputsFilters';
 import Pagination from './segments/pagination';
 import useCustomers from '@/lib/api/hooks/useProducts';
 import AlertModal from '../modals/alertModal';
-import useUsers from '@/lib/api/hooks/useUsers';
 import ContentData from './segments/contentData';
-import usePermissions from '@/hooks/usePermissions';
 
-const Table = ({ info = [], view, setSelected, rol, fetchData }) => {
+const Table = ({ header, info = [], view, setSelected, rol, fetchData }) => {
   const [filtered, setFiltered] = useState(info);
   const [selectedIds, setSelectedIds] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -19,9 +17,7 @@ const Table = ({ info = [], view, setSelected, rol, fetchData }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [alert, setAlert] = useState({ type: '', message: '', url: '' });
-  const [users, setUsers] = useState([]);
 
-  const { getUsers } = useUsers();
   const { deleteCustomer, loading: deleting, error } = useCustomers();
 
   const [filters, setFilters] = useState({
@@ -97,19 +93,6 @@ const Table = ({ info = [], view, setSelected, rol, fetchData }) => {
     setCurrentPage(1);
   }, [filters, info, view]);
 
-  const fetchUsers = useCallback(async () => {
-    try {
-      const { data } = await getUsers();
-      setUsers(data);
-    } catch (err) {
-      console.error(err);
-    }
-  }, [getUsers]);
-
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
-
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilters((prev) => ({ ...prev, [name]: value }));
@@ -170,12 +153,11 @@ const Table = ({ info = [], view, setSelected, rol, fetchData }) => {
   return (
     <>
       <table className="min-w-full text-sm text-left text-gray-700">
-        <Thead rol={rol} view={view} />
+        <Thead header={header} />
 
         <tbody>
           <InputFilters
-            rol={rol}
-            view={view}
+            allFilters={header}
             filters={filters}
             handleFilterChange={handleFilterChange}
           />

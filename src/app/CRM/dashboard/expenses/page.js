@@ -7,6 +7,7 @@ import Table from '@/components/dashboard/tables/table';
 import Header from '@/components/dashboard/customers/header';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import ViewModal from '../../viewModal';
+import { getHeaderTableExpenses } from '@/lib/api/utils/getHeaderTableExpenses';
 
 export default function Expenses() {
   const [archivo, setArchivo] = useState(null);
@@ -74,6 +75,7 @@ export default function Expenses() {
         {error && <p className="text-red-500 text-sm p-4">{error}</p>}
 
         <Table
+          header={getHeaderTableExpenses()}
           info={expenses || []}
           view="expenses"
           setSelected={setSelectedExpense}
