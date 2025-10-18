@@ -8,7 +8,7 @@ import {
   updateExpense,
   deleteExpense,
   importExpenses,
-} from '../expenses/index';
+} from '../routes/expenses/index';
 
 export default function useExpenses() {
   const [loading, setLoading] = useState(false);

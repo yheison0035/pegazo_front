@@ -5,47 +5,33 @@ import AlertModal from '@/components/dashboard/modals/alertModal';
 import { useAuth } from '@/context/authContext';
 import DinamicForm from '@/components/dashboard/form/DinamicForm';
 import useSales from '@/lib/api/hooks/useSales';
+import { getEmptySale, getFormFieldsSales } from '@/lib/api/utils/sales.config';
 
-export default function NewSale() {
+export default function AddSales() {
   const { usuario } = useAuth();
-  const { createSale } = useSales();
+  const { createSale, loading } = useSales();
 
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
-    document: '',
-    department: '',
-    city: '',
-    stateId: 0,
-    birthdate: '',
-    advisorId: 0,
-  });
+  const [formData, setFormData] = useState(getEmptySale());
   const [alert, setAlert] = useState({ type: '', message: '', url: '' });
 
-  const handleReset = () =>
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      address: '',
-      document: '',
-      department: '',
-      city: '',
-      stateId: 0,
-      birthdate: '',
-      advisorId: 0,
-    });
+  const handleReset = () => setFormData(getEmptySale());
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log(formData);
+    if (!formData.products || formData.products.length === 0) {
+      setAlert({
+        type: 'warning',
+        message: 'Debe agregar al menos un producto a la venta.',
+      });
+      return;
+    }
     try {
-      await createSale(formData);
+      //await createSale(formData);
       setAlert({
         type: 'success',
         message: 'Venta creada correctamente.',
-        url: '/CRM/dashboard/delivered-sales',
+        url: '/CRM/dashboard/delivered_sales',
       });
     } catch (err) {
       setAlert({
@@ -58,20 +44,22 @@ export default function NewSale() {
   return (
     <div className="max-w-full mx-auto bg-white shadow-lg rounded-2xl p-8 mt-6 border border-gray-100">
       <h2 className="text-3xl font-bold text-gray-800 mb-2">
-        Registrar Nueva Venta
+        Crear Venta Nueva
       </h2>
       <p className="text-sm text-gray-500 mb-6">
-        Complete los campos para registrar una nueva venta.
+        Ingrese la información de la venta para registrar una nueva venta.
       </p>
 
       <DinamicForm
         formData={formData}
+        formFields={getFormFieldsSales()}
         setFormData={setFormData}
         handleSubmit={handleSubmit}
         handleReset={handleReset}
-        loading={false}
+        loading={loading}
         mode="new"
         usuario={usuario}
+        module="delivered_sales"
       />
 
       <AlertModal

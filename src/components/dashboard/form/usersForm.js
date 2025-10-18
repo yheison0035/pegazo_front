@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import BtnClean from '@/components/dashboard/buttons/clear';
 import BtnSave from '@/components/dashboard/buttons/save';
 import BtnReturn from '@/components/dashboard/buttons/return';
@@ -9,9 +9,11 @@ import AlertModal from '@/components/dashboard/modals/alertModal';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { Roles } from '@/config/roles';
 import { useAuth } from '@/context/authContext';
-import usePermissions from '@/hooks/usePermissions';
+import useUsers from '@/lib/api/hooks/useUsers';
+import useLocals from '@/lib/api/hooks/useLocals';
 
 export default function UsersForm({
+  formFields,
   initialData,
   onSubmit,
   loading,
@@ -22,12 +24,46 @@ export default function UsersForm({
   const [formData, setFormData] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [alert, setAlert] = useState({ type: '', message: '', url: '' });
+  const [dynamicOptions, setDynamicOptions] = useState({});
   const { usuario } = useAuth();
-  const { canAssign, canViewAll } = usePermissions();
+  const { getUsers } = useUsers();
+  const { getLocals } = useLocals();
 
   useEffect(() => {
-    setFormData(initialData);
+    setFormData(initialData || {});
   }, [initialData]);
+
+  const fetchDynamicOptions = useCallback(async () => {
+    if (!Array.isArray(formFields)) return;
+
+    const loaders = {
+      users: getUsers,
+      locals: getLocals,
+    };
+
+    const results = {};
+
+    for (const field of formFields) {
+      if (field?.type === 'select' && loaders[field.source]) {
+        const fetcher = loaders[field.source];
+        const response = await fetcher();
+        const data = Array.isArray(response) ? response : response?.data || [];
+
+        results[field.name] = data.map((item) => ({
+          id: item.id,
+          name:
+            item.name ||
+            `${item.firstName ?? ''} ${item.lastName ?? ''}`.trim(),
+        }));
+      }
+    }
+
+    setDynamicOptions(results);
+  }, [formFields, getUsers, getLocals]);
+
+  useEffect(() => {
+    fetchDynamicOptions();
+  }, [fetchDynamicOptions]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -40,17 +76,14 @@ export default function UsersForm({
 
   const handleReset = () => setFormData(initialData);
 
-  const handleSubmit = async (e) => {
+  const handleSubmitForm = async (e) => {
     e.preventDefault();
     try {
       const payload = { ...formData };
-      if (mode === 'edit' && !payload.password) {
-        delete payload.password;
-      }
+      if (mode === 'edit' && !payload.password) delete payload.password;
       await onSubmit(payload);
-      if (profile) {
-        await updateLocalStorage(payload);
-      }
+      if (profile) await updateLocalStorage(payload);
+
       setAlert({
         type: 'success',
         message: profile
@@ -69,12 +102,10 @@ export default function UsersForm({
     }
   };
 
-  const getRoleOptions = () => {
-    const allRoles = Object.values(Roles);
-    if (usuario?.role === Roles.SUPER_ADMIN) {
-      return allRoles;
-    }
-    return allRoles.filter((role) => role !== Roles.SUPER_ADMIN);
+  const getRoleOptions = (options) => {
+    const allRoles = options;
+    if (usuario?.role === Roles.SUPER_ADMIN) return allRoles;
+    return allRoles.filter((r) => r !== Roles.SUPER_ADMIN);
   };
 
   return (
@@ -86,7 +117,6 @@ export default function UsersForm({
           ? 'Crear Asesor Nuevo'
           : 'Editar Asesor'}
       </h2>
-
       <p className="text-sm text-gray-500 mb-6">
         {profile
           ? 'Actualice su información personal y de contacto.'
@@ -95,91 +125,78 @@ export default function UsersForm({
           : 'Actualice la información personal y de contacto del asesor.'}
       </p>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <form onSubmit={handleSubmitForm} className="space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[
-            ['name', 'Nombre', 'text'],
-            ['email', 'Correo', 'email'],
-            ['birthdate', 'Fecha de Nacimiento', 'date'],
-            ['phone', 'Teléfono', 'number'],
-            ['address', 'Dirección', 'text'],
-            ['document', 'Documento', 'number'],
-          ].map(([name, label, type = 'text']) => (
-            <div key={name} className="flex flex-col">
-              <label
-                htmlFor={name}
-                className="text-sm font-medium text-gray-700 mb-1"
-              >
-                {label}
-              </label>
-              <input
-                type={type}
-                id={name}
-                name={name}
-                value={formData[name] || ''}
-                onChange={handleChange}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm shadow-sm 
-                  focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
-                required={name}
-              />
-            </div>
-          ))}
+          {Array.isArray(formFields) &&
+            formFields.map((field) => {
+              const {
+                name,
+                label,
+                type = 'text',
+                required = true,
+                options,
+                source,
+              } = field;
+              if (name === 'department' || name === 'city') return null;
+              if (type === 'select') {
+                let fieldOptions = options || dynamicOptions[source] || [];
+                if (name === 'role') {
+                  fieldOptions = getRoleOptions(options);
+                }
+                return (
+                  <div key={name} className="flex flex-col">
+                    <label className="text-sm font-medium text-gray-700 mb-1">
+                      {label}
+                    </label>
+                    <select
+                      name={name}
+                      value={formData[name] || ''}
+                      onChange={handleChange}
+                      required={required}
+                      className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
+                    >
+                      <option value="">Seleccione una opción</option>
+                      {fieldOptions.length ? (
+                        fieldOptions.map((opt) => (
+                          <option key={opt.id} value={opt.id}>
+                            {opt.name}
+                          </option>
+                        ))
+                      ) : (
+                        <option value="" disabled>
+                          No hay opciones disponibles
+                        </option>
+                      )}
+                    </select>
+                  </div>
+                );
+              }
+
+              return (
+                <div key={name} className="flex flex-col">
+                  <label className="text-sm font-medium text-gray-700 mb-1">
+                    {label}
+                  </label>
+                  <input
+                    type={type}
+                    name={name}
+                    value={formData[name] || ''}
+                    onChange={handleChange}
+                    required={required}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
+                  />
+                </div>
+              );
+            })}
 
           <DepartaCiudad formData={formData} handleChange={handleChange} />
 
-          {canAssign && (
-            <div className="flex flex-col">
-              <label className="text-sm font-medium text-gray-700 mb-1">
-                Rol
-              </label>
-              <select
-                name="role"
-                value={formData.role || ''}
-                onChange={handleChange}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm shadow-sm 
-                focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
-                required
-              >
-                <option value="">Selecciona un rol</option>
-                {getRoleOptions().map((rol) => (
-                  <option key={rol} value={rol}>
-                    {rol}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {canViewAll && (
-            <div className="flex flex-col">
-              <label className="text-sm font-medium text-gray-700 mb-1">
-                Estado
-              </label>
-              <select
-                name="status"
-                value={formData.status || ''}
-                onChange={handleChange}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm shadow-sm 
-                focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
-                required
-              >
-                <option value="">Selecciona un estado</option>
-                <option value="ACTIVE">Activo</option>
-                <option value="INACTIVE">Inactivo</option>
-              </select>
-            </div>
-          )}
-
           <div className="flex flex-col">
-            <label
-              htmlFor="password"
-              className="text-sm font-medium text-gray-700 mb-1"
-            >
+            <label className="text-sm font-medium text-gray-700 mb-1">
               {mode === 'create' ? 'Contraseña' : 'Nueva Contraseña'}
             </label>
             <div className="relative">
               <input
-                id="password"
                 type={showPassword ? 'text' : 'password'}
                 name="password"
                 value={formData.password || ''}
@@ -189,9 +206,8 @@ export default function UsersForm({
                     ? 'Ingrese la contraseña'
                     : 'Dejar en blanco si no desea cambiarla'
                 }
-                className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm shadow-sm 
-                  focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
                 required={mode === 'create'}
+                className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
               />
               <button
                 type="button"
@@ -211,9 +227,9 @@ export default function UsersForm({
 
         <div className="flex justify-end mt-6 gap-3">
           <BtnReturn
-            route={`${
+            route={
               profile ? '/CRM/dashboard/customers' : '/CRM/dashboard/users'
-            }`}
+            }
           />
           {mode === 'create' && <BtnClean handleReset={handleReset} />}
           <BtnSave disabled={loading} />

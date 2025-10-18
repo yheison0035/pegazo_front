@@ -1,22 +1,25 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { redirect, useParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import AlertModal from '@/components/dashboard/modals/alertModal';
-import UsersForm from '@/components/dashboard/form/usersForm';
+import DinamicForm from '@/components/dashboard/form/DinamicForm';
+import { useAuth } from '@/context/authContext';
 import useProducts from '@/lib/api/hooks/useProducts';
+import { getFormFieldsInventory } from '@/lib/api/utils/inventory.config';
 
-export default function EditInventory() {
-  const { id } = useParams();
-  const [product, setProduct] = useState(null);
+export default function EditProduct() {
+  const [formData, setFormData] = useState({});
   const [alert, setAlert] = useState({ type: '', message: '', url: '' });
+  const { id } = useParams();
+  const { usuario } = useAuth();
   const { getProductById, updateProduct, loading } = useProducts();
 
   const fetchProduct = useCallback(async () => {
     if (!id) return;
     try {
       const { data } = await getProductById(Number(id));
-      setProduct(data);
+      setFormData(data);
     } catch (err) {
       setAlert({
         type: 'warning',
@@ -30,24 +33,48 @@ export default function EditInventory() {
     fetchProduct();
   }, [fetchProduct]);
 
-  if (!product)
-    return (
+  const handleSubmit = async (e) => {
+    console.log(formData);
+    e.preventDefault();
+    try {
+      //await updateProduct(formData);
+      setAlert({
+        type: 'success',
+        message: 'Producto actualizado correctamente.',
+        url: '/CRM/dashboard/inventory',
+      });
+    } catch (err) {
+      setAlert({
+        type: 'error',
+        message: err.message || 'Error al crear producto',
+      });
+    }
+  };
+
+  return (
+    <div className="max-w-full mx-auto bg-white shadow-lg rounded-2xl p-8 mt-6 border border-gray-100">
+      <h2 className="text-3xl font-bold text-gray-800 mb-2">Editar Producto</h2>
+      <p className="text-sm text-gray-500 mb-6">
+        Modifica la información del producto según sea necesario.
+      </p>
+
+      <DinamicForm
+        formData={formData}
+        formFields={getFormFieldsInventory()}
+        setFormData={setFormData}
+        handleSubmit={handleSubmit}
+        loading={loading}
+        mode="edit"
+        usuario={usuario}
+        module="inventory"
+      />
+
       <AlertModal
         type={alert.type}
         message={alert.message}
-        onClose={() => redirect('/CRM/dashboard/inventory')}
+        onClose={() => setAlert({ type: '', message: '', url: '' })}
         url={alert.url}
       />
-    );
-
-  return (
-    <>
-      <UsersForm
-        mode="edit"
-        loading={loading}
-        initialData={product}
-        onSubmit={(data) => updateProduct(Number(id), data)}
-      />
-    </>
+    </div>
   );
 }

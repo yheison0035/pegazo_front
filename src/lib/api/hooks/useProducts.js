@@ -8,7 +8,7 @@ import {
   updateProduct,
   deleteProduct,
   importProducts,
-} from '../products/index';
+} from '../routes/products/index';
 
 export default function useProducts() {
   const [loading, setLoading] = useState(false);

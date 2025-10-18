@@ -5,6 +5,7 @@ import { redirect, useParams } from 'next/navigation';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import UsersForm from '@/components/dashboard/form/usersForm';
 import useUsers from '@/lib/api/hooks/useUsers';
+import { getFormFieldsUsers } from '@/lib/api/utils/users.config';
 
 export default function EditUser() {
   const { id } = useParams();
@@ -43,6 +44,7 @@ export default function EditUser() {
   return (
     <>
       <UsersForm
+        formFields={getFormFieldsUsers()}
         mode="edit"
         loading={loading}
         initialData={user}

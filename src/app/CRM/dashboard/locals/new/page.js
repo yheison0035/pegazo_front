@@ -8,11 +8,11 @@ import DinamicForm from '@/components/dashboard/form/DinamicForm';
 import {
   getEmptyLocal,
   getFormFieldsLocals,
-} from '@/lib/api/utils/locas.config';
+} from '@/lib/api/utils/locals.config';
 
 export default function NewLocal() {
   const { usuario } = useAuth();
-  const { createLocal } = useLocals();
+  const { createLocal, loading } = useLocals();
 
   const [formData, setFormData] = useState(getEmptyLocal());
   const [alert, setAlert] = useState({ type: '', message: '', url: '' });
@@ -51,9 +51,10 @@ export default function NewLocal() {
         setFormData={setFormData}
         handleSubmit={handleSubmit}
         handleReset={handleReset}
-        loading={false}
+        loading={loading}
         mode="new"
         usuario={usuario}
+        module="locals"
       />
 
       <AlertModal

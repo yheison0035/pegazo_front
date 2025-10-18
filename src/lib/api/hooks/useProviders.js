@@ -7,7 +7,7 @@ import {
   createProvider,
   updateProvider,
   deleteProvider,
-} from '../providers/index';
+} from '../routes/providers/index';
 
 export default function useProviders() {
   const [loading, setLoading] = useState(false);

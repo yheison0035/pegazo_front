@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
-import { createSale } from '../sales/index';
+import { useCallback, useState } from 'react';
+import { createSale } from '../routes/sales/index';
 
 export default function useSales() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const wrap = async (fn, ...args) => {
+  const wrap = useCallback(async (fn, ...args) => {
     setLoading(true);
     setError(null);
     try {
@@ -18,10 +18,12 @@ export default function useSales() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  const createSaleFn = useCallback((dto) => wrap(createSale, dto), [wrap]);
 
   return {
-    createSale: (data) => wrap(createSale, data),
+    createSale: createSaleFn,
     loading,
     error,
   };

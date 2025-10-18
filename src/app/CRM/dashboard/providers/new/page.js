@@ -5,43 +5,24 @@ import AlertModal from '@/components/dashboard/modals/alertModal';
 import { useAuth } from '@/context/authContext';
 import DinamicForm from '@/components/dashboard/form/DinamicForm';
 import useProviders from '@/lib/api/hooks/useProviders';
+import {
+  getEmptyProvider,
+  getFormFieldsProviders,
+} from '@/lib/api/utils/providers.config';
 
 export default function NewProvider() {
   const { usuario } = useAuth();
-  const { createProvider } = useProviders();
+  const { createProvider, loading } = useProviders();
 
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
-    document: '',
-    department: '',
-    city: '',
-    stateId: 0,
-    birthdate: '',
-    advisorId: 0,
-  });
+  const [formData, setFormData] = useState(getEmptyProvider());
   const [alert, setAlert] = useState({ type: '', message: '', url: '' });
 
-  const handleReset = () =>
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      address: '',
-      document: '',
-      department: '',
-      city: '',
-      stateId: 0,
-      birthdate: '',
-      advisorId: 0,
-    });
+  const handleReset = () => setFormData(getEmptyProvider());
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await createProvider(formData);
+      //await createProvider(formData);
       setAlert({
         type: 'success',
         message: 'Proveedor creado correctamente.',
@@ -61,18 +42,19 @@ export default function NewProvider() {
         Crear Proveedor Nuevo
       </h2>
       <p className="text-sm text-gray-500 mb-6">
-        Ingrese la información personal y de contacto para registrar un nuevo
-        proveedor.
+        Ingrese la información del proveedor para registrar un nuevo proveedor.
       </p>
 
       <DinamicForm
         formData={formData}
+        formFields={getFormFieldsProviders()}
         setFormData={setFormData}
         handleSubmit={handleSubmit}
         handleReset={handleReset}
-        loading={false}
+        loading={loading}
         mode="new"
         usuario={usuario}
+        module="providers"
       />
 
       <AlertModal

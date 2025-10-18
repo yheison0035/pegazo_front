@@ -7,7 +7,7 @@ import Table from '@/components/dashboard/tables/table';
 import Header from '@/components/dashboard/customers/header';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import ViewModal from '../../viewModal';
-import { getHeaderTableInventory } from '@/lib/api/utils/getHeaderTableInventory';
+import { getHeaderTableInventory } from '@/lib/api/utils/inventory.config';
 
 export default function Inventory() {
   const [archivo, setArchivo] = useState(null);
@@ -41,7 +41,7 @@ export default function Inventory() {
       setArchivo(null);
       setAlert({
         type: 'success',
-        message: 'Importación de inventario creada correctamente.',
+        message: 'Importación de productos creada correctamente.',
       });
       await fetchProducts();
     } catch (err) {

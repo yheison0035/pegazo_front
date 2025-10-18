@@ -7,15 +7,13 @@ import Table from '@/components/dashboard/tables/table';
 import Link from 'next/link';
 import RoleGuard from '@/auth/roleGuard';
 import { useAuth } from '@/context/authContext';
-import MessageEditorModal from '@/components/dashboard/modals/messageEditorModal';
 import { Roles } from '@/config/roles';
 import useUsers from '@/lib/api/hooks/useUsers';
-import { getHeaderTableUsers } from '@/lib/api/utils/getHeaderTableUsers';
+import { getHeaderTableUsers } from '@/lib/api/utils/users.config';
 
 export default function Users() {
   const [users, setUsers] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState(null);
-  const [showEditor, setShowEditor] = useState(false);
   const { usuario } = useAuth();
 
   const { getUsers } = useUsers();
@@ -49,13 +47,6 @@ export default function Users() {
               <PlusIcon className="w-4 h-4" />
               Agregar usuario
             </Link>
-
-            <button
-              onClick={() => setShowEditor(true)}
-              className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm transition cursor-pointer"
-            >
-              Contenedor mensaje
-            </button>
           </div>
         </div>
 
@@ -79,10 +70,6 @@ export default function Users() {
           )}
         </div>
       </div>
-
-      {showEditor && (
-        <MessageEditorModal onClose={() => setShowEditor(false)} />
-      )}
     </RoleGuard>
   );
 }

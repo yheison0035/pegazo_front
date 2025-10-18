@@ -7,7 +7,7 @@ import Table from '@/components/dashboard/tables/table';
 import Header from '@/components/dashboard/customers/header';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import ViewModal from '../../viewModal';
-import { getHeaderTableProviders } from '@/lib/api/utils/getHeaderTableProviders';
+import { getHeaderTableProviders } from '@/lib/api/utils/providers.config';
 
 export default function Providers() {
   const [selectedProvider, setSelectedProvider] = useState(null);

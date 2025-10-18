@@ -7,7 +7,7 @@ import {
   createLocal,
   updateLocal,
   deleteLocal,
-} from '../locals/index';
+} from '../routes/locals/index';
 
 export default function useLocals() {
   const [loading, setLoading] = useState(false);

@@ -7,7 +7,7 @@ import {
   updateDeliveredSale,
   deleteDeliveredSale,
   exportDeliveredSales,
-} from '../delivered_sales/index';
+} from '../routes/delivered_sales/index';
 
 export default function useDeliveredSales() {
   const [loading, setLoading] = useState(false);

@@ -1,53 +1,79 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { redirect, useParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import AlertModal from '@/components/dashboard/modals/alertModal';
-import UsersForm from '@/components/dashboard/form/usersForm';
-import useLocals from '@/lib/api/hooks/useLocals';
+import DinamicForm from '@/components/dashboard/form/DinamicForm';
+import { useAuth } from '@/context/authContext';
+import useExpenses from '@/lib/api/hooks/useExpenses';
+import { getFormFieldsExpenses } from '@/lib/api/utils/expenses.config';
 
-export default function EditLocal() {
-  const { id } = useParams();
-  const [locals, setLocals] = useState(null);
+export default function EditExpense() {
+  const [formData, setFormData] = useState({});
   const [alert, setAlert] = useState({ type: '', message: '', url: '' });
-  const { getLocalById, updateLocal, loading } = useLocals();
+  const { id } = useParams();
+  const { usuario } = useAuth();
+  const { getExpenseById, updateExpense, loading } = useExpenses();
 
-  const fetchLocal = useCallback(async () => {
+  const fetchExpense = useCallback(async () => {
     if (!id) return;
     try {
-      const { data } = await getLocalById(Number(id));
-      setLocals(data);
+      const { data } = await getExpenseById(Number(id));
+      setFormData(data);
     } catch (err) {
       setAlert({
         type: 'warning',
         message: err.message || 'No tienes permisos',
-        url: '/CRM/dashboard/locals',
+        url: '/CRM/dashboard/expenses',
       });
     }
-  }, [getLocalById, id]);
+  }, [getExpenseById, id]);
 
   useEffect(() => {
-    fetchLocal();
-  }, [fetchLocal]);
+    fetchExpense();
+  }, [fetchExpense]);
 
-  if (!locals)
-    return (
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      //await updateExpense(formData);
+      setAlert({
+        type: 'success',
+        message: 'Gasto actualizado correctamente.',
+        url: '/CRM/dashboard/expenses',
+      });
+    } catch (err) {
+      setAlert({
+        type: 'error',
+        message: err.message || 'Error al crear gasto',
+      });
+    }
+  };
+
+  return (
+    <div className="max-w-full mx-auto bg-white shadow-lg rounded-2xl p-8 mt-6 border border-gray-100">
+      <h2 className="text-3xl font-bold text-gray-800 mb-2">Editar Gasto</h2>
+      <p className="text-sm text-gray-500 mb-6">
+        Modifica la información del gasto según sea necesario.
+      </p>
+
+      <DinamicForm
+        formData={formData}
+        formFields={getFormFieldsExpenses()}
+        setFormData={setFormData}
+        handleSubmit={handleSubmit}
+        loading={loading}
+        mode="edit"
+        usuario={usuario}
+        module="expenses"
+      />
+
       <AlertModal
         type={alert.type}
         message={alert.message}
-        onClose={() => redirect('/CRM/dashboard/locals')}
+        onClose={() => setAlert({ type: '', message: '', url: '' })}
         url={alert.url}
       />
-    );
-
-  return (
-    <>
-      <UsersForm
-        mode="edit"
-        loading={loading}
-        initialData={locals}
-        onSubmit={(data) => updateLocal(Number(id), data)}
-      />
-    </>
+    </div>
   );
 }

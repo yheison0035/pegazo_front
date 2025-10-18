@@ -20,3 +20,9 @@ export function normalizeDateForInput(input) {
 
   return d.toISOString().split('T')[0];
 }
+
+export const formatPrice = (value) => {
+  if (!value) return '';
+  const numberValue = value.toString().replace(/\D/g, '');
+  return new Intl.NumberFormat('es-CO').format(Number(numberValue));
+};

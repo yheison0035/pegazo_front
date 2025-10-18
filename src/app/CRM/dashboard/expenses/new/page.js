@@ -5,52 +5,33 @@ import AlertModal from '@/components/dashboard/modals/alertModal';
 import { useAuth } from '@/context/authContext';
 import DinamicForm from '@/components/dashboard/form/DinamicForm';
 import useExpenses from '@/lib/api/hooks/useExpenses';
+import {
+  getEmptyExpense,
+  getFormFieldsExpenses,
+} from '@/lib/api/utils/expenses.config';
 
 export default function NewExpense() {
   const { usuario } = useAuth();
   const { createExpense } = useExpenses();
 
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
-    document: '',
-    department: '',
-    city: '',
-    stateId: 0,
-    birthdate: '',
-    advisorId: 0,
-  });
+  const [formData, setFormData] = useState(getEmptyExpense());
   const [alert, setAlert] = useState({ type: '', message: '', url: '' });
 
-  const handleReset = () =>
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      address: '',
-      document: '',
-      department: '',
-      city: '',
-      stateId: 0,
-      birthdate: '',
-      advisorId: 0,
-    });
+  const handleReset = () => setFormData(getEmptyExpense());
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await createExpense(formData);
+      //await createExpense(formData);
       setAlert({
         type: 'success',
-        message: 'Gasto creado correctamente.',
-        url: '/CRM/dashboard/expenses',
+        message: 'Local creado correctamente.',
+        url: '/CRM/dashboard/locals',
       });
     } catch (err) {
       setAlert({
         type: 'error',
-        message: err.message || 'Error al crear gasto',
+        message: err.message || 'Error al crear local',
       });
     }
   };
@@ -58,20 +39,22 @@ export default function NewExpense() {
   return (
     <div className="max-w-full mx-auto bg-white shadow-lg rounded-2xl p-8 mt-6 border border-gray-100">
       <h2 className="text-3xl font-bold text-gray-800 mb-2">
-        Crear Gasto Nuevo
+        Crear Local Nuevo
       </h2>
       <p className="text-sm text-gray-500 mb-6">
-        Ingrese la información del gasto para registrar un nuevo gasto.
+        Ingrese la información del local para registrar un nuevo local.
       </p>
 
       <DinamicForm
         formData={formData}
+        formFields={getFormFieldsExpenses()}
         setFormData={setFormData}
         handleSubmit={handleSubmit}
         handleReset={handleReset}
         loading={false}
         mode="new"
         usuario={usuario}
+        module="expenses"
       />
 
       <AlertModal

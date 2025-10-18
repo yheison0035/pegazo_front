@@ -10,7 +10,7 @@ import {
   toggleUserRole,
   uploadUserAvatar,
   deleteUserAvatar,
-} from '../users';
+} from '../routes/users';
 
 export default function useUsers() {
   const [loading, setLoading] = useState(false);

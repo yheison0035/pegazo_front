@@ -19,32 +19,39 @@ export default function SideNavigation() {
       >
         <Bars3Icon className="w-6 h-6" />
       </button>
+
       <aside
-        className={`fixed top-0 left-0 z-40 h-full w-64 bg-gray-900 text-white flex flex-col items-center py-8 space-y-3 transform transition-transform duration-300 ${
+        className={`fixed top-0 left-0 z-40 h-full w-64 bg-gray-900 text-white flex flex-col transition-transform duration-300 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
-        } md:translate-x-0 md:static md:flex`}
+        } md:translate-x-0 md:static`}
       >
-        <div className="w-full flex justify-end px-4 md:hidden">
-          <button
-            onClick={() => setIsOpen(false)}
-            className="text-white hover:text-red-400 cursor-pointer"
+        <div className="flex flex-col items-center py-6 border-b border-gray-700">
+          <div className="w-full flex justify-end px-4 md:hidden">
+            <button
+              onClick={() => setIsOpen(false)}
+              className="text-white hover:text-red-400 cursor-pointer"
+            >
+              <XMarkIcon className="w-6 h-6" />
+            </button>
+          </div>
+
+          <Avatar perfil={usuario} setPerfil={() => {}} />
+
+          <Link
+            href="/CRM/dashboard/profile/edit"
+            className="text-sm text-white font-semibold underline hover:underline"
           >
-            <XMarkIcon className="w-6 h-6" />
-          </button>
+            Editar perfil
+          </Link>
+
+          <h6 className="text-sm text-orange-400 font-semibold text-center mt-1">
+            Bienvenido(a) {usuario?.name}
+          </h6>
         </div>
 
-        <Avatar perfil={usuario} setPerfil={() => {}} />
-        <Link
-          href="/CRM/dashboard/profile/edit"
-          className="text-sm text-white font-semibold underline hover:underline"
-        >
-          Editar perfil
-        </Link>
-        <h6 className="text-sm text-orange-400 font-semibold text-center">
-          Bienvenido(a) {usuario?.name}
-        </h6>
-        <div className="w-full border-t border-gray-700 my-4"></div>
-        <NavLinks />
+        <div className="flex-1 w-full overflow-y-auto custom-scroll py-4">
+          <NavLinks />
+        </div>
       </aside>
     </>
   );

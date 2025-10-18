@@ -1,18 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   getMotivationMessage,
   createMotivation,
   updateMotivation,
   deleteMotivation,
-} from '../motivation/index';
+} from '../routes/motivation/index';
 
 export default function useMotivation() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const wrap = async (fn, ...args) => {
+  const wrap = useCallback(async (fn, ...args) => {
     setLoading(true);
     setError(null);
     try {
@@ -23,13 +23,30 @@ export default function useMotivation() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  const getMotivationMessageFn = useCallback(
+    () => wrap(getMotivationMessage),
+    [wrap]
+  );
+  const createMotivationFn = useCallback(
+    (dto) => wrap(createMotivation, dto),
+    [wrap]
+  );
+  const updateMotivationFn = useCallback(
+    (id, dto) => wrap(updateMotivation, id, dto),
+    [wrap]
+  );
+  const deleteMotivationFn = useCallback(
+    (id) => wrap(deleteMotivation, id),
+    [wrap]
+  );
 
   return {
-    getMotivationMessage: () => wrap(getMotivationMessage),
-    createMotivation: (dto) => wrap(createMotivation, dto),
-    updateMotivation: (id, dto) => wrap(updateMotivation, id, dto),
-    deleteMotivation: (id) => wrap(deleteMotivation, id),
+    getMotivationMessage: getMotivationMessageFn,
+    createMotivation: createMotivationFn,
+    updateMotivation: updateMotivationFn,
+    deleteMotivation: deleteMotivationFn,
     loading,
     error,
   };

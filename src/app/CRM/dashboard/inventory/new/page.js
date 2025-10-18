@@ -4,44 +4,26 @@ import { useState } from 'react';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import { useAuth } from '@/context/authContext';
 import DinamicForm from '@/components/dashboard/form/DinamicForm';
+import {
+  getEmptyInventory,
+  getFormFieldsInventory,
+} from '@/lib/api/utils/inventory.config';
 import useProducts from '@/lib/api/hooks/useProducts';
 
-export default function NewProvider() {
+export default function NewProduct() {
   const { usuario } = useAuth();
-  const { createProduct } = useProducts();
+  const { createProduct, loading } = useProducts();
 
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
-    document: '',
-    department: '',
-    city: '',
-    stateId: 0,
-    birthdate: '',
-    advisorId: 0,
-  });
+  const [formData, setFormData] = useState(getEmptyInventory());
   const [alert, setAlert] = useState({ type: '', message: '', url: '' });
 
-  const handleReset = () =>
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      address: '',
-      document: '',
-      department: '',
-      city: '',
-      stateId: 0,
-      birthdate: '',
-      advisorId: 0,
-    });
+  const handleReset = () => setFormData(getEmptyInventory());
 
   const handleSubmit = async (e) => {
+    console.log(formData);
     e.preventDefault();
     try {
-      await createProduct(formData);
+      //await createProduct(formData);
       setAlert({
         type: 'success',
         message: 'Producto creado correctamente.',
@@ -66,12 +48,14 @@ export default function NewProvider() {
 
       <DinamicForm
         formData={formData}
+        formFields={getFormFieldsInventory()}
         setFormData={setFormData}
         handleSubmit={handleSubmit}
         handleReset={handleReset}
-        loading={false}
+        loading={loading}
         mode="new"
         usuario={usuario}
+        module="inventory"
       />
 
       <AlertModal

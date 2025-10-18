@@ -9,14 +9,14 @@ import RoleGuard from '@/auth/roleGuard';
 import { useAuth } from '@/context/authContext';
 import { Roles } from '@/config/roles';
 import useLocals from '@/lib/api/hooks/useLocals';
-import { getHeaderTableLocals } from '@/lib/api/utils/locas.config';
+import { getHeaderTableLocals } from '@/lib/api/utils/locals.config';
 
 export default function Locals() {
   const [locals, setLocals] = useState([]);
   const [selectedLocals, setSelectedLocals] = useState(null);
   const { usuario } = useAuth();
 
-  const { getLocals } = useLocals();
+  const { getLocals, loading, error } = useLocals();
 
   const fetchLocals = useCallback(async () => {
     try {
@@ -58,8 +58,8 @@ export default function Locals() {
             setSelected={setSelectedLocals}
             rol={usuario?.role}
             fetchData={fetchLocals}
-            loading={false}
-            error={null}
+            loading={loading}
+            error={error}
           />
           {selectedLocals && (
             <ViewModal

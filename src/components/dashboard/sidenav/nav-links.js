@@ -4,15 +4,17 @@ import { useAuth } from '@/context/authContext';
 import {
   ArchiveBoxIcon,
   BuildingOfficeIcon,
+  TagIcon,
+  SparklesIcon,
   BuildingStorefrontIcon,
   BanknotesIcon,
+  UsersIcon,
   ClipboardDocumentCheckIcon,
   ChartBarIcon,
   Cog6ToothIcon,
   AdjustmentsHorizontalIcon,
   ArrowLeftOnRectangleIcon,
 } from '@heroicons/react/24/outline';
-
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -20,8 +22,7 @@ export default function NavLinks() {
   const { usuario, loading, logout } = useAuth();
   const pathname = usePathname();
 
-  if (loading) return null;
-  if (!usuario) return null;
+  if (loading || !usuario) return null;
 
   const links = [
     {
@@ -37,6 +38,18 @@ export default function NavLinks() {
       roles: ['SUPER_ADMIN', 'ADMIN'],
     },
     {
+      name: 'Categorías',
+      href: '/CRM/dashboard/categories',
+      icon: TagIcon,
+      roles: ['SUPER_ADMIN', 'ADMIN'],
+    },
+    {
+      name: 'Marcas',
+      href: '/CRM/dashboard/brands',
+      icon: SparklesIcon,
+      roles: ['SUPER_ADMIN', 'ADMIN'],
+    },
+    {
       name: 'Inventario',
       href: '/CRM/dashboard/inventory',
       icon: ArchiveBoxIcon,
@@ -47,6 +60,12 @@ export default function NavLinks() {
       href: '/CRM/dashboard/providers',
       icon: BuildingStorefrontIcon,
       roles: ['SUPER_ADMIN', 'ADMIN'],
+    },
+    {
+      name: 'Clientes',
+      href: '/CRM/dashboard/customers',
+      icon: UsersIcon,
+      roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR'],
     },
     {
       name: 'Realizar Venta',
@@ -81,36 +100,40 @@ export default function NavLinks() {
   ];
 
   return (
-    <nav className="flex flex-col w-full px-6 space-y-4">
-      {links
-        .filter((link) => link.roles.includes(usuario.role))
-        .map((link) => {
-          const LinkIcon = link.icon;
-          const isActive = pathname.startsWith(link.href);
+    <div className="flex flex-col w-full h-[calc(100vh-80px)] overflow-y-auto px-6 pb-6 custom-scroll">
+      <nav className="flex flex-col space-y-2">
+        {links
+          .filter((link) => link.roles.includes(usuario.role))
+          .map((link) => {
+            const LinkIcon = link.icon;
+            const isActive = pathname.startsWith(link.href);
 
-          return (
-            <Link
-              key={link.name}
-              href={link.href}
-              className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition ${
-                isActive
-                  ? 'bg-sky-100 text-gray-800'
-                  : 'text-gray-300 hover:text-white hover:bg-gray-800'
-              }`}
-            >
-              <LinkIcon className="w-5 h-5 min-w-[20px]" />
-              <p>{link.name}</p>
-            </Link>
-          );
-        })}
+            return (
+              <Link
+                key={link.name}
+                href={link.href}
+                className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition ${
+                  isActive
+                    ? 'bg-sky-100 text-gray-800'
+                    : 'text-gray-300 hover:text-white hover:bg-gray-800'
+                }`}
+              >
+                <LinkIcon className="w-5 h-5 min-w-[20px]" />
+                <p>{link.name}</p>
+              </Link>
+            );
+          })}
+      </nav>
 
-      <button
-        onClick={logout}
-        className="flex items-center space-x-3 px-3 py-2 rounded-lg transition text-gray-300 hover:text-white hover:bg-gray-800 cursor-pointer"
-      >
-        <ArrowLeftOnRectangleIcon className="w-5 h-5 min-w-[20px]" />
-        <p>Cerrar Sesión</p>
-      </button>
-    </nav>
+      <div className="mt-6 border-t border-gray-700 pt-4">
+        <button
+          onClick={logout}
+          className="flex items-center w-full space-x-3 px-3 py-2 rounded-lg transition text-gray-300 hover:text-white hover:bg-gray-800 cursor-pointer"
+        >
+          <ArrowLeftOnRectangleIcon className="w-5 h-5 min-w-[20px]" />
+          <p>Cerrar Sesión</p>
+        </button>
+      </div>
+    </div>
   );
 }

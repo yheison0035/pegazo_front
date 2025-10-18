@@ -7,7 +7,7 @@ import Table from '@/components/dashboard/tables/table';
 import Header from '@/components/dashboard/customers/header';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import ViewModal from '../../viewModal';
-import { getHeaderTableExpenses } from '@/lib/api/utils/getHeaderTableExpenses';
+import { getHeaderTableExpenses } from '@/lib/api/utils/expenses.config';
 
 export default function Expenses() {
   const [archivo, setArchivo] = useState(null);

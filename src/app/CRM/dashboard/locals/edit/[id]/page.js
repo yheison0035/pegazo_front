@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import useLocals from '@/lib/api/hooks/useLocals';
 import DinamicForm from '@/components/dashboard/form/DinamicForm';
-import { getFormFieldsLocals } from '@/lib/api/utils/locas.config';
+import { getFormFieldsLocals } from '@/lib/api/utils/locals.config';
 import { useAuth } from '@/context/authContext';
 
 export default function EditLocal() {
@@ -62,9 +62,10 @@ export default function EditLocal() {
         formFields={getFormFieldsLocals()}
         setFormData={setFormData}
         handleSubmit={handleSubmit}
-        loading={false}
-        mode="new"
+        loading={loading}
+        mode="edit"
         usuario={usuario}
+        module="locals"
       />
 
       <AlertModal
