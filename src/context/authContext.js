@@ -26,7 +26,6 @@ export const AuthProvider = ({ children }) => {
       const res = await apiLogin(email, password);
       const { data } = res;
       const token = data?.access_token;
-
       if (!token) throw new Error('Token no recibido');
 
       localStorage.setItem('token', token);

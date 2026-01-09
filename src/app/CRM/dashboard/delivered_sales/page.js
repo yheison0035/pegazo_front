@@ -6,8 +6,7 @@ import Table from '@/components/dashboard/tables/table';
 import { useAuth } from '@/context/authContext';
 import useDeliveredSales from '@/lib/api/hooks/useDeliveredSales';
 import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
-import usePermissions from '@/hooks/usePermissions';
-import { getHeaderTableDeliveredSales } from '@/lib/api/utils/getHeaderTableDeliveredSales';
+import { getHeaderTableDeliveredSales } from '@/lib/api/utils/deliveredSales.config';
 
 export default function Delivered_Sales() {
   const [selectedSale, setSelectedSale] = useState(null);

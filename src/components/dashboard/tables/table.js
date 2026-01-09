@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 import Thead from './segments/thead';
 import InputFilters from './segments/InputsFilters';
@@ -10,7 +10,6 @@ import AlertModal from '../modals/alertModal';
 import ContentData from './segments/contentData';
 
 const Table = ({ header, info = [], view, setSelected, rol, fetchData }) => {
-  const [filtered, setFiltered] = useState(info);
   const [selectedIds, setSelectedIds] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -18,7 +17,7 @@ const Table = ({ header, info = [], view, setSelected, rol, fetchData }) => {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [alert, setAlert] = useState({ type: '', message: '', url: '' });
 
-  const { deleteCustomer, loading: deleting, error } = useCustomers();
+  const { deleteCustomer, loading: deleting } = useCustomers();
 
   const [filters, setFilters] = useState({
     role: '',
@@ -31,9 +30,10 @@ const Table = ({ header, info = [], view, setSelected, rol, fetchData }) => {
     plateNumber: '',
   });
 
-  useEffect(() => {
+  const filtered = useMemo(() => {
     const arrayInfo = Array.isArray(info) ? info : [];
-    let result = arrayInfo.filter((a) => {
+
+    return arrayInfo.filter((a) => {
       const roleMatch = filters.role
         ? a.role?.toLowerCase().includes(filters.role.toLowerCase())
         : true;
@@ -88,10 +88,11 @@ const Table = ({ header, info = [], view, setSelected, rol, fetchData }) => {
 
       return roleMatch && nameMatch && emailMatch && phoneMatch;
     });
+  }, [info, filters, view]);
 
-    setFiltered(result);
+  useEffect(() => {
     setCurrentPage(1);
-  }, [filters, info, view]);
+  }, [filters, view]);
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -104,51 +105,52 @@ const Table = ({ header, info = [], view, setSelected, rol, fetchData }) => {
   };
 
   const confirmDelete = async () => {
-    if (deleteTarget) {
-      try {
-        await deleteCustomer(deleteTarget.id);
-        setShowDeleteModal(false);
-        setDeleteTarget(null);
-        setAlert({
-          type: 'success',
-          message: `Cliente eliminado correctamente.`,
-        });
-        await fetchData();
-      } catch (err) {
-        setAlert({
-          type: 'error',
-          message: err.message || 'Error al eliminar cliente',
-        });
-      }
+    if (!deleteTarget) return;
+
+    try {
+      await deleteCustomer(deleteTarget.id);
+      setShowDeleteModal(false);
+      setDeleteTarget(null);
+      setAlert({
+        type: 'success',
+        message: 'Cliente eliminado correctamente.',
+      });
+      await fetchData();
+    } catch (err) {
+      setAlert({
+        type: 'error',
+        message: err?.message || 'Error al eliminar cliente',
+      });
     }
   };
 
-  const toggleCheckbox = (info) => {
+  const toggleCheckbox = (row) => {
     setSelectedIds((prev) =>
-      prev.includes(info.id)
-        ? prev.filter((id) => id !== info.id)
-        : [...prev, info.id]
+      prev.includes(row.id)
+        ? prev.filter((id) => id !== row.id)
+        : [...prev, row.id]
     );
   };
 
-  const getCustomerLockState = (index, customer) => {
+  const totalPages = Math.ceil(filtered.length / rowsPerPage);
+
+  const paginatedData = filtered.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
+  );
+
+  const getCustomerLockState = (index, customer, data) => {
     if (rol !== 'ASESOR' || view !== 'customers') return false;
     if (customer.comments?.length > 0) return false;
 
     for (let i = 0; i < index; i++) {
-      const prevCustomer = paginatedData[i];
+      const prevCustomer = data[i];
       if (!prevCustomer.comments || prevCustomer.comments.length === 0) {
         return true;
       }
     }
     return false;
   };
-
-  const totalPages = Math.ceil(filtered.length / rowsPerPage);
-  const paginatedData = filtered.slice(
-    (currentPage - 1) * rowsPerPage,
-    currentPage * rowsPerPage
-  );
 
   return (
     <>
