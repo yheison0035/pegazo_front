@@ -14,6 +14,7 @@ import {
   Cog6ToothIcon,
   AdjustmentsHorizontalIcon,
   ArrowLeftOnRectangleIcon,
+  ClipboardDocumentListIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -65,6 +66,12 @@ export default function NavLinks() {
       name: 'Realizar Venta',
       href: '/CRM/dashboard/sales',
       icon: BanknotesIcon,
+      roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR'],
+    },
+    {
+      name: 'Pedidos',
+      href: '/CRM/dashboard/orders',
+      icon: ClipboardDocumentListIcon,
       roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR'],
     },
     {

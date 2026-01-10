@@ -2,47 +2,30 @@ import apiFetch from '../../auth/client';
 import { toFullISO } from '../../utils/utils';
 
 export async function getBrands() {
-  return apiFetch('/customers');
+  return apiFetch('/brands');
 }
 
 export async function getBrandById(id) {
-  return apiFetch(`/customers/${id}`);
+  return apiFetch(`/brands/${id}`);
 }
 
 export async function createBrand(dto) {
-  const body = {
-    ...dto,
-    birthdate: dto.birthdate ? toFullISO(dto.birthdate) : undefined,
-    advisorId: Number(dto.advisorId),
-    stateId: Number(dto.stateId),
-  };
-  return apiFetch('/customers', { method: 'POST', body: JSON.stringify(body) });
+  return apiFetch('/brands', { method: 'POST', body: JSON.stringify(dto) });
 }
 
 export async function updateBrand(id, dto) {
-  const {
-    id: _id,
-    createdAt,
-    updatedAt,
-    advisor,
-    comments,
-    state,
-    ...cleanDto
-  } = dto;
+  const { id: _id, createdAt, updatedAt, ...cleanDto } = dto;
 
   const body = {
     ...cleanDto,
-    stateId: Number(cleanDto.stateId) || null,
-    advisorId: Number(cleanDto.advisorId) || null,
-    birthdate: cleanDto.birthdate ? toFullISO(cleanDto.birthdate) : undefined,
   };
 
-  return apiFetch(`/customers/${id}`, {
+  return apiFetch(`/brands/${id}`, {
     method: 'PUT',
     body: JSON.stringify(body),
   });
 }
 
 export async function deleteBrand(id) {
-  return apiFetch(`/customers/${id}`, { method: 'DELETE' });
+  return apiFetch(`/brands/${id}`, { method: 'DELETE' });
 }

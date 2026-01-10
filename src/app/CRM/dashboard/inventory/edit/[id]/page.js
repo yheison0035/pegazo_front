@@ -11,8 +11,11 @@ import { getFormFieldsInventory } from '@/lib/api/utils/inventory.config';
 export default function EditProduct() {
   const [formData, setFormData] = useState({});
   const [alert, setAlert] = useState({ type: '', message: '', url: '' });
+  const [images, setImages] = useState([]);
+  const [showImages, setShowImages] = useState(false);
   const { id } = useParams();
   const { usuario } = useAuth();
+
   const { getProductById, updateProduct, loading } = useProducts();
 
   const fetchProduct = useCallback(async () => {
@@ -20,6 +23,7 @@ export default function EditProduct() {
     try {
       const { data } = await getProductById(Number(id));
       setFormData(data);
+      setImages(data.images || []);
     } catch (err) {
       setAlert({
         type: 'warning',
@@ -36,7 +40,7 @@ export default function EditProduct() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      //await updateProduct(formData);
+      await updateProduct(id, formData);
       setAlert({
         type: 'success',
         message: 'Producto actualizado correctamente.',
@@ -66,6 +70,10 @@ export default function EditProduct() {
         mode="edit"
         usuario={usuario}
         module="inventory"
+        images={images}
+        setImages={setImages}
+        showImages={showImages}
+        setShowImages={setShowImages}
       />
 
       <AlertModal

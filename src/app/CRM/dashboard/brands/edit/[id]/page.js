@@ -36,7 +36,7 @@ export default function EditBrand() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await updateBrand(formData);
+      await updateBrand(id, formData);
       setAlert({
         type: 'success',
         message: 'Marca actualizada correctamente.',

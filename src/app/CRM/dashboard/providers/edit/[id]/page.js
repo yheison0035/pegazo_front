@@ -36,7 +36,7 @@ export default function EditProvider() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      //await updateProvider(formData);
+      await updateProvider(id, formData);
       setAlert({
         type: 'success',
         message: 'Proveedor actualizado correctamente.',

@@ -7,6 +7,7 @@ export default function SearchFilter({
   type = 'text',
   handleFilterChange = () => {},
 }) {
+  if (name === 'image') return null;
   const inputId = `filter-${name}`;
 
   return (

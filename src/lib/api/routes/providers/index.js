@@ -1,48 +1,30 @@
 import apiFetch from '../../auth/client';
-import { toFullISO } from '../../utils/utils';
 
 export async function getProviders() {
-  return apiFetch('/customers');
+  return apiFetch('/providers');
 }
 
 export async function getProviderById(id) {
-  return apiFetch(`/customers/${id}`);
+  return apiFetch(`/providers/${id}`);
 }
 
 export async function createProvider(dto) {
-  const body = {
-    ...dto,
-    birthdate: dto.birthdate ? toFullISO(dto.birthdate) : undefined,
-    advisorId: Number(dto.advisorId),
-    stateId: Number(dto.stateId),
-  };
-  return apiFetch('/customers', { method: 'POST', body: JSON.stringify(body) });
+  return apiFetch('/providers', { method: 'POST', body: JSON.stringify(dto) });
 }
 
 export async function updateProvider(id, dto) {
-  const {
-    id: _id,
-    createdAt,
-    updatedAt,
-    advisor,
-    comments,
-    state,
-    ...cleanDto
-  } = dto;
+  const { id: _id, createdAt, updatedAt, ...cleanDto } = dto;
 
   const body = {
     ...cleanDto,
-    stateId: Number(cleanDto.stateId) || null,
-    advisorId: Number(cleanDto.advisorId) || null,
-    birthdate: cleanDto.birthdate ? toFullISO(cleanDto.birthdate) : undefined,
   };
 
-  return apiFetch(`/customers/${id}`, {
+  return apiFetch(`/providers/${id}`, {
     method: 'PUT',
     body: JSON.stringify(body),
   });
 }
 
 export async function deleteProvider(id) {
-  return apiFetch(`/customers/${id}`, { method: 'DELETE' });
+  return apiFetch(`/providers/${id}`, { method: 'DELETE' });
 }

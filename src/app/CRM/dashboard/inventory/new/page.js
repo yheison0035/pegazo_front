@@ -11,18 +11,24 @@ import {
 import useProducts from '@/lib/api/hooks/useProducts';
 
 export default function NewProduct() {
-  const { usuario } = useAuth();
-  const { createProduct, loading } = useProducts();
-
   const [formData, setFormData] = useState(getEmptyInventory());
   const [alert, setAlert] = useState({ type: '', message: '', url: '' });
+  const [images, setImages] = useState([]);
+  const [showImages, setShowImages] = useState(false);
+  const { usuario } = useAuth();
 
-  const handleReset = () => setFormData(getEmptyInventory());
+  const { createProduct, loading } = useProducts();
+
+  const handleReset = () => {
+    setFormData(getEmptyInventory());
+    setImages([]);
+    setShowImages(false);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      //await createProduct(formData);
+      await createProduct(formData, images);
       setAlert({
         type: 'success',
         message: 'Producto creado correctamente.',
@@ -55,6 +61,10 @@ export default function NewProduct() {
         mode="new"
         usuario={usuario}
         module="inventory"
+        images={images}
+        setImages={setImages}
+        showImages={showImages}
+        setShowImages={setShowImages}
       />
 
       <AlertModal

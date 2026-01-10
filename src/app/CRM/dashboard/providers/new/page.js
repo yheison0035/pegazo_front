@@ -22,7 +22,7 @@ export default function NewProvider() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      //await createProvider(formData);
+      await createProvider(formData);
       setAlert({
         type: 'success',
         message: 'Proveedor creado correctamente.',

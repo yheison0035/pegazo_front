@@ -12,6 +12,7 @@ import { getHeaderTableInventory } from '@/lib/api/utils/inventory.config';
 export default function Inventory() {
   const [archivo, setArchivo] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedVariants, setSelectedVariants] = useState(null);
   const [products, setProducts] = useState([]);
   const [alert, setAlert] = useState({ type: '', message: '', url: '' });
   const { usuario } = useAuth();
@@ -83,6 +84,7 @@ export default function Inventory() {
           fetchData={fetchProducts}
           loading={loading}
           error={error}
+          setSelectedVariants={setSelectedVariants}
         />
 
         {selectedProduct && (
@@ -92,9 +94,14 @@ export default function Inventory() {
             onClose={() => setSelectedProduct(null)}
           />
         )}
+        {selectedVariants && (
+          <ViewModal
+            data={selectedVariants}
+            type="variants"
+            onClose={() => setSelectedVariants(null)}
+          />
+        )}
       </div>
-
-      {/* Modal de alertas */}
       <AlertModal
         type={alert.type}
         message={alert.message}

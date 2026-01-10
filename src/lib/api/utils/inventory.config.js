@@ -11,7 +11,7 @@ export const getEmptyInventory = () => ({
   salePrice: '',
   categoryId: '',
   brandId: '',
-  status: '',
+  status: 'ACTIVO',
 });
 
 export const getFormFieldsInventory = () => [
@@ -65,16 +65,15 @@ export const getFormFieldsInventory = () => [
     type: 'select',
     required: true,
     options: [
-      { id: 'Activo', name: 'Activo' },
-      { id: 'Inactivo', name: 'Inactivo' },
+      { id: 'ACTIVO', name: 'ACTIVO' },
+      { id: 'INACTIVO', name: 'INACTIVO' },
     ],
   },
 ];
 
 export const getHeaderTableInventory = () => [
-  { name: 'sku', title: 'Código / SKU', show: true },
+  { name: 'image', title: 'Imagen Principal', show: true },
   { name: 'name', title: 'Nombre del Producto', show: true },
-  { name: 'color', title: 'Color', show: true },
   { name: 'stock', title: 'Cantidad', show: true },
   { name: 'localId', title: 'Local / Punto de Venta', show: true },
   { name: 'providerId', title: 'Proveedor', show: true },

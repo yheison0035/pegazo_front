@@ -1,6 +1,5 @@
 export const getEmptyProvider = () => ({
   name: '',
-  company: '',
   contactName: '',
   phone: '',
   email: '',
@@ -8,24 +7,23 @@ export const getEmptyProvider = () => ({
   department: '',
   address: '',
   productType: '',
-  status: '',
+  status: 'ACTIVO',
 });
 
 export const getFormFieldsProviders = () => [
-  { name: 'name', label: 'Nombre del Proveedor', type: 'text', required: true },
-  { name: 'company', label: 'Empresa', type: 'text', required: true },
+  { name: 'name', label: 'Empresa', type: 'text', required: true },
   {
     name: 'contactName',
     label: 'Nombre de Contacto',
     type: 'text',
-    required: false,
+    required: true,
   },
   { name: 'phone', label: 'Celular', type: 'text', required: true },
   {
     name: 'email',
     label: 'Correo Electrónico',
     type: 'email',
-    required: false,
+    required: true,
   },
   { name: 'city', label: 'Ciudad', type: 'text', required: true },
   { name: 'department', label: 'Departamento', type: 'text', required: false },
@@ -42,22 +40,20 @@ export const getFormFieldsProviders = () => [
     type: 'select',
     required: true,
     options: [
-      { id: 'Activo', name: 'Activo' },
-      { id: 'Inactivo', name: 'Inactivo' },
+      { id: 'ACTIVO', name: 'ACTIVO' },
+      { id: 'INACTIVO', name: 'INACTIVO' },
     ],
   },
 ];
 
 export const getHeaderTableProviders = () => [
-  { name: 'code', title: 'Código', show: true },
-  { name: 'name', title: 'Nombre del Proveedor', show: true },
-  { name: 'company', title: 'Empresa', show: true },
-  { name: 'contactName', title: 'Contacto', show: true },
-  { name: 'phone', title: 'Teléfono', show: true },
+  { name: 'name', title: 'Empresa', show: true },
+  { name: 'contactName', title: 'Nombre de Contacto', show: true },
   { name: 'email', title: 'Correo Electrónico', show: false },
+  { name: 'productType', title: 'Tipo de Producto', show: true },
+  { name: 'address', title: 'Dirección', show: true },
   { name: 'city', title: 'Ciudad', show: true },
   { name: 'department', title: 'Departamento', show: false },
-  { name: 'address', title: 'Dirección', show: false },
-  { name: 'productType', title: 'Tipo de Producto', show: true },
   { name: 'status', title: 'Estado', show: true },
+  { name: 'phone', title: 'Teléfono', show: true },
 ];

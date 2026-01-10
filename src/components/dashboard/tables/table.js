@@ -12,6 +12,7 @@ const Table = ({
   info = [],
   view,
   setSelected,
+  setSelectedVariants,
   rol,
   handleDeleteClick,
 }) => {
@@ -31,6 +32,12 @@ const Table = ({
     userId: '',
     city: '',
     address: '',
+    contactName: '',
+    productType: '',
+    stock: '',
+    localId: '',
+    providerId: '',
+    salePrice: '',
   });
 
   const filtered = useMemo(() => {
@@ -79,6 +86,38 @@ const Table = ({
           )
         : true;
 
+      const contactNameMatch = filters.contactName
+        ? (a.contactName?.toLowerCase() || '').includes(
+            filters.contactName.toLowerCase()
+          )
+        : true;
+
+      const productTypeMatch = filters.productType
+        ? (a.productType?.toLowerCase() || '').includes(
+            filters.productType.toLowerCase()
+          )
+        : true;
+
+      const stockMatch = filters.stock
+        ? String(a.stock).includes(String(filters.stock))
+        : true;
+
+      const localMatch = filters.localId
+        ? (a.local?.name?.toLowerCase() || '').includes(
+            filters.localId.toLowerCase()
+          )
+        : true;
+
+      const providerMatch = filters.providerId
+        ? (a.provider?.name?.toLowerCase() || '').includes(
+            filters.providerId.toLowerCase()
+          )
+        : true;
+
+      const salePriceMatch = filters.salePrice
+        ? String(a.salePrice).includes(String(filters.salePrice))
+        : true;
+
       return (
         roleMatch &&
         nameMatch &&
@@ -88,7 +127,13 @@ const Table = ({
         statusMatch &&
         userNameMatch &&
         cityMatch &&
-        addressMatch
+        addressMatch &&
+        productTypeMatch &&
+        contactNameMatch &&
+        stockMatch &&
+        localMatch &&
+        providerMatch &&
+        salePriceMatch
       );
     });
   }, [info, filters, view]);
@@ -148,6 +193,7 @@ const Table = ({
             rol={rol}
             view={view}
             setSelected={setSelected}
+            setSelectedVariants={setSelectedVariants}
             toggleCheckbox={toggleCheckbox}
             selectedIds={selectedIds}
             handleDeleteClick={handleDeleteClick}

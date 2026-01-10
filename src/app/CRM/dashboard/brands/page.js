@@ -10,13 +10,18 @@ import { useAuth } from '@/context/authContext';
 import { Roles } from '@/config/roles';
 import useBrands from '@/lib/api/hooks/useBrands';
 import { getHeaderTableBrands } from '@/lib/api/utils/brands.config';
+import ConfirmDeleteModal from '@/components/dashboard/tables/segments/confirmDeleteModal';
+import AlertModal from '@/components/dashboard/modals/alertModal';
 
 export default function Brands() {
   const [brands, setBrands] = useState([]);
   const [selectedBrands, setSelectedBrands] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const { usuario } = useAuth();
+  const [alert, setAlert] = useState({ type: '', message: '', url: '' });
 
-  const { getBrands, loading, error } = useBrands();
+  const { getBrands, deleteBrand, loading, error } = useBrands();
 
   const fetchBrands = useCallback(async () => {
     try {
@@ -30,6 +35,31 @@ export default function Brands() {
   useEffect(() => {
     fetchBrands();
   }, [fetchBrands]);
+
+  const handleDeleteClick = (id, name) => {
+    setDeleteTarget({ id, name, type: 'marca' });
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+
+    try {
+      await deleteBrand(deleteTarget.id);
+      setAlert({
+        type: 'success',
+        message: 'Marca eliminada correctamente.',
+      });
+      setShowDeleteModal(false);
+      setDeleteTarget(null);
+      await fetchBrands();
+    } catch (err) {
+      setAlert({
+        type: 'error',
+        message: err?.message || 'Error al eliminar marca',
+      });
+    }
+  };
 
   return (
     <RoleGuard allowedRoles={Object.values(Roles)}>
@@ -60,6 +90,7 @@ export default function Brands() {
             fetchData={fetchBrands}
             loading={loading}
             error={error}
+            handleDeleteClick={handleDeleteClick}
           />
           {selectedBrands && (
             <ViewModal
@@ -68,7 +99,23 @@ export default function Brands() {
               onClose={() => setSelectedBrands(null)}
             />
           )}
+          {showDeleteModal && (
+            <ConfirmDeleteModal
+              show={showDeleteModal}
+              setShow={setShowDeleteModal}
+              type={deleteTarget?.type}
+              name={deleteTarget?.name}
+              onConfirm={confirmDelete}
+              loading={loading}
+            />
+          )}
         </div>
+        <AlertModal
+          type={alert.type}
+          message={alert.message}
+          onClose={() => setAlert({ type: '', message: '', url: '' })}
+          url={alert.url}
+        />
       </div>
     </RoleGuard>
   );

@@ -8,14 +8,18 @@ import Header from '@/components/dashboard/customers/header';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import ViewModal from '../../viewModal';
 import { getHeaderTableProviders } from '@/lib/api/utils/providers.config';
+import ConfirmDeleteModal from '@/components/dashboard/tables/segments/confirmDeleteModal';
 
 export default function Providers() {
   const [selectedProvider, setSelectedProvider] = useState(null);
   const [providers, setProviders] = useState([]);
-  const [alert, setAlert] = useState({ type: '', message: '', url: '' });
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const { usuario } = useAuth();
 
-  const { getProviders, loading, error } = useProviders();
+  const [alert, setAlert] = useState({ type: '', message: '', url: '' });
+
+  const { getProviders, deleteProvider, loading, error } = useProviders();
 
   const fetchProviders = useCallback(async () => {
     try {
@@ -29,6 +33,31 @@ export default function Providers() {
   useEffect(() => {
     fetchProviders();
   }, [fetchProviders]);
+
+  const handleDeleteClick = (id, name) => {
+    setDeleteTarget({ id, name, type: 'proveedor' });
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+
+    try {
+      await deleteProvider(deleteTarget.id);
+      setAlert({
+        type: 'success',
+        message: 'Proveedor eliminado correctamente.',
+      });
+      setShowDeleteModal(false);
+      setDeleteTarget(null);
+      await fetchProviders();
+    } catch (err) {
+      setAlert({
+        type: 'error',
+        message: err?.message || 'Error al eliminar proveedor',
+      });
+    }
+  };
 
   return (
     <div className="w-full p-4">
@@ -54,6 +83,7 @@ export default function Providers() {
           fetchData={fetchProviders}
           loading={loading}
           error={error}
+          handleDeleteClick={handleDeleteClick}
         />
 
         {selectedProvider && (
@@ -63,8 +93,17 @@ export default function Providers() {
             onClose={() => setSelectedProvider(null)}
           />
         )}
+        {showDeleteModal && (
+          <ConfirmDeleteModal
+            show={showDeleteModal}
+            setShow={setShowDeleteModal}
+            type={deleteTarget?.type}
+            name={deleteTarget?.name}
+            onConfirm={confirmDelete}
+            loading={loading}
+          />
+        )}
       </div>
-
       <AlertModal
         type={alert.type}
         message={alert.message}

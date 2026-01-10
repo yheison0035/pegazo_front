@@ -1,7 +1,7 @@
 export const getEmptyBrand = () => ({
   name: '',
   description: '',
-  status: 'Activo',
+  status: 'ACTIVO',
 });
 
 export const getFormFieldsBrands = () => [
@@ -14,7 +14,7 @@ export const getFormFieldsBrands = () => [
   {
     name: 'description',
     label: 'Descripción',
-    type: 'text',
+    type: 'textarea',
     required: false,
   },
   {
@@ -23,14 +23,13 @@ export const getFormFieldsBrands = () => [
     type: 'select',
     required: true,
     options: [
-      { id: 'Activo', name: 'Activo' },
-      { id: 'Inactivo', name: 'Inactivo' },
+      { id: 'ACTIVO', name: 'ACTIVO' },
+      { id: 'INACTIVO', name: 'INACTIVO' },
     ],
   },
 ];
 
 export const getHeaderTableBrands = () => [
-  { name: 'code', title: 'Código', show: true },
   { name: 'name', title: 'Nombre de la Marca', show: true },
   { name: 'description', title: 'Descripción', show: true },
   { name: 'status', title: 'Estado', show: true },

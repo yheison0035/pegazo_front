@@ -12,6 +12,7 @@ import { getCategories } from '@/lib/api/routes/categories';
 import { getBrands } from '@/lib/api/routes/brands';
 import ProductSelector from './productSelector';
 import { getCustomers } from '@/lib/api/routes/customers';
+import ImageUploader from '../inventory/imageUploader';
 
 export default function DinamicForm({
   formData,
@@ -23,6 +24,10 @@ export default function DinamicForm({
   loading,
   mode = 'edit',
   module = 'inventory',
+  images,
+  setImages,
+  showImages,
+  setShowImages,
 }) {
   const [dynamicOptions, setDynamicOptions] = useState({});
   const { getUsers } = useUsers();
@@ -117,7 +122,7 @@ export default function DinamicForm({
                     {label}
                   </label>
                   <ColorSelect
-                    value={formData[name]}
+                    value={formData.variants}
                     onChange={(value) => handleColorChange(name, value)}
                     options={options}
                     disabled={isLocked}
@@ -223,13 +228,24 @@ export default function DinamicForm({
               </div>
             );
           })}
-
         {hasDepartaCiudad && (
           <DepartaCiudad
             formData={formData}
             handleChange={handleChange}
             isLocked={isLocked}
           />
+        )}
+        {module === 'inventory' && (
+          <>
+            <div className="col-span-full">
+              <ImageUploader
+                images={images}
+                setImages={setImages}
+                showImages={showImages}
+                setShowImages={setShowImages}
+              />
+            </div>
+          </>
         )}
       </div>
 

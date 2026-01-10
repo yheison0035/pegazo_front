@@ -7,8 +7,7 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
-  importProducts,
-} from '../routes/products/index';
+} from '../routes/inventory/index';
 
 export default function useProducts() {
   const [loading, setLoading] = useState(false);
@@ -41,10 +40,6 @@ export default function useProducts() {
     [wrap]
   );
   const deleteProductFn = useCallback((id) => wrap(deleteProduct, id), [wrap]);
-  const importProductsFn = useCallback(
-    (file) => wrap(importProducts, file),
-    [wrap]
-  );
 
   return {
     getProducts: getProductsFn,
@@ -52,7 +47,6 @@ export default function useProducts() {
     createProduct: createProductFn,
     updateProduct: updateProductFn,
     deleteProduct: deleteProductFn,
-    importProducts: importProductsFn,
     loading,
     error,
   };
