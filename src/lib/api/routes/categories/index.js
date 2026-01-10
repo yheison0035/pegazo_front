@@ -2,47 +2,33 @@ import apiFetch from '../../auth/client';
 import { toFullISO } from '../../utils/utils';
 
 export async function getCategories() {
-  return apiFetch('/customers');
+  return apiFetch('/categories');
 }
 
 export async function getCategoryById(id) {
-  return apiFetch(`/customers/${id}`);
+  return apiFetch(`/categories/${id}`);
 }
 
 export async function createCategory(dto) {
-  const body = {
-    ...dto,
-    birthdate: dto.birthdate ? toFullISO(dto.birthdate) : undefined,
-    advisorId: Number(dto.advisorId),
-    stateId: Number(dto.stateId),
-  };
-  return apiFetch('/customers', { method: 'POST', body: JSON.stringify(body) });
+  return apiFetch('/categories', {
+    method: 'POST',
+    body: JSON.stringify(dto),
+  });
 }
 
 export async function updateCategory(id, dto) {
-  const {
-    id: _id,
-    createdAt,
-    updatedAt,
-    advisor,
-    comments,
-    state,
-    ...cleanDto
-  } = dto;
+  const { id: _id, createdAt, updatedAt, ...cleanDto } = dto;
 
   const body = {
     ...cleanDto,
-    stateId: Number(cleanDto.stateId) || null,
-    advisorId: Number(cleanDto.advisorId) || null,
-    birthdate: cleanDto.birthdate ? toFullISO(cleanDto.birthdate) : undefined,
   };
 
-  return apiFetch(`/customers/${id}`, {
+  return apiFetch(`/categories/${id}`, {
     method: 'PUT',
     body: JSON.stringify(body),
   });
 }
 
 export async function deleteCategory(id) {
-  return apiFetch(`/customers/${id}`, { method: 'DELETE' });
+  return apiFetch(`/categories/${id}`, { method: 'DELETE' });
 }

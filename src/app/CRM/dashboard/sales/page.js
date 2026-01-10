@@ -18,7 +18,6 @@ export default function AddSales() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
     if (!formData.products || formData.products.length === 0) {
       setAlert({
         type: 'warning',

@@ -1,7 +1,7 @@
 export const getEmptyCategory = () => ({
   name: '',
   description: '',
-  status: 'Activo',
+  status: 'ACTIVO',
 });
 
 export const getFormFieldsCategories = () => [
@@ -14,7 +14,7 @@ export const getFormFieldsCategories = () => [
   {
     name: 'description',
     label: 'Descripción',
-    type: 'text',
+    type: 'textarea',
     required: false,
   },
   {
@@ -23,14 +23,13 @@ export const getFormFieldsCategories = () => [
     type: 'select',
     required: true,
     options: [
-      { id: 'Activo', name: 'Activo' },
-      { id: 'Inactivo', name: 'Inactivo' },
+      { id: 'ACTIVO', name: 'ACTIVO' },
+      { id: 'INACTIVO', name: 'INACTIVO' },
     ],
   },
 ];
 
 export const getHeaderTableCategories = () => [
-  { name: 'code', title: 'Código', show: true },
   { name: 'name', title: 'Nombre de la Categoría', show: true },
   { name: 'description', title: 'Descripción', show: true },
   { name: 'status', title: 'Estado', show: true },

@@ -1,22 +1,15 @@
 import usePermissions from '@/hooks/usePermissions';
-import {
-  EyeIcon,
-  TrashIcon,
-  PencilIcon,
-  ArrowPathIcon,
-} from '@heroicons/react/24/outline';
+import { EyeIcon, TrashIcon, PencilIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 
 export default function Actions({
   isLocked,
-  rol,
   info,
   view,
   setSelected,
   handleDelete,
-  setShowModalChangeAdvisor,
 }) {
-  const { canAssign, canEdit, canDelete } = usePermissions();
+  const { canDelete } = usePermissions();
   return (
     <div className="flex justify-center space-x-3">
       <div className="relative group flex items-center">
@@ -55,7 +48,7 @@ export default function Actions({
       {canDelete && (
         <div className="relative group flex items-center">
           <button
-            onClick={() => handleDelete(info.id, info.name, view)}
+            onClick={() => handleDelete()}
             disabled={isLocked}
             className="text-red-500 hover:text-red-700 cursor-pointer"
           >

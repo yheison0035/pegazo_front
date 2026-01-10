@@ -20,7 +20,6 @@ export default function NewProduct() {
   const handleReset = () => setFormData(getEmptyInventory());
 
   const handleSubmit = async (e) => {
-    console.log(formData);
     e.preventDefault();
     try {
       //await createProduct(formData);

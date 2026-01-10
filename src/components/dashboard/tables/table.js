@@ -5,19 +5,19 @@ import { useState, useEffect, useMemo } from 'react';
 import Thead from './segments/thead';
 import InputFilters from './segments/InputsFilters';
 import Pagination from './segments/pagination';
-import useCustomers from '@/lib/api/hooks/useProducts';
-import AlertModal from '../modals/alertModal';
 import ContentData from './segments/contentData';
 
-const Table = ({ header, info = [], view, setSelected, rol, fetchData }) => {
+const Table = ({
+  header,
+  info = [],
+  view,
+  setSelected,
+  rol,
+  handleDeleteClick,
+}) => {
   const [selectedIds, setSelectedIds] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState(null);
-  const [alert, setAlert] = useState({ type: '', message: '', url: '' });
-
-  const { deleteCustomer, loading: deleting } = useCustomers();
 
   const [filters, setFilters] = useState({
     role: '',
@@ -25,9 +25,12 @@ const Table = ({ header, info = [], view, setSelected, rol, fetchData }) => {
     email: '',
     phone: '',
     advisor: '',
-    state: '',
+    status: '',
     deliveryDate: '',
-    plateNumber: '',
+    description: '',
+    userId: '',
+    city: '',
+    address: '',
   });
 
   const filtered = useMemo(() => {
@@ -50,43 +53,43 @@ const Table = ({ header, info = [], view, setSelected, rol, fetchData }) => {
         ? a.phone?.toLowerCase().includes(filters.phone.toLowerCase())
         : true;
 
-      const deliveryDateMatch = filters.deliveryDate
-        ? a.deliveryDate
+      const descriptionMatch = filters.description
+        ? a.description
             ?.toLowerCase()
-            .includes(filters.deliveryDate.toLowerCase())
+            .includes(filters.description.toLowerCase())
         : true;
 
-      const plateNumberMatch = filters.plateNumber
-        ? a.plateNumber
-            ?.toLowerCase()
-            .includes(filters.plateNumber.toLowerCase())
+      const statusMatch = filters.status
+        ? (a.status.toLowerCase() || '').includes(filters.status.toLowerCase())
         : true;
 
-      if (view === 'customers' || view === 'delivered') {
-        const advisorMatch = filters.advisor
-          ? (a.advisor?.name?.toLowerCase() || 'sin asignar').includes(
-              filters.advisor.toLowerCase()
-            )
-          : true;
+      const userNameMatch = filters.userId
+        ? (a.user?.name?.toLowerCase() || '').includes(
+            filters.userId.toLowerCase()
+          )
+        : true;
 
-        const stateMatch = filters.state
-          ? (a.state?.name?.toLowerCase() || '').includes(
-              filters.state.toLowerCase()
-            )
-          : true;
+      const cityMatch = filters.city
+        ? (a.city?.toLowerCase() || '').includes(filters.city.toLowerCase())
+        : true;
 
-        return (
-          nameMatch &&
-          emailMatch &&
-          phoneMatch &&
-          advisorMatch &&
-          stateMatch &&
-          deliveryDateMatch &&
-          plateNumberMatch
-        );
-      }
+      const addressMatch = filters.address
+        ? (a.address?.toLowerCase() || '').includes(
+            filters.address.toLowerCase()
+          )
+        : true;
 
-      return roleMatch && nameMatch && emailMatch && phoneMatch;
+      return (
+        roleMatch &&
+        nameMatch &&
+        emailMatch &&
+        phoneMatch &&
+        descriptionMatch &&
+        statusMatch &&
+        userNameMatch &&
+        cityMatch &&
+        addressMatch
+      );
     });
   }, [info, filters, view]);
 
@@ -97,31 +100,6 @@ const Table = ({ header, info = [], view, setSelected, rol, fetchData }) => {
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilters((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleDeleteClick = (id, name, type) => {
-    setDeleteTarget({ id, name, type });
-    setShowDeleteModal(true);
-  };
-
-  const confirmDelete = async () => {
-    if (!deleteTarget) return;
-
-    try {
-      await deleteCustomer(deleteTarget.id);
-      setShowDeleteModal(false);
-      setDeleteTarget(null);
-      setAlert({
-        type: 'success',
-        message: 'Cliente eliminado correctamente.',
-      });
-      await fetchData();
-    } catch (err) {
-      setAlert({
-        type: 'error',
-        message: err?.message || 'Error al eliminar cliente',
-      });
-    }
   };
 
   const toggleCheckbox = (row) => {
@@ -173,11 +151,6 @@ const Table = ({ header, info = [], view, setSelected, rol, fetchData }) => {
             toggleCheckbox={toggleCheckbox}
             selectedIds={selectedIds}
             handleDeleteClick={handleDeleteClick}
-            showDeleteModal={showDeleteModal}
-            setShowDeleteModal={setShowDeleteModal}
-            deleteTarget={deleteTarget}
-            confirmDelete={confirmDelete}
-            deleting={deleting}
           />
         </tbody>
       </table>
@@ -189,13 +162,6 @@ const Table = ({ header, info = [], view, setSelected, rol, fetchData }) => {
         totalPages={totalPages}
         setRowsPerPage={setRowsPerPage}
         setCurrentPage={setCurrentPage}
-      />
-
-      <AlertModal
-        type={alert.type}
-        message={alert.message}
-        onClose={() => setAlert({ type: '', message: '', url: '' })}
-        url={alert.url}
       />
     </>
   );

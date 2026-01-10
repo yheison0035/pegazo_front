@@ -4,7 +4,7 @@ export const getEmptyLocal = () => ({
   department: '',
   city: '',
   phone: '',
-  managerId: '',
+  userId: '',
   status: '',
 });
 
@@ -15,7 +15,7 @@ export const getFormFieldsLocals = () => [
   { name: 'city', label: 'Ciudad', type: 'text', required: true },
   { name: 'phone', label: 'Celular', type: 'text', required: true },
   {
-    name: 'managerId',
+    name: 'userId',
     label: 'Encargado',
     type: 'select',
     required: true,
@@ -27,19 +27,18 @@ export const getFormFieldsLocals = () => [
     type: 'select',
     required: true,
     options: [
-      { id: 'Activo', name: 'Activo' },
-      { id: 'Inactivo', name: 'Inactivo' },
+      { id: 'ACTIVO', name: 'ACTIVO' },
+      { id: 'INACTIVO', name: 'INACTIVO' },
     ],
   },
 ];
 
 export const getHeaderTableLocals = () => [
-  { name: 'code', title: 'Código', show: true },
   { name: 'name', title: 'Nombre del Local', show: true },
   { name: 'address', title: 'Dirección', show: true },
   { name: 'department', title: 'Departamento', show: false },
   { name: 'city', title: 'Ciudad', show: true },
-  { name: 'phone', title: 'Teléfono', show: false },
-  { name: 'managerId', title: 'Encargado', show: true },
+  { name: 'userId', title: 'Encargado', show: true },
   { name: 'status', title: 'Estado', show: true },
+  { name: 'phone', title: 'Teléfono', show: true },
 ];

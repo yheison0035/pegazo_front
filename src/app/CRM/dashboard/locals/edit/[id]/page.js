@@ -36,7 +36,7 @@ export default function EditLocal() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await updateLocal(formData);
+      await updateLocal(id, formData);
       setAlert({
         type: 'success',
         message: 'Local actualizado correctamente.',

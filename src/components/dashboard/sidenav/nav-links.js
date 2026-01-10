@@ -26,12 +26,6 @@ export default function NavLinks() {
 
   const links = [
     {
-      name: 'Estadísticas',
-      href: '/CRM/dashboard/statistics',
-      icon: AdjustmentsHorizontalIcon,
-      roles: ['SUPER_ADMIN', 'ADMIN'],
-    },
-    {
       name: 'Locales',
       href: '/CRM/dashboard/locals',
       icon: BuildingOfficeIcon,
@@ -50,15 +44,15 @@ export default function NavLinks() {
       roles: ['SUPER_ADMIN', 'ADMIN'],
     },
     {
-      name: 'Inventario',
-      href: '/CRM/dashboard/inventory',
-      icon: ArchiveBoxIcon,
-      roles: ['SUPER_ADMIN', 'ADMIN'],
-    },
-    {
       name: 'Proveedores',
       href: '/CRM/dashboard/providers',
       icon: BuildingStorefrontIcon,
+      roles: ['SUPER_ADMIN', 'ADMIN'],
+    },
+    {
+      name: 'Inventario',
+      href: '/CRM/dashboard/inventory',
+      icon: ArchiveBoxIcon,
       roles: ['SUPER_ADMIN', 'ADMIN'],
     },
     {
@@ -89,6 +83,12 @@ export default function NavLinks() {
       name: 'Usuarios / Roles',
       href: '/CRM/dashboard/users',
       icon: Cog6ToothIcon,
+      roles: ['SUPER_ADMIN', 'ADMIN'],
+    },
+    {
+      name: 'Estadísticas',
+      href: '/CRM/dashboard/statistics',
+      icon: AdjustmentsHorizontalIcon,
       roles: ['SUPER_ADMIN', 'ADMIN'],
     },
     {

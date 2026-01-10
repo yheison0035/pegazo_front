@@ -10,13 +10,18 @@ import { useAuth } from '@/context/authContext';
 import { Roles } from '@/config/roles';
 import useLocals from '@/lib/api/hooks/useLocals';
 import { getHeaderTableLocals } from '@/lib/api/utils/locals.config';
+import ConfirmDeleteModal from '@/components/dashboard/tables/segments/confirmDeleteModal';
+import AlertModal from '@/components/dashboard/modals/alertModal';
 
 export default function Locals() {
   const [locals, setLocals] = useState([]);
   const [selectedLocals, setSelectedLocals] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const { usuario } = useAuth();
+  const [alert, setAlert] = useState({ type: '', message: '', url: '' });
 
-  const { getLocals, loading, error } = useLocals();
+  const { getLocals, deleteLocal, loading, error } = useLocals();
 
   const fetchLocals = useCallback(async () => {
     try {
@@ -30,6 +35,31 @@ export default function Locals() {
   useEffect(() => {
     fetchLocals();
   }, [fetchLocals]);
+
+  const handleDeleteClick = (id, name) => {
+    setDeleteTarget({ id, name, type: 'local' });
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+
+    try {
+      await deleteLocal(deleteTarget.id);
+      setAlert({
+        type: 'success',
+        message: 'Local eliminado correctamente.',
+      });
+      setShowDeleteModal(false);
+      setDeleteTarget(null);
+      await fetchLocals();
+    } catch (err) {
+      setAlert({
+        type: 'error',
+        message: err?.message || 'Error al eliminar local',
+      });
+    }
+  };
 
   return (
     <RoleGuard allowedRoles={Object.values(Roles)}>
@@ -60,6 +90,7 @@ export default function Locals() {
             fetchData={fetchLocals}
             loading={loading}
             error={error}
+            handleDeleteClick={handleDeleteClick}
           />
           {selectedLocals && (
             <ViewModal
@@ -68,7 +99,23 @@ export default function Locals() {
               onClose={() => setSelectedLocals(null)}
             />
           )}
+          {showDeleteModal && (
+            <ConfirmDeleteModal
+              show={showDeleteModal}
+              setShow={setShowDeleteModal}
+              type={deleteTarget?.type}
+              name={deleteTarget?.name}
+              onConfirm={confirmDelete}
+              loading={loading}
+            />
+          )}
         </div>
+        <AlertModal
+          type={alert.type}
+          message={alert.message}
+          onClose={() => setAlert({ type: '', message: '', url: '' })}
+          url={alert.url}
+        />
       </div>
     </RoleGuard>
   );

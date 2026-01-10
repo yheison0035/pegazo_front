@@ -34,7 +34,6 @@ export default function EditProduct() {
   }, [fetchProduct]);
 
   const handleSubmit = async (e) => {
-    console.log(formData);
     e.preventDefault();
     try {
       //await updateProduct(formData);

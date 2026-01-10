@@ -149,6 +149,29 @@ export default function DinamicForm({
               );
             }
 
+            if (type === 'textarea') {
+              return (
+                <div key={name} className="flex flex-col col-span-full">
+                  <label className="text-sm font-medium text-gray-700 mb-1">
+                    {label}
+                  </label>
+                  <textarea
+                    type={type}
+                    name={name}
+                    value={formData[name] || ''}
+                    onChange={handleChange}
+                    disabled={isLocked}
+                    required={required}
+                    className={`w-full border border-gray-200 rounded-xl px-4 py-2 text-sm shadow-sm focus:outline-none transition ${
+                      isLocked
+                        ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                        : 'focus:ring-2 focus:ring-orange-500 focus:border-orange-500'
+                    }`}
+                  />
+                </div>
+              );
+            }
+
             if (type === 'select') {
               const fieldOptions = options || dynamicOptions[name] || [];
               return (

@@ -36,7 +36,7 @@ export default function EditCategory() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await updateCategory(formData);
+      await updateCategory(id, formData);
       setAlert({
         type: 'success',
         message: 'Categoria actualizada correctamente.',
