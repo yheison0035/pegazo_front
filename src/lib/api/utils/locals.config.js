@@ -42,3 +42,33 @@ export const getHeaderTableLocals = () => [
   { name: 'status', title: 'Estado', show: true },
   { name: 'phone', title: 'Teléfono', show: true },
 ];
+
+export const viewModalConfig = {
+  title: 'Detalles del Local',
+  subtitle: 'Información completa del punto de venta',
+  columns: 3,
+  sections: [
+    {
+      fields: [
+        { name: 'name', label: 'Nombre del Local' },
+        { name: 'address', label: 'Dirección' },
+        { name: 'phone', label: 'Teléfono' },
+      ],
+    },
+    {
+      fields: [
+        { name: 'city', label: 'Ciudad' },
+        { name: 'department', label: 'Departamento' },
+        { name: 'status', label: 'Estado', type: 'status' },
+      ],
+    },
+    {
+      fields: [
+        { name: 'createdAt', label: 'Fecha de Registro', type: 'date' },
+        { name: 'user.name', label: 'Encargado' },
+        { name: 'user.email', label: 'Correo Encargado' },
+      ],
+    },
+  ],
+  showComments: false,
+};

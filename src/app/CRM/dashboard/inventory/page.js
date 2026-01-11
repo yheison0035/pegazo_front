@@ -7,17 +7,22 @@ import Table from '@/components/dashboard/tables/table';
 import Header from '@/components/dashboard/customers/header';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import ViewModal from '../../viewModal';
-import { getHeaderTableInventory } from '@/lib/api/utils/inventory.config';
+import {
+  getHeaderTableInventory,
+  viewModalConfig,
+} from '@/lib/api/utils/inventory.config';
+import ConfirmDeleteModal from '@/components/dashboard/tables/segments/confirmDeleteModal';
 
 export default function Inventory() {
-  const [archivo, setArchivo] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedVariants, setSelectedVariants] = useState(null);
   const [products, setProducts] = useState([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [alert, setAlert] = useState({ type: '', message: '', url: '' });
   const { usuario } = useAuth();
 
-  const { getProducts, importProducts, loading, error } = useProducts();
+  const { getProducts, deleteProduct, loading, error } = useProducts();
 
   const fetchProducts = useCallback(async () => {
     try {
@@ -32,23 +37,27 @@ export default function Inventory() {
     fetchProducts();
   }, [fetchProducts]);
 
-  const handleFileChange = (e) => setArchivo(e.target.files?.[0] || null);
-  const handleRemoveFile = () => setArchivo(null);
+  const handleDeleteClick = (id, name) => {
+    setDeleteTarget({ id, name, type: 'producto' });
+    setShowDeleteModal(true);
+  };
 
-  const handleUpload = async () => {
-    if (!archivo) return;
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+
     try {
-      await importProducts(archivo);
-      setArchivo(null);
+      await deleteProduct(deleteTarget.id);
       setAlert({
         type: 'success',
-        message: 'Importación de productos creada correctamente.',
+        message: 'Producto eliminado correctamente.',
       });
+      setShowDeleteModal(false);
+      setDeleteTarget(null);
       await fetchProducts();
     } catch (err) {
       setAlert({
         type: 'error',
-        message: err.message || 'Error al subir archivo',
+        message: err?.message || 'Error al eliminar producto',
       });
     }
   };
@@ -59,14 +68,7 @@ export default function Inventory() {
         <h1 className="text-xl md:text-2xl font-semibold text-gray-800">
           Listado de Inventario
         </h1>
-        <Header
-          type="producto"
-          typeUrl="inventory"
-          file={archivo}
-          handleFileChange={handleFileChange}
-          handleRemoveFile={handleRemoveFile}
-          handleUpload={handleUpload}
-        />
+        <Header type="producto" typeUrl="inventory" />
       </div>
 
       <div className="overflow-x-auto bg-white shadow-md rounded-lg">
@@ -85,13 +87,15 @@ export default function Inventory() {
           loading={loading}
           error={error}
           setSelectedVariants={setSelectedVariants}
+          handleDeleteClick={handleDeleteClick}
         />
 
         {selectedProduct && (
           <ViewModal
             data={selectedProduct}
-            type="product"
+            type="inventory"
             onClose={() => setSelectedProduct(null)}
+            viewModalConfig={viewModalConfig}
           />
         )}
         {selectedVariants && (
@@ -99,6 +103,16 @@ export default function Inventory() {
             data={selectedVariants}
             type="variants"
             onClose={() => setSelectedVariants(null)}
+          />
+        )}
+        {showDeleteModal && (
+          <ConfirmDeleteModal
+            show={showDeleteModal}
+            setShow={setShowDeleteModal}
+            type={deleteTarget?.type}
+            name={deleteTarget?.name}
+            onConfirm={confirmDelete}
+            loading={loading}
           />
         )}
       </div>

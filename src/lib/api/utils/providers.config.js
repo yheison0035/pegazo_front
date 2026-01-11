@@ -57,3 +57,34 @@ export const getHeaderTableProviders = () => [
   { name: 'status', title: 'Estado', show: true },
   { name: 'phone', title: 'Teléfono', show: true },
 ];
+
+export const viewModalConfig = {
+  title: 'Detalles del Proveedor',
+  subtitle: 'Información completa del proveedor',
+  columns: 3,
+  sections: [
+    {
+      fields: [
+        { name: 'name', label: 'Empresa' },
+        { name: 'contactName', label: 'Nombre de Contacto' },
+        { name: 'phone', label: 'Teléfono' },
+        { name: 'createdAt', label: 'Fecha de Registro', type: 'date' },
+      ],
+    },
+    {
+      fields: [
+        { name: 'email', label: 'Correo Electrónico' },
+        { name: 'productType', label: 'Tipo de Producto' },
+        { name: 'status', label: 'Estado', type: 'status' },
+      ],
+    },
+    {
+      fields: [
+        { name: 'city', label: 'Ciudad' },
+        { name: 'department', label: 'Departamento' },
+        { name: 'address', label: 'Dirección' },
+      ],
+    },
+  ],
+  showComments: false,
+};

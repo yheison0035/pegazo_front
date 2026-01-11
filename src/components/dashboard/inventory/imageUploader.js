@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { XMarkIcon, PlusIcon, PhotoIcon } from '@heroicons/react/24/outline';
 
 export default function ImageUploader({
@@ -10,6 +10,8 @@ export default function ImageUploader({
   setShowImages,
 }) {
   const inputRef = useRef(null);
+  const dragItem = useRef(null);
+  const dragOverItem = useRef(null);
 
   const handleFileSelect = (e) => {
     const files = Array.from(e.target.files);
@@ -26,6 +28,21 @@ export default function ImageUploader({
     setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
+  // 🔄 Reordenar imágenes
+  const handleSort = () => {
+    if (dragItem.current === null || dragOverItem.current === null) return;
+
+    const items = [...images];
+    const draggedItemContent = items[dragItem.current];
+    items.splice(dragItem.current, 1);
+    items.splice(dragOverItem.current, 0, draggedItemContent);
+
+    dragItem.current = null;
+    dragOverItem.current = null;
+
+    setImages(items);
+  };
+
   return (
     <div className="mt-8">
       <button
@@ -40,7 +57,7 @@ export default function ImageUploader({
       {(showImages || images.length > 0) && (
         <div className="mt-4 rounded-xl border border-dashed border-gray-300 p-4 bg-gray-50">
           <p className="text-sm text-gray-500 mb-3">
-            Puedes subir una o varias imágenes del producto. La primera será la
+            Arrastra las imágenes para cambiar el orden. La primera será la
             imagen principal.
           </p>
 
@@ -48,13 +65,19 @@ export default function ImageUploader({
             {images.map((img, index) => (
               <div
                 key={index}
-                className="relative group w-[70px] h-[80px] rounded-lg overflow-hidden border-2 bg-white border-gray-300 shadow-sm"
+                draggable
+                onDragStart={() => (dragItem.current = index)}
+                onDragEnter={() => (dragOverItem.current = index)}
+                onDragEnd={handleSort}
+                onDragOver={(e) => e.preventDefault()}
+                className="relative group w-[70px] h-[80px] rounded-lg overflow-hidden border-2 bg-white border-gray-300 shadow-sm cursor-move"
               >
                 <img
                   src={img.url}
                   alt={`Imagen ${index + 1}`}
                   className="w-full h-full object-cover"
                 />
+
                 <button
                   type="button"
                   onClick={() => removeImage(index)}
@@ -62,6 +85,12 @@ export default function ImageUploader({
                 >
                   <XMarkIcon className="w-5 h-5 text-white" />
                 </button>
+
+                {index === 0 && (
+                  <span className="absolute top-1 left-1 bg-orange-500 text-white text-[10px] px-1.5 py-0.5 rounded">
+                    Principal
+                  </span>
+                )}
               </div>
             ))}
 

@@ -35,3 +35,24 @@ export const getHeaderTableCategories = () => [
   { name: 'status', title: 'Estado', show: true },
   { name: 'updatedAt', title: 'Última Actualización', show: false },
 ];
+
+export const viewModalConfig = {
+  title: 'Detalles de la Categoría',
+  subtitle: 'Información de la categoría',
+  columns: 2,
+  sections: [
+    {
+      fields: [
+        { name: 'name', label: 'Nombre' },
+        { name: 'description', label: 'Descripción' },
+      ],
+    },
+    {
+      fields: [
+        { name: 'status', label: 'Estado', type: 'status' },
+        { name: 'updatedAt', label: 'Última Actualización', type: 'date' },
+      ],
+    },
+  ],
+  showComments: false,
+};

@@ -7,7 +7,10 @@ import Table from '@/components/dashboard/tables/table';
 import Header from '@/components/dashboard/customers/header';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import ViewModal from '../../viewModal';
-import { getHeaderTableProviders } from '@/lib/api/utils/providers.config';
+import {
+  getHeaderTableProviders,
+  viewModalConfig,
+} from '@/lib/api/utils/providers.config';
 import ConfirmDeleteModal from '@/components/dashboard/tables/segments/confirmDeleteModal';
 
 export default function Providers() {
@@ -91,6 +94,7 @@ export default function Providers() {
             data={selectedProvider}
             type="provider"
             onClose={() => setSelectedProvider(null)}
+            viewModalConfig={viewModalConfig}
           />
         )}
         {showDeleteModal && (

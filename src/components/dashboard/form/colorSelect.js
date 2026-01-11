@@ -1,13 +1,12 @@
 'use client';
 import { colorOptions } from '@/lib/api/utils/getColors';
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 
-export default function ColorSelect({ value, onChange, disabled }) {
+const ColorSelect = memo(function ColorSelect({ value, onChange, disabled }) {
+  const safeValue = Array.isArray(value) ? value : [];
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const ref = useRef(null);
-
-  const selected = colorOptions.find((opt) => opt.hex === value);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -19,9 +18,43 @@ export default function ColorSelect({ value, onChange, disabled }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Helper: buscar si un color ya está seleccionado
+  const getVariant = (colorName) =>
+    safeValue.find((v) => v.color?.toUpperCase() === colorName.toUpperCase());
+
   const filteredColors = colorOptions.filter((opt) =>
     opt.name.toLowerCase().includes(search.toLowerCase())
   );
+
+  // Aumentar stock
+  const increase = (color) => {
+    const existing = getVariant(color);
+    if (existing) {
+      onChange(
+        safeValue.map((v) =>
+          v.color?.toUpperCase() === color.toUpperCase()
+            ? { ...v, stock: v.stock + 1 }
+            : v
+        )
+      );
+    } else {
+      onChange([...safeValue, { color, stock: 1 }]);
+    }
+  };
+
+  // Disminuir stock
+  const decrease = (color) => {
+    const existing = getVariant(color);
+    if (!existing) return;
+
+    if (existing.stock <= 1) {
+      onChange(safeValue.filter((v) => v.color !== color));
+    } else {
+      onChange(
+        safeValue.filter((v) => v.color?.toUpperCase() !== color.toUpperCase())
+      );
+    }
+  };
 
   return (
     <div className="relative w-full" ref={ref}>
@@ -35,17 +68,7 @@ export default function ColorSelect({ value, onChange, disabled }) {
             : 'focus:ring-2 focus:ring-orange-500 focus:border-orange-500'
         }`}
       >
-        {selected ? (
-          <div className="flex items-center gap-2">
-            <span
-              className="w-5 h-5 rounded-full border"
-              style={{ backgroundColor: selected.hex }}
-            />
-            <span>{selected.name}</span>
-          </div>
-        ) : (
-          <span className="text-gray-500">Seleccione un color</span>
-        )}
+        <span className="text-gray-700">Seleccionar colores</span>
         <svg
           className={`w-4 h-4 transition-transform ${open ? 'rotate-180' : ''}`}
           fill="none"
@@ -73,25 +96,57 @@ export default function ColorSelect({ value, onChange, disabled }) {
             />
           </div>
 
-          <div className="max-h-48 overflow-y-auto">
+          <div className="max-h-56 overflow-y-auto">
             {filteredColors.length > 0 ? (
-              filteredColors.map((opt) => (
-                <div
-                  key={`${opt.hex}-${opt.name}`}
-                  onClick={() => {
-                    onChange(opt.hex);
-                    setOpen(false);
-                    setSearch('');
-                  }}
-                  className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer transition"
-                >
-                  <span
-                    className="w-5 h-5 rounded-full border"
-                    style={{ backgroundColor: opt.hex }}
-                  />
-                  <span>{opt.name}</span>
-                </div>
-              ))
+              filteredColors.map((opt) => {
+                const variant = getVariant(opt.name);
+
+                return (
+                  <div
+                    key={`${opt.hex}-${opt.name}`}
+                    className="flex items-center justify-between px-4 py-2 hover:bg-gray-100 transition"
+                  >
+                    {/* Color */}
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="w-5 h-5 rounded-full border"
+                        style={{ backgroundColor: opt.hex }}
+                      />
+                      <span className="text-sm">{opt.name}</span>
+                    </div>
+
+                    {variant ? (
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => decrease(opt.name)}
+                          className="w-7 h-7 rounded-full border text-gray-600 hover:bg-gray-200 cursor-pointer"
+                        >
+                          −
+                        </button>
+                        <span className="min-w-[24px] text-center font-semibold">
+                          {variant.stock}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => increase(opt.name)}
+                          className="w-7 h-7 rounded-full border text-gray-600 hover:bg-gray-200 cursor-pointer"
+                        >
+                          +
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => increase(opt.name)}
+                        className="text-sm text-orange-600 hover:underline cursor-pointer"
+                      >
+                        Agregar
+                      </button>
+                    )}
+                  </div>
+                );
+              })
             ) : (
               <div className="px-4 py-2 text-gray-500 text-sm text-center">
                 No se encuentra ese color.
@@ -102,4 +157,6 @@ export default function ColorSelect({ value, onChange, disabled }) {
       )}
     </div>
   );
-}
+});
+
+export default ColorSelect;

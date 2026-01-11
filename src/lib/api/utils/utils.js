@@ -41,3 +41,29 @@ export function formatCOP(value) {
     minimumFractionDigits: 0,
   });
 }
+
+export function parseCOPToNumber(value) {
+  if (value === null || value === undefined || value === '') return null;
+
+  if (typeof value === 'number') return value;
+
+  const clean = value.toString().replace(/[^\d]/g, '');
+
+  if (!clean) return null;
+
+  return Number(clean);
+}
+
+export const getValueByPath = (obj, path) => {
+  return path.split('.').reduce((acc, key) => acc?.[key], obj);
+};
+
+export const formatValue = (value, type) => {
+  if (!value) return 'No disponible';
+
+  if (type === 'date') {
+    return new Date(value).toLocaleDateString('es-CO');
+  }
+
+  return value;
+};

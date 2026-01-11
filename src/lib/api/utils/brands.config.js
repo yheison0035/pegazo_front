@@ -35,3 +35,24 @@ export const getHeaderTableBrands = () => [
   { name: 'status', title: 'Estado', show: true },
   { name: 'updatedAt', title: 'Última Actualización', show: false },
 ];
+
+export const viewModalConfig = {
+  title: 'Detalles de la Marca',
+  subtitle: 'Información completa de la marca',
+  columns: 2,
+  sections: [
+    {
+      fields: [
+        { name: 'name', label: 'Nombre de la Marca' },
+        { name: 'description', label: 'Descripción' },
+      ],
+    },
+    {
+      fields: [
+        { name: 'status', label: 'Estado', type: 'status' },
+        { name: 'createdAt', label: 'Fecha de Registro', type: 'date' },
+      ],
+    },
+  ],
+  showComments: false,
+};

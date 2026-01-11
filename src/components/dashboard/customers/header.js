@@ -1,19 +1,7 @@
-import usePermissions from '@/hooks/usePermissions';
-import {
-  DocumentArrowDownIcon,
-  PlusIcon,
-  XMarkIcon,
-} from '@heroicons/react/24/outline';
+import { PlusIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 
-export default function Header({
-  typeUrl,
-  type,
-  file,
-  handleFileChange,
-  handleRemoveFile,
-  handleUpload,
-}) {
+export default function Header({ typeUrl, type }) {
   return (
     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
       <Link
@@ -23,42 +11,6 @@ export default function Header({
         <PlusIcon className="w-4 h-4" />
         <span>Agregar {type}</span>
       </Link>
-
-      {type !== 'proveedor' && (
-        <>
-          {!file ? (
-            <label className="flex items-center gap-2 cursor-pointer bg-orange-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-orange-700 transition">
-              <DocumentArrowDownIcon className="w-4 h-4" />
-              Importar Excel
-              <input
-                type="file"
-                accept=".xlsx,.xls"
-                onChange={handleFileChange}
-                className="hidden"
-              />
-            </label>
-          ) : (
-            <div className="flex items-center bg-green-100 border border-green-400 px-4 py-2 rounded-lg">
-              <span className="text-green-800 text-sm font-medium truncate max-w-[200px]">
-                {file.name}
-              </span>
-              <button
-                onClick={handleRemoveFile}
-                className="ml-2 text-red-500 hover:text-red-700 cursor-pointer"
-                title="Eliminar archivo"
-              >
-                <XMarkIcon className="w-5 h-5" />
-              </button>
-              <button
-                onClick={handleUpload}
-                className="ml-2 bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 text-sm cursor-pointer"
-              >
-                Subir
-              </button>
-            </div>
-          )}
-        </>
-      )}
     </div>
   );
 }

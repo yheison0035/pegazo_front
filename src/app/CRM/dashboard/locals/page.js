@@ -9,7 +9,10 @@ import RoleGuard from '@/auth/roleGuard';
 import { useAuth } from '@/context/authContext';
 import { Roles } from '@/config/roles';
 import useLocals from '@/lib/api/hooks/useLocals';
-import { getHeaderTableLocals } from '@/lib/api/utils/locals.config';
+import {
+  getHeaderTableLocals,
+  viewModalConfig,
+} from '@/lib/api/utils/locals.config';
 import ConfirmDeleteModal from '@/components/dashboard/tables/segments/confirmDeleteModal';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 
@@ -97,6 +100,7 @@ export default function Locals() {
               data={selectedLocals}
               type="locals"
               onClose={() => setSelectedLocals(null)}
+              viewModalConfig={viewModalConfig}
             />
           )}
           {showDeleteModal && (

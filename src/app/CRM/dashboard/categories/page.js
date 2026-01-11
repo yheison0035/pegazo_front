@@ -9,7 +9,10 @@ import RoleGuard from '@/auth/roleGuard';
 import { useAuth } from '@/context/authContext';
 import { Roles } from '@/config/roles';
 import useCategories from '@/lib/api/hooks/useCategories';
-import { getHeaderTableCategories } from '@/lib/api/utils/categories.config';
+import {
+  getHeaderTableCategories,
+  viewModalConfig,
+} from '@/lib/api/utils/categories.config';
 import ConfirmDeleteModal from '@/components/dashboard/tables/segments/confirmDeleteModal';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 
@@ -97,6 +100,7 @@ export default function Categories() {
               data={selectedCategories}
               type="categories"
               onClose={() => setSelectedCategories(null)}
+              viewModalConfig={viewModalConfig}
             />
           )}
           {showDeleteModal && (

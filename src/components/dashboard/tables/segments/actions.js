@@ -36,22 +36,24 @@ export default function Actions({
         </span>
       </div>
 
-      <div className="relative group flex items-center">
-        <button
-          onClick={() => setSelectedVariants(info)}
-          disabled={isLocked}
-          className={`${
-            isLocked
-              ? 'text-gray-400 cursor-not-allowed'
-              : 'text-blue-500 hover:text-blue-700'
-          } cursor-pointer`}
-        >
-          <Squares2X2Icon className="w-5 h-5" />
-        </button>
-        <span className="absolute -top-11 left-1/2 -translate-x-1/2 scale-0 group-hover:scale-100 transition bg-black text-white text-xs rounded px-2 py-1">
-          Variantes
-        </span>
-      </div>
+      {view === 'inventory' && (
+        <div className="relative group flex items-center">
+          <button
+            onClick={() => setSelectedVariants(info)}
+            disabled={isLocked}
+            className={`${
+              isLocked
+                ? 'text-gray-400 cursor-not-allowed'
+                : 'text-blue-500 hover:text-blue-700'
+            } cursor-pointer`}
+          >
+            <Squares2X2Icon className="w-5 h-5" />
+          </button>
+          <span className="absolute -top-11 left-1/2 -translate-x-1/2 scale-0 group-hover:scale-100 transition bg-black text-white text-xs rounded px-2 py-1">
+            Variantes
+          </span>
+        </div>
+      )}
 
       <div className="relative group flex items-center">
         <Link

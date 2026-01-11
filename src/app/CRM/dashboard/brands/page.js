@@ -9,7 +9,10 @@ import RoleGuard from '@/auth/roleGuard';
 import { useAuth } from '@/context/authContext';
 import { Roles } from '@/config/roles';
 import useBrands from '@/lib/api/hooks/useBrands';
-import { getHeaderTableBrands } from '@/lib/api/utils/brands.config';
+import {
+  getHeaderTableBrands,
+  viewModalConfig,
+} from '@/lib/api/utils/brands.config';
 import ConfirmDeleteModal from '@/components/dashboard/tables/segments/confirmDeleteModal';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 
@@ -97,6 +100,7 @@ export default function Brands() {
               data={selectedBrands}
               type="brands"
               onClose={() => setSelectedBrands(null)}
+              viewModalConfig={viewModalConfig}
             />
           )}
           {showDeleteModal && (

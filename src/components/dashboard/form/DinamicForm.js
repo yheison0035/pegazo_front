@@ -5,7 +5,7 @@ import BtnReturn from '../buttons/return';
 import BtnSave from '../buttons/save';
 import useUsers from '@/lib/api/hooks/useUsers';
 import ColorSelect from './colorSelect';
-import { formatPrice } from '@/lib/api/utils/utils';
+import { formatCOP, formatPrice } from '@/lib/api/utils/utils';
 import useLocals from '@/lib/api/hooks/useLocals';
 import { getProviders } from '@/lib/api/routes/providers';
 import { getCategories } from '@/lib/api/routes/categories';
@@ -13,6 +13,7 @@ import { getBrands } from '@/lib/api/routes/brands';
 import ProductSelector from './productSelector';
 import { getCustomers } from '@/lib/api/routes/customers';
 import ImageUploader from '../inventory/imageUploader';
+import { colorOptions } from '@/lib/api/utils/getColors';
 
 export default function DinamicForm({
   formData,
@@ -35,7 +36,6 @@ export default function DinamicForm({
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
     let formattedValue = value;
 
     if (
@@ -53,12 +53,16 @@ export default function DinamicForm({
     }));
   };
 
-  const handleColorChange = (name, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  const handleColorChange = useCallback(
+    (value) => {
+      setFormData((prev) => ({
+        ...prev,
+        stock: value.reduce((acc, v) => acc + Number(v.stock || 0), 0),
+        variants: value,
+      }));
+    },
+    [setFormData]
+  );
 
   const fetchDynamicOptions = useCallback(async () => {
     if (!Array.isArray(formFields)) return;
@@ -100,8 +104,14 @@ export default function DinamicForm({
     ? formFields.some((f) => f.name === 'department' || f.name === 'city')
     : false;
 
+  const isObject = (value) =>
+    typeof value === 'object' && value !== null && !Array.isArray(value);
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form
+      onSubmit={handleSubmit}
+      className={`space-y-8 ${loading ? 'pointer-events-none opacity-60' : ''}`}
+    >
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {Array.isArray(formFields) &&
           formFields.map((field) => {
@@ -111,9 +121,14 @@ export default function DinamicForm({
               type = 'text',
               required = true,
               options,
+              disabled,
             } = field;
 
             if (name === 'department' || name === 'city') return null;
+
+            if (name === 'purchasePrice' || name === 'salePrice') {
+              formData[name] = formatCOP(formData[name] || '');
+            }
 
             if (type === 'colorSelect') {
               return (
@@ -121,9 +136,31 @@ export default function DinamicForm({
                   <label className="text-sm font-medium text-gray-700 mb-1">
                     {label}
                   </label>
+                  {formData.variants && formData.variants.length > 0 && (
+                    <>
+                      <div className="flex -space-x-1 mb-2">
+                        {(formData.variants || []).slice(0, 50).map((v) => {
+                          const opt = colorOptions.find(
+                            (c) =>
+                              c.name.toUpperCase() === v.color.toUpperCase()
+                          );
+
+                          return (
+                            <span
+                              key={v.color}
+                              title={`${v.color} (${v.stock})`}
+                              className="w-4 h-4 rounded-full border border-gray-300"
+                              style={{ backgroundColor: opt?.hex || '#ccc' }}
+                            />
+                          );
+                        })}
+                      </div>
+                    </>
+                  )}
+
                   <ColorSelect
-                    value={formData.variants}
-                    onChange={(value) => handleColorChange(name, value)}
+                    value={formData.variants || []}
+                    onChange={handleColorChange}
                     options={options}
                     disabled={isLocked}
                   />
@@ -176,7 +213,6 @@ export default function DinamicForm({
                 </div>
               );
             }
-
             if (type === 'select') {
               const fieldOptions = options || dynamicOptions[name] || [];
               return (
@@ -186,12 +222,16 @@ export default function DinamicForm({
                   </label>
                   <select
                     name={name}
-                    value={formData[name] || ''}
+                    value={
+                      isObject(formData[name])
+                        ? formData[name].id ?? ''
+                        : formData[name] ?? ''
+                    }
                     onChange={handleChange}
-                    disabled={isLocked}
+                    disabled={isLocked || disabled}
                     required={required}
                     className={`w-full border border-gray-200 rounded-xl px-4 py-2 text-sm shadow-sm focus:outline-none transition ${
-                      isLocked
+                      isLocked || disabled
                         ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
                         : 'focus:ring-2 focus:ring-orange-500 focus:border-orange-500'
                     }`}
@@ -206,7 +246,6 @@ export default function DinamicForm({
                 </div>
               );
             }
-
             return (
               <div key={name} className="flex flex-col">
                 <label className="text-sm font-medium text-gray-700 mb-1">
@@ -217,10 +256,10 @@ export default function DinamicForm({
                   name={name}
                   value={formData[name] || ''}
                   onChange={handleChange}
-                  disabled={isLocked}
+                  disabled={isLocked || disabled}
                   required={required}
                   className={`w-full border border-gray-200 rounded-xl px-4 py-2 text-sm shadow-sm focus:outline-none transition ${
-                    isLocked
+                    isLocked || disabled
                       ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
                       : 'focus:ring-2 focus:ring-orange-500 focus:border-orange-500'
                   }`}
@@ -250,11 +289,12 @@ export default function DinamicForm({
       </div>
 
       <div className="flex justify-end mt-6 gap-3">
-        <BtnReturn route={`/CRM/dashboard/${module}`} />
+        <BtnReturn route={`/CRM/dashboard/${module}`} disabled={loading} />
         {mode === 'new' && handleReset && (
           <button
             type="button"
             onClick={handleReset}
+            disabled={loading}
             className="px-4 py-2 border border-gray-200 rounded-xl text-sm shadow-sm hover:bg-gray-50 transition cursor-pointer"
           >
             Limpiar

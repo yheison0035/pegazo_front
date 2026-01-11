@@ -16,7 +16,6 @@ const Table = ({
   rol,
   handleDeleteClick,
 }) => {
-  const [selectedIds, setSelectedIds] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -147,14 +146,6 @@ const Table = ({
     setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
-  const toggleCheckbox = (row) => {
-    setSelectedIds((prev) =>
-      prev.includes(row.id)
-        ? prev.filter((id) => id !== row.id)
-        : [...prev, row.id]
-    );
-  };
-
   const totalPages = Math.ceil(filtered.length / rowsPerPage);
 
   const paginatedData = filtered.slice(
@@ -194,8 +185,6 @@ const Table = ({
             view={view}
             setSelected={setSelected}
             setSelectedVariants={setSelectedVariants}
-            toggleCheckbox={toggleCheckbox}
-            selectedIds={selectedIds}
             handleDeleteClick={handleDeleteClick}
           />
         </tbody>

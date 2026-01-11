@@ -7,6 +7,7 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
+  uploadProductImages,
 } from '../routes/inventory/index';
 
 export default function useProducts() {
@@ -40,6 +41,10 @@ export default function useProducts() {
     [wrap]
   );
   const deleteProductFn = useCallback((id) => wrap(deleteProduct, id), [wrap]);
+  const uploadProductImagesFn = useCallback(
+    (productId, images) => wrap(uploadProductImages, productId, images),
+    [wrap]
+  );
 
   return {
     getProducts: getProductsFn,
@@ -47,6 +52,7 @@ export default function useProducts() {
     createProduct: createProductFn,
     updateProduct: updateProductFn,
     deleteProduct: deleteProductFn,
+    uploadProductImages: uploadProductImagesFn,
     loading,
     error,
   };

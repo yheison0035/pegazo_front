@@ -13,8 +13,6 @@ export default function ContentData({
   view,
   setSelected,
   setSelectedVariants,
-  toggleCheckbox,
-  selectedIds,
   handleDeleteClick,
   setShowModalChangeAdvisor,
 }) {
@@ -33,35 +31,30 @@ export default function ContentData({
                 : 'hover:bg-gray-50'
             }`}
           >
-            {canAssign && view === 'customers' && (
-              <td className="px-4 py-3 text-center">
-                {info.advisor ? (
-                  <CheckIcon className="w-5 h-5 text-green-600 mx-auto" />
-                ) : (
-                  <input
-                    type="checkbox"
-                    checked={selectedIds.includes(info.id)}
-                    onChange={() => toggleCheckbox(info)}
-                    className="w-4 h-4 cursor-pointer"
-                  />
-                )}
-              </td>
+            {view === 'locals' && (
+              <>
+                <td className="px-4 py-3">{info.name}</td>
+                <td className="px-4 py-3">{info.address}</td>
+                <td className="px-4 py-3">{info.city || '-----'}</td>
+                <td className="px-4 py-3">{info.user?.name || '-----'}</td>
+                <td className="px-4 py-3">{info?.status || '-----'}</td>
+                <PhoneContentData info={info} />
+              </>
             )}
-
             {view === 'providers' && (
               <>
                 <td className="px-4 py-3">{info.name}</td>
                 <td className="px-4 py-3">{info.contactName}</td>
+                <td className="px-4 py-3">{info.productType || '-----'}</td>
                 <td className="px-4 py-3">{info.address}</td>
                 <td className="px-4 py-3">{info.city}</td>
-                <td className="px-4 py-3">{info.productType || '-----'}</td>
                 <td className="px-4 py-3">{info?.status || '-----'}</td>
+                <PhoneContentData info={info} />
               </>
             )}
-
             {view === 'inventory' && (
               <>
-                <td className="flex justify-center p-0 m-2">
+                <td className="flex justify-center items-center p-0 m-2">
                   <div className="relative group w-[70px] h-[80px] rounded-lg overflow-hidden border bg-white border-gray-300 shadow-sm">
                     <img
                       src={`${info?.images[0]?.url || '/images/no-image.png'} `}
@@ -90,24 +83,12 @@ export default function ContentData({
                 <td className="px-4 py-3">{info?.status || '-----'}</td>
               </>
             )}
-
-            {view === 'locals' && (
+            {(view === 'brands' || view === 'categories') && (
               <>
-                <td className="px-4 py-3">
-                  {info.user?.name || 'Sin Asignar'}
-                </td>
+                <td className="px-4 py-3">{info.name}</td>
+                <td className="px-4 py-3">{info.description}</td>
                 <td className="px-4 py-3">{info?.status || '-----'}</td>
               </>
-            )}
-
-            {view === 'brands' && (
-              <>
-                <td className="px-4 py-3">{info.description}</td>
-                <PhoneContentData info={info} />
-              </>
-            )}
-            {view === 'customers' && (
-              <td className="px-4 py-3">{info.state?.name}</td>
             )}
 
             <td className="px-4 py-3 text-center">
