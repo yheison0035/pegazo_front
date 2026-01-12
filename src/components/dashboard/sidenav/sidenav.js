@@ -38,7 +38,7 @@ export default function SideNavigation() {
           <Avatar perfil={usuario} setPerfil={() => {}} />
 
           <Link
-            href="/CRM/dashboard/profile/edit"
+            href={'/CRM/dashboard/users/edit/' + usuario?.id}
             className="text-sm text-white font-semibold underline hover:underline"
           >
             Editar perfil

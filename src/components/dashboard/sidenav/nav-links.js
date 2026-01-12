@@ -54,13 +54,19 @@ export default function NavLinks() {
       name: 'Inventario',
       href: '/CRM/dashboard/inventory',
       icon: ArchiveBoxIcon,
-      roles: ['SUPER_ADMIN', 'ADMIN'],
+      roles: ['SUPER_ADMIN', 'ADMIN', 'COORDINADOR', 'ASESOR', 'BODEGUERO'],
     },
     {
       name: 'Clientes',
       href: '/CRM/dashboard/customers',
       icon: UsersIcon,
       roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR'],
+    },
+    {
+      name: 'Usuarios / Roles',
+      href: '/CRM/dashboard/users',
+      icon: Cog6ToothIcon,
+      roles: ['SUPER_ADMIN', 'ADMIN'],
     },
     {
       name: 'Realizar Venta',
@@ -86,12 +92,7 @@ export default function NavLinks() {
       icon: ChartBarIcon,
       roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR'],
     },
-    {
-      name: 'Usuarios / Roles',
-      href: '/CRM/dashboard/users',
-      icon: Cog6ToothIcon,
-      roles: ['SUPER_ADMIN', 'ADMIN'],
-    },
+
     {
       name: 'Estadísticas',
       href: '/CRM/dashboard/statistics',

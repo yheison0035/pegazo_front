@@ -1,11 +1,12 @@
 'use client';
 import { useCallback, useEffect, useState } from 'react';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import DepartaCiudad from '@/components/dashboard/select/depart_ciud';
 import BtnReturn from '../buttons/return';
 import BtnSave from '../buttons/save';
 import useUsers from '@/lib/api/hooks/useUsers';
 import ColorSelect from './colorSelect';
-import { formatCOP, formatPrice } from '@/lib/api/utils/utils';
+import { formatCOP, formatPrice, toggleCase } from '@/lib/api/utils/utils';
 import useLocals from '@/lib/api/hooks/useLocals';
 import { getProviders } from '@/lib/api/routes/providers';
 import { getCategories } from '@/lib/api/routes/categories';
@@ -14,6 +15,7 @@ import ProductSelector from './productSelector';
 import { getCustomers } from '@/lib/api/routes/customers';
 import ImageUploader from '../inventory/imageUploader';
 import { colorOptions } from '@/lib/api/utils/getColors';
+import { useAuth } from '@/context/authContext';
 
 export default function DinamicForm({
   formData,
@@ -31,7 +33,9 @@ export default function DinamicForm({
   setShowImages,
 }) {
   const [dynamicOptions, setDynamicOptions] = useState({});
-  const { getUsers } = useUsers();
+  const [showPassword, setShowPassword] = useState(false);
+  const { getRoles, getUsers } = useUsers();
+  const { usuario } = useAuth();
   const { getLocals } = useLocals();
 
   const handleChange = (e) => {
@@ -68,6 +72,7 @@ export default function DinamicForm({
     if (!Array.isArray(formFields)) return;
 
     const loaders = {
+      roles: getRoles,
       users: getUsers,
       locals: getLocals,
       providers: getProviders,
@@ -128,6 +133,14 @@ export default function DinamicForm({
 
             if (name === 'purchasePrice' || name === 'salePrice') {
               formData[name] = formatCOP(formData[name] || '');
+            }
+
+            if (
+              name === 'name' ||
+              name === 'firstName' ||
+              name === 'lastName'
+            ) {
+              formData[name] = toggleCase(formData[name], 'uppercase');
             }
 
             if (type === 'colorSelect') {
@@ -213,7 +226,11 @@ export default function DinamicForm({
                 </div>
               );
             }
-            if (type === 'select') {
+
+            if (
+              type === 'select' &&
+              !(module === 'customers' && name === 'localId')
+            ) {
               const fieldOptions = options || dynamicOptions[name] || [];
               return (
                 <div key={name} className="flex flex-col">
@@ -237,8 +254,11 @@ export default function DinamicForm({
                     }`}
                   >
                     <option value="">Seleccione una opción</option>
-                    {fieldOptions.map((opt) => (
-                      <option key={opt.id} value={opt.id}>
+                    {fieldOptions.map((opt, index) => (
+                      <option
+                        key={`${name}-${opt.id ?? index}`}
+                        value={opt.id ?? ''}
+                      >
                         {opt.name}
                       </option>
                     ))}
@@ -246,6 +266,89 @@ export default function DinamicForm({
                 </div>
               );
             }
+
+            if (type === 'password') {
+              return (
+                <div key={name} className="flex flex-col relative">
+                  <label className="text-sm font-medium text-gray-700 mb-1">
+                    {label}
+                  </label>
+
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    name={name}
+                    value={formData[name] || ''}
+                    onChange={handleChange}
+                    disabled={isLocked || disabled}
+                    placeholder={
+                      mode === 'create'
+                        ? 'Ingrese la contraseña'
+                        : 'Dejar en blanco si no desea cambiarla'
+                    }
+                    required={mode === 'create'}
+                    className={`w-full border border-gray-200 rounded-xl px-4 py-2 pr-10 text-sm shadow-sm focus:outline-none transition ${
+                      isLocked || disabled
+                        ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                        : 'focus:ring-2 focus:ring-orange-500 focus:border-orange-500'
+                    }`}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute right-3 top-8 text-gray-400 hover:text-gray-600 cursor-pointer"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? (
+                      <EyeSlashIcon className="w-5 h-5" />
+                    ) : (
+                      <EyeIcon className="w-5 h-5" />
+                    )}
+                  </button>
+                </div>
+              );
+            }
+
+            if (
+              type === 'select' &&
+              module === 'customers' &&
+              usuario.managedLocals.length > 0
+            ) {
+              return (
+                <div key={name} className="flex flex-col">
+                  <label className="text-sm font-medium text-gray-700 mb-1">
+                    {label}
+                  </label>
+                  <select
+                    name={name}
+                    value={
+                      isObject(formData[name])
+                        ? formData[name].id ?? ''
+                        : formData[name] ?? ''
+                    }
+                    onChange={handleChange}
+                    disabled={isLocked || disabled}
+                    required={required}
+                    className={`w-full border border-gray-200 rounded-xl px-4 py-2 text-sm shadow-sm focus:outline-none transition ${
+                      isLocked || disabled
+                        ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                        : 'focus:ring-2 focus:ring-orange-500 focus:border-orange-500'
+                    }`}
+                  >
+                    <option value="">Seleccione una opción</option>
+                    {usuario.managedLocals.map((opt, index) => (
+                      <option
+                        key={`${name}-${opt.id ?? index}`}
+                        value={opt.id ?? ''}
+                      >
+                        {opt.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              );
+            }
+
             return (
               <div key={name} className="flex flex-col">
                 <label className="text-sm font-medium text-gray-700 mb-1">

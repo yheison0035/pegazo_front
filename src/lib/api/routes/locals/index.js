@@ -11,17 +11,25 @@ export async function getLocalById(id) {
 export async function createLocal(dto) {
   const body = {
     ...dto,
-    userId: Number(dto.userId),
+    managerId: Number(dto.managerId),
   };
   return apiFetch('/locals', { method: 'POST', body: JSON.stringify(body) });
 }
 
 export async function updateLocal(id, dto) {
-  const { id: _id, createdAt, updatedAt, user, ...cleanDto } = dto;
+  const {
+    id: _id,
+    createdAt,
+    updatedAt,
+    manager,
+    userId,
+    users,
+    ...cleanDto
+  } = dto;
 
   const body = {
     ...cleanDto,
-    userId: Number(cleanDto.userId) || null,
+    managerId: Number(cleanDto.managerId) || null,
   };
 
   return apiFetch(`/locals/${id}`, {

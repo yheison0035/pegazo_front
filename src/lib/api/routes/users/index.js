@@ -1,6 +1,9 @@
-// src/lib/api/users.js
 import apiFetch from '../../auth/client';
 import { toFullISO } from '../../utils/utils';
+
+export async function getRoles() {
+  return apiFetch('/users/roles/list');
+}
 
 export async function getUsers() {
   return apiFetch('/users');
@@ -13,18 +16,27 @@ export async function getUserById(id) {
 export async function createUser(dto) {
   const body = {
     ...dto,
-    birthdate: dto.birthdate ? toFullISO(dto.birthdate) : undefined,
     role: dto.role || 'ASESOR',
-    status: dto.status || 'ACTIVE',
+    status: dto.status || 'ACTIVO',
   };
   return apiFetch('/users', { method: 'POST', body: JSON.stringify(body) });
 }
 
 export async function updateUser(id, dto) {
-  const { id: _id, createdAt, updatedAt, password, ...cleanDto } = dto;
+  const {
+    id: _id,
+    createdAt,
+    updatedAt,
+    password,
+    managedLocals,
+    local,
+    avatar,
+    ...cleanDto
+  } = dto;
 
   const body = {
     ...cleanDto,
+    localId: cleanDto.localId ? Number(cleanDto.localId) : null,
     birthdate: cleanDto.birthdate ? toFullISO(cleanDto.birthdate) : undefined,
     ...(password ? { password } : {}),
   };

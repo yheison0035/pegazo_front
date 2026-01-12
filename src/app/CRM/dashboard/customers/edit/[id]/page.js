@@ -36,7 +36,7 @@ export default function EditCustomer() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      //await updateCustomer(formData);
+      await updateCustomer(id, formData);
       setAlert({
         type: 'success',
         message: 'Cliente actualizado correctamente.',

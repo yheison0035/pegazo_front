@@ -17,6 +17,7 @@ export default function ImageUploader({
     const files = Array.from(e.target.files);
 
     const newImages = files.map((file) => ({
+      id: null,
       file,
       url: URL.createObjectURL(file),
     }));
@@ -25,10 +26,20 @@ export default function ImageUploader({
   };
 
   const removeImage = (index) => {
-    setImages((prev) => prev.filter((_, i) => i !== index));
+    setImages((prev) => {
+      const copy = [...prev];
+
+      if (copy[index]?.id) {
+        copy[index]._removed = true;
+      } else {
+        copy.splice(index, 1);
+      }
+
+      return copy;
+    });
   };
 
-  // 🔄 Reordenar imágenes
+  // Reordenar imágenes
   const handleSort = () => {
     if (dragItem.current === null || dragOverItem.current === null) return;
 

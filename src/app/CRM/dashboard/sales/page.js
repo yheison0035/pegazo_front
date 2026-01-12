@@ -9,24 +9,36 @@ import { getEmptySale, getFormFieldsSales } from '@/lib/api/utils/sales.config';
 
 export default function AddSales() {
   const { usuario } = useAuth();
-  const { createSale, loading } = useSales();
-
   const [formData, setFormData] = useState(getEmptySale());
   const [alert, setAlert] = useState({ type: '', message: '', url: '' });
+
+  const { createSale, loading } = useSales();
 
   const handleReset = () => setFormData(getEmptySale());
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!formData.products || formData.products.length === 0) {
-      setAlert({
+      return setAlert({
         type: 'warning',
         message: 'Debe agregar al menos un producto a la venta.',
       });
-      return;
     }
+
+    const payload = {
+      customerId: formData.customerId || null,
+      localId: usuario.localId,
+      paymentMethod: formData.paymentMethod,
+      items: formData.products.map((p) => ({
+        inventoryVariantId: p.inventoryVariantId,
+        quantity: p.quantity,
+      })),
+    };
+
     try {
-      //await createSale(formData);
+      await createSale(payload);
+
       setAlert({
         type: 'success',
         message: 'Venta creada correctamente.',

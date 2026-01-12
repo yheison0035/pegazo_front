@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import { createSale } from '../routes/sales/index';
+import { searchProducts, createSale } from '../routes/sales/index';
 
 export default function useSales() {
   const [loading, setLoading] = useState(false);
@@ -20,9 +20,14 @@ export default function useSales() {
     }
   }, []);
 
+  const searchProductsFn = useCallback(
+    (term) => wrap(searchProducts, term),
+    [wrap]
+  );
   const createSaleFn = useCallback((dto) => wrap(createSale, dto), [wrap]);
 
   return {
+    searchProducts: searchProductsFn,
     createSale: createSaleFn,
     loading,
     error,

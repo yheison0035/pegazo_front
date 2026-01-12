@@ -1,66 +1,100 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { formatPrice } from '@/lib/api/utils/utils';
-
-const mockProducts = [
-  { id: 1, name: 'Hidrolavadora Karcher K2', price: 350000 },
-  { id: 2, name: 'Pulidora Industrial 1500W', price: 420000 },
-  { id: 3, name: 'Aspiradora Electrolux 1600W', price: 280000 },
-  { id: 4, name: 'Taladro Percutor Bosch', price: 310000 },
-];
+import {
+  formatCOP,
+  formatPrice,
+  formatText,
+  parseCOPToNumber,
+} from '@/lib/api/utils/utils';
+import useSales from '@/lib/api/hooks/useSales';
 
 export default function ProductSelector({ value = [], onChange, disabled }) {
   const [search, setSearch] = useState('');
   const [filtered, setFiltered] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState(value);
 
+  const { searchProducts, loading } = useSales();
+
   useEffect(() => {
-    if (search.trim() === '') {
-      setFiltered([]);
-    } else {
-      setFiltered(
-        mockProducts.filter((p) =>
-          p.name.toLowerCase().includes(search.toLowerCase())
-        )
-      );
-    }
+    const fetch = async () => {
+      if (search.trim().length < 2) {
+        setFiltered([]);
+        return;
+      }
+      const res = await searchProducts(search);
+      setFiltered(res.data || []);
+    };
+
+    fetch();
   }, [search]);
 
   const handleSelectProduct = (product) => {
-    const exists = selectedProducts.find((p) => p.id === product.id);
+    const exists = selectedProducts.find(
+      (p) => p.inventoryVariantId === product.id
+    );
     if (exists) return;
 
     const newList = [
       ...selectedProducts,
-      { ...product, quantity: 1, discount: 0, subtotal: product.price },
+      {
+        inventoryVariantId: product.id,
+        name: `${product.name} - ${product.color}`,
+        price: product.price,
+        stock: product.stock,
+        quantity: 1,
+        discount: 0,
+        subtotal: product.price,
+      },
     ];
+
     setSelectedProducts(newList);
     setSearch('');
     setFiltered([]);
     onChange?.(newList);
   };
 
-  const updateField = (id, field, value) => {
+  const updateQuantity = (id, quantity) => {
     const updated = selectedProducts.map((p) => {
-      if (p.id === id) {
-        const val =
-          field === 'discount' ? parseFloat(value) || 0 : parseInt(value) || 1;
-        const newSubtotal = p.price * p.quantity - (p.price * p.discount) / 100;
+      if (p.inventoryVariantId === id) {
+        const qty = Math.min(Math.max(1, quantity), p.stock);
+        const base = p.price * qty;
+        const discount = Math.min(p.discount, base);
+
         return {
           ...p,
-          [field]: val,
-          subtotal: p.price * p.quantity - (p.price * val) / 100,
+          quantity: qty,
+          subtotal: base - discount,
         };
       }
       return p;
     });
+
+    setSelectedProducts(updated);
+    onChange?.(updated);
+  };
+
+  const updateDiscount = (id, discount) => {
+    const updated = selectedProducts.map((p) => {
+      if (p.inventoryVariantId === id) {
+        const total = p.price * p.quantity;
+        const finalDiscount = Math.min(discount, total);
+
+        return {
+          ...p,
+          discount: finalDiscount,
+          subtotal: total - finalDiscount,
+        };
+      }
+      return p;
+    });
+
     setSelectedProducts(updated);
     onChange?.(updated);
   };
 
   const removeProduct = (id) => {
-    const updated = selectedProducts.filter((p) => p.id !== id);
+    const updated = selectedProducts.filter((p) => p.inventoryVariantId !== id);
     setSelectedProducts(updated);
     onChange?.(updated);
   };
@@ -74,78 +108,92 @@ export default function ProductSelector({ value = [], onChange, disabled }) {
           type="text"
           placeholder="Buscar producto..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => setSearch(formatText(e.target.value))}
           disabled={disabled}
           className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-orange-500"
         />
-        {filtered.length > 0 ? (
-          <ul className="absolute z-10 bg-white border border-gray-200 w-full rounded-xl mt-1 shadow-md max-h-48 overflow-auto">
-            {filtered.map((product) => (
-              <li
-                key={product.id}
-                onClick={() => handleSelectProduct(product)}
-                className="px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm text-gray-700"
-              >
-                {product.name} — {formatPrice(product.price)}
-              </li>
-            ))}
-          </ul>
-        ) : search.trim() !== '' ? (
-          <div className="absolute z-10 bg-white border border-gray-200 w-full rounded-xl mt-1 shadow-md px-4 py-2 text-sm text-gray-400">
-            Producto no encontrado
+
+        {search.trim().length >= 2 && (
+          <div className="absolute z-10 bg-white border w-full rounded-xl mt-1 shadow-md max-h-48 overflow-auto">
+            {loading ? (
+              <div className="px-4 py-2 text-sm text-gray-400">
+                Buscando productos...
+              </div>
+            ) : filtered.length > 0 ? (
+              <ul>
+                {filtered.map((product) => (
+                  <li
+                    key={product.id}
+                    onClick={() => handleSelectProduct(product)}
+                    className="px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm"
+                  >
+                    {formatText(product.name)} - {product.color} | Stock:{' '}
+                    {product.stock} — {formatPrice(product.price)}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="px-4 py-2 text-sm text-gray-400">
+                No hay productos relacionados
+              </div>
+            )}
           </div>
-        ) : null}
+        )}
       </div>
 
       {selectedProducts.length > 0 && (
-        <div className="border border-gray-200 rounded-xl p-4 bg-gray-50">
+        <div className="border border-gray-300 rounded-xl p-4 bg-gray-50">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-gray-600 text-left border-b">
-                <th className="py-1">Producto</th>
-                <th className="py-1">Precio</th>
-                <th className="py-1">Cant.</th>
-                <th className="py-1">Desc (%)</th>
-                <th className="py-1 text-right">Subtotal</th>
+              <tr className="border-b border-gray-300 text-left">
+                <th>Producto</th>
+                <th>Precio</th>
+                <th>Cant.</th>
+                <th>Desc. ($)</th>
+                <th className="text-right">Subtotal</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
               {selectedProducts.map((p) => (
-                <tr key={p.id} className="border-b last:border-0">
-                  <td className="py-2">{p.name}</td>
+                <tr key={p.inventoryVariantId}>
+                  <td>{formatText(p.name)}</td>
                   <td>{formatPrice(p.price)}</td>
                   <td>
                     <input
                       type="number"
-                      value={p.quantity}
                       min={1}
+                      max={p.stock}
+                      value={p.quantity}
                       onChange={(e) =>
-                        updateField(p.id, 'quantity', e.target.value)
+                        updateQuantity(
+                          p.inventoryVariantId,
+                          Number(e.target.value)
+                        )
                       }
-                      className="w-16 border rounded-md text-center"
+                      className="w-16 m-1 border border-gray-400 rounded text-center"
                     />
                   </td>
                   <td>
                     <input
-                      type="number"
-                      value={p.discount}
-                      min={0}
-                      max={100}
+                      type="text"
+                      value={formatCOP(p.discount || 0)}
+                      onFocus={(e) => e.target.select()}
                       onChange={(e) =>
-                        updateField(p.id, 'discount', e.target.value)
+                        updateDiscount(
+                          p.inventoryVariantId,
+                          parseCOPToNumber(e.target.value) || 0
+                        )
                       }
-                      className="w-16 border rounded-md text-center"
+                      className="w-28 border border-gray-400 rounded text-center"
+                      placeholder="$ 0"
                     />
                   </td>
-                  <td className="text-right font-medium text-gray-700">
-                    {formatPrice(p.subtotal)}
-                  </td>
-                  <td className="text-right">
+                  <td className="text-right">{formatPrice(p.subtotal)}</td>
+                  <td>
                     <button
-                      onClick={() => removeProduct(p.id)}
-                      type="button"
-                      className="text-red-500 hover:text-red-600 cursor-pointer"
+                      onClick={() => removeProduct(p.inventoryVariantId)}
+                      className="text-red-500 ml-2 cursor-pointer font-bold border rounded-full hover:bg-red-100 px-1"
                     >
                       ✕
                     </button>
@@ -155,7 +203,7 @@ export default function ProductSelector({ value = [], onChange, disabled }) {
             </tbody>
           </table>
 
-          <div className="flex justify-end mt-3 font-semibold text-gray-800">
+          <div className="flex justify-end mt-3 font-semibold">
             Total: {formatPrice(total)}
           </div>
         </div>

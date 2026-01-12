@@ -4,7 +4,7 @@ export const getEmptyLocal = () => ({
   department: '',
   city: '',
   phone: '',
-  userId: '',
+  managerId: '',
   status: '',
 });
 
@@ -15,7 +15,7 @@ export const getFormFieldsLocals = () => [
   { name: 'city', label: 'Ciudad', type: 'text', required: true },
   { name: 'phone', label: 'Celular', type: 'text', required: true },
   {
-    name: 'userId',
+    name: 'managerId',
     label: 'Encargado',
     type: 'select',
     required: true,
@@ -38,7 +38,7 @@ export const getHeaderTableLocals = () => [
   { name: 'address', title: 'Dirección', show: true },
   { name: 'department', title: 'Departamento', show: false },
   { name: 'city', title: 'Ciudad', show: true },
-  { name: 'userId', title: 'Encargado', show: true },
+  { name: 'managerId', title: 'Encargado', show: true },
   { name: 'status', title: 'Estado', show: true },
   { name: 'phone', title: 'Teléfono', show: true },
 ];
@@ -65,8 +65,8 @@ export const viewModalConfig = {
     {
       fields: [
         { name: 'createdAt', label: 'Fecha de Registro', type: 'date' },
-        { name: 'user.name', label: 'Encargado' },
-        { name: 'user.email', label: 'Correo Encargado' },
+        { name: 'manager.name', label: 'Encargado' },
+        { name: 'manager.email', label: 'Correo Encargado' },
       ],
     },
   ],

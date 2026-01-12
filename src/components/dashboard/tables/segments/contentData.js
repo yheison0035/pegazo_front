@@ -16,8 +16,6 @@ export default function ContentData({
   handleDeleteClick,
   setShowModalChangeAdvisor,
 }) {
-  const { canAssign, canViewAll } = usePermissions();
-
   return (
     <>
       {paginatedData.map((info, index) => {
@@ -36,7 +34,7 @@ export default function ContentData({
                 <td className="px-4 py-3">{info.name}</td>
                 <td className="px-4 py-3">{info.address}</td>
                 <td className="px-4 py-3">{info.city || '-----'}</td>
-                <td className="px-4 py-3">{info.user?.name || '-----'}</td>
+                <td className="px-4 py-3">{info.manager?.name || '-----'}</td>
                 <td className="px-4 py-3">{info?.status || '-----'}</td>
                 <PhoneContentData info={info} />
               </>
@@ -90,7 +88,39 @@ export default function ContentData({
                 <td className="px-4 py-3">{info?.status || '-----'}</td>
               </>
             )}
-
+            {view === 'users' && (
+              <>
+                <td className="px-4 py-3">{info.role}</td>
+                <td className="px-4 py-3">{info.name}</td>
+                <td className="px-4 py-3">
+                  {info.managedLocals?.length > 0 ? (
+                    <span className="text-gray-600 font-bold">
+                      {info.managedLocals
+                        .map((local) => local.name)
+                        .join(' - ')}
+                    </span>
+                  ) : (
+                    info.local?.name || '-Sin Asignar-'
+                  )}
+                </td>
+                <td className="px-4 py-3">{info.document || '-----'}</td>
+                <td className="px-4 py-3">{info.email || '-----'}</td>
+                <PhoneContentData info={info} />
+                <td className="px-4 py-3">{info.address || '-----'}</td>
+                <td className="px-4 py-3">{info?.status || '-----'}</td>
+              </>
+            )}
+            {view === 'customers' && (
+              <>
+                <td className="px-4 py-3">{info.type_document}</td>
+                <td className="px-4 py-3">{info.document}</td>
+                <td className="px-4 py-3">{info.name || '-----'}</td>
+                <td className="px-4 py-3">{info.email || '-----'}</td>
+                <PhoneContentData info={info} />
+                <td className="px-4 py-3">{info?.city || '-----'}</td>
+                <td className="px-4 py-3">{info?.status || '-----'}</td>
+              </>
+            )}
             <td className="px-4 py-3 text-center">
               <Actions
                 isLocked={isLocked}

@@ -33,6 +33,10 @@ export async function updateProduct(id, dto) {
     local,
     provider,
     stock,
+    createdBy,
+    createdById,
+    updatedBy,
+    updatedById,
     ...cleanDto
   } = dto;
 
@@ -66,7 +70,7 @@ export async function deleteProduct(id) {
 export async function uploadProductImages(productId, images) {
   if (!Array.isArray(images)) return;
 
-  const existingImages = images.filter((img) => img.id);
+  const existingImages = images.filter((img) => img.id && !img._removed);
   const newImages = images.filter((img) => img.file);
 
   const keepImageIds = existingImages.map((img) => img.id);

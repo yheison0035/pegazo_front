@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { locations } from '@/lib/api/utils/locations.data';
+import { formatText, normalizeText } from '@/lib/api/utils/utils';
 
 export default function DepartaCiudad({
   formData,
@@ -10,7 +11,11 @@ export default function DepartaCiudad({
 
   useEffect(() => {
     if (formData?.department) {
-      const dep = locations.find((d) => d.department === formData.department);
+      const dep = locations.find(
+        (d) =>
+          normalizeText(d.department) === normalizeText(formData.department)
+      );
+
       setAvailableCities(dep ? dep.city : []);
     } else {
       setAvailableCities([]);
@@ -26,24 +31,24 @@ export default function DepartaCiudad({
         >
           Departamento
         </label>
+
         <select
           id="department"
           name="department"
-          value={formData.department || ''}
+          value={normalizeText(formData.department || '')}
           onChange={handleChange}
-          className={`w-full border border-gray-200 rounded-xl px-4 py-2 text-sm shadow-sm 
-                     focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition ${
-                       isLocked
-                         ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
-                         : 'focus:ring-2 focus:ring-orange-500 focus:border-orange-500'
-                     }`}
-          required
           disabled={isLocked}
+          className={`w-full border border-gray-200 rounded-xl px-4 py-2 text-sm shadow-sm 
+            focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition ${
+              isLocked ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''
+            }`}
+          required
         >
           <option value="">Seleccione un departamento</option>
+
           {locations.map((d) => (
-            <option key={d.id} value={d.department}>
-              {d.department}
+            <option key={d.id} value={normalizeText(d.department)}>
+              {formatText(d.department)}
             </option>
           ))}
         </select>
@@ -56,18 +61,17 @@ export default function DepartaCiudad({
         >
           Ciudad
         </label>
+
         <select
           id="city"
           name="city"
-          value={formData.city || ''}
+          value={normalizeText(formData.city || '')}
           onChange={handleChange}
           disabled={!formData.department || isLocked}
           className={`w-full border border-gray-200 rounded-xl px-4 py-2 text-sm shadow-sm 
-                     focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition ${
-                       isLocked
-                         ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
-                         : 'focus:ring-2 focus:ring-orange-500 focus:border-orange-500'
-                     }`}
+            focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition ${
+              isLocked ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''
+            }`}
           required
         >
           <option value="">
@@ -75,9 +79,10 @@ export default function DepartaCiudad({
               ? 'Seleccione una ciudad'
               : 'Seleccione un departamento primero'}
           </option>
+
           {availableCities.map((c, idx) => (
-            <option key={idx} value={c}>
-              {c}
+            <option key={idx} value={normalizeText(c)}>
+              {formatText(c)}
             </option>
           ))}
         </select>

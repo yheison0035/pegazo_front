@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import {
+  getRoles,
   getUsers,
   getUserById,
   createUser,
@@ -29,6 +30,7 @@ export default function useUsers() {
     }
   }, []);
 
+  const getRolesFn = useCallback(() => wrap(getRoles), [wrap]);
   const getUsersFn = useCallback(() => wrap(getUsers), [wrap]);
   const getUserByIdFn = useCallback((id) => wrap(getUserById, id), [wrap]);
   const createUserFn = useCallback((dto) => wrap(createUser, dto), [wrap]);
@@ -48,6 +50,7 @@ export default function useUsers() {
   const deleteUserAvatarFn = useCallback(() => wrap(deleteUserAvatar), [wrap]);
 
   return {
+    getRoles: getRolesFn,
     getUsers: getUsersFn,
     getUserById: getUserByIdFn,
     createUser: createUserFn,

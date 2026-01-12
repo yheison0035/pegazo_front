@@ -3,7 +3,7 @@
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import CommentsHistory from '@/components/dashboard/comments/CommentsHistory';
 import Variants from '@/components/dashboard/viewModal/variants';
-import { formatValue, getValueByPath } from '@/lib/api/utils/utils';
+import { formatCOP, formatValue, getValueByPath } from '@/lib/api/utils/utils';
 import ImageGallery from '@/components/dashboard/viewModal/imageGallery';
 
 export default function ViewModal({ data, type, onClose, viewModalConfig }) {
@@ -55,8 +55,14 @@ export default function ViewModal({ data, type, onClose, viewModalConfig }) {
             <div key={idx} className="space-y-3">
               {section.fields.map((field) => {
                 const rawValue = getValueByPath(data, field.name);
-                const value = formatValue(rawValue, field.type);
+                let value = formatValue(rawValue, field.type);
 
+                if (
+                  field.name === 'purchasePrice' ||
+                  field.name === 'salePrice'
+                ) {
+                  value = formatCOP(value);
+                }
                 if (field.type === 'status') {
                   return (
                     <div key={field.name}>
@@ -72,6 +78,28 @@ export default function ViewModal({ data, type, onClose, viewModalConfig }) {
                       >
                         {value}
                       </span>
+                    </div>
+                  );
+                }
+
+                if (field.type === 'locals') {
+                  return (
+                    <div key={field.name}>
+                      <p className="font-semibold text-gray-700">
+                        {field.label}
+                      </p>
+
+                      {data.locals && data.locals.length > 0 ? (
+                        data.locals.map((local, index) => (
+                          <p key={index} className="text-gray-500">
+                            {local.name}
+                          </p>
+                        ))
+                      ) : (
+                        <p className="text-gray-400 italic">
+                          Sin locales asignados
+                        </p>
+                      )}
                     </div>
                   );
                 }

@@ -9,14 +9,22 @@ import RoleGuard from '@/auth/roleGuard';
 import { useAuth } from '@/context/authContext';
 import { Roles } from '@/config/roles';
 import useCustomers from '@/lib/api/hooks/useCustomers';
-import { getHeaderTableCustomers } from '@/lib/api/utils/customers.config';
+import {
+  getHeaderTableCustomers,
+  viewModalConfig,
+} from '@/lib/api/utils/customers.config';
+import ConfirmDeleteModal from '@/components/dashboard/tables/segments/confirmDeleteModal';
+import AlertModal from '@/components/dashboard/modals/alertModal';
 
 export default function Customers() {
   const [customers, setCustomers] = useState([]);
   const [selectedCustomers, setSelectedCustomers] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const { usuario } = useAuth();
+  const [alert, setAlert] = useState({ type: '', message: '', url: '' });
 
-  const { getCustomers, loading, error } = useCustomers();
+  const { getCustomers, deleteCustomer, loading, error } = useCustomers();
 
   const fetchCustomers = useCallback(async () => {
     try {
@@ -30,6 +38,31 @@ export default function Customers() {
   useEffect(() => {
     fetchCustomers();
   }, [fetchCustomers]);
+
+  const handleDeleteClick = (id, name) => {
+    setDeleteTarget({ id, name, type: 'cliente' });
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+
+    try {
+      await deleteCustomer(deleteTarget.id);
+      setAlert({
+        type: 'success',
+        message: 'Cliente eliminado correctamente.',
+      });
+      setShowDeleteModal(false);
+      setDeleteTarget(null);
+      await fetchCustomers();
+    } catch (err) {
+      setAlert({
+        type: 'error',
+        message: err?.message || 'Error al eliminar cliente',
+      });
+    }
+  };
 
   return (
     <RoleGuard allowedRoles={Object.values(Roles)}>
@@ -60,15 +93,33 @@ export default function Customers() {
             fetchData={fetchCustomers}
             loading={loading}
             error={error}
+            handleDeleteClick={handleDeleteClick}
           />
           {selectedCustomers && (
             <ViewModal
               data={selectedCustomers}
               type="customers"
               onClose={() => setSelectedCustomers(null)}
+              viewModalConfig={viewModalConfig}
+            />
+          )}
+          {showDeleteModal && (
+            <ConfirmDeleteModal
+              show={showDeleteModal}
+              setShow={setShowDeleteModal}
+              type={deleteTarget?.type}
+              name={deleteTarget?.name}
+              onConfirm={confirmDelete}
+              loading={loading}
             />
           )}
         </div>
+        <AlertModal
+          type={alert.type}
+          message={alert.message}
+          onClose={() => setAlert({ type: '', message: '', url: '' })}
+          url={alert.url}
+        />
       </div>
     </RoleGuard>
   );

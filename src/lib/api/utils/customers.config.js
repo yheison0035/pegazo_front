@@ -1,20 +1,18 @@
 export const getEmptyCustomer = () => ({
-  type: '',
+  type_document: '',
   document: '',
-  firstName: '',
-  lastName: '',
+  name: '',
   email: '',
   phone: '',
   department: '',
   city: '',
   address: '',
-  birthdate: '',
   status: '',
 });
 
 export const getFormFieldsCustomers = () => [
   {
-    name: 'type',
+    name: 'type_document',
     label: 'Tipo de Documento',
     type: 'select',
     required: true,
@@ -27,20 +25,56 @@ export const getFormFieldsCustomers = () => [
       { id: 'PEP', name: 'Permiso Especial de Permanencia' },
       { id: 'DIE', name: 'Documento de Identidad de Extranjería' },
     ],
+    disabled: false,
   },
-  { name: 'document', label: 'Documento', type: 'text', required: true },
-  { name: 'firstName', label: 'Nombre', type: 'text', required: true },
-  { name: 'lastName', label: 'Apellido', type: 'text', required: true },
-  { name: 'email', label: 'Correo Electrónico', type: 'email', required: true },
-  { name: 'phone', label: 'Teléfono / Celular', type: 'text', required: true },
-  { name: 'department', label: 'Departamento', type: 'text', required: true },
-  { name: 'city', label: 'Ciudad', type: 'text', required: true },
-  { name: 'address', label: 'Dirección', type: 'text', required: false },
   {
-    name: 'birthdate',
-    label: 'Fecha de Nacimiento',
-    type: 'date',
+    name: 'document',
+    label: 'Documento',
+    type: 'text',
+    required: true,
+    disabled: false,
+  },
+  {
+    name: 'name',
+    label: 'Nombre Completo',
+    type: 'text',
+    required: true,
+    disabled: false,
+  },
+  {
+    name: 'email',
+    label: 'Correo Electrónico',
+    type: 'email',
+    required: true,
+    disabled: false,
+  },
+  {
+    name: 'phone',
+    label: 'Teléfono / Celular',
+    type: 'text',
+    required: true,
+    disabled: false,
+  },
+  {
+    name: 'department',
+    label: 'Departamento',
+    type: 'text',
+    required: true,
+    disabled: false,
+  },
+  {
+    name: 'city',
+    label: 'Ciudad',
+    type: 'text',
+    required: true,
+    disabled: false,
+  },
+  {
+    name: 'address',
+    label: 'Dirección',
+    type: 'text',
     required: false,
+    disabled: false,
   },
   {
     name: 'status',
@@ -48,22 +82,60 @@ export const getFormFieldsCustomers = () => [
     type: 'select',
     required: true,
     options: [
-      { id: 'Activo', name: 'Activo' },
-      { id: 'Inactivo', name: 'Inactivo' },
+      { id: 'ACTIVO', name: 'ACTIVO' },
+      { id: 'INACTIVO', name: 'INACTIVO' },
     ],
+    disabled: false,
+  },
+  {
+    name: 'localId',
+    label: 'Local / Punto de Venta',
+    type: 'select',
+    required: true,
+    source: 'locals',
+    disabled: false,
   },
 ];
 
 export const getHeaderTableCustomers = () => [
-  { name: 'type', title: 'Tipo de Documento', show: true },
+  { name: 'type_document', title: 'Tipo de Documento', show: true },
   { name: 'document', title: 'Documento', show: true },
-  { name: 'firstName', title: 'Nombre', show: true },
-  { name: 'lastName', title: 'Apellido', show: true },
+  { name: 'name', title: 'Nombre Completo', show: true },
   { name: 'email', title: 'Correo', show: true },
   { name: 'phone', title: 'Teléfono', show: true },
-  { name: 'department', title: 'Departamento', show: true },
+  { name: 'department', title: 'Departamento', show: false },
   { name: 'city', title: 'Ciudad', show: true },
   { name: 'address', title: 'Dirección', show: false },
-  { name: 'birthdate', title: 'Fecha de Nacimiento', show: false },
   { name: 'status', title: 'Estado', show: true },
 ];
+
+export const viewModalConfig = {
+  title: 'Detalles del Cliente',
+  subtitle: 'Información completa del cliente',
+  columns: 3,
+  sections: [
+    {
+      fields: [
+        { name: 'type_document', label: 'Tipo de Documento' },
+        { name: 'document', label: 'Documento' },
+        { name: 'name', label: 'Nombre Completo' },
+        { name: 'email', label: 'Correo Electrónico' },
+        { name: 'phone', label: 'Teléfono' },
+      ],
+    },
+    {
+      fields: [
+        { name: 'department', label: 'Departamento' },
+        { name: 'city', label: 'Ciudad' },
+        { name: 'address', label: 'Dirección' },
+      ],
+    },
+    {
+      fields: [
+        { name: 'status', label: 'Estado', type: 'status' },
+        { name: 'createdAt', label: 'Fecha de Registro', type: 'date' },
+      ],
+    },
+  ],
+  showComments: false,
+};

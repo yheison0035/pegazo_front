@@ -28,7 +28,7 @@ const Table = ({
     status: '',
     deliveryDate: '',
     description: '',
-    userId: '',
+    managerId: '',
     city: '',
     address: '',
     contactName: '',
@@ -37,6 +37,8 @@ const Table = ({
     localId: '',
     providerId: '',
     salePrice: '',
+    document: '',
+    type_document: '',
   });
 
   const filtered = useMemo(() => {
@@ -69,9 +71,9 @@ const Table = ({
         ? (a.status.toLowerCase() || '').includes(filters.status.toLowerCase())
         : true;
 
-      const userNameMatch = filters.userId
-        ? (a.user?.name?.toLowerCase() || '').includes(
-            filters.userId.toLowerCase()
+      const userNameMatch = filters.managerId
+        ? (a.manager?.name?.toLowerCase() || '').includes(
+            filters.managerId.toLowerCase()
           )
         : true;
 
@@ -117,6 +119,14 @@ const Table = ({
         ? String(a.salePrice).includes(String(filters.salePrice))
         : true;
 
+      const documentMatch = filters.document
+        ? String(a.document).includes(String(filters.document))
+        : true;
+
+      const typeDocumentMatch = filters.type_document
+        ? String(a.type_document).includes(String(filters.type_document))
+        : true;
+
       return (
         roleMatch &&
         nameMatch &&
@@ -132,7 +142,9 @@ const Table = ({
         stockMatch &&
         localMatch &&
         providerMatch &&
-        salePriceMatch
+        salePriceMatch &&
+        documentMatch &&
+        typeDocumentMatch
       );
     });
   }, [info, filters, view]);

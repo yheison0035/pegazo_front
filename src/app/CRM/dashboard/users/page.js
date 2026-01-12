@@ -9,14 +9,22 @@ import RoleGuard from '@/auth/roleGuard';
 import { useAuth } from '@/context/authContext';
 import { Roles } from '@/config/roles';
 import useUsers from '@/lib/api/hooks/useUsers';
-import { getHeaderTableUsers } from '@/lib/api/utils/users.config';
+import {
+  getHeaderTableUsers,
+  viewModalConfig,
+} from '@/lib/api/utils/users.config';
+import ConfirmDeleteModal from '@/components/dashboard/tables/segments/confirmDeleteModal';
+import AlertModal from '@/components/dashboard/modals/alertModal';
 
 export default function Users() {
   const [users, setUsers] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const { usuario } = useAuth();
+  const [alert, setAlert] = useState({ type: '', message: '', url: '' });
 
-  const { getUsers } = useUsers();
+  const { getUsers, deleteUser, loading } = useUsers();
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -30,6 +38,31 @@ export default function Users() {
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
+
+  const handleDeleteClick = (id, name) => {
+    setDeleteTarget({ id, name, type: 'usuario' });
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+
+    try {
+      await deleteUser(deleteTarget.id);
+      setAlert({
+        type: 'success',
+        message: 'Usuario eliminado correctamente.',
+      });
+      setShowDeleteModal(false);
+      setDeleteTarget(null);
+      await fetchUsers();
+    } catch (err) {
+      setAlert({
+        type: 'error',
+        message: err?.message || 'Error al eliminar usuario',
+      });
+    }
+  };
 
   return (
     <RoleGuard allowedRoles={Object.values(Roles)}>
@@ -60,15 +93,33 @@ export default function Users() {
             fetchData={fetchUsers}
             loading={false}
             error={null}
+            handleDeleteClick={handleDeleteClick}
           />
           {selectedUsers && (
             <ViewModal
               data={selectedUsers}
               type="user"
               onClose={() => setSelectedUsers(null)}
+              viewModalConfig={viewModalConfig}
+            />
+          )}
+          {showDeleteModal && (
+            <ConfirmDeleteModal
+              show={showDeleteModal}
+              setShow={setShowDeleteModal}
+              type={deleteTarget?.type}
+              name={deleteTarget?.name}
+              onConfirm={confirmDelete}
+              loading={loading}
             />
           )}
         </div>
+        <AlertModal
+          type={alert.type}
+          message={alert.message}
+          onClose={() => setAlert({ type: '', message: '', url: '' })}
+          url={alert.url}
+        />
       </div>
     </RoleGuard>
   );

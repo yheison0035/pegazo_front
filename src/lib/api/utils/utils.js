@@ -1,3 +1,4 @@
+// Convierte una fecha en formato DD/MM/YYYY o cualquier formato reconocible por Date a ISO completo
 export function toFullISO(input) {
   if (!input) return null;
 
@@ -12,6 +13,7 @@ export function toFullISO(input) {
   return isNaN(d.getTime()) ? null : d.toISOString();
 }
 
+// Normaliza una fecha para usar en inputs tipo date (YYYY-MM-DD)
 export function normalizeDateForInput(input) {
   if (!input) return '';
 
@@ -21,12 +23,14 @@ export function normalizeDateForInput(input) {
   return d.toISOString().split('T')[0];
 }
 
+// Formatea un valor numérico agregando separadores de miles
 export const formatPrice = (value) => {
   if (!value) return '';
   const numberValue = value.toString().replace(/\D/g, '');
   return new Intl.NumberFormat('es-CO').format(Number(numberValue));
 };
 
+// Formatea un número o cadena como moneda COP
 export function formatCOP(value) {
   if (value === null || value === undefined || value === '') return '';
 
@@ -42,6 +46,7 @@ export function formatCOP(value) {
   });
 }
 
+// Convierte un valor formateado en COP a número
 export function parseCOPToNumber(value) {
   if (value === null || value === undefined || value === '') return null;
 
@@ -54,10 +59,12 @@ export function parseCOPToNumber(value) {
   return Number(clean);
 }
 
+// Obtiene el valor de un objeto dado una ruta en notación de puntos
 export const getValueByPath = (obj, path) => {
   return path.split('.').reduce((acc, key) => acc?.[key], obj);
 };
 
+// Formatea valores según su tipo
 export const formatValue = (value, type) => {
   if (!value) return 'No disponible';
 
@@ -67,3 +74,50 @@ export const formatValue = (value, type) => {
 
   return value;
 };
+
+// Normaliza texto: quita tildes, pasa a mayúsculas, elimina caracteres especiales y espacios extras
+export function formatText(input) {
+  if (!input) return '';
+
+  return input
+    .normalize('NFD') // separa tildes (á → a)
+    .replace(/[\u0300-\u036f]/g, '') // elimina tildes
+    .toUpperCase() // todo en mayúscula
+    .replace(/[^A-Z0-9 ]/g, '') // solo letras, números y espacios
+    .replace(/\s+/g, ' ') // un solo espacio
+    .trim(); // sin espacios al inicio/final
+}
+
+// Cambia el caso de un texto según el modo especificado
+export function toggleCase(text, modeText = 'toggle') {
+  if (!text) return '';
+
+  switch (modeText) {
+    case 'uppercase':
+      return text.toUpperCase();
+
+    case 'lowercase':
+      return text.toLowerCase();
+
+    case 'toggle':
+    default:
+      return text
+        .split('')
+        .map((char) => {
+          if (char === char.toUpperCase()) return char.toLowerCase();
+          if (char === char.toLowerCase()) return char.toUpperCase();
+          return char;
+        })
+        .join('');
+  }
+}
+
+// Normaliza texto: quita tildes, pasa a mayúsculas y elimina espacios extras
+export function normalizeText(text) {
+  if (!text) return '';
+  return text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase()
+    .trim();
+}

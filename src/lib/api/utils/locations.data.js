@@ -735,7 +735,7 @@ export const locations = [
       'Baraya',
       'Campoalegre',
       'Colombia',
-      'El Pital',
+      'Pital',
       'El\u00edas',
       'Garz\u00f3n',
       'Gigante',
