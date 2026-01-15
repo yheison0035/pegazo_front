@@ -9,12 +9,20 @@ import {
 } from '@/lib/api/utils/utils';
 import useSales from '@/lib/api/hooks/useSales';
 
-export default function ProductSelector({ value = [], onChange, disabled }) {
+export default function ProductSelector({ value = [], onChange, onTyping }) {
   const [search, setSearch] = useState('');
   const [filtered, setFiltered] = useState([]);
-  const [selectedProducts, setSelectedProducts] = useState(value);
+  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [processing, setProcessing] = useState(false);
 
   const { searchProducts, loading } = useSales();
+
+  // SINCRONIZAR CUANDO CAMBIA EL FORMULARIO (CREAR / EDITAR)
+  useEffect(() => {
+    if (Array.isArray(value)) {
+      setSelectedProducts(value);
+    }
+  }, [value]);
 
   useEffect(() => {
     const fetch = async () => {
@@ -29,11 +37,14 @@ export default function ProductSelector({ value = [], onChange, disabled }) {
     fetch();
   }, [search]);
 
-  const handleSelectProduct = (product) => {
+  const handleSelectProduct = async (product) => {
     const exists = selectedProducts.find(
       (p) => p.inventoryVariantId === product.id
     );
     if (exists) return;
+
+    setProcessing(true);
+    await new Promise((res) => setTimeout(res, 300));
 
     const newList = [
       ...selectedProducts,
@@ -43,7 +54,7 @@ export default function ProductSelector({ value = [], onChange, disabled }) {
         price: product.price,
         stock: product.stock,
         quantity: 1,
-        discount: 0,
+        discount: product.discount,
         subtotal: product.price,
       },
     ];
@@ -52,6 +63,7 @@ export default function ProductSelector({ value = [], onChange, disabled }) {
     setSearch('');
     setFiltered([]);
     onChange?.(newList);
+    setProcessing(false);
   };
 
   const updateQuantity = (id, quantity) => {
@@ -59,7 +71,7 @@ export default function ProductSelector({ value = [], onChange, disabled }) {
       if (p.inventoryVariantId === id) {
         const qty = Math.min(Math.max(1, quantity), p.stock);
         const base = p.price * qty;
-        const discount = Math.min(p.discount, base);
+        const discount = Math.min(p.discount || 0, base);
 
         return {
           ...p,
@@ -108,8 +120,10 @@ export default function ProductSelector({ value = [], onChange, disabled }) {
           type="text"
           placeholder="Buscar producto..."
           value={search}
-          onChange={(e) => setSearch(formatText(e.target.value))}
-          disabled={disabled}
+          onChange={(e) => {
+            setSearch(formatText(e.target.value));
+            onTyping?.();
+          }}
           className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-orange-500"
         />
 
@@ -141,7 +155,13 @@ export default function ProductSelector({ value = [], onChange, disabled }) {
         )}
       </div>
 
-      {selectedProducts.length > 0 && (
+      {processing && (
+        <div className="flex items-center justify-center border border-gray-300 rounded-xl p-4 bg-gray-50 text-gray-500 text-sm">
+          Cargando productos...
+        </div>
+      )}
+
+      {!processing && selectedProducts.length > 0 && (
         <div className="border border-gray-300 rounded-xl p-4 bg-gray-50">
           <table className="w-full text-sm">
             <thead>
@@ -189,7 +209,7 @@ export default function ProductSelector({ value = [], onChange, disabled }) {
                       placeholder="$ 0"
                     />
                   </td>
-                  <td className="text-right">{formatPrice(p.subtotal)}</td>
+                  <td className="text-right pl-4">{formatPrice(p.subtotal)}</td>
                   <td>
                     <button
                       onClick={() => removeProduct(p.inventoryVariantId)}

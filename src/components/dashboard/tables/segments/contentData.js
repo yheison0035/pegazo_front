@@ -1,10 +1,6 @@
-import { CheckIcon } from '@heroicons/react/24/outline';
 import Actions from './actions';
-import ConfirmDeleteModal from './confirmDeleteModal';
-import { formatDateTime } from '@/lib/api/utils/formatDateTime';
-import usePermissions from '@/hooks/usePermissions';
 import PhoneContentData from './contentData/phone';
-import { formatCOP } from '@/lib/api/utils/utils';
+import { formatCOP, formatDateTime } from '@/lib/api/utils/utils';
 
 export default function ContentData({
   paginatedData,
@@ -119,6 +115,22 @@ export default function ContentData({
                 <PhoneContentData info={info} />
                 <td className="px-4 py-3">{info?.city || '-----'}</td>
                 <td className="px-4 py-3">{info?.status || '-----'}</td>
+              </>
+            )}
+            {view === 'delivered_sales' && (
+              <>
+                <td className="px-4 py-3">{info.code || '-----'}</td>
+                <td className="px-4 py-3">{info?.customer?.name || '-----'}</td>
+                <td className="px-4 py-3 font-bold">
+                  {formatCOP(info.totalAmount) || '-----'}
+                </td>
+                <td className="px-4 py-3">{info.paymentMethod || '-----'}</td>
+                <td className="px-4 py-3">{info?.local?.name || '-----'}</td>
+                <td className="px-4 py-3">{info?.user?.name || '-----'}</td>
+                <td className="px-4 py-3">{info?.paymentStatus || '-----'}</td>
+                <td className="px-4 py-3">
+                  {formatDateTime(info?.saleDate) || '-----'}
+                </td>
               </>
             )}
             <td className="px-4 py-3 text-center">

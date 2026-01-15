@@ -46,10 +46,6 @@ export default function useDeliveredSales() {
     (id) => wrap(deleteDeliveredSale, id),
     [wrap]
   );
-  const exportDeliveredSalesFn = useCallback(
-    (id) => wrap(exportDeliveredSales, id),
-    [wrap]
-  );
 
   return {
     getDeliveredSales: getDeliveredSalesFn,
@@ -57,7 +53,6 @@ export default function useDeliveredSales() {
     createDeliveredSale: createDeliveredSaleFn,
     updateDeliveredSale: updateDeliveredSaleFn,
     deleteDeliveredSale: deleteDeliveredSaleFn,
-    exportDeliveredSales: exportDeliveredSalesFn,
     loading,
     error,
   };

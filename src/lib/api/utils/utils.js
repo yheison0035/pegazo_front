@@ -13,6 +13,50 @@ export function toFullISO(input) {
   return isNaN(d.getTime()) ? null : d.toISOString();
 }
 
+// Convierte una fecha (YYYY-MM-DD) a fecha+hora local real en ISO
+export function toLocalDateTimeISO(input) {
+  if (!input) return null;
+
+  // Si ya viene como ISO completo, solo lo normalizamos
+  if (typeof input === 'string' && input.includes('T')) {
+    const d = new Date(input);
+    return isNaN(d.getTime()) ? null : d.toISOString();
+  }
+
+  // Si viene como YYYY-MM-DD (input date)
+  if (typeof input === 'string' && input.includes('-')) {
+    const [year, month, day] = input.split('-').map(Number);
+
+    const now = new Date(); // hora actual local
+
+    const localDateTime = new Date(
+      year,
+      month - 1,
+      day,
+      now.getHours(),
+      now.getMinutes(),
+      now.getSeconds(),
+      now.getMilliseconds()
+    );
+
+    return isNaN(localDateTime.getTime()) ? null : localDateTime.toISOString();
+  }
+
+  // Fallback genérico
+  const d = new Date(input);
+  return isNaN(d.getTime()) ? null : d.toISOString();
+}
+
+//
+export function formatDateTime(value) {
+  if (!value) return 'No disponible';
+
+  return new Date(value).toLocaleString('es-CO', {
+    dateStyle: 'long',
+    timeStyle: 'short',
+  });
+}
+
 // Normaliza una fecha para usar en inputs tipo date (YYYY-MM-DD)
 export function normalizeDateForInput(input) {
   if (!input) return '';

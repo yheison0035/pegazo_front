@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 
 import Thead from './segments/thead';
 import InputFilters from './segments/InputsFilters';
 import Pagination from './segments/pagination';
 import ContentData from './segments/contentData';
+import useTableFilters from './hooks/useTableFilters';
 
 const Table = ({
   header,
@@ -19,144 +20,11 @@ const Table = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const [filters, setFilters] = useState({
-    role: '',
-    name: '',
-    email: '',
-    phone: '',
-    advisor: '',
-    status: '',
-    deliveryDate: '',
-    description: '',
-    managerId: '',
-    city: '',
-    address: '',
-    contactName: '',
-    productType: '',
-    stock: '',
-    localId: '',
-    providerId: '',
-    salePrice: '',
-    document: '',
-    type_document: '',
-  });
-
-  const filtered = useMemo(() => {
-    const arrayInfo = Array.isArray(info) ? info : [];
-
-    return arrayInfo.filter((a) => {
-      const roleMatch = filters.role
-        ? a.role?.toLowerCase().includes(filters.role.toLowerCase())
-        : true;
-
-      const nameMatch = filters.name
-        ? a.name?.toLowerCase().includes(filters.name.toLowerCase())
-        : true;
-
-      const emailMatch = filters.email
-        ? a.email?.toLowerCase().includes(filters.email.toLowerCase())
-        : true;
-
-      const phoneMatch = filters.phone
-        ? a.phone?.toLowerCase().includes(filters.phone.toLowerCase())
-        : true;
-
-      const descriptionMatch = filters.description
-        ? a.description
-            ?.toLowerCase()
-            .includes(filters.description.toLowerCase())
-        : true;
-
-      const statusMatch = filters.status
-        ? (a.status.toLowerCase() || '').includes(filters.status.toLowerCase())
-        : true;
-
-      const userNameMatch = filters.managerId
-        ? (a.manager?.name?.toLowerCase() || '').includes(
-            filters.managerId.toLowerCase()
-          )
-        : true;
-
-      const cityMatch = filters.city
-        ? (a.city?.toLowerCase() || '').includes(filters.city.toLowerCase())
-        : true;
-
-      const addressMatch = filters.address
-        ? (a.address?.toLowerCase() || '').includes(
-            filters.address.toLowerCase()
-          )
-        : true;
-
-      const contactNameMatch = filters.contactName
-        ? (a.contactName?.toLowerCase() || '').includes(
-            filters.contactName.toLowerCase()
-          )
-        : true;
-
-      const productTypeMatch = filters.productType
-        ? (a.productType?.toLowerCase() || '').includes(
-            filters.productType.toLowerCase()
-          )
-        : true;
-
-      const stockMatch = filters.stock
-        ? String(a.stock).includes(String(filters.stock))
-        : true;
-
-      const localMatch = filters.localId
-        ? (a.local?.name?.toLowerCase() || '').includes(
-            filters.localId.toLowerCase()
-          )
-        : true;
-
-      const providerMatch = filters.providerId
-        ? (a.provider?.name?.toLowerCase() || '').includes(
-            filters.providerId.toLowerCase()
-          )
-        : true;
-
-      const salePriceMatch = filters.salePrice
-        ? String(a.salePrice).includes(String(filters.salePrice))
-        : true;
-
-      const documentMatch = filters.document
-        ? String(a.document).includes(String(filters.document))
-        : true;
-
-      const typeDocumentMatch = filters.type_document
-        ? String(a.type_document).includes(String(filters.type_document))
-        : true;
-
-      return (
-        roleMatch &&
-        nameMatch &&
-        emailMatch &&
-        phoneMatch &&
-        descriptionMatch &&
-        statusMatch &&
-        userNameMatch &&
-        cityMatch &&
-        addressMatch &&
-        productTypeMatch &&
-        contactNameMatch &&
-        stockMatch &&
-        localMatch &&
-        providerMatch &&
-        salePriceMatch &&
-        documentMatch &&
-        typeDocumentMatch
-      );
-    });
-  }, [info, filters, view]);
+  const { filters, filtered, handleFilterChange } = useTableFilters(info, view);
 
   useEffect(() => {
     setCurrentPage(1);
   }, [filters, view]);
-
-  const handleFilterChange = (e) => {
-    const { name, value } = e.target;
-    setFilters((prev) => ({ ...prev, [name]: value }));
-  };
 
   const totalPages = Math.ceil(filtered.length / rowsPerPage);
 

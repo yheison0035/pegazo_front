@@ -8,9 +8,9 @@ import useSales from '@/lib/api/hooks/useSales';
 import { getEmptySale, getFormFieldsSales } from '@/lib/api/utils/sales.config';
 
 export default function AddSales() {
-  const { usuario } = useAuth();
   const [formData, setFormData] = useState(getEmptySale());
   const [alert, setAlert] = useState({ type: '', message: '', url: '' });
+  const { usuario } = useAuth();
 
   const { createSale, loading } = useSales();
 
@@ -19,24 +19,22 @@ export default function AddSales() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.products || formData.products.length === 0) {
-      return setAlert({
-        type: 'warning',
-        message: 'Debe agregar al menos un producto a la venta.',
-      });
-    }
-
-    const payload = {
-      customerId: formData.customerId || null,
-      localId: usuario.localId,
-      paymentMethod: formData.paymentMethod,
-      items: formData.products.map((p) => ({
-        inventoryVariantId: p.inventoryVariantId,
-        quantity: p.quantity,
-      })),
-    };
-
     try {
+      const payload = {
+        paymentMethod: formData.paymentMethod,
+        localId: formData.localId,
+        customerId: formData.customerId,
+        paymentStatus: formData.paymentStatus,
+        saleDate: formData.saleDate,
+        notes: formData.notes,
+        userId: formData.userId,
+
+        items: formData.items.map((p) => ({
+          inventoryVariantId: p.inventoryVariantId,
+          quantity: p.quantity,
+        })),
+      };
+
       await createSale(payload);
 
       setAlert({
@@ -70,7 +68,7 @@ export default function AddSales() {
         loading={loading}
         mode="new"
         usuario={usuario}
-        module="delivered_sales"
+        module="sales"
       />
 
       <AlertModal

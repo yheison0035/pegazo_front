@@ -69,17 +69,18 @@ export default function NavLinks() {
       roles: ['SUPER_ADMIN', 'ADMIN'],
     },
     {
-      name: 'Realizar Venta',
-      href: '/CRM/dashboard/sales',
-      icon: BanknotesIcon,
-      roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR'],
-    },
-    {
       name: 'Pedidos',
       href: '/CRM/dashboard/orders',
       icon: ClipboardDocumentListIcon,
       roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR'],
     },
+    {
+      name: 'Realizar Venta',
+      href: '/CRM/dashboard/sales',
+      icon: BanknotesIcon,
+      roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR'],
+    },
+
     {
       name: 'Ventas Realizadas',
       href: '/CRM/dashboard/delivered_sales',

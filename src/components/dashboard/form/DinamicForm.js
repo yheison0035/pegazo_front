@@ -5,17 +5,23 @@ import DepartaCiudad from '@/components/dashboard/select/depart_ciud';
 import BtnReturn from '../buttons/return';
 import BtnSave from '../buttons/save';
 import useUsers from '@/lib/api/hooks/useUsers';
-import ColorSelect from './colorSelect';
-import { formatCOP, formatPrice, toggleCase } from '@/lib/api/utils/utils';
+import {
+  formatCOP,
+  normalizeDateForInput,
+  formatPrice,
+  toggleCase,
+} from '@/lib/api/utils/utils';
 import useLocals from '@/lib/api/hooks/useLocals';
 import { getProviders } from '@/lib/api/routes/providers';
 import { getCategories } from '@/lib/api/routes/categories';
 import { getBrands } from '@/lib/api/routes/brands';
-import ProductSelector from './productSelector';
 import { getCustomers } from '@/lib/api/routes/customers';
 import ImageUploader from '../inventory/imageUploader';
 import { colorOptions } from '@/lib/api/utils/getColors';
-import { useAuth } from '@/context/authContext';
+import useEnums from '@/lib/api/hooks/useEnums';
+import SearchableSelect from './fields/SearchSelectField/searchableSelect';
+import ProductSelector from './fields/ProductSelectField/productSelector';
+import ColorSelect from './fields/colorSelect';
 
 export default function DinamicForm({
   formData,
@@ -34,9 +40,13 @@ export default function DinamicForm({
 }) {
   const [dynamicOptions, setDynamicOptions] = useState({});
   const [showPassword, setShowPassword] = useState(false);
-  const { getRoles, getUsers } = useUsers();
-  const { usuario } = useAuth();
+  const [productError, setProductError] = useState('');
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+
+  const { getUsers } = useUsers();
   const { getLocals } = useLocals();
+  const { getRoles, getStatus, getPaymentMethods, getPaymentStatus } =
+    useEnums();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -48,6 +58,14 @@ export default function DinamicForm({
       name === 'totalAmount'
     ) {
       formattedValue = formatPrice(value);
+    }
+
+    if (name === 'saleDate') {
+      formattedValue = normalizeDateForInput(value);
+    }
+
+    if (name === 'name' || name === 'firstName' || name === 'lastName') {
+      formattedValue = toggleCase(value, 'uppercase');
     }
 
     setFormData((prev) => ({
@@ -72,19 +90,26 @@ export default function DinamicForm({
     if (!Array.isArray(formFields)) return;
 
     const loaders = {
-      roles: getRoles,
       users: getUsers,
       locals: getLocals,
       providers: getProviders,
       categories: getCategories,
       brands: getBrands,
       customers: getCustomers,
+      roles: getRoles,
+      status: getStatus,
+      paymentMethod: getPaymentMethods,
+      paymentStatus: getPaymentStatus,
     };
 
     const results = {};
 
     for (const field of formFields) {
-      if (field?.type === 'select' && loaders[field.source]) {
+      if (
+        (field?.type === 'select' || field?.type === 'searchSelect') &&
+        field.source &&
+        loaders[field.source]
+      ) {
         const fetcher = loaders[field.source];
         const response = await fetcher();
         const data = Array.isArray(response) ? response : response?.data || [];
@@ -99,7 +124,16 @@ export default function DinamicForm({
     }
 
     setDynamicOptions(results);
-  }, [formFields, getUsers, getLocals]);
+  }, [
+    formFields,
+    getUsers,
+    getLocals,
+    getCustomers,
+    getRoles,
+    getStatus,
+    getPaymentMethods,
+    getPaymentStatus,
+  ]);
 
   useEffect(() => {
     fetchDynamicOptions();
@@ -112,11 +146,35 @@ export default function DinamicForm({
   const isObject = (value) =>
     typeof value === 'object' && value !== null && !Array.isArray(value);
 
+  const onSubmit = (e) => {
+    setHasSubmitted(true);
+
+    if (
+      module === 'sales' &&
+      (!formData.products || formData.products.length === 0)
+    ) {
+      e.preventDefault();
+      setProductError('Debes añadir productos');
+      return;
+    }
+
+    const requiredSearchFields = formFields.filter(
+      (f) => f.type === 'searchSelect' && f.required
+    );
+
+    for (const field of requiredSearchFields) {
+      if (!formData[field.name]) {
+        e.preventDefault();
+        return;
+      }
+    }
+
+    setProductError('');
+    handleSubmit(e);
+  };
+
   return (
-    <form
-      onSubmit={handleSubmit}
-      className={`space-y-8 ${loading ? 'pointer-events-none opacity-60' : ''}`}
-    >
+    <form onSubmit={onSubmit}>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {Array.isArray(formFields) &&
           formFields.map((field) => {
@@ -131,17 +189,12 @@ export default function DinamicForm({
 
             if (name === 'department' || name === 'city') return null;
 
-            if (name === 'purchasePrice' || name === 'salePrice') {
-              formData[name] = formatCOP(formData[name] || '');
-            }
-
-            if (
-              name === 'name' ||
-              name === 'firstName' ||
-              name === 'lastName'
-            ) {
-              formData[name] = toggleCase(formData[name], 'uppercase');
-            }
+            const inputValue =
+              name === 'saleDate'
+                ? normalizeDateForInput(formData[name])
+                : name === 'purchasePrice' || name === 'salePrice'
+                ? formatCOP(formData[name] || '')
+                : formData[name] || '';
 
             if (type === 'colorSelect') {
               return (
@@ -149,26 +202,24 @@ export default function DinamicForm({
                   <label className="text-sm font-medium text-gray-700 mb-1">
                     {label}
                   </label>
-                  {formData.variants && formData.variants.length > 0 && (
-                    <>
-                      <div className="flex -space-x-1 mb-2">
-                        {(formData.variants || []).slice(0, 50).map((v) => {
-                          const opt = colorOptions.find(
-                            (c) =>
-                              c.name.toUpperCase() === v.color.toUpperCase()
-                          );
 
-                          return (
-                            <span
-                              key={v.color}
-                              title={`${v.color} (${v.stock})`}
-                              className="w-4 h-4 rounded-full border border-gray-300"
-                              style={{ backgroundColor: opt?.hex || '#ccc' }}
-                            />
-                          );
-                        })}
-                      </div>
-                    </>
+                  {formData.variants && formData.variants.length > 0 && (
+                    <div className="flex -space-x-1 mb-2">
+                      {(formData.variants || []).slice(0, 50).map((v) => {
+                        const opt = colorOptions.find(
+                          (c) => c.name.toUpperCase() === v.color.toUpperCase()
+                        );
+
+                        return (
+                          <span
+                            key={v.color}
+                            title={`${v.color} (${v.stock})`}
+                            className="w-4 h-4 rounded-full border border-gray-300"
+                            style={{ backgroundColor: opt?.hex || '#ccc' }}
+                          />
+                        );
+                      })}
+                    </div>
                   )}
 
                   <ColorSelect
@@ -187,6 +238,7 @@ export default function DinamicForm({
                   <label className="text-sm font-medium text-gray-700 mb-1">
                     {label}
                   </label>
+
                   <ProductSelector
                     value={formData[name]}
                     onChange={(value) => {
@@ -198,8 +250,21 @@ export default function DinamicForm({
                           0
                         ),
                       }));
+
+                      if (value.length > 0) {
+                        setProductError('');
+                      }
+                    }}
+                    onTyping={() => {
+                      if (productError) setProductError('');
                     }}
                   />
+
+                  {productError && (
+                    <p className="mt-2 text-sm text-red-600 font-medium">
+                      {productError}
+                    </p>
+                  )}
                 </div>
               );
             }
@@ -211,9 +276,8 @@ export default function DinamicForm({
                     {label}
                   </label>
                   <textarea
-                    type={type}
                     name={name}
-                    value={formData[name] || ''}
+                    value={inputValue}
                     onChange={handleChange}
                     disabled={isLocked}
                     required={required}
@@ -227,10 +291,39 @@ export default function DinamicForm({
               );
             }
 
-            if (
-              type === 'select' &&
-              !(module === 'customers' && name === 'localId')
-            ) {
+            if (type === 'searchSelect') {
+              const fieldOptions = options || dynamicOptions[name] || [];
+              return (
+                <div key={name} className="flex flex-col">
+                  <label className="text-sm font-medium text-gray-700 mb-1">
+                    {label}
+                  </label>
+
+                  <SearchableSelect
+                    label={`Seleccionar ${label.toLowerCase()}`}
+                    name={name}
+                    value={
+                      isObject(formData[name])
+                        ? formData[name].id ?? ''
+                        : formData[name] ?? ''
+                    }
+                    options={fieldOptions}
+                    onChange={handleChange}
+                    disabled={isLocked || disabled}
+                    placeholder={`Buscar ${label.toLowerCase()}...`}
+                    required={required}
+                  />
+
+                  {required && hasSubmitted && !formData[name] && (
+                    <p className="mt-1 text-sm text-red-600 font-medium">
+                      Este campo es obligatorio
+                    </p>
+                  )}
+                </div>
+              );
+            }
+
+            if (type === 'select') {
               const fieldOptions = options || dynamicOptions[name] || [];
               return (
                 <div key={name} className="flex flex-col">
@@ -239,11 +332,7 @@ export default function DinamicForm({
                   </label>
                   <select
                     name={name}
-                    value={
-                      isObject(formData[name])
-                        ? formData[name].id ?? ''
-                        : formData[name] ?? ''
-                    }
+                    value={inputValue}
                     onChange={handleChange}
                     disabled={isLocked || disabled}
                     required={required}
@@ -277,7 +366,7 @@ export default function DinamicForm({
                   <input
                     type={showPassword ? 'text' : 'password'}
                     name={name}
-                    value={formData[name] || ''}
+                    value={inputValue}
                     onChange={handleChange}
                     disabled={isLocked || disabled}
                     placeholder={
@@ -309,46 +398,6 @@ export default function DinamicForm({
               );
             }
 
-            if (
-              type === 'select' &&
-              module === 'customers' &&
-              usuario.managedLocals.length > 0
-            ) {
-              return (
-                <div key={name} className="flex flex-col">
-                  <label className="text-sm font-medium text-gray-700 mb-1">
-                    {label}
-                  </label>
-                  <select
-                    name={name}
-                    value={
-                      isObject(formData[name])
-                        ? formData[name].id ?? ''
-                        : formData[name] ?? ''
-                    }
-                    onChange={handleChange}
-                    disabled={isLocked || disabled}
-                    required={required}
-                    className={`w-full border border-gray-200 rounded-xl px-4 py-2 text-sm shadow-sm focus:outline-none transition ${
-                      isLocked || disabled
-                        ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
-                        : 'focus:ring-2 focus:ring-orange-500 focus:border-orange-500'
-                    }`}
-                  >
-                    <option value="">Seleccione una opción</option>
-                    {usuario.managedLocals.map((opt, index) => (
-                      <option
-                        key={`${name}-${opt.id ?? index}`}
-                        value={opt.id ?? ''}
-                      >
-                        {opt.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              );
-            }
-
             return (
               <div key={name} className="flex flex-col">
                 <label className="text-sm font-medium text-gray-700 mb-1">
@@ -357,7 +406,7 @@ export default function DinamicForm({
                 <input
                   type={type}
                   name={name}
-                  value={formData[name] || ''}
+                  value={inputValue}
                   onChange={handleChange}
                   disabled={isLocked || disabled}
                   required={required}
@@ -370,6 +419,7 @@ export default function DinamicForm({
               </div>
             );
           })}
+
         {hasDepartaCiudad && (
           <DepartaCiudad
             formData={formData}
@@ -377,17 +427,16 @@ export default function DinamicForm({
             isLocked={isLocked}
           />
         )}
+
         {module === 'inventory' && (
-          <>
-            <div className="col-span-full">
-              <ImageUploader
-                images={images}
-                setImages={setImages}
-                showImages={showImages}
-                setShowImages={setShowImages}
-              />
-            </div>
-          </>
+          <div className="col-span-full">
+            <ImageUploader
+              images={images}
+              setImages={setImages}
+              showImages={showImages}
+              setShowImages={setShowImages}
+            />
+          </div>
         )}
       </div>
 
@@ -403,7 +452,7 @@ export default function DinamicForm({
             Limpiar
           </button>
         )}
-        <BtnSave disabled={loading} />
+        <BtnSave disabled={loading} module={module} />
       </div>
     </form>
   );

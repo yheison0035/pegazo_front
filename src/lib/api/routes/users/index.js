@@ -1,10 +1,6 @@
 import apiFetch from '../../auth/client';
 import { toFullISO } from '../../utils/utils';
 
-export async function getRoles() {
-  return apiFetch('/users/roles/list');
-}
-
 export async function getUsers() {
   return apiFetch('/users');
 }

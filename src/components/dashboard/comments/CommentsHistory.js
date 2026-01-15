@@ -1,6 +1,6 @@
 'use client';
 
-import { formatDateTime } from '@/lib/api/utils/formatDateTime';
+import { formatDateTime } from '@/lib/api/utils/utils';
 
 export default function CommentsHistory({ formData }) {
   const getInitial = (name) => (name ? name.charAt(0).toUpperCase() : '?');

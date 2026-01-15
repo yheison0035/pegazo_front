@@ -1,54 +1,42 @@
 import apiFetch from '../../auth/client';
-import { toFullISO } from '../../utils/utils';
+import { toLocalDateTimeISO } from '../../utils/utils';
 
 export async function getDeliveredSales() {
-  return apiFetch('/customers');
+  return apiFetch('/sales');
 }
 
 export async function getDeliveredSaleById(id) {
-  return apiFetch(`/customers/${id}`);
+  return apiFetch(`/sales/${id}`);
 }
 
 export async function updateDeliveredSale(id, dto) {
+  debugger;
   const {
     id: _id,
     createdAt,
     updatedAt,
-    advisor,
-    comments,
-    state,
+    code,
+    totalAmount,
+    customer,
+    user,
+    local,
     ...cleanDto
   } = dto;
 
   const body = {
     ...cleanDto,
-    stateId: Number(cleanDto.stateId) || null,
-    advisorId: Number(cleanDto.advisorId) || null,
-    birthdate: cleanDto.birthdate ? toFullISO(cleanDto.birthdate) : undefined,
+    saleDate: dto.saleDate ? toLocalDateTimeISO(dto.saleDate) : undefined,
+    customerId: Number(cleanDto.customerId) || null,
+    userId: Number(cleanDto.userId) || null,
+    localId: Number(cleanDto.localId) || null,
   };
 
-  return apiFetch(`/customers/${id}`, {
+  return apiFetch(`/sales/${id}`, {
     method: 'PUT',
     body: JSON.stringify(body),
   });
 }
 
 export async function deleteDeliveredSale(id) {
-  return apiFetch(`/customers/${id}`, { method: 'DELETE' });
-}
-
-export async function exportDeliveredSales() {
-  const blob = await apiFetch('/customers/delivered/export', {
-    method: 'GET',
-    responseType: 'blob',
-  });
-
-  const url = window.URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `ventas_realizadas_${Date.now()}.xlsx`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  window.URL.revokeObjectURL(url);
+  return apiFetch(`/sales/${id}`, { method: 'DELETE' });
 }
