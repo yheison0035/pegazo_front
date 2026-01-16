@@ -10,6 +10,7 @@ export default function ContentData({
   setSelected,
   setSelectedVariants,
   handleDeleteClick,
+  setPrinterInvoice,
   setShowModalChangeAdvisor,
 }) {
   return (
@@ -141,7 +142,10 @@ export default function ContentData({
                 view={view}
                 setSelected={setSelected}
                 setSelectedVariants={setSelectedVariants}
-                handleDelete={() => handleDeleteClick(info.id, info.name)}
+                setPrinterInvoice={setPrinterInvoice}
+                handleDelete={() =>
+                  handleDeleteClick(info.id, info.name || info.code)
+                }
                 setShowModalChangeAdvisor={(e) => setShowModalChangeAdvisor(e)}
               />
             </td>

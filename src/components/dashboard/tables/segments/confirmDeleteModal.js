@@ -15,7 +15,7 @@ export default function ConfirmDeleteModal({
           Confirmar eliminación
         </h2>
         <p className="text-gray-600">
-          ¿Estás segur@ de que quieres eliminar este {type}?
+          ¿Estás segur@ de que quieres eliminar {type}?
         </p>
         <h3 className="font-bold text-gray-600">{name}</h3>
         <p className="text-gray-600">Esta acción no se puede deshacer.</p>

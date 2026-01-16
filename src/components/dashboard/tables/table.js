@@ -16,6 +16,7 @@ const Table = ({
   setSelectedVariants,
   rol,
   handleDeleteClick,
+  setPrinterInvoice,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -66,6 +67,7 @@ const Table = ({
             setSelected={setSelected}
             setSelectedVariants={setSelectedVariants}
             handleDeleteClick={handleDeleteClick}
+            setPrinterInvoice={setPrinterInvoice}
           />
         </tbody>
       </table>

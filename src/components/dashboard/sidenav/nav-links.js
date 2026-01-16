@@ -100,12 +100,6 @@ export default function NavLinks() {
       icon: AdjustmentsHorizontalIcon,
       roles: ['SUPER_ADMIN', 'ADMIN'],
     },
-    {
-      name: 'Configuraciones',
-      href: '/CRM/dashboard/settings',
-      icon: AdjustmentsHorizontalIcon,
-      roles: ['SUPER_ADMIN'],
-    },
   ];
 
   return (

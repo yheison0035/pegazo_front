@@ -1,6 +1,10 @@
 import apiFetch from '../../auth/client';
 import { toLocalDateTimeISO } from '../../utils/utils';
 
+export async function getVerifyCodeSale(code) {
+  return apiFetch(`sales/verify/${code}`);
+}
+
 export async function getDeliveredSales() {
   return apiFetch('/sales');
 }
@@ -10,7 +14,6 @@ export async function getDeliveredSaleById(id) {
 }
 
 export async function updateDeliveredSale(id, dto) {
-  debugger;
   const {
     id: _id,
     createdAt,

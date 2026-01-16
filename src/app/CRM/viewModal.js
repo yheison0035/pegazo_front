@@ -3,8 +3,14 @@
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import CommentsHistory from '@/components/dashboard/comments/CommentsHistory';
 import Variants from '@/components/dashboard/viewModal/variants';
-import { formatCOP, formatValue, getValueByPath } from '@/lib/api/utils/utils';
+import {
+  formatCOP,
+  toLocalDateTimeISO,
+  formatValue,
+  getValueByPath,
+} from '@/lib/api/utils/utils';
 import ImageGallery from '@/components/dashboard/viewModal/imageGallery';
+import SaleItemsTable from '@/components/dashboard/viewModal/saleItemsTable';
 
 export default function ViewModal({ data, type, onClose, viewModalConfig }) {
   if (!data) return null;
@@ -59,10 +65,12 @@ export default function ViewModal({ data, type, onClose, viewModalConfig }) {
 
                 if (
                   field.name === 'purchasePrice' ||
-                  field.name === 'salePrice'
+                  field.name === 'salePrice' ||
+                  field.name === 'totalAmount'
                 ) {
                   value = formatCOP(value);
                 }
+
                 if (field.type === 'status') {
                   return (
                     <div key={field.name}>
@@ -114,6 +122,10 @@ export default function ViewModal({ data, type, onClose, viewModalConfig }) {
             </div>
           ))}
         </div>
+
+        {Array.isArray(data.items) && data.items.length > 0 && (
+          <SaleItemsTable items={data.items} />
+        )}
 
         {type === 'inventory' && <ImageGallery images={data.images} />}
 

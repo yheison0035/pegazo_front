@@ -6,7 +6,7 @@ import {
   getDeliveredSaleById,
   updateDeliveredSale,
   deleteDeliveredSale,
-  exportDeliveredSales,
+  getVerifyCodeSale,
 } from '../routes/delivered_sales/index';
 
 export default function useDeliveredSales() {
@@ -26,16 +26,17 @@ export default function useDeliveredSales() {
     }
   }, []);
 
+  const getVerifyCodeSaleFn = useCallback(
+    (code) => wrap(getVerifyCodeSale, code),
+    [wrap]
+  );
+
   const getDeliveredSalesFn = useCallback(
     () => wrap(getDeliveredSales),
     [wrap]
   );
   const getDeliveredSaleByIdFn = useCallback(
     (id) => wrap(getDeliveredSaleById, id),
-    [wrap]
-  );
-  const createDeliveredSaleFn = useCallback(
-    (dto) => wrap(createDeliveredSale, dto),
     [wrap]
   );
   const updateDeliveredSaleFn = useCallback(
@@ -48,9 +49,9 @@ export default function useDeliveredSales() {
   );
 
   return {
+    getVerifyCodeSale: getVerifyCodeSaleFn,
     getDeliveredSales: getDeliveredSalesFn,
     getDeliveredSaleById: getDeliveredSaleByIdFn,
-    createDeliveredSale: createDeliveredSaleFn,
     updateDeliveredSale: updateDeliveredSaleFn,
     deleteDeliveredSale: deleteDeliveredSaleFn,
     loading,

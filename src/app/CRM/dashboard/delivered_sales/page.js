@@ -1,19 +1,28 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import ViewModal from '../../viewModal';
 import Table from '@/components/dashboard/tables/table';
 import { useAuth } from '@/context/authContext';
 import useDeliveredSales from '@/lib/api/hooks/useDeliveredSales';
-import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
-import { getHeaderTableDeliveredSales } from '@/lib/api/utils/deliveredSales.config';
+import {
+  getHeaderTableDeliveredSales,
+  viewModalConfig,
+} from '@/lib/api/utils/deliveredSales.config';
+import ConfirmDeleteModal from '@/components/dashboard/tables/segments/confirmDeleteModal';
+import AlertModal from '@/components/dashboard/modals/alertModal';
+import ViewModal from '../../viewModal';
+import { printSaleInvoice } from '@/utils/printInvoice';
 
 export default function Delivered_Sales() {
   const [selectedSale, setSelectedSale] = useState(null);
   const [sales, setSales] = useState([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const { usuario } = useAuth();
+  const [alert, setAlert] = useState({ type: '', message: '', url: '' });
 
-  const { getDeliveredSales, loading, error } = useDeliveredSales();
+  const { getDeliveredSales, deleteDeliveredSale, loading, error } =
+    useDeliveredSales();
 
   const fetchData = useCallback(async () => {
     try {
@@ -27,6 +36,36 @@ export default function Delivered_Sales() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  const handleDeleteClick = (id, name) => {
+    console.log(name);
+    setDeleteTarget({ id, name, type: 'esta venta' });
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+
+    try {
+      await deleteDeliveredSale(deleteTarget.id);
+      setAlert({
+        type: 'success',
+        message: 'Venta eliminada correctamente.',
+      });
+      setShowDeleteModal(false);
+      setDeleteTarget(null);
+      await fetchData();
+    } catch (err) {
+      setAlert({
+        type: 'error',
+        message: err?.message || 'Error al eliminar venta',
+      });
+    }
+  };
+
+  const setPrinterInvoice = (sale) => {
+    printSaleInvoice(sale);
+  };
 
   return (
     <div className="w-full p-4">
@@ -53,6 +92,8 @@ export default function Delivered_Sales() {
           fetchData={fetchData}
           loading={loading}
           error={error}
+          handleDeleteClick={handleDeleteClick}
+          setPrinterInvoice={setPrinterInvoice}
         />
 
         {selectedSale && (
@@ -60,9 +101,26 @@ export default function Delivered_Sales() {
             data={selectedSale}
             type="delivered_sales"
             onClose={() => setSelectedSale(null)}
+            viewModalConfig={viewModalConfig}
+          />
+        )}
+        {showDeleteModal && (
+          <ConfirmDeleteModal
+            show={showDeleteModal}
+            setShow={setShowDeleteModal}
+            type={deleteTarget?.type}
+            name={deleteTarget?.name}
+            onConfirm={confirmDelete}
+            loading={loading}
           />
         )}
       </div>
+      <AlertModal
+        type={alert.type}
+        message={alert.message}
+        onClose={() => setAlert({ type: '', message: '', url: '' })}
+        url={alert.url}
+      />
     </div>
   );
 }

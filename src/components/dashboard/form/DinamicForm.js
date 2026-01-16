@@ -148,10 +148,9 @@ export default function DinamicForm({
 
   const onSubmit = (e) => {
     setHasSubmitted(true);
-
     if (
       module === 'sales' &&
-      (!formData.products || formData.products.length === 0)
+      (!formData.items || formData.items.length === 0)
     ) {
       e.preventDefault();
       setProductError('Debes añadir productos');
