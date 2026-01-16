@@ -27,7 +27,6 @@ export default function VerifyCodeSaleClient() {
         setSale(res?.data || res);
         setNotFound(false);
       } catch (err) {
-        console.error(err);
         setNotFound(true);
       }
     };

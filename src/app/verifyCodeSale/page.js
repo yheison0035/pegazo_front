@@ -3,16 +3,14 @@ import VerifyCodeSaleClient from '@/components/verifyCodeSale/verifyCodeSaleClie
 
 export default function Page() {
   return (
-    <Suspense fallback={<Loading />}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center text-gray-500 text-sm">
+          Cargando verificación...
+        </div>
+      }
+    >
       <VerifyCodeSaleClient />
     </Suspense>
-  );
-}
-
-function Loading() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <p className="text-gray-500 text-sm">Cargando verificación...</p>
-    </div>
   );
 }
