@@ -6,8 +6,8 @@ import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/authContext';
 
 export default function Login() {
-  const [email, setEmail] = useState('yheison0035@gmail.com');
-  const [password, setPassword] = useState('europeatvstore123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const { login } = useAuth();
