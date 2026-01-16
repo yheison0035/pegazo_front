@@ -12,6 +12,7 @@ export async function getUserById(id) {
 export async function createUser(dto) {
   const body = {
     ...dto,
+    localId: cleanDto.localId ? Number(cleanDto.localId) : null,
     role: dto.role || 'ASESOR',
     status: dto.status || 'ACTIVO',
   };

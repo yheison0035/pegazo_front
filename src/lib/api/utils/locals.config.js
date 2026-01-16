@@ -18,7 +18,7 @@ export const getFormFieldsLocals = () => [
     name: 'managerId',
     label: 'Encargado',
     type: 'select',
-    required: true,
+    required: false,
     source: 'users',
   },
   {
