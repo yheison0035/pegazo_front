@@ -440,7 +440,9 @@ export default function DinamicForm({
       </div>
 
       <div className="flex justify-end mt-6 gap-3">
-        <BtnReturn route={`/CRM/dashboard/${module}`} disabled={loading} />
+        {module !== 'sales' && (
+          <BtnReturn route={`/CRM/dashboard/${module}`} disabled={loading} />
+        )}
         {mode === 'new' && handleReset && (
           <button
             type="button"
