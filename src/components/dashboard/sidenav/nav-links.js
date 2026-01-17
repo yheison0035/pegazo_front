@@ -30,7 +30,7 @@ export default function NavLinks() {
       name: 'Locales',
       href: '/CRM/dashboard/locals',
       icon: BuildingOfficeIcon,
-      roles: ['SUPER_ADMIN', 'ADMIN'],
+      roles: ['SUPER_ADMIN'],
     },
     {
       name: 'Categorías',
@@ -48,19 +48,19 @@ export default function NavLinks() {
       name: 'Proveedores',
       href: '/CRM/dashboard/providers',
       icon: BuildingStorefrontIcon,
-      roles: ['SUPER_ADMIN', 'ADMIN'],
+      roles: ['SUPER_ADMIN'],
     },
     {
       name: 'Inventario',
       href: '/CRM/dashboard/inventory',
       icon: ArchiveBoxIcon,
-      roles: ['SUPER_ADMIN', 'ADMIN', 'COORDINADOR', 'ASESOR', 'BODEGUERO'],
+      roles: ['SUPER_ADMIN', 'ADMIN'],
     },
     {
       name: 'Clientes',
       href: '/CRM/dashboard/customers',
       icon: UsersIcon,
-      roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR'],
+      roles: ['SUPER_ADMIN', 'ADMIN'],
     },
     {
       name: 'Usuarios / Roles',
@@ -72,33 +72,33 @@ export default function NavLinks() {
       name: 'Pedidos',
       href: '/CRM/dashboard/orders',
       icon: ClipboardDocumentListIcon,
-      roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR'],
+      roles: ['SUPER_ADMIN'],
     },
     {
       name: 'Realizar Venta',
       href: '/CRM/dashboard/sales',
       icon: BanknotesIcon,
-      roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR'],
+      roles: ['SUPER_ADMIN', 'ADMIN'],
     },
 
     {
       name: 'Ventas Realizadas',
       href: '/CRM/dashboard/delivered_sales',
       icon: ClipboardDocumentCheckIcon,
-      roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR'],
+      roles: ['SUPER_ADMIN', 'ADMIN'],
     },
     {
       name: 'Gastos',
       href: '/CRM/dashboard/expenses',
       icon: ChartBarIcon,
-      roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR'],
+      roles: ['SUPER_ADMIN', 'ADMIN'],
     },
 
     {
       name: 'Estadísticas',
       href: '/CRM/dashboard/statistics',
       icon: AdjustmentsHorizontalIcon,
-      roles: ['SUPER_ADMIN', 'ADMIN'],
+      roles: ['SUPER_ADMIN'],
     },
   ];
 
