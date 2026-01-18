@@ -69,7 +69,7 @@ export default function SalesRangeReModal({ onClose }) {
         <div className="relative bg-gradient-to-r from-gray-900 to-gray-700 px-8 py-6 text-white">
           <button
             onClick={onClose}
-            className="absolute top-5 right-5 text-gray-300 hover:text-white transition"
+            className="absolute top-5 right-5 text-gray-300 hover:text-white transition cursor-pointer"
           >
             <XMarkIcon className="w-6 h-6" />
           </button>

@@ -49,11 +49,10 @@ export default function DailySalesReportModal({ onClose }) {
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white w-full max-w-5xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
-        {/* HEADER */}
         <div className="relative bg-gradient-to-r from-gray-900 to-gray-700 px-8 py-6 text-white">
           <button
             onClick={onClose}
-            className="absolute top-5 right-5 text-gray-300 hover:text-white transition"
+            className="absolute top-5 right-5 text-gray-300 hover:text-white transition cursor-pointer"
           >
             <XMarkIcon className="w-6 h-6" />
           </button>
@@ -71,7 +70,6 @@ export default function DailySalesReportModal({ onClose }) {
           </div>
         </div>
 
-        {/* FILTROS */}
         <div className="bg-gray-50 px-8 py-6 border-b">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
@@ -116,7 +114,6 @@ export default function DailySalesReportModal({ onClose }) {
           </button>
         </div>
 
-        {/* RESULTADOS */}
         <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6 bg-gray-100">
           {!result && (
             <div className="text-center text-gray-400 py-20">
@@ -126,7 +123,6 @@ export default function DailySalesReportModal({ onClose }) {
 
           {result && (
             <>
-              {/* RESUMEN GENERAL */}
               <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
                 <h3 className="text-lg font-semibold text-gray-800 mb-4">
                   Resumen General
@@ -161,7 +157,6 @@ export default function DailySalesReportModal({ onClose }) {
                 </div>
               </div>
 
-              {/* MÉTODOS DE PAGO */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {Object.entries(result.methods).map(([method, data]) => (
                   <div
