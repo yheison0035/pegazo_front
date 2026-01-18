@@ -45,7 +45,7 @@ export const getFormFieldsCustomers = () => [
     name: 'email',
     label: 'Correo Electrónico',
     type: 'email',
-    required: true,
+    required: false,
     disabled: false,
   },
   {
@@ -59,14 +59,14 @@ export const getFormFieldsCustomers = () => [
     name: 'department',
     label: 'Departamento',
     type: 'text',
-    required: true,
+    required: false,
     disabled: false,
   },
   {
     name: 'city',
     label: 'Ciudad',
     type: 'text',
-    required: true,
+    required: false,
     disabled: false,
   },
   {
@@ -80,11 +80,8 @@ export const getFormFieldsCustomers = () => [
     name: 'status',
     label: 'Estado',
     type: 'select',
-    required: true,
-    options: [
-      { id: 'ACTIVO', name: 'ACTIVO' },
-      { id: 'INACTIVO', name: 'INACTIVO' },
-    ],
+    required: false,
+    options: [{ id: 'ACTIVO', name: 'ACTIVO' }],
     disabled: false,
   },
   {

@@ -194,6 +194,20 @@ export function printSaleInvoice(sale) {
 
       <hr />
 
+      ${
+        sale.notes
+          ? `
+      <hr />
+
+      <!-- OBSERVACIONES -->
+      <div class="bold">Observaciones:</div>
+      <div style="font-size:11px; margin-top:2px; white-space:pre-wrap;">
+        ${sale.notes}
+      </div>
+    `
+          : ''
+      }
+
       <!-- QR -->
       <div class="center bold">Verifique su factura</div>
       <div class="qr">
