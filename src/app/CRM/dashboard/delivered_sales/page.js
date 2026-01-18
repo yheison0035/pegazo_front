@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import Table from '@/components/dashboard/tables/table';
 import { useAuth } from '@/context/authContext';
-import { ChartBarIcon } from '@heroicons/react/24/outline';
+import { CalendarDaysIcon, CalendarIcon } from '@heroicons/react/24/solid';
 import useDeliveredSales from '@/lib/api/hooks/useDeliveredSales';
 import {
   getHeaderTableDeliveredSales,
@@ -14,12 +14,14 @@ import AlertModal from '@/components/dashboard/modals/alertModal';
 import ViewModal from '../../viewModal';
 import { printSaleInvoice } from '@/utils/printInvoice';
 import DailySalesReportModal from '@/components/dashboard/modals/dailySalesReportModal';
+import SalesRangeReModal from '@/components/dashboard/modals/salesRangeReModal';
 
 export default function Delivered_Sales() {
   const [selectedSale, setSelectedSale] = useState(null);
   const [sales, setSales] = useState([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDailyReport, setShowDailyReport] = useState(false);
+  const [showRangeReport, setShowRangeReport] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const { usuario } = useAuth();
   const [alert, setAlert] = useState({ type: '', message: '', url: '' });
@@ -81,8 +83,15 @@ export default function Delivered_Sales() {
             onClick={() => setShowDailyReport(true)}
             className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm transition cursor-pointer"
           >
-            <ChartBarIcon className="w-4 h-4" />
+            <CalendarDaysIcon className="w-4 h-4" />
             Venta por Día
+          </button>
+          <button
+            onClick={() => setShowRangeReport(true)}
+            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm transition cursor-pointer"
+          >
+            <CalendarIcon className="w-4 h-4" />
+            Venta por Semana
           </button>
         </div>
       </div>
@@ -128,6 +137,9 @@ export default function Delivered_Sales() {
         )}
         {showDailyReport && (
           <DailySalesReportModal onClose={() => setShowDailyReport(false)} />
+        )}
+        {showRangeReport && (
+          <SalesRangeReModal onClose={() => setShowRangeReport(false)} />
         )}
       </div>
       <AlertModal

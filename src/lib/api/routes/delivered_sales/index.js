@@ -15,6 +15,20 @@ export async function getDailySalesReport(date, localId) {
   });
 }
 
+export async function getSalesRangeReport(dto) {
+  const body = {
+    startDate: dto.startDate ? toLocalDateTimeISO(dto.startDate) : undefined,
+    endDate: dto.endDate ? toLocalDateTimeISO(dto.endDate) : undefined,
+    localId: Number(dto.localId),
+    userId: Number(dto.userId),
+  };
+
+  return apiFetch('/sales/reports/range', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
 export async function getDeliveredSales() {
   return apiFetch('/sales');
 }
