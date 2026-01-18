@@ -124,6 +124,7 @@ export default function VerifyCodeSaleClient() {
             <Info label="Local" value={sale?.local || '---'} />
             <Info label="Método de pago" value={sale?.paymentMethod} />
             <Info label="Estado" value={sale?.paymentStatus} />
+            <Info label="Observación" value={sale?.notes} />
           </div>
 
           {Array.isArray(sale?.items) && sale?.items.length > 0 && (
