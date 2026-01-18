@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import Table from '@/components/dashboard/tables/table';
 import { useAuth } from '@/context/authContext';
+import { ChartBarIcon } from '@heroicons/react/24/outline';
 import useDeliveredSales from '@/lib/api/hooks/useDeliveredSales';
 import {
   getHeaderTableDeliveredSales,
@@ -12,11 +13,13 @@ import ConfirmDeleteModal from '@/components/dashboard/tables/segments/confirmDe
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import ViewModal from '../../viewModal';
 import { printSaleInvoice } from '@/utils/printInvoice';
+import DailySalesReportModal from '@/components/dashboard/modals/dailySalesReportModal';
 
 export default function Delivered_Sales() {
   const [selectedSale, setSelectedSale] = useState(null);
   const [sales, setSales] = useState([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showDailyReport, setShowDailyReport] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const { usuario } = useAuth();
   const [alert, setAlert] = useState({ type: '', message: '', url: '' });
@@ -72,6 +75,16 @@ export default function Delivered_Sales() {
         <h1 className="text-xl md:text-2xl font-semibold text-gray-800">
           Listado de Ventas Realizadas
         </h1>
+
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowDailyReport(true)}
+            className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm transition cursor-pointer"
+          >
+            <ChartBarIcon className="w-4 h-4" />
+            Venta por Día
+          </button>
+        </div>
       </div>
 
       <div className="overflow-x-auto bg-white shadow-md rounded-lg">
@@ -112,6 +125,9 @@ export default function Delivered_Sales() {
             onConfirm={confirmDelete}
             loading={loading}
           />
+        )}
+        {showDailyReport && (
+          <DailySalesReportModal onClose={() => setShowDailyReport(false)} />
         )}
       </div>
       <AlertModal

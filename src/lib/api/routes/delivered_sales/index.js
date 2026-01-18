@@ -5,6 +5,16 @@ export async function getVerifyCodeSale(code) {
   return apiFetch(`sales/verify/${code}`);
 }
 
+export async function getDailySalesReport(date, localId) {
+  return apiFetch('/sales/reports/daily', {
+    method: 'POST',
+    body: JSON.stringify({
+      date,
+      localId: Number(localId),
+    }),
+  });
+}
+
 export async function getDeliveredSales() {
   return apiFetch('/sales');
 }

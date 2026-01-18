@@ -7,6 +7,7 @@ import {
   updateDeliveredSale,
   deleteDeliveredSale,
   getVerifyCodeSale,
+  getDailySalesReport,
 } from '../routes/delivered_sales/index';
 
 export default function useDeliveredSales() {
@@ -28,6 +29,11 @@ export default function useDeliveredSales() {
 
   const getVerifyCodeSaleFn = useCallback(
     (code) => wrap(getVerifyCodeSale, code),
+    [wrap]
+  );
+
+  const getDailySalesReportFn = useCallback(
+    (date, localId) => wrap(getDailySalesReport, date, localId),
     [wrap]
   );
 
@@ -54,6 +60,7 @@ export default function useDeliveredSales() {
     getDeliveredSaleById: getDeliveredSaleByIdFn,
     updateDeliveredSale: updateDeliveredSaleFn,
     deleteDeliveredSale: deleteDeliveredSaleFn,
+    getDailySalesReport: getDailySalesReportFn,
     loading,
     error,
   };
