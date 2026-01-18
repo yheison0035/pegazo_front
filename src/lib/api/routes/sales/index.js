@@ -14,6 +14,7 @@ export async function createSale(dto) {
     customerId: Number(dto.customerId),
     userId: Number(dto.userId),
   };
+
   return apiFetch('/sales', {
     method: 'POST',
     body: JSON.stringify(body),

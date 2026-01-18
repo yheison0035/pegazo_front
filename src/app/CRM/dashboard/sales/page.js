@@ -32,6 +32,7 @@ export default function AddSales() {
         items: formData.items.map((p) => ({
           inventoryVariantId: p.inventoryVariantId,
           quantity: p.quantity,
+          discount: p.discount,
         })),
       };
 
