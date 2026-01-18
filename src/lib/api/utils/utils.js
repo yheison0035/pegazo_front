@@ -13,6 +13,16 @@ export function toFullISO(input) {
   return isNaN(d.getTime()) ? null : d.toISOString();
 }
 
+export function formatDateDMY(value) {
+  if (!value) return 'No disponible';
+
+  return new Date(value).toLocaleDateString('es-CO', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+}
+
 // Convierte una fecha (YYYY-MM-DD) a fecha+hora local real en ISO
 export function toLocalDateTimeISO(input) {
   if (!input) return null;
@@ -106,17 +116,6 @@ export function parseCOPToNumber(value) {
 // Obtiene el valor de un objeto dado una ruta en notación de puntos
 export const getValueByPath = (obj, path) => {
   return path.split('.').reduce((acc, key) => acc?.[key], obj);
-};
-
-// Formatea valores según su tipo
-export const formatValue = (value, type) => {
-  if (!value) return 'No disponible';
-
-  if (type === 'date') {
-    return new Date(value).toLocaleDateString('es-CO');
-  }
-
-  return value;
 };
 
 // Normaliza texto: quita tildes, pasa a mayúsculas, elimina caracteres especiales y espacios extras

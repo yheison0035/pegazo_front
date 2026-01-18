@@ -1,6 +1,6 @@
 import Actions from './actions';
 import PhoneContentData from './contentData/phone';
-import { formatCOP, formatDateTime } from '@/lib/api/utils/utils';
+import { formatCOP, formatDateDMY } from '@/lib/api/utils/utils';
 
 export default function ContentData({
   paginatedData,
@@ -132,7 +132,7 @@ export default function ContentData({
                 <td className="px-4 py-3">{info?.user?.name || '-----'}</td>
                 <td className="px-4 py-3">{info?.paymentStatus || '-----'}</td>
                 <td className="px-4 py-3">
-                  {formatDateTime(info?.saleDate) || '-----'}
+                  {formatDateDMY(info?.saleDate) || '-----'}
                 </td>
               </>
             )}

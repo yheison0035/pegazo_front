@@ -1,3 +1,4 @@
+import { formatDateDMY } from '@/lib/api/utils/utils';
 import { useState, useMemo } from 'react';
 
 export default function useTableFilters(info = [], view) {
@@ -156,7 +157,7 @@ export default function useTableFilters(info = [], view) {
         : true;
 
       const saleDateMatch = filters.saleDate
-        ? String(a.saleDate || '').includes(filters.saleDate)
+        ? String(formatDateDMY(a.saleDate) || '').includes(filters.saleDate)
         : true;
 
       return (

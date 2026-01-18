@@ -54,7 +54,7 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
         price: product.price,
         stock: product.stock,
         originalQuantity: 0,
-        quantity: 0,
+        quantity: 1,
         discount: product.discount,
         subtotal: product.price,
       },

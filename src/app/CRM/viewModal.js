@@ -5,9 +5,9 @@ import CommentsHistory from '@/components/dashboard/comments/CommentsHistory';
 import Variants from '@/components/dashboard/viewModal/variants';
 import {
   formatCOP,
-  toLocalDateTimeISO,
   formatValue,
   getValueByPath,
+  formatDateTime,
 } from '@/lib/api/utils/utils';
 import ImageGallery from '@/components/dashboard/viewModal/imageGallery';
 import SaleItemsTable from '@/components/dashboard/viewModal/saleItemsTable';
@@ -38,8 +38,8 @@ export default function ViewModal({ data, type, onClose, viewModalConfig }) {
     config.columns === 2
       ? 'md:grid-cols-2'
       : config.columns === 3
-      ? 'md:grid-cols-3'
-      : 'md:grid-cols-1';
+        ? 'md:grid-cols-3'
+        : 'md:grid-cols-1';
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
@@ -60,8 +60,7 @@ export default function ViewModal({ data, type, onClose, viewModalConfig }) {
           {config.sections.map((section, idx) => (
             <div key={idx} className="space-y-3">
               {section.fields.map((field) => {
-                const rawValue = getValueByPath(data, field.name);
-                let value = formatValue(rawValue, field.type);
+                let value = getValueByPath(data, field.name);
 
                 if (
                   field.name === 'purchasePrice' ||
@@ -69,6 +68,10 @@ export default function ViewModal({ data, type, onClose, viewModalConfig }) {
                   field.name === 'totalAmount'
                 ) {
                   value = formatCOP(value);
+                }
+
+                if (field.type === 'date') {
+                  value = formatDateTime(value);
                 }
 
                 if (field.type === 'status') {
