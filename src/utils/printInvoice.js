@@ -197,12 +197,19 @@ export function printSaleInvoice(sale) {
       ${
         sale.notes
           ? `
-      <hr />
-
       <!-- OBSERVACIONES -->
-      <div class="bold">Observaciones:</div>
-      <div style="font-size:11px; margin-top:2px; white-space:pre-wrap;">
-        ${sale.notes}
+      <div style="
+        border: 1px solid #000;
+        padding: 6px;
+        font-size: 11px;
+        text-align: left;
+      ">
+        <div style="font-weight:700; margin-bottom:4px;">
+          Observaciones:
+        </div>
+        <div style="white-space: pre-wrap;">
+          ${sale.notes}
+        </div>
       </div>
     `
           : ''
