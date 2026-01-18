@@ -8,6 +8,7 @@ export const getEmptyCustomer = () => ({
   city: '',
   address: '',
   status: '',
+  localId: '',
 });
 
 export const getFormFieldsCustomers = () => [
@@ -99,6 +100,7 @@ export const getHeaderTableCustomers = () => [
   { name: 'document', title: 'Documento', show: true },
   { name: 'name', title: 'Nombre Completo', show: true },
   { name: 'email', title: 'Correo', show: true },
+  { name: 'localId', title: 'Local / Punto de Venta', show: true },
   { name: 'phone', title: 'Teléfono', show: true },
   { name: 'department', title: 'Departamento', show: false },
   { name: 'city', title: 'Ciudad', show: true },
@@ -125,6 +127,7 @@ export const viewModalConfig = {
         { name: 'department', label: 'Departamento' },
         { name: 'city', label: 'Ciudad' },
         { name: 'address', label: 'Dirección' },
+        { name: 'local.name', label: 'Local / Punto de Venta' },
       ],
     },
     {

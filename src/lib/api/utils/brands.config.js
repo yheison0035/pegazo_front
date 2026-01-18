@@ -2,6 +2,7 @@ export const getEmptyBrand = () => ({
   name: '',
   description: '',
   status: 'ACTIVO',
+  localId: '',
 });
 
 export const getFormFieldsBrands = () => [
@@ -27,12 +28,21 @@ export const getFormFieldsBrands = () => [
       { id: 'INACTIVO', name: 'INACTIVO' },
     ],
   },
+  {
+    name: 'localId',
+    label: 'Local / Punto de Venta',
+    type: 'select',
+    required: true,
+    source: 'locals',
+    disabled: false,
+  },
 ];
 
 export const getHeaderTableBrands = () => [
   { name: 'name', title: 'Nombre de la Marca', show: true },
   { name: 'description', title: 'Descripción', show: true },
   { name: 'status', title: 'Estado', show: true },
+  { name: 'localId', title: 'Local / Punto de Venta', show: true },
   { name: 'updatedAt', title: 'Última Actualización', show: false },
 ];
 
@@ -45,12 +55,14 @@ export const viewModalConfig = {
       fields: [
         { name: 'name', label: 'Nombre de la Marca' },
         { name: 'description', label: 'Descripción' },
+        { name: 'local.name', label: 'Local / Punto de Venta' },
       ],
     },
     {
       fields: [
         { name: 'status', label: 'Estado', type: 'status' },
-        { name: 'createdAt', label: 'Fecha de Registro', type: 'date' },
+        { name: 'createdAt', label: 'Fecha Creación', type: 'date' },
+        { name: 'updatedAt', label: 'Última Actualización', type: 'date' },
       ],
     },
   ],

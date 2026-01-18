@@ -2,6 +2,7 @@ export const getEmptyCategory = () => ({
   name: '',
   description: '',
   status: 'ACTIVO',
+  localId: '',
 });
 
 export const getFormFieldsCategories = () => [
@@ -27,12 +28,21 @@ export const getFormFieldsCategories = () => [
       { id: 'INACTIVO', name: 'INACTIVO' },
     ],
   },
+  {
+    name: 'localId',
+    label: 'Local / Punto de Venta',
+    type: 'select',
+    required: true,
+    source: 'locals',
+    disabled: false,
+  },
 ];
 
 export const getHeaderTableCategories = () => [
   { name: 'name', title: 'Nombre de la Categoría', show: true },
   { name: 'description', title: 'Descripción', show: true },
   { name: 'status', title: 'Estado', show: true },
+  { name: 'localId', title: 'Local / Punto de Venta', show: true },
   { name: 'updatedAt', title: 'Última Actualización', show: false },
 ];
 
@@ -45,11 +55,13 @@ export const viewModalConfig = {
       fields: [
         { name: 'name', label: 'Nombre' },
         { name: 'description', label: 'Descripción' },
+        { name: 'local.name', label: 'Local / Punto de Venta' },
       ],
     },
     {
       fields: [
         { name: 'status', label: 'Estado', type: 'status' },
+        { name: 'createdAt', label: 'Fecha Creación', type: 'date' },
         { name: 'updatedAt', label: 'Última Actualización', type: 'date' },
       ],
     },

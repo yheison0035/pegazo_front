@@ -48,7 +48,7 @@ export default function NavLinks() {
       name: 'Proveedores',
       href: '/CRM/dashboard/providers',
       icon: BuildingStorefrontIcon,
-      roles: ['SUPER_ADMIN'],
+      roles: ['SUPER_ADMIN', 'ADMIN'],
     },
     {
       name: 'Inventario',
@@ -66,7 +66,7 @@ export default function NavLinks() {
       name: 'Usuarios / Roles',
       href: '/CRM/dashboard/users',
       icon: Cog6ToothIcon,
-      roles: ['SUPER_ADMIN', 'ADMIN'],
+      roles: ['SUPER_ADMIN'],
     },
     {
       name: 'Pedidos',

@@ -38,7 +38,6 @@ export default function Delivered_Sales() {
   }, [fetchData]);
 
   const handleDeleteClick = (id, name) => {
-    console.log(name);
     setDeleteTarget({ id, name, type: 'esta venta' });
     setShowDeleteModal(true);
   };

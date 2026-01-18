@@ -64,8 +64,8 @@ export default function ContentData({
                     info?.stock <= 3
                       ? 'text-red-700'
                       : info?.stock <= 6
-                      ? 'text-orange-700'
-                      : 'text-green-700'
+                        ? 'text-orange-700'
+                        : 'text-green-700'
                   }`}
                 >
                   {info?.stock ?? '-----'}
@@ -83,6 +83,7 @@ export default function ContentData({
                 <td className="px-4 py-3">{info.name}</td>
                 <td className="px-4 py-3">{info.description}</td>
                 <td className="px-4 py-3">{info?.status || '-----'}</td>
+                <td className="px-4 py-3">{info?.local?.name || '-----'}</td>
               </>
             )}
             {view === 'users' && (
@@ -113,6 +114,7 @@ export default function ContentData({
                 <td className="px-4 py-3">{info.document}</td>
                 <td className="px-4 py-3">{info.name || '-----'}</td>
                 <td className="px-4 py-3">{info.email || '-----'}</td>
+                <td className="px-4 py-3">{info.local?.name || '-----'}</td>
                 <PhoneContentData info={info} />
                 <td className="px-4 py-3">{info?.city || '-----'}</td>
                 <td className="px-4 py-3">{info?.status || '-----'}</td>

@@ -53,6 +53,7 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
         name: `${product.name} - ${product.color}`,
         price: product.price,
         stock: product.stock,
+        originalQuantity: 1,
         quantity: 1,
         discount: product.discount,
         subtotal: product.price,
@@ -69,14 +70,20 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
   const updateQuantity = (id, quantity) => {
     const updated = selectedProducts.map((p) => {
       if (p.inventoryVariantId === id) {
-        const qty = Math.min(Math.max(1, quantity), p.stock);
-        const base = p.price * qty;
-        const discount = Math.min(p.discount || 0, base);
+        const maxAllowed = p.stock + p.originalQuantity;
+
+        const safeQty = Math.max(
+          1,
+          Math.min(Number(quantity) || 1, maxAllowed)
+        );
+
+        const base = p.price * safeQty;
+        const safeDiscount = Math.min(p.discount || 0, base);
 
         return {
           ...p,
-          quantity: qty,
-          subtotal: base - discount,
+          quantity: safeQty,
+          subtotal: base - safeDiscount,
         };
       }
       return p;
@@ -90,12 +97,16 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
     const updated = selectedProducts.map((p) => {
       if (p.inventoryVariantId === id) {
         const total = p.price * p.quantity;
-        const finalDiscount = Math.min(discount, total);
+
+        const safeDiscount = Math.max(
+          0,
+          Math.min(Number(discount) || 0, total)
+        );
 
         return {
           ...p,
-          discount: finalDiscount,
-          subtotal: total - finalDiscount,
+          discount: safeDiscount,
+          subtotal: total - safeDiscount,
         };
       }
       return p;
@@ -183,7 +194,7 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
                     <input
                       type="number"
                       min={1}
-                      max={p.stock}
+                      max={p.stock + p.originalQuantity}
                       value={p.quantity}
                       onChange={(e) =>
                         updateQuantity(
@@ -202,7 +213,7 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
                       onChange={(e) =>
                         updateDiscount(
                           p.inventoryVariantId,
-                          parseCOPToNumber(e.target.value) || 0
+                          parseCOPToNumber(e.target.value)
                         )
                       }
                       className="w-28 border border-gray-400 rounded text-center"

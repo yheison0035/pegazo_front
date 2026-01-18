@@ -20,7 +20,6 @@ export default function AddSales() {
     e.preventDefault();
 
     try {
-      debugger;
       const payload = {
         paymentMethod: formData.paymentMethod,
         localId: formData.localId,

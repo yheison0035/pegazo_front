@@ -20,7 +20,6 @@ export default function EditDeliveredSales() {
     if (!id) return;
     try {
       const { data } = await getDeliveredSaleById(Number(id));
-      // TRANSFORMAR ITEMS PARA PRODUCTSELECTOR
       const formattedItems = (data.items || []).map((item) => ({
         inventoryVariantId: item.inventoryVariantId,
         name: `${item.variant?.inventory?.name || 'Producto'} - ${
@@ -28,6 +27,9 @@ export default function EditDeliveredSales() {
         }`,
         price: item.price,
         stock: item.variant?.stock || 0,
+
+        originalQuantity: item.quantity,
+
         quantity: item.quantity,
         discount: item.discount,
         subtotal: item.subtotal,

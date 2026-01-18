@@ -10,17 +10,23 @@ export async function getCategoryById(id) {
 }
 
 export async function createCategory(dto) {
+  const body = {
+    ...dto,
+    localId: Number(dto.localId) || null,
+  };
+
   return apiFetch('/categories', {
     method: 'POST',
-    body: JSON.stringify(dto),
+    body: JSON.stringify(body),
   });
 }
 
 export async function updateCategory(id, dto) {
-  const { id: _id, createdAt, updatedAt, ...cleanDto } = dto;
+  const { id: _id, createdAt, updatedAt, local, ...cleanDto } = dto;
 
   const body = {
     ...cleanDto,
+    localId: Number(cleanDto.localId) || null,
   };
 
   return apiFetch(`/categories/${id}`, {
