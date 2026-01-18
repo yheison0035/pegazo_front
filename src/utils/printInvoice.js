@@ -3,7 +3,10 @@ import { formatCOP, formatDateTime } from '@/lib/api/utils/utils';
 export function printSaleInvoice(sale) {
   if (!sale) return;
 
-  const verifyUrl = `${window.location.origin}/verifyCodeSale?code=${sale.code}`;
+  const verifyBase =
+    process.env.NEXT_PUBLIC_VERIFY_URL || window.location.origin;
+
+  const verifyUrl = `${verifyBase}/verifyCodeSale?code=${sale.code}`;
 
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
     verifyUrl
