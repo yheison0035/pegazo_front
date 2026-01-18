@@ -199,7 +199,7 @@ export function printSaleInvoice(sale) {
           ? `
       <!-- OBSERVACIONES -->
       <div style="
-        border: 1px solid #000;
+        border: 1px solid #f2f4f8;
         padding: 6px;
         font-size: 11px;
         text-align: left;
