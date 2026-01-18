@@ -207,7 +207,7 @@ export function printSaleInvoice(sale) {
         <div style="font-weight:700; margin-bottom:4px;">
           Observaciones:
         </div>
-        <div style="white-space: pre-wrap;">
+        <div>
           ${sale.notes}
         </div>
       </div>
