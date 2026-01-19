@@ -21,7 +21,7 @@ export default function Expenses() {
   const { usuario } = useAuth();
   const [alert, setAlert] = useState({ type: '', message: '', url: '' });
 
-  const { getExpenses, loading, error } = useExpenses();
+  const { getExpenses, deleteExpenses, loading, error } = useExpenses();
 
   const fetchExpenses = useCallback(async () => {
     try {
@@ -45,7 +45,7 @@ export default function Expenses() {
     if (!deleteTarget) return;
 
     try {
-      await deleteCategory(deleteTarget.id);
+      await deleteExpenses(deleteTarget.id);
       setAlert({
         type: 'success',
         message: 'Categoría eliminada correctamente.',
