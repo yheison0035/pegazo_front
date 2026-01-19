@@ -123,7 +123,7 @@ export const viewModalConfig = {
     {
       fields: [
         { name: 'paymentMethod', label: 'Método de Pago' },
-        { name: 'provider', label: 'Proveedor' },
+        { name: 'provider.name', label: 'Proveedor' },
         { name: 'local.name', label: 'Local / Punto de Venta' },
         { name: 'status', label: 'Estado', type: 'status' },
       ],
