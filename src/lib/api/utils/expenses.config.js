@@ -56,7 +56,7 @@ export const getFormFieldsExpenses = () => [
     name: 'providerId',
     label: 'Proveedor',
     type: 'select',
-    required: true,
+    required: false,
     source: 'providers',
     disabled: false,
   },
