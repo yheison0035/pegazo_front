@@ -13,12 +13,12 @@ export default function EditExpense() {
   const [alert, setAlert] = useState({ type: '', message: '', url: '' });
   const { id } = useParams();
   const { usuario } = useAuth();
-  const { getExpenseById, updateExpense, loading } = useExpenses();
+  const { getExpensesById, updateExpenses, loading } = useExpenses();
 
   const fetchExpense = useCallback(async () => {
     if (!id) return;
     try {
-      const { data } = await getExpenseById(Number(id));
+      const { data } = await getExpensesById(Number(id));
       setFormData(data);
     } catch (err) {
       setAlert({
@@ -27,7 +27,7 @@ export default function EditExpense() {
         url: '/CRM/dashboard/expenses',
       });
     }
-  }, [getExpenseById, id]);
+  }, [getExpensesById, id]);
 
   useEffect(() => {
     fetchExpense();
@@ -36,7 +36,7 @@ export default function EditExpense() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      //await updateExpense(formData);
+      await updateExpenses(id, formData);
       setAlert({
         type: 'success',
         message: 'Gasto actualizado correctamente.',

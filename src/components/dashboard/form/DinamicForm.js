@@ -45,8 +45,13 @@ export default function DinamicForm({
 
   const { getUsers } = useUsers();
   const { getLocals } = useLocals();
-  const { getRoles, getStatus, getPaymentMethods, getPaymentStatus } =
-    useEnums();
+  const {
+    getRoles,
+    getStatus,
+    getPaymentMethods,
+    getPaymentStatus,
+    getTypeExpenses,
+  } = useEnums();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -60,11 +65,17 @@ export default function DinamicForm({
       formattedValue = formatPrice(value);
     }
 
-    if (name === 'saleDate') {
+    if (name === 'saleDate' || name === 'expenseDate') {
       formattedValue = normalizeDateForInput(value);
     }
 
-    if (name === 'name' || name === 'firstName' || name === 'lastName') {
+    if (
+      name === 'name' ||
+      name === 'firstName' ||
+      name === 'lastName' ||
+      name === 'concept' ||
+      name === 'paidTo'
+    ) {
       formattedValue = toggleCase(value, 'uppercase');
     }
 
@@ -100,6 +111,7 @@ export default function DinamicForm({
       status: getStatus,
       paymentMethod: getPaymentMethods,
       paymentStatus: getPaymentStatus,
+      expenses: getTypeExpenses,
     };
 
     const results = {};
@@ -189,11 +201,13 @@ export default function DinamicForm({
             if (name === 'department' || name === 'city') return null;
 
             const inputValue =
-              name === 'saleDate'
+              name === 'saleDate' || name === 'expenseDate'
                 ? normalizeDateForInput(formData[name])
-                : name === 'purchasePrice' || name === 'salePrice'
-                ? formatCOP(formData[name] || '')
-                : formData[name] || '';
+                : name === 'purchasePrice' ||
+                    name === 'salePrice' ||
+                    name === 'amount'
+                  ? formatCOP(formData[name] || '')
+                  : formData[name] || '';
 
             if (type === 'colorSelect') {
               return (
@@ -303,8 +317,8 @@ export default function DinamicForm({
                     name={name}
                     value={
                       isObject(formData[name])
-                        ? formData[name].id ?? ''
-                        : formData[name] ?? ''
+                        ? (formData[name].id ?? '')
+                        : (formData[name] ?? '')
                     }
                     options={fieldOptions}
                     onChange={handleChange}

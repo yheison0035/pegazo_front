@@ -40,7 +40,7 @@ export default function Brands() {
   }, [fetchBrands]);
 
   const handleDeleteClick = (id, name) => {
-    setDeleteTarget({ id, name, type: 'marca' });
+    setDeleteTarget({ id, name, type: 'esta marca' });
     setShowDeleteModal(true);
   };
 

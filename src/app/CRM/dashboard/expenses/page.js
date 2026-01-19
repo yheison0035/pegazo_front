@@ -7,16 +7,21 @@ import Table from '@/components/dashboard/tables/table';
 import Header from '@/components/dashboard/customers/header';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import ViewModal from '../../viewModal';
-import { getHeaderTableExpenses } from '@/lib/api/utils/expenses.config';
+import {
+  getHeaderTableExpenses,
+  viewModalConfig,
+} from '@/lib/api/utils/expenses.config';
+import ConfirmDeleteModal from '@/components/dashboard/tables/segments/confirmDeleteModal';
 
 export default function Expenses() {
-  const [archivo, setArchivo] = useState(null);
   const [selectedExpense, setSelectedExpense] = useState(null);
   const [expenses, setExpenses] = useState([]);
-  const [alert, setAlert] = useState({ type: '', message: '', url: '' });
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const { usuario } = useAuth();
+  const [alert, setAlert] = useState({ type: '', message: '', url: '' });
 
-  const { getExpenses, importExpenses, loading, error } = useExpenses();
+  const { getExpenses, loading, error } = useExpenses();
 
   const fetchExpenses = useCallback(async () => {
     try {
@@ -31,23 +36,27 @@ export default function Expenses() {
     fetchExpenses();
   }, [fetchExpenses]);
 
-  const handleFileChange = (e) => setArchivo(e.target.files?.[0] || null);
-  const handleRemoveFile = () => setArchivo(null);
+  const handleDeleteClick = (id, name) => {
+    setDeleteTarget({ id, name, type: 'este gasto' });
+    setShowDeleteModal(true);
+  };
 
-  const handleUpload = async () => {
-    if (!archivo) return;
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+
     try {
-      await importExpenses(archivo);
-      setArchivo(null);
+      await deleteCategory(deleteTarget.id);
       setAlert({
         type: 'success',
-        message: 'Importación de gastos creado correctamente.',
+        message: 'Categoría eliminada correctamente.',
       });
-      await fetchExpenses();
+      setShowDeleteModal(false);
+      setDeleteTarget(null);
+      await fetchCategories();
     } catch (err) {
       setAlert({
         type: 'error',
-        message: err.message || 'Error al subir archivo',
+        message: err?.message || 'Error al eliminar categoría',
       });
     }
   };
@@ -58,14 +67,7 @@ export default function Expenses() {
         <h1 className="text-xl md:text-2xl font-semibold text-gray-800">
           Listado de Gastos
         </h1>
-        <Header
-          type="Gastos"
-          typeUrl="expenses"
-          file={archivo}
-          handleFileChange={handleFileChange}
-          handleRemoveFile={handleRemoveFile}
-          handleUpload={handleUpload}
-        />
+        <Header type="Gastos" typeUrl="expenses" />
       </div>
 
       <div className="overflow-x-auto bg-white shadow-md rounded-lg">
@@ -83,6 +85,7 @@ export default function Expenses() {
           fetchData={fetchExpenses}
           loading={loading}
           error={error}
+          handleDeleteClick={handleDeleteClick}
         />
 
         {selectedExpense && (
@@ -90,6 +93,17 @@ export default function Expenses() {
             data={selectedExpense}
             type="expenses"
             onClose={() => setSelectedExpense(null)}
+            viewModalConfig={viewModalConfig}
+          />
+        )}
+        {showDeleteModal && (
+          <ConfirmDeleteModal
+            show={showDeleteModal}
+            setShow={setShowDeleteModal}
+            type={deleteTarget?.type}
+            name={deleteTarget?.name}
+            onConfirm={confirmDelete}
+            loading={loading}
           />
         )}
       </div>

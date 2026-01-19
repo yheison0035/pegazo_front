@@ -18,6 +18,7 @@ export default function useTableFilters(info = [], view) {
     productType: '',
     stock: '',
     managedLocals: '',
+    localId: '',
     providerId: '',
     salePrice: '',
     document: '',
@@ -28,6 +29,11 @@ export default function useTableFilters(info = [], view) {
     paymentMethod: '',
     paymentStatus: '',
     saleDate: '',
+    concept: '',
+    type: '',
+    amount: '',
+    paidTo: '',
+    expenseDate: '',
   });
 
   const handleFilterChange = (e) => {
@@ -101,15 +107,18 @@ export default function useTableFilters(info = [], view) {
         ? String(a.stock).includes(String(filters.stock))
         : true;
 
-      const localMatch = filters.managedLocals
+      const managedLocalsMatch = filters.managedLocals
         ? a.managedLocals?.some((local) =>
             local.name
               ?.toLowerCase()
               .includes(filters.managedLocals.toLowerCase())
-          ) ||
-          a.local?.name
-            ?.toLowerCase()
-            .includes(filters.managedLocals.toLowerCase())
+          )
+        : true;
+
+      const localMatch = filters.localId
+        ? (a.local?.name?.toLowerCase() || '').includes(
+            filters.localId.toLowerCase()
+          )
         : true;
 
       const providerMatch = filters.providerId
@@ -160,6 +169,30 @@ export default function useTableFilters(info = [], view) {
         ? String(formatDateDMY(a.saleDate) || '').includes(filters.saleDate)
         : true;
 
+      const conceptMatch = filters.concept
+        ? (a.concept?.toLowerCase() || '').includes(
+            filters.concept.toLowerCase()
+          )
+        : true;
+
+      const typeMatch = filters.type
+        ? (a.type?.toLowerCase() || '').includes(filters.type.toLowerCase())
+        : true;
+
+      const amountMatch = filters.amount
+        ? String(a.amount).includes(String(filters.amount))
+        : true;
+
+      const paidToMatch = filters.paidTo
+        ? (a.paidTo?.toLowerCase() || '').includes(filters.paidTo.toLowerCase())
+        : true;
+
+      const expenseDateMatch = filters.expenseDate
+        ? String(formatDateDMY(a.expenseDate) || '').includes(
+            filters.expenseDate
+          )
+        : true;
+
       return (
         roleMatch &&
         nameMatch &&
@@ -175,6 +208,7 @@ export default function useTableFilters(info = [], view) {
         contactNameMatch &&
         stockMatch &&
         localMatch &&
+        managedLocalsMatch &&
         providerMatch &&
         salePriceMatch &&
         documentMatch &&
@@ -184,7 +218,12 @@ export default function useTableFilters(info = [], view) {
         totalAmountMatch &&
         paymentMethodMatch &&
         paymentStatusMatch &&
-        saleDateMatch
+        saleDateMatch &&
+        conceptMatch &&
+        typeMatch &&
+        amountMatch &&
+        paidToMatch &&
+        expenseDateMatch
       );
     });
   }, [info, filters, view]);

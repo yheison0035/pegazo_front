@@ -1,5 +1,4 @@
 import apiFetch from '../../auth/client';
-import { toFullISO } from '../../utils/utils';
 
 export async function getCategories() {
   return apiFetch('/categories');

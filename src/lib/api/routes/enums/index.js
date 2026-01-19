@@ -19,3 +19,7 @@ export async function getPaymentStatus() {
 export async function getSaleStatus() {
   return apiFetch('/enums/sale-status');
 }
+
+export async function getTypeExpenses() {
+  return apiFetch('/enums/type-expenses');
+}

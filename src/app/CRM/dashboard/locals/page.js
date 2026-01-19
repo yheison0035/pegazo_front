@@ -40,7 +40,7 @@ export default function Locals() {
   }, [fetchLocals]);
 
   const handleDeleteClick = (id, name) => {
-    setDeleteTarget({ id, name, type: 'local' });
+    setDeleteTarget({ id, name, type: 'este local' });
     setShowDeleteModal(true);
   };
 

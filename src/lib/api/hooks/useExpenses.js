@@ -3,11 +3,10 @@
 import { useCallback, useState } from 'react';
 import {
   getExpenses,
-  getExpenseById,
-  createExpense,
-  updateExpense,
-  deleteExpense,
-  importExpenses,
+  getExpensesById,
+  createExpenses,
+  updateExpenses,
+  deleteExpenses,
 } from '../routes/expenses/index';
 
 export default function useExpenses() {
@@ -28,31 +27,29 @@ export default function useExpenses() {
   }, []);
 
   const getExpensesFn = useCallback(() => wrap(getExpenses), [wrap]);
-  const getExpenseByIdFn = useCallback(
-    (id) => wrap(getExpenseById, id),
+  const getExpensesByIdFn = useCallback(
+    (id) => wrap(getExpensesById, id),
     [wrap]
   );
-  const createExpenseFn = useCallback(
-    (dto) => wrap(createExpense, dto),
+  const createExpensesFn = useCallback(
+    (dto) => wrap(createExpenses, dto),
     [wrap]
   );
-  const updateExpenseFn = useCallback(
-    (id, dto) => wrap(updateExpense, id, dto),
+  const updateExpensesFn = useCallback(
+    (id, dto) => wrap(updateExpenses, id, dto),
     [wrap]
   );
-  const deleteExpenseFn = useCallback((id) => wrap(deleteExpense, id), [wrap]);
-  const importExpensesFn = useCallback(
-    (file) => wrap(importExpenses, file),
+  const deleteExpensesFn = useCallback(
+    (id) => wrap(deleteExpenses, id),
     [wrap]
   );
 
   return {
     getExpenses: getExpensesFn,
-    getExpenseById: getExpenseByIdFn,
-    createExpense: createExpenseFn,
-    updateExpense: updateExpenseFn,
-    deleteExpense: deleteExpenseFn,
-    importExpenses: importExpensesFn,
+    getExpensesById: getExpensesByIdFn,
+    createExpenses: createExpensesFn,
+    updateExpenses: updateExpensesFn,
+    deleteExpenses: deleteExpensesFn,
     loading,
     error,
   };

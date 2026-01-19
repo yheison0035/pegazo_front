@@ -40,7 +40,7 @@ export default function Categories() {
   }, [fetchCategories]);
 
   const handleDeleteClick = (id, name) => {
-    setDeleteTarget({ id, name, type: 'categoria' });
+    setDeleteTarget({ id, name, type: 'esta categoria' });
     setShowDeleteModal(true);
   };
 

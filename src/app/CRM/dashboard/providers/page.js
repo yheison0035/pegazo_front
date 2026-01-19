@@ -38,7 +38,7 @@ export default function Providers() {
   }, [fetchProviders]);
 
   const handleDeleteClick = (id, name) => {
-    setDeleteTarget({ id, name, type: 'proveedor' });
+    setDeleteTarget({ id, name, type: 'este proveedor' });
     setShowDeleteModal(true);
   };
 

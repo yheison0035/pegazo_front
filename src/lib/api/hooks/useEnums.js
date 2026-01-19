@@ -7,6 +7,7 @@ import {
   getPaymentMethods,
   getPaymentStatus,
   getSaleStatus,
+  getTypeExpenses,
 } from '../routes/enums';
 
 export default function useEnums() {
@@ -34,6 +35,7 @@ export default function useEnums() {
   );
   const getPaymentStatusFn = useCallback(() => wrap(getPaymentStatus), [wrap]);
   const getSaleStatusFn = useCallback(() => wrap(getSaleStatus), [wrap]);
+  const getTypeExpensesFn = useCallback(() => wrap(getTypeExpenses), [wrap]);
 
   return {
     getRoles: getRolesFn,
@@ -41,6 +43,7 @@ export default function useEnums() {
     getPaymentMethods: getPaymentMethodsFn,
     getPaymentStatus: getPaymentStatusFn,
     getSaleStatus: getSaleStatusFn,
+    getTypeExpenses: getTypeExpensesFn,
     loading,
     error,
   };

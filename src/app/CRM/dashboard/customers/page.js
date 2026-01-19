@@ -40,7 +40,7 @@ export default function Customers() {
   }, [fetchCustomers]);
 
   const handleDeleteClick = (id, name) => {
-    setDeleteTarget({ id, name, type: 'cliente' });
+    setDeleteTarget({ id, name, type: 'este cliente' });
     setShowDeleteModal(true);
   };
 

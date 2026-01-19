@@ -12,7 +12,7 @@ import {
 
 export default function NewExpense() {
   const { usuario } = useAuth();
-  const { createExpense } = useExpenses();
+  const { createExpenses } = useExpenses();
 
   const [formData, setFormData] = useState(getEmptyExpense());
   const [alert, setAlert] = useState({ type: '', message: '', url: '' });
@@ -22,11 +22,11 @@ export default function NewExpense() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      //await createExpense(formData);
+      await createExpenses(formData);
       setAlert({
         type: 'success',
-        message: 'Local creado correctamente.',
-        url: '/CRM/dashboard/locals',
+        message: 'Gasto añadido correctamente.',
+        url: '/CRM/dashboard/expenses',
       });
     } catch (err) {
       setAlert({
@@ -39,10 +39,10 @@ export default function NewExpense() {
   return (
     <div className="max-w-full mx-auto bg-white shadow-lg rounded-2xl p-8 mt-6 border border-gray-100">
       <h2 className="text-3xl font-bold text-gray-800 mb-2">
-        Crear Local Nuevo
+        Crear Nuevo Gasto
       </h2>
       <p className="text-sm text-gray-500 mb-6">
-        Ingrese la información del local para registrar un nuevo local.
+        Ingrese la información del nuevo gasto.
       </p>
 
       <DinamicForm

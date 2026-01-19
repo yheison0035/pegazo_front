@@ -1,54 +1,46 @@
 import apiFetch from '../../auth/client';
-import { toFullISO } from '../../utils/utils';
+import { parseCOPToNumber, toLocalDateTimeISO } from '../../utils/utils';
 
 export async function getExpenses() {
-  return apiFetch('/customers');
+  return apiFetch('/expenses');
 }
 
-export async function getExpenseById(id) {
-  return apiFetch(`/customers/${id}`);
+export async function getExpensesById(id) {
+  return apiFetch(`/expenses/${id}`);
 }
 
-export async function createExpense(dto) {
+export async function createExpenses(dto) {
   const body = {
     ...dto,
-    birthdate: dto.birthdate ? toFullISO(dto.birthdate) : undefined,
-    advisorId: Number(dto.advisorId),
-    stateId: Number(dto.stateId),
+    amount: parseCOPToNumber(dto.amount) || 0,
+    localId: Number(dto.localId) || null,
+    providerId: Number(dto.providerId) || null,
+    expenseDate: toLocalDateTimeISO(dto.expenseDate) || '',
   };
-  return apiFetch('/customers', { method: 'POST', body: JSON.stringify(body) });
+
+  return apiFetch('/expenses', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
 }
 
-export async function updateExpense(id, dto) {
-  const {
-    id: _id,
-    createdAt,
-    updatedAt,
-    advisor,
-    comments,
-    state,
-    ...cleanDto
-  } = dto;
+export async function updateExpenses(id, dto) {
+  const { id: _id, createdAt, updatedAt, local, provider, ...cleanDto } = dto;
 
   const body = {
     ...cleanDto,
-    stateId: Number(cleanDto.stateId) || null,
-    advisorId: Number(cleanDto.advisorId) || null,
-    birthdate: cleanDto.birthdate ? toFullISO(cleanDto.birthdate) : undefined,
+    amount: parseCOPToNumber(dto.amount) || 0,
+    localId: Number(dto.localId) || null,
+    providerId: Number(dto.providerId) || null,
+    expenseDate: toLocalDateTimeISO(dto.expenseDate) || '',
   };
 
-  return apiFetch(`/customers/${id}`, {
+  return apiFetch(`/expenses/${id}`, {
     method: 'PUT',
     body: JSON.stringify(body),
   });
 }
 
-export async function deleteExpense(id) {
-  return apiFetch(`/customers/${id}`, { method: 'DELETE' });
-}
-
-export async function importExpenses(file) {
-  const fd = new FormData();
-  fd.append('file', file);
-  return apiFetch('/customers/import', { method: 'POST', body: fd });
+export async function deleteExpenses(id) {
+  return apiFetch(`/expenses/${id}`, { method: 'DELETE' });
 }

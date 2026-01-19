@@ -113,7 +113,8 @@ export const getHeaderTableUsers = () => {
   return [
     { name: 'role', title: 'Rol', show: true },
     { name: 'name', title: 'Nombre Completo', show: true },
-    { name: 'managedLocals', title: 'Local Asignado', show: true },
+    { name: 'managedLocals', title: 'Locales Admin', show: true },
+    { name: 'localId', title: 'Local Asignado', show: true },
     { name: 'document', title: 'Documento', show: true },
     { name: 'email', title: 'Correo Electrónico', show: true },
     { name: 'phone', title: 'Teléfono', show: true },

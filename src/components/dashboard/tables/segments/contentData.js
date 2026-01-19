@@ -98,9 +98,10 @@ export default function ContentData({
                         .join(' - ')}
                     </span>
                   ) : (
-                    info.local?.name || '-Sin Asignar-'
+                    '-----'
                   )}
                 </td>
+                <td className="px-4 py-3">{info.local?.name || '-----'}</td>
                 <td className="px-4 py-3">{info.document || '-----'}</td>
                 <td className="px-4 py-3">{info.email || '-----'}</td>
                 <PhoneContentData info={info} />
@@ -134,6 +135,23 @@ export default function ContentData({
                 <td className="px-4 py-3">
                   {formatDateDMY(info?.saleDate) || '-----'}
                 </td>
+              </>
+            )}
+            {view === 'expenses' && (
+              <>
+                <td className="px-4 py-3">{info.concept || '-----'}</td>
+                <td className="px-4 py-3">{info.type || '-----'}</td>
+                <td className="px-4 py-3 font-bold">
+                  {formatCOP(info.amount) || '-----'}
+                </td>
+                <td className="px-4 py-3">{info.paymentMethod || '-----'}</td>
+                <td className="px-4 py-3">{info.paidTo || '-----'}</td>
+                <td className="px-4 py-3">{info?.local?.name || '-----'}</td>
+                <td className="px-4 py-3">{info?.provider?.name || '-----'}</td>
+                <td className="px-4 py-3">
+                  {formatDateDMY(info?.expenseDate) || '-----'}
+                </td>
+                <td className="px-4 py-3">{info?.status || '-----'}</td>
               </>
             )}
             <td className="px-4 py-3 text-center">

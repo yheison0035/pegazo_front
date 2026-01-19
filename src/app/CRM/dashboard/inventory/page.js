@@ -38,7 +38,7 @@ export default function Inventory() {
   }, [fetchProducts]);
 
   const handleDeleteClick = (id, name) => {
-    setDeleteTarget({ id, name, type: 'producto' });
+    setDeleteTarget({ id, name, type: 'este producto' });
     setShowDeleteModal(true);
   };
 

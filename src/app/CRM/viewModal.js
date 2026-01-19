@@ -65,7 +65,8 @@ export default function ViewModal({ data, type, onClose, viewModalConfig }) {
                 if (
                   field.name === 'purchasePrice' ||
                   field.name === 'salePrice' ||
-                  field.name === 'totalAmount'
+                  field.name === 'totalAmount' ||
+                  field.name === 'amount'
                 ) {
                   value = formatCOP(value);
                 }
@@ -118,7 +119,7 @@ export default function ViewModal({ data, type, onClose, viewModalConfig }) {
                 return (
                   <div key={field.name}>
                     <p className="font-semibold text-gray-700">{field.label}</p>
-                    <p className="text-gray-500">{value}</p>
+                    <p className="text-gray-500">{value || '-----'}</p>
                   </div>
                 );
               })}
