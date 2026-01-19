@@ -48,15 +48,15 @@ export default function Expenses() {
       await deleteExpenses(deleteTarget.id);
       setAlert({
         type: 'success',
-        message: 'Categoría eliminada correctamente.',
+        message: 'Gasto eliminado correctamente.',
       });
       setShowDeleteModal(false);
       setDeleteTarget(null);
-      await fetchCategories();
+      await fetchExpenses();
     } catch (err) {
       setAlert({
         type: 'error',
-        message: err?.message || 'Error al eliminar categoría',
+        message: err?.message || 'Error al eliminar gasto',
       });
     }
   };
