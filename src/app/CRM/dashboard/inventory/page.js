@@ -78,7 +78,7 @@ export default function Inventory() {
         {error && <p className="text-red-500 text-sm p-4">{error}</p>}
 
         <Table
-          header={getHeaderTableInventory()}
+          header={getHeaderTableInventory(usuario)}
           info={products || []}
           view="inventory"
           setSelected={setSelectedProduct}
@@ -95,7 +95,7 @@ export default function Inventory() {
             data={selectedProduct}
             type="inventory"
             onClose={() => setSelectedProduct(null)}
-            viewModalConfig={viewModalConfig}
+            viewModalConfig={viewModalConfig(usuario)}
           />
         )}
         {selectedVariants && (

@@ -21,6 +21,7 @@ export default function useTableFilters(info = [], view) {
     localId: '',
     providerId: '',
     salePrice: '',
+    oldPrice: '',
     document: '',
     type_document: '',
     customer: '',
@@ -131,6 +132,10 @@ export default function useTableFilters(info = [], view) {
         ? String(a.salePrice).includes(String(filters.salePrice))
         : true;
 
+      const oldPriceMatch = filters.oldPrice
+        ? String(a.oldPrice).includes(String(filters.oldPrice))
+        : true;
+
       const documentMatch = filters.document
         ? String(a.document).includes(String(filters.document))
         : true;
@@ -211,6 +216,7 @@ export default function useTableFilters(info = [], view) {
         managedLocalsMatch &&
         providerMatch &&
         salePriceMatch &&
+        oldPriceMatch &&
         documentMatch &&
         typeDocumentMatch &&
         codeSaleMatch &&

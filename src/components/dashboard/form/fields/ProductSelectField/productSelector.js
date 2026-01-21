@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   formatCOP,
   formatPrice,
@@ -14,13 +14,14 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
   const [filtered, setFiltered] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [processing, setProcessing] = useState(false);
+  const initialized = useRef(false);
 
   const { searchProducts, loading } = useSales();
 
-  // SINCRONIZAR CUANDO CAMBIA EL FORMULARIO (CREAR / EDITAR)
   useEffect(() => {
-    if (Array.isArray(value)) {
+    if (!initialized.current && Array.isArray(value) && value.length > 0) {
       setSelectedProducts(value);
+      initialized.current = true;
     }
   }, [value]);
 

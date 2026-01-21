@@ -52,6 +52,7 @@ export default function NewProduct() {
       ...formData,
       purchasePrice: parseCOPToNumber(formData.purchasePrice),
       salePrice: parseCOPToNumber(formData.salePrice),
+      oldPrice: parseCOPToNumber(formData.oldPrice),
     };
 
     try {
@@ -93,7 +94,7 @@ export default function NewProduct() {
 
         <DinamicForm
           formData={formData}
-          formFields={getFormFieldsInventory()}
+          formFields={getFormFieldsInventory(usuario)}
           setFormData={setFormData}
           handleSubmit={handleSubmit}
           handleReset={handleReset}

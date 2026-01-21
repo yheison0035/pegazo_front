@@ -1,6 +1,8 @@
+import { canSeeOldPrice } from '@/hooks/inventory.permissions';
 import Actions from './actions';
 import PhoneContentData from './contentData/phone';
 import { formatCOP, formatDateDMY } from '@/lib/api/utils/utils';
+import { useAuth } from '@/context/authContext';
 
 export default function ContentData({
   paginatedData,
@@ -13,6 +15,9 @@ export default function ContentData({
   setPrinterInvoice,
   setShowModalChangeAdvisor,
 }) {
+  const { usuario } = useAuth();
+  const showOldPrice = canSeeOldPrice(usuario);
+
   return (
     <>
       {paginatedData.map((info, index) => {
@@ -75,6 +80,11 @@ export default function ContentData({
                 <td className="px-4 py-3">
                   {formatCOP(info?.salePrice || '-----')}
                 </td>
+                {showOldPrice && (
+                  <td className="px-4 py-3">
+                    {formatCOP(info?.oldPrice || '-----')}
+                  </td>
+                )}
                 <td className="px-4 py-3">{info?.status || '-----'}</td>
               </>
             )}

@@ -65,6 +65,7 @@ export default function ViewModal({ data, type, onClose, viewModalConfig }) {
                 if (
                   field.name === 'purchasePrice' ||
                   field.name === 'salePrice' ||
+                  field.name === 'oldPrice' ||
                   field.name === 'totalAmount' ||
                   field.name === 'amount'
                 ) {

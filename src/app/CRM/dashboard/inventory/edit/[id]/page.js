@@ -65,6 +65,7 @@ export default function EditProduct() {
       ...formData,
       purchasePrice: parseCOPToNumber(formData.purchasePrice),
       salePrice: parseCOPToNumber(formData.salePrice),
+      oldPrice: parseCOPToNumber(formData.oldPrice),
     };
 
     try {
@@ -111,7 +112,7 @@ export default function EditProduct() {
 
         <DinamicForm
           formData={formData}
-          formFields={getFormFieldsInventory()}
+          formFields={getFormFieldsInventory(usuario)}
           setFormData={setFormData}
           handleSubmit={handleSubmit}
           loading={loading}

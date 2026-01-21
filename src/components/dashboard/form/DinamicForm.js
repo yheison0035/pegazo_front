@@ -60,6 +60,7 @@ export default function DinamicForm({
     if (
       name === 'purchasePrice' ||
       name === 'salePrice' ||
+      name === 'oldPrice' ||
       name === 'totalAmount'
     ) {
       formattedValue = formatPrice(value);
@@ -205,6 +206,7 @@ export default function DinamicForm({
                 ? normalizeDateForInput(formData[name])
                 : name === 'purchasePrice' ||
                     name === 'salePrice' ||
+                    name === 'oldPrice' ||
                     name === 'amount'
                   ? formatCOP(formData[name] || '')
                   : formData[name] || '';
