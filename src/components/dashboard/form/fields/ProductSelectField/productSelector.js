@@ -6,6 +6,7 @@ import {
   formatPrice,
   formatText,
   parseCOPToNumber,
+  toggleCase,
 } from '@/lib/api/utils/utils';
 import useSales from '@/lib/api/hooks/useSales';
 
@@ -133,7 +134,7 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
           placeholder="Buscar producto..."
           value={search}
           onChange={(e) => {
-            setSearch(formatText(e.target.value));
+            setSearch(toggleCase(e.target.value, 'uppercase'));
             onTyping?.();
           }}
           className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-orange-500"
