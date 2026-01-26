@@ -15,6 +15,8 @@ export const getEmptyInventory = () => ({
   brandId: '',
   status: 'ACTIVO',
   variants: [],
+  features: [],
+  specifications: [],
 });
 
 export const getFormFieldsInventory = (usuario) => {
@@ -32,7 +34,7 @@ export const getFormFieldsInventory = (usuario) => {
       name: 'description',
       label: 'Descripción',
       type: 'textarea',
-      required: true,
+      required: false,
       disabled: false,
     },
     {

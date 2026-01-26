@@ -47,11 +47,17 @@ const ColorSelect = memo(function ColorSelect({ value, onChange, disabled }) {
     const existing = getVariant(color);
     if (!existing) return;
 
-    if (existing.stock <= 1) {
-      onChange(safeValue.filter((v) => v.color !== color));
-    } else {
+    if (existing.stock === 1) {
       onChange(
         safeValue.filter((v) => v.color?.toUpperCase() !== color.toUpperCase())
+      );
+    } else {
+      onChange(
+        safeValue.map((v) =>
+          v.color?.toUpperCase() === color.toUpperCase()
+            ? { ...v, stock: v.stock - 1 }
+            : v
+        )
       );
     }
   };

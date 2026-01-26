@@ -19,6 +19,8 @@ export async function createProduct(dto) {
     providerId: Number(cleanDto.providerId) || null,
   };
 
+  debugger;
+
   return apiFetch('/inventory', { method: 'POST', body: JSON.stringify(body) });
 }
 
@@ -48,15 +50,33 @@ export async function updateProduct(id, dto) {
       }))
     : [];
 
+  const cleanFeatures = Array.isArray(cleanDto.features)
+    ? cleanDto.features.map((v) => ({
+        title: v.title,
+        description: v.description,
+        order: Number(v.order),
+      }))
+    : [];
+
+  const cleanSpecifications = Array.isArray(cleanDto.specifications)
+    ? cleanDto.specifications.map((v) => ({
+        key: v.key,
+        value: v.value,
+        order: Number(v.order),
+      }))
+    : [];
+
   const body = {
     ...cleanDto,
     variants: cleanVariants,
+    features: cleanFeatures,
+    specifications: cleanSpecifications,
     localId: Number(cleanDto.localId) || null,
     providerId: Number(cleanDto.providerId) || null,
     categoryId: Number(cleanDto.categoryId) || null,
     brandId: Number(cleanDto.brandId) || null,
   };
-
+  debugger;
   return apiFetch(`/inventory/${id}`, {
     method: 'PUT',
     body: JSON.stringify(body),
