@@ -20,9 +20,7 @@ export default function InventorySpecsView({ title, data }) {
               ? (item.title ?? item.key ?? item.label)
               : item[0];
 
-            const value = isArray
-              ? (item.description ?? item.value ?? item.name ?? '—')
-              : item[1];
+            const value = isArray ? (item.value ?? item.name ?? '—') : item[1];
 
             return (
               <div
