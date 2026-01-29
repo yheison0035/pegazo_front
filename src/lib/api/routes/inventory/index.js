@@ -34,6 +34,7 @@ export async function updateProduct(id, dto) {
     images,
     local,
     provider,
+    slug,
     stock,
     createdBy,
     createdById,
