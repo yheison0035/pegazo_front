@@ -1,12 +1,30 @@
 'use client';
+
 import { colorOptions } from '@/lib/api/utils/getColors';
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState, useMemo } from 'react';
 
 const ColorSelect = memo(function ColorSelect({ value, onChange, disabled }) {
   const safeValue = Array.isArray(value) ? value : [];
+
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const ref = useRef(null);
+
+  const normalizedValue = useMemo(() => {
+    return Object.values(
+      safeValue.reduce((acc, v) => {
+        if (!v || !v.color) return acc;
+
+        const key = v.color.toUpperCase();
+
+        acc[key] = acc[key]
+          ? { ...v, stock: acc[key].stock + v.stock }
+          : { ...v };
+
+        return acc;
+      }, {})
+    );
+  }, [safeValue]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -14,47 +32,50 @@ const ColorSelect = memo(function ColorSelect({ value, onChange, disabled }) {
         setOpen(false);
       }
     };
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Helper: buscar si un color ya está seleccionado
   const getVariant = (colorName) =>
-    safeValue.find((v) => v.color?.toUpperCase() === colorName.toUpperCase());
+    normalizedValue.find(
+      (v) => v.color.toUpperCase() === colorName.toUpperCase()
+    );
 
   const filteredColors = colorOptions.filter((opt) =>
     opt.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  // Aumentar stock
   const increase = (color) => {
     const existing = getVariant(color);
+
     if (existing) {
       onChange(
-        safeValue.map((v) =>
-          v.color?.toUpperCase() === color.toUpperCase()
+        normalizedValue.map((v) =>
+          v.color.toUpperCase() === color.toUpperCase()
             ? { ...v, stock: v.stock + 1 }
             : v
         )
       );
     } else {
-      onChange([...safeValue, { color, stock: 1 }]);
+      onChange([...normalizedValue, { color, stock: 1 }]);
     }
   };
 
-  // Disminuir stock
   const decrease = (color) => {
     const existing = getVariant(color);
     if (!existing) return;
 
     if (existing.stock === 1) {
       onChange(
-        safeValue.filter((v) => v.color?.toUpperCase() !== color.toUpperCase())
+        normalizedValue.filter(
+          (v) => v.color.toUpperCase() !== color.toUpperCase()
+        )
       );
     } else {
       onChange(
-        safeValue.map((v) =>
-          v.color?.toUpperCase() === color.toUpperCase()
+        normalizedValue.map((v) =>
+          v.color.toUpperCase() === color.toUpperCase()
             ? { ...v, stock: v.stock - 1 }
             : v
         )
@@ -112,7 +133,6 @@ const ColorSelect = memo(function ColorSelect({ value, onChange, disabled }) {
                     key={`${opt.hex}-${opt.name}`}
                     className="flex items-center justify-between px-4 py-2 hover:bg-gray-100 transition"
                   >
-                    {/* Color */}
                     <div className="flex items-center gap-2">
                       <span
                         className="w-5 h-5 rounded-full border"
@@ -126,17 +146,19 @@ const ColorSelect = memo(function ColorSelect({ value, onChange, disabled }) {
                         <button
                           type="button"
                           onClick={() => decrease(opt.name)}
-                          className="w-7 h-7 rounded-full border text-gray-600 hover:bg-gray-200 cursor-pointer"
+                          className="w-7 h-7 rounded-full border text-gray-600 hover:bg-gray-200"
                         >
                           −
                         </button>
+
                         <span className="min-w-[24px] text-center font-semibold">
                           {variant.stock}
                         </span>
+
                         <button
                           type="button"
                           onClick={() => increase(opt.name)}
-                          className="w-7 h-7 rounded-full border text-gray-600 hover:bg-gray-200 cursor-pointer"
+                          className="w-7 h-7 rounded-full border text-gray-600 hover:bg-gray-200"
                         >
                           +
                         </button>
@@ -145,7 +167,7 @@ const ColorSelect = memo(function ColorSelect({ value, onChange, disabled }) {
                       <button
                         type="button"
                         onClick={() => increase(opt.name)}
-                        className="text-sm text-orange-600 hover:underline cursor-pointer"
+                        className="text-sm text-orange-600 hover:underline"
                       >
                         Agregar
                       </button>
