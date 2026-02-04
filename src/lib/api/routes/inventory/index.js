@@ -19,8 +19,6 @@ export async function createProduct(dto) {
     providerId: Number(cleanDto.providerId) || null,
   };
 
-  debugger;
-
   return apiFetch('/inventory', { method: 'POST', body: JSON.stringify(body) });
 }
 
@@ -77,7 +75,7 @@ export async function updateProduct(id, dto) {
     categoryId: Number(cleanDto.categoryId) || null,
     brandId: Number(cleanDto.brandId) || null,
   };
-  debugger;
+
   return apiFetch(`/inventory/${id}`, {
     method: 'PUT',
     body: JSON.stringify(body),

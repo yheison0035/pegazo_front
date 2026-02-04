@@ -47,6 +47,13 @@ export async function updateDeliveredSale(id, dto) {
     customer,
     user,
     local,
+    ecommerceCustomerId,
+    source,
+    shippingStatus,
+    wompiTransactionId,
+    wompiReference,
+    wompiStatus,
+    wompiPayload,
     ...cleanDto
   } = dto;
 

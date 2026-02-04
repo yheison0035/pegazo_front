@@ -64,6 +64,7 @@ export default function ContentData({
                   </div>
                 </td>
                 <td className="px-4 py-3">{info?.name || '-----'}</td>
+                <td className="px-4 py-3">{info?.barcode || '-----'}</td>
                 <td
                   className={`px-4 py-3 font-semibold text-center ${
                     info?.stock <= 3

@@ -146,7 +146,7 @@ const ColorSelect = memo(function ColorSelect({ value, onChange, disabled }) {
                         <button
                           type="button"
                           onClick={() => decrease(opt.name)}
-                          className="w-7 h-7 rounded-full border text-gray-600 hover:bg-gray-200"
+                          className="w-7 h-7 rounded-full border text-gray-600 hover:bg-gray-200 cursor-pointer"
                         >
                           −
                         </button>
@@ -158,7 +158,7 @@ const ColorSelect = memo(function ColorSelect({ value, onChange, disabled }) {
                         <button
                           type="button"
                           onClick={() => increase(opt.name)}
-                          className="w-7 h-7 rounded-full border text-gray-600 hover:bg-gray-200"
+                          className="w-7 h-7 rounded-full border text-gray-600 hover:bg-gray-200 cursor-pointer"
                         >
                           +
                         </button>
@@ -167,7 +167,7 @@ const ColorSelect = memo(function ColorSelect({ value, onChange, disabled }) {
                       <button
                         type="button"
                         onClick={() => increase(opt.name)}
-                        className="text-sm text-orange-600 hover:underline"
+                        className="text-sm text-orange-600 hover:underline cursor-pointer"
                       >
                         Agregar
                       </button>

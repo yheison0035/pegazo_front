@@ -35,6 +35,7 @@ export default function useTableFilters(info = [], view) {
     amount: '',
     paidTo: '',
     expenseDate: '',
+    barcode: '',
   });
 
   const handleFilterChange = (e) => {
@@ -198,6 +199,12 @@ export default function useTableFilters(info = [], view) {
           )
         : true;
 
+      const barcodeMatch = filters.barcode
+        ? (a.barcode?.toLowerCase() || '').includes(
+            filters.barcode.toLowerCase()
+          )
+        : true;
+
       return (
         roleMatch &&
         nameMatch &&
@@ -229,7 +236,8 @@ export default function useTableFilters(info = [], view) {
         typeMatch &&
         amountMatch &&
         paidToMatch &&
-        expenseDateMatch
+        expenseDateMatch &&
+        barcodeMatch
       );
     });
   }, [info, filters, view]);

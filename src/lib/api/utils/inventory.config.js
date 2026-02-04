@@ -3,6 +3,7 @@ import { canSeeOldPrice } from '@/hooks/inventory.permissions';
 export const getEmptyInventory = () => ({
   sku: '',
   name: '',
+  barcode: '',
   description: '',
   color: '',
   stock: 0,
@@ -28,6 +29,13 @@ export const getFormFieldsInventory = (usuario) => {
       label: 'Nombre del Producto',
       type: 'text',
       required: true,
+      disabled: false,
+    },
+    {
+      name: 'barcode',
+      label: 'Codigo de barras',
+      type: 'text',
+      required: false,
       disabled: false,
     },
     {
@@ -128,6 +136,7 @@ export const getHeaderTableInventory = (usuario) => {
   return [
     { name: 'image', title: 'Imagen Principal', show: true },
     { name: 'name', title: 'Nombre del Producto', show: true },
+    { name: 'barcode', title: 'Codigo de barras', show: true },
     { name: 'stock', title: 'Cantidad', show: true },
     { name: 'localId', title: 'Local / Punto de Venta', show: true },
     { name: 'providerId', title: 'Proveedor', show: true },
@@ -156,6 +165,7 @@ export const viewModalConfig = (usuario) => {
       {
         fields: [
           { name: 'name', label: 'Nombre del Producto' },
+          { name: 'barcode', label: 'Código de barras' },
           { name: 'status', label: 'Estado', type: 'status' },
           { name: 'description', label: 'Descripción' },
           { name: 'purchasePrice', label: 'Precio de Compra' },

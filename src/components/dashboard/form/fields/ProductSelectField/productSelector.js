@@ -27,16 +27,22 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
   }, [value]);
 
   useEffect(() => {
-    const fetch = async () => {
-      if (search.trim().length < 2) {
+    const handler = setTimeout(async () => {
+      if (!search || search.trim().length < 2) {
         setFiltered([]);
         return;
       }
-      const res = await searchProducts(search);
-      setFiltered(res.data || []);
-    };
 
-    fetch();
+      try {
+        const res = await searchProducts(search);
+        setFiltered(res?.data || []);
+      } catch (err) {
+        console.error('Error buscando productos', err);
+        setFiltered([]);
+      }
+    }, 300);
+
+    return () => clearTimeout(handler);
   }, [search]);
 
   const handleSelectProduct = async (product) => {
@@ -134,8 +140,14 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
           placeholder="Buscar producto..."
           value={search}
           onChange={(e) => {
-            setSearch(toggleCase(e.target.value, 'uppercase'));
+            const value = toggleCase(e.target.value, 'uppercase');
+            setSearch(value);
             onTyping?.();
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+            }
           }}
           className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-orange-500"
         />
