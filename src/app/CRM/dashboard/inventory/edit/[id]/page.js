@@ -48,13 +48,6 @@ export default function EditProduct() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.variants || formData.variants.length === 0) {
-      return setAlert({
-        type: 'warning',
-        message: 'Debes mantener al menos un color con stock.',
-      });
-    }
-
     const invalidVariant = formData.variants.find(
       (v) => !v.color || !v.stock || v.stock <= 0
     );
