@@ -89,19 +89,18 @@ export async function deleteProduct(id) {
 export async function uploadProductImages(productId, images) {
   if (!Array.isArray(images)) return;
 
-  const existingImages = images.filter((img) => img.id && !img._removed);
-  const newImages = images.filter((img) => img.file);
-
-  const keepImageIds = existingImages.map((img) => img.id);
-
   const formData = new FormData();
 
-  // Nuevas imágenes
-  newImages.forEach((img) => {
-    formData.append('images', img.file);
-  });
+  const keepImageIds = images
+    .filter((img) => img.id && !img._removed)
+    .map((img) => img.id);
 
-  // Orden de imágenes existentes
+  images
+    .filter((img) => img.file)
+    .forEach((img) => {
+      formData.append('images', img.file);
+    });
+
   keepImageIds.forEach((id) => {
     formData.append('keepImageIds', id);
   });

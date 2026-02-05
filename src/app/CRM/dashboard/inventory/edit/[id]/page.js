@@ -81,12 +81,7 @@ export default function EditProduct() {
         throw new Error('No se pudo obtener el ID del producto');
       }
 
-      const hasNewImages = images.some((img) => img.file);
-      const hasRemovedImages = images.some((img) => img._removed);
-
-      if (hasNewImages || hasRemovedImages) {
-        await uploadProductImages(productId, images);
-      }
+      await uploadProductImages(productId, images);
 
       setAlert({
         type: 'success',
