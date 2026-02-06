@@ -27,7 +27,10 @@ export default function useProducts() {
     }
   }, []);
 
-  const getProductsFn = useCallback(() => wrap(getProducts), [wrap]);
+  const getProductsFn = useCallback(
+    (page, limit) => wrap(getProducts, page, limit),
+    [wrap]
+  );
   const getProductByIdFn = useCallback(
     (id) => wrap(getProductById, id),
     [wrap]

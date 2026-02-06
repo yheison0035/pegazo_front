@@ -34,13 +34,13 @@ export const getFormFieldsLocals = () => [
 ];
 
 export const getHeaderTableLocals = () => [
-  { name: 'name', title: 'Nombre del Local', show: true },
-  { name: 'address', title: 'Dirección', show: true },
-  { name: 'department', title: 'Departamento', show: false },
-  { name: 'city', title: 'Ciudad', show: true },
-  { name: 'managerId', title: 'Encargado', show: true },
-  { name: 'status', title: 'Estado', show: true },
-  { name: 'phone', title: 'Teléfono', show: true },
+  { name: 'name', title: 'Nombre del Local', show: true, showInput: true },
+  { name: 'address', title: 'Dirección', show: true, showInput: true },
+  { name: 'department', title: 'Departamento', show: false, showInput: false },
+  { name: 'city', title: 'Ciudad', show: true, showInput: true },
+  { name: 'managerId', title: 'Encargado', show: true, showInput: true },
+  { name: 'status', title: 'Estado', show: true, showInput: true },
+  { name: 'phone', title: 'Teléfono', show: true, showInput: true },
 ];
 
 export const viewModalConfig = {

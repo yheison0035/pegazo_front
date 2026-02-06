@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import ViewModal from '../../viewModal';
 import Table from '@/components/dashboard/tables/table';
+import Pagination from '@/components/dashboard/tables/segments/pagination';
 import Link from 'next/link';
 import RoleGuard from '@/auth/roleGuard';
 import { useAuth } from '@/context/authContext';
@@ -15,25 +16,43 @@ import {
 } from '@/lib/api/utils/brands.config';
 import ConfirmDeleteModal from '@/components/dashboard/tables/segments/confirmDeleteModal';
 import AlertModal from '@/components/dashboard/modals/alertModal';
+import LoadingOverlay from '@/components/ui/LoadingOverlay';
+import useColumnFilters from '@/components/dashboard/tables/hooks/useColumnFilters';
+import { useDebounce } from '@/components/dashboard/tables/hooks/useDebounce';
 
 export default function Brands() {
+  const { usuario } = useAuth();
+  const { getBrands, deleteBrand, loading } = useBrands();
+
   const [brands, setBrands] = useState([]);
-  const [selectedBrands, setSelectedBrands] = useState(null);
+  const [meta, setMeta] = useState(null);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+
+  const [selectedBrand, setSelectedBrand] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
-  const { usuario } = useAuth();
-  const [alert, setAlert] = useState({ type: '', message: '', url: '' });
+  const [alert, setAlert] = useState({});
 
-  const { getBrands, deleteBrand, loading, error } = useBrands();
+  const { filters, handleFilterChange } = useColumnFilters({
+    name: '',
+    description: '',
+    status: '',
+    localId: '',
+  });
+
+  const debouncedFilters = useDebounce(filters, 400);
 
   const fetchBrands = useCallback(async () => {
-    try {
-      const { data } = await getBrands();
-      setBrands(data);
-    } catch (err) {
-      console.error(err);
-    }
-  }, [getBrands]);
+    const res = await getBrands({
+      page,
+      limit,
+      ...debouncedFilters,
+    });
+
+    setBrands(res.data);
+    setMeta(res.meta);
+  }, [getBrands, page, limit, debouncedFilters]);
 
   useEffect(() => {
     fetchBrands();
@@ -45,80 +64,77 @@ export default function Brands() {
   };
 
   const confirmDelete = async () => {
-    if (!deleteTarget) return;
-
-    try {
-      await deleteBrand(deleteTarget.id);
-      setAlert({
-        type: 'success',
-        message: 'Marca eliminada correctamente.',
-      });
-      setShowDeleteModal(false);
-      setDeleteTarget(null);
-      await fetchBrands();
-    } catch (err) {
-      setAlert({
-        type: 'error',
-        message: err?.message || 'Error al eliminar marca',
-      });
-    }
+    await deleteBrand(deleteTarget.id);
+    setShowDeleteModal(false);
+    setDeleteTarget(null);
+    fetchBrands();
   };
 
   return (
     <RoleGuard allowedRoles={Object.values(Roles)}>
       <div className="w-full p-4">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
-          <h1 className="text-xl md:text-2xl font-semibold text-gray-800">
-            Listado de Marcas
-          </h1>
+        <div className="flex flex-col md:flex-row justify-between mb-4 gap-4">
+          <h1 className="text-2xl font-semibold">Listado de Marcas</h1>
 
-          <div className="flex gap-2">
-            <Link
-              href="/CRM/dashboard/brands/new"
-              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm transition"
-            >
-              <PlusIcon className="w-4 h-4" />
-              Agregar marca
-            </Link>
-          </div>
+          <Link
+            href="/CRM/dashboard/brands/new"
+            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm"
+          >
+            <PlusIcon className="w-4 h-4" />
+            Agregar marca
+          </Link>
         </div>
 
-        <div className="overflow-x-auto bg-white shadow-md rounded-lg">
+        <div className="bg-white rounded-lg shadow relative">
+          <LoadingOverlay show={loading} text="Cargando marcas..." />
+
           <Table
             header={getHeaderTableBrands()}
             info={brands}
             view="brands"
-            setSelected={setSelectedBrands}
             rol={usuario?.role}
-            fetchData={fetchBrands}
             loading={loading}
-            error={error}
+            filters={filters}
+            handleFilterChange={handleFilterChange}
+            setSelected={setSelectedBrand}
             handleDeleteClick={handleDeleteClick}
           />
-          {selectedBrands && (
-            <ViewModal
-              data={selectedBrands}
-              type="brands"
-              onClose={() => setSelectedBrands(null)}
-              viewModalConfig={viewModalConfig}
-            />
-          )}
-          {showDeleteModal && (
-            <ConfirmDeleteModal
-              show={showDeleteModal}
-              setShow={setShowDeleteModal}
-              type={deleteTarget?.type}
-              name={deleteTarget?.name}
-              onConfirm={confirmDelete}
-              loading={loading}
+
+          {meta && (
+            <Pagination
+              page={meta.page}
+              totalPages={meta.totalPages}
+              limit={limit}
+              setPage={setPage}
+              setLimit={setLimit}
             />
           )}
         </div>
+
+        {selectedBrand && (
+          <ViewModal
+            data={selectedBrand}
+            type="brands"
+            onClose={() => setSelectedBrand(null)}
+            viewModalConfig={viewModalConfig}
+          />
+        )}
+
+        {showDeleteModal && (
+          <ConfirmDeleteModal
+            show={showDeleteModal}
+            setShow={setShowDeleteModal}
+            type={deleteTarget?.type}
+            name={deleteTarget?.name}
+            onConfirm={confirmDelete}
+            loading={loading}
+          />
+        )}
+
         <AlertModal
           type={alert.type}
           message={alert.message}
-          onClose={() => setAlert({ type: '', message: '', url: '' })}
-          url={alert.url}
+          onClose={() => setAlert({})}
         />
       </div>
     </RoleGuard>

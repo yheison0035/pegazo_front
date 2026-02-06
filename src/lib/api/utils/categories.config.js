@@ -39,11 +39,26 @@ export const getFormFieldsCategories = () => [
 ];
 
 export const getHeaderTableCategories = () => [
-  { name: 'name', title: 'Nombre de la Categoría', show: true },
-  { name: 'description', title: 'Descripción', show: true },
-  { name: 'status', title: 'Estado', show: true },
-  { name: 'localId', title: 'Local / Punto de Venta', show: true },
-  { name: 'updatedAt', title: 'Última Actualización', show: false },
+  {
+    name: 'name',
+    title: 'Nombre de la Categoría',
+    show: true,
+    showInput: true,
+  },
+  { name: 'description', title: 'Descripción', show: true, showInput: true },
+  { name: 'status', title: 'Estado', show: true, showInput: true },
+  {
+    name: 'localId',
+    title: 'Local / Punto de Venta',
+    show: true,
+    showInput: true,
+  },
+  {
+    name: 'updatedAt',
+    title: 'Última Actualización',
+    show: false,
+    showInput: false,
+  },
 ];
 
 export const viewModalConfig = {

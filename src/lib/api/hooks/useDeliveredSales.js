@@ -44,7 +44,7 @@ export default function useDeliveredSales() {
   );
 
   const getDeliveredSalesFn = useCallback(
-    () => wrap(getDeliveredSales),
+    (page, limit) => wrap(getDeliveredSales, page, limit),
     [wrap]
   );
 

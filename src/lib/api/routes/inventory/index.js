@@ -1,7 +1,20 @@
 import apiFetch from '../../auth/client';
 
-export async function getProducts() {
-  return apiFetch('/inventory');
+export async function getProducts(params = {}) {
+  const { page = 1, limit = 10, ...filters } = params;
+
+  const query = new URLSearchParams();
+
+  query.set('page', String(page));
+  query.set('limit', String(limit));
+
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== '' && value !== null && value !== undefined) {
+      query.set(key, String(value));
+    }
+  });
+
+  return apiFetch(`/inventory?${query.toString()}`);
 }
 
 export async function getProductById(id) {

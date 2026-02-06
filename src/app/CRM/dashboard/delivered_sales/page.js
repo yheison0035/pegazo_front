@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import Table from '@/components/dashboard/tables/table';
+import Pagination from '@/components/dashboard/tables/segments/pagination';
+import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import { useAuth } from '@/context/authContext';
 import { CalendarDaysIcon, CalendarIcon } from '@heroicons/react/24/solid';
 import useDeliveredSales from '@/lib/api/hooks/useDeliveredSales';
@@ -15,32 +17,53 @@ import ViewModal from '../../viewModal';
 import { printSaleInvoice } from '@/utils/printInvoice';
 import DailySalesReportModal from '@/components/dashboard/modals/dailySalesReportModal';
 import SalesRangeReModal from '@/components/dashboard/modals/salesRangeReModal';
+import useColumnFilters from '@/components/dashboard/tables/hooks/useColumnFilters';
+import { useDebounce } from '@/components/dashboard/tables/hooks/useDebounce';
 
 export default function Delivered_Sales() {
-  const [selectedSale, setSelectedSale] = useState(null);
+  const { usuario } = useAuth();
+  const { getDeliveredSales, deleteDeliveredSale, loading } =
+    useDeliveredSales();
+
   const [sales, setSales] = useState([]);
+  const [meta, setMeta] = useState(null);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+
+  const [selectedSale, setSelectedSale] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDailyReport, setShowDailyReport] = useState(false);
   const [showRangeReport, setShowRangeReport] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
-  const { usuario } = useAuth();
-  const [alert, setAlert] = useState({ type: '', message: '', url: '' });
+  const [alert, setAlert] = useState({});
 
-  const { getDeliveredSales, deleteDeliveredSale, loading, error } =
-    useDeliveredSales();
+  const { filters, handleFilterChange } = useColumnFilters({
+    code: '',
+    customer: '',
+    totalAmount: '',
+    paymentMethod: '',
+    localId: '',
+    userId: '',
+    paymentStatus: '',
+    saleDate: '',
+  });
 
-  const fetchData = useCallback(async () => {
-    try {
-      const { data } = await getDeliveredSales();
-      setSales(data || []);
-    } catch (err) {
-      console.error(err);
-    }
-  }, [getDeliveredSales]);
+  const debouncedFilters = useDebounce(filters, 400);
+
+  const fetchSales = useCallback(async () => {
+    const res = await getDeliveredSales({
+      page,
+      limit,
+      ...debouncedFilters,
+    });
+
+    setSales(res.data);
+    setMeta(res.meta);
+  }, [getDeliveredSales, page, limit, debouncedFilters]);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    fetchSales();
+  }, [fetchSales]);
 
   const handleDeleteClick = (id, name) => {
     setDeleteTarget({ id, name, type: 'esta venta' });
@@ -48,23 +71,10 @@ export default function Delivered_Sales() {
   };
 
   const confirmDelete = async () => {
-    if (!deleteTarget) return;
-
-    try {
-      await deleteDeliveredSale(deleteTarget.id);
-      setAlert({
-        type: 'success',
-        message: 'Venta eliminada correctamente.',
-      });
-      setShowDeleteModal(false);
-      setDeleteTarget(null);
-      await fetchData();
-    } catch (err) {
-      setAlert({
-        type: 'error',
-        message: err?.message || 'Error al eliminar venta',
-      });
-    }
+    await deleteDeliveredSale(deleteTarget.id);
+    setShowDeleteModal(false);
+    setDeleteTarget(null);
+    fetchSales();
   };
 
   const setPrinterInvoice = (sale) => {
@@ -73,22 +83,21 @@ export default function Delivered_Sales() {
 
   return (
     <div className="w-full p-4">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <h1 className="text-xl md:text-2xl font-semibold text-gray-800">
-          Listado de Ventas Realizadas
-        </h1>
+      <div className="flex flex-col md:flex-row justify-between mb-6 gap-4">
+        <h1 className="text-2xl font-semibold">Listado de Ventas Realizadas</h1>
 
         <div className="flex gap-2">
           <button
             onClick={() => setShowDailyReport(true)}
-            className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm transition cursor-pointer"
+            className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm cursor-pointer"
           >
             <CalendarDaysIcon className="w-4 h-4" />
             Venta por Día
           </button>
+
           <button
             onClick={() => setShowRangeReport(true)}
-            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm transition cursor-pointer"
+            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm cursor-pointer"
           >
             <CalendarIcon className="w-4 h-4" />
             Venta por Semana
@@ -96,57 +105,65 @@ export default function Delivered_Sales() {
         </div>
       </div>
 
-      <div className="overflow-x-auto bg-white shadow-md rounded-lg">
-        {loading && (
-          <p className="text-gray-500 text-sm p-4">
-            Cargando ventas realizadas...
-          </p>
-        )}
-        {error && <p className="text-red-500 text-sm p-4">{error}</p>}
+      <div className="bg-white rounded-lg shadow relative">
+        <LoadingOverlay show={loading} text="Cargando ventas..." />
 
         <Table
           header={getHeaderTableDeliveredSales()}
           info={sales}
           view="delivered_sales"
-          setSelected={setSelectedSale}
           rol={usuario?.role}
-          fetchData={fetchData}
           loading={loading}
-          error={error}
+          filters={filters}
+          handleFilterChange={handleFilterChange}
+          setSelected={setSelectedSale}
           handleDeleteClick={handleDeleteClick}
           setPrinterInvoice={setPrinterInvoice}
         />
 
-        {selectedSale && (
-          <ViewModal
-            data={selectedSale}
-            type="delivered_sales"
-            onClose={() => setSelectedSale(null)}
-            viewModalConfig={viewModalConfig}
+        {meta && (
+          <Pagination
+            page={meta.page}
+            totalPages={meta.totalPages}
+            limit={limit}
+            setPage={setPage}
+            setLimit={setLimit}
           />
-        )}
-        {showDeleteModal && (
-          <ConfirmDeleteModal
-            show={showDeleteModal}
-            setShow={setShowDeleteModal}
-            type={deleteTarget?.type}
-            name={deleteTarget?.name}
-            onConfirm={confirmDelete}
-            loading={loading}
-          />
-        )}
-        {showDailyReport && (
-          <DailySalesReportModal onClose={() => setShowDailyReport(false)} />
-        )}
-        {showRangeReport && (
-          <SalesRangeReModal onClose={() => setShowRangeReport(false)} />
         )}
       </div>
+
+      {selectedSale && (
+        <ViewModal
+          data={selectedSale}
+          type="delivered_sales"
+          onClose={() => setSelectedSale(null)}
+          viewModalConfig={viewModalConfig}
+        />
+      )}
+
+      {showDeleteModal && (
+        <ConfirmDeleteModal
+          show={showDeleteModal}
+          setShow={setShowDeleteModal}
+          type={deleteTarget?.type}
+          name={deleteTarget?.name}
+          onConfirm={confirmDelete}
+          loading={loading}
+        />
+      )}
+
+      {showDailyReport && (
+        <DailySalesReportModal onClose={() => setShowDailyReport(false)} />
+      )}
+
+      {showRangeReport && (
+        <SalesRangeReModal onClose={() => setShowRangeReport(false)} />
+      )}
+
       <AlertModal
         type={alert.type}
         message={alert.message}
-        onClose={() => setAlert({ type: '', message: '', url: '' })}
-        url={alert.url}
+        onClose={() => setAlert({})}
       />
     </div>
   );

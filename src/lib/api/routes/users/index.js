@@ -1,8 +1,21 @@
 import apiFetch from '../../auth/client';
 import { toFullISO } from '../../utils/utils';
 
-export async function getUsers() {
-  return apiFetch('/users');
+export async function getUsers(params = {}) {
+  const { page = 1, limit = 10, ...filters } = params;
+
+  const query = new URLSearchParams();
+
+  query.set('page', String(page));
+  query.set('limit', String(limit));
+
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== '' && value !== null && value !== undefined) {
+      query.set(key, String(value));
+    }
+  });
+
+  return apiFetch(`/users?${query.toString()}`);
 }
 
 export async function getUserById(id) {

@@ -96,16 +96,26 @@ export const getFormFieldsCustomers = () => [
 ];
 
 export const getHeaderTableCustomers = () => [
-  { name: 'type_document', title: 'Tipo de Documento', show: true },
-  { name: 'document', title: 'Documento', show: true },
-  { name: 'name', title: 'Nombre Completo', show: true },
-  { name: 'email', title: 'Correo', show: true },
-  { name: 'localId', title: 'Local / Punto de Venta', show: true },
-  { name: 'phone', title: 'Teléfono', show: true },
-  { name: 'department', title: 'Departamento', show: false },
-  { name: 'city', title: 'Ciudad', show: true },
-  { name: 'address', title: 'Dirección', show: false },
-  { name: 'status', title: 'Estado', show: true },
+  {
+    name: 'type_document',
+    title: 'Tipo de Documento',
+    show: true,
+    showInput: true,
+  },
+  { name: 'document', title: 'Documento', show: true, showInput: true },
+  { name: 'name', title: 'Nombre Completo', show: true, showInput: true },
+  { name: 'email', title: 'Correo', show: true, showInput: true },
+  {
+    name: 'localId',
+    title: 'Local / Punto de Venta',
+    show: true,
+    showInput: true,
+  },
+  { name: 'phone', title: 'Teléfono', show: true, showInput: true },
+  { name: 'city', title: 'Ciudad', show: true, showInput: true },
+  { name: 'status', title: 'Estado', show: true, showInput: true },
+  { name: 'department', title: 'Departamento', show: false, showInput: false },
+  { name: 'address', title: 'Dirección', show: false, showInput: false },
 ];
 
 export const viewModalConfig = {

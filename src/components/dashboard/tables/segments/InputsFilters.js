@@ -9,12 +9,13 @@ export default function InputFilters({
     <tr>
       {allFilters
         .filter((f) => f.show)
-        .map(({ name, title }) => (
+        .map(({ name, title, showInput }) => (
           <th key={name} className="px-4 py-2">
             <SearchFilter
               name={name}
               title={title}
               value={filters[name] || ''}
+              showInput={showInput}
               className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
               handleFilterChange={handleFilterChange}
             />

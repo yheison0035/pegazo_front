@@ -1,26 +1,24 @@
 export default function SearchFilter({
-  name = 'campo',
+  name,
   value = '',
   className = '',
   placeholder,
+  showInput,
   title = '',
   type = 'text',
-  handleFilterChange = () => {},
+  handleFilterChange,
 }) {
   if (name === 'image') return null;
-  const inputId = `filter-${name}`;
+  if (!showInput) return null;
 
   return (
-    <>
-      <input
-        id={inputId}
-        type={type}
-        name={name}
-        value={value}
-        onChange={handleFilterChange}
-        placeholder={placeholder || `Filtrar ${title}`}
-        className={className}
-      />
-    </>
+    <input
+      type={type}
+      name={name}
+      value={value}
+      onChange={handleFilterChange}
+      placeholder={placeholder || `Filtrar ${title}`}
+      className={className}
+    />
   );
 }

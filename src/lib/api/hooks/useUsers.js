@@ -29,7 +29,10 @@ export default function useUsers() {
     }
   }, []);
 
-  const getUsersFn = useCallback(() => wrap(getUsers), [wrap]);
+  const getUsersFn = useCallback(
+    (page, limit) => wrap(getUsers, page, limit),
+    [wrap]
+  );
   const getUserByIdFn = useCallback((id) => wrap(getUserById, id), [wrap]);
   const createUserFn = useCallback((dto) => wrap(createUser, dto), [wrap]);
   const updateUserFn = useCallback(

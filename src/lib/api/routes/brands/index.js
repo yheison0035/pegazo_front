@@ -1,8 +1,20 @@
 import apiFetch from '../../auth/client';
-import { toFullISO } from '../../utils/utils';
 
-export async function getBrands() {
-  return apiFetch('/brands');
+export async function getBrands(params = {}) {
+  const { page = 1, limit = 10, ...filters } = params;
+
+  const query = new URLSearchParams();
+
+  query.set('page', String(page));
+  query.set('limit', String(limit));
+
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== '' && value !== null && value !== undefined) {
+      query.set(key, String(value));
+    }
+  });
+
+  return apiFetch(`/brands?${query.toString()}`);
 }
 
 export async function getBrandById(id) {

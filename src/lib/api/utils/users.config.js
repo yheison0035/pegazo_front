@@ -111,20 +111,45 @@ export const getFormFieldsUsers = () => [
 
 export const getHeaderTableUsers = () => {
   return [
-    { name: 'role', title: 'Rol', show: true },
-    { name: 'name', title: 'Nombre Completo', show: true },
-    { name: 'managedLocals', title: 'Locales Admin', show: true },
-    { name: 'localId', title: 'Local Asignado', show: true },
-    { name: 'document', title: 'Documento', show: true },
-    { name: 'email', title: 'Correo Electrónico', show: true },
-    { name: 'phone', title: 'Teléfono', show: true },
-    { name: 'address', title: 'Dirección', show: true },
-    { name: 'birthdate', title: 'Fecha de Nacimiento', show: false },
-    { name: 'department', title: 'Departamento', show: false },
-    { name: 'city', title: 'Ciudad', show: false },
-    { name: 'status', title: 'Estado', show: true },
-    { name: 'lastLogin', title: 'Último Acceso', show: false },
-    { name: 'createdAt', title: 'Fecha de Registro', show: false },
+    { name: 'role', title: 'Rol', show: true, showInput: true },
+    { name: 'name', title: 'Nombre Completo', show: true, showInput: true },
+    {
+      name: 'managedLocals',
+      title: 'Locales Admin',
+      show: true,
+      showInput: true,
+    },
+    { name: 'localId', title: 'Local Asignado', show: true, showInput: true },
+    { name: 'document', title: 'Documento', show: true, showInput: true },
+    { name: 'email', title: 'Correo Electrónico', show: true, showInput: true },
+    { name: 'phone', title: 'Teléfono', show: true, showInput: true },
+    { name: 'address', title: 'Dirección', show: true, showInput: true },
+    { name: 'status', title: 'Estado', show: true, showInput: true },
+    {
+      name: 'birthdate',
+      title: 'Fecha de Nacimiento',
+      show: false,
+      showInput: false,
+    },
+    {
+      name: 'department',
+      title: 'Departamento',
+      show: false,
+      showInput: false,
+    },
+    { name: 'city', title: 'Ciudad', show: false, showInput: false },
+    {
+      name: 'lastLogin',
+      title: 'Último Acceso',
+      show: false,
+      showInput: false,
+    },
+    {
+      name: 'createdAt',
+      title: 'Fecha de Registro',
+      show: false,
+      showInput: false,
+    },
   ];
 };
 

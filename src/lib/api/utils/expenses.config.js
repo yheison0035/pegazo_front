@@ -96,15 +96,25 @@ export const getFormFieldsExpenses = () => [
 ];
 
 export const getHeaderTableExpenses = () => [
-  { name: 'concept', title: 'Concepto', show: true },
-  { name: 'type', title: 'Tipo', show: true },
-  { name: 'amount', title: 'Valor', show: true },
-  { name: 'paymentMethod', title: 'Método de Pago', show: true },
-  { name: 'paidTo', title: 'Pagado a', show: true },
-  { name: 'localId', title: 'Local / Punto de Venta', show: true },
-  { name: 'providerId', title: 'Proveedor', show: true },
-  { name: 'expenseDate', title: 'Fecha', show: true },
-  { name: 'status', title: 'Estado', show: true },
+  { name: 'concept', title: 'Concepto', show: true, showInput: true },
+  { name: 'type', title: 'Tipo', show: true, showInput: true },
+  { name: 'amount', title: 'Valor', show: true, showInput: true },
+  {
+    name: 'paymentMethod',
+    title: 'Método de Pago',
+    show: true,
+    showInput: true,
+  },
+  { name: 'paidTo', title: 'Pagado a', show: true, showInput: true },
+  {
+    name: 'localId',
+    title: 'Local / Punto de Venta',
+    show: true,
+    showInput: true,
+  },
+  { name: 'providerId', title: 'Proveedor', show: true, showInput: true },
+  { name: 'expenseDate', title: 'Fecha', show: true, showInput: true },
+  { name: 'status', title: 'Estado', show: true, showInput: true },
 ];
 
 export const viewModalConfig = {

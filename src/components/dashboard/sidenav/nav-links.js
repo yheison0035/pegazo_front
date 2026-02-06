@@ -69,7 +69,7 @@ export default function NavLinks() {
       roles: ['SUPER_ADMIN'],
     },
     {
-      name: 'Pedidos',
+      name: 'Pedidos (pendiente)',
       href: '/CRM/dashboard/orders',
       icon: ClipboardDocumentListIcon,
       roles: ['SUPER_ADMIN'],

@@ -4,33 +4,57 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/authContext';
 import useExpenses from '@/lib/api/hooks/useExpenses';
 import Table from '@/components/dashboard/tables/table';
+import Pagination from '@/components/dashboard/tables/segments/pagination';
 import Header from '@/components/dashboard/customers/header';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import ViewModal from '../../viewModal';
+import ConfirmDeleteModal from '@/components/dashboard/tables/segments/confirmDeleteModal';
+import LoadingOverlay from '@/components/ui/LoadingOverlay';
+import useColumnFilters from '@/components/dashboard/tables/hooks/useColumnFilters';
+import { useDebounce } from '@/components/dashboard/tables/hooks/useDebounce';
 import {
   getHeaderTableExpenses,
   viewModalConfig,
 } from '@/lib/api/utils/expenses.config';
-import ConfirmDeleteModal from '@/components/dashboard/tables/segments/confirmDeleteModal';
 
 export default function Expenses() {
-  const [selectedExpense, setSelectedExpense] = useState(null);
+  const { usuario } = useAuth();
+  const { getExpenses, deleteExpenses, loading } = useExpenses();
+
   const [expenses, setExpenses] = useState([]);
+  const [meta, setMeta] = useState(null);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+
+  const [selectedExpense, setSelectedExpense] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
-  const { usuario } = useAuth();
-  const [alert, setAlert] = useState({ type: '', message: '', url: '' });
+  const [alert, setAlert] = useState({});
 
-  const { getExpenses, deleteExpenses, loading, error } = useExpenses();
+  const { filters, handleFilterChange } = useColumnFilters({
+    concept: '',
+    type: '',
+    amount: '',
+    paymentMethod: '',
+    paidTo: '',
+    localId: '',
+    providerId: '',
+    expenseDate: '',
+    status: '',
+  });
+
+  const debouncedFilters = useDebounce(filters, 400);
 
   const fetchExpenses = useCallback(async () => {
-    try {
-      const { data } = await getExpenses();
-      setExpenses(data);
-    } catch (err) {
-      console.error(err);
-    }
-  }, [getExpenses]);
+    const res = await getExpenses({
+      page,
+      limit,
+      ...debouncedFilters,
+    });
+
+    setExpenses(res.data);
+    setMeta(res.meta);
+  }, [getExpenses, page, limit, debouncedFilters]);
 
   useEffect(() => {
     fetchExpenses();
@@ -42,76 +66,69 @@ export default function Expenses() {
   };
 
   const confirmDelete = async () => {
-    if (!deleteTarget) return;
-
-    try {
-      await deleteExpenses(deleteTarget.id);
-      setAlert({
-        type: 'success',
-        message: 'Gasto eliminado correctamente.',
-      });
-      setShowDeleteModal(false);
-      setDeleteTarget(null);
-      await fetchExpenses();
-    } catch (err) {
-      setAlert({
-        type: 'error',
-        message: err?.message || 'Error al eliminar gasto',
-      });
-    }
+    await deleteExpenses(deleteTarget.id);
+    setShowDeleteModal(false);
+    setDeleteTarget(null);
+    fetchExpenses();
   };
 
   return (
     <div className="w-full p-4">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <h1 className="text-xl md:text-2xl font-semibold text-gray-800">
-          Listado de Gastos
-        </h1>
+      <div className="flex justify-between mb-4">
+        <h1 className="text-2xl font-semibold">Listado de Gastos</h1>
         <Header type="Gastos" typeUrl="expenses" />
       </div>
 
-      <div className="overflow-x-auto bg-white shadow-md rounded-lg">
-        {loading && (
-          <p className="text-gray-500 text-sm p-4">Cargando gastos...</p>
-        )}
-        {error && <p className="text-red-500 text-sm p-4">{error}</p>}
+      <div className="bg-white rounded-lg shadow relative">
+        <LoadingOverlay show={loading} text="Cargando gastos..." />
 
         <Table
           header={getHeaderTableExpenses()}
-          info={expenses || []}
+          info={expenses}
           view="expenses"
-          setSelected={setSelectedExpense}
           rol={usuario?.role}
-          fetchData={fetchExpenses}
           loading={loading}
-          error={error}
+          filters={filters}
+          handleFilterChange={handleFilterChange}
+          setSelected={setSelectedExpense}
           handleDeleteClick={handleDeleteClick}
         />
 
-        {selectedExpense && (
-          <ViewModal
-            data={selectedExpense}
-            type="expenses"
-            onClose={() => setSelectedExpense(null)}
-            viewModalConfig={viewModalConfig}
-          />
-        )}
-        {showDeleteModal && (
-          <ConfirmDeleteModal
-            show={showDeleteModal}
-            setShow={setShowDeleteModal}
-            type={deleteTarget?.type}
-            name={deleteTarget?.name}
-            onConfirm={confirmDelete}
-            loading={loading}
+        {meta && (
+          <Pagination
+            page={meta.page}
+            totalPages={meta.totalPages}
+            limit={limit}
+            setPage={setPage}
+            setLimit={setLimit}
           />
         )}
       </div>
+
+      {selectedExpense && (
+        <ViewModal
+          data={selectedExpense}
+          type="expenses"
+          onClose={() => setSelectedExpense(null)}
+          viewModalConfig={viewModalConfig}
+        />
+      )}
+
+      {showDeleteModal && (
+        <ConfirmDeleteModal
+          show
+          setShow={setShowDeleteModal}
+          type={deleteTarget?.type}
+          name={deleteTarget?.name}
+          onConfirm={confirmDelete}
+          loading={loading}
+        />
+      )}
+
       <AlertModal
         type={alert.type}
         message={alert.message}
-        onClose={() => setAlert({ type: '', message: '', url: '' })}
-        url={alert.url}
+        onClose={() => setAlert({})}
       />
     </div>
   );

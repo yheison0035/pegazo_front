@@ -134,23 +134,44 @@ export const getHeaderTableInventory = (usuario) => {
   const showOldPrice = canSeeOldPrice(usuario);
 
   return [
-    { name: 'image', title: 'Imagen Principal', show: true },
-    { name: 'name', title: 'Nombre del Producto', show: true },
-    { name: 'barcode', title: 'Codigo de barras', show: true },
-    { name: 'stock', title: 'Cantidad', show: true },
-    { name: 'localId', title: 'Local / Punto de Venta', show: true },
-    { name: 'providerId', title: 'Proveedor', show: true },
-    { name: 'purchasePrice', title: 'Precio de Compra', show: false },
-    { name: 'salePrice', title: 'Precio de Venta', show: true },
+    { name: 'image', title: 'Imagen Principal', show: true, showInput: true },
+    { name: 'name', title: 'Nombre del Producto', show: true, showInput: true },
+    { name: 'barcode', title: 'Codigo de barras', show: true, showInput: true },
+    { name: 'stock', title: 'Cantidad', show: true, showInput: false },
+    {
+      name: 'localId',
+      title: 'Local / Punto de Venta',
+      show: true,
+      showInput: true,
+    },
+    { name: 'providerId', title: 'Proveedor', show: true, showInput: true },
+    {
+      name: 'purchasePrice',
+      title: 'Precio de Compra',
+      show: false,
+      showInput: false,
+    },
+    {
+      name: 'salePrice',
+      title: 'Precio de Venta',
+      show: true,
+      showInput: true,
+    },
     {
       name: 'oldPrice',
       title: 'Precio de Venta (Anteriormente)',
       show: showOldPrice,
+      showInput: true,
     },
-    { name: 'categoryId', title: 'Categoría', show: false },
-    { name: 'brandId', title: 'Marca', show: false },
-    { name: 'status', title: 'Estado', show: true },
-    { name: 'updatedAt', title: 'Última Actualización', show: false },
+    { name: 'categoryId', title: 'Categoría', show: false, showInput: false },
+    { name: 'brandId', title: 'Marca', show: false, showInput: false },
+    { name: 'status', title: 'Estado', show: true, showInput: true },
+    {
+      name: 'updatedAt',
+      title: 'Última Actualización',
+      show: false,
+      showInput: false,
+    },
   ];
 };
 

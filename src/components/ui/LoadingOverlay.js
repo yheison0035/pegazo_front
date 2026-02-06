@@ -1,14 +1,12 @@
 'use client';
 
-export default function LoadingOverlay({ show, text = 'Procesando...' }) {
+export default function LoadingOverlay({ show = false, text = 'Cargando...' }) {
   if (!show) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-xl p-6 flex flex-col items-center gap-4 animate-fade-in">
-        <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-sm font-medium text-gray-700">{text}</p>
-      </div>
+    <div className="absolute inset-0 z-10 bg-white/70 backdrop-blur-sm flex flex-col items-center justify-center">
+      <div className="h-10 w-10 border-4 border-gray-300 border-t-orange-600 rounded-full animate-spin" />
+      <p className="mt-3 text-sm text-gray-600">{text}</p>
     </div>
   );
 }

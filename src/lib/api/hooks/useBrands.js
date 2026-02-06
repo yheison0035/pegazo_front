@@ -26,7 +26,10 @@ export default function useBrands() {
     }
   }, []);
 
-  const getBrandsFn = useCallback(() => wrap(getBrands), [wrap]);
+  const getBrandsFn = useCallback(
+    (page, limit) => wrap(getBrands, page, limit),
+    [wrap]
+  );
   const getBrandByIdFn = useCallback((id) => wrap(getBrandById, id), [wrap]);
   const createBrandFn = useCallback((dto) => wrap(createBrand, dto), [wrap]);
   const updateBrandFn = useCallback(

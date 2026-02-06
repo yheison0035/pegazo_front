@@ -26,7 +26,10 @@ export default function useCategories() {
     }
   }, []);
 
-  const getCategoriesFn = useCallback(() => wrap(getCategories), [wrap]);
+  const getCategoriesFn = useCallback(
+    (page, limit) => wrap(getCategories, page, limit),
+    [wrap]
+  );
   const getCategoryByIdFn = useCallback(
     (id) => wrap(getCategoryById, id),
     [wrap]

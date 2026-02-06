@@ -26,7 +26,10 @@ export default function useCustomers() {
     }
   }, []);
 
-  const getCustomersFn = useCallback(() => wrap(getCustomers), [wrap]);
+  const getCustomersFn = useCallback(
+    (page, limit) => wrap(getCustomers, page, limit),
+    [wrap]
+  );
   const getCustomerByIdFn = useCallback(
     (id) => wrap(getCustomerById, id),
     [wrap]

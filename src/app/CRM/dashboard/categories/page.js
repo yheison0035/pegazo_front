@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import ViewModal from '../../viewModal';
 import Table from '@/components/dashboard/tables/table';
+import Pagination from '@/components/dashboard/tables/segments/pagination';
 import Link from 'next/link';
 import RoleGuard from '@/auth/roleGuard';
 import { useAuth } from '@/context/authContext';
@@ -15,110 +16,125 @@ import {
 } from '@/lib/api/utils/categories.config';
 import ConfirmDeleteModal from '@/components/dashboard/tables/segments/confirmDeleteModal';
 import AlertModal from '@/components/dashboard/modals/alertModal';
+import LoadingOverlay from '@/components/ui/LoadingOverlay';
+import useColumnFilters from '@/components/dashboard/tables/hooks/useColumnFilters';
+import { useDebounce } from '@/components/dashboard/tables/hooks/useDebounce';
 
 export default function Categories() {
+  const { usuario } = useAuth();
+  const { getCategories, deleteCategory, loading } = useCategories();
+
   const [categories, setCategories] = useState([]);
-  const [selectedCategories, setSelectedCategories] = useState(null);
+  const [meta, setMeta] = useState(null);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
-  const { usuario } = useAuth();
-  const [alert, setAlert] = useState({ type: '', message: '', url: '' });
+  const [alert, setAlert] = useState({});
 
-  const { getCategories, deleteCategory, loading, error } = useCategories();
+  const { filters, handleFilterChange } = useColumnFilters({
+    name: '',
+    description: '',
+    status: '',
+    localId: '',
+  });
+
+  const debouncedFilters = useDebounce(filters, 400);
 
   const fetchCategories = useCallback(async () => {
-    try {
-      const { data } = await getCategories();
-      setCategories(data);
-    } catch (err) {
-      console.error(err);
-    }
-  }, [getCategories]);
+    const res = await getCategories({
+      page,
+      limit,
+      ...debouncedFilters,
+    });
+
+    setCategories(res.data);
+    setMeta(res.meta);
+  }, [getCategories, page, limit, debouncedFilters]);
 
   useEffect(() => {
     fetchCategories();
   }, [fetchCategories]);
 
   const handleDeleteClick = (id, name) => {
-    setDeleteTarget({ id, name, type: 'esta categoria' });
+    setDeleteTarget({ id, name, type: 'esta categoría' });
     setShowDeleteModal(true);
   };
 
   const confirmDelete = async () => {
-    if (!deleteTarget) return;
-
-    try {
-      await deleteCategory(deleteTarget.id);
-      setAlert({
-        type: 'success',
-        message: 'Categoría eliminada correctamente.',
-      });
-      setShowDeleteModal(false);
-      setDeleteTarget(null);
-      await fetchCategories();
-    } catch (err) {
-      setAlert({
-        type: 'error',
-        message: err?.message || 'Error al eliminar categoría',
-      });
-    }
+    await deleteCategory(deleteTarget.id);
+    setShowDeleteModal(false);
+    setDeleteTarget(null);
+    fetchCategories();
   };
 
   return (
     <RoleGuard allowedRoles={Object.values(Roles)}>
       <div className="w-full p-4">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
-          <h1 className="text-xl md:text-2xl font-semibold text-gray-800">
-            Listado de Categorías
-          </h1>
+        <div className="flex flex-col md:flex-row justify-between mb-4 gap-4">
+          <h1 className="text-2xl font-semibold">Listado de Categorías</h1>
 
-          <div className="flex gap-2">
-            <Link
-              href="/CRM/dashboard/categories/new"
-              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm transition"
-            >
-              <PlusIcon className="w-4 h-4" />
-              Agregar categoría
-            </Link>
-          </div>
+          <Link
+            href="/CRM/dashboard/categories/new"
+            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm"
+          >
+            <PlusIcon className="w-4 h-4" />
+            Agregar categoría
+          </Link>
         </div>
 
-        <div className="overflow-x-auto bg-white shadow-md rounded-lg">
+        <div className="bg-white rounded-lg shadow relative">
+          <LoadingOverlay show={loading} text="Cargando categorías..." />
+
           <Table
             header={getHeaderTableCategories()}
             info={categories}
             view="categories"
-            setSelected={setSelectedCategories}
             rol={usuario?.role}
-            fetchData={fetchCategories}
             loading={loading}
-            error={error}
+            filters={filters}
+            handleFilterChange={handleFilterChange}
+            setSelected={setSelectedCategory}
             handleDeleteClick={handleDeleteClick}
           />
-          {selectedCategories && (
-            <ViewModal
-              data={selectedCategories}
-              type="categories"
-              onClose={() => setSelectedCategories(null)}
-              viewModalConfig={viewModalConfig}
-            />
-          )}
-          {showDeleteModal && (
-            <ConfirmDeleteModal
-              show={showDeleteModal}
-              setShow={setShowDeleteModal}
-              type={deleteTarget?.type}
-              name={deleteTarget?.name}
-              onConfirm={confirmDelete}
-              loading={loading}
+
+          {meta && (
+            <Pagination
+              page={meta.page}
+              totalPages={meta.totalPages}
+              limit={limit}
+              setPage={setPage}
+              setLimit={setLimit}
             />
           )}
         </div>
+
+        {selectedCategory && (
+          <ViewModal
+            data={selectedCategory}
+            type="categories"
+            onClose={() => setSelectedCategory(null)}
+            viewModalConfig={viewModalConfig}
+          />
+        )}
+
+        {showDeleteModal && (
+          <ConfirmDeleteModal
+            show={showDeleteModal}
+            setShow={setShowDeleteModal}
+            type={deleteTarget?.type}
+            name={deleteTarget?.name}
+            onConfirm={confirmDelete}
+            loading={loading}
+          />
+        )}
+
         <AlertModal
           type={alert.type}
           message={alert.message}
-          onClose={() => setAlert({ type: '', message: '', url: '' })}
-          url={alert.url}
+          onClose={() => setAlert({})}
         />
       </div>
     </RoleGuard>

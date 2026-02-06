@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import ViewModal from '../../viewModal';
 import Table from '@/components/dashboard/tables/table';
+import Pagination from '@/components/dashboard/tables/segments/pagination';
 import Link from 'next/link';
 import RoleGuard from '@/auth/roleGuard';
 import { useAuth } from '@/context/authContext';
@@ -15,25 +16,47 @@ import {
 } from '@/lib/api/utils/customers.config';
 import ConfirmDeleteModal from '@/components/dashboard/tables/segments/confirmDeleteModal';
 import AlertModal from '@/components/dashboard/modals/alertModal';
+import LoadingOverlay from '@/components/ui/LoadingOverlay';
+import useColumnFilters from '@/components/dashboard/tables/hooks/useColumnFilters';
+import { useDebounce } from '@/components/dashboard/tables/hooks/useDebounce';
 
 export default function Customers() {
+  const { usuario } = useAuth();
+  const { getCustomers, deleteCustomer, loading } = useCustomers();
+
   const [customers, setCustomers] = useState([]);
-  const [selectedCustomers, setSelectedCustomers] = useState(null);
+  const [meta, setMeta] = useState(null);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
-  const { usuario } = useAuth();
-  const [alert, setAlert] = useState({ type: '', message: '', url: '' });
+  const [alert, setAlert] = useState({});
 
-  const { getCustomers, deleteCustomer, loading, error } = useCustomers();
+  const { filters, handleFilterChange } = useColumnFilters({
+    type_document: '',
+    document: '',
+    name: '',
+    email: '',
+    localId: '',
+    phone: '',
+    city: '',
+    status: '',
+  });
+
+  const debouncedFilters = useDebounce(filters, 400);
 
   const fetchCustomers = useCallback(async () => {
-    try {
-      const { data } = await getCustomers();
-      setCustomers(data);
-    } catch (err) {
-      console.error(err);
-    }
-  }, [getCustomers]);
+    const res = await getCustomers({
+      page,
+      limit,
+      ...debouncedFilters,
+    });
+
+    setCustomers(res.data);
+    setMeta(res.meta);
+  }, [getCustomers, page, limit, debouncedFilters]);
 
   useEffect(() => {
     fetchCustomers();
@@ -45,80 +68,77 @@ export default function Customers() {
   };
 
   const confirmDelete = async () => {
-    if (!deleteTarget) return;
-
-    try {
-      await deleteCustomer(deleteTarget.id);
-      setAlert({
-        type: 'success',
-        message: 'Cliente eliminado correctamente.',
-      });
-      setShowDeleteModal(false);
-      setDeleteTarget(null);
-      await fetchCustomers();
-    } catch (err) {
-      setAlert({
-        type: 'error',
-        message: err?.message || 'Error al eliminar cliente',
-      });
-    }
+    await deleteCustomer(deleteTarget.id);
+    setShowDeleteModal(false);
+    setDeleteTarget(null);
+    fetchCustomers();
   };
 
   return (
     <RoleGuard allowedRoles={Object.values(Roles)}>
       <div className="w-full p-4">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
-          <h1 className="text-xl md:text-2xl font-semibold text-gray-800">
-            Listado de Clientes
-          </h1>
+        <div className="flex justify-between mb-4">
+          <h1 className="text-2xl font-semibold">Listado de Clientes</h1>
 
-          <div className="flex gap-2">
-            <Link
-              href="/CRM/dashboard/customers/new"
-              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm transition"
-            >
-              <PlusIcon className="w-4 h-4" />
-              Agregar cliente
-            </Link>
-          </div>
+          <Link
+            href="/CRM/dashboard/customers/new"
+            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm"
+          >
+            <PlusIcon className="w-4 h-4" />
+            Agregar cliente
+          </Link>
         </div>
 
-        <div className="overflow-x-auto bg-white shadow-md rounded-lg">
+        <div className="bg-white rounded-lg shadow relative">
+          <LoadingOverlay show={loading} text="Cargando clientes..." />
+
           <Table
             header={getHeaderTableCustomers()}
             info={customers}
             view="customers"
-            setSelected={setSelectedCustomers}
             rol={usuario?.role}
-            fetchData={fetchCustomers}
             loading={loading}
-            error={error}
+            filters={filters}
+            handleFilterChange={handleFilterChange}
+            setSelected={setSelectedCustomer}
             handleDeleteClick={handleDeleteClick}
           />
-          {selectedCustomers && (
-            <ViewModal
-              data={selectedCustomers}
-              type="customers"
-              onClose={() => setSelectedCustomers(null)}
-              viewModalConfig={viewModalConfig}
-            />
-          )}
-          {showDeleteModal && (
-            <ConfirmDeleteModal
-              show={showDeleteModal}
-              setShow={setShowDeleteModal}
-              type={deleteTarget?.type}
-              name={deleteTarget?.name}
-              onConfirm={confirmDelete}
-              loading={loading}
+
+          {meta && (
+            <Pagination
+              page={meta.page}
+              totalPages={meta.totalPages}
+              limit={limit}
+              setPage={setPage}
+              setLimit={setLimit}
             />
           )}
         </div>
+
+        {selectedCustomer && (
+          <ViewModal
+            data={selectedCustomer}
+            type="customers"
+            onClose={() => setSelectedCustomer(null)}
+            viewModalConfig={viewModalConfig}
+          />
+        )}
+
+        {showDeleteModal && (
+          <ConfirmDeleteModal
+            show={showDeleteModal}
+            setShow={setShowDeleteModal}
+            type={deleteTarget?.type}
+            name={deleteTarget?.name}
+            onConfirm={confirmDelete}
+            loading={loading}
+          />
+        )}
+
         <AlertModal
           type={alert.type}
           message={alert.message}
-          onClose={() => setAlert({ type: '', message: '', url: '' })}
-          url={alert.url}
+          onClose={() => setAlert({})}
         />
       </div>
     </RoleGuard>

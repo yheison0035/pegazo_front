@@ -26,7 +26,10 @@ export default function useLocals() {
     }
   }, []);
 
-  const getLocalsFn = useCallback(() => wrap(getLocals), [wrap]);
+  const getLocalsFn = useCallback(
+    (page, limit) => wrap(getLocals, page, limit),
+    [wrap]
+  );
   const getLocalByIdFn = useCallback((id) => wrap(getLocalById, id), [wrap]);
   const createLocalFn = useCallback((dto) => wrap(createLocal, dto), [wrap]);
   const updateLocalFn = useCallback(

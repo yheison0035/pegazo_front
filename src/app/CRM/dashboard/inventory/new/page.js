@@ -58,7 +58,7 @@ export default function NewProduct() {
     const invalidVariant = formData.variants.find(
       (v) => !v.color || !v.stock || v.stock <= 0
     );
-    console.log(invalidVariant);
+
     if (invalidVariant) {
       return setAlert({
         type: 'warning',

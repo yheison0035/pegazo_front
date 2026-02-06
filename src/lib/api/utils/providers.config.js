@@ -47,15 +47,25 @@ export const getFormFieldsProviders = () => [
 ];
 
 export const getHeaderTableProviders = () => [
-  { name: 'name', title: 'Empresa', show: true },
-  { name: 'contactName', title: 'Nombre de Contacto', show: true },
-  { name: 'email', title: 'Correo Electrónico', show: false },
-  { name: 'productType', title: 'Tipo de Producto', show: true },
-  { name: 'address', title: 'Dirección', show: true },
-  { name: 'city', title: 'Ciudad', show: true },
-  { name: 'department', title: 'Departamento', show: false },
-  { name: 'status', title: 'Estado', show: true },
-  { name: 'phone', title: 'Teléfono', show: true },
+  { name: 'name', title: 'Empresa', show: true, showInput: true },
+  {
+    name: 'contactName',
+    title: 'Nombre de Contacto',
+    show: true,
+    showInput: true,
+  },
+  {
+    name: 'productType',
+    title: 'Tipo de Producto',
+    show: true,
+    showInput: true,
+  },
+  { name: 'address', title: 'Dirección', show: true, showInput: true },
+  { name: 'city', title: 'Ciudad', show: true, showInput: true },
+  { name: 'status', title: 'Estado', show: true, showInput: true },
+  { name: 'phone', title: 'Teléfono', show: true, showInput: true },
+  { name: 'email', title: 'Correo Electrónico', show: false, showInput: false },
+  { name: 'department', title: 'Departamento', show: false, showInput: false },
 ];
 
 export const viewModalConfig = {

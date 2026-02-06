@@ -26,7 +26,10 @@ export default function useProviders() {
     }
   }, []);
 
-  const getProvidersFn = useCallback(() => wrap(getProviders), [wrap]);
+  const getProvidersFn = useCallback(
+    (page, limit) => wrap(getProviders, page, limit),
+    [wrap]
+  );
   const getProviderByIdFn = useCallback(
     (id) => wrap(getProviderById, id),
     [wrap]
