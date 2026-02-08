@@ -87,7 +87,7 @@ export default function SalesRangeReModal({ onClose }) {
           </div>
         </div>
 
-        <div className="bg-gray-50 px-8 py-6 border-b">
+        <div className="bg-gray-50 px-8 py-6 border-b border-gray-300">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
             <div>
               <label className="flex items-center gap-2 text-xs font-semibold uppercase text-gray-600">
@@ -175,7 +175,18 @@ export default function SalesRangeReModal({ onClose }) {
               <h3 className="text-lg font-semibold text-gray-800 mb-4">
                 Resumen General
               </h3>
-
+              <span className="text-sm text-gray-600">
+                {Object.entries(result.total.users).map(([user]) => (
+                  <div
+                    key={user}
+                    className="flex justify-between text-sm text-gray-700"
+                  >
+                    <span className="font-bold">
+                      {toggleCase(user, 'uppercase')}
+                    </span>
+                  </div>
+                ))}
+              </span>
               <div className="flex justify-between items-center mb-4">
                 <span className="text-sm text-gray-600">
                   Total de ventas en el rango de{' '}
@@ -192,19 +203,60 @@ export default function SalesRangeReModal({ onClose }) {
                 </span>
               </div>
 
-              <div className="border-t pt-3 space-y-2">
-                {Object.entries(result.total.users).map(([user, total]) => (
-                  <div
-                    key={user}
-                    className="flex justify-between text-sm text-gray-700"
-                  >
-                    <span className="font-bold">
-                      {toggleCase(user, 'uppercase')}
-                    </span>
-                    <span className="font-bold">{formatCOP(total)}</span>
-                  </div>
-                ))}
-                <div className="mt-4 pt-4 border-t flex justify-center">
+              <div className="mt-3 border-t border-gray-300 pt-3 space-y-2">
+                <h4 className="text-lg font-semibold text-gray-800 mb-4">
+                  Ventas por día
+                </h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-2">
+                  {result.daily.map((day) => {
+                    const hasSales = day.total > 0;
+
+                    return (
+                      <div
+                        key={day.date}
+                        className={`rounded-2xl border p-4 shadow-sm transition
+                        ${
+                          hasSales
+                            ? 'bg-white border-green-200'
+                            : 'bg-gray-50 border-gray-200'
+                        }`}
+                      >
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-semibold text-gray-700">
+                            {formatDateDMY(day.date)}
+                          </span>
+
+                          <span
+                            className={`text-sm font-bold ${
+                              hasSales ? 'text-green-600' : 'text-gray-400'
+                            }`}
+                          >
+                            {formatCOP(day.total)}
+                          </span>
+                        </div>
+
+                        {hasSales && (
+                          <div className="mt-2 h-2 w-full bg-green-100 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-green-500 rounded-full"
+                              style={{
+                                width: `${Math.min(
+                                  (day.total / result.total.total) * 100,
+                                  100
+                                )}%`,
+                              }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="pt-3 space-y-2">
+                <div className="mt-4 pt-4 border-t border-gray-300 flex justify-center">
                   <button
                     onClick={() => setShowMethods((prev) => !prev)}
                     className="text-sm font-medium text-green-700 hover:text-green-800 transition cursor-pointer"

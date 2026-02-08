@@ -16,11 +16,9 @@ export function toFullISO(input) {
 export function formatDateDMY(value) {
   if (!value) return 'No disponible';
 
-  return new Date(value).toLocaleDateString('es-CO', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  });
+  const [year, month, day] = value.split('-');
+
+  return `${day}/${month}/${year}`;
 }
 
 // Convierte una fecha (YYYY-MM-DD) a fecha+hora local real en ISO

@@ -47,7 +47,7 @@ export default function ViewModal({ data, type, onClose, viewModalConfig }) {
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col relative">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-20 text-white hover:text-gray-200 transition"
+          className="absolute top-4 right-4 z-20 text-white hover:text-gray-200 transition cursor-pointer"
         >
           <XMarkIcon className="w-6 h-6" />
         </button>

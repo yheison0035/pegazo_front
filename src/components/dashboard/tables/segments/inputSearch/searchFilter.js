@@ -10,7 +10,9 @@ export default function SearchFilter({
 }) {
   if (name === 'image') return null;
   if (!showInput) return null;
-
+  if (name === 'saleDate' || name === 'expenseDate') {
+    title = `dd/mm/yyyy`;
+  }
   return (
     <input
       type={type}

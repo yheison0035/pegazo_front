@@ -1,7 +1,11 @@
 import { canSeeOldPrice } from '@/hooks/inventory.permissions';
 import Actions from './actions';
 import PhoneContentData from './contentData/phone';
-import { formatCOP, formatDateDMY } from '@/lib/api/utils/utils';
+import {
+  formatCOP,
+  formatDateDMY,
+  formatDateTime,
+} from '@/lib/api/utils/utils';
 import { useAuth } from '@/context/authContext';
 
 export default function ContentData({
@@ -153,7 +157,7 @@ export default function ContentData({
                 <td className="px-4 py-3">{info.user?.name || '-----'}</td>
                 <td className="px-4 py-3">{info.paymentStatus || '-----'}</td>
                 <td className="px-4 py-3">
-                  {formatDateDMY(info.saleDate) || '-----'}
+                  {formatDateTime(info.saleDate) || '-----'}
                 </td>
               </>
             )}
@@ -170,7 +174,7 @@ export default function ContentData({
                 <td className="px-4 py-3">{info.local?.name || '-----'}</td>
                 <td className="px-4 py-3">{info.provider?.name || '-----'}</td>
                 <td className="px-4 py-3">
-                  {formatDateDMY(info.expenseDate) || '-----'}
+                  {formatDateTime(info.expenseDate) || '-----'}
                 </td>
                 <td className="px-4 py-3">{info.status || '-----'}</td>
               </>
