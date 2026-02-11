@@ -149,7 +149,7 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
               e.preventDefault();
             }
           }}
-          className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-orange-500"
+          className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
         />
 
         {search.trim().length >= 2 && (
