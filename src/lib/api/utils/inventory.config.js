@@ -134,7 +134,7 @@ export const getHeaderTableInventory = (usuario) => {
   const showOldPrice = canSeeOldPrice(usuario);
 
   return [
-    { name: 'image', title: 'Imagen Principal', show: true, showInput: true },
+    { name: 'image', title: 'Imagen Principal', show: true, showInput: false },
     { name: 'name', title: 'Nombre del Producto', show: true, showInput: true },
     { name: 'barcode', title: 'Codigo de barras', show: true, showInput: true },
     { name: 'stock', title: 'Cantidad', show: true, showInput: false },

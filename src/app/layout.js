@@ -10,7 +10,6 @@ export const metadata = {
     shortcut: ['/favicon.ico'],
     apple: ['/apple-icon.png'],
   },
-  themeColor: '#0f172a',
 };
 
 export default function RootLayout({ children }) {

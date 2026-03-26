@@ -19,33 +19,37 @@ const Table = ({
   setPrinterInvoice,
 }) => {
   return (
-    <table className="min-w-full text-sm text-left text-gray-700">
-      <Thead header={header} />
+    <div className="w-full overflow-hidden rounded-2xl border border-gray-200 bg-white/70 backdrop-blur-xl shadow-sm">
+      <div className="overflow-x-auto">
+        <table className="min-w-full text-sm text-gray-700">
+          <Thead header={header} />
 
-      <tbody>
-        {!loading && (
-          <InputFilters
-            allFilters={header}
-            filters={filters}
-            handleFilterChange={handleFilterChange}
-          />
-        )}
+          <tbody className="divide-y divide-gray-100">
+            {!loading && (
+              <InputFilters
+                allFilters={header}
+                filters={filters}
+                handleFilterChange={handleFilterChange}
+              />
+            )}
 
-        {loading ? (
-          <TableSkeleton rows={10} cols={header.length + 1} />
-        ) : (
-          <ContentData
-            paginatedData={info}
-            rol={rol}
-            view={view}
-            setSelected={setSelected}
-            setSelectedVariants={setSelectedVariants}
-            handleDeleteClick={handleDeleteClick}
-            setPrinterInvoice={setPrinterInvoice}
-          />
-        )}
-      </tbody>
-    </table>
+            {loading ? (
+              <TableSkeleton rows={8} cols={header.length + 1} />
+            ) : (
+              <ContentData
+                paginatedData={info}
+                rol={rol}
+                view={view}
+                setSelected={setSelected}
+                setSelectedVariants={setSelectedVariants}
+                handleDeleteClick={handleDeleteClick}
+                setPrinterInvoice={setPrinterInvoice}
+              />
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 };
 

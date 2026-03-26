@@ -41,6 +41,8 @@ export async function updateUser(id, dto) {
     managedLocals,
     local,
     avatar,
+    company,
+    companyId,
     ...cleanDto
   } = dto;
 

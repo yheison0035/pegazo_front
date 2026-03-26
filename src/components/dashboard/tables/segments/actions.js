@@ -6,7 +6,6 @@ import {
   Squares2X2Icon,
   PrinterIcon,
 } from '@heroicons/react/24/outline';
-
 import Link from 'next/link';
 
 export default function Actions({
@@ -19,92 +18,57 @@ export default function Actions({
   setPrinterInvoice,
 }) {
   const { canDelete } = usePermissions();
+
   return (
-    <div className="flex justify-center space-x-3">
-      <div className="relative group flex items-center">
-        <button
-          onClick={() => setSelected(info)}
-          disabled={isLocked}
-          className={`${
-            isLocked
-              ? 'text-gray-400 cursor-not-allowed'
-              : 'text-blue-500 hover:text-blue-700'
-          } cursor-pointer`}
-        >
-          <EyeIcon className="w-5 h-5" />
-        </button>
-        <span className="absolute -top-11 left-1/2 -translate-x-1/2 scale-0 group-hover:scale-100 transition bg-black text-white text-xs rounded px-2 py-1">
-          Ver detalles
-        </span>
-      </div>
+    <div className="flex justify-center items-center gap-2 opacity-70 group-hover:opacity-100 transition">
+      <button
+        onClick={() => setSelected(info)}
+        disabled={isLocked}
+        title="Ver"
+        className="p-2 rounded-lg hover:bg-blue-50 text-blue-600 transition cursor-pointer"
+      >
+        <EyeIcon className="w-5 h-5" />
+      </button>
 
       {view === 'inventory' && (
-        <div className="relative group flex items-center">
-          <button
-            onClick={() => setSelectedVariants(info)}
-            disabled={isLocked}
-            className={`${
-              isLocked
-                ? 'text-gray-400 cursor-not-allowed'
-                : 'text-blue-500 hover:text-blue-700'
-            } cursor-pointer`}
-          >
-            <Squares2X2Icon className="w-5 h-5" />
-          </button>
-          <span className="absolute -top-11 left-1/2 -translate-x-1/2 scale-0 group-hover:scale-100 transition bg-black text-white text-xs rounded px-2 py-1">
-            Variantes
-          </span>
-        </div>
+        <button
+          onClick={() => setSelectedVariants(info)}
+          disabled={isLocked}
+          title="Variantes"
+          className="p-2 rounded-lg hover:bg-indigo-50 text-indigo-600 transition cursor-pointer"
+        >
+          <Squares2X2Icon className="w-5 h-5" />
+        </button>
       )}
 
       {view === 'delivered_sales' && (
-        <div className="relative group flex items-center">
-          <button
-            onClick={() => setPrinterInvoice(info)}
-            disabled={isLocked}
-            className={`${
-              isLocked
-                ? 'text-gray-400 cursor-not-allowed'
-                : 'text-blue-500 hover:text-blue-700'
-            } cursor-pointer`}
-          >
-            <PrinterIcon className="w-5 h-5" />
-          </button>
-          <span className="absolute -top-11 left-1/2 -translate-x-1/2 scale-0 group-hover:scale-100 transition bg-black text-white text-xs rounded px-2 py-1">
-            Imprimir Factura
-          </span>
-        </div>
+        <button
+          onClick={() => setPrinterInvoice(info)}
+          disabled={isLocked}
+          title="Imprimir"
+          className="p-2 rounded-lg hover:bg-purple-50 text-purple-600 transition cursor-pointer"
+        >
+          <PrinterIcon className="w-5 h-5" />
+        </button>
       )}
 
-      <div className="relative group flex items-center">
-        <Link
-          href={isLocked ? '#' : `/CRM/dashboard/${view}/edit/${info.id}`}
-          className={`${
-            isLocked
-              ? 'text-gray-400 cursor-not-allowed'
-              : 'text-green-500 hover:text-green-700'
-          }`}
-        >
-          <PencilIcon className="w-5 h-5" />
-        </Link>
-        <span className="absolute -top-8 left-1/2 -translate-x-1/2 scale-0 group-hover:scale-100 transition bg-black text-white text-xs rounded px-2 py-1">
-          Editar
-        </span>
-      </div>
+      <Link
+        href={isLocked ? '#' : `/CRM/dashboard/${view}/edit/${info.id}`}
+        title="Editar"
+        className="p-2 rounded-lg hover:bg-green-50 text-green-600 transition cursor-pointer"
+      >
+        <PencilIcon className="w-5 h-5" />
+      </Link>
 
       {canDelete && (
-        <div className="relative group flex items-center">
-          <button
-            onClick={() => handleDelete()}
-            disabled={isLocked}
-            className="text-red-500 hover:text-red-700 cursor-pointer"
-          >
-            <TrashIcon className="w-5 h-5" />
-          </button>
-          <span className="absolute -top-8 left-1/2 -translate-x-1/2 scale-0 group-hover:scale-100 transition bg-black text-white text-xs rounded px-2 py-1">
-            Eliminar
-          </span>
-        </div>
+        <button
+          onClick={() => handleDelete()}
+          disabled={isLocked}
+          title="Eliminar"
+          className="p-2 rounded-lg hover:bg-red-50 text-red-600 transition cursor-pointer"
+        >
+          <TrashIcon className="w-5 h-5" />
+        </button>
       )}
     </div>
   );
