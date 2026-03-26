@@ -24,88 +24,101 @@ export default function Login() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg pb-9 mx-4 sm:mx-auto">
-        <div className="bg-blue-950 w-full rounded-t-2xl flex justify-center py-6">
+    <div className="min-h-screen flex bg-gray-100">
+      <div className="hidden md:flex w-1/2 relative bg-gradient-to-br from-blue-950 via-blue-900 to-blue-800 text-white p-16 flex-col justify-between">
+        <div className="absolute top-20 left-20 w-72 h-72 bg-blue-500 opacity-20 blur-3xl rounded-full"></div>
+        <div className="absolute bottom-20 right-20 w-72 h-72 bg-cyan-400 opacity-20 blur-3xl rounded-full"></div>
+
+        <div className="relative z-10 m-0 p-0">
           <img
-            src="/images/logo.png"
-            alt="Logo MotoRenting"
-            className="h-[100px] w-auto"
+            src="/images/logo_zorvex_blanco.png"
+            alt="Zorvex"
+            className="h-80"
           />
+
+          <h1 className="hidden">Zorvex CRM</h1>
+
+          <p className="text-blue-200 text-lg max-w-md">
+            Control total de tu negocio. Gestiona clientes, ventas y operaciones
+            en una sola plataforma.
+          </p>
         </div>
 
-        <h1 className="text-xl font-semibold text-gray-800 text-center py-4">
-          EUROPEATVSTORE
-        </h1>
+        <div className="relative z-10 text-sm text-blue-300">
+          © {new Date().getFullYear()} Zorvex. Todos los derechos reservados.
+        </div>
+      </div>
 
-        <form
-          onSubmit={handleSubmit}
-          autoComplete="on"
-          className="space-y-4 pl-6 pr-6 sm:pl-8 sm:pr8"
-        >
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-xs text-gray-700 font-semibold py-2"
-            >
-              Correo Electronico
-            </label>
-            <input
-              id="email"
-              type="email"
-              name="email"
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Ingrese su email"
-              required
-              className="w-full px-4 py-2 border text-gray-600 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-950 bg-transparent placeholder-gray-500"
-            />
-          </div>
+      <div className="flex w-full md:w-1/2 items-center justify-center px-6">
+        <div className="w-full max-w-md">
+          <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-200">
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+              Bienvenido
+            </h2>
 
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-xs text-gray-600 font-semibold py-2"
-            >
-              Contraseña
-            </label>
-            <div className="relative">
-              <input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                name="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Ingrese su contraseña"
-                required
-                className="w-full px-4 py-2 pr-10 border text-gray-600 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-950 bg-transparent placeholder-gray-500"
-              />
+            <p className="text-sm text-gray-500 mb-6">
+              Ingresa a tu cuenta para continuar
+            </p>
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div>
+                <label className="text-xs font-semibold text-gray-600">
+                  Correo electrónico
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  placeholder="ejemplo@empresa.com"
+                  className="w-full mt-1 px-4 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-gray-600">
+                  Contraseña
+                </label>
+
+                <div className="relative mt-1">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    placeholder="••••••••"
+                    className="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
+                  >
+                    {showPassword ? (
+                      <EyeSlashIcon className="h-5 w-5" />
+                    ) : (
+                      <EyeIcon className="h-5 w-5" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {error && <p className="text-red-500 text-sm">{error}</p>}
+
               <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-3 flex items-center text-gray-700 hover:text-gray-800 cursor-pointer"
-                tabIndex={-1}
+                type="submit"
+                className="w-full bg-gradient-to-r cursor-pointer from-blue-950 to-blue-800 text-white py-2 rounded-lg font-semibold hover:opacity-90 transition duration-200 shadow-md"
               >
-                {showPassword ? (
-                  <EyeSlashIcon className="h-5 w-5" />
-                ) : (
-                  <EyeIcon className="h-5 w-5" />
-                )}
+                Iniciar sesión
               </button>
-            </div>
+            </form>
+
+            <p className="text-xs text-gray-400 text-center mt-6">
+              Plataforma segura · Zorvex CRM
+            </p>
           </div>
-
-          {error && <p className="text-red-400 text-sm mt-4">{error}</p>}
-
-          <button
-            type="submit"
-            className="block w-full bg-blue-950 text-white font-semibold text-center py-2 mt-6 rounded-lg hover:bg-blue-800 transition duration-200 cursor-pointer"
-          >
-            Iniciar Sesión
-          </button>
-        </form>
+        </div>
       </div>
     </div>
   );

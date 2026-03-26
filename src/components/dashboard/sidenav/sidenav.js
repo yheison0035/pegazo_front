@@ -15,41 +15,73 @@ export default function SideNavigation() {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="md:hidden p-2 m-2 text-white bg-gray-950 rounded cursor-pointer"
+        className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-black/80 backdrop-blur border border-white/10"
       >
-        <Bars3Icon className="w-6 h-6" />
+        <Bars3Icon className="w-6 h-6 text-white" />
       </button>
 
+      {isOpen && (
+        <div
+          onClick={() => setIsOpen(false)}
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
+        />
+      )}
+
       <aside
-        className={`fixed top-0 left-0 z-40 h-full w-64 bg-gray-900 text-white flex flex-col transition-transform duration-300 ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        } md:translate-x-0 md:static`}
+        className={`
+          fixed top-0 left-0 z-50 h-full w-72 
+          bg-[#0B0F19] text-white flex flex-col
+          border-r border-white/5
+          transform transition-all duration-300 ease-in-out
+          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+          md:translate-x-0 md:static
+        `}
       >
-        <div className="flex flex-col items-center py-6 border-b border-gray-700">
-          <div className="w-full flex justify-end px-4 md:hidden">
-            <button
-              onClick={() => setIsOpen(false)}
-              className="text-white hover:text-red-400 cursor-pointer"
-            >
-              <XMarkIcon className="w-6 h-6" />
-            </button>
+        <div className="flex items-center justify-between px-6 py-5 border-b border-white/5">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3">
+              <img
+                src={
+                  usuario?.company?.logo || '/images/logo_europeatvstore.png'
+                }
+                alt="Company"
+                className="w-19 h-19 rounded-lg p-1 object-cover"
+              />
+
+              <div className="flex flex-col leading-tight">
+                <span className="text-sm font-semibold">
+                  {usuario?.company?.name || 'Europeatvstore'}
+                </span>
+                <span className="text-[11px] text-white/50">Workspace</span>
+              </div>
+            </div>
           </div>
 
-          <Avatar perfil={usuario} setPerfil={() => {}} />
-
-          <Link
-            href={'/CRM/dashboard/users/edit/' + usuario?.id}
-            className="text-sm text-white font-semibold underline hover:underline"
+          <button
+            onClick={() => setIsOpen(false)}
+            className="md:hidden text-white/70 hover:text-white"
           >
-            Editar perfil
-          </Link>
-
-          <h6 className="text-sm text-orange-400 font-semibold text-center mt-1">
-            Bienvenido(a) {usuario?.name}
-          </h6>
+            <XMarkIcon className="w-6 h-6" />
+          </button>
         </div>
 
-        <div className="flex-1 w-full overflow-y-auto custom-scroll py-4">
+        <div className="px-6 py-6 border-b border-white/5">
+          <div className="flex items-center gap-3">
+            <Avatar perfil={usuario} setPerfil={() => {}} />
+
+            <div className="flex flex-col">
+              <span className="text-sm font-medium">{usuario?.name}</span>
+              <Link
+                href={'/CRM/dashboard/users/edit/' + usuario?.id}
+                className="text-xs text-blue-400 hover:text-blue-300"
+              >
+                Editar perfil
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-2 py-4">
           <NavLinks />
         </div>
       </aside>
