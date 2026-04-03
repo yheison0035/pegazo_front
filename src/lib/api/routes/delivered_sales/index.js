@@ -28,6 +28,17 @@ export async function getSalesRangeReport(dto) {
   });
 }
 
+export async function getSalesRangeGeneralReport(dto) {
+  return apiFetch('/sales/reports/range/general', {
+    method: 'POST',
+    body: JSON.stringify({
+      startDate: dto.startDate,
+      endDate: dto.endDate,
+      localId: Number(dto.localId),
+    }),
+  });
+}
+
 export async function getDeliveredSales(params = {}) {
   const { page = 1, limit = 10, ...filters } = params;
 

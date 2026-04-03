@@ -1,5 +1,5 @@
 import apiFetch from '../../auth/client';
-import { parseCOPToNumber, toLocalDateTimeISO } from '../../utils/utils';
+import { parseCOPToNumber } from '../../utils/utils';
 
 export async function getExpenses(params = {}) {
   const { page = 1, limit = 10, ...filters } = params;
@@ -28,7 +28,7 @@ export async function createExpenses(dto) {
     amount: parseCOPToNumber(dto.amount) || 0,
     localId: Number(dto.localId) || null,
     providerId: Number(dto.providerId) || null,
-    expenseDate: toLocalDateTimeISO(dto.expenseDate) || '',
+    expenseDate: dto.expenseDate || '',
   };
 
   return apiFetch('/expenses', {
@@ -45,7 +45,7 @@ export async function updateExpenses(id, dto) {
     amount: parseCOPToNumber(dto.amount) || 0,
     localId: Number(dto.localId) || null,
     providerId: Number(dto.providerId) || null,
-    expenseDate: toLocalDateTimeISO(dto.expenseDate) || '',
+    expenseDate: dto.expenseDate || '',
   };
 
   return apiFetch(`/expenses/${id}`, {

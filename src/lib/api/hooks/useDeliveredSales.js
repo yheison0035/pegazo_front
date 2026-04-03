@@ -9,6 +9,7 @@ import {
   getVerifyCodeSale,
   getDailySalesReport,
   getSalesRangeReport,
+  getSalesRangeGeneralReport,
 } from '../routes/delivered_sales/index';
 
 export default function useDeliveredSales() {
@@ -43,6 +44,11 @@ export default function useDeliveredSales() {
     [wrap]
   );
 
+  const getSalesRangeGeneralReportFn = useCallback(
+    (dto) => wrap(getSalesRangeGeneralReport, dto),
+    [wrap]
+  );
+
   const getDeliveredSalesFn = useCallback(
     (page, limit) => wrap(getDeliveredSales, page, limit),
     [wrap]
@@ -71,6 +77,7 @@ export default function useDeliveredSales() {
     deleteDeliveredSale: deleteDeliveredSaleFn,
     getDailySalesReport: getDailySalesReportFn,
     getSalesRangeReport: getSalesRangeReportFn,
+    getSalesRangeGeneralReport: getSalesRangeGeneralReportFn,
     loading,
     error,
   };

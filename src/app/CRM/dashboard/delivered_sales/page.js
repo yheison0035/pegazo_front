@@ -19,6 +19,7 @@ import DailySalesReportModal from '@/components/dashboard/modals/dailySalesRepor
 import SalesRangeReModal from '@/components/dashboard/modals/salesRangeReModal';
 import useColumnFilters from '@/components/dashboard/tables/hooks/useColumnFilters';
 import { useDebounce } from '@/components/dashboard/tables/hooks/useDebounce';
+import SalesRangeGeneralModal from '@/components/dashboard/modals/salesRangeGeneralModal';
 
 export default function Delivered_Sales() {
   const { usuario } = useAuth();
@@ -34,6 +35,7 @@ export default function Delivered_Sales() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDailyReport, setShowDailyReport] = useState(false);
   const [showRangeReport, setShowRangeReport] = useState(false);
+  const [showGeneralReport, setShowGeneralReport] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [alert, setAlert] = useState({});
 
@@ -102,6 +104,14 @@ export default function Delivered_Sales() {
             <CalendarIcon className="w-4 h-4" />
             Venta por Semana
           </button>
+
+          <button
+            onClick={() => setShowGeneralReport(true)}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm cursor-pointer"
+          >
+            <CalendarIcon className="w-4 h-4" />
+            Ventas Generales
+          </button>
         </div>
       </div>
 
@@ -158,6 +168,10 @@ export default function Delivered_Sales() {
 
       {showRangeReport && (
         <SalesRangeReModal onClose={() => setShowRangeReport(false)} />
+      )}
+
+      {showGeneralReport && (
+        <SalesRangeGeneralModal onClose={() => setShowGeneralReport(false)} />
       )}
 
       <AlertModal
