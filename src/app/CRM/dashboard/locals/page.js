@@ -40,9 +40,6 @@ export default function Locals() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [alert, setAlert] = useState({});
 
-  /* =========================
-     🔍 FILTROS
-     ========================= */
   const { filters, handleFilterChange } = useColumnFilters({
     name: '',
     address: '',
@@ -54,9 +51,6 @@ export default function Locals() {
 
   const debouncedFilters = useDebounce(filters, 400);
 
-  /* =========================
-     📦 FETCH
-     ========================= */
   const fetchLocals = useCallback(async () => {
     const res = await getLocals({
       page,
@@ -72,9 +66,6 @@ export default function Locals() {
     fetchLocals();
   }, [fetchLocals]);
 
-  /* =========================
-     🗑️ DELETE
-     ========================= */
   const handleDeleteClick = (id, name) => {
     setDeleteTarget({ id, name, type: 'este local' });
     setShowDeleteModal(true);
@@ -113,7 +104,7 @@ export default function Locals() {
             loading={loading}
             filters={filters}
             handleFilterChange={(name, value) => {
-              setPage(1); // 👈 clave
+              setPage(1);
               handleFilterChange(name, value);
             }}
             setSelected={setSelectedLocals}

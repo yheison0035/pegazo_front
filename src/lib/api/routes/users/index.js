@@ -27,6 +27,7 @@ export async function createUser(dto) {
     localId: dto.localId ? Number(dto.localId) : null,
     role: dto.role || 'ASESOR',
     status: dto.status || 'ACTIVO',
+    birthdate: new Date(dto.birthdate),
   };
   return apiFetch('/users', { method: 'POST', body: JSON.stringify(body) });
 }
@@ -48,7 +49,7 @@ export async function updateUser(id, dto) {
   const body = {
     ...cleanDto,
     localId: cleanDto.localId ? Number(cleanDto.localId) : null,
-    birthdate: cleanDto.birthdate,
+    birthdate: new Date(cleanDto.birthdate),
     ...(password ? { password } : {}),
   };
 

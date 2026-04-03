@@ -15,9 +15,11 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const storedUser = localStorage.getItem('usuario');
     const token = localStorage.getItem('token');
+
     if (storedUser && token) {
       setUsuario(JSON.parse(storedUser));
     }
+
     setLoading(false);
   }, []);
 
@@ -25,6 +27,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await apiLogin(email, password);
       const { data } = res;
+
       const token = data?.access_token;
       if (!token) throw new Error('Token no recibido');
 
@@ -32,8 +35,11 @@ export const AuthProvider = ({ children }) => {
 
       const profile = await apiFetch('/auth/me');
       const { data: userData } = profile;
+
       localStorage.setItem('usuario', JSON.stringify(userData));
       setUsuario(userData);
+
+      return userData;
     } catch (err) {
       throw new Error(err.message || 'Credenciales inválidas');
     }

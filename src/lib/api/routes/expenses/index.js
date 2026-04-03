@@ -28,7 +28,7 @@ export async function createExpenses(dto) {
     amount: parseCOPToNumber(dto.amount) || 0,
     localId: Number(dto.localId) || null,
     providerId: Number(dto.providerId) || null,
-    expenseDate: dto.expenseDate || '',
+    expenseDate: new Date(dto.expenseDate) || '',
   };
 
   return apiFetch('/expenses', {
@@ -45,7 +45,7 @@ export async function updateExpenses(id, dto) {
     amount: parseCOPToNumber(dto.amount) || 0,
     localId: Number(dto.localId) || null,
     providerId: Number(dto.providerId) || null,
-    expenseDate: dto.expenseDate || '',
+    expenseDate: new Date(dto.expenseDate) || '',
   };
 
   return apiFetch(`/expenses/${id}`, {

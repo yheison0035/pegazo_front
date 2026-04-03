@@ -1,146 +1,59 @@
 'use client';
 
-import { useAuth } from '@/context/authContext';
-import {
-  ArchiveBoxIcon,
-  BuildingOfficeIcon,
-  TagIcon,
-  SparklesIcon,
-  BuildingStorefrontIcon,
-  BanknotesIcon,
-  UsersIcon,
-  ClipboardDocumentCheckIcon,
-  ChartBarIcon,
-  Cog6ToothIcon,
-  AdjustmentsHorizontalIcon,
-  ArrowLeftOnRectangleIcon,
-  ClipboardDocumentListIcon,
-} from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { ArrowLeftOnRectangleIcon } from '@heroicons/react/24/outline';
+import { useAuth } from '@/context/authContext';
+import useNavigation from '@/hooks/useNavigation';
 
 export default function NavLinks() {
   const { usuario, loading, logout } = useAuth();
   const pathname = usePathname();
+  const links = useNavigation();
 
   if (loading || !usuario) return null;
-
-  const links = [
-    {
-      name: 'Locales',
-      href: '/CRM/dashboard/locals',
-      icon: BuildingOfficeIcon,
-      roles: ['SUPER_ADMIN'],
-    },
-    {
-      name: 'Categorías',
-      href: '/CRM/dashboard/categories',
-      icon: TagIcon,
-      roles: ['SUPER_ADMIN', 'ADMIN'],
-    },
-    {
-      name: 'Marcas',
-      href: '/CRM/dashboard/brands',
-      icon: SparklesIcon,
-      roles: ['SUPER_ADMIN', 'ADMIN'],
-    },
-    {
-      name: 'Proveedores',
-      href: '/CRM/dashboard/providers',
-      icon: BuildingStorefrontIcon,
-      roles: ['SUPER_ADMIN', 'ADMIN'],
-    },
-    {
-      name: 'Inventario',
-      href: '/CRM/dashboard/inventory',
-      icon: ArchiveBoxIcon,
-      roles: ['SUPER_ADMIN', 'ADMIN'],
-    },
-    {
-      name: 'Clientes',
-      href: '/CRM/dashboard/customers',
-      icon: UsersIcon,
-      roles: ['SUPER_ADMIN', 'ADMIN'],
-    },
-    {
-      name: 'Usuarios / Roles',
-      href: '/CRM/dashboard/users',
-      icon: Cog6ToothIcon,
-      roles: ['SUPER_ADMIN'],
-    },
-    {
-      name: 'Pedidos (pendiente)',
-      href: '/CRM/dashboard/orders',
-      icon: ClipboardDocumentListIcon,
-      roles: ['SUPER_ADMIN'],
-    },
-    {
-      name: 'Realizar Venta',
-      href: '/CRM/dashboard/sales',
-      icon: BanknotesIcon,
-      roles: ['SUPER_ADMIN', 'ADMIN'],
-    },
-
-    {
-      name: 'Ventas Realizadas',
-      href: '/CRM/dashboard/delivered_sales',
-      icon: ClipboardDocumentCheckIcon,
-      roles: ['SUPER_ADMIN', 'ADMIN'],
-    },
-    {
-      name: 'Gastos',
-      href: '/CRM/dashboard/expenses',
-      icon: ChartBarIcon,
-      roles: ['SUPER_ADMIN', 'ADMIN'],
-    },
-
-    {
-      name: 'Estadísticas',
-      href: '/CRM/dashboard/statistics',
-      icon: AdjustmentsHorizontalIcon,
-      roles: ['SUPER_ADMIN'],
-    },
-  ];
 
   return (
     <div className="flex flex-col w-full h-[calc(100vh-80px)] overflow-y-auto px-6 pb-6 custom-scroll">
       <nav className="flex flex-col space-y-2">
-        {links
-          .filter((link) => link.roles.includes(usuario.role))
-          .map((link) => {
-            const LinkIcon = link.icon;
-            const isActive = pathname.startsWith(link.href);
+        {links.length === 0 && (
+          <p className="text-white/50 text-sm px-3">Sin módulos disponibles</p>
+        )}
 
-            return (
-              <Link
-                key={link.name}
-                href={link.href}
-                className={`
-                  relative flex items-center gap-3 px-3 py-2.5 rounded-lg
-                  text-sm font-medium transition-all duration-200
-                  ${
-                    isActive
-                      ? 'bg-white/5 text-white'
-                      : 'text-white/60 hover:text-white hover:bg-white/5'
-                  }
-                `}
-              >
-                {isActive && (
-                  <span className="absolute left-0 top-0 h-full w-[3px] bg-cyan-400 rounded-r-full" />
-                )}
+        {links.map((link) => {
+          const LinkIcon = link.icon;
+          const isActive = pathname.startsWith(link.href);
 
-                <LinkIcon className="w-5 h-5 shrink-0" />
+          return (
+            <Link
+              key={link.name}
+              href={link.href}
+              className={`
+                relative flex items-center gap-3 px-3 py-2.5 rounded-lg
+                text-sm font-medium transition-all duration-200
+                ${
+                  isActive
+                    ? 'bg-white/5 text-white'
+                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                }
+              `}
+            >
+              {isActive && (
+                <span className="absolute left-0 top-0 h-full w-[3px] bg-cyan-400 rounded-r-full" />
+              )}
 
-                <span>{link.name}</span>
-              </Link>
-            );
-          })}
+              <LinkIcon className="w-5 h-5 shrink-0" />
+
+              <span>{link.name}</span>
+            </Link>
+          );
+        })}
       </nav>
 
       <div className="mt-6 border-t border-gray-700 pt-4">
         <button
           onClick={logout}
-          className="flex items-center w-full space-x-3 px-3 py-2 rounded-lg transition text-gray-300 hover:text-white hover:bg-gray-800 cursor-pointer"
+          className="flex items-center w-full space-x-3 px-3 py-2 rounded-lg transition text-gray-300 hover:text-white hover:bg-gray-800"
         >
           <ArrowLeftOnRectangleIcon className="w-5 h-5 min-w-[20px]" />
           <p>Cerrar Sesión</p>

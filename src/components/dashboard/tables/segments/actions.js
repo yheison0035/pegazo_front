@@ -53,14 +53,18 @@ export default function Actions({
       )}
 
       <Link
-        href={isLocked ? '#' : `/CRM/dashboard/${view}/edit/${info.id}`}
+        href={
+          isLocked
+            ? '#'
+            : `/CRM/${view === 'dashboard' ? 'dashboard' : 'platform'}/${view}/edit/${info.id}`
+        }
         title="Editar"
         className="p-2 rounded-lg hover:bg-green-50 text-green-600 transition cursor-pointer"
       >
         <PencilIcon className="w-5 h-5" />
       </Link>
 
-      {canDelete && (
+      {(canDelete || view === 'companies') && (
         <button
           onClick={() => handleDelete()}
           disabled={isLocked}

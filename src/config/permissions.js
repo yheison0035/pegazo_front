@@ -1,32 +1,28 @@
 export const ROLE_PERMISSIONS = {
+  SUPER_PLATFORM_ADMIN: {
+    '*': ['*'],
+  },
+
   SUPER_ADMIN: {
-    canDoEverything: true,
-    canViewAll: true,
-    canCreate: true,
-    canEdit: true,
-    canDelete: true,
-    canExport: true,
-    canImport: true,
-    canAssign: true,
+    '*': ['view', 'create', 'edit', 'delete', 'export', 'import'],
   },
+
   ADMIN: {
-    canDoEverything: false,
-    canViewAll: true,
-    canCreate: true,
-    canEdit: true,
-    canDelete: false,
-    canExport: false,
-    canImport: true,
-    canAssign: true,
+    locals: ['view', 'create', 'edit'],
+    inventory: ['view', 'create', 'edit'],
+    customers: ['view', 'create', 'edit'],
+    sales: ['view', 'create'],
+    delivered_sales: ['view'],
+    expenses: ['view', 'create'],
+    providers: ['view', 'create'],
+    categories: ['view', 'create'],
+    brands: ['view', 'create'],
+    statistics: ['view'],
   },
+
   ASESOR: {
-    canDoEverything: false,
-    canViewAll: false,
-    canCreate: true,
-    canEdit: true,
-    canDelete: false,
-    canExport: false,
-    canImport: false,
-    canAssign: false,
+    sales: ['view', 'create'],
+    customers: ['view', 'create'],
+    inventory: ['view'],
   },
 };

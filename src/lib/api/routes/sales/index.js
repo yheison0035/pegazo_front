@@ -8,7 +8,7 @@ export async function searchProducts(term) {
 export async function createSale(dto) {
   const body = {
     ...dto,
-    saleDate: dto.saleDate,
+    saleDate: new Date(dto.saleDate),
     localId: Number(dto.localId),
     customerId: Number(dto.customerId),
     userId: Number(dto.userId),

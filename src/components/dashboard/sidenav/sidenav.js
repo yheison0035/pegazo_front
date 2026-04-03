@@ -59,7 +59,7 @@ export default function SideNavigation() {
 
           <button
             onClick={() => setIsOpen(false)}
-            className="md:hidden text-white/70 hover:text-white"
+            className="md:hidden text-white/70 hover:text-white transition mb-20 ml-20 rounded-lg border border-white"
           >
             <XMarkIcon className="w-6 h-6" />
           </button>

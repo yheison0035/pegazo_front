@@ -256,6 +256,35 @@ export default function ContentData({
               </>
             )}
 
+            {view === 'companies' && (
+              <>
+                <td className="px-5 py-4">
+                  <div className="w-[120px] h-[130px] rounded-xl overflow-hidden flex items-center justify-center">
+                    <img
+                      src={info?.logo || '/images/no-image.png'}
+                      alt={info.name}
+                      className="object-cover bg-[#0B0F19]"
+                    />
+                  </div>
+                </td>
+                <td className="px-5 py-4 whitespace-nowrap">
+                  {info.name || '---'}
+                </td>
+                <td className="px-5 py-4 whitespace-nowrap">
+                  {info.type || '---'}
+                </td>
+                <td className="px-5 py-4 whitespace-nowrap">
+                  {info.manager || '---'}
+                </td>
+                <td className="px-5 py-4 whitespace-nowrap">
+                  {info.phone || '---'}
+                </td>
+                <td className="px-5 py-4 whitespace-nowrap">
+                  {info.status || '---'}
+                </td>
+              </>
+            )}
+
             <td className="px-5 py-4 text-center">
               <Actions
                 isLocked={isLocked}

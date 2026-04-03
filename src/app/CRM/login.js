@@ -15,8 +15,18 @@ export default function Login() {
 
   async function handleSubmit(e) {
     e.preventDefault();
+    setError('');
+
     try {
-      await login(email, password);
+      const user = await login(email, password);
+
+      const role = user?.role;
+
+      if (role === 'SUPER_PLATFORM_ADMIN') {
+        router.push('/CRM/platform/companies');
+        return;
+      }
+
       router.push('/CRM/dashboard/sales');
     } catch (err) {
       setError(err.message || 'Error en login');
@@ -31,12 +41,10 @@ export default function Login() {
 
         <div className="relative z-10 m-0 p-0">
           <img
-            src="/images/logo_zorvex_blanco.png"
+            src="https://res.cloudinary.com/dl7g5sslz/image/upload/v1775250791/logo_zorvex_blanco_u7cpht.png"
             alt="Zorvex"
             className="h-80"
           />
-
-          <h1 className="hidden">Zorvex CRM</h1>
 
           <p className="text-blue-200 text-lg max-w-md">
             Control total de tu negocio. Gestiona clientes, ventas y operaciones

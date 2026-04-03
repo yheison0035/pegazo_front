@@ -51,6 +51,7 @@ export default function DinamicForm({
     getPaymentMethods,
     getPaymentStatus,
     getTypeExpenses,
+    getTypeCompanies,
   } = useEnums();
 
   const handleChange = (e) => {
@@ -113,6 +114,7 @@ export default function DinamicForm({
       paymentMethod: getPaymentMethods,
       paymentStatus: getPaymentStatus,
       expenses: getTypeExpenses,
+      typeCompanies: getTypeCompanies,
     };
 
     const results = {};
