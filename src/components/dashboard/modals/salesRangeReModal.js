@@ -11,7 +11,7 @@ import {
 import useLocals from '@/lib/api/hooks/useLocals';
 import useUsers from '@/lib/api/hooks/useUsers';
 import useDeliveredSales from '@/lib/api/hooks/useDeliveredSales';
-import { formatCOP, formatDateDMY, toggleCase } from '@/lib/api/utils/utils';
+import { formatCOP, toggleCase } from '@/lib/api/utils/utils';
 
 export default function SalesRangeReModal({ onClose }) {
   const [locals, setLocals] = useState([]);
@@ -191,11 +191,11 @@ export default function SalesRangeReModal({ onClose }) {
                 <span className="text-sm text-gray-600">
                   Total de ventas en el rango de{' '}
                   <span className="font-bold text-gray-900">
-                    {formatDateDMY(result.startDate)}
+                    {result.startDate}
                   </span>{' '}
                   a{' '}
                   <span className="font-bold text-gray-900">
-                    {formatDateDMY(result.endDate)}
+                    {result.endDate}
                   </span>
                 </span>
                 <span className="text-2xl font-bold text-green-600">
@@ -224,7 +224,7 @@ export default function SalesRangeReModal({ onClose }) {
                       >
                         <div className="flex justify-between items-center">
                           <span className="text-sm font-semibold text-gray-700">
-                            {formatDateDMY(day.date)}
+                            {day.date}
                           </span>
 
                           <span
@@ -262,8 +262,8 @@ export default function SalesRangeReModal({ onClose }) {
                     className="text-sm font-medium text-green-700 hover:text-green-800 transition cursor-pointer"
                   >
                     {showMethods
-                      ? 'Ocultar detalle por método'
-                      : 'Ver detalle por método'}
+                      ? 'Ocultar detalle por método de pago'
+                      : 'Ver detalle por método de pago'}
                   </button>
                 </div>
               </div>

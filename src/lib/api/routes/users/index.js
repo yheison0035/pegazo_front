@@ -1,5 +1,4 @@
 import apiFetch from '../../auth/client';
-import { toFullISO } from '../../utils/utils';
 
 export async function getUsers(params = {}) {
   const { page = 1, limit = 10, ...filters } = params;
@@ -49,7 +48,7 @@ export async function updateUser(id, dto) {
   const body = {
     ...cleanDto,
     localId: cleanDto.localId ? Number(cleanDto.localId) : null,
-    birthdate: cleanDto.birthdate ? toFullISO(cleanDto.birthdate) : undefined,
+    birthdate: cleanDto.birthdate,
     ...(password ? { password } : {}),
   };
 

@@ -1,5 +1,4 @@
 import apiFetch from '../../auth/client';
-import { toLocalDateTimeISO } from '../../utils/utils';
 
 export async function getVerifyCodeSale(code) {
   return apiFetch(`sales/verify/${code}`);
@@ -17,8 +16,8 @@ export async function getDailySalesReport(date, localId) {
 
 export async function getSalesRangeReport(dto) {
   const body = {
-    startDate: dto.startDate ? toLocalDateTimeISO(dto.startDate) : undefined,
-    endDate: dto.endDate ? toLocalDateTimeISO(dto.endDate) : undefined,
+    startDate: dto.startDate?.split('T')[0],
+    endDate: dto.endDate?.split('T')[0],
     localId: Number(dto.localId),
     userId: Number(dto.userId),
   };
@@ -72,7 +71,7 @@ export async function updateDeliveredSale(id, dto) {
 
   const body = {
     ...cleanDto,
-    saleDate: dto.saleDate ? toLocalDateTimeISO(dto.saleDate) : undefined,
+    saleDate: dto.saleDate,
     customerId: Number(cleanDto.customerId) || null,
     userId: Number(cleanDto.userId) || null,
     localId: Number(cleanDto.localId) || null,

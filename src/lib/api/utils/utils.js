@@ -1,88 +1,65 @@
-// Convierte una fecha en formato DD/MM/YYYY o cualquier formato reconocible por Date a ISO completo
-export function toFullISO(input) {
-  if (!input) return null;
+// TIMEZONE GLOBAL (Colombia)
+const TIMEZONE = 'America/Bogota';
 
-  if (typeof input === 'string' && input.includes('/')) {
-    const [d, m, y] = input.split('/').map((p) => p.trim());
-    const iso = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
-    const dt = new Date(iso);
-    return isNaN(dt.getTime()) ? null : dt.toISOString();
-  }
+// =============================
+// PARSE / NORMALIZACIÓN
+// =============================
 
-  const d = new Date(input);
-  return isNaN(d.getTime()) ? null : d.toISOString();
+// Convierte cualquier entrada a Date válido
+export function parseDate(value) {
+  if (!value) return null;
+
+  const date = new Date(value);
+  return isNaN(date.getTime()) ? null : date;
 }
 
+// Devuelve YYYY-MM-DD desde cualquier fecha
+export function toISODate(value) {
+  const date = parseDate(value);
+  if (!date) return null;
+
+  return date.toLocaleDateString('en-CA', {
+    timeZone: TIMEZONE,
+  });
+}
+
+// Normaliza fecha para inputs tipo <input type="date" />
+export function normalizeDateForInput(value) {
+  const iso = toISODate(value);
+  return iso || '';
+}
+
+// =============================
+// FORMATOS VISUALES
+// =============================
+
+// Formato DD/MM/YYYY
 export function formatDateDMY(value) {
-  if (!value) return 'No disponible';
+  const date = parseDate(value);
+  if (!date) return 'No disponible';
 
-  const [year, month, day] = value.split('-');
-
-  return `${day}/${month}/${year}`;
+  return date.toLocaleDateString('es-CO', {
+    timeZone: TIMEZONE,
+  });
 }
 
-// Convierte una fecha (YYYY-MM-DD) a fecha+hora local real en ISO
-export function toLocalDateTimeISO(input) {
-  if (!input) return null;
-
-  // Si ya viene como ISO completo, solo lo normalizamos
-  if (typeof input === 'string' && input.includes('T')) {
-    const d = new Date(input);
-    return isNaN(d.getTime()) ? null : d.toISOString();
-  }
-
-  // Si viene como YYYY-MM-DD (input date)
-  if (typeof input === 'string' && input.includes('-')) {
-    const [year, month, day] = input.split('-').map(Number);
-
-    const now = new Date(); // hora actual local
-
-    const localDateTime = new Date(
-      year,
-      month - 1,
-      day,
-      now.getHours(),
-      now.getMinutes(),
-      now.getSeconds(),
-      now.getMilliseconds()
-    );
-
-    return isNaN(localDateTime.getTime()) ? null : localDateTime.toISOString();
-  }
-
-  // Fallback genérico
-  const d = new Date(input);
-  return isNaN(d.getTime()) ? null : d.toISOString();
-}
-
-//
+// Fecha + hora (formato largo)
 export function formatDateTime(value) {
-  if (!value) return 'No disponible';
+  const date = parseDate(value);
+  if (!date) return 'No disponible';
 
-  return new Date(value).toLocaleString('es-CO', {
+  return date.toLocaleString('es-CO', {
+    timeZone: TIMEZONE,
     dateStyle: 'long',
     timeStyle: 'short',
   });
 }
 
-// Normaliza una fecha para usar en inputs tipo date (YYYY-MM-DD)
-export function normalizeDateForInput(input) {
-  if (!input) return '';
+// =============================
+// FORMATOS NUMÉRICOS
+// =============================
 
-  const d = new Date(input);
-  if (isNaN(d.getTime())) return '';
-
-  return d.toISOString().split('T')[0];
-}
-
-// Formatea un valor numérico agregando separadores de miles
-export const formatPrice = (value) => {
-  if (!value) return '';
-  const numberValue = value.toString().replace(/\D/g, '');
-  return new Intl.NumberFormat('es-CO').format(Number(numberValue));
-};
-
-// Formatea un número o cadena como moneda COP
+// Formatea número como COP
 export function formatCOP(value) {
   if (value === null || value === undefined || value === '') return '';
 
@@ -98,67 +75,76 @@ export function formatCOP(value) {
   });
 }
 
-// Convierte un valor formateado en COP a número
+// Convierte COP formateado a número
 export function parseCOPToNumber(value) {
-  if (value === null || value === undefined || value === '') return null;
+  if (!value) return null;
 
   if (typeof value === 'number') return value;
 
   const clean = value.toString().replace(/[^\d]/g, '');
-
-  if (!clean) return null;
-
-  return Number(clean);
+  return clean ? Number(clean) : null;
 }
 
-// Obtiene el valor de un objeto dado una ruta en notación de puntos
-export const getValueByPath = (obj, path) => {
-  return path.split('.').reduce((acc, key) => acc?.[key], obj);
-};
+// =============================
+// TEXTO
+// =============================
 
-// Normaliza texto: quita tildes, pasa a mayúsculas, elimina caracteres especiales y espacios extras
+// Normaliza texto (sin tildes, uppercase)
+export function normalizeText(text) {
+  if (!text) return '';
+
+  return text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase()
+    .trim();
+}
+
+// Cambia mayúsculas/minúsculas
+export function toggleCase(text, mode = 'toggle') {
+  if (!text) return '';
+
+  switch (mode) {
+    case 'uppercase':
+      return text.toUpperCase();
+    case 'lowercase':
+      return text.toLowerCase();
+    default:
+      return text
+        .split('')
+        .map((char) =>
+          char === char.toUpperCase() ? char.toLowerCase() : char.toUpperCase()
+        )
+        .join('');
+  }
+}
+
+// Formatea texto (quita tildes, caracteres raros y lo deja limpio)
 export function formatText(input) {
   if (!input) return '';
 
   return input
     .normalize('NFD') // separa tildes (á → a)
     .replace(/[\u0300-\u036f]/g, '') // elimina tildes
-    .toUpperCase() // todo en mayúscula
+    .toUpperCase() // mayúsculas
     .replace(/[^A-Z0-9 ]/g, '') // solo letras, números y espacios
-    .replace(/\s+/g, ' ') // un solo espacio
-    .trim(); // sin espacios al inicio/final
-}
-
-// Cambia el caso de un texto según el modo especificado
-export function toggleCase(text, modeText = 'toggle') {
-  if (!text) return '';
-
-  switch (modeText) {
-    case 'uppercase':
-      return text.toUpperCase();
-
-    case 'lowercase':
-      return text.toLowerCase();
-
-    case 'toggle':
-    default:
-      return text
-        .split('')
-        .map((char) => {
-          if (char === char.toUpperCase()) return char.toLowerCase();
-          if (char === char.toLowerCase()) return char.toUpperCase();
-          return char;
-        })
-        .join('');
-  }
-}
-
-// Normaliza texto: quita tildes, pasa a mayúsculas y elimina espacios extras
-export function normalizeText(text) {
-  if (!text) return '';
-  return text
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toUpperCase()
+    .replace(/\s+/g, ' ') // espacios simples
     .trim();
+}
+
+// =============================
+// UTILIDADES
+// =============================
+
+// Obtener valor por path (obj.a.b.c)
+export function getValueByPath(obj, path) {
+  return path.split('.').reduce((acc, key) => acc?.[key], obj);
+}
+
+// Formatea número con separadores
+export function formatPrice(value) {
+  if (!value) return '';
+
+  const numberValue = value.toString().replace(/\D/g, '');
+  return new Intl.NumberFormat('es-CO').format(Number(numberValue));
 }
