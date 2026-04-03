@@ -239,8 +239,8 @@ export default function SalesRangeGeneralModal({ onClose }) {
                     className="text-sm font-medium text-blue-700 hover:text-blue-800 transition cursor-pointer"
                   >
                     {showMethods
-                      ? 'Ocultar detalle por método'
-                      : 'Ver detalle por método'}
+                      ? 'Ocultar detalle por método de pago'
+                      : 'Ver detalle por método de pago'}
                   </button>
                 </div>
               </div>

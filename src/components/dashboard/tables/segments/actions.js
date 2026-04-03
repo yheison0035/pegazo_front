@@ -56,7 +56,7 @@ export default function Actions({
         href={
           isLocked
             ? '#'
-            : `/CRM/${view === 'dashboard' ? 'dashboard' : 'platform'}/${view}/edit/${info.id}`
+            : `/CRM/${view === 'platform' ? 'platform' : 'dashboard'}/${view}/edit/${info.id}`
         }
         title="Editar"
         className="p-2 rounded-lg hover:bg-green-50 text-green-600 transition cursor-pointer"
