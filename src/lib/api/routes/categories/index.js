@@ -34,7 +34,7 @@ export async function createCategory(dto) {
 }
 
 export async function updateCategory(id, dto) {
-  const { id: _id, createdAt, updatedAt, local, ...cleanDto } = dto;
+  const { id: _id, createdAt, updatedAt, local, companyId, ...cleanDto } = dto;
 
   const body = {
     ...cleanDto,

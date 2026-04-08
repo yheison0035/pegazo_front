@@ -1,89 +1,151 @@
 import {
-  ArchiveBoxIcon,
-  BuildingOfficeIcon,
+  HomeIcon,
+  BuildingOffice2Icon,
   TagIcon,
   SparklesIcon,
-  BuildingStorefrontIcon,
-  BanknotesIcon,
+  TruckIcon,
+  ArchiveBoxIcon,
   UsersIcon,
+  UserGroupIcon,
+  ShoppingCartIcon,
+  BanknotesIcon,
   ClipboardDocumentCheckIcon,
-  ChartBarIcon,
+  ChartBarSquareIcon,
   Cog6ToothIcon,
-  AdjustmentsHorizontalIcon,
-  ClipboardDocumentListIcon,
+  CalendarDaysIcon,
+  WrenchScrewdriverIcon,
 } from '@heroicons/react/24/outline';
 
-export const NAVIGATION = {
-  locals: {
-    name: 'Locales',
-    href: '/CRM/dashboard/locals',
-    icon: BuildingOfficeIcon,
-    roles: ['SUPER_ADMIN'],
+export const NAVIGATION = [
+  {
+    section: 'General',
+    items: [
+      {
+        name: 'Dashboard',
+        href: '/CRM/dashboard',
+        icon: HomeIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN'],
+      },
+      {
+        name: 'Locales',
+        href: '/CRM/dashboard/locals',
+        icon: BuildingOffice2Icon,
+        roles: ['SUPER_ADMIN'],
+      },
+    ],
   },
-  categories: {
-    name: 'Categorías',
-    href: '/CRM/dashboard/categories',
-    icon: TagIcon,
-    roles: ['SUPER_ADMIN', 'ADMIN'],
+
+  {
+    section: 'Inventario',
+    items: [
+      {
+        name: 'Categorías',
+        href: '/CRM/dashboard/categories',
+        icon: TagIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN'],
+      },
+      {
+        name: 'Marcas',
+        href: '/CRM/dashboard/brands',
+        icon: SparklesIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN'],
+      },
+      {
+        name: 'Proveedores',
+        href: '/CRM/dashboard/providers',
+        icon: TruckIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN'],
+      },
+      {
+        name: 'Inventario',
+        href: '/CRM/dashboard/inventory',
+        icon: ArchiveBoxIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN'],
+      },
+    ],
   },
-  brands: {
-    name: 'Marcas',
-    href: '/CRM/dashboard/brands',
-    icon: SparklesIcon,
-    roles: ['SUPER_ADMIN', 'ADMIN'],
+
+  {
+    section: 'Ventas',
+    items: [
+      {
+        name: 'Realizar Venta',
+        href: '/CRM/dashboard/sales',
+        icon: BanknotesIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN'],
+      },
+      {
+        name: 'Pedidos',
+        href: '/CRM/dashboard/orders',
+        icon: ShoppingCartIcon,
+        roles: ['SUPER_ADMIN'],
+      },
+      {
+        name: 'Ventas Realizadas',
+        href: '/CRM/dashboard/delivered_sales',
+        icon: ClipboardDocumentCheckIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN'],
+      },
+    ],
   },
-  providers: {
-    name: 'Proveedores',
-    href: '/CRM/dashboard/providers',
-    icon: BuildingStorefrontIcon,
-    roles: ['SUPER_ADMIN', 'ADMIN'],
+
+  {
+    section: 'Clientes',
+    items: [
+      {
+        name: 'Clientes',
+        href: '/CRM/dashboard/customers',
+        icon: UsersIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN'],
+      },
+    ],
   },
-  inventory: {
-    name: 'Inventario',
-    href: '/CRM/dashboard/inventory',
-    icon: ArchiveBoxIcon,
-    roles: ['SUPER_ADMIN', 'ADMIN'],
+
+  {
+    section: 'Operación',
+    items: [
+      {
+        name: 'Citas',
+        href: '/CRM/dashboard/appointments',
+        icon: CalendarDaysIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN'],
+      },
+      {
+        name: 'Servicios',
+        href: '/CRM/dashboard/services',
+        icon: WrenchScrewdriverIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN'],
+      },
+      {
+        name: 'Gastos',
+        href: '/CRM/dashboard/expenses',
+        icon: ChartBarSquareIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN'],
+      },
+      {
+        name: 'Estadísticas',
+        href: '/CRM/dashboard/statistics',
+        icon: ChartBarSquareIcon,
+        roles: ['SUPER_ADMIN'],
+      },
+    ],
   },
-  customers: {
-    name: 'Clientes',
-    href: '/CRM/dashboard/customers',
-    icon: UsersIcon,
-    roles: ['SUPER_ADMIN', 'ADMIN'],
+
+  {
+    section: 'Administración',
+    items: [
+      {
+        name: 'Usuarios / Roles',
+        href: '/CRM/dashboard/users',
+        icon: UserGroupIcon,
+        roles: ['SUPER_ADMIN'],
+      },
+      {
+        name: 'Configuración',
+        href: '/CRM/dashboard/settings',
+        icon: Cog6ToothIcon,
+        roles: ['SUPER_ADMIN'],
+      },
+    ],
   },
-  users: {
-    name: 'Usuarios / Roles',
-    href: '/CRM/dashboard/users',
-    icon: Cog6ToothIcon,
-    roles: ['SUPER_ADMIN'],
-  },
-  orders: {
-    name: 'Pedidos',
-    href: '/CRM/dashboard/orders',
-    icon: ClipboardDocumentListIcon,
-    roles: ['SUPER_ADMIN'],
-  },
-  sales: {
-    name: 'Realizar Venta',
-    href: '/CRM/dashboard/sales',
-    icon: BanknotesIcon,
-    roles: ['SUPER_ADMIN', 'ADMIN'],
-  },
-  delivered_sales: {
-    name: 'Ventas Realizadas',
-    href: '/CRM/dashboard/delivered_sales',
-    icon: ClipboardDocumentCheckIcon,
-    roles: ['SUPER_ADMIN', 'ADMIN'],
-  },
-  expenses: {
-    name: 'Gastos',
-    href: '/CRM/dashboard/expenses',
-    icon: ChartBarIcon,
-    roles: ['SUPER_ADMIN', 'ADMIN'],
-  },
-  statistics: {
-    name: 'Estadísticas',
-    href: '/CRM/dashboard/statistics',
-    icon: AdjustmentsHorizontalIcon,
-    roles: ['SUPER_ADMIN'],
-  },
-};
+];

@@ -9,6 +9,8 @@ import {
   toggleCase,
 } from '@/lib/api/utils/utils';
 import useSales from '@/lib/api/hooks/useSales';
+import { TrashIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import AlertModal from '@/components/dashboard/modals/alertModal';
 
 export default function ProductSelector({ value = [], onChange, onTyping }) {
   const [search, setSearch] = useState('');
@@ -16,6 +18,7 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [processing, setProcessing] = useState(false);
   const initialized = useRef(false);
+  const [alert, setAlert] = useState({ type: '', message: '', url: '' });
 
   const { searchProducts, loading } = useSales();
 
@@ -50,6 +53,14 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
       (p) => p.inventoryVariantId === product.id
     );
     if (exists) return;
+
+    if (!product.stock || product.stock <= 0) {
+      setAlert({
+        type: 'info',
+        message: 'Este producto no tiene stock disponible',
+      });
+      return;
+    }
 
     setProcessing(true);
     await new Promise((res) => setTimeout(res, 300));
@@ -133,47 +144,101 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
   const total = selectedProducts.reduce((acc, p) => acc + p.subtotal, 0);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="relative">
-        <input
-          type="text"
-          placeholder="Buscar producto..."
-          value={search}
-          onChange={(e) => {
-            const value = toggleCase(e.target.value, 'uppercase');
-            setSearch(value);
-            onTyping?.();
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault();
-            }
-          }}
-          className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
-        />
+        <div className="relative">
+          <MagnifyingGlassIcon className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
+
+          <input
+            type="text"
+            placeholder="Buscar producto por nombre o referencia..."
+            value={search}
+            onChange={(e) => {
+              const value = toggleCase(e.target.value, 'uppercase');
+              setSearch(value);
+              onTyping?.();
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') e.preventDefault();
+            }}
+            className="
+              w-full rounded-2xl pl-11 pr-4 py-3 text-sm
+              bg-white border border-gray-200
+              placeholder:text-gray-400
+              focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400
+              transition-all shadow-sm
+            "
+          />
+        </div>
 
         {search.trim().length >= 2 && (
-          <div className="absolute z-10 bg-white border w-full rounded-xl mt-1 shadow-md max-h-48 overflow-auto">
-            {loading ? (
-              <div className="px-4 py-2 text-sm text-gray-400">
-                Buscando productos...
+          <div
+            className="
+              absolute z-30 mt-2 w-full
+              bg-white border border-gray-200 rounded-2xl
+              shadow-xl overflow-hidden
+            "
+          >
+            {loading && (
+              <div className="px-4 py-4 text-sm text-gray-400 flex items-center gap-2">
+                <span className="animate-pulse">Buscando productos...</span>
               </div>
-            ) : filtered.length > 0 ? (
-              <ul>
-                {filtered.map((product) => (
-                  <li
-                    key={product.id}
-                    onClick={() => handleSelectProduct(product)}
-                    className="px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm"
-                  >
-                    {formatText(product.name)} - {product.color} | Stock:{' '}
-                    {product.stock} — {formatPrice(product.price)}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div className="px-4 py-2 text-sm text-gray-400">
-                No hay productos relacionados
+            )}
+
+            {!loading && filtered.length > 0 && (
+              <div className="max-h-72 overflow-auto">
+                {filtered.map((product) => {
+                  const noStock = product.stock <= 0;
+
+                  return (
+                    <div
+                      key={product.id}
+                      onClick={() => {
+                        if (noStock) return;
+                        handleSelectProduct(product);
+                      }}
+                      className={`
+                  flex items-center justify-between
+                  px-4 py-3 text-sm
+                  border-b border-gray-100
+                  transition
+                  ${
+                    noStock
+                      ? 'opacity-50 cursor-not-allowed'
+                      : 'cursor-pointer hover:bg-gray-50'
+                  }
+                `}
+                    >
+                      <div className="flex flex-col">
+                        <span className="text-gray-800 font-medium">
+                          {formatText(product.name)}
+                        </span>
+
+                        <div className="flex items-center gap-2 text-xs text-gray-400">
+                          <span>{product.color}</span>
+                          <span>•</span>
+                          <span>Stock: {product.stock}</span>
+
+                          {noStock && (
+                            <span className="text-red-500 font-medium">
+                              Sin stock
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <span className="text-gray-900 font-semibold">
+                        ${formatPrice(product.price)}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {!loading && filtered.length === 0 && (
+              <div className="px-4 py-4 text-sm text-gray-400 text-center">
+                No se encontraron productos
               </div>
             )}
           </div>
@@ -181,30 +246,47 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
       </div>
 
       {processing && (
-        <div className="flex items-center justify-center border border-gray-300 rounded-xl p-4 bg-gray-50 text-gray-500 text-sm">
+        <div
+          className="
+        flex items-center justify-center
+        rounded-2xl p-6
+        border border-gray-200 bg-gray-50
+        text-gray-500 text-sm
+      "
+        >
           Cargando productos...
         </div>
       )}
 
       {!processing && selectedProducts.length > 0 && (
-        <div className="border border-gray-300 rounded-xl p-4 bg-gray-50">
+        <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
           <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-300 text-left">
-                <th>Producto</th>
-                <th>Precio</th>
-                <th>Cant.</th>
-                <th>Desc. ($)</th>
-                <th className="text-right">Subtotal</th>
-                <th></th>
+            <thead className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
+              <tr>
+                <th className="px-6 py-4 text-left">Producto</th>
+                <th className="px-6 py-4 text-center">Precio</th>
+                <th className="px-6 py-4 text-center">Cant.</th>
+                <th className="px-6 py-4 text-center">Desc.</th>
+                <th className="px-6 py-4 text-right">Subtotal</th>
+                <th className="px-6 py-4"></th>
               </tr>
             </thead>
+
             <tbody>
               {selectedProducts.map((p) => (
-                <tr key={p.inventoryVariantId}>
-                  <td>{formatText(p.name)}</td>
-                  <td>{formatPrice(p.price)}</td>
-                  <td>
+                <tr
+                  key={p.inventoryVariantId}
+                  className="border-t border-gray-100 hover:bg-gray-50 transition"
+                >
+                  <td className="px-6 py-4 font-medium text-gray-800">
+                    {formatText(p.name)}
+                  </td>
+
+                  <td className="px-6 py-4 text-center text-gray-700">
+                    ${formatPrice(p.price)}
+                  </td>
+
+                  <td className="px-6 py-4 text-center">
                     <input
                       type="number"
                       min={1}
@@ -216,10 +298,15 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
                           Number(e.target.value)
                         )
                       }
-                      className="w-16 m-1 border border-gray-400 rounded text-center"
+                      className="
+                w-16 h-9 text-center rounded-lg
+                border border-gray-200 bg-white
+                focus:ring-2 focus:ring-blue-500/20 outline-none
+              "
                     />
                   </td>
-                  <td>
+
+                  <td className="px-6 py-4 text-center">
                     <input
                       type="text"
                       value={formatCOP(p.discount || 0)}
@@ -230,17 +317,31 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
                           parseCOPToNumber(e.target.value)
                         )
                       }
-                      className="w-28 border border-gray-400 rounded text-center"
+                      className="
+                w-24 h-9 text-center rounded-lg
+                border border-gray-200 bg-white
+                focus:ring-2 focus:ring-blue-500/20 outline-none
+              "
                       placeholder="$ 0"
                     />
                   </td>
-                  <td className="text-right pl-4">{formatPrice(p.subtotal)}</td>
-                  <td>
+
+                  <td className="px-6 py-4 text-right font-semibold text-gray-900">
+                    ${formatPrice(p.subtotal)}
+                  </td>
+
+                  <td className="px-6 py-4 text-right">
                     <button
                       onClick={() => removeProduct(p.inventoryVariantId)}
-                      className="text-red-500 ml-2 cursor-pointer font-bold border rounded-full hover:bg-red-100 px-1"
+                      className="
+                flex items-center justify-center
+                w-9 h-9 rounded-lg
+                border border-gray-200
+                hover:bg-red-50 hover:border-red-200
+                transition group cursor-pointer
+              "
                     >
-                      ✕
+                      <TrashIcon className="w-4 h-4 text-gray-400 group-hover:text-red-500 transition" />
                     </button>
                   </td>
                 </tr>
@@ -248,11 +349,48 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
             </tbody>
           </table>
 
-          <div className="flex justify-end mt-3 font-semibold">
-            Total: {formatPrice(total)}
+          <div className="flex justify-end px-6 py-5 border-t border-gray-100">
+            <div className="flex flex-col items-end gap-1 text-sm">
+              <div className="flex justify-between w-48 text-gray-500">
+                <span>Subtotal</span>
+                <span>
+                  $
+                  {formatPrice(
+                    selectedProducts.reduce(
+                      (acc, p) => acc + p.price * p.quantity,
+                      0
+                    )
+                  )}
+                </span>
+              </div>
+
+              <div className="flex justify-between w-48 text-red-500">
+                <span>Descuento</span>
+                <span>
+                  -$
+                  {formatPrice(
+                    selectedProducts.reduce(
+                      (acc, p) => acc + (p.discount || 0),
+                      0
+                    )
+                  )}
+                </span>
+              </div>
+
+              <div className="flex justify-between w-48 text-base font-semibold text-gray-900 pt-1">
+                <span>Total</span>
+                <span>${formatPrice(total)}</span>
+              </div>
+            </div>
           </div>
         </div>
       )}
+      <AlertModal
+        type={alert.type}
+        message={alert.message}
+        onClose={() => setAlert({ type: '', message: '', url: '' })}
+        url={alert.url}
+      />
     </div>
   );
 }

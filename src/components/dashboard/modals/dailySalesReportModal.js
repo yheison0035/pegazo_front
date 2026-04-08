@@ -81,7 +81,7 @@ export default function DailySalesReportModal({ onClose }) {
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="mt-2 w-full cursor-pointer rounded-xl border border-gray-300 px-4 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                className="mt-2 w-full cursor-pointer rounded-xl border border-gray-300 px-4 py-2 text-sm focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
               />
             </div>
 
@@ -93,7 +93,7 @@ export default function DailySalesReportModal({ onClose }) {
               <select
                 value={localId}
                 onChange={(e) => setLocalId(e.target.value)}
-                className="mt-2 w-full rounded-xl cursor-pointer border border-gray-300 px-4 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                className="mt-2 w-full rounded-xl cursor-pointer border border-gray-300 px-4 py-2 text-sm focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
               >
                 <option value="">Seleccione</option>
                 {locals.map((l) => (

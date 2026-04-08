@@ -1,3 +1,5 @@
+'use client';
+
 import { BUSINESS_TYPES } from '@/config/businessTypes';
 import { NAVIGATION } from '@/config/navigation';
 import { PLATFORM_NAVIGATION } from '@/config/platformNavigation';
@@ -16,9 +18,22 @@ export default function useNavigation() {
 
   const businessType = usuario.company?.type || 'COMERCIO';
 
+  // módulos permitidos por tipo de negocio
   const modules = BUSINESS_TYPES[businessType] || BUSINESS_TYPES.COMERCIO;
 
-  return modules
-    .map((key) => NAVIGATION[key])
-    .filter((link) => link && link.roles.includes(role));
+  // filtrar por módulos + roles dentro de secciones
+  const filteredSections = NAVIGATION.map((section) => {
+    const filteredItems = section.items.filter(
+      (item) =>
+        modules.includes(item.href.split('/').pop()) && // valida módulo
+        item.roles.includes(role)
+    );
+
+    return {
+      ...section,
+      items: filteredItems,
+    };
+  }).filter((section) => section.items.length > 0);
+
+  return filteredSections;
 }

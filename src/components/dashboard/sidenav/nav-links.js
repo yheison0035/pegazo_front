@@ -9,53 +9,70 @@ import useNavigation from '@/hooks/useNavigation';
 export default function NavLinks() {
   const { usuario, loading, logout } = useAuth();
   const pathname = usePathname();
-  const links = useNavigation();
+  const sections = useNavigation();
 
   if (loading || !usuario) return null;
 
   return (
-    <div className="flex flex-col w-full h-[calc(100vh-80px)] overflow-y-auto px-6 pb-6 custom-scroll">
-      <nav className="flex flex-col space-y-2">
-        {links.length === 0 && (
-          <p className="text-white/50 text-sm px-3">Sin módulos disponibles</p>
+    <div className="flex flex-col w-full h-full">
+      <nav className="flex flex-col">
+        {sections.length === 0 && (
+          <p className="text-white/40 text-sm px-4">Sin módulos disponibles</p>
         )}
 
-        {links.map((link) => {
-          const LinkIcon = link.icon;
-          const isActive = pathname.startsWith(link.href);
+        {sections.map((section) => (
+          <div key={section.section} className="mb-4">
+            <p className="text-[11px] uppercase text-white/30 px-4 mb-2 tracking-wider">
+              {section.section}
+            </p>
 
-          return (
-            <Link
-              key={link.name}
-              href={link.href}
-              className={`
-                relative flex items-center gap-3 px-3 py-2.5 rounded-lg
-                text-sm font-medium transition-all duration-200
-                ${
-                  isActive
-                    ? 'bg-white/5 text-white'
-                    : 'text-white/60 hover:text-white hover:bg-white/5'
-                }
-              `}
-            >
-              {isActive && (
-                <span className="absolute left-0 top-0 h-full w-[3px] bg-cyan-400 rounded-r-full" />
-              )}
+            <div className="flex flex-col space-y-1">
+              {section.items.map((link) => {
+                const LinkIcon = link.icon;
+                const isActive = pathname.startsWith(link.href);
 
-              <LinkIcon className="w-5 h-5 shrink-0" />
+                return (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    className={`
+                      group relative flex items-center gap-3 px-4 py-3 rounded-xl
+                      text-sm font-medium transition-all duration-200
+                      ${
+                        isActive
+                          ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/10 text-white shadow-inner'
+                          : 'text-white/60 hover:text-white hover:bg-white/5'
+                      }
+                    `}
+                  >
+                    {isActive && (
+                      <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] bg-cyan-400 rounded-r-full" />
+                    )}
 
-              <span>{link.name}</span>
-            </Link>
-          );
-        })}
+                    <LinkIcon
+                      className={`w-5 h-5 transition ${
+                        isActive
+                          ? 'text-cyan-400'
+                          : 'text-white/50 group-hover:text-white'
+                      }`}
+                    />
+
+                    <span>{link.name}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
-      <div className="mt-6 border-t border-gray-700 pt-4">
+      <div className="mt-6 pb-9 border-t border-cyan-500/10 pt-4 px-2">
         <button
           onClick={logout}
-          className="flex items-center w-full space-x-3 px-3 py-2 rounded-lg transition text-gray-300 hover:text-white hover:bg-gray-800"
+          className="flex items-center w-full gap-3 px-4 py-3 rounded-xl transition
+          text-white/60 hover:text-white hover:bg-red-500/10 cursor-pointer"
         >
-          <ArrowLeftOnRectangleIcon className="w-5 h-5 min-w-[20px]" />
+          <ArrowLeftOnRectangleIcon className="w-5 h-5" />
           <p>Cerrar Sesión</p>
         </button>
       </div>

@@ -30,7 +30,7 @@ export async function createCustomer(dto) {
 }
 
 export async function updateCustomer(id, dto) {
-  const { id: _id, createdAt, updatedAt, local, ...cleanDto } = dto;
+  const { id: _id, createdAt, updatedAt, local, companyId, ...cleanDto } = dto;
 
   const body = {
     ...cleanDto,

@@ -26,7 +26,21 @@ export const BUSINESS_TYPES = {
     'statistics',
   ],
 
-  SERVICIOS: ['appointments', 'services', 'customers', 'sales', 'statistics'],
+  SERVICIOS: [
+    'locals',
+    'users',
+    'categories',
+    'brands',
+    'providers',
+    'customers',
+    'inventory',
+    'services',
+    'appointments',
+    'sales',
+    'delivered_sales',
+    'expenses',
+    'statistics',
+  ],
 
   ECOMMERCE: [
     'inventory',

@@ -1,3 +1,4 @@
+import { useAuth } from '@/context/authContext';
 import usePermissions from '@/hooks/usePermissions';
 import {
   EyeIcon,
@@ -17,8 +18,7 @@ export default function Actions({
   handleDelete,
   setPrinterInvoice,
 }) {
-  const { canDelete } = usePermissions();
-
+  const { usuario } = useAuth();
   return (
     <div className="flex justify-center items-center gap-2 opacity-70 group-hover:opacity-100 transition">
       <button
@@ -64,7 +64,7 @@ export default function Actions({
         <PencilIcon className="w-5 h-5" />
       </Link>
 
-      {(canDelete || view === 'companies') && (
+      {usuario.role === 'SUPER_ADMIN' && (
         <button
           onClick={() => handleDelete()}
           disabled={isLocked}

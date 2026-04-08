@@ -26,7 +26,7 @@ export async function createProvider(dto) {
 }
 
 export async function updateProvider(id, dto) {
-  const { id: _id, createdAt, updatedAt, ...cleanDto } = dto;
+  const { id: _id, createdAt, updatedAt, companyId, ...cleanDto } = dto;
 
   const body = {
     ...cleanDto,

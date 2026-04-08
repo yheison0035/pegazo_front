@@ -60,7 +60,7 @@ const SearchableSelect = memo(function SearchableSelect({
         className={`flex items-center justify-between w-full border border-gray-200 rounded-xl px-4 py-2 text-sm shadow-sm transition ${
           disabled
             ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
-            : 'focus:ring-2 focus:ring-orange-500 focus:border-orange-500'
+            : 'focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500'
         }`}
       >
         <span className={selectedOption ? 'text-gray-700' : 'text-gray-400'}>

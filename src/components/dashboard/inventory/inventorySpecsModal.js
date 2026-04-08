@@ -147,7 +147,7 @@ export default function InventorySpecsModal({
           <button
             onClick={saveData}
             className={`inline-flex items-center gap-2 px-4 py-2 mr-2 border border-transparent 
-                bg-blue-600 hover:text-orange-600 hover:border-orange-600
+                bg-blue-600 hover:text-cyan-600 hover:border-cyan-600
             text-white 
       hover:bg-white
         font-medium rounded-lg transition-colors 

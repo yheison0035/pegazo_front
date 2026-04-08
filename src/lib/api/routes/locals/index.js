@@ -37,6 +37,7 @@ export async function updateLocal(id, dto) {
     manager,
     userId,
     users,
+    companyId,
     ...cleanDto
   } = dto;
 
