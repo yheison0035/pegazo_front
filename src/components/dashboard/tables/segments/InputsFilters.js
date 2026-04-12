@@ -8,6 +8,7 @@ export default function InputFilters({
 }) {
   return (
     <tr className="bg-white/60 backdrop-blur">
+      <th></th>
       {allFilters
         .filter((f) => f.show)
         .map(({ name, title, showInput }) => (

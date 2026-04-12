@@ -143,6 +143,11 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
 
   const total = selectedProducts.reduce((acc, p) => acc + p.subtotal, 0);
 
+  const totalDiscount = selectedProducts.reduce(
+    (acc, p) => acc + (isNaN(Number(p.discount)) ? 0 : Number(p.discount)),
+    0
+  );
+
   return (
     <div className="space-y-6">
       <div className="relative">
@@ -368,12 +373,7 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
                 <span>Descuento</span>
                 <span>
                   -$
-                  {formatPrice(
-                    selectedProducts.reduce(
-                      (acc, p) => acc + (p.discount || 0),
-                      0
-                    )
-                  )}
+                  {totalDiscount === 0 ? '0' : formatPrice(totalDiscount)}
                 </span>
               </div>
 

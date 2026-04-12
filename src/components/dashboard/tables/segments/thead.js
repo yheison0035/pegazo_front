@@ -2,6 +2,8 @@ export default function Thead({ header = [] }) {
   return (
     <thead className="bg-gray-50/70 backdrop-blur sticky top-0 z-10">
       <tr className="text-xs uppercase tracking-wide text-gray-500">
+        <th className="px-5 py-4 text-center">Acciones</th>
+
         {header
           .filter((f) => f.show)
           .map(({ name, title }) => (
@@ -14,7 +16,6 @@ export default function Thead({ header = [] }) {
               {title}
             </th>
           ))}
-        <th className="px-5 py-4 text-center">Acciones</th>
       </tr>
     </thead>
   );

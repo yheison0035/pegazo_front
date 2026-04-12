@@ -4,7 +4,9 @@ import { colorOptions } from '@/lib/api/utils/getColors';
 import { memo, useEffect, useRef, useState, useMemo } from 'react';
 
 const ColorSelect = memo(function ColorSelect({ value, onChange, disabled }) {
-  const safeValue = Array.isArray(value) ? value : [];
+  const safeValue = Array.isArray(value)
+    ? value.filter((v) => v && v.color && v.stock > 0)
+    : [];
 
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -119,7 +121,7 @@ const ColorSelect = memo(function ColorSelect({ value, onChange, disabled }) {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar color..."
-              className="w-full border border-gray-200 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="w-full border border-gray-200 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
             />
           </div>
 
@@ -167,7 +169,7 @@ const ColorSelect = memo(function ColorSelect({ value, onChange, disabled }) {
                       <button
                         type="button"
                         onClick={() => increase(opt.name)}
-                        className="text-sm text-orange-600 hover:underline cursor-pointer"
+                        className="text-sm text-cyan-600 hover:underline cursor-pointer"
                       >
                         Agregar
                       </button>

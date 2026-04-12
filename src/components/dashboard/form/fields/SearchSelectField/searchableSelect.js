@@ -89,7 +89,7 @@ const SearchableSelect = memo(function SearchableSelect({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={placeholder}
-              className="w-full border border-gray-200 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="w-full border border-gray-200 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
               autoFocus
             />
           </div>
@@ -108,14 +108,14 @@ const SearchableSelect = memo(function SearchableSelect({
                   }}
                   className={`flex items-center justify-between px-4 py-2 hover:bg-gray-100 transition cursor-pointer ${
                     String(opt.id) === String(value)
-                      ? 'bg-orange-100 text-orange-700 font-medium'
+                      ? 'bg-cyan-100 text-cyan-700 font-medium'
                       : 'text-gray-700'
                   }`}
                 >
                   <span className="text-sm">{opt.name}</span>
 
                   {String(opt.id) === String(value) && (
-                    <span className="text-xs text-orange-600 font-semibold">
+                    <span className="text-xs text-cyan-600 font-semibold">
                       Seleccionado
                     </span>
                   )}

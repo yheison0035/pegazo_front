@@ -211,7 +211,9 @@ export default function DinamicForm({
                     name === 'oldPrice' ||
                     name === 'amount'
                   ? formatCOP(formData[name] || '')
-                  : formData[name] || '';
+                  : name === 'stock'
+                    ? (formData[name] ?? 0)
+                    : formData[name] || '';
 
             if (type === 'colorSelect') {
               return (
@@ -220,22 +222,26 @@ export default function DinamicForm({
                     {label}
                   </label>
 
-                  {formData.variants && formData.variants.length > 0 && (
+                  {formData.variants?.some((v) => v.stock > 0) && (
                     <div className="flex -space-x-1 mb-2">
-                      {(formData.variants || []).slice(0, 50).map((v) => {
-                        const opt = colorOptions.find(
-                          (c) => c.name.toUpperCase() === v.color.toUpperCase()
-                        );
+                      {formData.variants
+                        .filter((v) => v.stock > 0)
+                        .slice(0, 50)
+                        .map((v) => {
+                          const opt = colorOptions.find(
+                            (c) =>
+                              c.name.toUpperCase() === v.color.toUpperCase()
+                          );
 
-                        return (
-                          <span
-                            key={v.color}
-                            title={`${v.color} (${v.stock})`}
-                            className="w-4 h-4 rounded-full border border-gray-300"
-                            style={{ backgroundColor: opt?.hex || '#ccc' }}
-                          />
-                        );
-                      })}
+                          return (
+                            <span
+                              key={v.color}
+                              title={`${v.color} (${v.stock})`}
+                              className="w-4 h-4 rounded-full border border-gray-300"
+                              style={{ backgroundColor: opt?.hex || '#ccc' }}
+                            />
+                          );
+                        })}
                     </div>
                   )}
 

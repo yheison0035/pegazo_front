@@ -36,6 +36,21 @@ export default function ContentData({
               ${isLocked ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-50'}
             `}
           >
+            <td className="px-5 py-4 text-center">
+              <Actions
+                isLocked={isLocked}
+                rol={rol}
+                info={info}
+                view={view}
+                setSelected={setSelected}
+                setSelectedVariants={setSelectedVariants}
+                setPrinterInvoice={setPrinterInvoice}
+                handleDelete={() =>
+                  handleDeleteClick(info.id, info.name || info.code)
+                }
+                setShowModalChangeAdvisor={setShowModalChangeAdvisor}
+              />
+            </td>
             {view === 'locals' && (
               <>
                 <td className="px-5 py-4 whitespace-nowrap">{info.name}</td>
@@ -284,22 +299,6 @@ export default function ContentData({
                 </td>
               </>
             )}
-
-            <td className="px-5 py-4 text-center">
-              <Actions
-                isLocked={isLocked}
-                rol={rol}
-                info={info}
-                view={view}
-                setSelected={setSelected}
-                setSelectedVariants={setSelectedVariants}
-                setPrinterInvoice={setPrinterInvoice}
-                handleDelete={() =>
-                  handleDeleteClick(info.id, info.name || info.code)
-                }
-                setShowModalChangeAdvisor={setShowModalChangeAdvisor}
-              />
-            </td>
           </tr>
         );
       })}
