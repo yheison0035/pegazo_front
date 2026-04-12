@@ -16,6 +16,7 @@ import {
 } from '@/lib/api/utils/providers.config';
 import useColumnFilters from '@/components/dashboard/tables/hooks/useColumnFilters';
 import { useDebounce } from '@/components/dashboard/tables/hooks/useDebounce';
+import usePermissions from '@/hooks/usePermissions';
 
 export default function Providers() {
   const { usuario } = useAuth();
@@ -70,11 +71,15 @@ export default function Providers() {
     fetchProviders();
   };
 
+  const { can } = usePermissions();
+
   return (
     <div className="w-full p-4">
       <div className="flex justify-between mb-4">
         <h1 className="text-2xl font-semibold">Listado de Proveedores</h1>
-        <Header type="proveedor" typeUrl="providers" />
+        {can('providers', 'create') && (
+          <Header type="proveedor" typeUrl="providers" />
+        )}
       </div>
 
       <div className="bg-white rounded-lg shadow relative">

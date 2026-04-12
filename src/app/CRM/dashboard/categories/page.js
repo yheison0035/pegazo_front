@@ -19,6 +19,8 @@ import AlertModal from '@/components/dashboard/modals/alertModal';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import useColumnFilters from '@/components/dashboard/tables/hooks/useColumnFilters';
 import { useDebounce } from '@/components/dashboard/tables/hooks/useDebounce';
+import usePermissions from '@/hooks/usePermissions';
+import Header from '@/components/dashboard/customers/header';
 
 export default function Categories() {
   const { usuario } = useAuth();
@@ -70,19 +72,17 @@ export default function Categories() {
     fetchCategories();
   };
 
+  const { can } = usePermissions();
+
   return (
     <RoleGuard allowedRoles={Object.values(Roles)}>
       <div className="w-full p-4">
         <div className="flex flex-col md:flex-row justify-between mb-4 gap-4">
           <h1 className="text-2xl font-semibold">Listado de Categorías</h1>
 
-          <Link
-            href="/CRM/dashboard/categories/new"
-            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm"
-          >
-            <PlusIcon className="w-4 h-4" />
-            Agregar categoría
-          </Link>
+          {can('categories', 'create') && (
+            <Header type="categoría" typeUrl="categories" />
+          )}
         </div>
 
         <div className="bg-white rounded-lg shadow relative">

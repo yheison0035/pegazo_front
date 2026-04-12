@@ -99,6 +99,8 @@ export default function DinamicForm({
     [setFormData]
   );
 
+  const ALL_SOURCES = ['brands', 'categories', 'providers'];
+
   const fetchDynamicOptions = useCallback(async () => {
     if (!Array.isArray(formFields)) return;
 
@@ -126,7 +128,11 @@ export default function DinamicForm({
         loaders[field.source]
       ) {
         const fetcher = loaders[field.source];
-        const response = await fetcher();
+
+        const params = ALL_SOURCES.includes(field.source) ? { all: true } : {};
+
+        const response = await fetcher(params);
+
         const data = Array.isArray(response) ? response : response?.data || [];
 
         results[field.name] = data.map((item) => ({

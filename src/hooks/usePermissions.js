@@ -9,13 +9,17 @@ export default function usePermissions() {
   const permissions = ROLE_PERMISSIONS[role] || {};
 
   function can(module, action) {
-    // acceso total
+    // acceso total absoluto
     if (permissions['*']?.includes('*')) return true;
+
+    // acceso global por acción (SUPER_ADMIN)
+    if (permissions['*']?.includes(action)) return true;
 
     // acceso total por módulo
     if (permissions[module]?.includes('*')) return true;
 
-    return permissions[module]?.includes(action);
+    // acceso normal
+    return permissions[module]?.includes(action) || false;
   }
 
   return { can };

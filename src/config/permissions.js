@@ -10,13 +10,13 @@ export const ROLE_PERMISSIONS = {
   ADMIN: {
     locals: ['view', 'create', 'edit'],
     inventory: ['view', 'create', 'edit'],
-    customers: ['view', 'create', 'edit'],
+    customers: ['view', 'create', 'edit', 'delete'],
     sales: ['view', 'create'],
     delivered_sales: ['view'],
-    expenses: ['view', 'create'],
-    providers: ['view', 'create'],
-    categories: ['view', 'create'],
-    brands: ['view', 'create'],
+    expenses: ['view', 'create', 'edit'],
+    providers: ['view', 'create', 'edit', 'delete'],
+    categories: ['view', 'create', 'edit', 'delete'],
+    brands: ['view', 'create', 'edit', 'delete'],
     statistics: ['view'],
   },
 
@@ -24,5 +24,8 @@ export const ROLE_PERMISSIONS = {
     sales: ['view', 'create'],
     customers: ['view', 'create'],
     inventory: ['view'],
+    providers: ['view'],
+    categories: ['view'],
+    brands: ['view'],
   },
 };

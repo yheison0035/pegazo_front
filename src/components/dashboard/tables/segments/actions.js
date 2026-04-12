@@ -18,19 +18,26 @@ export default function Actions({
   handleDelete,
   setPrinterInvoice,
 }) {
-  const { usuario } = useAuth();
+  const { can } = usePermissions();
+
+  const canView = can(view, 'view');
+  const canEdit = can(view, 'edit');
+  const canDelete = can(view, 'delete');
+
   return (
     <div className="flex justify-center items-center gap-2 opacity-70 group-hover:opacity-100 transition">
-      <button
-        onClick={() => setSelected(info)}
-        disabled={isLocked}
-        title="Ver"
-        className="p-2 rounded-lg hover:bg-blue-50 text-blue-600 transition cursor-pointer"
-      >
-        <EyeIcon className="w-5 h-5" />
-      </button>
+      {canView && (
+        <button
+          onClick={() => setSelected(info)}
+          disabled={isLocked}
+          title="Ver"
+          className="p-2 rounded-lg hover:bg-blue-50 text-blue-600 transition cursor-pointer"
+        >
+          <EyeIcon className="w-5 h-5" />
+        </button>
+      )}
 
-      {view === 'inventory' && (
+      {view === 'inventory' && canView && (
         <button
           onClick={() => setSelectedVariants(info)}
           disabled={isLocked}
@@ -41,7 +48,7 @@ export default function Actions({
         </button>
       )}
 
-      {view === 'delivered_sales' && (
+      {view === 'delivered_sales' && canView && (
         <button
           onClick={() => setPrinterInvoice(info)}
           disabled={isLocked}
@@ -52,19 +59,21 @@ export default function Actions({
         </button>
       )}
 
-      <Link
-        href={
-          isLocked
-            ? '#'
-            : `/CRM/${view === 'platform' ? 'platform' : 'dashboard'}/${view}/edit/${info.id}`
-        }
-        title="Editar"
-        className="p-2 rounded-lg hover:bg-green-50 text-green-600 transition cursor-pointer"
-      >
-        <PencilIcon className="w-5 h-5" />
-      </Link>
+      {canEdit && (
+        <Link
+          href={
+            isLocked
+              ? '#'
+              : `/CRM/${view === 'platform' ? 'platform' : 'dashboard'}/${view}/edit/${info.id}`
+          }
+          title="Editar"
+          className="p-2 rounded-lg hover:bg-green-50 text-green-600 transition cursor-pointer"
+        >
+          <PencilIcon className="w-5 h-5" />
+        </Link>
+      )}
 
-      {usuario.role === 'SUPER_ADMIN' && (
+      {canDelete && (
         <button
           onClick={() => handleDelete()}
           disabled={isLocked}

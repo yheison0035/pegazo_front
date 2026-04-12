@@ -132,7 +132,7 @@ export default function DailySalesReportModal({ onClose }) {
                   <span className="text-sm text-gray-600">
                     Ventas del día{' '}
                     <span className="font-bold text-gray-900">
-                      {formatDateDMY(result.date)}
+                      {result.date}
                     </span>
                   </span>
                   <span className="text-2xl font-bold text-orange-600">
@@ -141,17 +141,26 @@ export default function DailySalesReportModal({ onClose }) {
                 </div>
 
                 <div className="border-t pt-3 space-y-2">
-                  {Object.entries(result.total.users).map(([user, total]) => (
+                  {result.total.users.map((user, index) => (
                     <div
-                      key={user}
-                      className="flex justify-between text-sm text-gray-700"
+                      key={user.name}
+                      className={`flex justify-between items-center text-sm px-3 py-2 rounded-lg
+                        ${index === 0 ? 'bg-yellow-50 border border-yellow-300' : 'text-gray-700'}
+                      `}
                     >
-                      <span className="font-bold">
-                        {toggleCase(user, 'uppercase')}
+                      <span className="font-bold flex items-center gap-2">
+                        {index === 0 && <span className="text-xl">🐲</span>}
+
+                        {toggleCase(user.name, 'uppercase')}
+
+                        {index === 0 && (
+                          <span className="text-xs text-yellow-700 font-extrabold">
+                            (LA BESTIA)
+                          </span>
+                        )}
                       </span>
-                      <span className="font-bold">
-                        {formatCOP(total) || '$ 0'}
-                      </span>
+
+                      <span className="font-bold">{formatCOP(user.total)}</span>
                     </div>
                   ))}
                 </div>

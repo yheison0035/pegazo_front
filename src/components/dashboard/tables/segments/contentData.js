@@ -22,11 +22,7 @@ export default function ContentData({
   return (
     <>
       {paginatedData.map((info, index) => {
-        const isLocked =
-          view === 'customers' &&
-          rol === 'ASESOR' &&
-          !info.comments?.length &&
-          index > 0;
+        const isLocked = false;
 
         return (
           <tr

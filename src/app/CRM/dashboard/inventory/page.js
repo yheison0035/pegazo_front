@@ -16,6 +16,7 @@ import {
 } from '@/lib/api/utils/inventory.config';
 import useColumnFilters from '@/components/dashboard/tables/hooks/useColumnFilters';
 import { useDebounce } from '@/components/dashboard/tables/hooks/useDebounce';
+import usePermissions from '@/hooks/usePermissions';
 
 export default function Inventory() {
   const { usuario } = useAuth();
@@ -70,11 +71,15 @@ export default function Inventory() {
     fetchProducts();
   };
 
+  const { can } = usePermissions();
+
   return (
     <div className="w-full p-4">
       <div className="flex justify-between mb-4">
         <h1 className="text-2xl font-semibold">Listado de Inventario</h1>
-        <Header type="producto" typeUrl="inventory" />
+        {can('inventory', 'create') && (
+          <Header type="producto" typeUrl="inventory" />
+        )}
       </div>
 
       <div className="bg-white rounded-lg shadow relative">
