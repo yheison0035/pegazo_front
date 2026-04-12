@@ -16,6 +16,7 @@ import {
   getHeaderTableExpenses,
   viewModalConfig,
 } from '@/lib/api/utils/expenses.config';
+import usePermissions from '@/hooks/usePermissions';
 
 export default function Expenses() {
   const { usuario } = useAuth();
@@ -72,11 +73,15 @@ export default function Expenses() {
     fetchExpenses();
   };
 
+  const { can } = usePermissions();
+
   return (
     <div className="w-full p-4">
       <div className="flex justify-between mb-4">
         <h1 className="text-2xl font-semibold">Listado de Gastos</h1>
-        <Header type="Gastos" typeUrl="expenses" />
+        {can('expenses', 'create') && (
+          <Header type="Gastos" typeUrl="expenses" />
+        )}
       </div>
 
       <div className="bg-white rounded-lg shadow relative">

@@ -22,10 +22,12 @@ export const ROLE_PERMISSIONS = {
 
   ASESOR: {
     sales: ['view', 'create'],
-    customers: ['view', 'create'],
+    customers: ['view', 'create', 'edit'],
     inventory: ['view'],
     providers: ['view'],
     categories: ['view'],
     brands: ['view'],
+    delivered_sales: ['view'],
+    expenses: ['view', 'create', 'edit'],
   },
 };
