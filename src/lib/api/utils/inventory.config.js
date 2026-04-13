@@ -189,7 +189,6 @@ export const viewModalConfig = (usuario) => {
           { name: 'barcode', label: 'Código de barras' },
           { name: 'status', label: 'Estado', type: 'status' },
           { name: 'description', label: 'Descripción' },
-          { name: 'purchasePrice', label: 'Precio de Compra' },
         ],
       },
 

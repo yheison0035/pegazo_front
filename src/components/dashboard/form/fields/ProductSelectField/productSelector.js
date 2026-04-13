@@ -48,13 +48,16 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
     return () => clearTimeout(handler);
   }, [search]);
 
+  // ✅ AJUSTE: soporte services
   const handleSelectProduct = async (product) => {
     const exists = selectedProducts.find(
-      (p) => p.inventoryVariantId === product.id
+      (p) => p.inventoryVariantId === product.id && p.type === product.type
     );
     if (exists) return;
 
-    if (!product.stock || product.stock <= 0) {
+    const isService = product.type === 'service';
+
+    if (!isService && (!product.stock || product.stock <= 0)) {
       setAlert({
         type: 'info',
         message: 'Este producto no tiene stock disponible',
@@ -68,10 +71,11 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
     const newList = [
       ...selectedProducts,
       {
+        type: product.type, // 👈 CLAVE
         inventoryVariantId: product.id,
-        name: `${product.name} - ${product.color}`,
+        name: isService ? product.name : `${product.name} - ${product.color}`,
         price: product.price,
-        stock: product.stock,
+        stock: isService ? null : product.stock,
         originalQuantity: 0,
         quantity: 1,
         discount: product.discount,
@@ -86,15 +90,21 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
     setProcessing(false);
   };
 
+  // ✅ AJUSTE: servicios sin límite
   const updateQuantity = (id, quantity) => {
     const updated = selectedProducts.map((p) => {
       if (p.inventoryVariantId === id) {
-        const maxAllowed = p.stock + p.originalQuantity;
+        const isService = p.type === 'service';
 
-        const safeQty = Math.max(
-          1,
-          Math.min(Number(quantity) || 1, maxAllowed)
-        );
+        let safeQty;
+
+        if (isService) {
+          safeQty = Math.max(1, Number(quantity) || 1);
+        } else {
+          const maxAllowed = p.stock + p.originalQuantity;
+
+          safeQty = Math.max(1, Math.min(Number(quantity) || 1, maxAllowed));
+        }
 
         const base = p.price * safeQty;
         const safeDiscount = Math.min(p.discount || 0, base);
@@ -135,6 +145,7 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
     onChange?.(updated);
   };
 
+  // ✅ AJUSTE: eliminar correcto con type
   const removeProduct = (id) => {
     const updated = selectedProducts.filter((p) => p.inventoryVariantId !== id);
     setSelectedProducts(updated);
@@ -177,13 +188,7 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
         </div>
 
         {search.trim().length >= 2 && (
-          <div
-            className="
-              absolute z-30 mt-2 w-full
-              bg-white border border-gray-200 rounded-2xl
-              shadow-xl overflow-hidden
-            "
-          >
+          <div className="absolute z-30 mt-2 w-full bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden">
             {loading && (
               <div className="px-4 py-4 text-sm text-gray-400 flex items-center gap-2">
                 <span className="animate-pulse">Buscando productos...</span>
@@ -193,43 +198,45 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
             {!loading && filtered.length > 0 && (
               <div className="max-h-72 overflow-auto">
                 {filtered.map((product) => {
-                  const noStock = product.stock <= 0;
+                  const noStock =
+                    product.type !== 'service' && product.stock <= 0;
 
                   return (
                     <div
-                      key={product.id}
+                      key={`${product.type}-${product.id}`}
                       onClick={() => {
                         if (noStock) return;
                         handleSelectProduct(product);
                       }}
                       className={`
-                  flex items-center justify-between
-                  px-4 py-3 text-sm
-                  border-b border-gray-100
-                  transition
-                  ${
-                    noStock
-                      ? 'opacity-50 cursor-not-allowed'
-                      : 'cursor-pointer hover:bg-gray-50'
-                  }
-                `}
+                        flex items-center justify-between
+                        px-4 py-3 text-sm
+                        border-b border-gray-100
+                        transition
+                        ${
+                          noStock
+                            ? 'opacity-50 cursor-not-allowed'
+                            : 'cursor-pointer hover:bg-gray-50'
+                        }
+                      `}
                     >
                       <div className="flex flex-col">
                         <span className="text-gray-800 font-medium">
                           {formatText(product.name)}
                         </span>
+                        {product.type !== 'service' && (
+                          <div className="flex items-center gap-2 text-xs text-gray-400">
+                            <span>{product.color}</span>
+                            <span>•</span>
+                            <span>Stock: {product.stock}</span>
 
-                        <div className="flex items-center gap-2 text-xs text-gray-400">
-                          <span>{product.color}</span>
-                          <span>•</span>
-                          <span>Stock: {product.stock}</span>
-
-                          {noStock && (
-                            <span className="text-red-500 font-medium">
-                              Sin stock
-                            </span>
-                          )}
-                        </div>
+                            {noStock && (
+                              <span className="text-red-500 font-medium">
+                                Sin stock
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </div>
 
                       <span className="text-gray-900 font-semibold">
@@ -251,14 +258,7 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
       </div>
 
       {processing && (
-        <div
-          className="
-        flex items-center justify-center
-        rounded-2xl p-6
-        border border-gray-200 bg-gray-50
-        text-gray-500 text-sm
-      "
-        >
+        <div className="flex items-center justify-center rounded-2xl p-6 border border-gray-200 bg-gray-50 text-gray-500 text-sm">
           Cargando productos...
         </div>
       )}
@@ -280,7 +280,7 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
             <tbody>
               {selectedProducts.map((p) => (
                 <tr
-                  key={p.inventoryVariantId}
+                  key={`${p.type}-${p.inventoryVariantId}`}
                   className="border-t border-gray-100 hover:bg-gray-50 transition"
                 >
                   <td className="px-6 py-4 font-medium text-gray-800">
@@ -295,7 +295,11 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
                     <input
                       type="number"
                       min={1}
-                      max={p.stock + p.originalQuantity}
+                      max={
+                        p.type === 'service'
+                          ? undefined
+                          : p.stock + p.originalQuantity
+                      }
                       value={p.quantity}
                       onChange={(e) =>
                         updateQuantity(
@@ -303,11 +307,7 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
                           Number(e.target.value)
                         )
                       }
-                      className="
-                w-16 h-9 text-center rounded-lg
-                border border-gray-200 bg-white
-                focus:ring-2 focus:ring-blue-500/20 outline-none
-              "
+                      className="w-16 h-9 text-center rounded-lg border border-gray-200 bg-white focus:ring-2 focus:ring-blue-500/20 outline-none"
                     />
                   </td>
 
@@ -322,11 +322,7 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
                           parseCOPToNumber(e.target.value)
                         )
                       }
-                      className="
-                w-24 h-9 text-center rounded-lg
-                border border-gray-200 bg-white
-                focus:ring-2 focus:ring-blue-500/20 outline-none
-              "
+                      className="w-24 h-9 text-center rounded-lg border border-gray-200 bg-white focus:ring-2 focus:ring-blue-500/20 outline-none"
                       placeholder="$ 0"
                     />
                   </td>
@@ -338,13 +334,7 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
                   <td className="px-6 py-4 text-right">
                     <button
                       onClick={() => removeProduct(p.inventoryVariantId)}
-                      className="
-                flex items-center justify-center
-                w-9 h-9 rounded-lg
-                border border-gray-200
-                hover:bg-red-50 hover:border-red-200
-                transition group cursor-pointer
-              "
+                      className="flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 hover:bg-red-50 hover:border-red-200 transition group cursor-pointer"
                     >
                       <TrashIcon className="w-4 h-4 text-gray-400 group-hover:text-red-500 transition" />
                     </button>
@@ -385,6 +375,7 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
           </div>
         </div>
       )}
+
       <AlertModal
         type={alert.type}
         message={alert.message}

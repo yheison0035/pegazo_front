@@ -7,23 +7,28 @@ import {
 
 export const PLATFORM_NAVIGATION = [
   {
-    name: 'Empresas',
-    href: '/CRM/platform/companies',
-    icon: BuildingOfficeIcon,
-  },
-  {
-    name: 'Usuarios Globales',
-    href: '/CRM/platform/users',
-    icon: UsersIcon,
-  },
-  {
-    name: 'Estadísticas Globales',
-    href: '/CRM/platform/statistics',
-    icon: ChartBarIcon,
-  },
-  {
-    name: 'Configuración',
-    href: '/CRM/platform/settings',
-    icon: Cog6ToothIcon,
+    section: 'Operación',
+    items: [
+      {
+        name: 'Empresas',
+        href: '/CRM/platform/companies',
+        icon: BuildingOfficeIcon,
+      },
+      {
+        name: 'Usuarios Globales',
+        href: '/CRM/platform/users',
+        icon: UsersIcon,
+      },
+      {
+        name: 'Estadísticas Globales',
+        href: '/CRM/platform/statistics',
+        icon: ChartBarIcon,
+      },
+      {
+        name: 'Configuración',
+        href: '/CRM/platform/settings',
+        icon: Cog6ToothIcon,
+      },
+    ],
   },
 ];

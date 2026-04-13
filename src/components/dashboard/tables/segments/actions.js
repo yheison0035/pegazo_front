@@ -37,7 +37,7 @@ export default function Actions({
         </button>
       )}
 
-      {view === 'inventory' && canView && (
+      {(view === 'inventory' || view === 'services') && canView && (
         <button
           onClick={() => setSelectedVariants(info)}
           disabled={isLocked}

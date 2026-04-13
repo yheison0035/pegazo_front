@@ -22,6 +22,7 @@ import useEnums from '@/lib/api/hooks/useEnums';
 import SearchableSelect from './fields/SearchSelectField/searchableSelect';
 import ProductSelector from './fields/ProductSelectField/productSelector';
 import ColorSelect from './fields/colorSelect';
+import ServiceLocalsField from '../services/serviceLocalsField';
 
 export default function DinamicForm({
   formData,
@@ -215,7 +216,8 @@ export default function DinamicForm({
                 : name === 'purchasePrice' ||
                     name === 'salePrice' ||
                     name === 'oldPrice' ||
-                    name === 'amount'
+                    name === 'amount' ||
+                    name === 'price'
                   ? formatCOP(formData[name] || '')
                   : name === 'stock'
                     ? (formData[name] ?? 0)
@@ -466,6 +468,15 @@ export default function DinamicForm({
               setShowImages={setShowImages}
             />
           </div>
+        )}
+
+        {module === 'services' && (
+          <ServiceLocalsField
+            value={formData.locals}
+            onChange={(val) =>
+              setFormData((prev) => ({ ...prev, locals: val }))
+            }
+          />
         )}
       </div>
 

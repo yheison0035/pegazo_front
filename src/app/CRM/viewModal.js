@@ -13,7 +13,13 @@ import ImageGallery from '@/components/dashboard/viewModal/imageGallery';
 import SaleItemsTable from '@/components/dashboard/viewModal/saleItemsTable';
 import InventorySpecsView from '@/components/dashboard/viewModal/inventorySpecsView';
 
-export default function ViewModal({ data, type, onClose, viewModalConfig }) {
+export default function ViewModal({
+  data,
+  type,
+  onClose,
+  viewModalConfig,
+  view = '',
+}) {
   if (!data) return null;
 
   if (type === 'variants') {
@@ -26,7 +32,7 @@ export default function ViewModal({ data, type, onClose, viewModalConfig }) {
           >
             <XMarkIcon className="w-6 h-6" />
           </button>
-          <Variants data={data} />
+          <Variants data={data} view={view} />
         </div>
       </div>
     );

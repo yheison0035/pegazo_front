@@ -1,14 +1,9 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { PlusIcon } from '@heroicons/react/24/outline';
-import Link from 'next/link';
-
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
 import { useAuth } from '@/context/authContext';
-
-import useLocals from '@/lib/api/hooks/useLocals';
 
 import Table from '@/components/dashboard/tables/table';
 import Pagination from '@/components/dashboard/tables/segments/pagination';
@@ -16,90 +11,91 @@ import ViewModal from '../../viewModal';
 import ConfirmDeleteModal from '@/components/dashboard/tables/segments/confirmDeleteModal';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
+import Header from '@/components/dashboard/customers/header';
 
 import {
-  getHeaderTableLocals,
+  getHeaderTableServices,
   viewModalConfig,
-} from '@/lib/api/utils/locals.config';
+} from '@/lib/api/utils/services.config';
 
 import useColumnFilters from '@/components/dashboard/tables/hooks/useColumnFilters';
 import { useDebounce } from '@/components/dashboard/tables/hooks/useDebounce';
+import useServices from '@/lib/api/hooks/useServices';
+import usePermissions from '@/hooks/usePermissions';
 
 export default function Services() {
   const { usuario } = useAuth();
-  const { getLocals, deleteLocal, loading } = useLocals();
+  const { getServices, deleteService, loading } = useServices();
 
-  const [locals, setLocals] = useState([]);
+  const [services, setServices] = useState([]);
   const [meta, setMeta] = useState(null);
 
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
 
-  const [selectedLocals, setSelectedLocals] = useState(null);
+  const [selectedServices, setSelectedServices] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [alert, setAlert] = useState({});
+  const [selectedVariants, setSelectedVariants] = useState(null);
 
   const { filters, handleFilterChange } = useColumnFilters({
     name: '',
-    address: '',
-    city: '',
-    managerId: '',
-    phone: '',
+    description: '',
+    price: '',
+    duration: '',
     status: '',
   });
 
   const debouncedFilters = useDebounce(filters, 400);
 
-  const fetchLocals = useCallback(async () => {
-    const res = await getLocals({
+  const fetchServices = useCallback(async () => {
+    const res = await getServices({
       page,
       limit,
       ...debouncedFilters,
     });
 
-    setLocals(res.data);
+    setServices(res.data);
     setMeta(res.meta);
-  }, [getLocals, page, limit, debouncedFilters]);
+  }, [getServices, page, limit, debouncedFilters]);
 
   useEffect(() => {
-    fetchLocals();
-  }, [fetchLocals]);
+    fetchServices();
+  }, [fetchServices]);
 
   const handleDeleteClick = (id, name) => {
-    setDeleteTarget({ id, name, type: 'este local' });
+    setDeleteTarget({ id, name, type: 'este servicio' });
     setShowDeleteModal(true);
   };
 
   const confirmDelete = async () => {
-    await deleteLocal(deleteTarget.id);
+    await deleteService(deleteTarget.id);
     setShowDeleteModal(false);
     setDeleteTarget(null);
-    fetchLocals();
+    fetchServices();
   };
+
+  const { can } = usePermissions();
 
   return (
     <RoleGuard allowedRoles={Object.values(Roles)}>
       <div className="w-full p-4">
         <div className="flex flex-col md:flex-row justify-between mb-4 gap-4">
-          <h1 className="text-2xl font-semibold">Listado de Locales</h1>
+          <h1 className="text-2xl font-semibold">Listado de Servicios</h1>
 
-          <Link
-            href="/CRM/dashboard/locals/new"
-            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm"
-          >
-            <PlusIcon className="w-4 h-4" />
-            Agregar local
-          </Link>
+          {can('services', 'create') && (
+            <Header type="servicio" typeUrl="services" />
+          )}
         </div>
 
         <div className="bg-white rounded-lg shadow relative">
-          <LoadingOverlay show={loading} text="Cargando locales..." />
+          <LoadingOverlay show={loading} text="Cargando servicios..." />
 
           <Table
-            header={getHeaderTableLocals()}
-            info={locals}
-            view="locals"
+            header={getHeaderTableServices()}
+            info={services}
+            view="services"
             rol={usuario?.role}
             loading={loading}
             filters={filters}
@@ -107,8 +103,9 @@ export default function Services() {
               setPage(1);
               handleFilterChange(name, value);
             }}
-            setSelected={setSelectedLocals}
+            setSelected={setSelectedServices}
             handleDeleteClick={handleDeleteClick}
+            setSelectedVariants={setSelectedVariants}
           />
 
           {meta && (
@@ -125,11 +122,11 @@ export default function Services() {
           )}
         </div>
 
-        {selectedLocals && (
+        {selectedServices && (
           <ViewModal
-            data={selectedLocals}
-            type="locals"
-            onClose={() => setSelectedLocals(null)}
+            data={selectedServices}
+            type="services"
+            onClose={() => setSelectedServices(null)}
             viewModalConfig={viewModalConfig}
           />
         )}
@@ -142,6 +139,15 @@ export default function Services() {
             name={deleteTarget?.name}
             onConfirm={confirmDelete}
             loading={loading}
+          />
+        )}
+
+        {selectedVariants && (
+          <ViewModal
+            data={selectedVariants}
+            type="variants"
+            onClose={() => setSelectedVariants(null)}
+            view="services"
           />
         )}
 

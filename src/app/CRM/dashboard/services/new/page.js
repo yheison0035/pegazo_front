@@ -3,66 +3,125 @@
 import { useState } from 'react';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import { useAuth } from '@/context/authContext';
-import useLocals from '@/lib/api/hooks/useLocals';
 import DinamicForm from '@/components/dashboard/form/DinamicForm';
 import {
-  getEmptyLocal,
-  getFormFieldsLocals,
-} from '@/lib/api/utils/locals.config';
+  getEmptyService,
+  getFormFieldsServices,
+} from '@/lib/api/utils/services.config';
+import useServices from '@/lib/api/hooks/useServices';
+import LoadingOverlay from '@/components/ui/LoadingOverlay';
+import { parseCOPToNumber } from '@/lib/api/utils/utils';
 
-export default function NewLocal() {
+export default function NewService() {
   const { usuario } = useAuth();
-  const { createLocal, loading } = useLocals();
+  const { createService, loading } = useServices();
 
-  const [formData, setFormData] = useState(getEmptyLocal());
+  const [formData, setFormData] = useState(getEmptyService());
   const [alert, setAlert] = useState({ type: '', message: '', url: '' });
 
-  const handleReset = () => setFormData(getEmptyLocal());
+  const handleReset = () => {
+    setFormData(getEmptyService());
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!formData.name) {
+      return setAlert({
+        type: 'warning',
+        message: 'El nombre del servicio es obligatorio.',
+      });
+    }
+
+    if (!formData.locals || formData.locals.length === 0) {
+      return setAlert({
+        type: 'warning',
+        message: 'Debes agregar al menos un local con precio.',
+      });
+    }
+
+    const invalid = formData.locals.find(
+      (l) => !l.localId || !l.price || Number(l.price) <= 0
+    );
+
+    if (invalid) {
+      return setAlert({
+        type: 'warning',
+        message: 'Todos los locales deben tener precio válido.',
+      });
+    }
+
+    if (!formData.duration || Number(formData.duration) <= 0) {
+      return setAlert({
+        type: 'warning',
+        message: 'La duración debe ser válida.',
+      });
+    }
+
     try {
-      await createLocal(formData);
+      await createService({
+        ...formData,
+        duration: Number(formData.duration),
+
+        locals: formData.locals.map((l) => ({
+          localId: l.localId,
+          price: parseCOPToNumber(l.price),
+        })),
+      });
+
       setAlert({
         type: 'success',
-        message: 'Local creado correctamente.',
-        url: '/CRM/dashboard/locals',
+        message: 'Servicio creado correctamente.',
+        url: '/CRM/dashboard/services',
       });
+
+      handleReset();
     } catch (err) {
       setAlert({
         type: 'error',
-        message: err.message || 'Error al crear local',
+        message: err.message || 'Error al crear servicio',
       });
     }
   };
 
   return (
-    <div className="max-w-full mx-auto bg-white shadow-lg rounded-2xl p-8 mt-6 border border-gray-100">
-      <h2 className="text-3xl font-bold text-gray-800 mb-2">
-        Crear Local Nuevo
-      </h2>
-      <p className="text-sm text-gray-500 mb-6">
-        Ingrese la información del local para registrar un nuevo local.
-      </p>
-
-      <DinamicForm
-        formData={formData}
-        formFields={getFormFieldsLocals()}
-        setFormData={setFormData}
-        handleSubmit={handleSubmit}
-        handleReset={handleReset}
-        loading={loading}
-        mode="new"
-        usuario={usuario}
-        module="locals"
+    <>
+      <LoadingOverlay
+        show={loading}
+        text="Creando servicio, por favor espera..."
       />
 
-      <AlertModal
-        type={alert.type}
-        message={alert.message}
-        onClose={() => setAlert({ type: '', message: '', url: '' })}
-        url={alert.url}
-      />
-    </div>
+      <div className="max-w-full mx-auto bg-white shadow-lg rounded-2xl p-8 mt-6 border border-gray-100">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-800">
+              Crear Servicio Nuevo
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">
+              Registra un nuevo servicio para tu negocio.
+            </p>
+          </div>
+        </div>
+
+        <DinamicForm
+          formData={formData}
+          formFields={getFormFieldsServices(usuario)}
+          setFormData={setFormData}
+          handleSubmit={handleSubmit}
+          handleReset={handleReset}
+          loading={loading}
+          mode="new"
+          usuario={usuario}
+          module="services"
+        />
+
+        <AlertModal
+          type={alert.type}
+          message={alert.message}
+          onClose={() => setAlert({ type: '', message: '', url: '' })}
+          url={alert.url}
+        />
+      </div>
+    </>
   );
 }

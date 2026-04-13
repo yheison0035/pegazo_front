@@ -295,6 +295,23 @@ export default function ContentData({
                 </td>
               </>
             )}
+
+            {view === 'services' && (
+              <>
+                <td className="px-5 py-4 whitespace-nowrap">
+                  {info.name || '---'}
+                </td>
+                <td className="px-5 py-4 whitespace-nowrap">
+                  {info.description || '---'}
+                </td>
+                <td className="px-5 py-4 whitespace-nowrap">
+                  {info.duration ? `${info.duration} min` : '---'}
+                </td>
+                <td className="px-5 py-4 whitespace-nowrap">
+                  {info.status || '---'}
+                </td>
+              </>
+            )}
           </tr>
         );
       })}

@@ -38,7 +38,7 @@ export const getFormFieldsSales = () => [
   },
   {
     name: 'userId',
-    label: 'Vendedor / Asesor',
+    label: 'Atendido por',
     type: 'select',
     required: true,
     source: 'users',

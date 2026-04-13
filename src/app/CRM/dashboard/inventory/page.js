@@ -122,6 +122,7 @@ export default function Inventory() {
           data={selectedVariants}
           type="variants"
           onClose={() => setSelectedVariants(null)}
+          view="inventory"
         />
       )}
       {showDeleteModal && (
