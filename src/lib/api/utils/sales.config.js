@@ -14,7 +14,7 @@ export const getEmptySale = () => ({
 export const getFormFieldsSales = () => [
   {
     name: 'items',
-    label: 'Productos Vendidos',
+    label: 'Productos o servicios',
     type: 'productSelect',
     required: true,
     source: 'products',
