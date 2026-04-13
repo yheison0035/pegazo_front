@@ -54,10 +54,10 @@ export default function AddSales() {
   return (
     <div className="max-w-full mx-auto bg-white shadow-lg rounded-2xl p-8 mt-6 border border-gray-100">
       <h2 className="text-3xl font-bold text-gray-800 mb-2">
-        Crear Venta Nueva
+        Crear Factura de Venta
       </h2>
       <p className="text-sm text-gray-500 mb-6">
-        Ingrese la información de la venta para registrar una nueva venta.
+        Ingrese la información de la factura para registrar una nueva factura.
       </p>
 
       <DinamicForm

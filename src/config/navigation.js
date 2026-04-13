@@ -69,7 +69,7 @@ export const NAVIGATION = [
     section: 'Ventas',
     items: [
       {
-        name: 'Realizar Venta',
+        name: 'Realizar Factura',
         href: '/CRM/dashboard/sales',
         icon: BanknotesIcon,
         roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR'],
