@@ -131,7 +131,7 @@ export function printSaleInvoice(sale) {
       <div class="center">NIT 1082159046-1</div>
       <div class="center">Bogotá D.C</div>
       <div class="center">CRA 20 #13-57</div>
-      <div class="center">Tel: 573174337602</div>
+      <div class="center">Tel: +57 3147337602</div>
       <div class="center">europeatvstore@gmail.com</div>
       <div class="center">Régimen: No responsable de IVA</div>
 
