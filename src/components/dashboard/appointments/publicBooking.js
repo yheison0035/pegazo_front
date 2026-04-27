@@ -54,7 +54,13 @@ export default function PublicBooking() {
   };
 
   const loadServices = async () => {
-    const res = await getServices({ all: true });
+    if (!local) return;
+
+    const res = await getServices({
+      all: true,
+      localId: local.id,
+    });
+
     setServices(res.data || []);
   };
 
