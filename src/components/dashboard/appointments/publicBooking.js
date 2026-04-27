@@ -138,7 +138,7 @@ export default function PublicBooking() {
   };
 
   return (
-    <div className="min-h-screen flex bg-black text-white pb-30">
+    <div className="min-h-screen flex bg-black text-white">
       <div className="hidden md:flex w-80 bg-[#0a0a0a] border-r border-gray-800 p-8 flex-col justify-between">
         <div>
           <img
@@ -196,7 +196,7 @@ export default function PublicBooking() {
         <p className="text-xs text-gray-600">Ragnor Barber ©</p>
       </div>
 
-      <div className="flex-1 p-6 md:p-12 relative">
+      <div className="flex-1 p-6 md:p-12 relative pb-30">
         <div className="md:hidden flex justify-center mb-6">
           <img
             src="https://res.cloudinary.com/dl7g5sslz/image/upload/v1777311594/logo_ragnor_okgsb8.png"
