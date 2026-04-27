@@ -110,11 +110,11 @@ export default function PublicBooking() {
 
     const message = `Hola, quiero agendar una cita:
 
-      📌 Local: ${local.name}
-      💇 Servicio: ${service.name}
-      👤 Barbero: ${barber.name}
-      📆 Fecha: ${date}
-      🕐 Hora: ${time}`;
+📌 Local: ${local.name}
+💇 Servicio: ${service.name}
+👤 Barbero: ${barber.name}
+📆 Fecha: ${date}
+🕐 Hora: ${time}`;
 
     const url = `https://wa.me/573147337602?text=${encodeURIComponent(message)}`;
 
@@ -138,7 +138,7 @@ export default function PublicBooking() {
   };
 
   return (
-    <div className="min-h-screen flex bg-black text-white">
+    <div className="min-h-screen flex bg-black text-white pb-30">
       <div className="hidden md:flex w-80 bg-[#0a0a0a] border-r border-gray-800 p-8 flex-col justify-between">
         <div>
           <img
