@@ -19,6 +19,7 @@ export const ROLE_PERMISSIONS = {
     brands: ['view', 'create', 'edit', 'delete'],
     statistics: ['view'],
     services: ['view'],
+    appointments: ['view', 'create', 'edit', 'delete'],
   },
 
   ASESOR: {

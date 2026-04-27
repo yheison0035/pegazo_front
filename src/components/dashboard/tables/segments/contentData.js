@@ -3,7 +3,11 @@
 import { canSeeOldPrice } from '@/hooks/inventory.permissions';
 import Actions from './actions';
 import PhoneContentData from './contentData/phone';
-import { formatCOP, formatDateTime } from '@/lib/api/utils/utils';
+import {
+  formatCOP,
+  formatDateTime,
+  formatDateSafe,
+} from '@/lib/api/utils/utils';
 import { useAuth } from '@/context/authContext';
 
 export default function ContentData({
@@ -306,6 +310,35 @@ export default function ContentData({
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
                   {info.duration ? `${info.duration} min` : '---'}
+                </td>
+                <td className="px-5 py-4 whitespace-nowrap">
+                  {info.status || '---'}
+                </td>
+              </>
+            )}
+
+            {view === 'appointments' && (
+              <>
+                <td className="px-5 py-4 whitespace-nowrap">
+                  {formatDateSafe(info.date) || '---'}
+                </td>
+                <td className="px-5 py-4 whitespace-nowrap">
+                  {info.startTime || '---'}
+                </td>
+                <td className="px-5 py-4 whitespace-nowrap">
+                  {info.service?.name || '---'}
+                </td>
+                <td className="px-5 py-4 whitespace-nowrap">
+                  {info.barber?.name || '---'}
+                </td>
+                <td className="px-5 py-4 whitespace-nowrap">
+                  {info.customer?.name || '---'}
+                </td>
+                <td className="px-5 py-4 whitespace-nowrap">
+                  {info.local?.name || '---'}
+                </td>
+                <td className="px-5 py-4 whitespace-nowrap">
+                  {info.notes || '---'}
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
                   {info.status || '---'}

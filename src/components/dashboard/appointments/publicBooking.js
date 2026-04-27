@@ -142,8 +142,8 @@ export default function PublicBooking() {
       <div className="hidden md:flex w-80 bg-[#0a0a0a] border-r border-gray-800 p-8 flex-col justify-between">
         <div>
           <img
-            src="https://res.cloudinary.com/dl7g5sslz/image/upload/v1777311594/logo_ragnor_okgsb8.png"
-            className="w-24 mb-10"
+            src="https://res.cloudinary.com/dl7g5sslz/image/upload/v1775236258/logo_ragnorbarber_coihnw.png"
+            className="w-80 mb-10"
           />
 
           <div className="space-y-6 text-sm">
@@ -200,7 +200,7 @@ export default function PublicBooking() {
         <div className="md:hidden flex justify-center mb-6">
           <img
             src="https://res.cloudinary.com/dl7g5sslz/image/upload/v1777311594/logo_ragnor_okgsb8.png"
-            className="w-20 opacity-90"
+            className="w-70 opacity-90"
           />
         </div>
 

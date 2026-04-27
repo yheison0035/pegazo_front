@@ -1,7 +1,6 @@
 export const getEmptyAppointment = () => ({
   date: '',
   startTime: '',
-  endTime: '',
   serviceId: '',
   barberId: '',
   customerId: '',
@@ -11,13 +10,12 @@ export const getEmptyAppointment = () => ({
 });
 
 export const getFormFieldsAppointments = () => [
-  { name: 'date', label: 'Fecha', type: 'date', required: true },
-  { name: 'startTime', label: 'Hora de Inicio', type: 'time', required: true },
   {
-    name: 'endTime',
-    label: 'Hora de Finalización',
-    type: 'time',
+    name: 'localId',
+    label: 'Local',
+    type: 'select',
     required: true,
+    source: 'locals',
   },
   {
     name: 'serviceId',
@@ -31,21 +29,22 @@ export const getFormFieldsAppointments = () => [
     label: 'Barbero',
     type: 'select',
     required: true,
-    source: 'users',
+    source: 'getUsersByRole',
+  },
+  { name: 'date', label: 'Fecha de la Cita', type: 'date', required: true },
+  {
+    name: 'startTime',
+    label: 'Hora cita',
+    type: 'select',
+    required: true,
+    source: 'getAvailability',
   },
   {
     name: 'customerId',
     label: 'Cliente',
     type: 'select',
     required: true,
-    source: 'users',
-  },
-  {
-    name: 'localId',
-    label: 'Local',
-    type: 'select',
-    required: true,
-    source: 'locals',
+    source: 'customers',
   },
   { name: 'notes', label: 'Notas', type: 'textarea', required: false },
   {
@@ -54,25 +53,19 @@ export const getFormFieldsAppointments = () => [
     type: 'select',
     required: true,
     options: [
-      { id: 'NUEVA', name: 'PENDIENTE' },
-      { id: 'EN_PROCESO', name: 'EN PROCESO' },
       { id: 'PENDIENTE', name: 'PENDIENTE' },
-      { id: 'APROBADA', name: 'APROBADA' },
-      { id: 'RECHAZADA', name: 'RECHAZADA' },
+      { id: 'CONFIRMADA', name: 'CONFIRMADA' },
+      { id: 'EN_PROCESO', name: 'EN PROCESO' },
+      { id: 'COMPLETADA', name: 'COMPLETADA' },
       { id: 'CANCELADA', name: 'CANCELADA' },
+      { id: 'NO_ASISTIO', name: 'NO ASISTIO' },
     ],
   },
 ];
 
 export const getHeaderTableAppointments = () => [
   { name: 'date', title: 'Fecha', show: true, showInput: true },
-  { name: 'startTime', title: 'Hora de Inicio', show: true, showInput: true },
-  {
-    name: 'endTime',
-    title: 'Hora de Finalización',
-    show: true,
-    showInput: true,
-  },
+  { name: 'startTime', title: 'Hora cita', show: true, showInput: true },
   { name: 'serviceId', title: 'Servicio', show: true, showInput: true },
   { name: 'barberId', title: 'Barbero', show: true, showInput: true },
   { name: 'customerId', title: 'Cliente', show: true, showInput: true },
@@ -88,14 +81,13 @@ export const viewModalConfig = {
   sections: [
     {
       fields: [
-        { name: 'date', label: 'Fecha de la Cita', type: 'date' },
+        { name: 'date', label: 'Fecha de la Cita', type: 'dateOnly' },
         { name: 'startTime', label: 'Hora de Inicio', type: 'time' },
-        { name: 'endTime', label: 'Hora de Finalización', type: 'time' },
+        { name: 'service.name', label: 'Servicio' },
       ],
     },
     {
       fields: [
-        { name: 'service.name', label: 'Servicio' },
         { name: 'barber.name', label: 'Barbero' },
         { name: 'customer.name', label: 'Cliente' },
         { name: 'local.name', label: 'Local' },

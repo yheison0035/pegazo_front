@@ -5,7 +5,7 @@ import CommentsHistory from '@/components/dashboard/comments/CommentsHistory';
 import Variants from '@/components/dashboard/viewModal/variants';
 import {
   formatCOP,
-  formatValue,
+  formatDateSafe,
   getValueByPath,
   formatDateTime,
 } from '@/lib/api/utils/utils';
@@ -84,6 +84,10 @@ export default function ViewModal({
 
                   if (field.type === 'date') {
                     value = formatDateTime(value);
+                  }
+
+                  if (field.type === 'dateOnly') {
+                    value = formatDateSafe(value);
                   }
 
                   if (field.type === 'status') {

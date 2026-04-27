@@ -1,4 +1,5 @@
 import apiFetch from '../../auth/client';
+import { buildISODateTime } from '../../utils/utils';
 
 export async function getAppointments(params = {}) {
   const { page = 1, limit = 10, ...filters } = params;
@@ -22,9 +23,13 @@ export async function getAppointmentById(id) {
 }
 
 export async function createAppointment(dto) {
+  debugger;
   const body = {
     ...dto,
-    managerId: Number(dto.managerId),
+    serviceId: Number(dto.serviceId),
+    barberId: Number(dto.barberId),
+    localId: Number(dto.localId),
+    customerId: dto.customerId ? Number(dto.customerId) : null,
   };
 
   return apiFetch('/appointments', {

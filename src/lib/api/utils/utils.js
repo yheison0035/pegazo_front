@@ -55,6 +55,13 @@ export function formatDateTime(value) {
   });
 }
 
+// Solo fecha (formato largo)
+export function formatDateSafe(value) {
+  if (!value) return '';
+
+  return value.split('T')[0];
+}
+
 // =============================
 // FORMATOS NUMÉRICOS
 // =============================
@@ -117,6 +124,24 @@ export function toggleCase(text, mode = 'toggle') {
         )
         .join('');
   }
+}
+
+export function buildISODateTime(date, time) {
+  if (!date || !time) return null;
+
+  let [hour, minute] = time.split(':');
+  minute = minute.substring(0, 2);
+
+  const isPM = time.toLowerCase().includes('p');
+
+  let h = Number(hour);
+
+  if (isPM && h !== 12) h += 12;
+  if (!isPM && h === 12) h = 0;
+
+  const formatted = `${date}T${String(h).padStart(2, '0')}:${minute}:00`;
+
+  return new Date(formatted).toISOString();
 }
 
 // Formatea texto (quita tildes, caracteres raros y lo deja limpio)

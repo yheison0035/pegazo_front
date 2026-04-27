@@ -23,6 +23,8 @@ import SearchableSelect from './fields/SearchSelectField/searchableSelect';
 import ProductSelector from './fields/ProductSelectField/productSelector';
 import ColorSelect from './fields/colorSelect';
 import ServiceLocalsField from '../services/serviceLocalsField';
+import useServices from '@/lib/api/hooks/useServices';
+import useAppointments from '@/lib/api/hooks/useAppointments';
 
 export default function DinamicForm({
   formData,
@@ -44,8 +46,10 @@ export default function DinamicForm({
   const [productError, setProductError] = useState('');
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
-  const { getUsers } = useUsers();
+  const { getUsers, getUsersByRole } = useUsers();
   const { getLocals } = useLocals();
+  const { getServices } = useServices();
+  const { getAvailability } = useAppointments();
   const {
     getRoles,
     getStatus,
@@ -118,6 +122,47 @@ export default function DinamicForm({
       paymentStatus: getPaymentStatus,
       expenses: getTypeExpenses,
       typeCompanies: getTypeCompanies,
+      services: getServices,
+      getUsersByRole: async () => {
+        if (!formData.localId) return [];
+
+        const res = await getUsersByRole({
+          role: 'barbero',
+          localId: formData.localId,
+        });
+
+        const data = Array.isArray(res) ? res : res.data || [];
+
+        return data.map((item) => ({
+          id: item.id,
+          name: item.name,
+        }));
+      },
+
+      getAvailability: async () => {
+        if (
+          !formData.localId ||
+          !formData.serviceId ||
+          !formData.date ||
+          !formData.barberId
+        ) {
+          return [];
+        }
+
+        const res = await getAvailability({
+          localId: formData.localId,
+          serviceId: formData.serviceId,
+          barberId: formData.barberId,
+          date: formData.date,
+        });
+
+        const data = Array.isArray(res) ? res : res.data || [];
+
+        return data.map((time) => ({
+          id: time,
+          name: time,
+        }));
+      },
     };
 
     const results = {};
@@ -148,6 +193,10 @@ export default function DinamicForm({
     setDynamicOptions(results);
   }, [
     formFields,
+    formData.localId,
+    formData.serviceId,
+    formData.barberId,
+    formData.date,
     getUsers,
     getLocals,
     getCustomers,
@@ -155,6 +204,9 @@ export default function DinamicForm({
     getStatus,
     getPaymentMethods,
     getPaymentStatus,
+    getServices,
+    getTypeExpenses,
+    getTypeCompanies,
   ]);
 
   useEffect(() => {
