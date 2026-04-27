@@ -8,8 +8,6 @@ import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
 import { useAuth } from '@/context/authContext';
 
-import useLocals from '@/lib/api/hooks/useLocals';
-
 import Table from '@/components/dashboard/tables/table';
 import Pagination from '@/components/dashboard/tables/segments/pagination';
 import ViewModal from '../../viewModal';
@@ -18,24 +16,25 @@ import AlertModal from '@/components/dashboard/modals/alertModal';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 
 import {
-  getHeaderTableLocals,
+  getHeaderTableAppointments,
   viewModalConfig,
-} from '@/lib/api/utils/locals.config';
+} from '@/lib/api/utils/appointments.config';
 
 import useColumnFilters from '@/components/dashboard/tables/hooks/useColumnFilters';
 import { useDebounce } from '@/components/dashboard/tables/hooks/useDebounce';
+import useAppointments from '@/lib/api/hooks/useAppointments';
 
 export default function Appointments() {
   const { usuario } = useAuth();
-  const { getLocals, deleteLocal, loading } = useLocals();
+  const { getAppointments, deleteAppointment, loading } = useAppointments();
 
-  const [locals, setLocals] = useState([]);
+  const [appointments, setAppointments] = useState([]);
   const [meta, setMeta] = useState(null);
 
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
 
-  const [selectedLocals, setSelectedLocals] = useState(null);
+  const [selectedAppointments, setSelectedAppointments] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [alert, setAlert] = useState({});
@@ -51,55 +50,55 @@ export default function Appointments() {
 
   const debouncedFilters = useDebounce(filters, 400);
 
-  const fetchLocals = useCallback(async () => {
-    const res = await getLocals({
+  const fetchAppointments = useCallback(async () => {
+    const res = await getAppointments({
       page,
       limit,
       ...debouncedFilters,
     });
 
-    setLocals(res.data);
+    setAppointments(res.data);
     setMeta(res.meta);
-  }, [getLocals, page, limit, debouncedFilters]);
+  }, [getAppointments, page, limit, debouncedFilters]);
 
   useEffect(() => {
-    fetchLocals();
-  }, [fetchLocals]);
+    fetchAppointments();
+  }, [fetchAppointments]);
 
   const handleDeleteClick = (id, name) => {
-    setDeleteTarget({ id, name, type: 'este local' });
+    setDeleteTarget({ id, name, type: 'esta cita' });
     setShowDeleteModal(true);
   };
 
   const confirmDelete = async () => {
-    await deleteLocal(deleteTarget.id);
+    await deleteAppointment(deleteTarget.id);
     setShowDeleteModal(false);
     setDeleteTarget(null);
-    fetchLocals();
+    fetchAppointments();
   };
 
   return (
     <RoleGuard allowedRoles={Object.values(Roles)}>
       <div className="w-full p-4">
         <div className="flex flex-col md:flex-row justify-between mb-4 gap-4">
-          <h1 className="text-2xl font-semibold">Listado de Locales</h1>
+          <h1 className="text-2xl font-semibold">Listado de Citas</h1>
 
           <Link
-            href="/CRM/dashboard/locals/new"
+            href="/CRM/dashboard/appointments/new"
             className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm"
           >
             <PlusIcon className="w-4 h-4" />
-            Agregar local
+            Agregar cita
           </Link>
         </div>
 
         <div className="bg-white rounded-lg shadow relative">
-          <LoadingOverlay show={loading} text="Cargando locales..." />
+          <LoadingOverlay show={loading} text="Cargando citas..." />
 
           <Table
-            header={getHeaderTableLocals()}
-            info={locals}
-            view="locals"
+            header={getHeaderTableAppointments()}
+            info={appointments}
+            view="appointments"
             rol={usuario?.role}
             loading={loading}
             filters={filters}
@@ -107,7 +106,7 @@ export default function Appointments() {
               setPage(1);
               handleFilterChange(name, value);
             }}
-            setSelected={setSelectedLocals}
+            setSelected={setSelectedAppointments}
             handleDeleteClick={handleDeleteClick}
           />
 
@@ -125,11 +124,11 @@ export default function Appointments() {
           )}
         </div>
 
-        {selectedLocals && (
+        {selectedAppointments && (
           <ViewModal
-            data={selectedLocals}
-            type="locals"
-            onClose={() => setSelectedLocals(null)}
+            data={selectedAppointments}
+            type="appointments"
+            onClose={() => setSelectedAppointments(null)}
             viewModalConfig={viewModalConfig}
           />
         )}

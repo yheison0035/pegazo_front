@@ -108,7 +108,7 @@ export const NAVIGATION = [
         name: 'Citas',
         href: '/CRM/dashboard/appointments',
         icon: CalendarDaysIcon,
-        roles: ['SUPER_ADMIN', 'ADMIN'],
+        roles: ['SUPER_ADMIN', 'ADMIN', 'BARBERO'],
       },
       {
         name: 'Servicios',

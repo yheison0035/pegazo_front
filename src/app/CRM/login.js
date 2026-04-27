@@ -27,6 +27,11 @@ export default function Login() {
         return;
       }
 
+      if (role === 'BARBERO') {
+        router.push('/CRM/dashboard/appointments');
+        return;
+      }
+
       router.push('/CRM/dashboard/sales');
     } catch (err) {
       setError(err.message || 'Error en login');

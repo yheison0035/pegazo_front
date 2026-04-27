@@ -10,6 +10,7 @@ import {
   toggleUserRole,
   uploadUserAvatar,
   deleteUserAvatar,
+  getUsersByRole,
 } from '../routes/users';
 
 export default function useUsers() {
@@ -50,6 +51,11 @@ export default function useUsers() {
   );
   const deleteUserAvatarFn = useCallback(() => wrap(deleteUserAvatar), [wrap]);
 
+  const getUsersByRoleFn = useCallback(
+    (params) => wrap(getUsersByRole, params),
+    [wrap]
+  );
+
   return {
     getUsers: getUsersFn,
     getUserById: getUserByIdFn,
@@ -59,6 +65,7 @@ export default function useUsers() {
     toggleUserRole: toggleUserRoleFn,
     uploadUserAvatar: uploadUserAvatarFn,
     deleteUserAvatar: deleteUserAvatarFn,
+    getUsersByRole: getUsersByRoleFn,
     loading,
     error,
   };

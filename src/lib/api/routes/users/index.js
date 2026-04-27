@@ -82,3 +82,17 @@ export async function deleteUserAvatar() {
     method: 'DELETE',
   });
 }
+
+export async function getUsersByRole(params = {}) {
+  const query = new URLSearchParams();
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== '' && value !== null && value !== undefined) {
+      query.set(key, String(value));
+    }
+  });
+
+  const res = await apiFetch(`/users/by-role?${query.toString()}`);
+
+  return res.data || res;
+}

@@ -31,4 +31,8 @@ export const ROLE_PERMISSIONS = {
     delivered_sales: ['view'],
     expenses: ['view', 'create', 'edit'],
   },
+
+  BARBERO: {
+    appointments: ['view'],
+  },
 };
