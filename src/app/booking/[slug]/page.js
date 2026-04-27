@@ -1,7 +1,11 @@
+// src/app/booking/[slug]/page.js
+
 import PublicBooking from '@/components/dashboard/appointments/publicBooking';
 
 const LOGO =
   'https://res.cloudinary.com/dl7g5sslz/image/upload/v1777311594/logo_ragnor_okgsb8.png';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata = {
   metadataBase: new URL('https://admin.europeatvstore.com'),
@@ -13,6 +17,20 @@ export const metadata = {
 
   description:
     'Reserva tu cita en RAGNOR BARBER. Corte, barba y estilo profesional.',
+
+  icons: {
+    icon: [
+      {
+        url: 'https://res.cloudinary.com/dl7g5sslz/image/upload/v1777332078/logo_ragnor_pvnvqe.ico',
+      },
+      {
+        url: 'https://res.cloudinary.com/dl7g5sslz/image/upload/v1777311594/logo_ragnor_okgsb8.png',
+        type: 'image/png',
+      },
+    ],
+    shortcut: ['/favicon.ico'],
+    apple: ['/apple-icon.png'],
+  },
 
   keywords: [
     'barbería',
@@ -28,7 +46,7 @@ export const metadata = {
     title: 'RAGNOR BARBER',
     description:
       'Agenda tu cita fácil y rápido en RAGNOR BARBER. Servicio premium.',
-    url: '/booking/ragnor-barber',
+    url: 'https://admin.europeatvstore.com/booking/ragnor-barber',
     siteName: 'RAGNOR BARBER',
     images: [
       {

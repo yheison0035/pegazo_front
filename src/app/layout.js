@@ -1,23 +1,36 @@
-import { AuthProvider } from '@/context/authContext';
 import { monserrat } from '@/styles/fonts';
-import '@/styles/globals.css';
+
+const LOGO =
+  'https://res.cloudinary.com/dl7g5sslz/image/upload/v1777311594/logo_ragnor_okgsb8.png';
 
 export const metadata = {
-  title: 'Zorvex',
-  description: 'CRM inteligente para gestión empresarial',
+  title: 'RAGNOR BARBER',
+  description: 'Agenda tu cita con los mejores barberos',
+
+  openGraph: {
+    title: 'RAGNOR BARBER',
+    description: 'Reserva tu cita fácil y rápido',
+    images: [LOGO],
+  },
+
+  twitter: {
+    card: 'summary_large_image',
+    images: [LOGO],
+  },
+
   icons: {
-    icon: [{ url: '/favicon.ico' }, { url: '/icon.png', type: 'image/png' }],
-    shortcut: ['/favicon.ico'],
-    apple: ['/apple-icon.png'],
+    icon: LOGO,
+    shortcut: LOGO,
+    apple: LOGO,
   },
 };
 
-export default function RootLayout({ children }) {
+export default function BookingLayout({ children }) {
   return (
-    <AuthProvider>
-      <html lang="es">
-        <body className={`${monserrat.className} antialiased`}>{children}</body>
-      </html>
-    </AuthProvider>
+    <html lang="es">
+      <body className={`${monserrat.className} antialiased bg-black`}>
+        {children}
+      </body>
+    </html>
   );
 }
