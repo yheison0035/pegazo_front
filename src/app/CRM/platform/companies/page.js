@@ -20,7 +20,8 @@ import { getHeaderTableCompanies } from '@/lib/api/utils/companies.config';
 import useCompanies from '@/lib/api/hooks/useCompanies';
 
 export default function Companies() {
-  const { usuario } = useAuth();
+  const auth = useAuth();
+  const usuario = auth?.usuario;
   const { getCompanies, deleteCompany, loading } = useCompanies();
 
   const [companies, setCompanies] = useState([]);

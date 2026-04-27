@@ -11,7 +11,8 @@ import {
 } from '@/lib/api/utils/categories.config';
 
 export default function NewCategory() {
-  const { usuario } = useAuth();
+  const auth = useAuth();
+  const usuario = auth?.usuario;
   const { createCategory, loading } = useCategories();
 
   const [formData, setFormData] = useState(getEmptyCategory());

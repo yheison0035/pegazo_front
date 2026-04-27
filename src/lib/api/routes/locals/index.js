@@ -1,6 +1,7 @@
 import apiFetch from '../../auth/client';
 
 export async function getLocals(params = {}) {
+  debugger;
   const { page = 1, limit = 10, ...filters } = params;
 
   const query = new URLSearchParams();

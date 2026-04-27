@@ -19,7 +19,8 @@ import { useDebounce } from '@/components/dashboard/tables/hooks/useDebounce';
 import usePermissions from '@/hooks/usePermissions';
 
 export default function Inventory() {
-  const { usuario } = useAuth();
+  const auth = useAuth();
+  const usuario = auth?.usuario;
   const { getProducts, deleteProduct, loading } = useProducts();
 
   const [products, setProducts] = useState([]);

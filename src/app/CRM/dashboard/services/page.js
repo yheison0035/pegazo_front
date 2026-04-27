@@ -24,7 +24,8 @@ import useServices from '@/lib/api/hooks/useServices';
 import usePermissions from '@/hooks/usePermissions';
 
 export default function Services() {
-  const { usuario } = useAuth();
+  const auth = useAuth();
+  const usuario = auth?.usuario;
   const { getServices, deleteService, loading } = useServices();
 
   const [services, setServices] = useState([]);

@@ -21,7 +21,8 @@ export default function NewProduct() {
   const [images, setImages] = useState([]);
   const [showImages, setShowImages] = useState(false);
   const [showSpecsModal, setShowSpecsModal] = useState(false);
-  const { usuario } = useAuth();
+  const auth = useAuth();
+  const usuario = auth?.usuario;
   const showOldPrice = canSeeOldPrice(usuario);
 
   const { createProduct, uploadProductImages, loading } = useProducts();

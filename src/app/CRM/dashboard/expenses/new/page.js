@@ -11,7 +11,8 @@ import {
 } from '@/lib/api/utils/expenses.config';
 
 export default function NewExpense() {
-  const { usuario } = useAuth();
+  const auth = useAuth();
+  const usuario = auth?.usuario;
   const { createExpenses } = useExpenses();
 
   const [formData, setFormData] = useState(getEmptyExpense());

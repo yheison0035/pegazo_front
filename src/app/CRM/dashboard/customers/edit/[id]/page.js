@@ -12,7 +12,8 @@ export default function EditCustomer() {
   const [formData, setFormData] = useState({});
   const [alert, setAlert] = useState({ type: '', message: '', url: '' });
   const { id } = useParams();
-  const { usuario } = useAuth();
+  const auth = useAuth();
+  const usuario = auth?.usuario;
   const { getCustomerById, updateCustomer, loading } = useCustomers();
 
   const fetchCustomer = useCallback(async () => {

@@ -26,7 +26,8 @@ import useColumnFilters from '@/components/dashboard/tables/hooks/useColumnFilte
 import { useDebounce } from '@/components/dashboard/tables/hooks/useDebounce';
 
 export default function Locals() {
-  const { usuario } = useAuth();
+  const auth = useAuth();
+  const usuario = auth?.usuario;
   const { getLocals, deleteLocal, loading } = useLocals();
 
   const [locals, setLocals] = useState([]);

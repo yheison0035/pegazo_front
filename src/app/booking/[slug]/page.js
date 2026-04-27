@@ -1,5 +1,3 @@
-// src/app/booking/[slug]/page.js
-
 import PublicBooking from '@/components/dashboard/appointments/publicBooking';
 
 const LOGO =
@@ -28,12 +26,8 @@ export const metadata = {
         type: 'image/png',
       },
     ],
-    shortcut: [
-      'https://res.cloudinary.com/dl7g5sslz/image/upload/v1777332078/logo_ragnor_pvnvqe.ico',
-    ],
-    apple: [
-      'https://res.cloudinary.com/dl7g5sslz/image/upload/v1777311594/logo_ragnor_okgsb8.png',
-    ],
+    shortcut: ['/favicon.ico'],
+    apple: ['/apple-icon.png'],
   },
 
   keywords: [

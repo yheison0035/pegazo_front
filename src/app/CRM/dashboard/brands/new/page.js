@@ -11,7 +11,8 @@ import {
 import useBrands from '@/lib/api/hooks/useBrands';
 
 export default function NewBrand() {
-  const { usuario } = useAuth();
+  const auth = useAuth();
+  const usuario = auth?.usuario;
   const { createBrand, loading } = useBrands();
 
   const [formData, setFormData] = useState(getEmptyBrand());

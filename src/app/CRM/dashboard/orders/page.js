@@ -18,7 +18,8 @@ export default function Orders() {
   const [selectedCategories, setSelectedCategories] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
-  const { usuario } = useAuth();
+  const auth = useAuth();
+  const usuario = auth?.usuario;
   const [alert, setAlert] = useState({ type: '', message: '', url: '' });
 
   const { getCategories, deleteCategory, loading, error } = useCategories();

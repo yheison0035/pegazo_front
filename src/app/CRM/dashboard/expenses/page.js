@@ -19,7 +19,8 @@ import {
 import usePermissions from '@/hooks/usePermissions';
 
 export default function Expenses() {
-  const { usuario } = useAuth();
+  const auth = useAuth();
+  const usuario = auth?.usuario;
   const { getExpenses, deleteExpenses, loading } = useExpenses();
 
   const [expenses, setExpenses] = useState([]);

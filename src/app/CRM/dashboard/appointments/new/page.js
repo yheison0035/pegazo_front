@@ -11,7 +11,8 @@ import {
 } from '@/lib/api/utils/appointments.config';
 
 export default function NewAppointment() {
-  const { usuario } = useAuth();
+  const auth = useAuth();
+  const usuario = auth?.usuario;
   const { createAppointment, loading } = useAppointments();
 
   const [formData, setFormData] = useState(getEmptyAppointment());

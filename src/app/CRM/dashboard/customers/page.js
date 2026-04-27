@@ -21,7 +21,8 @@ import useColumnFilters from '@/components/dashboard/tables/hooks/useColumnFilte
 import { useDebounce } from '@/components/dashboard/tables/hooks/useDebounce';
 
 export default function Customers() {
-  const { usuario } = useAuth();
+  const auth = useAuth();
+  const usuario = auth?.usuario;
   const { getCustomers, deleteCustomer, loading } = useCustomers();
 
   const [customers, setCustomers] = useState([]);

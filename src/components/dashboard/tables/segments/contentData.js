@@ -20,7 +20,8 @@ export default function ContentData({
   setPrinterInvoice,
   setShowModalChangeAdvisor,
 }) {
-  const { usuario } = useAuth();
+  const auth = useAuth();
+  const usuario = auth?.usuario;
   const showOldPrice = canSeeOldPrice(usuario);
 
   return (

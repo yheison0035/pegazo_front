@@ -9,7 +9,8 @@ import Avatar from '../profile/avatar';
 
 export default function SideNavigation() {
   const [isOpen, setIsOpen] = useState(false);
-  const { usuario } = useAuth();
+  const auth = useAuth();
+  const usuario = auth?.usuario;
 
   return (
     <>

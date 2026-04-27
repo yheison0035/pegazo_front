@@ -12,7 +12,8 @@ export default function EditCategory() {
   const [formData, setFormData] = useState({});
   const [alert, setAlert] = useState({ type: '', message: '', url: '' });
   const { id } = useParams();
-  const { usuario } = useAuth();
+  const auth = useAuth();
+  const usuario = auth?.usuario;
   const { getCategoryById, updateCategory, loading } = useCategories();
 
   const fetchCategory = useCallback(async () => {

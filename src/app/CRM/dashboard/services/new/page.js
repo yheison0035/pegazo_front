@@ -13,7 +13,8 @@ import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import { parseCOPToNumber } from '@/lib/api/utils/utils';
 
 export default function NewService() {
-  const { usuario } = useAuth();
+  const auth = useAuth();
+  const usuario = auth?.usuario;
   const { createService, loading } = useServices();
 
   const [formData, setFormData] = useState(getEmptyService());

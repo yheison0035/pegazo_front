@@ -10,7 +10,8 @@ import { getEmptySale, getFormFieldsSales } from '@/lib/api/utils/sales.config';
 export default function AddSales() {
   const [formData, setFormData] = useState(getEmptySale());
   const [alert, setAlert] = useState({ type: '', message: '', url: '' });
-  const { usuario } = useAuth();
+  const auth = useAuth();
+  const usuario = auth?.usuario;
 
   const { createSale, loading } = useSales();
 

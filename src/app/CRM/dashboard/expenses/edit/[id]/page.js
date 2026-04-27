@@ -12,7 +12,8 @@ export default function EditExpense() {
   const [formData, setFormData] = useState({});
   const [alert, setAlert] = useState({ type: '', message: '', url: '' });
   const { id } = useParams();
-  const { usuario } = useAuth();
+  const auth = useAuth();
+  const usuario = auth?.usuario;
   const { getExpensesById, updateExpenses, loading } = useExpenses();
 
   const fetchExpense = useCallback(async () => {

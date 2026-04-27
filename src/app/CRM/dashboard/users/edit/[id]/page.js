@@ -11,7 +11,8 @@ import { getFormFieldsUsers } from '@/lib/api/utils/users.config';
 export default function EditUser() {
   const [formData, setFormData] = useState({});
   const { id } = useParams();
-  const { usuario } = useAuth();
+  const auth = useAuth();
+  const usuario = auth?.usuario;
   const { getUserById, updateUser, loading } = useUsers();
   const [alert, setAlert] = useState({ type: '', message: '', url: '' });
 

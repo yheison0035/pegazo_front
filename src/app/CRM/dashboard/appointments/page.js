@@ -25,7 +25,6 @@ import { useDebounce } from '@/components/dashboard/tables/hooks/useDebounce';
 import useAppointments from '@/lib/api/hooks/useAppointments';
 
 export default function Appointments() {
-  const { usuario } = useAuth();
   const { getAppointments, deleteAppointment, loading } = useAppointments();
 
   const [appointments, setAppointments] = useState([]);
@@ -38,6 +37,8 @@ export default function Appointments() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [alert, setAlert] = useState({});
+  const auth = useAuth();
+  const usuario = auth?.usuario;
 
   const { filters, handleFilterChange } = useColumnFilters({
     name: '',

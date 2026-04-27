@@ -8,7 +8,8 @@ import useUsers from '@/lib/api/hooks/useUsers';
 import { getEmptyUser, getFormFieldsUsers } from '@/lib/api/utils/users.config';
 
 export default function NewUser() {
-  const { usuario } = useAuth();
+  const auth = useAuth();
+  const usuario = auth?.usuario;
   const { createUser, loading } = useUsers();
 
   const [formData, setFormData] = useState(getEmptyUser());

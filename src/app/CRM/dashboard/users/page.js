@@ -21,7 +21,8 @@ import useColumnFilters from '@/components/dashboard/tables/hooks/useColumnFilte
 import { useDebounce } from '@/components/dashboard/tables/hooks/useDebounce';
 
 export default function Users() {
-  const { usuario } = useAuth();
+  const auth = useAuth();
+  const usuario = auth?.usuario;
   const { getUsers, deleteUser, loading } = useUsers();
 
   const [users, setUsers] = useState([]);

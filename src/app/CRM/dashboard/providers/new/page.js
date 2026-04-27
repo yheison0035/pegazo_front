@@ -11,7 +11,8 @@ import {
 } from '@/lib/api/utils/providers.config';
 
 export default function NewProvider() {
-  const { usuario } = useAuth();
+  const auth = useAuth();
+  const usuario = auth?.usuario;
   const { createProvider, loading } = useProviders();
 
   const [formData, setFormData] = useState(getEmptyProvider());

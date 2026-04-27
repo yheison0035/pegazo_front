@@ -23,7 +23,8 @@ import usePermissions from '@/hooks/usePermissions';
 import Header from '@/components/dashboard/customers/header';
 
 export default function Brands() {
-  const { usuario } = useAuth();
+  const auth = useAuth();
+  const usuario = auth?.usuario;
   const { getBrands, deleteBrand, loading } = useBrands();
 
   const [brands, setBrands] = useState([]);

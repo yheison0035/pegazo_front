@@ -11,7 +11,8 @@ import {
 import useCustomers from '@/lib/api/hooks/useCustomers';
 
 export default function NewCustomer() {
-  const { usuario } = useAuth();
+  const auth = useAuth();
+  const usuario = auth?.usuario;
   const { createCustomer, loading } = useCustomers();
 
   const [formData, setFormData] = useState(getEmptyCustomer());

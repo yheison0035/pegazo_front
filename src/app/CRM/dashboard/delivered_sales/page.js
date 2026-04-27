@@ -22,7 +22,8 @@ import { useDebounce } from '@/components/dashboard/tables/hooks/useDebounce';
 import SalesRangeGeneralModal from '@/components/dashboard/modals/salesRangeGeneralModal';
 
 export default function Delivered_Sales() {
-  const { usuario } = useAuth();
+  const auth = useAuth();
+  const usuario = auth?.usuario;
   const { getDeliveredSales, deleteDeliveredSale, loading } =
     useDeliveredSales();
 

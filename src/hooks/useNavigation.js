@@ -6,7 +6,8 @@ import { PLATFORM_NAVIGATION } from '@/config/platformNavigation';
 import { useAuth } from '@/context/authContext';
 
 export default function useNavigation() {
-  const { usuario } = useAuth();
+  const auth = useAuth();
+  const usuario = auth?.usuario;
 
   if (!usuario) return [];
 

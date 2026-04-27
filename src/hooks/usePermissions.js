@@ -2,7 +2,8 @@ import { useAuth } from '@/context/authContext';
 import { ROLE_PERMISSIONS } from '@/config/permissions';
 
 export default function usePermissions() {
-  const { usuario } = useAuth();
+  const auth = useAuth();
+  const usuario = auth?.usuario;
 
   const role = usuario?.role;
 

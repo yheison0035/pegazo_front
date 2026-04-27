@@ -19,7 +19,8 @@ import { useDebounce } from '@/components/dashboard/tables/hooks/useDebounce';
 import usePermissions from '@/hooks/usePermissions';
 
 export default function Providers() {
-  const { usuario } = useAuth();
+  const auth = useAuth();
+  const usuario = auth?.usuario;
   const { getProviders, deleteProvider, loading } = useProviders();
 
   const [providers, setProviders] = useState([]);

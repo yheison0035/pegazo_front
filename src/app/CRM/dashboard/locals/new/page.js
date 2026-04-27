@@ -11,7 +11,8 @@ import {
 } from '@/lib/api/utils/locals.config';
 
 export default function NewLocal() {
-  const { usuario } = useAuth();
+  const auth = useAuth();
+  const usuario = auth?.usuario;
   const { createLocal, loading } = useLocals();
 
   const [formData, setFormData] = useState(getEmptyLocal());

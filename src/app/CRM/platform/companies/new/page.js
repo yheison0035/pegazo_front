@@ -11,7 +11,8 @@ import {
 import useCompanies from '@/lib/api/hooks/useCompanies';
 
 export default function NewCompany() {
-  const { usuario } = useAuth();
+  const auth = useAuth();
+  const usuario = auth?.usuario;
   const { createCompany, loading } = useCompanies();
 
   const [formData, setFormData] = useState(getEmptyCompany());

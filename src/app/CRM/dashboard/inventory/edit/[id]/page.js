@@ -20,7 +20,8 @@ export default function EditProduct() {
   const [showImages, setShowImages] = useState(false);
   const [showSpecsModal, setShowSpecsModal] = useState(false);
   const { id } = useParams();
-  const { usuario } = useAuth();
+  const auth = useAuth();
+  const usuario = auth?.usuario;
   const showOldPrice = canSeeOldPrice(usuario);
 
   const { getProductById, updateProduct, uploadProductImages, loading } =

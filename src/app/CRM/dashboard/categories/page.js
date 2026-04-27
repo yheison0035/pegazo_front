@@ -23,7 +23,8 @@ import usePermissions from '@/hooks/usePermissions';
 import Header from '@/components/dashboard/customers/header';
 
 export default function Categories() {
-  const { usuario } = useAuth();
+  const auth = useAuth();
+  const usuario = auth?.usuario;
   const { getCategories, deleteCategory, loading } = useCategories();
 
   const [categories, setCategories] = useState([]);
