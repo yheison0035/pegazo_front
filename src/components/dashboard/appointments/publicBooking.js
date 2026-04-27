@@ -46,7 +46,10 @@ export default function PublicBooking() {
   }, []);
 
   const loadLocals = async () => {
-    const res = await getLocals({ all: true });
+    const res = await getLocals({
+      all: true,
+      companyId: 2,
+    });
     setLocals(res.data || []);
   };
 
