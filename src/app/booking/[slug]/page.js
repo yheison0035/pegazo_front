@@ -28,8 +28,12 @@ export const metadata = {
         type: 'image/png',
       },
     ],
-    shortcut: ['/favicon.ico'],
-    apple: ['/apple-icon.png'],
+    shortcut: [
+      'https://res.cloudinary.com/dl7g5sslz/image/upload/v1777332078/logo_ragnor_pvnvqe.ico',
+    ],
+    apple: [
+      'https://res.cloudinary.com/dl7g5sslz/image/upload/v1777311594/logo_ragnor_okgsb8.png',
+    ],
   },
 
   keywords: [
@@ -46,7 +50,7 @@ export const metadata = {
     title: 'RAGNOR BARBER',
     description:
       'Agenda tu cita fácil y rápido en RAGNOR BARBER. Servicio premium.',
-    url: 'https://admin.europeatvstore.com/booking/ragnor-barber',
+    url: 'https://admin.europeatvstore.com/booking/ragnorbarber',
     siteName: 'RAGNOR BARBER',
     images: [
       {
