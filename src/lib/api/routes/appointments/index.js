@@ -23,7 +23,6 @@ export async function getAppointmentById(id) {
 }
 
 export async function createAppointment(dto) {
-  debugger;
   const body = {
     ...dto,
     serviceId: Number(dto.serviceId),

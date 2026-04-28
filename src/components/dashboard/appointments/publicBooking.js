@@ -24,7 +24,7 @@ export default function PublicBooking() {
   const [slots, setSlots] = useState([]);
   const [time, setTime] = useState('');
 
-  const { getLocals } = useLocals();
+  const { getPublicLocals } = useLocals();
   const { getUsersByRole } = useUsers();
   const { getAvailability, availabilityLoading } = useAppointments();
   const { getServices } = useServices();
@@ -46,7 +46,7 @@ export default function PublicBooking() {
   }, []);
 
   const loadLocals = async () => {
-    const res = await getLocals({
+    const res = await getPublicLocals({
       all: true,
       companyId: 2,
     });

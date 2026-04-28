@@ -1,7 +1,6 @@
 import apiFetch from '../../auth/client';
 
 export async function getLocals(params = {}) {
-  debugger;
   const { page = 1, limit = 10, ...filters } = params;
 
   const query = new URLSearchParams();
@@ -55,4 +54,16 @@ export async function updateLocal(id, dto) {
 
 export async function deleteLocal(id) {
   return apiFetch(`/locals/${id}`, { method: 'DELETE' });
+}
+
+export async function getPublicLocals(params = {}) {
+  const query = new URLSearchParams();
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== '' && value !== null && value !== undefined) {
+      query.set(key, String(value));
+    }
+  });
+
+  return apiFetch(`/public/locals?${query.toString()}`);
 }

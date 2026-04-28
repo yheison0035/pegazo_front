@@ -7,6 +7,7 @@ import {
   createLocal,
   updateLocal,
   deleteLocal,
+  getPublicLocals,
 } from '../routes/locals/index';
 
 export default function useLocals() {
@@ -26,10 +27,7 @@ export default function useLocals() {
     }
   }, []);
 
-  const getLocalsFn = useCallback(
-    (page, limit) => wrap(getLocals, page, limit),
-    [wrap]
-  );
+  const getLocalsFn = useCallback((params) => wrap(getLocals, params), [wrap]);
   const getLocalByIdFn = useCallback((id) => wrap(getLocalById, id), [wrap]);
   const createLocalFn = useCallback((dto) => wrap(createLocal, dto), [wrap]);
   const updateLocalFn = useCallback(
@@ -37,6 +35,10 @@ export default function useLocals() {
     [wrap]
   );
   const deleteLocalFn = useCallback((id) => wrap(deleteLocal, id), [wrap]);
+  const getPublicLocalsFn = useCallback(
+    (params) => wrap(getPublicLocals, params),
+    [wrap]
+  );
 
   return {
     getLocals: getLocalsFn,
@@ -44,6 +46,7 @@ export default function useLocals() {
     createLocal: createLocalFn,
     updateLocal: updateLocalFn,
     deleteLocal: deleteLocalFn,
+    getPublicLocals: getPublicLocalsFn,
     loading,
     error,
   };
