@@ -205,7 +205,7 @@ export default function PublicBooking() {
         <p className="text-xs text-gray-600">Ragnor Barber ©</p>
       </div>
 
-      <div className="flex-1 p-6 md:p-12 relative pb-30">
+      <div className="flex-1 p-6 md:p-12 relative">
         <div className="md:hidden flex justify-center mb-6">
           <img
             src="https://res.cloudinary.com/dl7g5sslz/image/upload/v1777311594/logo_ragnor_okgsb8.png"
@@ -220,7 +220,7 @@ export default function PublicBooking() {
           />
         </div>
 
-        <div className="max-w-5xl mx-auto space-y-12 relative z-10">
+        <div className="max-w-5xl mx-auto space-y-12 relative z-10 pb-20">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
