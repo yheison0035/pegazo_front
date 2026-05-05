@@ -56,3 +56,15 @@ export async function deleteService(id) {
     method: 'DELETE',
   });
 }
+
+export async function getPublicServices(params = {}) {
+  const query = new URLSearchParams();
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== '' && value !== null && value !== undefined) {
+      query.set(key, String(value));
+    }
+  });
+
+  return apiFetch(`/public/services?${query.toString()}`);
+}

@@ -27,7 +27,7 @@ export default function PublicBooking() {
   const { getPublicLocals } = useLocals();
   const { getUsersByRole } = useUsers();
   const { getAvailability, availabilityLoading } = useAppointments();
-  const { getServices } = useServices();
+  const { getPublicServices } = useServices();
 
   const currentStep = !local
     ? 1
@@ -56,7 +56,7 @@ export default function PublicBooking() {
   const loadServices = async () => {
     if (!local) return;
 
-    const res = await getServices({
+    const res = await getPublicServices({
       all: true,
       localId: local.id,
     });

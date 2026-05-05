@@ -7,6 +7,7 @@ import {
   createService,
   updateService,
   deleteService,
+  getPublicServices,
 } from '../routes/services/index';
 
 export default function useServices() {
@@ -44,12 +45,18 @@ export default function useServices() {
   );
   const deleteServiceFn = useCallback((id) => wrap(deleteService, id), [wrap]);
 
+  const getPublicServicesFn = useCallback(
+    (params) => wrap(getPublicServices, params),
+    [wrap]
+  );
+
   return {
     getServices: getServicesFn,
     getServiceById: getServiceByIdFn,
     createService: createServiceFn,
     updateService: updateServiceFn,
     deleteService: deleteServiceFn,
+    getPublicServices: getPublicServicesFn,
     loading,
     error,
   };
