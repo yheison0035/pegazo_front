@@ -340,7 +340,7 @@ export default function PublicBooking() {
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="space-y-3"
+              className="space-y-3 w-full max-w-md"
             >
               <div className="flex items-center gap-2">
                 <CalendarDaysIcon className="w-5 h-5 text-yellow-500" />
@@ -349,12 +349,13 @@ export default function PublicBooking() {
                 </h2>
               </div>
 
-              <div className="relative">
+              <div className="relative w-full">
                 <input
                   type="date"
                   onChange={(e) => setDate(e.target.value)}
                   className="
                     w-full
+                    min-w-0
                     bg-[#0b0b0b]
                     border border-gray-800
                     rounded-xl
@@ -363,14 +364,14 @@ export default function PublicBooking() {
                     text-sm
                     outline-none
                     transition-all
-                    focus:border-purple-500
+                    focus:border-yellow-500
                     focus:ring-2
-                    focus:ring-purple-500/20
+                    focus:ring-yellow-500/20
                     hover:border-gray-600
                   "
                 />
 
-                <div className="absolute inset-0 rounded-xl pointer-events-none ring-1 ring-transparent focus-within:ring-purple-500/30 transition" />
+                <div className="absolute inset-0 rounded-xl pointer-events-none ring-1 ring-transparent focus-within:ring-yellow-500/30 transition" />
               </div>
 
               <p className="text-xs text-gray-500">
