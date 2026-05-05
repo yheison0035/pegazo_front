@@ -239,7 +239,7 @@ export default function ContentData({
                   {info.paymentStatus || '---'}
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
-                  {formatDateTime(info.saleDate) || '---'}
+                  {formatDateTime(info.createdAt) || '---'}
                 </td>
               </>
             )}

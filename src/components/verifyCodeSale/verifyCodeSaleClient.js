@@ -113,7 +113,7 @@ export default function VerifyCodeSaleClient() {
             <Info label="Factura" value={sale?.code} />
             <Info
               label="Fecha de venta"
-              value={formatDateTime(sale?.saleDate)}
+              value={formatDateTime(sale?.createdAt) || '---'}
             />
             <Info
               label="Cliente"

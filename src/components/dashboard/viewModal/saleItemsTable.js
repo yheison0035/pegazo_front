@@ -27,7 +27,8 @@ export default function SaleItemsTable({ items = [] }) {
           </thead>
           <tbody className="divide-y text-sm text-gray-700">
             {items.map((item) => {
-              const name = item?.variant?.inventory?.name || 'Producto';
+              const name =
+                item?.variant?.inventory?.name || item?.service?.name;
               const color = item?.variant?.color || '-';
 
               return (

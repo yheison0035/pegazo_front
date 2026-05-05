@@ -145,7 +145,7 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
     onChange?.(updated);
   };
 
-  // ✅ AJUSTE: eliminar correcto con type
+  // AJUSTE: eliminar correcto con type
   const removeProduct = (id) => {
     const updated = selectedProducts.filter((p) => p.inventoryVariantId !== id);
     setSelectedProducts(updated);

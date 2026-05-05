@@ -6,7 +6,7 @@ import useLocals from '@/lib/api/hooks/useLocals';
 import useUsers from '@/lib/api/hooks/useUsers';
 import useServices from '@/lib/api/hooks/useServices';
 import { useEffect, useState } from 'react';
-import { formatHour } from '@/lib/api/utils/utils';
+import { formatHour, formatPrice } from '@/lib/api/utils/utils';
 
 export default function PublicBooking() {
   const [locals, setLocals] = useState([]);
@@ -272,8 +272,15 @@ export default function PublicBooking() {
                         : 'border-gray-800 hover:border-gray-600'
                     }`}
                   >
-                    <p className="font-medium">{s.name}</p>
-                    <p className="text-xs text-gray-400">{s.duration} min</p>
+                    <p className="font-medium">
+                      {s.name} -{' '}
+                      {s.priceFrom
+                        ? `$${formatPrice(s.priceFrom)}`
+                        : 'Precio a convenir'}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      {s.duration} minutos
+                    </p>
                   </motion.div>
                 ))}
               </div>

@@ -30,11 +30,21 @@ export default function AddSales() {
         notes: formData.notes,
         userId: formData.userId,
 
-        items: formData.items.map((p) => ({
-          inventoryVariantId: p.inventoryVariantId,
-          quantity: p.quantity,
-          discount: p.discount,
-        })),
+        items: formData.items.map((p) => {
+          if (p.type === 'service') {
+            return {
+              serviceId: p.inventoryVariantId,
+              quantity: p.quantity,
+              discount: p.discount || 0,
+            };
+          }
+
+          return {
+            inventoryVariantId: p.inventoryVariantId,
+            quantity: p.quantity,
+            discount: p.discount || 0,
+          };
+        }),
       };
 
       await createSale(payload);

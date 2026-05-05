@@ -17,7 +17,7 @@ export const getHeaderTableDeliveredSales = () => {
     },
     { name: 'userId', title: 'Vendedor / Asesor', show: true, showInput: true },
     { name: 'paymentStatus', title: 'Estado', show: true, showInput: true },
-    { name: 'saleDate', title: 'Fecha de Venta', show: true, showInput: true },
+    { name: 'createdAt', title: 'Fecha de Venta', show: true, showInput: true },
   ];
 };
 
@@ -39,7 +39,7 @@ export const viewModalConfig = {
         { name: 'local.name', label: 'Local Venta' },
         { name: 'user.name', label: 'Asesor' },
         { name: 'paymentStatus', label: 'Estado del Pago', type: 'status' },
-        { name: 'saleDate', label: 'Fecha de Venta', type: 'date' },
+        { name: 'createdAt', label: 'Fecha de Venta', type: 'date' },
       ],
     },
   ],

@@ -18,17 +18,17 @@ export function printSaleInvoice(sale) {
       <tr>
         <td style="width:5%;">${index + 1}</td>
         <td style="width:55%;">
-          ${item.variant.inventory.name}
+          ${item?.variant?.inventory?.name || item?.service?.name}
           <br />
-          <span style="font-size:10px; color:#555;">${item.variant.color}</span>
+          <span style="font-size:10px; color:#555;">${item?.variant?.color || '-'}</span>
         </td>
-        <td style="width:10%; text-align:center;">${item.quantity}</td>
-        <td style="width:15%; text-align:right;">${formatCOP(item.price)}</td>
+        <td style="width:10%; text-align:center;">${item?.quantity}</td>
+        <td style="width:15%; text-align:right;">${formatCOP(item?.price)}</td>
         <td style="width:15%; text-align:right;">${formatCOP(
-          item.discount
+          item?.discount
         )}</td>
         <td style="width:15%; text-align:right;">${formatCOP(
-          item.subtotal
+          item?.subtotal
         )}</td>
       </tr>
     `
@@ -38,7 +38,7 @@ export function printSaleInvoice(sale) {
   const html = `
   <html>
     <head>
-      <title>Factura ${sale.code}</title>
+      <title>Factura ${sale?.code}</title>
       <style>
         * {
           font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
@@ -139,34 +139,34 @@ export function printSaleInvoice(sale) {
 
       <!-- CLIENTE -->
       <div class="bold">Cliente: ${
-        sale.customer?.name || 'NOMBRE DEL CLIENTE'
+        sale?.customer?.name || 'NOMBRE DEL CLIENTE'
       }</div>
       <div><span class="bold">Documento:</span> ${
-        sale.customer?.document || '-------'
+        sale?.customer?.document || '-------'
       }</div>
       <div><span class="bold">Dirección:</span> ${
-        sale.customer?.address || '-------'
+        sale?.customer?.address || '-------'
       }</div>
       <div><span class="bold">Ciudad:</span> ${
-        sale.customer?.city || '-------'
+        sale?.customer?.city || '-------'
       }</div>
 
       <hr />
 
       <!-- FACTURA -->
       <div class="section-title">Factura de venta</div>
-      <div class="center bold">N° ${sale.code || '000000'}</div>
+      <div class="center bold">N° ${sale?.code || '000000'}</div>
 
       <hr />
 
       <div><span class="bold">Fecha:</span> ${formatDateTime(
-        sale.saleDate
+        sale?.createdAt
       )}</div>
       <div><span class="bold">Forma de pago:</span> Contado</div>
       <div><span class="bold">Método de pago:</span> ${
-        sale.paymentMethod || '---'
+        sale?.paymentMethod || '---'
       }</div>
-      <div><span class="bold">Vendedor:</span> ${sale.user?.name || '---'}</div>
+      <div><span class="bold">Vendedor:</span> ${sale?.user?.name || '---'}</div>
 
       <hr />
 
@@ -189,13 +189,13 @@ export function printSaleInvoice(sale) {
 
       <hr />
 
-      <div class="right bold">Subtotal: ${formatCOP(sale.totalAmount)}</div>
-      <div class="right bold">Total: ${formatCOP(sale.totalAmount)}</div>
+      <div class="right bold">Subtotal: ${formatCOP(sale?.totalAmount)}</div>
+      <div class="right bold">Total: ${formatCOP(sale?.totalAmount)}</div>
 
       <hr />
 
       ${
-        sale.notes
+        sale?.notes
           ? `
       <!-- OBSERVACIONES -->
       <div style="
@@ -208,7 +208,7 @@ export function printSaleInvoice(sale) {
           Observaciones:
         </div>
         <div>
-          ${sale.notes}
+          ${sale?.notes}
         </div>
       </div>
     `

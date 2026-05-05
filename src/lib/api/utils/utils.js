@@ -45,14 +45,25 @@ export function formatDateDMY(value) {
 
 // Fecha + hora (formato largo)
 export function formatDateTime(value) {
-  const date = parseDate(value);
-  if (!date) return 'No disponible';
+  if (!value) return 'No disponible';
 
-  return date.toLocaleString('es-CO', {
-    timeZone: TIMEZONE,
-    dateStyle: 'long',
-    timeStyle: 'short',
+  const date = new Date(value);
+
+  const datePart = date.toLocaleDateString('es-CO', {
+    timeZone: 'America/Bogota',
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
   });
+
+  const timePart = date.toLocaleTimeString('es-CO', {
+    timeZone: 'America/Bogota',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
+
+  return `${datePart} · ${timePart}`;
 }
 
 // Solo fecha (formato largo)
