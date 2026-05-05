@@ -8,7 +8,7 @@ import {
   ChartBarIcon,
 } from '@heroicons/react/24/outline';
 import useLocals from '@/lib/api/hooks/useLocals';
-import { formatCOP, toggleCase, formatDateDMY } from '@/lib/api/utils/utils';
+import { formatCOP, toggleCase } from '@/lib/api/utils/utils';
 import useDeliveredSales from '@/lib/api/hooks/useDeliveredSales';
 
 export default function SalesRangeGeneralModal({ onClose }) {

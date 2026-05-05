@@ -9,7 +9,7 @@ import {
 } from '@heroicons/react/24/outline';
 import useLocals from '@/lib/api/hooks/useLocals';
 import useDeliveredSales from '@/lib/api/hooks/useDeliveredSales';
-import { formatCOP, toggleCase, formatDateDMY } from '@/lib/api/utils/utils';
+import { formatCOP, toggleCase } from '@/lib/api/utils/utils';
 
 export default function DailySalesReportModal({ onClose }) {
   const [locals, setLocals] = useState([]);

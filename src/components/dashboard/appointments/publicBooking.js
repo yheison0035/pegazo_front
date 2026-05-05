@@ -6,7 +6,15 @@ import useLocals from '@/lib/api/hooks/useLocals';
 import useUsers from '@/lib/api/hooks/useUsers';
 import useServices from '@/lib/api/hooks/useServices';
 import { useEffect, useState } from 'react';
-import { formatHour, formatPrice } from '@/lib/api/utils/utils';
+import { formatPrice } from '@/lib/api/utils/utils';
+import {
+  BuildingStorefrontIcon,
+  ScissorsIcon,
+  UserIcon,
+  CalendarDaysIcon,
+  ClockIcon,
+  CheckCircleIcon,
+} from '@heroicons/react/24/outline';
 
 export default function PublicBooking() {
   const [locals, setLocals] = useState([]);
@@ -236,7 +244,12 @@ export default function PublicBooking() {
           </motion.div>
 
           <motion.div layout>
-            <h2 className="text-gray-500 text-sm mb-4 uppercase">1. Sede</h2>
+            <div className="flex items-center gap-2 mb-4">
+              <BuildingStorefrontIcon className="w-5 h-5 text-yellow-500" />
+              <h2 className="text-gray-400 text-xs tracking-widest uppercase">
+                1. Selecciona la sede
+              </h2>
+            </div>
             <div className="grid md:grid-cols-3 gap-4">
               {locals.map((l) => (
                 <motion.div
@@ -257,9 +270,12 @@ export default function PublicBooking() {
 
           {local && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              <h2 className="text-gray-500 text-sm mb-4 uppercase">
-                2. Servicio
-              </h2>
+              <div className="flex items-center gap-2 mb-4">
+                <ScissorsIcon className="w-5 h-5 text-yellow-500" />
+                <h2 className="text-gray-400 text-xs tracking-widest uppercase">
+                  2. Selecciona el servicio
+                </h2>
+              </div>
               <div className="grid md:grid-cols-3 gap-4">
                 {services.map((s) => (
                   <motion.div
@@ -289,9 +305,12 @@ export default function PublicBooking() {
 
           {service && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              <h2 className="text-gray-500 text-sm mb-4 uppercase">
-                3. Profesional
-              </h2>
+              <div className="flex items-center gap-2 mb-4">
+                <UserIcon className="w-5 h-5 text-yellow-500" />
+                <h2 className="text-gray-400 text-xs tracking-widest uppercase">
+                  3. Selecciona el profesional
+                </h2>
+              </div>
               <div className="grid md:grid-cols-4 gap-4">
                 {barbers.map((b) => (
                   <motion.div
@@ -318,21 +337,56 @@ export default function PublicBooking() {
           )}
 
           {barber && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              <h2 className="text-gray-500 text-sm mb-4 uppercase">4. Fecha</h2>
-              <input
-                type="date"
-                className="bg-[#111] border border-gray-800 rounded-lg px-4 py-2"
-                onChange={(e) => setDate(e.target.value)}
-              />
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-3"
+            >
+              <div className="flex items-center gap-2">
+                <CalendarDaysIcon className="w-5 h-5 text-yellow-500" />
+                <h2 className="text-gray-400 text-xs tracking-widest uppercase">
+                  4. Selecciona la fecha
+                </h2>
+              </div>
+
+              <div className="relative">
+                <input
+                  type="date"
+                  onChange={(e) => setDate(e.target.value)}
+                  className="
+                    w-full
+                    bg-[#0b0b0b]
+                    border border-gray-800
+                    rounded-xl
+                    px-4 py-3
+                    text-white
+                    text-sm
+                    outline-none
+                    transition-all
+                    focus:border-purple-500
+                    focus:ring-2
+                    focus:ring-purple-500/20
+                    hover:border-gray-600
+                  "
+                />
+
+                <div className="absolute inset-0 rounded-xl pointer-events-none ring-1 ring-transparent focus-within:ring-purple-500/30 transition" />
+              </div>
+
+              <p className="text-xs text-gray-500">
+                Selecciona el día en el que deseas agendar la cita
+              </p>
             </motion.div>
           )}
 
           {date && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              <h2 className="text-gray-500 text-sm mb-4 uppercase">
-                5. Horario
-              </h2>
+              <div className="flex items-center gap-2 mb-4">
+                <ClockIcon className="w-5 h-5 text-yellow-500" />
+                <h2 className="text-gray-400 text-xs tracking-widest uppercase">
+                  5. Selecciona la hora
+                </h2>
+              </div>
 
               {availabilityLoading ? (
                 <p className="text-gray-500">Cargando...</p>

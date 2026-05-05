@@ -10,6 +10,7 @@ import {
   getDailySalesReport,
   getSalesRangeReport,
   getSalesRangeGeneralReport,
+  getServicePerformanceReport,
 } from '../routes/delivered_sales/index';
 
 export default function useDeliveredSales() {
@@ -49,6 +50,11 @@ export default function useDeliveredSales() {
     [wrap]
   );
 
+  const getServicePerformanceReportFn = useCallback(
+    (dto) => wrap(getServicePerformanceReport, dto),
+    [wrap]
+  );
+
   const getDeliveredSalesFn = useCallback(
     (page, limit) => wrap(getDeliveredSales, page, limit),
     [wrap]
@@ -78,6 +84,7 @@ export default function useDeliveredSales() {
     getDailySalesReport: getDailySalesReportFn,
     getSalesRangeReport: getSalesRangeReportFn,
     getSalesRangeGeneralReport: getSalesRangeGeneralReportFn,
+    getServicePerformanceReport: getServicePerformanceReportFn,
     loading,
     error,
   };

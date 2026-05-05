@@ -5,7 +5,12 @@ import Table from '@/components/dashboard/tables/table';
 import Pagination from '@/components/dashboard/tables/segments/pagination';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import { useAuth } from '@/context/authContext';
-import { CalendarDaysIcon, CalendarIcon } from '@heroicons/react/24/solid';
+import {
+  Squares2X2Icon,
+  CalendarDaysIcon,
+  CalendarIcon,
+  ChartBarIcon,
+} from '@heroicons/react/24/solid';
 import useDeliveredSales from '@/lib/api/hooks/useDeliveredSales';
 import {
   getHeaderTableDeliveredSales,
@@ -20,6 +25,7 @@ import SalesRangeReModal from '@/components/dashboard/modals/salesRangeReModal';
 import useColumnFilters from '@/components/dashboard/tables/hooks/useColumnFilters';
 import { useDebounce } from '@/components/dashboard/tables/hooks/useDebounce';
 import SalesRangeGeneralModal from '@/components/dashboard/modals/salesRangeGeneralModal';
+import ServicePerformanceModal from '@/components/dashboard/modals/servicePerformanceModal';
 
 export default function Delivered_Sales() {
   const auth = useAuth();
@@ -37,6 +43,7 @@ export default function Delivered_Sales() {
   const [showDailyReport, setShowDailyReport] = useState(false);
   const [showRangeReport, setShowRangeReport] = useState(false);
   const [showGeneralReport, setShowGeneralReport] = useState(false);
+  const [showServiceReport, setShowServiceReport] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [alert, setAlert] = useState({});
 
@@ -89,30 +96,41 @@ export default function Delivered_Sales() {
       <div className="flex flex-col md:flex-row justify-between mb-6 gap-4">
         <h1 className="text-2xl font-semibold">Listado de Ventas Realizadas</h1>
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 sm:gap-3">
           <button
-            onClick={() => setShowDailyReport(true)}
-            className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm cursor-pointer"
+            onClick={() => setShowServiceReport(true)}
+            className="flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm transition w-full sm:w-auto cursor-pointer"
           >
-            <CalendarDaysIcon className="w-4 h-4" />
-            Venta por Día
+            <Squares2X2Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="whitespace-nowrap">Ventas y Servicios</span>
           </button>
+          {usuario?.company?.type !== 'SERVICIOS' && (
+            <>
+              <button
+                onClick={() => setShowDailyReport(true)}
+                className="flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm transition w-full sm:w-auto cursor-pointer"
+              >
+                <CalendarDaysIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="whitespace-nowrap">Venta por Día</span>
+              </button>
 
-          <button
-            onClick={() => setShowRangeReport(true)}
-            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm cursor-pointer"
-          >
-            <CalendarIcon className="w-4 h-4" />
-            Venta por Semana
-          </button>
+              <button
+                onClick={() => setShowRangeReport(true)}
+                className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm transition w-full sm:w-auto cursor-pointer"
+              >
+                <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="whitespace-nowrap">Venta por Semana</span>
+              </button>
 
-          <button
-            onClick={() => setShowGeneralReport(true)}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm cursor-pointer"
-          >
-            <CalendarIcon className="w-4 h-4" />
-            Ventas Generales
-          </button>
+              <button
+                onClick={() => setShowGeneralReport(true)}
+                className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm transition w-full sm:w-auto cursor-pointer"
+              >
+                <ChartBarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="whitespace-nowrap">Ventas Generales</span>
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -161,6 +179,10 @@ export default function Delivered_Sales() {
           onConfirm={confirmDelete}
           loading={loading}
         />
+      )}
+
+      {showServiceReport && (
+        <ServicePerformanceModal onClose={() => setShowServiceReport(false)} />
       )}
 
       {showDailyReport && (

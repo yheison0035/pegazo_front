@@ -39,6 +39,17 @@ export async function getSalesRangeGeneralReport(dto) {
   });
 }
 
+export async function getServicePerformanceReport(dto) {
+  return apiFetch('/sales/reports/service-performance', {
+    method: 'POST',
+    body: JSON.stringify({
+      startDate: dto.startDate,
+      endDate: dto.endDate,
+      localId: Number(dto.localId),
+    }),
+  });
+}
+
 export async function getDeliveredSales(params = {}) {
   const { page = 1, limit = 10, ...filters } = params;
 
@@ -77,7 +88,7 @@ export async function updateDeliveredSale(id, dto) {
     wompiReference,
     wompiStatus,
     wompiPayload,
-    appointmentId, 
+    appointmentId,
     ...cleanDto
   } = dto;
 
