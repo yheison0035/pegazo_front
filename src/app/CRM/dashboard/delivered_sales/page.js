@@ -97,13 +97,15 @@ export default function Delivered_Sales() {
         <h1 className="text-2xl font-semibold">Listado de Ventas Realizadas</h1>
 
         <div className="flex flex-wrap gap-2 sm:gap-3">
-          <button
-            onClick={() => setShowServiceReport(true)}
-            className="flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm transition w-full sm:w-auto cursor-pointer"
-          >
-            <Squares2X2Icon className="w-4 h-4 sm:w-5 sm:h-5" />
-            <span className="whitespace-nowrap">Ventas y Servicios</span>
-          </button>
+          {usuario?.company?.type === 'SERVICIOS' && (
+            <button
+              onClick={() => setShowServiceReport(true)}
+              className="flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm transition w-full sm:w-auto cursor-pointer"
+            >
+              <Squares2X2Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="whitespace-nowrap">Ventas y Servicios</span>
+            </button>
+          )}
           {usuario?.company?.type !== 'SERVICIOS' && (
             <>
               <button
