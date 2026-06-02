@@ -104,7 +104,7 @@ export default function DinamicForm({
     [setFormData]
   );
 
-  const ALL_SOURCES = ['brands', 'categories', 'providers'];
+  const ALL_SOURCES = ['brands', 'categories', 'providers', 'services'];
 
   const fetchDynamicOptions = useCallback(async () => {
     if (!Array.isArray(formFields)) return;
