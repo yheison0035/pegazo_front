@@ -133,7 +133,7 @@ export default function PublicBooking() {
 📆 Fecha: ${date}
 🕐 Hora: ${time}`;
 
-    const url = `https://wa.me/573147337602?text=${encodeURIComponent(message)}`;
+    const url = `https://wa.me/573218263404?text=${encodeURIComponent(message)}`;
 
     window.open(url, '_blank');
 
