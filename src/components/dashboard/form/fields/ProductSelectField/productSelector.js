@@ -222,7 +222,7 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
                     >
                       <div className="flex flex-col">
                         <span className="text-gray-800 font-medium">
-                          {formatText(product.name)}
+                          {product.name}
                         </span>
                         {product.type !== 'service' && (
                           <div className="flex items-center gap-2 text-xs text-gray-400">
@@ -284,7 +284,7 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
                   className="border-t border-gray-100 hover:bg-gray-50 transition"
                 >
                   <td className="px-6 py-4 font-medium text-gray-800">
-                    {formatText(p.name)}
+                    {p.name}
                   </td>
 
                   <td className="px-6 py-4 text-center text-gray-700">

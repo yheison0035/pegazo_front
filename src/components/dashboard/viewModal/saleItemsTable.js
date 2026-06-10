@@ -33,7 +33,7 @@ export default function SaleItemsTable({ items = [] }) {
 
               return (
                 <tr key={item.id}>
-                  <td className="px-4 py-2 font-medium">{formatText(name)}</td>
+                  <td className="px-4 py-2 font-medium">{name}</td>
                   <td className="px-4 py-2">{color}</td>
                   <td className="px-4 py-2 text-center">{item.quantity}</td>
                   <td className="px-4 py-2 text-right">

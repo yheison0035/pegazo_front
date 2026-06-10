@@ -19,20 +19,31 @@ export default function EditDeliveredSales() {
 
   const fetchDeliveredSale = useCallback(async () => {
     if (!id) return;
+
     try {
       const { data } = await getDeliveredSaleById(Number(id));
+
       const formattedItems = (data.items || []).map((item) => ({
-        inventoryVariantId: item.inventoryVariantId,
-        name: `${item.variant?.inventory?.name || 'Producto'} - ${
-          item.variant?.color || ''
-        }`,
+        ...(item.type === 'service'
+          ? {
+              serviceId: item.serviceId,
+            }
+          : {
+              inventoryVariantId: item.inventoryVariantId,
+            }),
+
+        name: item.name,
+
         price: item.price,
-        stock: item.variant?.stock || 0,
+
+        stock: item.type === 'service' ? null : item.stock || 0,
 
         originalQuantity: item.quantity,
 
         quantity: item.quantity,
-        discount: item.discount,
+
+        discount: item.discount || 0,
+
         subtotal: item.subtotal,
       }));
 

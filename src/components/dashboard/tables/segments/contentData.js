@@ -7,6 +7,7 @@ import {
   formatCOP,
   formatDateTime,
   formatDateSafe,
+  toggleCase,
 } from '@/lib/api/utils/utils';
 import { useAuth } from '@/context/authContext';
 
@@ -321,6 +322,28 @@ export default function ContentData({
             {view === 'appointments' && (
               <>
                 <td className="px-5 py-4 whitespace-nowrap">
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-medium
+                    ${
+                      info.status === 'COMPLETADA'
+                        ? 'bg-green-100 text-green-700'
+                        : info.status === 'PENDIENTE'
+                          ? 'bg-orange-100 text-orange-700'
+                          : info.status === 'CANCELADA'
+                            ? 'bg-red-100 text-red-700'
+                            : info.status === 'CONFIRMADA'
+                              ? 'bg-blue-100 text-blue-700'
+                              : info.status === 'EN_PROCESO'
+                                ? 'bg-purple-100 text-purple-700'
+                                : info.status === 'NO_ASISTIO'
+                                  ? 'bg-gray-100 text-gray-700'
+                                  : 'bg-slate-100 text-slate-700'
+                    }`}
+                  >
+                    {toggleCase(info.status, 'uppercase') || '---'}
+                  </span>
+                </td>
+                <td className="px-5 py-4 whitespace-nowrap">
                   {formatDateSafe(info.date) || '---'}
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
@@ -340,9 +363,6 @@ export default function ContentData({
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
                   {info.notes || '---'}
-                </td>
-                <td className="px-5 py-4 whitespace-nowrap">
-                  {info.status || '---'}
                 </td>
               </>
             )}

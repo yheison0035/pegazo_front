@@ -53,17 +53,15 @@ export const getFormFieldsAppointments = () => [
     type: 'select',
     required: true,
     options: [
-      { id: 'PENDIENTE', name: 'PENDIENTE' },
       { id: 'CONFIRMADA', name: 'CONFIRMADA' },
-      { id: 'EN_PROCESO', name: 'EN PROCESO' },
       { id: 'COMPLETADA', name: 'COMPLETADA' },
       { id: 'CANCELADA', name: 'CANCELADA' },
-      { id: 'NO_ASISTIO', name: 'NO ASISTIO' },
     ],
   },
 ];
 
 export const getHeaderTableAppointments = () => [
+  { name: 'status', title: 'Estado', show: true, showInput: true },
   { name: 'date', title: 'Fecha', show: true, showInput: true },
   { name: 'startTime', title: 'Hora cita', show: true, showInput: true },
   { name: 'serviceId', title: 'Servicio', show: true, showInput: true },
@@ -71,7 +69,6 @@ export const getHeaderTableAppointments = () => [
   { name: 'customerId', title: 'Cliente', show: true, showInput: true },
   { name: 'localId', title: 'Local', show: true, showInput: true },
   { name: 'notes', title: 'Notas', show: true, showInput: true },
-  { name: 'status', title: 'Estado', show: true, showInput: true },
 ];
 
 export const viewModalConfig = {

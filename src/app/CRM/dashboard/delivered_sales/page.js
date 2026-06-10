@@ -137,7 +137,7 @@ export default function Delivered_Sales() {
       </div>
 
       <div className="bg-white rounded-lg shadow relative">
-        <LoadingOverlay show={loading} text="Cargando ventas..." />
+        <LoadingOverlay show={loading} text="Cargando ventas o servicios..." />
 
         <Table
           header={getHeaderTableDeliveredSales()}

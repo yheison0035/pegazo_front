@@ -104,7 +104,13 @@ export default function DinamicForm({
     [setFormData]
   );
 
-  const ALL_SOURCES = ['brands', 'categories', 'providers', 'services'];
+  const ALL_SOURCES = [
+    'brands',
+    'categories',
+    'providers',
+    'services',
+    'customers',
+  ];
 
   const fetchDynamicOptions = useCallback(async () => {
     if (!Array.isArray(formFields)) return;
@@ -150,6 +156,7 @@ export default function DinamicForm({
         }
 
         const res = await getAvailability({
+          appointmentId: formData.id,
           localId: formData.localId,
           serviceId: formData.serviceId,
           barberId: formData.barberId,

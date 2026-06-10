@@ -89,6 +89,8 @@ export async function updateDeliveredSale(id, dto) {
     wompiStatus,
     wompiPayload,
     appointmentId,
+    shipment,
+    appointment,
     ...cleanDto
   } = dto;
 

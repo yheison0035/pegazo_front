@@ -38,20 +38,15 @@ export async function createAppointment(dto) {
 }
 
 export async function updateAppointment(id, dto) {
-  const {
-    id: _id,
-    createdAt,
-    updatedAt,
-    manager,
-    userId,
-    users,
-    companyId,
-    ...cleanDto
-  } = dto;
-
   const body = {
-    ...cleanDto,
-    managerId: Number(cleanDto.managerId) || null,
+    date: dto.date,
+    startTime: dto.startTime,
+    serviceId: Number(dto.serviceId),
+    barberId: Number(dto.barberId),
+    customerId: Number(dto.customerId),
+    localId: Number(dto.localId),
+    notes: dto.notes || '',
+    status: dto.status,
   };
 
   return apiFetch(`/appointments/${id}`, {
