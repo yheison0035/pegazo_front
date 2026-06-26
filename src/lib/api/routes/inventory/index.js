@@ -51,6 +51,7 @@ export async function updateProduct(id, dto) {
     createdById,
     updatedBy,
     updatedById,
+    publishInEcommerce,
     ...cleanDto
   } = dto;
 
