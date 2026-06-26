@@ -88,7 +88,7 @@ export default function Delivered_Sales() {
   };
 
   const setPrinterInvoice = (sale) => {
-    printSaleInvoice(sale);
+    printSaleInvoice(sale, usuario);
   };
 
   return (

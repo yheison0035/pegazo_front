@@ -86,14 +86,8 @@ export default function VerifyCodeSaleClient() {
       <div className="max-w-3xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-200">
         <div className="bg-gradient-to-r from-blue-900 to-gray-900 text-white px-6 py-5 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <img
-              src="https://res.cloudinary.com/dl7g5sslz/image/upload/v1768575675/logo_dtenlx.png"
-              alt="EUROPEATVSTORE"
-              className="h-20 w-auto object-contain rounded"
-            />
             <div>
               <h1 className="text-2xl font-bold">Verificación de Factura</h1>
-              <p className="text-sm opacity-80">EUROPEATVSTORE</p>
             </div>
           </div>
 
@@ -178,7 +172,7 @@ export default function VerifyCodeSaleClient() {
         </div>
 
         <div className="bg-gray-50 text-center py-4 text-xs text-gray-500">
-          Esta verificación fue generada automáticamente por EUROPEATVSTORE.
+          Esta verificación fue generada automáticamente.
           <br />
           Para soporte o garantías, conserve este comprobante.
         </div>

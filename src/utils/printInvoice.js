@@ -1,6 +1,6 @@
 import { formatCOP, formatDateTime } from '@/lib/api/utils/utils';
 
-export function printSaleInvoice(sale) {
+export function printSaleInvoice(sale, usuario) {
   if (!sale) return;
 
   const verifyBase =
@@ -120,19 +120,18 @@ export function printSaleInvoice(sale) {
       <!-- LOGO -->
       <div class="logo">
         <img 
-          src="https://res.cloudinary.com/dl7g5sslz/image/upload/v1768575675/logo_dtenlx.png" 
-          alt="EUROPEATVSTORE" 
+          src=${usuario?.company?.logo || '/images/no-image.png'}
+          alt=${usuario?.company?.name || 'sin nombre'}
           referrerpolicy="no-referrer"
         />
       </div>
 
       <!-- ENCABEZADO -->
-      <div class="center bold">EUROPEATVSTORE</div>
-      <div class="center">NIT 1082159046-1</div>
-      <div class="center">Bogotá D.C</div>
-      <div class="center">CRA 20 #13-57</div>
-      <div class="center">Tel: +57 3147337602</div>
-      <div class="center">europeatvstore@gmail.com</div>
+      <div class="center bold">${usuario?.company?.name || 'EUROPEATVSTORE'}</div>
+      <div class="center">NIT ${usuario?.company?.nit || '11111111111'}</div>
+      <div class="center">${sale?.local?.address || ''}</div>
+      <div class="center">+57 ${usuario?.company?.phone || ''}</div>
+      <div class="center">${usuario?.company?.email || ''}</div>
       <div class="center">Régimen: No responsable de IVA</div>
 
       <hr />
