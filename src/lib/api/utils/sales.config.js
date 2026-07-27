@@ -49,7 +49,10 @@ export const getFormFieldsSales = () => [
     label: 'Estado',
     type: 'select',
     required: true,
-    options: [{ id: 'PAGADA', name: 'PAGADA' }],
+    options: [
+      { id: 'PAGADA', name: 'PAGADA' },
+      { id: 'FIADO', name: 'FIADO' },
+    ],
     source: 'paymentStatus',
     disabled: false,
   },
