@@ -114,6 +114,12 @@ export const getHeaderTableCustomers = () => [
   { name: 'phone', title: 'Teléfono', show: true, showInput: true },
   { name: 'city', title: 'Ciudad', show: true, showInput: true },
   { name: 'status', title: 'Estado', show: true, showInput: true },
+  {
+    name: 'lastAudit',
+    title: 'Última modificación',
+    show: true,
+    showInput: false,
+  },
   { name: 'department', title: 'Departamento', show: false, showInput: false },
   { name: 'address', title: 'Dirección', show: false, showInput: false },
 ];

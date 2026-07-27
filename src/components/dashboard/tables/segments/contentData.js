@@ -4,6 +4,7 @@ import { canSeeOldPrice } from '@/hooks/inventory.permissions';
 import Actions from './actions';
 import PhoneContentData from './contentData/phone';
 import WhatsappLink from './contentData/whatsappLink';
+import LastAudit from './contentData/lastAudit';
 import {
   formatCOP,
   formatDateTime,
@@ -214,6 +215,9 @@ export default function ContentData({
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
                   {info.status || '---'}
+                </td>
+                <td className="px-5 py-4">
+                  <LastAudit audit={info.lastAudit} />
                 </td>
               </>
             )}
