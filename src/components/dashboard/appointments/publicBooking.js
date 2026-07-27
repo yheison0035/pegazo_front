@@ -221,7 +221,7 @@ export default function PublicBooking() {
           />
         </div>
 
-        <div className="absolute inset-0 opacity-[0.03] flex items-center justify-center pointer-events-none">
+        <div className="absolute inset-0 overflow-hidden opacity-[0.03] flex items-center justify-center pointer-events-none">
           <img
             src="https://res.cloudinary.com/dl7g5sslz/image/upload/v1777311594/logo_ragnor_okgsb8.png"
             className="w-[600px]"

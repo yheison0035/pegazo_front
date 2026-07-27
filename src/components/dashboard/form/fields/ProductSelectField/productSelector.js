@@ -264,8 +264,8 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
       )}
 
       {!processing && selectedProducts.length > 0 && (
-        <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
-          <table className="w-full text-sm">
+        <div className="bg-white border border-gray-200 rounded-2xl overflow-x-auto shadow-sm">
+          <table className="w-full min-w-[520px] text-sm">
             <thead className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
               <tr>
                 <th className="px-6 py-4 text-left">Producto</th>
