@@ -33,6 +33,7 @@ import {
   shortDate,
   truncate,
 } from '@/components/dashboard/statistics/statsUI';
+import useTerms from '@/hooks/useTerms';
 
 const todayCol = () =>
   new Date().toLocaleDateString('en-CA', { timeZone: 'America/Bogota' });
@@ -53,6 +54,7 @@ function EmptyChart({ height = 260 }) {
 }
 
 export default function Statistics() {
+  const t = useTerms();
   const { getLocals } = useLocals();
 
   const [locals, setLocals] = useState([]);
@@ -383,7 +385,10 @@ export default function Statistics() {
 
         {/* Top productos + Top servicios */}
         <div className="mb-6 grid gap-6 lg:grid-cols-2">
-          <ChartCard title="Top productos" subtitle="Por monto vendido">
+          <ChartCard
+            title={`Top ${t.productPlural}`}
+            subtitle="Por monto vendido"
+          >
             {data?.topProducts?.length ? (
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={data.topProducts} layout="vertical">
@@ -417,7 +422,10 @@ export default function Statistics() {
             )}
           </ChartCard>
 
-          <ChartCard title="Top servicios" subtitle="Por monto vendido">
+          <ChartCard
+            title={`Top ${t.servicePlural}`}
+            subtitle="Por monto vendido"
+          >
             {data?.topServices?.length ? (
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={data.topServices} layout="vertical">
@@ -455,7 +463,7 @@ export default function Statistics() {
         {/* Top vendedores */}
         <div className="mb-6">
           <ChartCard
-            title="Top vendedores / asesores"
+            title={`Top ${t.attendantPlural}`}
             subtitle="Por ventas del periodo"
           >
             {data?.topSellers?.length ? (

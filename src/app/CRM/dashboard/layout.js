@@ -11,7 +11,9 @@ export default function Layout({ children }) {
         <div className="w-full flex-none md:w-64">
           <SideNavigation />
         </div>
-        <div className="grow p-6 md:overflow-y-auto md:p-12">{children}</div>
+        <div className="grow p-6 pt-16 md:overflow-y-auto md:p-12 md:pt-12">
+          {children}
+        </div>
       </div>
     </RoleGuard>
   );
