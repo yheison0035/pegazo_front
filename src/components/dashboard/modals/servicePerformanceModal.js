@@ -30,6 +30,8 @@ export default function ServicePerformanceModal({ onClose }) {
   const [globalTotal, setGlobalTotal] = useState(0);
   const [paymentBreakdown, setPaymentBreakdown] = useState({});
   const [commissionRate, setCommissionRate] = useState(0.45);
+  const [previousRate, setPreviousRate] = useState(0.4);
+  const [changeDate, setChangeDate] = useState('');
   const [loading, setLoading] = useState(false);
 
   const { getLocals } = useLocals();
@@ -67,6 +69,8 @@ export default function ServicePerformanceModal({ onClose }) {
       setGlobalTotal(res.globalTotal || 0);
       setPaymentBreakdown(res.paymentBreakdown || {});
       setCommissionRate(res.commissionRate ?? 0.45);
+      setPreviousRate(res.previousCommissionRate ?? 0.4);
+      setChangeDate(res.commissionRateChangeDate || '');
     } catch (err) {
       console.error(err);
     } finally {
@@ -192,6 +196,17 @@ export default function ServicePerformanceModal({ onClose }) {
                 </div>
               )}
 
+              {changeDate && (
+                <p className="px-1 text-xs text-gray-500">
+                  Comisión de barberos:{' '}
+                  <span className="font-semibold">
+                    {Math.round(commissionRate * 100)}%
+                  </span>{' '}
+                  desde el {changeDate.split('-').reverse().join('/')} ·{' '}
+                  {Math.round(previousRate * 100)}% en fechas anteriores.
+                </p>
+              )}
+
               <div className="bg-white border border-gray-200 rounded-2xl shadow-sm">
                 <div className="w-full overflow-x-auto">
                   <table className="w-full text-sm">
@@ -208,7 +223,7 @@ export default function ServicePerformanceModal({ onClose }) {
                         </th>
                         <th className="text-right px-4 py-3 border-b">Total</th>
                         <th className="text-right px-4 py-3 border-b">
-                          Comisión ({Math.round(commissionRate * 100)}%)
+                          Comisión
                         </th>
                         <th className="text-right px-4 py-3 border-b"></th>
                       </tr>
