@@ -3,6 +3,7 @@
 import { canSeeOldPrice } from '@/hooks/inventory.permissions';
 import Actions from './actions';
 import PhoneContentData from './contentData/phone';
+import WhatsappLink from './contentData/whatsappLink';
 import {
   formatCOP,
   formatDateTime,
@@ -223,7 +224,11 @@ export default function ContentData({
                   {info.code || '---'}
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
-                  {info.customer?.name || '---'}
+                  <div>{info.customer?.name || '---'}</div>
+                  <WhatsappLink
+                    phone={info.customer?.phone}
+                    className="mt-1 text-xs"
+                  />
                 </td>
                 <td className="px-5 py-4 font-semibold whitespace-nowrap">
                   {formatCOP(info.totalAmount) || '---'}
