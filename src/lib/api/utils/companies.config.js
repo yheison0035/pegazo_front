@@ -33,7 +33,7 @@ export const getFormFieldsCompanies = () => [
 ];
 
 export const getHeaderTableCompanies = () => [
-  { name: 'logo', title: 'Logo', show: true, showInput: true },
+  { name: 'logo', title: 'Logo', show: true, showInput: false },
   { name: 'name', title: 'Nombre de la Empresa', show: true, showInput: true },
   { name: 'type', title: 'Tipo de Empresa', show: true, showInput: true },
   { name: 'manager', title: 'Encargado', show: true, showInput: true },
