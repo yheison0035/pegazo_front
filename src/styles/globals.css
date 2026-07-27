@@ -24,6 +24,20 @@ body {
   color: var(--foreground);
 }
 
+/* Elementos interactivos: cursor de mano al pasar el mouse */
+button:not(:disabled),
+[role='button'],
+a,
+label[for],
+select,
+summary {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
 /* SCROLL GENERAL */
 ::-webkit-scrollbar {
   width: 6px;
