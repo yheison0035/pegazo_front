@@ -18,7 +18,6 @@ import {
 } from 'recharts';
 
 import RoleGuard from '@/auth/roleGuard';
-import { useAuth } from '@/context/authContext';
 import { Roles } from '@/config/roles';
 import useLocals from '@/lib/api/hooks/useLocals';
 import { getDashboardStats } from '@/lib/api/routes/statistics';
@@ -53,8 +52,6 @@ function EmptyChart({ height = 260 }) {
 }
 
 export default function Statistics() {
-  const auth = useAuth();
-  const usuario = auth?.usuario;
   const { getLocals } = useLocals();
 
   const [locals, setLocals] = useState([]);
