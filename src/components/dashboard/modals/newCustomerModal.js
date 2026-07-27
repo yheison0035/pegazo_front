@@ -31,6 +31,9 @@ export default function NewCustomerModal({ localId, onClose, onCreated }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Evita que el submit del modal burbujee (por el portal de React) hasta el
+    // formulario de la factura y dispare su validación.
+    e.stopPropagation();
     setApiError('');
 
     const nextErrors = {};
