@@ -66,23 +66,25 @@ export function KpiCard({ label, value, delta, invert = false, accent }) {
   const arrow = up ? '▲' : down ? '▼' : '•';
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+    <div className="min-w-0 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
       <div className="flex items-center gap-2">
         {accent && (
           <span
-            className="inline-block h-2.5 w-2.5 rounded-full"
+            className="inline-block h-2.5 w-2.5 flex-none rounded-full"
             style={{ backgroundColor: accent }}
           />
         )}
-        <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+        <p className="truncate text-xs font-semibold uppercase tracking-wide text-gray-500">
           {label}
         </p>
       </div>
-      <p className="mt-2 text-2xl font-bold text-gray-900">{value}</p>
+      <p className="mt-2 break-words text-lg font-bold leading-tight text-gray-900 sm:text-xl xl:text-2xl">
+        {value}
+      </p>
       {hasDelta && (
         <p className={`mt-1 text-xs font-medium ${deltaColor}`}>
           {arrow} {Math.abs(delta)}%{' '}
-          <span className="text-gray-400">vs periodo anterior</span>
+          <span className="text-gray-400">vs anterior</span>
         </p>
       )}
     </div>
