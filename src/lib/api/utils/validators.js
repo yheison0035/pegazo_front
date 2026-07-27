@@ -42,6 +42,21 @@ export function validateField(field, value) {
   return null;
 }
 
+// Solo se validan los tipos de campo estándar cuyo valor vive en formData[name].
+// Los especiales (colorSelect guarda en variants, imágenes, password según modo,
+// selectores de productos, etc.) se dejan a su propia lógica.
+const VALIDATABLE_TYPES = [
+  'text',
+  'email',
+  'number',
+  'tel',
+  'textarea',
+  'select',
+  'searchSelect',
+  'date',
+  'datetime-local',
+];
+
 // Valida todos los campos del formulario. Devuelve { name: mensaje }.
 export function validateForm(fields, formData) {
   const errors = {};
@@ -51,6 +66,9 @@ export function validateForm(fields, formData) {
     if (!field?.name) continue;
     // department / city se manejan con un componente aparte
     if (field.name === 'department' || field.name === 'city') continue;
+
+    const type = field.type || 'text';
+    if (!VALIDATABLE_TYPES.includes(type)) continue;
 
     const error = validateField(field, formData?.[field.name]);
     if (error) errors[field.name] = error;
