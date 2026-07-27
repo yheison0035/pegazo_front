@@ -42,9 +42,17 @@ export default function NewAppointment() {
       <h2 className="text-3xl font-bold text-gray-800 mb-2">
         Programar Nueva Cita
       </h2>
-      <p className="text-sm text-gray-500 mb-6">
+      <p className="text-sm text-gray-500 mb-4">
         Ingrese la información de la cita para registrar una nueva cita.
       </p>
+
+      <div className="mb-6 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+        <span className="font-semibold">Importante:</span> completa los campos{' '}
+        <span className="font-semibold">en orden, uno por uno</span>. Cada campo
+        habilita las opciones del siguiente — por ejemplo, al elegir el{' '}
+        <span className="font-semibold">Local</span> se cargan los servicios,
+        barberos y horarios disponibles.
+      </div>
 
       <DinamicForm
         formData={formData}

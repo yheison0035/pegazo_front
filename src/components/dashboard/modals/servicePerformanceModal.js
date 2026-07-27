@@ -12,6 +12,14 @@ import useLocals from '@/lib/api/hooks/useLocals';
 import useDeliveredSales from '@/lib/api/hooks/useDeliveredSales';
 import { formatCOP } from '@/lib/api/utils/utils';
 
+const PAYMENT_LABELS = {
+  EFECTIVO: 'Efectivo',
+  BANCOLOMBIA: 'Bancolombia',
+  TRANSFERENCIA: 'Transferencia',
+  DATAFONO: 'Datáfono',
+  ADDI: 'Addi',
+};
+
 export default function ServicePerformanceModal({ onClose }) {
   const [locals, setLocals] = useState([]);
   const [localId, setLocalId] = useState('');
@@ -20,6 +28,8 @@ export default function ServicePerformanceModal({ onClose }) {
 
   const [result, setResult] = useState(null);
   const [globalTotal, setGlobalTotal] = useState(0);
+  const [paymentBreakdown, setPaymentBreakdown] = useState({});
+  const [commissionRate, setCommissionRate] = useState(0.45);
   const [loading, setLoading] = useState(false);
 
   const { getLocals } = useLocals();
@@ -55,6 +65,8 @@ export default function ServicePerformanceModal({ onClose }) {
 
       setResult(res.data || {});
       setGlobalTotal(res.globalTotal || 0);
+      setPaymentBreakdown(res.paymentBreakdown || {});
+      setCommissionRate(res.commissionRate ?? 0.45);
     } catch (err) {
       console.error(err);
     } finally {
@@ -157,6 +169,29 @@ export default function ServicePerformanceModal({ onClose }) {
                 </span>
               </div>
 
+              {Object.keys(paymentBreakdown).length > 0 && (
+                <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
+                  <p className="mb-4 text-sm font-semibold text-gray-700">
+                    Recaudo por método de pago
+                  </p>
+                  <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+                    {Object.entries(paymentBreakdown).map(([method, amount]) => (
+                      <div
+                        key={method}
+                        className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3"
+                      >
+                        <p className="text-xs uppercase tracking-wide text-gray-500">
+                          {PAYMENT_LABELS[method] || method}
+                        </p>
+                        <p className="text-lg font-bold text-gray-800">
+                          {formatCOP(amount)}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="bg-white border border-gray-200 rounded-2xl shadow-sm">
                 <div className="w-full overflow-x-auto">
                   <table className="w-full text-sm">
@@ -173,7 +208,7 @@ export default function ServicePerformanceModal({ onClose }) {
                         </th>
                         <th className="text-right px-4 py-3 border-b">Total</th>
                         <th className="text-right px-4 py-3 border-b">
-                          Comisión
+                          Comisión ({Math.round(commissionRate * 100)}%)
                         </th>
                         <th className="text-right px-4 py-3 border-b"></th>
                       </tr>

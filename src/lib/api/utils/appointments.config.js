@@ -42,7 +42,7 @@ export const getFormFieldsAppointments = () => [
   {
     name: 'customerId',
     label: 'Cliente',
-    type: 'select',
+    type: 'searchSelect',
     required: true,
     source: 'customers',
   },
