@@ -10,16 +10,24 @@ export default function SearchFilter({
 }) {
   if (name === 'image') return null;
   if (!showInput) return null;
-  if (name === 'saleDate' || name === 'expenseDate') {
-    title = `dd/mm/yyyy`;
-  }
+
+  // El filtro de fecha de venta usa un selector de fecha nativo (envía
+  // YYYY-MM-DD), evitando formatos ambiguos escritos a mano.
+  const isDate = name === 'saleDate';
+  const inputType = isDate ? 'date' : type;
+  const finalPlaceholder = isDate
+    ? 'Filtrar por fecha'
+    : name === 'expenseDate'
+      ? 'Filtrar dd/mm/yyyy'
+      : placeholder || `Filtrar ${title}`;
+
   return (
     <input
-      type={type}
+      type={inputType}
       name={name}
       value={value}
       onChange={handleFilterChange}
-      placeholder={placeholder || `Filtrar ${title}`}
+      placeholder={finalPlaceholder}
       className={className}
     />
   );
