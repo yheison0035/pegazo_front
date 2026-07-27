@@ -26,6 +26,7 @@ import ColorSelect from './fields/colorSelect';
 import ServiceLocalsField from '../services/serviceLocalsField';
 import useServices from '@/lib/api/hooks/useServices';
 import useAppointments from '@/lib/api/hooks/useAppointments';
+import { validateForm } from '@/lib/api/utils/validators';
 
 export default function DinamicForm({
   formData,
@@ -46,6 +47,7 @@ export default function DinamicForm({
   const [showPassword, setShowPassword] = useState(false);
   const [productError, setProductError] = useState('');
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const { getUsers, getUsersByRole } = useUsers();
   const { getLocals } = useLocals();
@@ -94,6 +96,8 @@ export default function DinamicForm({
       [name]: formattedValue,
       ...(name === 'department' ? { city: '' } : {}),
     }));
+
+    setErrors((prev) => ({ ...prev, [name]: undefined }));
   };
 
   const handleColorChange = useCallback(
@@ -252,6 +256,14 @@ export default function DinamicForm({
         return;
       }
     }
+
+    const validationErrors = validateForm(formFields, formData);
+    if (Object.keys(validationErrors).length > 0) {
+      e.preventDefault();
+      setErrors(validationErrors);
+      return;
+    }
+    setErrors({});
 
     setProductError('');
     handleSubmit(e);
@@ -448,6 +460,11 @@ export default function DinamicForm({
                       </option>
                     ))}
                   </select>
+                  {errors[name] && (
+                    <p className="mt-1 text-sm font-medium text-red-600">
+                      {errors[name]}
+                    </p>
+                  )}
                 </div>
               );
             }
@@ -512,6 +529,11 @@ export default function DinamicForm({
                       : 'focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500'
                   }`}
                 />
+                {errors[name] && (
+                  <p className="mt-1 text-sm font-medium text-red-600">
+                    {errors[name]}
+                  </p>
+                )}
               </div>
             );
           })}

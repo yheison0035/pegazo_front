@@ -16,7 +16,7 @@ export const getFormFieldsCustomers = () => [
     name: 'type_document',
     label: 'Tipo de Documento',
     type: 'select',
-    required: true,
+    required: false,
     options: [
       { id: 'CC', name: 'Cédula de Ciudadanía' },
       { id: 'NIT', name: 'NIT' },
@@ -32,7 +32,7 @@ export const getFormFieldsCustomers = () => [
     name: 'document',
     label: 'Documento',
     type: 'text',
-    required: true,
+    required: false,
     disabled: false,
   },
   {
@@ -46,7 +46,7 @@ export const getFormFieldsCustomers = () => [
     name: 'email',
     label: 'Correo Electrónico',
     type: 'email',
-    required: false,
+    required: true,
     disabled: false,
   },
   {
@@ -89,7 +89,7 @@ export const getFormFieldsCustomers = () => [
     name: 'localId',
     label: 'Local / Punto de Venta',
     type: 'select',
-    required: true,
+    required: false,
     source: 'locals',
     disabled: false,
   },
