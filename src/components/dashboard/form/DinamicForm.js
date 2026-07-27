@@ -217,16 +217,25 @@ export default function DinamicForm({
 
         const params = ALL_SOURCES.includes(field.source) ? { all: true } : {};
 
-        const response = await fetcher(params);
+        try {
+          const response = await fetcher(params);
 
-        const data = Array.isArray(response) ? response : response?.data || [];
+          const data = Array.isArray(response)
+            ? response
+            : response?.data || [];
 
-        results[field.name] = data.map((item) => ({
-          id: item.id,
-          name:
-            item.name ||
-            `${item.firstName ?? ''} ${item.lastName ?? ''}`.trim(),
-        }));
+          results[field.name] = data.map((item) => ({
+            id: item.id,
+            name:
+              item.name ||
+              `${item.firstName ?? ''} ${item.lastName ?? ''}`.trim(),
+          }));
+        } catch (err) {
+          // Si una fuente falla (p. ej. 403 por permisos), no debe dejar
+          // vacíos los demás selects: se deja lista vacía y se continúa.
+          console.error(`Error cargando opciones de "${field.source}":`, err);
+          results[field.name] = [];
+        }
       }
     }
 
