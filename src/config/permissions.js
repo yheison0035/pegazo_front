@@ -36,4 +36,19 @@ export const ROLE_PERMISSIONS = {
   BARBERO: {
     appointments: ['view'],
   },
+
+  // Puede todo MENOS locales, estadísticas, usuarios y roles.
+  // Puede ver, crear y editar, pero NO eliminar.
+  RECEPCIONISTA: {
+    inventory: ['view', 'create', 'edit'],
+    customers: ['view', 'create', 'edit'],
+    sales: ['view', 'create'],
+    delivered_sales: ['view'],
+    expenses: ['view', 'create', 'edit'],
+    providers: ['view', 'create', 'edit'],
+    categories: ['view', 'create', 'edit'],
+    brands: ['view', 'create', 'edit'],
+    services: ['view', 'create', 'edit'],
+    appointments: ['view', 'create', 'edit'],
+  },
 };
