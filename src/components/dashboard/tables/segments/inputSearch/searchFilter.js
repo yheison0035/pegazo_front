@@ -11,15 +11,14 @@ export default function SearchFilter({
   if (name === 'image') return null;
   if (!showInput) return null;
 
-  // El filtro de fecha de venta usa un selector de fecha nativo (envía
-  // YYYY-MM-DD), evitando formatos ambiguos escritos a mano.
-  const isDate = name === 'saleDate';
+  // Los filtros de fecha usan un selector de fecha nativo (envía YYYY-MM-DD),
+  // evitando formatos ambiguos escritos a mano.
+  const dateColumns = ['saleDate', 'expenseDate', 'date'];
+  const isDate = dateColumns.includes(name);
   const inputType = isDate ? 'date' : type;
   const finalPlaceholder = isDate
     ? 'Filtrar por fecha'
-    : name === 'expenseDate'
-      ? 'Filtrar dd/mm/yyyy'
-      : placeholder || `Filtrar ${title}`;
+    : placeholder || `Filtrar ${title}`;
 
   return (
     <input
