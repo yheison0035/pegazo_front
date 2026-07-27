@@ -26,7 +26,7 @@ import ColorSelect from './fields/colorSelect';
 import ServiceLocalsField from '../services/serviceLocalsField';
 import useServices from '@/lib/api/hooks/useServices';
 import useAppointments from '@/lib/api/hooks/useAppointments';
-import { validateForm } from '@/lib/api/utils/validators';
+import { validateField, validateForm } from '@/lib/api/utils/validators';
 import NewCustomerModal from '@/components/dashboard/modals/newCustomerModal';
 
 export default function DinamicForm({
@@ -99,7 +99,13 @@ export default function DinamicForm({
       ...(name === 'department' ? { city: '' } : {}),
     }));
 
-    setErrors((prev) => ({ ...prev, [name]: undefined }));
+    // Validación en tiempo real: valida el campo con su nuevo valor y muestra
+    // (o limpia) el mensaje debajo al instante.
+    const field = Array.isArray(formFields)
+      ? formFields.find((f) => f.name === name)
+      : null;
+    const fieldError = field ? validateField(field, formattedValue) : null;
+    setErrors((prev) => ({ ...prev, [name]: fieldError }));
   };
 
   // Se llama al crear un cliente desde el modal en la factura: lo agrega a las

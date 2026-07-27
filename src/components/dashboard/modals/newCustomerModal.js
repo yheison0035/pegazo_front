@@ -20,7 +20,11 @@ export default function NewCustomerModal({ localId, onClose, onCreated }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setData((prev) => ({ ...prev, [name]: value }));
-    setErrors((prev) => ({ ...prev, [name]: undefined }));
+    const field = FIELDS.find((f) => f.name === name);
+    setErrors((prev) => ({
+      ...prev,
+      [name]: field ? validateField(field, value) : null,
+    }));
   };
 
   const handleSubmit = async (e) => {
