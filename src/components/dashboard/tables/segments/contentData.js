@@ -88,6 +88,9 @@ export default function ContentData({
                   {info?.status || '---'}
                 </td>
                 <PhoneContentData info={info} />
+                <td className="px-5 py-4">
+                  <LastAudit audit={info.lastAudit} />
+                </td>
               </>
             )}
 
@@ -144,6 +147,9 @@ export default function ContentData({
                 <td className="px-5 py-4 whitespace-nowrap">
                   {info.status || '---'}
                 </td>
+                <td className="px-5 py-4">
+                  <LastAudit audit={info.lastAudit} />
+                </td>
               </>
             )}
 
@@ -160,6 +166,9 @@ export default function ContentData({
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
                   {info.local?.name || '---'}
+                </td>
+                <td className="px-5 py-4">
+                  <LastAudit audit={info.lastAudit} />
                 </td>
               </>
             )}
@@ -254,6 +263,9 @@ export default function ContentData({
                 <td className="px-5 py-4 whitespace-nowrap">
                   {formatDateTime(info.saleDate) || '---'}
                 </td>
+                <td className="px-5 py-4">
+                  <LastAudit audit={info.lastAudit} />
+                </td>
               </>
             )}
 
@@ -281,6 +293,9 @@ export default function ContentData({
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
                   {info.status || '---'}
+                </td>
+                <td className="px-5 py-4">
+                  <LastAudit audit={info.lastAudit} />
                 </td>
               </>
             )}
@@ -327,6 +342,9 @@ export default function ContentData({
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
                   {info.status || '---'}
+                </td>
+                <td className="px-5 py-4">
+                  <LastAudit audit={info.lastAudit} />
                 </td>
               </>
             )}
@@ -375,6 +393,9 @@ export default function ContentData({
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
                   {info.notes || '---'}
+                </td>
+                <td className="px-5 py-4">
+                  <LastAudit audit={info.lastAudit} />
                 </td>
               </>
             )}

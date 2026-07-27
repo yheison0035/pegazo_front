@@ -38,6 +38,19 @@ const FIELD_LABELS = {
   brandId: 'Marca',
   duration: 'Duración',
   role: 'Rol',
+  contactName: 'Contacto',
+  productType: 'Tipo de producto',
+  expenseDate: 'Fecha',
+  date: 'Fecha',
+  startTime: 'Hora',
+  notes: 'Notas',
+  serviceId: 'Servicio',
+  barberId: 'Barbero',
+  customerId: 'Cliente',
+  userId: 'Vendedor',
+  paymentStatus: 'Estado de pago',
+  saleStatus: 'Estado de venta',
+  totalAmount: 'Total',
 };
 
 export default function LastAudit({ audit }) {

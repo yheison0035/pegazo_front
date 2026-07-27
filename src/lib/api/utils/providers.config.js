@@ -66,6 +66,12 @@ export const getHeaderTableProviders = () => [
   { name: 'phone', title: 'Teléfono', show: true, showInput: true },
   { name: 'email', title: 'Correo Electrónico', show: false, showInput: false },
   { name: 'department', title: 'Departamento', show: false, showInput: false },
+  {
+    name: 'lastAudit',
+    title: 'Última modificación',
+    show: true,
+    showInput: false,
+  },
 ];
 
 export const viewModalConfig = {

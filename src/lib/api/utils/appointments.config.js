@@ -69,6 +69,12 @@ export const getHeaderTableAppointments = () => [
   { name: 'customerId', title: 'Cliente', show: true, showInput: true },
   { name: 'localId', title: 'Local', show: true, showInput: true },
   { name: 'notes', title: 'Notas', show: true, showInput: true },
+  {
+    name: 'lastAudit',
+    title: 'Última modificación',
+    show: true,
+    showInput: false,
+  },
 ];
 
 export const viewModalConfig = {

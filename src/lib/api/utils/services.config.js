@@ -32,6 +32,12 @@ export const getHeaderTableServices = () => [
   { name: 'description', title: 'Descripción', show: true, showInput: true },
   { name: 'duration', title: 'Duración', show: true, showInput: true },
   { name: 'status', title: 'Estado', show: true, showInput: true },
+  {
+    name: 'lastAudit',
+    title: 'Última modificación',
+    show: true,
+    showInput: false,
+  },
 ];
 
 export const viewModalConfig = {

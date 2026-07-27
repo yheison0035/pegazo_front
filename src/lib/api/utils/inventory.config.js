@@ -172,6 +172,12 @@ export const getHeaderTableInventory = (usuario) => {
       show: false,
       showInput: false,
     },
+    {
+      name: 'lastAudit',
+      title: 'Última modificación',
+      show: true,
+      showInput: false,
+    },
   ];
 };
 

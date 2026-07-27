@@ -18,6 +18,12 @@ export const getHeaderTableDeliveredSales = () => {
     { name: 'userId', title: 'Vendedor / Asesor', show: true, showInput: true },
     { name: 'paymentStatus', title: 'Estado', show: true, showInput: true },
     { name: 'saleDate', title: 'Fecha de Venta', show: true, showInput: true },
+    {
+      name: 'lastAudit',
+      title: 'Última modificación',
+      show: true,
+      showInput: false,
+    },
   ];
 };
 

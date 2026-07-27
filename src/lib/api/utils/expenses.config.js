@@ -115,6 +115,12 @@ export const getHeaderTableExpenses = () => [
   { name: 'providerId', title: 'Proveedor', show: true, showInput: true },
   { name: 'expenseDate', title: 'Fecha', show: true, showInput: true },
   { name: 'status', title: 'Estado', show: true, showInput: true },
+  {
+    name: 'lastAudit',
+    title: 'Última modificación',
+    show: true,
+    showInput: false,
+  },
 ];
 
 export const viewModalConfig = {

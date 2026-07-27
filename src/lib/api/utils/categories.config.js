@@ -59,6 +59,12 @@ export const getHeaderTableCategories = () => [
     show: false,
     showInput: false,
   },
+  {
+    name: 'lastAudit',
+    title: 'Última modificación',
+    show: true,
+    showInput: false,
+  },
 ];
 
 export const viewModalConfig = {
