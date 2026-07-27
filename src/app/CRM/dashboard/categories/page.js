@@ -94,6 +94,10 @@ export default function Categories() {
             info={categories}
             view="categories"
             rol={usuario?.role}
+            meta={meta}
+            limit={limit}
+            setPage={setPage}
+            setLimit={setLimit}
             loading={loading}
             filters={filters}
             handleFilterChange={handleFilterChange}

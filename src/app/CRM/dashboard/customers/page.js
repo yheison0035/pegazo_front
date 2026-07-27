@@ -98,6 +98,10 @@ export default function Customers() {
             info={customers}
             view="customers"
             rol={usuario?.role}
+            meta={meta}
+            limit={limit}
+            setPage={setPage}
+            setLimit={setLimit}
             loading={loading}
             filters={filters}
             handleFilterChange={handleFilterChange}

@@ -92,6 +92,10 @@ export default function Companies() {
             info={companies}
             view="companies"
             rol={usuario?.role}
+            meta={meta}
+            limit={limit}
+            setPage={setPage}
+            setLimit={setLimit}
             loading={loading}
             filters={filters}
             handleFilterChange={(name, value) => {

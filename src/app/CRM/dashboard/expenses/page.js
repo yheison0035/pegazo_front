@@ -93,6 +93,10 @@ export default function Expenses() {
           info={expenses}
           view="expenses"
           rol={usuario?.role}
+          meta={meta}
+          limit={limit}
+          setPage={setPage}
+          setLimit={setLimit}
           loading={loading}
           filters={filters}
           handleFilterChange={handleFilterChange}
