@@ -50,6 +50,7 @@ export default function DinamicForm({
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [errors, setErrors] = useState({});
   const [showNewCustomer, setShowNewCustomer] = useState(false);
+  const [createdCustomers, setCreatedCustomers] = useState([]);
 
   const { getUsers, getUsersByRole } = useUsers();
   const { getLocals } = useLocals();
@@ -113,15 +114,12 @@ export default function DinamicForm({
   const handleCustomerCreated = (customer) => {
     if (!customer?.id) return;
 
-    setDynamicOptions((prev) => ({
-      ...prev,
-      customerId: [
-        { id: customer.id, name: customer.name },
-        ...(prev.customerId || []).filter(
-          (opt) => String(opt.id) !== String(customer.id)
-        ),
-      ],
-    }));
+    // Se guarda aparte para que SIEMPRE esté en las opciones aunque se
+    // recarguen (así no se pierde la selección).
+    setCreatedCustomers((prev) => [
+      { id: customer.id, name: customer.name },
+      ...prev.filter((c) => String(c.id) !== String(customer.id)),
+    ]);
 
     setFormData((prev) => ({ ...prev, customerId: customer.id }));
     setShowNewCustomer(false);
@@ -427,8 +425,15 @@ export default function DinamicForm({
             }
 
             if (type === 'searchSelect') {
-              const fieldOptions = options || dynamicOptions[name] || [];
               const isCustomerField = name === 'customerId';
+              let fieldOptions = options || dynamicOptions[name] || [];
+              if (isCustomerField && createdCustomers.length) {
+                const existing = new Set(fieldOptions.map((o) => String(o.id)));
+                fieldOptions = [
+                  ...createdCustomers.filter((c) => !existing.has(String(c.id))),
+                  ...fieldOptions,
+                ];
+              }
               return (
                 <div key={name} className="flex flex-col">
                   <label className="text-sm font-medium text-gray-700 mb-1">
