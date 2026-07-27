@@ -29,6 +29,28 @@ export function normalizeDateForInput(value) {
   return iso || '';
 }
 
+// Normaliza fecha + hora para inputs tipo <input type="datetime-local" />
+// Devuelve "YYYY-MM-DDTHH:mm" en la zona horaria de Colombia.
+export function normalizeDateTimeForInput(value) {
+  const date = parseDate(value);
+  if (!date) return '';
+
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).formatToParts(date);
+
+  const get = (type) => parts.find((p) => p.type === type)?.value;
+  const hour = get('hour') === '24' ? '00' : get('hour');
+
+  return `${get('year')}-${get('month')}-${get('day')}T${hour}:${get('minute')}`;
+}
+
 // =============================
 // FORMATOS VISUALES
 // =============================

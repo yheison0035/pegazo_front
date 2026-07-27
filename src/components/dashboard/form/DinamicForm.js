@@ -8,6 +8,7 @@ import useUsers from '@/lib/api/hooks/useUsers';
 import {
   formatCOP,
   normalizeDateForInput,
+  normalizeDateTimeForInput,
   formatPrice,
   toggleCase,
 } from '@/lib/api/utils/utils';
@@ -116,7 +117,8 @@ export default function DinamicForm({
     if (!Array.isArray(formFields)) return;
 
     const loaders = {
-      users: getUsers,
+      users: (params) =>
+        getUsers({ ...params, status: 'ACTIVO', limit: 1000 }),
       locals: getLocals,
       providers: getProviders,
       categories: getCategories,
@@ -270,9 +272,11 @@ export default function DinamicForm({
             if (name === 'department' || name === 'city') return null;
 
             const inputValue =
-              name === 'saleDate' || name === 'expenseDate'
-                ? normalizeDateForInput(formData[name])
-                : name === 'purchasePrice' ||
+              name === 'saleDate'
+                ? normalizeDateTimeForInput(formData[name])
+                : name === 'expenseDate'
+                  ? normalizeDateForInput(formData[name])
+                  : name === 'purchasePrice' ||
                     name === 'salePrice' ||
                     name === 'oldPrice' ||
                     name === 'amount' ||

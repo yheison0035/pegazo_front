@@ -56,7 +56,7 @@ export const getFormFieldsSales = () => [
   {
     name: 'saleDate',
     label: 'Fecha de la Venta',
-    type: 'date',
+    type: 'datetime-local',
     required: true,
     source: null,
     disabled: false,
