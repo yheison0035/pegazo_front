@@ -225,10 +225,12 @@ export default function ContentData({
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
                   <div>{info.customer?.name || '---'}</div>
-                  <WhatsappLink
-                    phone={info.customer?.phone}
-                    className="mt-1 text-xs"
-                  />
+                  {info.customer?.document !== '222222222222' && (
+                    <WhatsappLink
+                      phone={info.customer?.phone}
+                      className="mt-1 text-xs"
+                    />
+                  )}
                 </td>
                 <td className="px-5 py-4 font-semibold whitespace-nowrap">
                   {formatCOP(info.totalAmount) || '---'}
