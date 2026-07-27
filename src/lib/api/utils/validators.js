@@ -24,13 +24,13 @@ export function validateField(field, value) {
     if (!EMAIL_RE.test(raw)) return 'Ingresa un correo válido';
   }
 
-  // Teléfono / celular (7 a 15 dígitos)
+  // Celular móvil de Colombia: 10 dígitos que empiezan por 3.
   const isPhone =
     PHONE_FIELDS.includes(name) || /phone|celular|tel|whatsapp/i.test(name);
   if (isPhone) {
     const digits = raw.replace(/\D/g, '');
-    if (digits.length < 7 || digits.length > 15) {
-      return 'Ingresa un número de teléfono válido';
+    if (!/^3\d{9}$/.test(digits)) {
+      return 'Ingresa un celular válido (10 dígitos, empieza por 3)';
     }
   }
 

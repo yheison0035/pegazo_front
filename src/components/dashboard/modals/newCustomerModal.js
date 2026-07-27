@@ -20,11 +20,12 @@ export default function NewCustomerModal({ localId, onClose, onCreated }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setData((prev) => ({ ...prev, [name]: value }));
+    const finalValue = name === 'name' ? value.toUpperCase() : value;
+    setData((prev) => ({ ...prev, [name]: finalValue }));
     const field = FIELDS.find((f) => f.name === name);
     setErrors((prev) => ({
       ...prev,
-      [name]: field ? validateField(field, value) : null,
+      [name]: field ? validateField(field, finalValue) : null,
     }));
   };
 
