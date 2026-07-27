@@ -1,231 +1,491 @@
 'use client';
 
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useCallback, useEffect, useState } from 'react';
 import {
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
+  Legend,
   ResponsiveContainer,
 } from 'recharts';
-import { X } from 'lucide-react';
 
-const fakeData = {
-  'FERIA 1 Mall Plaza 77': {
-    daily: [
-      { name: '21/08/2025', ventas: 200 },
-      { name: '22/08/2025', ventas: 260 },
-      { name: '23/08/2025', ventas: 310 },
-      { name: '24/08/2025', ventas: 280 },
-      { name: '25/08/2025', ventas: 340 },
-    ],
-    monthly: [
-      { name: 'Enero', ventas: 4500 },
-      { name: 'Febrero', ventas: 5200 },
-      { name: 'Marzo', ventas: 6100 },
-      { name: 'Abril', ventas: 7200 },
-      { name: 'Mayo', ventas: 7600 },
-      { name: 'Junio', ventas: 8200 },
-      { name: 'Julio', ventas: 9100 },
-      { name: 'Agosto', ventas: 9700 },
-      { name: 'Septiembre', ventas: 9000 },
-    ],
-    yearly: [
-      { name: '2021', ventas: 36000 },
-      { name: '2022', ventas: 42000 },
-      { name: '2023', ventas: 48000 },
-      { name: '2024', ventas: 56000 },
-      { name: '2025', ventas: 62000 },
-    ],
-  },
-  'FERIA 2 La Gran Manzana': {
-    daily: [
-      { name: '21/08/2025', ventas: 180 },
-      { name: '22/08/2025', ventas: 230 },
-      { name: '23/08/2025', ventas: 290 },
-      { name: '24/08/2025', ventas: 250 },
-      { name: '25/08/2025', ventas: 310 },
-    ],
-    monthly: [
-      { name: 'Enero', ventas: 4100 },
-      { name: 'Febrero', ventas: 4800 },
-      { name: 'Marzo', ventas: 5900 },
-      { name: 'Abril', ventas: 6500 },
-      { name: 'Mayo', ventas: 7000 },
-      { name: 'Junio', ventas: 7700 },
-      { name: 'Julio', ventas: 8300 },
-      { name: 'Agosto', ventas: 9000 },
-      { name: 'Septiembre', ventas: 9000 },
-    ],
-    yearly: [
-      { name: '2021', ventas: 30000 },
-      { name: '2022', ventas: 35000 },
-      { name: '2023', ventas: 41000 },
-      { name: '2024', ventas: 49000 },
-      { name: '2025', ventas: 55000 },
-    ],
-  },
-  'Burbuja Mall Plaza 77': {
-    daily: [
-      { name: '21/08/2025', ventas: 240 },
-      { name: '22/08/2025', ventas: 280 },
-      { name: '23/08/2025', ventas: 360 },
-      { name: '24/08/2025', ventas: 330 },
-      { name: '25/08/2025', ventas: 400 },
-    ],
-    monthly: [
-      { name: 'Enero', ventas: 4800 },
-      { name: 'Febrero', ventas: 5400 },
-      { name: 'Marzo', ventas: 6100 },
-      { name: 'Abril', ventas: 6800 },
-      { name: 'Mayo', ventas: 7500 },
-      { name: 'Junio', ventas: 8300 },
-      { name: 'Julio', ventas: 9100 },
-      { name: 'Agosto', ventas: 9800 },
-      { name: 'Septiembre', ventas: 9000 },
-    ],
-    yearly: [
-      { name: '2021', ventas: 34000 },
-      { name: '2022', ventas: 39000 },
-      { name: '2023', ventas: 46000 },
-      { name: '2024', ventas: 52000 },
-      { name: '2025', ventas: 60000 },
-    ],
-  },
-};
+import RoleGuard from '@/auth/roleGuard';
+import { useAuth } from '@/context/authContext';
+import { Roles } from '@/config/roles';
+import useLocals from '@/lib/api/hooks/useLocals';
+import { getDashboardStats } from '@/lib/api/routes/statistics';
+import LoadingOverlay from '@/components/ui/LoadingOverlay';
+import {
+  PALETTE,
+  COLORS,
+  KpiCard,
+  ChartCard,
+  MoneyTooltip,
+  formatShort,
+  formatMoney,
+  shortDate,
+} from '@/components/dashboard/statistics/statsUI';
+
+const todayCol = () =>
+  new Date().toLocaleDateString('en-CA', { timeZone: 'America/Bogota' });
+const daysAgoCol = (n) =>
+  new Date(Date.now() - n * 86400000).toLocaleDateString('en-CA', {
+    timeZone: 'America/Bogota',
+  });
+
+function EmptyChart({ height = 260 }) {
+  return (
+    <div
+      className="flex items-center justify-center text-sm text-gray-400"
+      style={{ height }}
+    >
+      Sin datos en este periodo
+    </div>
+  );
+}
 
 export default function Statistics() {
-  const [selectedBusiness, setSelectedBusiness] = useState(null);
-  const [timeRange, setTimeRange] = useState('daily');
+  const auth = useAuth();
+  const usuario = auth?.usuario;
+  const { getLocals } = useLocals();
 
-  const handleSelect = (business) => {
-    setSelectedBusiness(business);
-  };
+  const [locals, setLocals] = useState([]);
+  const [localId, setLocalId] = useState('');
+  const [startDate, setStartDate] = useState(daysAgoCol(29));
+  const [endDate, setEndDate] = useState(todayCol());
 
-  const closeDetail = () => setSelectedBusiness(null);
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    getLocals()
+      .then((res) => setLocals(res?.data || []))
+      .catch(() => {});
+  }, [getLocals]);
+
+  const fetchStats = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await getDashboardStats({
+        startDate,
+        endDate,
+        ...(localId ? { localId: String(localId) } : {}),
+      });
+      setData(res?.data || null);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [startDate, endDate, localId]);
+
+  useEffect(() => {
+    fetchStats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const s = data?.summary;
 
   return (
-    <div className="w-full p-4">
-      <h1 className="text-xl md:text-2xl font-semibold text-gray-800 mb-5">
-        Estadísticas de Ventas
-      </h1>
+    <RoleGuard
+      allowedRoles={[Roles.SUPER_ADMIN, Roles.ADMIN, Roles.COORDINADOR]}
+    >
+      <div className="relative w-full p-4">
+        <LoadingOverlay show={loading} text="Cargando estadísticas..." />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {Object.keys(fakeData).map((business) => {
-          const totalDia = fakeData[business].daily.slice(-1)[0].ventas;
-          const totalMes = fakeData[business].monthly.slice(-1)[0].ventas;
-          const totalAnual = fakeData[business].yearly.slice(-1)[0].ventas;
+        <div className="mb-2">
+          <h1 className="text-2xl font-semibold text-gray-800">Estadísticas</h1>
+          <p className="text-sm text-gray-500">
+            Cómo va tu empresa — ventas, rentabilidad, productos y clientes.
+          </p>
+        </div>
 
-          return (
-            <motion.div
-              key={business}
-              whileHover={{ scale: 1.03 }}
-              className="cursor-pointer bg-white text-blue-950 p-5 rounded-2xl shadow-lg hover:shadow-xl transition-all"
-              onClick={() => handleSelect(business)}
+        {/* Filtros */}
+        <div className="mb-6 flex flex-wrap items-end gap-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+          <div className="flex flex-col">
+            <label className="mb-1 text-xs font-semibold uppercase text-gray-500">
+              Desde
+            </label>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="rounded-xl border border-gray-200 px-3 py-2 text-sm"
+            />
+          </div>
+          <div className="flex flex-col">
+            <label className="mb-1 text-xs font-semibold uppercase text-gray-500">
+              Hasta
+            </label>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="rounded-xl border border-gray-200 px-3 py-2 text-sm"
+            />
+          </div>
+          <div className="flex flex-col">
+            <label className="mb-1 text-xs font-semibold uppercase text-gray-500">
+              Sede
+            </label>
+            <select
+              value={localId}
+              onChange={(e) => setLocalId(e.target.value)}
+              className="rounded-xl border border-gray-200 px-3 py-2 text-sm"
             >
-              <h3 className="text-lg font-semibold cursor-pointer">
-                {business}
-              </h3>
-              <p className="text-sm mt-3">
-                Último día: <span className="font-semibold">${totalDia}</span>
-              </p>
-              <p className="text-sm">
-                Último mes: <span className="font-semibold">${totalMes}</span>
-              </p>
-              <p className="text-sm">
-                Total año actual:{' '}
-                <span className="font-semibold text-green-600">
-                  ${totalAnual}
-                </span>
-              </p>
-              <div className="mt-4 h-24">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={fakeData[business].daily}>
-                    <Line
-                      type="monotone"
-                      dataKey="ventas"
-                      stroke="#2563eb"
-                      strokeWidth={3}
-                      dot={false}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </motion.div>
-          );
-        })}
-      </div>
-
-      <AnimatePresence>
-        {selectedBusiness && (
-          <motion.div
-            className="fixed inset-0 bg-blue-950/95 backdrop-blur-md flex flex-col items-center justify-center z-50 p-6"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+              <option value="">Todas las sedes</option>
+              {locals.map((l) => (
+                <option key={l.id} value={l.id}>
+                  {l.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button
+            onClick={fetchStats}
+            className="rounded-xl bg-cyan-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-cyan-700"
           >
-            <button
-              onClick={closeDetail}
-              className="absolute top-6 right-6 text-white hover:text-gray-300"
-            >
-              <X size={32} />
-            </button>
+            Aplicar
+          </button>
+        </div>
 
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="bg-white text-blue-950 p-6 rounded-2xl shadow-2xl w-full max-w-5xl"
-            >
-              <h2 className="text-2xl font-semibold mb-2">
-                Detalle de {selectedBusiness}
-              </h2>
-              <div className="flex gap-2 mb-4">
-                {['daily', 'monthly', 'yearly'].map((range) => (
-                  <button
-                    key={range}
-                    onClick={() => setTimeRange(range)}
-                    className={`px-4 py-2 rounded-md font-semibold text-sm transition ${
-                      timeRange === range
-                        ? 'bg-blue-950 text-white'
-                        : 'bg-gray-200 text-blue-950 hover:bg-gray-300'
-                    }`}
-                  >
-                    {range === 'daily'
-                      ? 'Días'
-                      : range === 'monthly'
-                      ? 'Meses'
-                      : 'Años'}
-                  </button>
-                ))}
-              </div>
-
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={fakeData[selectedBusiness][timeRange]}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" stroke="#1e3a8a" />
-                    <YAxis />
-                    <Tooltip />
-                    <Line
-                      type="monotone"
-                      dataKey="ventas"
-                      stroke="#2563eb"
-                      strokeWidth={3}
-                      dot={{ r: 5 }}
-                      activeDot={{ r: 8 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </motion.div>
-          </motion.div>
+        {/* KPIs */}
+        {s && (
+          <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
+            <KpiCard
+              label="Ventas"
+              value={formatMoney(s.totalSales)}
+              delta={s.deltas.totalSales}
+              accent={COLORS.income}
+            />
+            <KpiCard
+              label="Nº de ventas"
+              value={s.salesCount}
+              delta={s.deltas.salesCount}
+              accent={COLORS.profit}
+            />
+            <KpiCard
+              label="Ticket promedio"
+              value={formatMoney(s.avgTicket)}
+              delta={s.deltas.avgTicket}
+              accent={PALETTE[3]}
+            />
+            <KpiCard
+              label="Gastos"
+              value={formatMoney(s.totalExpenses)}
+              delta={s.deltas.totalExpenses}
+              invert
+              accent={COLORS.expense}
+            />
+            <KpiCard
+              label="Utilidad"
+              value={formatMoney(s.profit)}
+              delta={s.deltas.profit}
+              accent={PALETTE[5]}
+            />
+            <KpiCard
+              label="Clientes nuevos"
+              value={s.newCustomers}
+              delta={s.deltas.newCustomers}
+              accent={PALETTE[4]}
+            />
+          </div>
         )}
-      </AnimatePresence>
-    </div>
+
+        {/* Ingresos vs Gastos */}
+        <div className="mb-6">
+          <ChartCard
+            title="Ingresos vs Gastos"
+            subtitle="Evolución en el periodo"
+          >
+            {data?.series?.length ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart
+                  data={data.series}
+                  margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+                >
+                  <defs>
+                    <linearGradient id="gIncome" x1="0" y1="0" x2="0" y2="1">
+                      <stop
+                        offset="0%"
+                        stopColor={COLORS.income}
+                        stopOpacity={0.35}
+                      />
+                      <stop
+                        offset="100%"
+                        stopColor={COLORS.income}
+                        stopOpacity={0}
+                      />
+                    </linearGradient>
+                    <linearGradient id="gExpense" x1="0" y1="0" x2="0" y2="1">
+                      <stop
+                        offset="0%"
+                        stopColor={COLORS.expense}
+                        stopOpacity={0.35}
+                      />
+                      <stop
+                        offset="100%"
+                        stopColor={COLORS.expense}
+                        stopOpacity={0}
+                      />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid stroke={COLORS.grid} vertical={false} />
+                  <XAxis
+                    dataKey="date"
+                    tickFormatter={shortDate}
+                    tick={{ fontSize: 11, fill: COLORS.axis }}
+                    minTickGap={24}
+                  />
+                  <YAxis
+                    tickFormatter={formatShort}
+                    tick={{ fontSize: 11, fill: COLORS.axis }}
+                    width={54}
+                  />
+                  <Tooltip
+                    content={<MoneyTooltip />}
+                    labelFormatter={shortDate}
+                  />
+                  <Legend />
+                  <Area
+                    type="monotone"
+                    dataKey="ventas"
+                    name="Ingresos"
+                    stroke={COLORS.income}
+                    strokeWidth={2}
+                    fill="url(#gIncome)"
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="gastos"
+                    name="Gastos"
+                    stroke={COLORS.expense}
+                    strokeWidth={2}
+                    fill="url(#gExpense)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <EmptyChart height={300} />
+            )}
+          </ChartCard>
+        </div>
+
+        {/* Métodos de pago + Por sede/Gastos */}
+        <div className="mb-6 grid gap-6 lg:grid-cols-2">
+          <ChartCard title="Ventas por método de pago">
+            {data?.paymentMethods?.length ? (
+              <ResponsiveContainer width="100%" height={280}>
+                <PieChart>
+                  <Pie
+                    data={data.paymentMethods}
+                    dataKey="total"
+                    nameKey="method"
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={100}
+                    paddingAngle={2}
+                  >
+                    {data.paymentMethods.map((entry, i) => (
+                      <Cell
+                        key={entry.method}
+                        fill={PALETTE[i % PALETTE.length]}
+                        stroke="#fff"
+                        strokeWidth={2}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<MoneyTooltip />} />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <EmptyChart height={280} />
+            )}
+          </ChartCard>
+
+          <ChartCard
+            title={
+              data?.hasMultipleLocals ? 'Ventas por sede' : 'Gastos por tipo'
+            }
+          >
+            {data?.hasMultipleLocals ? (
+              data?.byLocal?.length ? (
+                <ResponsiveContainer width="100%" height={280}>
+                  <BarChart data={data.byLocal} layout="vertical">
+                    <CartesianGrid stroke={COLORS.grid} horizontal={false} />
+                    <XAxis
+                      type="number"
+                      tickFormatter={formatShort}
+                      tick={{ fontSize: 11, fill: COLORS.axis }}
+                    />
+                    <YAxis
+                      type="category"
+                      dataKey="local"
+                      width={130}
+                      tick={{ fontSize: 11, fill: COLORS.axis }}
+                    />
+                    <Tooltip
+                      content={<MoneyTooltip />}
+                      cursor={{ fill: '#f8fafc' }}
+                    />
+                    <Bar dataKey="total" name="Ventas" radius={[0, 4, 4, 0]}>
+                      {data.byLocal.map((e, i) => (
+                        <Cell key={e.local} fill={PALETTE[i % PALETTE.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <EmptyChart height={280} />
+              )
+            ) : data?.expensesByType?.length ? (
+              <ResponsiveContainer width="100%" height={280}>
+                <BarChart data={data.expensesByType} layout="vertical">
+                  <CartesianGrid stroke={COLORS.grid} horizontal={false} />
+                  <XAxis
+                    type="number"
+                    tickFormatter={formatShort}
+                    tick={{ fontSize: 11, fill: COLORS.axis }}
+                  />
+                  <YAxis
+                    type="category"
+                    dataKey="type"
+                    width={130}
+                    tick={{ fontSize: 11, fill: COLORS.axis }}
+                  />
+                  <Tooltip
+                    content={<MoneyTooltip />}
+                    cursor={{ fill: '#f8fafc' }}
+                  />
+                  <Bar
+                    dataKey="total"
+                    name="Gastos"
+                    fill={COLORS.expense}
+                    radius={[0, 4, 4, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <EmptyChart height={280} />
+            )}
+          </ChartCard>
+        </div>
+
+        {/* Top productos + Top servicios */}
+        <div className="mb-6 grid gap-6 lg:grid-cols-2">
+          <ChartCard title="Top productos" subtitle="Por monto vendido">
+            {data?.topProducts?.length ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={data.topProducts} layout="vertical">
+                  <CartesianGrid stroke={COLORS.grid} horizontal={false} />
+                  <XAxis
+                    type="number"
+                    tickFormatter={formatShort}
+                    tick={{ fontSize: 11, fill: COLORS.axis }}
+                  />
+                  <YAxis
+                    type="category"
+                    dataKey="name"
+                    width={140}
+                    tick={{ fontSize: 11, fill: COLORS.axis }}
+                  />
+                  <Tooltip
+                    content={<MoneyTooltip />}
+                    cursor={{ fill: '#f8fafc' }}
+                  />
+                  <Bar
+                    dataKey="total"
+                    name="Vendido"
+                    fill={PALETTE[0]}
+                    radius={[0, 4, 4, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <EmptyChart height={300} />
+            )}
+          </ChartCard>
+
+          <ChartCard title="Top servicios" subtitle="Por monto vendido">
+            {data?.topServices?.length ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={data.topServices} layout="vertical">
+                  <CartesianGrid stroke={COLORS.grid} horizontal={false} />
+                  <XAxis
+                    type="number"
+                    tickFormatter={formatShort}
+                    tick={{ fontSize: 11, fill: COLORS.axis }}
+                  />
+                  <YAxis
+                    type="category"
+                    dataKey="name"
+                    width={140}
+                    tick={{ fontSize: 11, fill: COLORS.axis }}
+                  />
+                  <Tooltip
+                    content={<MoneyTooltip />}
+                    cursor={{ fill: '#f8fafc' }}
+                  />
+                  <Bar
+                    dataKey="total"
+                    name="Vendido"
+                    fill={PALETTE[2]}
+                    radius={[0, 4, 4, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <EmptyChart height={300} />
+            )}
+          </ChartCard>
+        </div>
+
+        {/* Top vendedores */}
+        <div className="mb-6">
+          <ChartCard
+            title="Top vendedores / asesores"
+            subtitle="Por ventas del periodo"
+          >
+            {data?.topSellers?.length ? (
+              <ResponsiveContainer width="100%" height={280}>
+                <BarChart data={data.topSellers}>
+                  <CartesianGrid stroke={COLORS.grid} vertical={false} />
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fontSize: 11, fill: COLORS.axis }}
+                  />
+                  <YAxis
+                    tickFormatter={formatShort}
+                    tick={{ fontSize: 11, fill: COLORS.axis }}
+                    width={54}
+                  />
+                  <Tooltip
+                    content={<MoneyTooltip />}
+                    cursor={{ fill: '#f8fafc' }}
+                  />
+                  <Bar dataKey="total" name="Ventas" radius={[4, 4, 0, 0]}>
+                    {data.topSellers.map((e, i) => (
+                      <Cell key={e.name} fill={PALETTE[i % PALETTE.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <EmptyChart height={280} />
+            )}
+          </ChartCard>
+        </div>
+      </div>
+    </RoleGuard>
   );
 }
