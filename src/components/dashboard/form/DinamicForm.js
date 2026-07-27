@@ -27,6 +27,7 @@ import ServiceLocalsField from '../services/serviceLocalsField';
 import useServices from '@/lib/api/hooks/useServices';
 import useAppointments from '@/lib/api/hooks/useAppointments';
 import { validateForm } from '@/lib/api/utils/validators';
+import NewCustomerModal from '@/components/dashboard/modals/newCustomerModal';
 
 export default function DinamicForm({
   formData,
@@ -48,6 +49,7 @@ export default function DinamicForm({
   const [productError, setProductError] = useState('');
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [errors, setErrors] = useState({});
+  const [showNewCustomer, setShowNewCustomer] = useState(false);
 
   const { getUsers, getUsersByRole } = useUsers();
   const { getLocals } = useLocals();
@@ -98,6 +100,25 @@ export default function DinamicForm({
     }));
 
     setErrors((prev) => ({ ...prev, [name]: undefined }));
+  };
+
+  // Se llama al crear un cliente desde el modal en la factura: lo agrega a las
+  // opciones y lo deja seleccionado, sin borrar lo ya diligenciado en la venta.
+  const handleCustomerCreated = (customer) => {
+    if (!customer?.id) return;
+
+    setDynamicOptions((prev) => ({
+      ...prev,
+      customerId: [
+        { id: customer.id, name: customer.name },
+        ...(prev.customerId || []).filter(
+          (opt) => String(opt.id) !== String(customer.id)
+        ),
+      ],
+    }));
+
+    setFormData((prev) => ({ ...prev, customerId: customer.id }));
+    setShowNewCustomer(false);
   };
 
   const handleColorChange = useCallback(
@@ -401,6 +422,8 @@ export default function DinamicForm({
 
             if (type === 'searchSelect') {
               const fieldOptions = options || dynamicOptions[name] || [];
+              const isSaleCustomer =
+                module === 'sales' && name === 'customerId';
               return (
                 <div key={name} className="flex flex-col">
                   <label className="text-sm font-medium text-gray-700 mb-1">
@@ -422,10 +445,28 @@ export default function DinamicForm({
                     required={required}
                   />
 
+                  {isSaleCustomer && (
+                    <button
+                      type="button"
+                      onClick={() => setShowNewCustomer(true)}
+                      className="mt-2 self-start text-sm font-medium text-cyan-600 hover:underline"
+                    >
+                      + Crear cliente nuevo
+                    </button>
+                  )}
+
                   {required && hasSubmitted && !formData[name] && (
                     <p className="mt-1 text-sm text-red-600 font-medium">
                       Este campo es obligatorio
                     </p>
+                  )}
+
+                  {isSaleCustomer && showNewCustomer && (
+                    <NewCustomerModal
+                      localId={formData.localId}
+                      onClose={() => setShowNewCustomer(false)}
+                      onCreated={handleCustomerCreated}
+                    />
                   )}
                 </div>
               );
