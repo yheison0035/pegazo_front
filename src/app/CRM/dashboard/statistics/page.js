@@ -31,6 +31,7 @@ import {
   formatShort,
   formatMoney,
   shortDate,
+  truncate,
 } from '@/components/dashboard/statistics/statsUI';
 
 const todayCol = () =>
@@ -328,7 +329,8 @@ export default function Statistics() {
                     <YAxis
                       type="category"
                       dataKey="local"
-                      width={130}
+                      width={150}
+                      tickFormatter={(v) => truncate(v, 18)}
                       tick={{ fontSize: 11, fill: COLORS.axis }}
                     />
                     <Tooltip
@@ -357,7 +359,8 @@ export default function Statistics() {
                   <YAxis
                     type="category"
                     dataKey="type"
-                    width={130}
+                    width={150}
+                    tickFormatter={(v) => truncate(v, 18)}
                     tick={{ fontSize: 11, fill: COLORS.axis }}
                   />
                   <Tooltip
@@ -393,7 +396,8 @@ export default function Statistics() {
                   <YAxis
                     type="category"
                     dataKey="name"
-                    width={140}
+                    width={160}
+                    tickFormatter={(v) => truncate(v, 20)}
                     tick={{ fontSize: 11, fill: COLORS.axis }}
                   />
                   <Tooltip
@@ -426,7 +430,8 @@ export default function Statistics() {
                   <YAxis
                     type="category"
                     dataKey="name"
-                    width={140}
+                    width={160}
+                    tickFormatter={(v) => truncate(v, 20)}
                     tick={{ fontSize: 11, fill: COLORS.axis }}
                   />
                   <Tooltip
@@ -459,6 +464,7 @@ export default function Statistics() {
                   <CartesianGrid stroke={COLORS.grid} vertical={false} />
                   <XAxis
                     dataKey="name"
+                    tickFormatter={(v) => truncate(v, 16)}
                     tick={{ fontSize: 11, fill: COLORS.axis }}
                   />
                   <YAxis

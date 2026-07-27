@@ -35,6 +35,13 @@ export function formatMoney(value) {
   });
 }
 
+// Trunca textos largos a una sola línea (con …). El nombre completo se ve
+// en el tooltip al pasar el mouse.
+export function truncate(str, max = 20) {
+  const s = String(str ?? '');
+  return s.length > max ? `${s.slice(0, max - 1)}…` : s;
+}
+
 // Etiqueta corta de fecha YYYY-MM-DD -> DD/MM
 export function shortDate(iso) {
   if (!iso) return '';
