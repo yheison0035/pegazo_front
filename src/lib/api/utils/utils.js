@@ -18,8 +18,10 @@ export function toISODate(value) {
   const date = parseDate(value);
   if (!date) return null;
 
+  // Las fechas "solo día" se guardan a medianoche UTC; se leen en UTC para
+  // no correr el día por la conversión de zona horaria.
   return date.toLocaleDateString('en-CA', {
-    timeZone: TIMEZONE,
+    timeZone: 'UTC',
   });
 }
 
@@ -62,6 +64,20 @@ export function formatDateDMY(value) {
 
   return date.toLocaleDateString('es-CO', {
     timeZone: TIMEZONE,
+  });
+}
+
+// Solo fecha en formato DD/MM/YYYY, SIN conversión de zona horaria.
+// Para fechas "solo día" (nacimiento, cita, gasto) guardadas a medianoche UTC.
+export function formatDateOnly(value) {
+  const date = parseDate(value);
+  if (!date) return 'No disponible';
+
+  return date.toLocaleDateString('es-CO', {
+    timeZone: 'UTC',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
   });
 }
 

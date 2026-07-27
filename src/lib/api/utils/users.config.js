@@ -172,7 +172,7 @@ export const viewModalConfig = {
         { name: 'email', label: 'Correo Electrónico' },
         { name: 'phone', label: 'Teléfono' },
         { name: 'address', label: 'Dirección' },
-        { name: 'birthdate', label: 'Fecha de Nacimiento', type: 'date' },
+        { name: 'birthdate', label: 'Fecha de Nacimiento', type: 'dateOnly' },
         { name: 'city', label: 'Ciudad' },
       ],
     },

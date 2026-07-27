@@ -7,6 +7,7 @@ import {
   formatCOP,
   formatDateTime,
   formatDateSafe,
+  formatDateOnly,
   toggleCase,
 } from '@/lib/api/utils/utils';
 import { useAuth } from '@/context/authContext';
@@ -265,7 +266,7 @@ export default function ContentData({
                   {info.provider?.name || '---'}
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
-                  {formatDateTime(info.expenseDate) || '---'}
+                  {formatDateOnly(info.expenseDate) || '---'}
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
                   {info.status || '---'}
@@ -344,7 +345,7 @@ export default function ContentData({
                   </span>
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
-                  {formatDateSafe(info.date) || '---'}
+                  {formatDateOnly(info.date) || '---'}
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
                   {info.startTime || '---'}

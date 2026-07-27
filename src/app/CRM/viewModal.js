@@ -6,6 +6,7 @@ import Variants from '@/components/dashboard/viewModal/variants';
 import {
   formatCOP,
   formatDateSafe,
+  formatDateOnly,
   getValueByPath,
   formatDateTime,
 } from '@/lib/api/utils/utils';
@@ -87,7 +88,7 @@ export default function ViewModal({
                   }
 
                   if (field.type === 'dateOnly') {
-                    value = formatDateSafe(value);
+                    value = formatDateOnly(value);
                   }
 
                   if (field.type === 'status') {

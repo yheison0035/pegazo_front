@@ -73,7 +73,9 @@ export default function DinamicForm({
       formattedValue = formatPrice(value);
     }
 
-    if (name === 'saleDate' || name === 'expenseDate') {
+    // expenseDate es solo fecha; saleDate es datetime-local y se guarda tal cual
+    // (con hora), sin recortarla.
+    if (name === 'expenseDate') {
       formattedValue = normalizeDateForInput(value);
     }
 
@@ -272,9 +274,9 @@ export default function DinamicForm({
             if (name === 'department' || name === 'city') return null;
 
             const inputValue =
-              name === 'saleDate'
+              type === 'datetime-local'
                 ? normalizeDateTimeForInput(formData[name])
-                : name === 'expenseDate'
+                : type === 'date'
                   ? normalizeDateForInput(formData[name])
                   : name === 'purchasePrice' ||
                     name === 'salePrice' ||
