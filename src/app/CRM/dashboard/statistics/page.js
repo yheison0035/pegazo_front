@@ -496,6 +496,66 @@ export default function Statistics() {
             )}
           </ChartCard>
         </div>
+
+        {/* Por cobrar (Fiado) */}
+        <div className="mb-6">
+          <ChartCard
+            title="Por cobrar (Fiado)"
+            subtitle={
+              data?.receivables?.count
+                ? `${data.receivables.count} venta(s) a crédito pendientes de cobro`
+                : 'Ventas a crédito aún sin cobrar'
+            }
+          >
+            {data?.receivables?.count ? (
+              <div>
+                <div className="mb-4 flex items-baseline gap-2">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    Total por cobrar
+                  </span>
+                  <span className="text-xl font-bold text-amber-600">
+                    {formatMoney(data.receivables.total)}
+                  </span>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-100 text-left text-xs uppercase tracking-wide text-gray-500">
+                        <th className="py-2 pr-4">Cliente</th>
+                        <th className="py-2 pr-4 text-right">Monto</th>
+                        <th className="py-2 pr-4">Fecha</th>
+                        {data?.hasMultipleLocals && (
+                          <th className="py-2 pr-4">Sede</th>
+                        )}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50">
+                      {data.receivables.items.map((r) => (
+                        <tr key={r.id} className="text-gray-700">
+                          <td className="py-2 pr-4">{r.customer}</td>
+                          <td className="py-2 pr-4 text-right font-semibold">
+                            {formatMoney(r.amount)}
+                          </td>
+                          <td className="whitespace-nowrap py-2 pr-4">
+                            {shortDate(r.date)}
+                          </td>
+                          {data?.hasMultipleLocals && (
+                            <td className="py-2 pr-4">{r.local}</td>
+                          )}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : (
+              <div className="py-8 text-center text-sm text-gray-400">
+                No hay ventas a crédito pendientes 🎉
+              </div>
+            )}
+          </ChartCard>
+        </div>
       </div>
     </RoleGuard>
   );
