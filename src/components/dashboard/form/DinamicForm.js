@@ -428,8 +428,7 @@ export default function DinamicForm({
 
             if (type === 'searchSelect') {
               const fieldOptions = options || dynamicOptions[name] || [];
-              const isSaleCustomer =
-                module === 'sales' && name === 'customerId';
+              const isCustomerField = name === 'customerId';
               return (
                 <div key={name} className="flex flex-col">
                   <label className="text-sm font-medium text-gray-700 mb-1">
@@ -451,7 +450,7 @@ export default function DinamicForm({
                     required={required}
                   />
 
-                  {isSaleCustomer && (
+                  {isCustomerField && (
                     <button
                       type="button"
                       onClick={() => setShowNewCustomer(true)}
@@ -467,7 +466,7 @@ export default function DinamicForm({
                     </p>
                   )}
 
-                  {isSaleCustomer && showNewCustomer && (
+                  {isCustomerField && showNewCustomer && (
                     <NewCustomerModal
                       localId={formData.localId}
                       onClose={() => setShowNewCustomer(false)}
