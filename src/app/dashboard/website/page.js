@@ -117,7 +117,6 @@ export default function WebsitePage() {
 
       setForm({
         websiteName: data.websiteName || '',
-        logo: data.logo || '',
         favicon: data.favicon || '',
         theme: data.theme || 'clasico',
         fontFamily: data.fontFamily || 'inter',
@@ -233,6 +232,10 @@ export default function WebsitePage() {
   };
 
   const colors = themeColors(form.theme);
+
+  const selectedLocal = (config?.locals || []).find(
+    (local) => String(local.id) === String(form.ecommerceLocalId)
+  );
 
   return (
     <RoleGuard allowedRoles={['SUPER_ADMIN', 'SUPER_PLATFORM_ADMIN']}>
@@ -366,10 +369,36 @@ export default function WebsitePage() {
             </Section>
 
             {/* ---------- IDENTIDAD ---------- */}
-            <Section title="Identidad">
+            <Section
+              title="Identidad"
+              description="El logo y los datos de contacto son los de tu empresa. Aquí solo ajustas cómo se ven en la tienda."
+            >
+              <div className="mb-5 flex items-center gap-3 rounded-lg bg-gray-50 p-3">
+                {config.logo ? (
+                  <Image
+                    src={config.logo}
+                    alt={config.name}
+                    width={48}
+                    height={48}
+                    className="h-12 w-12 rounded border border-gray-200 bg-white object-contain"
+                  />
+                ) : (
+                  <div className="flex h-12 w-12 items-center justify-center rounded border border-dashed border-gray-300 text-xs text-gray-400">
+                    Sin logo
+                  </div>
+                )}
+                <div className="text-sm">
+                  <p className="font-medium text-gray-800">{config.name}</p>
+                  <p className="text-xs text-gray-500">
+                    Logo y datos de la empresa. Se cambian en los datos de tu
+                    empresa, no aquí.
+                  </p>
+                </div>
+              </div>
+
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field
-                  label="Nombre de la tienda"
+                  label="Nombre visible en la tienda"
                   hint={`Si lo dejas vacío se usa "${config.name}"`}
                 >
                   <input
@@ -393,32 +422,6 @@ export default function WebsitePage() {
                       </option>
                     ))}
                   </select>
-                </Field>
-
-                <Field label="Logo">
-                  <div className="flex items-center gap-3">
-                    {form.logo && (
-                      <Image
-                        src={form.logo}
-                        alt="Logo"
-                        width={48}
-                        height={48}
-                        className="h-12 w-12 rounded border border-gray-200 object-contain"
-                      />
-                    )}
-                    <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50">
-                      <ArrowUpTrayIcon className="h-4 w-4" />
-                      {uploading === 'logo' ? 'Subiendo…' : 'Subir imagen'}
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) =>
-                          handleUpload(e.target.files?.[0], set('logo'), 'logo')
-                        }
-                      />
-                    </label>
-                  </div>
                 </Field>
 
                 <Field label="Favicon" hint="El iconito de la pestaña del navegador">
@@ -480,15 +483,23 @@ export default function WebsitePage() {
             </Section>
 
             {/* ---------- CONTACTO ---------- */}
-            <Section title="Contacto y redes">
+            <Section
+              title="Contacto y redes"
+              description="Si dejas algo vacío, la tienda usa los datos de tu empresa y de la sede."
+            >
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field
                   label="WhatsApp"
-                  hint="Sin indicativo. Si lo dejas vacío no se muestra el botón."
+                  hint={
+                    config.phone
+                      ? `Si lo dejas vacío se usa ${config.phone}`
+                      : 'Sin indicativo. Si lo dejas vacío no se muestra el botón.'
+                  }
                 >
                   <input
                     type="text"
                     value={form.whatsapp}
+                    placeholder={config.phone || ''}
                     onChange={(e) => set('whatsapp')(e.target.value)}
                     className={inputClass}
                   />
@@ -504,10 +515,11 @@ export default function WebsitePage() {
                   />
                 </Field>
 
-                <Field label="Dirección">
+                <Field label="Dirección" hint="Si la dejas vacía se usa la de la sede publicada">
                   <input
                     type="text"
                     value={form.address}
+                    placeholder={selectedLocal?.address || ''}
                     onChange={(e) => set('address')(e.target.value)}
                     className={inputClass}
                   />
