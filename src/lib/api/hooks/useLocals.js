@@ -7,6 +7,7 @@ import {
   createLocal,
   updateLocal,
   deleteLocal,
+  setLocalStatus,
   getPublicLocals,
 } from '../routes/locals/index';
 
@@ -35,6 +36,10 @@ export default function useLocals() {
     [wrap]
   );
   const deleteLocalFn = useCallback((id) => wrap(deleteLocal, id), [wrap]);
+  const setLocalStatusFn = useCallback(
+    (id, status) => wrap(setLocalStatus, id, status),
+    [wrap]
+  );
   const getPublicLocalsFn = useCallback(
     (params) => wrap(getPublicLocals, params),
     [wrap]
@@ -46,6 +51,7 @@ export default function useLocals() {
     createLocal: createLocalFn,
     updateLocal: updateLocalFn,
     deleteLocal: deleteLocalFn,
+    setLocalStatus: setLocalStatusFn,
     getPublicLocals: getPublicLocalsFn,
     loading,
     error,

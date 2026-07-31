@@ -56,6 +56,14 @@ export async function deleteLocal(id) {
   return apiFetch(`/locals/${id}`, { method: 'DELETE' });
 }
 
+// Activar / desactivar un local
+export async function setLocalStatus(id, status) {
+  return apiFetch(`/locals/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  });
+}
+
 export async function getPublicLocals(params = {}) {
   const query = new URLSearchParams();
 

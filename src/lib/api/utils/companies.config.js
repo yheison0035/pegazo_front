@@ -5,6 +5,8 @@ export const getEmptyCompany = () => ({
   phone: '',
   manager: '',
   status: '',
+  plan: '',
+  paidUntil: '',
 });
 
 export const getFormFieldsCompanies = () => [
@@ -30,6 +32,18 @@ export const getFormFieldsCompanies = () => [
       { id: 'INACTIVO', name: 'INACTIVO' },
     ],
   },
+  {
+    name: 'plan',
+    label: 'Plan',
+    type: 'text',
+    required: false,
+  },
+  {
+    name: 'paidUntil',
+    label: 'Pago al día hasta (vencimiento)',
+    type: 'date',
+    required: false,
+  },
 ];
 
 export const getHeaderTableCompanies = () => [
@@ -39,6 +53,7 @@ export const getHeaderTableCompanies = () => [
   { name: 'manager', title: 'Encargado', show: true, showInput: true },
   { name: 'phone', title: 'Teléfono', show: true, showInput: true },
   { name: 'status', title: 'Estado', show: true, showInput: true },
+  { name: 'paidUntil', title: 'Pago hasta', show: true, showInput: false },
 ];
 
 export const viewModalConfig = {
@@ -57,6 +72,8 @@ export const viewModalConfig = {
       fields: [
         { name: 'manager', label: 'Encargado' },
         { name: 'status', label: 'Estado', type: 'status' },
+        { name: 'plan', label: 'Plan' },
+        { name: 'paidUntil', label: 'Pago al día hasta', type: 'date' },
       ],
     },
   ],

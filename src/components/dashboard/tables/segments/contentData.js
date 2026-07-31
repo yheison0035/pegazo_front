@@ -328,6 +328,22 @@ export default function ContentData({
                 <td className="px-5 py-4 whitespace-nowrap">
                   {info.status || '---'}
                 </td>
+                <td className="px-5 py-4 whitespace-nowrap">
+                  {info.paidUntil ? (
+                    <span
+                      className={
+                        new Date(info.paidUntil) < new Date()
+                          ? 'font-semibold text-red-600'
+                          : 'text-gray-700'
+                      }
+                    >
+                      {formatDateOnly(info.paidUntil)}
+                      {new Date(info.paidUntil) < new Date() && ' (vencido)'}
+                    </span>
+                  ) : (
+                    <span className="text-gray-400">—</span>
+                  )}
+                </td>
               </>
             )}
 

@@ -38,6 +38,11 @@ export async function deleteCompany(id) {
   return apiFetch(`/companies/${id}`, { method: 'DELETE' });
 }
 
+// Resumen global de la plataforma
+export async function getPlatformOverview() {
+  return apiFetch('/companies/platform/overview');
+}
+
 // Activar / desactivar empresa (suspensión por impago)
 export async function setCompanyStatus(id, status) {
   return apiFetch(`/companies/${id}/status`, {

@@ -21,6 +21,23 @@ export async function getUserById(id) {
   return apiFetch(`/users/${id}`);
 }
 
+// Listado global de usuarios (todas las empresas) — plataforma
+export async function getGlobalUsers(params = {}) {
+  const { page = 1, limit = 20, ...filters } = params;
+
+  const query = new URLSearchParams();
+  query.set('page', String(page));
+  query.set('limit', String(limit));
+
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== '' && value !== null && value !== undefined) {
+      query.set(key, String(value));
+    }
+  });
+
+  return apiFetch(`/users/platform/all?${query.toString()}`);
+}
+
 export async function createUser(dto) {
   const body = {
     ...dto,
