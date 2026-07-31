@@ -22,7 +22,6 @@ export default function AddSales() {
 
     try {
       const payload = {
-        invoiceType: formData.invoiceType || 'NORMAL',
         paymentMethod: formData.paymentMethod,
         localId: formData.localId,
         customerId: formData.customerId,

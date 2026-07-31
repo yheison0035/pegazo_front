@@ -12,32 +12,6 @@ export function printSaleInvoice(sale, usuario) {
     verifyUrl
   )}`;
 
-  // Modo de factura: electrónica desglosa IVA y usa datos/QR de la DIAN.
-  const isElectronic = sale?.invoiceType === 'ELECTRONICA';
-  const subtotalBase = Number(sale?.subtotal ?? sale?.totalAmount) || 0;
-  const taxTotal = Number(sale?.taxTotal ?? 0) || 0;
-  const docTitle = isElectronic
-    ? 'Factura electrónica de venta'
-    : 'Factura de venta';
-  const regimen = isElectronic ? 'Responsable de IVA' : 'No responsable de IVA';
-  // Si la DIAN ya devolvió su QR (fase de emisión), se usa ese; si no, el de
-  // verificación interna.
-  const qrSrc = isElectronic && sale?.qrUrl ? sale.qrUrl : qrUrl;
-
-  const totalsHTML = isElectronic
-    ? `<div class="right">Subtotal: ${formatCOP(subtotalBase)}</div>
-       <div class="right">IVA: ${formatCOP(taxTotal)}</div>
-       <div class="right bold">Total: ${formatCOP(sale?.totalAmount)}</div>`
-    : `<div class="right bold">Total: ${formatCOP(sale?.totalAmount)}</div>`;
-
-  // CUFE (solo cuando la factura electrónica fue emitida/validada por la DIAN).
-  const cufeHTML =
-    isElectronic && sale?.cufe
-      ? `<div style="font-size:9px; word-break:break-all; text-align:center; margin-top:4px;">
-           <span class="bold">CUFE:</span> ${sale.cufe}
-         </div>`
-      : '';
-
   const itemsHTML = sale.items
     .map(
       (item, index) => `
@@ -158,7 +132,7 @@ export function printSaleInvoice(sale, usuario) {
       <div class="center">${sale?.local?.address || ''}</div>
       <div class="center">+57 ${usuario?.company?.phone || ''}</div>
       <div class="center">${usuario?.company?.email || ''}</div>
-      <div class="center">Régimen: ${regimen}</div>
+      <div class="center">Régimen: No responsable de IVA</div>
 
       <hr />
 
@@ -179,9 +153,8 @@ export function printSaleInvoice(sale, usuario) {
       <hr />
 
       <!-- FACTURA -->
-      <div class="section-title">${docTitle}</div>
+      <div class="section-title">Factura de venta</div>
       <div class="center bold">N° ${sale?.code || '000000'}</div>
-      ${cufeHTML}
 
       <hr />
 
@@ -215,7 +188,8 @@ export function printSaleInvoice(sale, usuario) {
 
       <hr />
 
-      ${totalsHTML}
+      <div class="right bold">Subtotal: ${formatCOP(sale?.totalAmount)}</div>
+      <div class="right bold">Total: ${formatCOP(sale?.totalAmount)}</div>
 
       <hr />
 
@@ -243,9 +217,9 @@ export function printSaleInvoice(sale, usuario) {
       <!-- QR -->
       <div class="center bold">Verifique su factura</div>
       <div class="qr">
-        <img
-          src="${qrSrc}"
-          alt="QR de verificación"
+        <img 
+          src="${qrUrl}" 
+          alt="QR de verificación" 
           referrerpolicy="no-referrer"
         />
       </div>

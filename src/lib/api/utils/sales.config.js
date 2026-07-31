@@ -1,8 +1,5 @@
-import { EINVOICE_ENABLED } from '@/config/features';
-
 export const getEmptySale = () => ({
   items: [],
-  invoiceType: 'NORMAL',
   paymentMethod: '',
   localId: '',
   userId: '',
@@ -23,23 +20,6 @@ export const getFormFieldsSales = () => [
     source: 'products',
     disabled: false,
   },
-  // Selector Normal/Electrónica: oculto hasta que la factura electrónica esté
-  // conectada a la DIAN (flag EINVOICE_ENABLED).
-  ...(EINVOICE_ENABLED
-    ? [
-        {
-          name: 'invoiceType',
-          label: 'Tipo de factura',
-          type: 'select',
-          required: true,
-          options: [
-            { id: 'NORMAL', name: 'Factura normal' },
-            { id: 'ELECTRONICA', name: 'Factura electrónica' },
-          ],
-          disabled: false,
-        },
-      ]
-    : []),
   {
     name: 'paymentMethod',
     label: 'Método de Pago',

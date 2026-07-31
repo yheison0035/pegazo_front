@@ -43,19 +43,6 @@ export async function getPlatformOverview() {
   return apiFetch('/companies/platform/overview');
 }
 
-// Configuración fiscal de la empresa (la propia, o de una empresa si es plataforma)
-export async function getCompanyConfig(companyId) {
-  const q = companyId ? `?companyId=${companyId}` : '';
-  return apiFetch(`/companies/config${q}`);
-}
-
-export async function updateCompanyConfig(dto) {
-  return apiFetch('/companies/config', {
-    method: 'PUT',
-    body: JSON.stringify(dto),
-  });
-}
-
 // Activar / desactivar empresa (suspensión por impago)
 export async function setCompanyStatus(id, status) {
   return apiFetch(`/companies/${id}/status`, {
