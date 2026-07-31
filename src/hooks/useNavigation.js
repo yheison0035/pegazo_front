@@ -19,8 +19,12 @@ export default function useNavigation() {
 
   const businessType = usuario.company?.type || 'COMERCIO';
 
-  // módulos permitidos por tipo de negocio
-  const modules = BUSINESS_TYPES[businessType] || BUSINESS_TYPES.COMERCIO;
+  // módulos permitidos por tipo de negocio (+ 'settings' siempre disponible,
+  // la Configuración es universal; el filtro por rol decide quién la ve).
+  const modules = [
+    ...(BUSINESS_TYPES[businessType] || BUSINESS_TYPES.COMERCIO),
+    'settings',
+  ];
 
   // filtrar por módulos + roles dentro de secciones
   const filteredSections = NAVIGATION.map((section) => {

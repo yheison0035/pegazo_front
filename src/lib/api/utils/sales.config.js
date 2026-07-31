@@ -1,5 +1,6 @@
 export const getEmptySale = () => ({
   items: [],
+  invoiceType: 'NORMAL',
   paymentMethod: '',
   localId: '',
   userId: '',
@@ -18,6 +19,17 @@ export const getFormFieldsSales = () => [
     type: 'productSelect',
     required: true,
     source: 'products',
+    disabled: false,
+  },
+  {
+    name: 'invoiceType',
+    label: 'Tipo de factura',
+    type: 'select',
+    required: true,
+    options: [
+      { id: 'NORMAL', name: 'Factura normal' },
+      { id: 'ELECTRONICA', name: 'Factura electrónica' },
+    ],
     disabled: false,
   },
   {
