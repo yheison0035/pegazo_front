@@ -43,16 +43,28 @@ export default function SideNavigation() {
         <div className="flex items-center justify-between px-6 py-5 border-b border-orange-500/10">
           <div className="flex items-center gap-3">
             <img
-              src={usuario?.company?.logo || '/images/no-image.png'}
-              alt="Company"
-              className="w-12 h-12 rounded-xl object-cover border border-orange-400/20 shadow"
+              src={
+                usuario?.role === 'SUPER_PLATFORM_ADMIN'
+                  ? '/images/logo_pegazo_icon.png'
+                  : usuario?.company?.logo || '/images/no-image.png'
+              }
+              alt={
+                usuario?.role === 'SUPER_PLATFORM_ADMIN' ? 'Pegazo' : 'Company'
+              }
+              className="w-12 h-12 rounded-xl object-contain border border-orange-400/20 shadow"
             />
 
             <div className="flex flex-col leading-tight">
               <span className="text-sm font-semibold tracking-wide">
-                {usuario?.company?.name || 'Pegazo'}
+                {usuario?.role === 'SUPER_PLATFORM_ADMIN'
+                  ? 'Pegazo'
+                  : usuario?.company?.name || 'Pegazo'}
               </span>
-              <span className="text-[11px] text-orange-400/60">Workspace</span>
+              <span className="text-[11px] text-orange-400/60">
+                {usuario?.role === 'SUPER_PLATFORM_ADMIN'
+                  ? 'Plataforma'
+                  : 'Workspace'}
+              </span>
             </div>
           </div>
 
