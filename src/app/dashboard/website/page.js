@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import Image from 'next/image';
 import {
   PlusIcon,
   TrashIcon,
@@ -151,6 +150,15 @@ export default function WebsitePage() {
 
   const set = (key) => (value) => setForm((prev) => ({ ...prev, [key]: value }));
 
+  /**
+   * Al elegir un tema se adoptan sus colores. Si no se hiciera, los colores
+   * que la empresa ya había escogido seguirían mandando y parecería que el
+   * tema no cambia nada. Después puede volver a ajustar cada color.
+   */
+  const applyTheme = (themeId) => {
+    setForm((prev) => ({ ...prev, theme: themeId, ...themeColors(themeId) }));
+  };
+
   const handleUpload = async (file, onDone, key) => {
     if (!file) return;
 
@@ -294,7 +302,7 @@ export default function WebsitePage() {
                     <button
                       key={theme.id}
                       type="button"
-                      onClick={() => set('theme')(theme.id)}
+                      onClick={() => applyTheme(theme.id)}
                       className={`rounded-lg border p-4 text-left transition ${
                         selected
                           ? 'border-orange-500 ring-2 ring-orange-200'
@@ -375,11 +383,12 @@ export default function WebsitePage() {
             >
               <div className="mb-5 flex items-center gap-3 rounded-lg bg-gray-50 p-3">
                 {config.logo ? (
-                  <Image
+                  // Imagen normal: el logo puede estar en cualquier dominio y
+                  // next/image reventaría la pantalla si no está permitido.
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
                     src={config.logo}
-                    alt={config.name}
-                    width={48}
-                    height={48}
+                    alt={config.name || 'Logo'}
                     className="h-12 w-12 rounded border border-gray-200 bg-white object-contain"
                   />
                 ) : (
@@ -427,11 +436,10 @@ export default function WebsitePage() {
                 <Field label="Favicon" hint="El iconito de la pestaña del navegador">
                   <div className="flex items-center gap-3">
                     {form.favicon && (
-                      <Image
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
                         src={form.favicon}
                         alt="Favicon"
-                        width={32}
-                        height={32}
                         className="h-8 w-8 rounded border border-gray-200 object-contain"
                       />
                     )}

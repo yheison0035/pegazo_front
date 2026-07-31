@@ -8,6 +8,8 @@ export const getEmptyCompany = () => ({
   manager: '',
   status: '',
   plan: '',
+  domain: '',
+  websiteEnabled: '',
   paidUntil: '',
   startDate: '',
   adminName: '',
@@ -44,6 +46,22 @@ export const getFormFieldsCompanies = (includeAdmin = false) => [
     type: 'select',
     required: false,
     options: PLAN_OPTIONS,
+  },
+  {
+    name: 'domain',
+    label: 'Dominio de la tienda online (ej: mitienda.com)',
+    type: 'text',
+    required: false,
+  },
+  {
+    name: 'websiteEnabled',
+    label: 'Tienda online publicada',
+    type: 'select',
+    required: false,
+    options: [
+      { value: 'true', label: 'Sí, publicada' },
+      { value: 'false', label: 'No publicada' },
+    ],
   },
   {
     name: 'startDate',
@@ -97,6 +115,8 @@ export const getHeaderTableCompanies = () => [
   },
   { name: 'phone', title: 'Teléfono', show: true, showInput: true },
   { name: 'status', title: 'Estado', show: true, showInput: true },
+  { name: 'plan', title: 'Plan', show: true, showInput: false },
+  { name: 'domain', title: 'Dominio', show: true, showInput: true },
   { name: 'startDate', title: 'Cliente desde', show: true, showInput: false },
   { name: 'paidUntil', title: 'Pago hasta', show: true, showInput: false },
 ];
@@ -120,6 +140,7 @@ export const viewModalConfig = {
         { name: 'manager', label: 'Encargado' },
         { name: 'status', label: 'Estado', type: 'status' },
         { name: 'plan', label: 'Plan' },
+        { name: 'domain', label: 'Dominio de la tienda' },
         { name: 'startDate', label: 'Cliente desde', type: 'date' },
         { name: 'createdAt', label: 'Registrada el', type: 'date' },
         { name: 'paidUntil', label: 'Pago al día hasta', type: 'date' },

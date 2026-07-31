@@ -26,11 +26,16 @@ export const WEBSITE_THEMES = [
 ];
 
 export const WEBSITE_FONTS = [
-  { id: 'inter', name: 'Inter', sample: 'Aa · moderna y neutra' },
-  { id: 'poppins', name: 'Poppins', sample: 'Aa · redonda y amable' },
-  { id: 'montserrat', name: 'Montserrat', sample: 'Aa · geométrica' },
-  { id: 'roboto', name: 'Roboto', sample: 'Aa · clásica de pantalla' },
-  { id: 'playfair', name: 'Playfair Display', sample: 'Aa · elegante' },
+  { id: 'inter', name: 'Inter', sample: 'moderna y neutra' },
+  { id: 'poppins', name: 'Poppins', sample: 'redonda y amable' },
+  { id: 'montserrat', name: 'Montserrat', sample: 'geométrica' },
+  { id: 'roboto', name: 'Roboto', sample: 'clásica de pantalla' },
+  { id: 'open-sans', name: 'Open Sans', sample: 'muy legible' },
+  { id: 'lato', name: 'Lato', sample: 'sobria y cálida' },
+  { id: 'nunito', name: 'Nunito', sample: 'suave y cercana' },
+  { id: 'raleway', name: 'Raleway', sample: 'fina y elegante' },
+  { id: 'playfair', name: 'Playfair Display', sample: 'con serifa, de lujo' },
+  { id: 'oswald', name: 'Oswald', sample: 'estrecha y con carácter' },
 ];
 
 /** Colores del tema, para precargar los selectores cuando no hay propios. */

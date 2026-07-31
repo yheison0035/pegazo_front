@@ -29,24 +29,68 @@ export async function uploadCompanyLogo(file) {
   return apiFetch('/companies/logo-upload', { method: 'POST', body: fd });
 }
 
+// Campos que el backend acepta. Se manda solo esto: la empresa que llega del
+// API trae todas sus columnas (theme, favicon, slug…) y el DTO rechaza
+// cualquier campo que no conozca, así que enviar el objeto entero fallaba.
+const EDITABLE_FIELDS = [
+  'name',
+  'logo',
+  'phone',
+  'manager',
+  'type',
+  'status',
+  'plan',
+  'paidUntil',
+  'startDate',
+  'domain',
+  'websiteEnabled',
+];
+
+const ADMIN_FIELDS = ['adminName', 'adminEmail', 'adminPassword'];
+
+function buildPayload(dto, fields) {
+  const payload = {};
+
+  fields.forEach((field) => {
+    const value = dto[field];
+
+    if (value === undefined || value === null || value === '') return;
+
+    // El formulario maneja la publicación como texto ('true' / 'false').
+    if (field === 'websiteEnabled') {
+      payload[field] = value === true || value === 'true';
+      return;
+    }
+
+    payload[field] = value;
+  });
+
+  return payload;
+}
+
 export async function createCompany(dto) {
-  return apiFetch('/companies', { method: 'POST', body: JSON.stringify(dto) });
+  return apiFetch('/companies', {
+    method: 'POST',
+    body: JSON.stringify(buildPayload(dto, [...EDITABLE_FIELDS, ...ADMIN_FIELDS])),
+  });
 }
 
 export async function updateCompany(id, dto) {
-  const {
-    id: _id,
-    createdAt,
-    updatedAt,
-    users,
-    adminEmail,
-    adminName,
-    ...cleanDto
-  } = dto;
+  const payload = buildPayload(dto, EDITABLE_FIELDS);
+
+  // El dominio sí debe poder borrarse: se manda vacío a propósito.
+  if (dto.domain === '' || dto.domain === null) {
+    payload.domain = '';
+  }
+
+  // Y la publicación puede apagarse explícitamente.
+  if (dto.websiteEnabled === false || dto.websiteEnabled === 'false') {
+    payload.websiteEnabled = false;
+  }
 
   return apiFetch(`/companies/${id}`, {
     method: 'PUT',
-    body: JSON.stringify(cleanDto),
+    body: JSON.stringify(payload),
   });
 }
 
