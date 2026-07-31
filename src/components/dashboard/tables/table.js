@@ -17,6 +17,7 @@ const Table = ({
   setSelected,
   setSelectedVariants,
   handleDeleteClick,
+  handleToggleStatus,
   setPrinterInvoice,
   meta,
   limit,
@@ -63,6 +64,7 @@ const Table = ({
                 setSelected={setSelected}
                 setSelectedVariants={setSelectedVariants}
                 handleDeleteClick={handleDeleteClick}
+                handleToggleStatus={handleToggleStatus}
                 setPrinterInvoice={setPrinterInvoice}
               />
             )}

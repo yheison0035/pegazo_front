@@ -21,6 +21,7 @@ export default function ContentData({
   setSelected,
   setSelectedVariants,
   handleDeleteClick,
+  handleToggleStatus,
   setPrinterInvoice,
   setShowModalChangeAdvisor,
 }) {
@@ -53,6 +54,7 @@ export default function ContentData({
                 handleDelete={() =>
                   handleDeleteClick(info.id, info.name || info.code)
                 }
+                handleToggle={() => handleToggleStatus?.(info)}
                 setShowModalChangeAdvisor={setShowModalChangeAdvisor}
               />
             </td>

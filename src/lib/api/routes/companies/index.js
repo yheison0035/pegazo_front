@@ -37,3 +37,11 @@ export async function updateCompany(id, dto) {
 export async function deleteCompany(id) {
   return apiFetch(`/companies/${id}`, { method: 'DELETE' });
 }
+
+// Activar / desactivar empresa (suspensión por impago)
+export async function setCompanyStatus(id, status) {
+  return apiFetch(`/companies/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  });
+}

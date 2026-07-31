@@ -22,7 +22,8 @@ import useCompanies from '@/lib/api/hooks/useCompanies';
 export default function Companies() {
   const auth = useAuth();
   const usuario = auth?.usuario;
-  const { getCompanies, deleteCompany, loading } = useCompanies();
+  const { getCompanies, deleteCompany, setCompanyStatus, loading } =
+    useCompanies();
 
   const [companies, setCompanies] = useState([]);
   const [meta, setMeta] = useState(null);
@@ -69,6 +70,30 @@ export default function Companies() {
     fetchCompanies();
   };
 
+  // Activar / desactivar empresa (suspensión por impago). Es reversible, pero
+  // desactivar corta el acceso a todo el negocio, así que se confirma.
+  const handleToggleStatus = async (company) => {
+    const next = company.status === 'ACTIVO' ? 'INACTIVO' : 'ACTIVO';
+
+    const ok = window.confirm(
+      next === 'INACTIVO'
+        ? `¿Desactivar "${company.name}"? Se cortará el acceso a todos sus usuarios (útil cuando no ha pagado).`
+        : `¿Reactivar "${company.name}"? Sus usuarios podrán volver a ingresar.`
+    );
+    if (!ok) return;
+
+    try {
+      await setCompanyStatus(company.id, next);
+      setAlert({
+        type: 'success',
+        message: next === 'ACTIVO' ? 'Empresa activada' : 'Empresa desactivada',
+      });
+      fetchCompanies();
+    } catch (err) {
+      setAlert({ type: 'error', message: err.message || 'No se pudo cambiar el estado' });
+    }
+  };
+
   return (
     <RoleGuard allowedRoles={['SUPER_PLATFORM_ADMIN']}>
       <div className="w-full p-4">
@@ -104,6 +129,7 @@ export default function Companies() {
             }}
             setSelected={setSelectedCompany}
             handleDeleteClick={handleDeleteClick}
+            handleToggleStatus={handleToggleStatus}
           />
 
           {meta && (

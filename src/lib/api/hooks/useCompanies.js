@@ -7,6 +7,7 @@ import {
   getCompanyById,
   updateCompany,
   deleteCompany,
+  setCompanyStatus,
 } from '../routes/companies/index';
 
 export default function useCompanies() {
@@ -43,6 +44,10 @@ export default function useCompanies() {
     [wrap]
   );
   const deleteCompanyFn = useCallback((id) => wrap(deleteCompany, id), [wrap]);
+  const setCompanyStatusFn = useCallback(
+    (id, status) => wrap(setCompanyStatus, id, status),
+    [wrap]
+  );
 
   return {
     getCompanies: getCompaniesFn,
@@ -50,6 +55,7 @@ export default function useCompanies() {
     createCompany: createCompanyFn,
     updateCompany: updateCompanyFn,
     deleteCompany: deleteCompanyFn,
+    setCompanyStatus: setCompanyStatusFn,
     loading,
     error,
   };
