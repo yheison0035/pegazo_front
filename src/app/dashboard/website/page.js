@@ -336,7 +336,7 @@ export default function WebsitePage() {
             >
               <div className="grid gap-4 sm:grid-cols-2">
                 <ColorField
-                  label="Color principal"
+                  label="Color principal (menú y pie de página)"
                   value={form.primaryColor}
                   fallback={colors.primaryColor}
                   onChange={set('primaryColor')}
