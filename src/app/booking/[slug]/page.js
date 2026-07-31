@@ -6,7 +6,7 @@ const LOGO =
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  metadataBase: new URL('https://admin.europeatvstore.com'),
+  metadataBase: new URL('https://pegazo.co'),
 
   title: {
     default: 'RAGNOR BARBER',
@@ -44,7 +44,7 @@ export const metadata = {
     title: 'RAGNOR BARBER',
     description:
       'Agenda tu cita fácil y rápido en RAGNOR BARBER. Servicio premium.',
-    url: 'https://admin.europeatvstore.com/booking/ragnorbarber',
+    url: 'https://pegazo.co/booking/ragnorbarber',
     siteName: 'RAGNOR BARBER',
     images: [
       {

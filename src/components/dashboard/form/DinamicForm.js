@@ -629,7 +629,7 @@ export default function DinamicForm({
 
       <div className="flex justify-end mt-6 gap-3">
         {module !== 'sales' && (
-          <BtnReturn route={`/CRM/dashboard/${module}`} disabled={loading} />
+          <BtnReturn route={`/dashboard/${module}`} disabled={loading} />
         )}
         {mode === 'new' && handleReset && (
           <button

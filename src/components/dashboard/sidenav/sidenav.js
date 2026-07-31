@@ -71,7 +71,7 @@ export default function SideNavigation() {
             <div className="flex flex-col">
               <span className="text-sm font-medium">{usuario?.name}</span>
               <Link
-                href={'/CRM/dashboard/users/edit/' + usuario?.id}
+                href={'/dashboard/users/edit/' + usuario?.id}
                 className="text-xs text-cyan-400 hover:text-cyan-300"
               >
                 Editar perfil

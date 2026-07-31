@@ -138,7 +138,7 @@ export default function ForgotPasswordPage() {
             <p className="text-sm text-gray-600">
               ¡Listo! Tu contraseña fue actualizada. Ya puedes iniciar sesión.
             </p>
-            <a href="/CRM" className={btnClass + ' inline-block text-center'}>
+            <a href="/" className={btnClass + ' inline-block text-center'}>
               Iniciar sesión
             </a>
           </div>
@@ -149,7 +149,7 @@ export default function ForgotPasswordPage() {
               enlace para restablecer tu contraseña. Revisa tu bandeja (y spam).
               Vence en 30 minutos.
             </p>
-            <a href="/CRM" className="text-sm text-blue-800 hover:underline">
+            <a href="/" className="text-sm text-blue-800 hover:underline">
               Volver a iniciar sesión
             </a>
           </div>
@@ -269,7 +269,7 @@ export default function ForgotPasswordPage() {
 
         {!done && !emailSent && (
           <div className="mt-6 text-center">
-            <a href="/CRM" className="text-xs text-gray-500 hover:underline">
+            <a href="/" className="text-xs text-gray-500 hover:underline">
               Volver a iniciar sesión
             </a>
           </div>

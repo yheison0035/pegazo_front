@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 export default function RoleGuard({
   allowedRoles = [],
   children,
-  redirectTo = '/CRM/dashboard',
+  redirectTo = '/dashboard',
 }) {
   const { usuario, loading } = useAuth();
   const router = useRouter();
@@ -15,7 +15,7 @@ export default function RoleGuard({
   useEffect(() => {
     if (!loading) {
       if (!usuario) {
-        router.push('/CRM');
+        router.push('/');
       } else {
         const validAllowedRoles = Array.isArray(allowedRoles)
           ? allowedRoles

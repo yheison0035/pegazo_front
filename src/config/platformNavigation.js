@@ -11,22 +11,22 @@ export const PLATFORM_NAVIGATION = [
     items: [
       {
         name: 'Empresas',
-        href: '/CRM/platform/companies',
+        href: '/platform/companies',
         icon: BuildingOfficeIcon,
       },
       {
         name: 'Usuarios Globales',
-        href: '/CRM/platform/users',
+        href: '/platform/users',
         icon: UsersIcon,
       },
       {
         name: 'Estadísticas Globales',
-        href: '/CRM/platform/statistics',
+        href: '/platform/statistics',
         icon: ChartBarIcon,
       },
       {
         name: 'Configuración',
-        href: '/CRM/platform/settings',
+        href: '/platform/settings',
         icon: Cog6ToothIcon,
       },
     ],

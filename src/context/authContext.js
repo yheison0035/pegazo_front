@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     apiLogout();
     setUsuario(null);
-    router.push('/CRM');
+    router.push('/');
   };
 
   return (

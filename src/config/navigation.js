@@ -22,13 +22,13 @@ export const NAVIGATION = [
     items: [
       {
         name: 'Dashboard',
-        href: '/CRM/dashboard',
+        href: '/dashboard',
         icon: HomeIcon,
         roles: ['SUPER_ADMIN', 'ADMIN'],
       },
       {
         name: 'Locales',
-        href: '/CRM/dashboard/locals',
+        href: '/dashboard/locals',
         icon: BuildingOffice2Icon,
         roles: ['SUPER_ADMIN'],
       },
@@ -40,25 +40,25 @@ export const NAVIGATION = [
     items: [
       {
         name: 'Categorías',
-        href: '/CRM/dashboard/categories',
+        href: '/dashboard/categories',
         icon: TagIcon,
         roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA'],
       },
       {
         name: 'Marcas',
-        href: '/CRM/dashboard/brands',
+        href: '/dashboard/brands',
         icon: SparklesIcon,
         roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA'],
       },
       {
         name: 'Proveedores',
-        href: '/CRM/dashboard/providers',
+        href: '/dashboard/providers',
         icon: TruckIcon,
         roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA'],
       },
       {
         name: 'Inventario',
-        href: '/CRM/dashboard/inventory',
+        href: '/dashboard/inventory',
         icon: ArchiveBoxIcon,
         roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA'],
       },
@@ -70,19 +70,19 @@ export const NAVIGATION = [
     items: [
       {
         name: 'Realizar Factura',
-        href: '/CRM/dashboard/sales',
+        href: '/dashboard/sales',
         icon: BanknotesIcon,
         roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA'],
       },
       {
         name: 'Pedidos',
-        href: '/CRM/dashboard/orders',
+        href: '/dashboard/orders',
         icon: ShoppingCartIcon,
         roles: ['SUPER_ADMIN'],
       },
       {
         name: 'Ventas Realizadas',
-        href: '/CRM/dashboard/delivered_sales',
+        href: '/dashboard/delivered_sales',
         icon: ClipboardDocumentCheckIcon,
         roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA'],
       },
@@ -94,7 +94,7 @@ export const NAVIGATION = [
     items: [
       {
         name: 'Clientes',
-        href: '/CRM/dashboard/customers',
+        href: '/dashboard/customers',
         icon: UsersIcon,
         roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA'],
       },
@@ -106,25 +106,25 @@ export const NAVIGATION = [
     items: [
       {
         name: 'Citas',
-        href: '/CRM/dashboard/appointments',
+        href: '/dashboard/appointments',
         icon: CalendarDaysIcon,
         roles: ['SUPER_ADMIN', 'ADMIN', 'BARBERO', 'RECEPCIONISTA'],
       },
       {
         name: 'Servicios',
-        href: '/CRM/dashboard/services',
+        href: '/dashboard/services',
         icon: WrenchScrewdriverIcon,
         roles: ['SUPER_ADMIN', 'ADMIN', 'RECEPCIONISTA'],
       },
       {
         name: 'Gastos',
-        href: '/CRM/dashboard/expenses',
+        href: '/dashboard/expenses',
         icon: ChartBarSquareIcon,
         roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA'],
       },
       {
         name: 'Estadísticas',
-        href: '/CRM/dashboard/statistics',
+        href: '/dashboard/statistics',
         icon: ChartBarSquareIcon,
         roles: ['SUPER_ADMIN'],
       },
@@ -136,13 +136,13 @@ export const NAVIGATION = [
     items: [
       {
         name: 'Usuarios / Roles',
-        href: '/CRM/dashboard/users',
+        href: '/dashboard/users',
         icon: UserGroupIcon,
         roles: ['SUPER_ADMIN'],
       },
       {
         name: 'Configuración',
-        href: '/CRM/dashboard/settings',
+        href: '/dashboard/settings',
         icon: Cog6ToothIcon,
         roles: ['SUPER_ADMIN'],
       },

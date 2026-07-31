@@ -59,7 +59,7 @@ export default function ResetPasswordPage() {
               ¡Listo! Tu contraseña fue actualizada. Ya puedes iniciar sesión.
             </p>
             <a
-              href="/CRM"
+              href="/"
               className="inline-block rounded-lg bg-blue-900 px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
             >
               Iniciar sesión
@@ -110,7 +110,7 @@ export default function ResetPasswordPage() {
               </button>
 
               <div className="text-center">
-                <a href="/CRM" className="text-xs text-gray-500 hover:underline">
+                <a href="/" className="text-xs text-gray-500 hover:underline">
                   Volver a iniciar sesión
                 </a>
               </div>
