@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import useCustomers from '@/lib/api/hooks/useCustomers';
 import { validateField } from '@/lib/api/utils/validators';
+import { lookupCustomerByDocument } from '@/lib/api/routes/customers';
 
 const FIELDS = [
   { name: 'name', label: 'Nombre completo', type: 'text', required: true },
@@ -14,19 +15,53 @@ const FIELDS = [
 
 export default function NewCustomerModal({ localId, onClose, onCreated }) {
   const { createCustomer, loading } = useCustomers();
-  const [data, setData] = useState({ name: '', email: '', phone: '' });
+  const [data, setData] = useState({
+    document: '',
+    name: '',
+    email: '',
+    phone: '',
+  });
   const [errors, setErrors] = useState({});
   const [apiError, setApiError] = useState('');
+  const [existing, setExisting] = useState(null);
+  const [lookingUp, setLookingUp] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     const finalValue = name === 'name' ? value.toUpperCase() : value;
     setData((prev) => ({ ...prev, [name]: finalValue }));
+    if (name === 'document') setExisting(null);
     const field = FIELDS.find((f) => f.name === name);
     setErrors((prev) => ({
       ...prev,
       [name]: field ? validateField(field, finalValue) : null,
     }));
+  };
+
+  // Al salir del campo documento: si ese cliente ya existe en la empresa, se
+  // trae y se autocompleta (evita duplicados y datos repetidos).
+  const handleDocumentBlur = async () => {
+    const doc = (data.document || '').trim();
+    if (!doc) return;
+    setLookingUp(true);
+    try {
+      const res = await lookupCustomerByDocument(doc);
+      const found = res?.data;
+      if (found) {
+        setExisting(found);
+        setData((prev) => ({
+          ...prev,
+          name: found.name || '',
+          email: found.email || '',
+          phone: found.phone || '',
+        }));
+        setErrors({});
+      }
+    } catch {
+      // silencioso: si falla el lookup, se sigue creando normal
+    } finally {
+      setLookingUp(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -35,6 +70,12 @@ export default function NewCustomerModal({ localId, onClose, onCreated }) {
     // formulario de la factura y dispare su validación.
     e.stopPropagation();
     setApiError('');
+
+    // Si el documento ya corresponde a un cliente existente, se usa ese.
+    if (existing) {
+      onCreated(existing);
+      return;
+    }
 
     const nextErrors = {};
     for (const field of FIELDS) {
@@ -72,6 +113,30 @@ export default function NewCustomerModal({ localId, onClose, onCreated }) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 px-6 py-5">
+          {/* Documento con autocompletado */}
+          <div className="flex flex-col">
+            <label className="mb-1 text-sm font-medium text-gray-700">
+              Documento / NIT
+            </label>
+            <input
+              type="text"
+              name="document"
+              value={data.document}
+              onChange={handleChange}
+              onBlur={handleDocumentBlur}
+              placeholder="Escribe el documento para buscar..."
+              className="w-full rounded-xl border border-gray-200 px-4 py-2 text-sm shadow-sm transition focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            />
+            {lookingUp && (
+              <p className="mt-1 text-xs text-gray-400">Buscando...</p>
+            )}
+            {existing && (
+              <p className="mt-1 text-xs font-medium text-emerald-600">
+                Cliente existente encontrado — se usarán sus datos.
+              </p>
+            )}
+          </div>
+
           {FIELDS.map((field) => (
             <div key={field.name} className="flex flex-col">
               <label className="mb-1 text-sm font-medium text-gray-700">

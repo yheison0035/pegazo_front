@@ -1,6 +1,23 @@
 // TIMEZONE GLOBAL (Colombia)
 const TIMEZONE = 'America/Bogota';
 
+// Dígito de verificación del NIT (algoritmo DIAN). Se calcula, no consulta nada.
+export function calcularDV(nit) {
+  const cleaned = String(nit || '').replace(/\D/g, '');
+  if (!cleaned) return '';
+
+  const weights = [3, 7, 13, 17, 19, 23, 29, 37, 41, 43, 47, 53, 59, 67, 71];
+  const digits = cleaned.split('').reverse();
+
+  let sum = 0;
+  for (let i = 0; i < digits.length; i++) {
+    sum += Number(digits[i]) * (weights[i] || 0);
+  }
+
+  const mod = sum % 11;
+  return String(mod > 1 ? 11 - mod : mod);
+}
+
 // =============================
 // PARSE / NORMALIZACIÓN
 // =============================

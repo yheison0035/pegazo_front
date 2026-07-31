@@ -17,6 +17,13 @@ export async function getCustomers(params = {}) {
   return apiFetch(`/customers?${query.toString()}`);
 }
 
+// Autocompletar: trae el cliente si el documento ya existe (o null)
+export async function lookupCustomerByDocument(document) {
+  return apiFetch(
+    `/customers/lookup?document=${encodeURIComponent(document || '')}`
+  );
+}
+
 export async function getCustomerById(id) {
   return apiFetch(`/customers/${id}`);
 }

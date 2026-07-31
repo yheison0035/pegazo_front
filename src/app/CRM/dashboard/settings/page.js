@@ -8,11 +8,10 @@ import {
   getCompanyConfig,
   updateCompanyConfig,
 } from '@/lib/api/routes/companies';
+import { calcularDV } from '@/lib/api/utils/utils';
 
 const TEXT_FIELDS = [
   { name: 'businessName', label: 'Razón social' },
-  { name: 'nit', label: 'NIT' },
-  { name: 'dv', label: 'Dígito de verificación (DV)' },
   { name: 'taxRegime', label: 'Régimen tributario' },
   { name: 'ciiu', label: 'Actividad económica (CIIU)' },
   { name: 'fiscalAddress', label: 'Dirección fiscal' },
@@ -146,6 +145,35 @@ export default function Settings() {
                   <option value="NATURAL">Persona natural</option>
                   <option value="JURIDICA">Persona jurídica</option>
                 </select>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-500">
+                  NIT
+                </label>
+                <input
+                  type="text"
+                  value={form.nit || ''}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    // El DV se calcula solo a partir del NIT (algoritmo DIAN).
+                    setForm((prev) => ({ ...prev, nit: v, dv: calcularDV(v) }));
+                  }}
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-500">
+                  Dígito de verificación (DV)
+                </label>
+                <input
+                  type="text"
+                  value={form.dv || ''}
+                  onChange={(e) => set('dv', e.target.value)}
+                  className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none"
+                  placeholder="Se calcula automáticamente"
+                />
               </div>
 
               {TEXT_FIELDS.map((f) => (
