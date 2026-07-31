@@ -6,7 +6,7 @@ export default function WhatsappLink({ phone, className = '' }) {
   return (
     <a
       href={`https://wa.me/${number}?text=${encodeURIComponent(
-        'Hola, te contacto desde Europeatvstore ---'
+        'Hola, te contacto ---'
       )}`}
       target="_blank"
       rel="noopener noreferrer"

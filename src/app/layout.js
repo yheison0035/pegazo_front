@@ -3,8 +3,8 @@ import { monserrat } from '@/styles/fonts';
 import '@/styles/globals.css';
 
 export const metadata = {
-  title: 'Zorvex',
-  description: 'CRM inteligente para gestión empresarial',
+  title: 'Pegazo',
+  description: 'Pegazo · plataforma para gestionar y hacer despegar tu negocio',
   icons: {
     icon: [{ url: '/favicon.ico' }, { url: '/icon.png', type: 'image/png' }],
     shortcut: ['/favicon.ico'],

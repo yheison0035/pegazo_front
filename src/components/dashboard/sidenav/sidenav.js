@@ -43,14 +43,14 @@ export default function SideNavigation() {
         <div className="flex items-center justify-between px-6 py-5 border-b border-cyan-500/10">
           <div className="flex items-center gap-3">
             <img
-              src={usuario?.company?.logo || '/images/logo_europeatvstore.png'}
+              src={usuario?.company?.logo || '/images/no-image.png'}
               alt="Company"
               className="w-12 h-12 rounded-xl object-cover border border-cyan-400/20 shadow"
             />
 
             <div className="flex flex-col leading-tight">
               <span className="text-sm font-semibold tracking-wide">
-                {usuario?.company?.name || 'Zorvex'}
+                {usuario?.company?.name || 'Pegazo'}
               </span>
               <span className="text-[11px] text-cyan-400/60">Workspace</span>
             </div>

@@ -45,11 +45,7 @@ export default function Login() {
         <div className="absolute bottom-20 right-20 w-72 h-72 bg-cyan-400 opacity-20 blur-3xl rounded-full"></div>
 
         <div className="relative z-10 m-0 p-0">
-          <img
-            src="https://res.cloudinary.com/dl7g5sslz/image/upload/v1775250791/logo_zorvex_blanco_u7cpht.png"
-            alt="Zorvex"
-            className="h-80"
-          />
+          <h1 className="text-7xl font-extrabold tracking-tight mb-6">Pegazo</h1>
 
           <p className="text-blue-200 text-lg max-w-md">
             Control total de tu negocio. Gestiona clientes, ventas y operaciones
@@ -58,7 +54,7 @@ export default function Login() {
         </div>
 
         <div className="relative z-10 text-sm text-blue-300">
-          © {new Date().getFullYear()} Zorvex. Todos los derechos reservados.
+          © {new Date().getFullYear()} Pegazo. Todos los derechos reservados.
         </div>
       </div>
 
@@ -137,7 +133,7 @@ export default function Login() {
             </form>
 
             <p className="text-xs text-gray-400 text-center mt-6">
-              Plataforma segura · Zorvex CRM
+              Plataforma segura · Pegazo
             </p>
           </div>
         </div>

@@ -127,7 +127,7 @@ export function printSaleInvoice(sale, usuario) {
       </div>
 
       <!-- ENCABEZADO -->
-      <div class="center bold">${usuario?.company?.name || 'EUROPEATVSTORE'}</div>
+      <div class="center bold">${usuario?.company?.name || ''}</div>
       <div class="center">NIT ${usuario?.company?.nit || '11111111111'}</div>
       <div class="center">${sale?.local?.address || ''}</div>
       <div class="center">+57 ${usuario?.company?.phone || ''}</div>
