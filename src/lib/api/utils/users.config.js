@@ -84,7 +84,7 @@ export const getFormFieldsUsers = () => [
     name: 'localId',
     label: 'Local / Punto de Venta',
     type: 'select',
-    required: true,
+    required: false,
     source: 'locals',
     disabled: false,
   },

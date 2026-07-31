@@ -59,8 +59,8 @@ export const getFormFieldsCompanies = (includeAdmin = false) => [
     type: 'select',
     required: false,
     options: [
-      { value: 'true', label: 'Sí, publicada' },
-      { value: 'false', label: 'No publicada' },
+      { id: 'true', name: 'Sí, publicada' },
+      { id: 'false', name: 'No publicada' },
     ],
   },
   {

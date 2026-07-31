@@ -128,9 +128,9 @@ export function printSaleInvoice(sale, usuario) {
 
       <!-- ENCABEZADO -->
       <div class="center bold">${usuario?.company?.name || ''}</div>
-      <div class="center">NIT ${usuario?.company?.nit || '11111111111'}</div>
+      ${usuario?.company?.nit ? `<div class="center">NIT ${usuario.company.nit}</div>` : ''}
       <div class="center">${sale?.local?.address || ''}</div>
-      <div class="center">+57 ${usuario?.company?.phone || ''}</div>
+      ${usuario?.company?.phone ? `<div class="center">+57 ${usuario.company.phone}</div>` : ''}
       <div class="center">${usuario?.company?.email || ''}</div>
       <div class="center">Régimen: No responsable de IVA</div>
 
@@ -159,9 +159,11 @@ export function printSaleInvoice(sale, usuario) {
       <hr />
 
       <div><span class="bold">Fecha:</span> ${formatDateTime(
-        sale?.createdAt
+        sale?.saleDate || sale?.createdAt
       )}</div>
-      <div><span class="bold">Forma de pago:</span> Contado</div>
+      <div><span class="bold">Forma de pago:</span> ${
+        sale?.paymentStatus === 'FIADO' ? 'Crédito' : 'Contado'
+      }</div>
       <div><span class="bold">Método de pago:</span> ${
         sale?.paymentMethod || '---'
       }</div>

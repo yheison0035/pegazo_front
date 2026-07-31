@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import { useAuth } from '@/context/authContext';
 import DinamicForm from '@/components/dashboard/form/DinamicForm';
@@ -12,8 +13,12 @@ import useProducts from '@/lib/api/hooks/useProducts';
 import { parseCOPToNumber } from '@/lib/api/utils/utils';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import InventorySpecsModal from '@/components/dashboard/inventory/inventorySpecsModal';
-import { PlusIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import { canSeeOldPrice } from '@/hooks/inventory.permissions';
+import { getCategories } from '@/lib/api/routes/categories';
+import { getBrands } from '@/lib/api/routes/brands';
+import { getProviders } from '@/lib/api/routes/providers';
+import { getLocals } from '@/lib/api/routes/locals';
 
 export default function NewProduct() {
   const [formData, setFormData] = useState(getEmptyInventory());
@@ -21,11 +26,44 @@ export default function NewProduct() {
   const [images, setImages] = useState([]);
   const [showImages, setShowImages] = useState(false);
   const [showSpecsModal, setShowSpecsModal] = useState(false);
+  const [deps, setDeps] = useState({ loading: true, missing: [] });
   const auth = useAuth();
   const usuario = auth?.usuario;
   const showOldPrice = canSeeOldPrice(usuario);
 
   const { createProduct, uploadProductImages, loading } = useProducts();
+
+  // Precheck: antes de dejar llenar el formulario, verifica que la empresa ya
+  // tenga sedes, categorías, marcas y proveedores. Si falta algo, se avisa con
+  // enlaces directos para crearlos y no obligar a devolverse a mitad de camino.
+  const checkDependencies = async () => {
+    setDeps((d) => ({ ...d, loading: true }));
+    try {
+      const [locs, cats, brs, provs] = await Promise.all([
+        getLocals({ all: true }),
+        getCategories({ all: true }),
+        getBrands({ all: true }),
+        getProviders({ all: true }),
+      ]);
+      const missing = [];
+      if (!locs?.data?.length)
+        missing.push({ label: 'Sedes / locales', href: '/dashboard/locals/new' });
+      if (!cats?.data?.length)
+        missing.push({ label: 'Categorías', href: '/dashboard/categories/new' });
+      if (!brs?.data?.length)
+        missing.push({ label: 'Marcas', href: '/dashboard/brands/new' });
+      if (!provs?.data?.length)
+        missing.push({ label: 'Proveedores', href: '/dashboard/providers/new' });
+      setDeps({ loading: false, missing });
+    } catch {
+      // Si el chequeo falla (red/permiso), no bloqueamos: se muestra el form.
+      setDeps({ loading: false, missing: [] });
+    }
+  };
+
+  useEffect(() => {
+    checkDependencies();
+  }, []);
 
   const handleReset = () => {
     setFormData(getEmptyInventory());
@@ -108,6 +146,61 @@ export default function NewProduct() {
     }
     setShowSpecsModal(true);
   };
+
+  // Mientras verifica las dependencias.
+  if (deps.loading) {
+    return (
+      <div className="max-w-full mx-auto bg-white shadow-lg rounded-2xl p-8 mt-6 border border-gray-100">
+        <p className="text-sm text-gray-500">Verificando requisitos previos...</p>
+      </div>
+    );
+  }
+
+  // Faltan requisitos: se avisa con enlaces para crearlos antes de continuar.
+  if (deps.missing.length > 0) {
+    return (
+      <div className="max-w-2xl mx-auto bg-white shadow-lg rounded-2xl p-8 mt-6 border border-gray-100">
+        <h2 className="text-2xl font-bold text-gray-800">
+          Antes de crear un producto
+        </h2>
+        <p className="text-sm text-gray-500 mt-1">
+          Para registrar productos primero necesitas tener esto creado. Así no
+          tendrás que devolverte a mitad del formulario.
+        </p>
+
+        <div className="mt-6 space-y-3">
+          {deps.missing.map((m) => (
+            <Link
+              key={m.href}
+              href={m.href}
+              className="flex items-center justify-between rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 transition hover:border-orange-400"
+            >
+              <span className="font-medium text-gray-800">
+                Registra tus <span className="text-orange-600">{m.label}</span>
+              </span>
+              <ArrowRightIcon className="h-5 w-5 text-orange-600" />
+            </Link>
+          ))}
+        </div>
+
+        <div className="mt-6 flex items-center gap-3">
+          <button
+            type="button"
+            onClick={checkDependencies}
+            className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700"
+          >
+            Ya los creé, reintentar
+          </button>
+          <Link
+            href="/dashboard/inventory"
+            className="text-sm font-medium text-gray-500 hover:text-gray-700"
+          >
+            Volver al inventario
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

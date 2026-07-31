@@ -83,7 +83,7 @@ export default function Actions({
           href={
             isLocked
               ? '#'
-              : `/${view === 'platform' ? 'platform' : 'dashboard'}/${view}/edit/${info.id}`
+              : `/${['companies'].includes(view) ? 'platform' : 'dashboard'}/${view}/edit/${info.id}`
           }
           title="Editar"
           className="p-2 rounded-lg hover:bg-green-50 text-green-600 transition cursor-pointer"

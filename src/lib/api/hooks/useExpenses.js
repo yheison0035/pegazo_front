@@ -26,7 +26,10 @@ export default function useExpenses() {
     }
   }, []);
 
-  const getExpensesFn = useCallback(() => wrap(getExpenses), [wrap]);
+  const getExpensesFn = useCallback(
+    (params) => wrap(getExpenses, params),
+    [wrap]
+  );
   const getExpensesByIdFn = useCallback(
     (id) => wrap(getExpensesById, id),
     [wrap]

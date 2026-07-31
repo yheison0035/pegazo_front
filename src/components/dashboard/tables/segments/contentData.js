@@ -341,6 +341,29 @@ export default function ContentData({
                   {info.status || '---'}
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
+                  {info.plan ? (
+                    <span className="rounded-full bg-orange-50 px-2.5 py-1 text-xs font-medium text-orange-600">
+                      {info.plan}
+                    </span>
+                  ) : (
+                    <span className="text-gray-400">—</span>
+                  )}
+                </td>
+                <td className="px-5 py-4 whitespace-nowrap">
+                  {info.domain ? (
+                    <a
+                      href={`https://${info.domain}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="font-medium text-orange-600 hover:underline"
+                    >
+                      {info.domain}
+                    </a>
+                  ) : (
+                    <span className="text-gray-400">—</span>
+                  )}
+                </td>
+                <td className="px-5 py-4 whitespace-nowrap">
                   {formatDateOnly(info.startDate || info.createdAt) || '---'}
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
