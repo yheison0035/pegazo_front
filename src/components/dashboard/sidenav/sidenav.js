@@ -16,9 +16,9 @@ export default function SideNavigation() {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="md:hidden fixed top-4 left-4 z-50 p-2 b-4 rounded-xl bg-[#0B0F19]/90 backdrop-blur border border-cyan-500/20 shadow-lg"
+        className="md:hidden fixed top-4 left-4 z-50 p-2 b-4 rounded-xl bg-[#0B0F19]/90 backdrop-blur border border-orange-500/20 shadow-lg"
       >
-        <Bars3Icon className="w-6 h-6 text-cyan-400" />
+        <Bars3Icon className="w-6 h-6 text-orange-400" />
       </button>
 
       {isOpen && (
@@ -33,26 +33,26 @@ export default function SideNavigation() {
           fixed top-0 left-0 z-50 h-full w-72 
           bg-gradient-to-b from-[#0B0F19] to-[#05070d]
           text-white flex flex-col
-          border-r border-cyan-500/10
+          border-r border-orange-500/10
           shadow-2xl
           transform transition-all duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
           md:translate-x-0 md:static
         `}
       >
-        <div className="flex items-center justify-between px-6 py-5 border-b border-cyan-500/10">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-orange-500/10">
           <div className="flex items-center gap-3">
             <img
               src={usuario?.company?.logo || '/images/no-image.png'}
               alt="Company"
-              className="w-12 h-12 rounded-xl object-cover border border-cyan-400/20 shadow"
+              className="w-12 h-12 rounded-xl object-cover border border-orange-400/20 shadow"
             />
 
             <div className="flex flex-col leading-tight">
               <span className="text-sm font-semibold tracking-wide">
                 {usuario?.company?.name || 'Pegazo'}
               </span>
-              <span className="text-[11px] text-cyan-400/60">Workspace</span>
+              <span className="text-[11px] text-orange-400/60">Workspace</span>
             </div>
           </div>
 
@@ -64,7 +64,7 @@ export default function SideNavigation() {
           </button>
         </div>
 
-        <div className="px-6 py-5 border-b border-cyan-500/10">
+        <div className="px-6 py-5 border-b border-orange-500/10">
           <div className="flex items-center gap-3">
             <Avatar perfil={usuario} setPerfil={() => {}} />
 
@@ -72,7 +72,7 @@ export default function SideNavigation() {
               <span className="text-sm font-medium">{usuario?.name}</span>
               <Link
                 href={'/dashboard/users/edit/' + usuario?.id}
-                className="text-xs text-cyan-400 hover:text-cyan-300"
+                className="text-xs text-orange-400 hover:text-orange-300"
               >
                 Editar perfil
               </Link>

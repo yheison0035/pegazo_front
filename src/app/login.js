@@ -40,20 +40,19 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex bg-gray-100">
-      <div className="hidden md:flex w-1/2 relative bg-gradient-to-br from-blue-950 via-blue-900 to-blue-800 text-white p-16 flex-col justify-between">
-        <div className="absolute top-20 left-20 w-72 h-72 bg-blue-500 opacity-20 blur-3xl rounded-full"></div>
-        <div className="absolute bottom-20 right-20 w-72 h-72 bg-cyan-400 opacity-20 blur-3xl rounded-full"></div>
+      <div className="hidden md:flex w-1/2 relative bg-gradient-to-br from-neutral-900 via-neutral-950 to-black text-white p-16 flex-col justify-between overflow-hidden">
+        <div className="absolute top-20 left-20 w-72 h-72 bg-orange-500 opacity-25 blur-3xl rounded-full"></div>
+        <div className="absolute bottom-20 right-20 w-72 h-72 bg-amber-400 opacity-20 blur-3xl rounded-full"></div>
 
-        <div className="relative z-10 m-0 p-0">
-          <h1 className="text-7xl font-extrabold tracking-tight mb-6">Pegazo</h1>
-
-          <p className="text-blue-200 text-lg max-w-md">
-            Control total de tu negocio. Gestiona clientes, ventas y operaciones
-            en una sola plataforma.
-          </p>
+        <div className="relative z-10 flex flex-1 flex-col justify-center">
+          <img
+            src="/images/logo_pegazo.png"
+            alt="Pegazo"
+            className="w-96 max-w-full"
+          />
         </div>
 
-        <div className="relative z-10 text-sm text-blue-300">
+        <div className="relative z-10 text-sm text-neutral-400">
           © {new Date().getFullYear()} Pegazo. Todos los derechos reservados.
         </div>
       </div>
@@ -61,9 +60,7 @@ export default function Login() {
       <div className="flex w-full md:w-1/2 items-center justify-center px-6">
         <div className="w-full max-w-md">
           <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-200">
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">
-              Bienvenido
-            </h2>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">Bienvenido</h2>
 
             <p className="text-sm text-gray-500 mb-6">
               Ingresa a tu cuenta para continuar
@@ -80,7 +77,7 @@ export default function Login() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   placeholder="ejemplo@empresa.com"
-                  className="w-full mt-1 px-4 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition"
+                  className="w-full mt-1 px-4 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
                 />
               </div>
 
@@ -96,7 +93,7 @@ export default function Login() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     placeholder="••••••••"
-                    className="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition"
+                    className="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
                   />
 
                   <button
@@ -116,7 +113,7 @@ export default function Login() {
               <div className="text-right">
                 <a
                   href="/forgot-password"
-                  className="text-xs font-medium text-blue-800 hover:underline"
+                  className="text-xs font-medium text-orange-600 hover:underline"
                 >
                   ¿Olvidaste tu contraseña?
                 </a>
@@ -126,7 +123,7 @@ export default function Login() {
 
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r cursor-pointer from-blue-950 to-blue-800 text-white py-2 rounded-lg font-semibold hover:opacity-90 transition duration-200 shadow-md"
+                className="w-full bg-gradient-to-r cursor-pointer from-orange-600 to-amber-500 text-white py-2 rounded-lg font-semibold hover:opacity-90 transition duration-200 shadow-md"
               >
                 Iniciar sesión
               </button>

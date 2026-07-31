@@ -40,19 +40,19 @@ export default function NavLinks() {
                       text-sm font-medium transition-all duration-200
                       ${
                         isActive
-                          ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/10 text-white shadow-inner'
+                          ? 'bg-gradient-to-r from-orange-500/25 to-amber-500/10 text-white shadow-inner'
                           : 'text-white/60 hover:text-white hover:bg-white/5'
                       }
                     `}
                   >
                     {isActive && (
-                      <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] bg-cyan-400 rounded-r-full" />
+                      <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] bg-orange-400 rounded-r-full" />
                     )}
 
                     <LinkIcon
                       className={`w-5 h-5 transition ${
                         isActive
-                          ? 'text-cyan-400'
+                          ? 'text-orange-400'
                           : 'text-white/50 group-hover:text-white'
                       }`}
                     />
@@ -66,7 +66,7 @@ export default function NavLinks() {
         ))}
       </nav>
 
-      <div className="mt-6 pb-9 border-t border-cyan-500/10 pt-4 px-2">
+      <div className="mt-6 pb-9 border-t border-orange-500/10 pt-4 px-2">
         <button
           onClick={logout}
           className="flex items-center w-full gap-3 px-4 py-3 rounded-xl transition

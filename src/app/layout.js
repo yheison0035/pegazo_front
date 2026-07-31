@@ -6,9 +6,8 @@ export const metadata = {
   title: 'Pegazo',
   description: 'Pegazo · plataforma para gestionar y hacer despegar tu negocio',
   icons: {
-    icon: [{ url: '/favicon.ico' }, { url: '/icon.png', type: 'image/png' }],
-    shortcut: ['/favicon.ico'],
-    apple: ['/apple-icon.png'],
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
   },
 };
 
