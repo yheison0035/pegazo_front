@@ -34,6 +34,22 @@ export async function resetPassword(token, password) {
   });
 }
 
+export async function requestPasswordOtp(identifier) {
+  return apiFetch('/auth/forgot-password-otp', {
+    method: 'POST',
+    body: JSON.stringify({ identifier }),
+    auth: false,
+  });
+}
+
+export async function resetPasswordWithOtp(identifier, code, password) {
+  return apiFetch('/auth/reset-password-otp', {
+    method: 'POST',
+    body: JSON.stringify({ identifier, code, password }),
+    auth: false,
+  });
+}
+
 export function logout() {
   if (typeof window !== 'undefined') {
     localStorage.removeItem('token');
