@@ -48,8 +48,40 @@ export default function Login() {
           <img
             src="/images/logo_pegazo.png"
             alt="Pegazo"
-            className="w-[28rem] max-w-full"
+            className="w-[24rem] max-w-full"
           />
+
+          <h1 className="mt-8 text-3xl font-bold leading-tight">
+            Todo tu negocio,{' '}
+            <span className="bg-gradient-to-r from-orange-500 to-amber-400 bg-clip-text text-transparent">
+              en un solo lugar
+            </span>
+          </h1>
+
+          <p className="mt-4 max-w-md text-neutral-300">
+            Ventas, inventario, clientes, gastos, citas y reportes. Gestiona y
+            haz despegar tu negocio desde una sola plataforma, en la nube.
+          </p>
+
+          <div className="mt-6 flex flex-wrap gap-2">
+            {['Ventas', 'Inventario', 'Clientes', 'Citas', 'Reportes', 'Multi-sede'].map(
+              (t) => (
+                <span
+                  key={t}
+                  className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-neutral-200"
+                >
+                  {t}
+                </span>
+              )
+            )}
+          </div>
+
+          <a
+            href="/"
+            className="mt-8 inline-flex items-center gap-1 text-sm font-medium text-orange-400 transition hover:text-orange-300"
+          >
+            Conoce todo lo que Pegazo hace por tu negocio →
+          </a>
         </div>
 
         <div className="relative z-10 text-sm text-neutral-400">
@@ -57,8 +89,28 @@ export default function Login() {
         </div>
       </div>
 
-      <div className="flex w-full md:w-1/2 items-center justify-center px-6">
+      <div className="flex w-full md:w-1/2 items-center justify-center px-6 py-8">
         <div className="w-full max-w-md">
+          {/* Banner solo en móvil: presenta Pegazo a quien llega desde redes.
+              Fondo oscuro para que el logo (blanco/naranja) se vea bien. */}
+          <div className="md:hidden mb-6 rounded-2xl bg-gradient-to-br from-neutral-900 via-neutral-950 to-black p-6 text-center text-white shadow-lg">
+            <img
+              src="/images/logo_pegazo.png"
+              alt="Pegazo"
+              className="mx-auto w-52 max-w-full"
+            />
+            <p className="mt-3 text-sm text-neutral-300">
+              Todo tu negocio, en un solo lugar. Ventas, inventario, clientes,
+              citas y reportes en la nube.
+            </p>
+            <a
+              href="/"
+              className="mt-3 inline-block text-xs font-semibold text-orange-400 hover:text-orange-300"
+            >
+              Conoce Pegazo →
+            </a>
+          </div>
+
           <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-200">
             <h2 className="text-2xl font-bold text-gray-800 mb-2">Bienvenido</h2>
 
