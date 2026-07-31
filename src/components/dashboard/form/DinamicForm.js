@@ -18,6 +18,7 @@ import { getCategories } from '@/lib/api/routes/categories';
 import { getBrands } from '@/lib/api/routes/brands';
 import { getCustomers } from '@/lib/api/routes/customers';
 import ImageUploader from '../inventory/imageUploader';
+import LogoUploader from '@/components/ui/LogoUploader';
 import { colorOptions } from '@/lib/api/utils/getColors';
 import useEnums from '@/lib/api/hooks/useEnums';
 import SearchableSelect from './fields/SearchSelectField/searchableSelect';
@@ -333,6 +334,20 @@ export default function DinamicForm({
                   : name === 'stock'
                     ? (formData[name] ?? 0)
                     : formData[name] || '';
+
+            if (type === 'logo') {
+              return (
+                <div key={name} className="flex flex-col col-span-full">
+                  <LogoUploader
+                    label={label}
+                    value={formData[name] || ''}
+                    onChange={(url) =>
+                      setFormData((prev) => ({ ...prev, [name]: url }))
+                    }
+                  />
+                </div>
+              );
+            }
 
             if (type === 'colorSelect') {
               return (

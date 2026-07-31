@@ -16,7 +16,7 @@ export const getEmptyCompany = () => ({
 });
 
 export const getFormFieldsCompanies = (includeAdmin = false) => [
-  { name: 'logo', label: 'Logo de la Empresa', type: 'text', required: true },
+  { name: 'logo', label: 'Logo de la Empresa', type: 'logo', required: false },
   { name: 'name', label: 'Nombre de la Empresa', type: 'text', required: true },
   {
     name: 'type',

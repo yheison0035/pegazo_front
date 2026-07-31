@@ -20,7 +20,12 @@ export default function useNavigation() {
   const businessType = usuario.company?.type || 'COMERCIO';
 
   // módulos permitidos por tipo de negocio
-  const modules = BUSINESS_TYPES[businessType] || BUSINESS_TYPES.COMERCIO;
+  const modules = [...(BUSINESS_TYPES[businessType] || BUSINESS_TYPES.COMERCIO)];
+
+  // La tienda online solo aparece si la plataforma se la habilitó a la empresa.
+  if (usuario.company?.websiteEnabled) {
+    modules.push('website');
+  }
 
   // filtrar por módulos + roles dentro de secciones
   const filteredSections = NAVIGATION.map((section) => {

@@ -14,6 +14,7 @@ import {
   Cog6ToothIcon,
   CalendarDaysIcon,
   WrenchScrewdriverIcon,
+  GlobeAltIcon,
 } from '@heroicons/react/24/outline';
 
 export const NAVIGATION = [
@@ -138,6 +139,12 @@ export const NAVIGATION = [
         name: 'Usuarios / Roles',
         href: '/dashboard/users',
         icon: UserGroupIcon,
+        roles: ['SUPER_ADMIN'],
+      },
+      {
+        name: 'Tienda online',
+        href: '/dashboard/website',
+        icon: GlobeAltIcon,
         roles: ['SUPER_ADMIN'],
       },
       {

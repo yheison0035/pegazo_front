@@ -7,6 +7,7 @@ import { CheckCircleIcon } from '@heroicons/react/24/solid';
 import { useAuth } from '@/context/authContext';
 import { validateCoupon } from '@/lib/api/auth/auth';
 import { PLANS } from '@/lib/plans';
+import LogoUploader from '@/components/ui/LogoUploader';
 
 const BUSINESS_TYPES = [
   { id: 'COMERCIO', name: 'Tienda / Comercio' },
@@ -17,6 +18,7 @@ const BUSINESS_TYPES = [
 ];
 
 const PLAN_IDS = PLANS.map((p) => p.id);
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function formatCOP(n) {
   return new Intl.NumberFormat('es-CO', {
@@ -24,6 +26,39 @@ function formatCOP(n) {
     currency: 'COP',
     maximumFractionDigits: 0,
   }).format(n || 0);
+}
+
+// Validación de un campo puntual. Devuelve el mensaje de error o ''.
+function validateField(name, value, form) {
+  const v = (value ?? '').toString().trim();
+  switch (name) {
+    case 'companyName':
+      if (!v) return 'El nombre del negocio es obligatorio.';
+      if (v.length < 2) return 'Debe tener al menos 2 caracteres.';
+      if (v.length > 60) return 'Máximo 60 caracteres.';
+      return '';
+    case 'ownerName':
+      if (!v) return 'Tu nombre es obligatorio.';
+      if (v.length < 2) return 'Debe tener al menos 2 caracteres.';
+      return '';
+    case 'email':
+      if (!v) return 'El correo es obligatorio.';
+      if (!EMAIL_RE.test(v)) return 'Ingresa un correo válido.';
+      return '';
+    case 'password':
+      if (!v) return 'La contraseña es obligatoria.';
+      if (v.length < 6) return 'Mínimo 6 caracteres.';
+      if (!/[a-zA-Z]/.test(v) || !/\d/.test(v))
+        return 'Usa letras y números para mayor seguridad.';
+      return '';
+    case 'phone':
+      if (!v) return ''; // opcional
+      if (!/^\d{7,15}$/.test(v.replace(/\D/g, '')))
+        return 'Ingresa un número válido (solo dígitos).';
+      return '';
+    default:
+      return '';
+  }
 }
 
 export default function Register() {
@@ -38,15 +73,16 @@ export default function Register() {
     password: '',
     phone: '',
   });
+  const [logo, setLogo] = useState('');
   const [plan, setPlan] = useState('');
   const [coupon, setCoupon] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [couponMsg, setCouponMsg] = useState(null);
   const [checkingCoupon, setCheckingCoupon] = useState(false);
+  const [errors, setErrors] = useState({});
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Preselecciona el plan si viene desde la landing (?plan=IMPULSO).
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const p = (params.get('plan') || '').toUpperCase();
@@ -56,13 +92,21 @@ export default function Register() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: validateField(name, value) }));
+    }
+  };
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    setErrors((prev) => ({ ...prev, [name]: validateField(name, value) }));
   };
 
   const selectPlan = (id) => {
     setPlan(id);
-    // Un cambio de plan invalida el cupón aplicado (puede no aplicar).
     setAppliedCoupon(null);
     setCouponMsg(null);
+    setErrors((prev) => ({ ...prev, plan: '' }));
   };
 
   const applyCoupon = async () => {
@@ -95,24 +139,37 @@ export default function Register() {
         : Math.max(0, base - appliedCoupon.discountValue);
   }
 
+  const validateAll = () => {
+    const next = {};
+    ['companyName', 'ownerName', 'email', 'password', 'phone'].forEach((n) => {
+      const msg = validateField(n, form[n], form);
+      if (msg) next[n] = msg;
+    });
+    if (!plan) next.plan = 'Debes seleccionar un plan.';
+    return next;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    if (!plan) {
-      setError('Debes seleccionar un plan para continuar.');
+    const next = validateAll();
+    if (Object.keys(next).length > 0) {
+      setErrors(next);
+      if (next.plan) setError('Debes seleccionar un plan para continuar.');
       return;
     }
 
     setLoading(true);
     try {
       await registerBusiness({
-        companyName: form.companyName,
+        companyName: form.companyName.trim(),
         type: form.type,
-        ownerName: form.ownerName,
-        email: form.email,
+        ownerName: form.ownerName.trim(),
+        email: form.email.trim().toLowerCase(),
         password: form.password,
-        phone: form.phone || undefined,
+        phone: form.phone.trim() || undefined,
+        logo: logo || undefined,
         plan,
         couponCode: appliedCoupon?.code || undefined,
       });
@@ -127,7 +184,6 @@ export default function Register() {
   return (
     <div className="min-h-screen bg-neutral-100 py-10 px-4">
       <div className="mx-auto max-w-3xl">
-        {/* Encabezado */}
         <div className="mb-6 rounded-2xl bg-gradient-to-br from-neutral-900 via-neutral-950 to-black p-6 text-center text-white shadow-lg">
           <img
             src="/images/logo_pegazo.png"
@@ -142,9 +198,10 @@ export default function Register() {
 
         <form
           onSubmit={handleSubmit}
+          noValidate
           className="space-y-8 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm sm:p-8"
         >
-          {/* 1. Plan (obligatorio) */}
+          {/* 1. Plan */}
           <section>
             <h2 className="text-lg font-bold text-neutral-900">
               1. Elige tu plan <span className="text-orange-600">*</span>
@@ -152,7 +209,6 @@ export default function Register() {
             <p className="mb-4 text-sm text-neutral-500">
               Puedes empezar gratis y cambiar de plan cuando quieras.
             </p>
-
             <div className="grid gap-3 sm:grid-cols-2">
               {PLANS.map((p) => {
                 const active = plan === p.id;
@@ -184,6 +240,11 @@ export default function Register() {
                 );
               })}
             </div>
+            {errors.plan && (
+              <p className="mt-2 text-sm font-medium text-red-600">
+                {errors.plan}
+              </p>
+            )}
           </section>
 
           {/* 2. Datos del negocio */}
@@ -197,7 +258,8 @@ export default function Register() {
               name="companyName"
               value={form.companyName}
               onChange={handleChange}
-              required
+              onBlur={handleBlur}
+              error={errors.companyName}
             />
 
             <div className="flex flex-col">
@@ -223,14 +285,25 @@ export default function Register() {
               name="ownerName"
               value={form.ownerName}
               onChange={handleChange}
-              required
+              onBlur={handleBlur}
+              error={errors.ownerName}
             />
             <Field
               label="Celular"
               name="phone"
               value={form.phone}
               onChange={handleChange}
+              onBlur={handleBlur}
+              error={errors.phone}
             />
+
+            <div className="col-span-full">
+              <LogoUploader
+                label="Logo del negocio (opcional)"
+                value={logo}
+                onChange={setLogo}
+              />
+            </div>
           </section>
 
           {/* 3. Acceso */}
@@ -244,7 +317,8 @@ export default function Register() {
               type="email"
               value={form.email}
               onChange={handleChange}
-              required
+              onBlur={handleBlur}
+              error={errors.email}
             />
             <Field
               label="Contraseña *"
@@ -252,8 +326,8 @@ export default function Register() {
               type="password"
               value={form.password}
               onChange={handleChange}
-              required
-              minLength={6}
+              onBlur={handleBlur}
+              error={errors.password}
             />
           </section>
 
@@ -299,9 +373,7 @@ export default function Register() {
           {selected && (
             <div className="rounded-xl bg-neutral-50 p-4">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-neutral-600">
-                  Plan {selected.name}
-                </span>
+                <span className="text-neutral-600">Plan {selected.name}</span>
                 <span className="font-semibold text-neutral-900">
                   {base > 0 ? formatCOP(base) + '/mes' : 'Gratis'}
                 </span>
@@ -355,7 +427,7 @@ export default function Register() {
   );
 }
 
-function Field({ label, ...props }) {
+function Field({ label, error, ...props }) {
   return (
     <div className="flex flex-col">
       <label className="mb-1 text-xs font-semibold text-neutral-600">
@@ -363,8 +435,13 @@ function Field({ label, ...props }) {
       </label>
       <input
         {...props}
-        className="rounded-lg border border-neutral-300 px-4 py-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+        className={`rounded-lg border px-4 py-2 text-sm focus:outline-none focus:ring-2 ${
+          error
+            ? 'border-red-400 focus:border-red-500 focus:ring-red-500'
+            : 'border-neutral-300 focus:border-orange-500 focus:ring-orange-500'
+        }`}
       />
+      {error && <p className="mt-1 text-sm font-medium text-red-600">{error}</p>}
     </div>
   );
 }

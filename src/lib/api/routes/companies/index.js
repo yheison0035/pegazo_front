@@ -21,6 +21,14 @@ export async function getCompanyById(id) {
   return apiFetch(`/companies/${id}`);
 }
 
+// Sube el logo de la empresa a Cloudinary (carpeta companies/logos) y devuelve
+// su URL. Sirve tanto autenticado (panel) como público (registro).
+export async function uploadCompanyLogo(file) {
+  const fd = new FormData();
+  fd.append('file', file);
+  return apiFetch('/companies/logo-upload', { method: 'POST', body: fd });
+}
+
 export async function createCompany(dto) {
   return apiFetch('/companies', { method: 'POST', body: JSON.stringify(dto) });
 }
