@@ -23,7 +23,7 @@ export default function AlertModal({
     success: <CheckCircleIcon className="w-12 h-12 text-green-500" />,
     error: <XCircleIcon className="w-12 h-12 text-red-500" />,
     warning: <ExclamationTriangleIcon className="w-12 h-12 text-yellow-500" />,
-    info: <InformationCircleIcon className="w-12 h-12 text-blue-500" />,
+    info: <InformationCircleIcon className="w-12 h-12 text-orange-500" />,
   };
 
   const defaultTitles = {

@@ -94,7 +94,7 @@ const ColorSelect = memo(function ColorSelect({ value, onChange, disabled }) {
         className={`flex items-center justify-between w-full border border-gray-200 rounded-xl px-4 py-2 text-sm shadow-sm transition ${
           disabled
             ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
-            : 'focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500'
+            : 'focus:ring-2 focus:ring-orange-500 focus:border-orange-500'
         }`}
       >
         <span className="text-gray-700">Seleccionar colores</span>
@@ -121,7 +121,7 @@ const ColorSelect = memo(function ColorSelect({ value, onChange, disabled }) {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar color..."
-              className="w-full border border-gray-200 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              className="w-full border border-gray-200 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
 
@@ -169,7 +169,7 @@ const ColorSelect = memo(function ColorSelect({ value, onChange, disabled }) {
                       <button
                         type="button"
                         onClick={() => increase(opt.name)}
-                        className="text-sm text-cyan-600 hover:underline cursor-pointer"
+                        className="text-sm text-orange-600 hover:underline cursor-pointer"
                       >
                         Agregar
                       </button>

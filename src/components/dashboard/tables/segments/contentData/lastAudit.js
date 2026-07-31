@@ -6,7 +6,7 @@ const ACTION_LABEL = {
 
 const ACTION_COLOR = {
   CREATE: 'text-emerald-600',
-  UPDATE: 'text-blue-600',
+  UPDATE: 'text-orange-600',
   DELETE: 'text-red-600',
 };
 

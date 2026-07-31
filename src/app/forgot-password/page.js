@@ -87,9 +87,9 @@ export default function ForgotPasswordPage() {
   };
 
   const inputClass =
-    'mt-1 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-900';
+    'mt-1 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-orange-900 focus:outline-none focus:ring-2 focus:ring-orange-900';
   const btnClass =
-    'w-full rounded-lg bg-gradient-to-r from-blue-950 to-blue-800 py-2 font-semibold text-white shadow-md transition hover:opacity-90 disabled:opacity-60';
+    'w-full rounded-lg bg-gradient-to-r from-orange-600 to-amber-500 py-2 font-semibold text-white shadow-md transition hover:opacity-90 disabled:opacity-60';
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
@@ -109,7 +109,7 @@ export default function ForgotPasswordPage() {
               }}
               className={`flex-1 rounded-md py-1.5 font-medium ${
                 channel === 'email'
-                  ? 'bg-white text-blue-900 shadow'
+                  ? 'bg-white text-orange-900 shadow'
                   : 'text-gray-500'
               }`}
             >
@@ -149,7 +149,7 @@ export default function ForgotPasswordPage() {
               enlace para restablecer tu contraseña. Revisa tu bandeja (y spam).
               Vence en 30 minutos.
             </p>
-            <a href="/" className="text-sm text-blue-800 hover:underline">
+            <a href="/" className="text-sm text-orange-800 hover:underline">
               Volver a iniciar sesión
             </a>
           </div>

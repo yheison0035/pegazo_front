@@ -5,7 +5,7 @@ export default function Variants({ data, view }) {
 
   return (
     <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
-      <div className="bg-gradient-to-r from-blue-900 to-gray-900 px-6 py-5 text-white">
+      <div className="bg-gradient-to-r from-orange-600 to-gray-900 px-6 py-5 text-white">
         <h2 className="text-2xl font-bold">{data.name || 'Detalles'}</h2>
         <p className="text-sm opacity-80">
           {isService
@@ -32,7 +32,7 @@ export default function Variants({ data, view }) {
                 </div>
 
                 <div className="flex justify-end">
-                  <span className="inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold bg-cyan-100 text-cyan-700">
+                  <span className="inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold bg-orange-100 text-orange-700">
                     $ {Number(item.price || 0).toLocaleString()}
                   </span>
                 </div>

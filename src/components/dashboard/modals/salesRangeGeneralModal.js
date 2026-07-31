@@ -66,7 +66,7 @@ export default function SalesRangeGeneralModal({ onClose }) {
           </button>
 
           <div className="flex items-center gap-3">
-            <ChartBarIcon className="w-8 h-8 text-blue-400" />
+            <ChartBarIcon className="w-8 h-8 text-orange-400" />
             <div>
               <h2 className="text-2xl font-bold tracking-tight">
                 Reporte General de Ventas
@@ -89,7 +89,7 @@ export default function SalesRangeGeneralModal({ onClose }) {
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="mt-2 w-full cursor-pointer rounded-xl border border-gray-300 px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="mt-2 w-full cursor-pointer rounded-xl border border-gray-300 px-4 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               />
             </div>
 
@@ -102,7 +102,7 @@ export default function SalesRangeGeneralModal({ onClose }) {
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="mt-2 w-full cursor-pointer rounded-xl border border-gray-300 px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="mt-2 w-full cursor-pointer rounded-xl border border-gray-300 px-4 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               />
             </div>
 
@@ -114,7 +114,7 @@ export default function SalesRangeGeneralModal({ onClose }) {
               <select
                 value={localId}
                 onChange={(e) => setLocalId(e.target.value)}
-                className="mt-2 w-full rounded-xl cursor-pointer border border-gray-300 px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="mt-2 w-full rounded-xl cursor-pointer border border-gray-300 px-4 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               >
                 <option value="">Seleccione</option>
                 {locals.map((l) => (
@@ -129,7 +129,7 @@ export default function SalesRangeGeneralModal({ onClose }) {
           <button
             disabled={!startDate || !endDate || !localId || loading}
             onClick={handleFetch}
-            className="mt-6 w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold transition disabled:opacity-50 cursor-pointer"
+            className="mt-6 w-full flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-xl font-semibold transition disabled:opacity-50 cursor-pointer"
           >
             {loading ? 'Consultando...' : 'Generar reporte'}
           </button>
@@ -160,7 +160,7 @@ export default function SalesRangeGeneralModal({ onClose }) {
                       {result.endDate}
                     </span>
                   </span>
-                  <span className="text-2xl font-bold text-blue-600">
+                  <span className="text-2xl font-bold text-orange-600">
                     {formatCOP(result.total.total)}
                   </span>
                 </div>
@@ -206,7 +206,7 @@ export default function SalesRangeGeneralModal({ onClose }) {
                         className={`rounded-2xl border p-4 shadow-sm transition
                         ${
                           hasSales
-                            ? 'bg-white border-blue-200'
+                            ? 'bg-white border-orange-200'
                             : 'bg-gray-50 border-gray-200'
                         }`}
                       >
@@ -217,7 +217,7 @@ export default function SalesRangeGeneralModal({ onClose }) {
 
                           <span
                             className={`text-sm font-bold ${
-                              hasSales ? 'text-blue-600' : 'text-gray-400'
+                              hasSales ? 'text-orange-600' : 'text-gray-400'
                             }`}
                           >
                             {formatCOP(day.total)}
@@ -225,9 +225,9 @@ export default function SalesRangeGeneralModal({ onClose }) {
                         </div>
 
                         {hasSales && (
-                          <div className="mt-2 h-2 w-full bg-blue-100 rounded-full overflow-hidden">
+                          <div className="mt-2 h-2 w-full bg-orange-100 rounded-full overflow-hidden">
                             <div
-                              className="h-full bg-blue-500 rounded-full"
+                              className="h-full bg-orange-500 rounded-full"
                               style={{
                                 width: `${Math.min(
                                   (day.total / result.total.total) * 100,
@@ -247,7 +247,7 @@ export default function SalesRangeGeneralModal({ onClose }) {
                 <div className="mt-4 pt-4 border-t border-gray-300 flex justify-center">
                   <button
                     onClick={() => setShowMethods((prev) => !prev)}
-                    className="text-sm font-medium text-blue-700 hover:text-blue-800 transition cursor-pointer"
+                    className="text-sm font-medium text-orange-700 hover:text-orange-800 transition cursor-pointer"
                   >
                     {showMethods
                       ? 'Ocultar detalle por método de pago'

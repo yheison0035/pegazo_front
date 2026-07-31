@@ -69,7 +69,7 @@ export default function PlatformStatistics() {
             icon={BuildingOffice2Icon}
             label="Empresas"
             value={t?.companies ?? '—'}
-            accent="bg-blue-50 text-blue-600"
+            accent="bg-orange-50 text-orange-600"
           />
           <Card
             icon={CheckCircleIcon}
@@ -93,7 +93,7 @@ export default function PlatformStatistics() {
             icon={UsersIcon}
             label="Usuarios"
             value={t?.users ?? '—'}
-            accent="bg-indigo-50 text-indigo-600"
+            accent="bg-orange-50 text-orange-600"
           />
           <Card
             icon={BuildingStorefrontIcon}
@@ -128,7 +128,7 @@ export default function PlatformStatistics() {
                       <td className="py-2 pr-4">
                         <Link
                           href={`/platform/companies/edit/${c.id}`}
-                          className="text-blue-600 hover:underline"
+                          className="text-orange-600 hover:underline"
                         >
                           Gestionar
                         </Link>

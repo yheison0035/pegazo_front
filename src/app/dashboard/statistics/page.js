@@ -151,7 +151,7 @@ export default function Statistics() {
           </div>
           <button
             onClick={fetchStats}
-            className="rounded-xl bg-cyan-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-cyan-700"
+            className="rounded-xl bg-orange-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-orange-700"
           >
             Aplicar
           </button>

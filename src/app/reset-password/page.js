@@ -60,7 +60,7 @@ export default function ResetPasswordPage() {
             </p>
             <a
               href="/"
-              className="inline-block rounded-lg bg-blue-900 px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
+              className="inline-block rounded-lg bg-orange-900 px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
             >
               Iniciar sesión
             </a>
@@ -81,7 +81,7 @@ export default function ResetPasswordPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   placeholder="••••••••"
-                  className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-900"
+                  className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-orange-900 focus:outline-none focus:ring-2 focus:ring-orange-900"
                 />
               </div>
 
@@ -95,7 +95,7 @@ export default function ResetPasswordPage() {
                   onChange={(e) => setConfirm(e.target.value)}
                   required
                   placeholder="••••••••"
-                  className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-900"
+                  className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-orange-900 focus:outline-none focus:ring-2 focus:ring-orange-900"
                 />
               </div>
 
@@ -104,7 +104,7 @@ export default function ResetPasswordPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full rounded-lg bg-gradient-to-r from-blue-950 to-blue-800 py-2 font-semibold text-white shadow-md transition hover:opacity-90 disabled:opacity-60"
+                className="w-full rounded-lg bg-gradient-to-r from-orange-600 to-amber-500 py-2 font-semibold text-white shadow-md transition hover:opacity-90 disabled:opacity-60"
               >
                 {loading ? 'Guardando...' : 'Restablecer contraseña'}
               </button>

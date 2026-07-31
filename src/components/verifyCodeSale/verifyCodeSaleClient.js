@@ -38,7 +38,7 @@ export default function VerifyCodeSaleClient() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <DocumentTextIcon className="w-12 h-12 text-blue-600 mx-auto mb-3 animate-pulse" />
+          <DocumentTextIcon className="w-12 h-12 text-orange-600 mx-auto mb-3 animate-pulse" />
           <p className="text-gray-600 text-sm">Verificando factura...</p>
         </div>
       </div>
@@ -84,7 +84,7 @@ export default function VerifyCodeSaleClient() {
   return (
     <div className="min-h-screen bg-gray-100 py-10 px-4">
       <div className="max-w-3xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-200">
-        <div className="bg-gradient-to-r from-blue-900 to-gray-900 text-white px-6 py-5 flex items-center justify-between">
+        <div className="bg-gradient-to-r from-orange-600 to-gray-900 text-white px-6 py-5 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div>
               <h1 className="text-2xl font-bold">Verificación de Factura</h1>

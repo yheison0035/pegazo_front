@@ -46,7 +46,7 @@ export default function NewAppointment() {
         Ingrese la información de la cita para registrar una nueva cita.
       </p>
 
-      <div className="mb-6 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+      <div className="mb-6 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-800">
         <span className="font-semibold">Importante:</span> completa los campos{' '}
         <span className="font-semibold">en orden, uno por uno</span>. Cada campo
         habilita las opciones del siguiente — por ejemplo, al elegir el{' '}

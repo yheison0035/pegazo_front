@@ -45,7 +45,7 @@ export default function PlatformUsers() {
             setSearch(e.target.value);
           }}
           placeholder="Buscar por nombre..."
-          className="mb-4 w-full max-w-sm rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none"
+          className="mb-4 w-full max-w-sm rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none"
         />
 
         <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
@@ -78,7 +78,7 @@ export default function PlatformUsers() {
                     <td className="px-4 py-3 font-medium">{u.name}</td>
                     <td className="px-4 py-3">{u.email}</td>
                     <td className="px-4 py-3">
-                      <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-600">
+                      <span className="rounded-full bg-orange-50 px-2.5 py-1 text-xs font-medium text-orange-600">
                         {u.role}
                       </span>
                     </td>

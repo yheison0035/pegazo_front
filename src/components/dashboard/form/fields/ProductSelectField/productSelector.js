@@ -181,7 +181,7 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
               w-full rounded-2xl pl-11 pr-4 py-3 text-sm
               bg-white border border-gray-200
               placeholder:text-gray-400
-              focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400
+              focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400
               transition-all shadow-sm
             "
           />
@@ -307,7 +307,7 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
                           Number(e.target.value)
                         )
                       }
-                      className="w-16 h-9 text-center rounded-lg border border-gray-200 bg-white focus:ring-2 focus:ring-blue-500/20 outline-none"
+                      className="w-16 h-9 text-center rounded-lg border border-gray-200 bg-white focus:ring-2 focus:ring-orange-500/20 outline-none"
                     />
                   </td>
 
@@ -322,7 +322,7 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
                           parseCOPToNumber(e.target.value)
                         )
                       }
-                      className="w-24 h-9 text-center rounded-lg border border-gray-200 bg-white focus:ring-2 focus:ring-blue-500/20 outline-none"
+                      className="w-24 h-9 text-center rounded-lg border border-gray-200 bg-white focus:ring-2 focus:ring-orange-500/20 outline-none"
                       placeholder="$ 0"
                     />
                   </td>

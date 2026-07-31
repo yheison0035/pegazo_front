@@ -426,7 +426,7 @@ export default function DinamicForm({
                     className={`w-full border border-gray-200 rounded-xl px-4 py-2 text-sm shadow-sm focus:outline-none transition ${
                       isLocked
                         ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
-                        : 'focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500'
+                        : 'focus:ring-2 focus:ring-orange-500 focus:border-orange-500'
                     }`}
                   />
                 </div>
@@ -468,7 +468,7 @@ export default function DinamicForm({
                     <button
                       type="button"
                       onClick={() => setShowNewCustomer(true)}
-                      className="mt-2 self-start text-sm font-medium text-cyan-600 hover:underline"
+                      className="mt-2 self-start text-sm font-medium text-orange-600 hover:underline"
                     >
                       + Crear cliente nuevo
                     </button>
@@ -507,7 +507,7 @@ export default function DinamicForm({
                     className={`w-full border border-gray-200 rounded-xl px-4 py-2 text-sm shadow-sm focus:outline-none transition ${
                       isLocked || disabled
                         ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
-                        : 'focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500'
+                        : 'focus:ring-2 focus:ring-orange-500 focus:border-orange-500'
                     }`}
                   >
                     <option value="">Seleccione una opción</option>
@@ -551,7 +551,7 @@ export default function DinamicForm({
                     className={`w-full border border-gray-200 rounded-xl px-4 py-2 pr-10 text-sm shadow-sm focus:outline-none transition ${
                       isLocked || disabled
                         ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
-                        : 'focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500'
+                        : 'focus:ring-2 focus:ring-orange-500 focus:border-orange-500'
                     }`}
                   />
 
@@ -586,7 +586,7 @@ export default function DinamicForm({
                   className={`w-full border border-gray-200 rounded-xl px-4 py-2 text-sm shadow-sm focus:outline-none transition ${
                     isLocked || disabled
                       ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
-                      : 'focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500'
+                      : 'focus:ring-2 focus:ring-orange-500 focus:border-orange-500'
                   }`}
                 />
                 {errors[name] && (

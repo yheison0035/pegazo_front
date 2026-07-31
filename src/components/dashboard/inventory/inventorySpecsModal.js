@@ -45,7 +45,7 @@ export default function InventorySpecsModal({
           <XMarkIcon className="w-6 h-6" />
         </button>
 
-        <div className="bg-gradient-to-r from-blue-900 to-gray-900 text-white px-6 py-5 rounded-t-2xl">
+        <div className="bg-gradient-to-r from-orange-600 to-gray-900 text-white px-6 py-5 rounded-t-2xl">
           <h2 className="text-2xl font-bold">
             Características y especificaciones
           </h2>
@@ -85,7 +85,7 @@ export default function InventorySpecsModal({
 
             <button
               onClick={() => setFeatures([...features, { title: '' }])}
-              className="flex items-center gap-2 text-sm text-green-600 hover:text-blue-800 mt-2 cursor-pointer"
+              className="flex items-center gap-2 text-sm text-green-600 hover:text-orange-800 mt-2 cursor-pointer"
             >
               <PlusIcon className="w-4 h-4" /> Agregar característica
             </button>
@@ -130,7 +130,7 @@ export default function InventorySpecsModal({
 
             <button
               onClick={() => setSpecs([...specs, { key: '', value: '' }])}
-              className="flex items-center gap-2 text-sm text-green-600 hover:text-blue-800 mt-2 cursor-pointer"
+              className="flex items-center gap-2 text-sm text-green-600 hover:text-orange-800 mt-2 cursor-pointer"
             >
               <PlusIcon className="w-4 h-4" /> Agregar especificación
             </button>
@@ -147,7 +147,7 @@ export default function InventorySpecsModal({
           <button
             onClick={saveData}
             className={`inline-flex items-center gap-2 px-4 py-2 mr-2 border border-transparent 
-                bg-blue-600 hover:text-cyan-600 hover:border-cyan-600
+                bg-orange-600 hover:text-orange-600 hover:border-orange-600
             text-white 
       hover:bg-white
         font-medium rounded-lg transition-colors 

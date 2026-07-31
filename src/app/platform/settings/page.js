@@ -22,9 +22,9 @@ export default function PlatformSettings() {
         <div className="grid gap-4 md:grid-cols-3">
           <Link
             href="/platform/companies"
-            className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:border-blue-300"
+            className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:border-orange-300"
           >
-            <BuildingOffice2Icon className="mb-2 h-6 w-6 text-blue-600" />
+            <BuildingOffice2Icon className="mb-2 h-6 w-6 text-orange-600" />
             <p className="font-semibold text-gray-800">Empresas</p>
             <p className="text-sm text-gray-500">
               Crear, suspender y gestionar los negocios y sus locales.
@@ -33,9 +33,9 @@ export default function PlatformSettings() {
 
           <Link
             href="/platform/users"
-            className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:border-blue-300"
+            className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:border-orange-300"
           >
-            <UsersIcon className="mb-2 h-6 w-6 text-indigo-600" />
+            <UsersIcon className="mb-2 h-6 w-6 text-orange-600" />
             <p className="font-semibold text-gray-800">Usuarios Globales</p>
             <p className="text-sm text-gray-500">
               Ver todos los usuarios de todas las empresas.
@@ -44,7 +44,7 @@ export default function PlatformSettings() {
 
           <Link
             href="/platform/statistics"
-            className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:border-blue-300"
+            className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:border-orange-300"
           >
             <ChartBarIcon className="mb-2 h-6 w-6 text-teal-600" />
             <p className="font-semibold text-gray-800">Estadísticas Globales</p>

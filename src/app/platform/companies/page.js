@@ -102,7 +102,7 @@ export default function Companies() {
 
           <Link
             href="/platform/companies/new"
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm"
+            className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm"
           >
             <PlusIcon className="w-4 h-4" />
             Crear empresa

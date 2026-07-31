@@ -125,7 +125,7 @@ export default function NewCustomerModal({ localId, onClose, onCreated }) {
               onChange={handleChange}
               onBlur={handleDocumentBlur}
               placeholder="Escribe el documento para buscar..."
-              className="w-full rounded-xl border border-gray-200 px-4 py-2 text-sm shadow-sm transition focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              className="w-full rounded-xl border border-gray-200 px-4 py-2 text-sm shadow-sm transition focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
             {lookingUp && (
               <p className="mt-1 text-xs text-gray-400">Buscando...</p>
@@ -147,7 +147,7 @@ export default function NewCustomerModal({ localId, onClose, onCreated }) {
                 name={field.name}
                 value={data[field.name]}
                 onChange={handleChange}
-                className="w-full rounded-xl border border-gray-200 px-4 py-2 text-sm shadow-sm transition focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                className="w-full rounded-xl border border-gray-200 px-4 py-2 text-sm shadow-sm transition focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
               {errors[field.name] && (
                 <p className="mt-1 text-sm font-medium text-red-600">

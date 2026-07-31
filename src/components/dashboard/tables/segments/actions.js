@@ -33,7 +33,7 @@ export default function Actions({
           onClick={() => setSelected(info)}
           disabled={isLocked}
           title="Ver"
-          className="p-2 rounded-lg hover:bg-blue-50 text-blue-600 transition cursor-pointer"
+          className="p-2 rounded-lg hover:bg-orange-50 text-orange-600 transition cursor-pointer"
         >
           <EyeIcon className="w-5 h-5" />
         </button>
@@ -61,7 +61,7 @@ export default function Actions({
           onClick={() => setSelectedVariants(info)}
           disabled={isLocked}
           title="Variantes"
-          className="p-2 rounded-lg hover:bg-indigo-50 text-indigo-600 transition cursor-pointer"
+          className="p-2 rounded-lg hover:bg-orange-50 text-orange-600 transition cursor-pointer"
         >
           <Squares2X2Icon className="w-5 h-5" />
         </button>

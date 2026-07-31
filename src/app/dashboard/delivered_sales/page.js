@@ -126,7 +126,7 @@ export default function Delivered_Sales() {
 
               <button
                 onClick={() => setShowGeneralReport(true)}
-                className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm transition w-full sm:w-auto cursor-pointer"
+                className="flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm transition w-full sm:w-auto cursor-pointer"
               >
                 <ChartBarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span className="whitespace-nowrap">Ventas Generales</span>

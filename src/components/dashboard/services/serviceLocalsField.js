@@ -41,7 +41,7 @@ export default function ServiceLocalsField({ value = [], onChange }) {
         <button
           type="button"
           onClick={addRow}
-          className="flex items-center gap-1 text-sm text-cyan-600 hover:text-cyan-700 transition cursor-pointer"
+          className="flex items-center gap-1 text-sm text-orange-600 hover:text-orange-700 transition cursor-pointer"
         >
           <PlusIcon className="w-4 h-4" />
           Agregar
@@ -66,7 +66,7 @@ export default function ServiceLocalsField({ value = [], onChange }) {
               onChange={(e) =>
                 handleChange(index, 'localId', Number(e.target.value))
               }
-              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
             >
               <option value="">Seleccione un local</option>
               {localsOptions.map((l) => (
@@ -86,7 +86,7 @@ export default function ServiceLocalsField({ value = [], onChange }) {
                 value={formatCOP(row.price || '')}
                 onChange={(e) => handleChange(index, 'price', e.target.value)}
                 placeholder="$ 0"
-                className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
 
               <button
