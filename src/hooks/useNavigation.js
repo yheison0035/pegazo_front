@@ -3,6 +3,7 @@
 import { BUSINESS_TYPES } from '@/config/businessTypes';
 import { NAVIGATION } from '@/config/navigation';
 import { PLATFORM_NAVIGATION } from '@/config/platformNavigation';
+import { EINVOICE_ENABLED } from '@/config/features';
 import { useAuth } from '@/context/authContext';
 
 export default function useNavigation() {
@@ -19,11 +20,12 @@ export default function useNavigation() {
 
   const businessType = usuario.company?.type || 'COMERCIO';
 
-  // módulos permitidos por tipo de negocio (+ 'settings' siempre disponible,
-  // la Configuración es universal; el filtro por rol decide quién la ve).
+  // módulos permitidos por tipo de negocio. La Configuración fiscal (settings)
+  // solo aparece cuando la factura electrónica está habilitada (flag), para no
+  // mostrar en producción cosas de FE que aún no funcionan.
   const modules = [
     ...(BUSINESS_TYPES[businessType] || BUSINESS_TYPES.COMERCIO),
-    'settings',
+    ...(EINVOICE_ENABLED ? ['settings'] : []),
   ];
 
   // filtrar por módulos + roles dentro de secciones
