@@ -26,7 +26,15 @@ export async function createCompany(dto) {
 }
 
 export async function updateCompany(id, dto) {
-  const { id: _id, createdAt, updatedAt, users, ...cleanDto } = dto;
+  const {
+    id: _id,
+    createdAt,
+    updatedAt,
+    users,
+    adminEmail,
+    adminName,
+    ...cleanDto
+  } = dto;
 
   return apiFetch(`/companies/${id}`, {
     method: 'PUT',

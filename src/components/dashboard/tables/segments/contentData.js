@@ -323,6 +323,18 @@ export default function ContentData({
                   {info.manager || '---'}
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
+                  {info.adminEmail ? (
+                    <a
+                      href={`mailto:${info.adminEmail}`}
+                      className="font-medium text-orange-600 hover:underline"
+                    >
+                      {info.adminEmail}
+                    </a>
+                  ) : (
+                    <span className="text-gray-400">sin admin</span>
+                  )}
+                </td>
+                <td className="px-5 py-4 whitespace-nowrap">
                   {info.phone || '---'}
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">

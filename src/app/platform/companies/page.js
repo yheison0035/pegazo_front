@@ -16,7 +16,10 @@ import LoadingOverlay from '@/components/ui/LoadingOverlay';
 
 import useColumnFilters from '@/components/dashboard/tables/hooks/useColumnFilters';
 import { useDebounce } from '@/components/dashboard/tables/hooks/useDebounce';
-import { getHeaderTableCompanies } from '@/lib/api/utils/companies.config';
+import {
+  getHeaderTableCompanies,
+  viewModalConfig,
+} from '@/lib/api/utils/companies.config';
 import useCompanies from '@/lib/api/hooks/useCompanies';
 
 export default function Companies() {
@@ -151,7 +154,7 @@ export default function Companies() {
             data={selectedCompany}
             type="companies"
             onClose={() => setSelectedCompany(null)}
-            viewModalConfig={viewModalConfigCompanies}
+            viewModalConfig={viewModalConfig}
           />
         )}
 

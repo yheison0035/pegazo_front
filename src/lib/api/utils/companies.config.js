@@ -86,6 +86,12 @@ export const getHeaderTableCompanies = () => [
   { name: 'name', title: 'Nombre de la Empresa', show: true, showInput: true },
   { name: 'type', title: 'Tipo de Empresa', show: true, showInput: true },
   { name: 'manager', title: 'Encargado', show: true, showInput: true },
+  {
+    name: 'adminEmail',
+    title: 'Correo de acceso',
+    show: true,
+    showInput: false,
+  },
   { name: 'phone', title: 'Teléfono', show: true, showInput: true },
   { name: 'status', title: 'Estado', show: true, showInput: true },
   { name: 'startDate', title: 'Cliente desde', show: true, showInput: false },
@@ -102,6 +108,8 @@ export const viewModalConfig = {
         { name: 'name', label: 'Nombre de la Empresa' },
         { name: 'type', label: 'Tipo de Empresa' },
         { name: 'phone', label: 'Teléfono' },
+        { name: 'adminEmail', label: 'Correo de acceso (administrador)' },
+        { name: 'adminName', label: 'Administrador' },
       ],
     },
     {
