@@ -7,7 +7,6 @@ import {
   Squares2X2Icon,
   PrinterIcon,
   PowerIcon,
-  BuildingStorefrontIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 
@@ -38,16 +37,6 @@ export default function Actions({
         >
           <EyeIcon className="w-5 h-5" />
         </button>
-      )}
-
-      {view === 'companies' && (
-        <Link
-          href={`/CRM/platform/companies/${info.id}/locals`}
-          title="Gestionar locales"
-          className="p-2 rounded-lg hover:bg-teal-50 text-teal-600 transition cursor-pointer"
-        >
-          <BuildingStorefrontIcon className="w-5 h-5" />
-        </Link>
       )}
 
       {view === 'companies' && (
