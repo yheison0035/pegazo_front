@@ -329,6 +329,9 @@ export default function ContentData({
                   {info.status || '---'}
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
+                  {formatDateOnly(info.startDate || info.createdAt) || '---'}
+                </td>
+                <td className="px-5 py-4 whitespace-nowrap">
                   {info.paidUntil ? (
                     <span
                       className={

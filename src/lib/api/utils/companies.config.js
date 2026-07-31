@@ -7,6 +7,7 @@ export const getEmptyCompany = () => ({
   status: '',
   plan: '',
   paidUntil: '',
+  startDate: '',
   adminName: '',
   adminEmail: '',
   adminPassword: '',
@@ -39,6 +40,12 @@ export const getFormFieldsCompanies = (includeAdmin = false) => [
     name: 'plan',
     label: 'Plan',
     type: 'text',
+    required: false,
+  },
+  {
+    name: 'startDate',
+    label: 'Cliente desde (si se deja vacío se usa la fecha de creación)',
+    type: 'date',
     required: false,
   },
   {
@@ -81,6 +88,7 @@ export const getHeaderTableCompanies = () => [
   { name: 'manager', title: 'Encargado', show: true, showInput: true },
   { name: 'phone', title: 'Teléfono', show: true, showInput: true },
   { name: 'status', title: 'Estado', show: true, showInput: true },
+  { name: 'startDate', title: 'Cliente desde', show: true, showInput: false },
   { name: 'paidUntil', title: 'Pago hasta', show: true, showInput: false },
 ];
 
@@ -101,6 +109,8 @@ export const viewModalConfig = {
         { name: 'manager', label: 'Encargado' },
         { name: 'status', label: 'Estado', type: 'status' },
         { name: 'plan', label: 'Plan' },
+        { name: 'startDate', label: 'Cliente desde', type: 'date' },
+        { name: 'createdAt', label: 'Registrada el', type: 'date' },
         { name: 'paidUntil', label: 'Pago al día hasta', type: 'date' },
       ],
     },
