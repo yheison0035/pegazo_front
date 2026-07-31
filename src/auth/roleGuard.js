@@ -15,7 +15,7 @@ export default function RoleGuard({
   useEffect(() => {
     if (!loading) {
       if (!usuario) {
-        router.push('/');
+        router.push('/login');
       } else {
         const validAllowedRoles = Array.isArray(allowedRoles)
           ? allowedRoles

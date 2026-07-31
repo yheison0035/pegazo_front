@@ -4,7 +4,7 @@ const nextConfig = {
   // los enlaces viejos /CRM/... a la nueva ubicación para no romper marcadores.
   async redirects() {
     return [
-      { source: '/CRM', destination: '/', permanent: true },
+      { source: '/CRM', destination: '/login', permanent: true },
       { source: '/CRM/:path*', destination: '/:path*', permanent: true },
     ];
   },
