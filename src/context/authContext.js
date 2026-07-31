@@ -2,7 +2,11 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { login as apiLogin, logout as apiLogout } from '@/lib/api/auth/auth';
+import {
+  login as apiLogin,
+  logout as apiLogout,
+  registerBusiness as apiRegisterBusiness,
+} from '@/lib/api/auth/auth';
 import apiFetch from '@/lib/api/auth/client';
 
 const AuthContext = createContext();
@@ -45,6 +49,23 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Auto-registro de negocio: crea la empresa + admin y deja la sesión iniciada.
+  const registerBusiness = async (payload) => {
+    const res = await apiRegisterBusiness(payload);
+    const token = res?.data?.access_token;
+    if (!token) throw new Error('No se recibió token del servidor');
+
+    localStorage.setItem('token', token);
+
+    const profile = await apiFetch('/auth/me');
+    const { data: userData } = profile;
+
+    localStorage.setItem('usuario', JSON.stringify(userData));
+    setUsuario(userData);
+
+    return userData;
+  };
+
   const logout = () => {
     apiLogout();
     setUsuario(null);
@@ -52,7 +73,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ usuario, loading, login, logout }}>
+    <AuthContext.Provider
+      value={{ usuario, loading, login, logout, registerBusiness }}
+    >
       {children}
     </AuthContext.Provider>
   );

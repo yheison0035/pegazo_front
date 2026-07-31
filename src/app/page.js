@@ -91,12 +91,20 @@ export default function Landing() {
               Contacto
             </a>
           </nav>
-          <Link
-            href="/login"
-            className="rounded-lg bg-gradient-to-r from-orange-600 to-amber-500 px-5 py-2 text-sm font-semibold text-white shadow hover:opacity-90"
-          >
-            Iniciar sesión
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/login"
+              className="hidden rounded-lg px-4 py-2 text-sm font-semibold text-neutral-200 hover:text-white sm:block"
+            >
+              Iniciar sesión
+            </Link>
+            <Link
+              href="/register"
+              className="rounded-lg bg-gradient-to-r from-orange-600 to-amber-500 px-5 py-2 text-sm font-semibold text-white shadow hover:opacity-90"
+            >
+              Crear cuenta
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -124,17 +132,17 @@ export default function Landing() {
 
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
-              href="/login"
+              href="/register"
               className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 px-7 py-3 font-semibold text-white shadow-lg hover:opacity-90"
             >
-              Iniciar sesión <ArrowRightIcon className="h-5 w-5" />
+              Crear cuenta gratis <ArrowRightIcon className="h-5 w-5" />
             </Link>
-            <a
-              href="#funciones"
+            <Link
+              href="/login"
               className="rounded-xl border border-white/20 px-7 py-3 font-semibold text-white hover:bg-white/5"
             >
-              Ver funciones
-            </a>
+              Iniciar sesión
+            </Link>
           </div>
 
           <div className="mt-9 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-neutral-400">
@@ -285,7 +293,7 @@ export default function Landing() {
               </div>
 
               <Link
-                href="/login"
+                href={`/register?plan=${plan.id}`}
                 className={`mt-5 block rounded-xl px-4 py-2.5 text-center text-sm font-semibold transition ${
                   plan.highlight
                     ? 'bg-gradient-to-r from-orange-600 to-amber-500 text-white hover:opacity-90'
@@ -338,10 +346,10 @@ export default function Landing() {
             Todo tu negocio, en un solo lugar. Ingresa y comienza hoy.
           </p>
           <Link
-            href="/login"
+            href="/register"
             className="mt-8 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 px-8 py-3.5 font-semibold text-white shadow-lg hover:opacity-90"
           >
-            Iniciar sesión <ArrowRightIcon className="h-5 w-5" />
+            Crear cuenta gratis <ArrowRightIcon className="h-5 w-5" />
           </Link>
         </div>
       </section>

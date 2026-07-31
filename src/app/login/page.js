@@ -199,7 +199,17 @@ export default function Login() {
               </button>
             </form>
 
-            <p className="text-xs text-gray-400 text-center mt-6">
+            <p className="text-sm text-gray-500 text-center mt-6">
+              ¿No tienes cuenta?{' '}
+              <a
+                href="/register"
+                className="font-semibold text-orange-600 hover:underline"
+              >
+                Crea tu negocio gratis
+              </a>
+            </p>
+
+            <p className="text-xs text-gray-400 text-center mt-3">
               Plataforma segura · Pegazo
             </p>
           </div>

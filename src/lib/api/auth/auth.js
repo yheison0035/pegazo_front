@@ -18,6 +18,30 @@ export async function login(email, password) {
   return res;
 }
 
+export async function registerBusiness(payload) {
+  const res = await apiFetch('/auth/register-business', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+    auth: false,
+  });
+
+  const token = res?.data?.access_token;
+  if (!token) throw new Error('No se recibió token del servidor');
+
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('token', token);
+  }
+  return res;
+}
+
+export async function validateCoupon(code, plan) {
+  return apiFetch('/coupons/validate', {
+    method: 'POST',
+    body: JSON.stringify({ code, plan }),
+    auth: false,
+  });
+}
+
 export async function forgotPassword(email) {
   return apiFetch('/auth/forgot-password', {
     method: 'POST',

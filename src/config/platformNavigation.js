@@ -3,6 +3,7 @@ import {
   UsersIcon,
   ChartBarIcon,
   Cog6ToothIcon,
+  TicketIcon,
 } from '@heroicons/react/24/outline';
 
 export const PLATFORM_NAVIGATION = [
@@ -18,6 +19,11 @@ export const PLATFORM_NAVIGATION = [
         name: 'Usuarios Globales',
         href: '/platform/users',
         icon: UsersIcon,
+      },
+      {
+        name: 'Cupones',
+        href: '/platform/coupons',
+        icon: TicketIcon,
       },
       {
         name: 'Estadísticas Globales',
