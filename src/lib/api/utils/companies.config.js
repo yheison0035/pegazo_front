@@ -1,3 +1,5 @@
+import { PLAN_OPTIONS } from '@/lib/plans';
+
 export const getEmptyCompany = () => ({
   logo: '',
   name: '',
@@ -39,8 +41,9 @@ export const getFormFieldsCompanies = (includeAdmin = false) => [
   {
     name: 'plan',
     label: 'Plan',
-    type: 'text',
+    type: 'select',
     required: false,
+    options: PLAN_OPTIONS,
   },
   {
     name: 'startDate',

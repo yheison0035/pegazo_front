@@ -12,6 +12,7 @@ import {
   CheckCircleIcon,
   ShoppingBagIcon,
 } from '@heroicons/react/24/outline';
+import { PLANS } from '@/lib/plans';
 
 const FEATURES = [
   {
@@ -79,6 +80,9 @@ export default function Landing() {
           <nav className="hidden items-center gap-8 text-sm text-neutral-300 md:flex">
             <a href="#funciones" className="hover:text-white">
               Funciones
+            </a>
+            <a href="#planes" className="hover:text-white">
+              Planes
             </a>
             <a href="#negocios" className="hover:text-white">
               Para tu negocio
@@ -230,6 +234,94 @@ export default function Landing() {
             ))}
           </div>
         </div>
+      </section>
+
+      {/* PLANES */}
+      <section id="planes" className="mx-auto max-w-6xl px-5 py-20">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-3xl font-bold text-neutral-900">
+            Un plan para cada momento de tu negocio
+          </h2>
+          <p className="mt-3 text-neutral-500">
+            Empieza gratis y sube de nivel cuando crezcas. Sin permanencia, con
+            14 días de prueba en los planes pagos.
+          </p>
+        </div>
+
+        <div className="mt-12 grid items-start gap-6 lg:grid-cols-4">
+          {PLANS.map((plan) => (
+            <div
+              key={plan.id}
+              className={`relative flex h-full flex-col rounded-2xl border p-6 shadow-sm transition ${
+                plan.highlight
+                  ? 'border-orange-500 bg-white ring-2 ring-orange-500'
+                  : 'border-neutral-200 bg-white hover:border-orange-300'
+              }`}
+            >
+              {plan.highlight && (
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-orange-600 to-amber-500 px-3 py-1 text-xs font-semibold text-white shadow">
+                  Más popular
+                </span>
+              )}
+
+              <div className="text-2xl">{plan.emoji}</div>
+              <h3 className="mt-2 text-lg font-bold text-neutral-900">
+                {plan.name}
+              </h3>
+              <p className="text-sm text-neutral-500">{plan.tagline}</p>
+
+              <div className="mt-4">
+                <span className="text-3xl font-extrabold text-neutral-900">
+                  {plan.priceLabel}
+                </span>
+                <span className="text-sm text-neutral-500">
+                  {plan.priceSuffix}
+                </span>
+                {plan.yearLabel && (
+                  <p className="mt-1 text-xs text-neutral-400">
+                    {plan.yearLabel}
+                  </p>
+                )}
+              </div>
+
+              <Link
+                href="/login"
+                className={`mt-5 block rounded-xl px-4 py-2.5 text-center text-sm font-semibold transition ${
+                  plan.highlight
+                    ? 'bg-gradient-to-r from-orange-600 to-amber-500 text-white hover:opacity-90'
+                    : 'border border-neutral-300 text-neutral-800 hover:border-orange-400 hover:text-orange-600'
+                }`}
+              >
+                {plan.cta}
+              </Link>
+
+              <div className="mt-5 flex flex-wrap gap-1.5">
+                {plan.limits.map((l) => (
+                  <span
+                    key={l}
+                    className="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-medium text-neutral-600"
+                  >
+                    {l}
+                  </span>
+                ))}
+              </div>
+
+              <ul className="mt-5 space-y-2 border-t border-neutral-100 pt-5">
+                {plan.features.map((f) => (
+                  <li key={f} className="flex items-start gap-2 text-sm">
+                    <CheckCircleIcon className="mt-0.5 h-4 w-4 flex-none text-orange-500" />
+                    <span className="text-neutral-600">{f}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        <p className="mt-8 text-center text-sm text-neutral-400">
+          Todos los planes incluyen datos en la nube y respaldados. Los precios
+          están en pesos colombianos (COP).
+        </p>
       </section>
 
       {/* CTA FINAL */}

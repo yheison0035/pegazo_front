@@ -1,0 +1,87 @@
+// Fuente única de verdad de los planes de Pegazo. Se usa en la landing (sección
+// de precios) y en el panel (selector de plan al crear/editar una empresa).
+// Si cambian precios o nombres, se edita solo aquí.
+
+export const PLANS = [
+  {
+    id: 'DESPEGUE',
+    name: 'Despegue',
+    emoji: '🛫',
+    tagline: 'Para el que arranca',
+    priceLabel: 'Gratis',
+    priceSuffix: '',
+    yearLabel: '',
+    highlight: false,
+    limits: ['1 usuario', '1 sede', '50 productos', '100 clientes'],
+    features: [
+      'Ventas (POS)',
+      'Inventario básico',
+      'Clientes',
+      'Reportes básicos',
+    ],
+    cta: 'Empezar gratis',
+  },
+  {
+    id: 'IMPULSO',
+    name: 'Impulso',
+    emoji: '🚀',
+    tagline: 'Negocio en marcha',
+    priceLabel: '$39.900',
+    priceSuffix: '/mes',
+    yearLabel: '$399.000/año · 2 meses gratis',
+    highlight: true,
+    limits: ['3 usuarios', '1 sede', 'Productos ilimitados', 'Clientes ilimitados'],
+    features: [
+      'Todo lo de Despegue',
+      'Gastos',
+      'Fiado / crédito',
+      'Citas y servicios',
+      'Roles y permisos',
+      'Estadísticas completas',
+      'Códigos de barras y alertas de stock',
+      'Soporte prioritario por WhatsApp',
+    ],
+    cta: 'Probar 14 días gratis',
+  },
+  {
+    id: 'ALTURA',
+    name: 'Altura',
+    emoji: '📈',
+    tagline: 'Crece con varias sedes',
+    priceLabel: '$89.900',
+    priceSuffix: '/mes',
+    yearLabel: '$899.000/año · 2 meses gratis',
+    highlight: false,
+    limits: ['10 usuarios', 'Hasta 3 sedes', 'Productos ilimitados', 'Clientes ilimitados'],
+    features: [
+      'Todo lo de Impulso',
+      'Multi-sede (hasta 3)',
+      'Reportes y comparativas por sede',
+      'Auditoría avanzada',
+      '🛒 Tienda online conectada a tu inventario',
+    ],
+    cta: 'Probar 14 días gratis',
+  },
+  {
+    id: 'ORBITA',
+    name: 'Órbita',
+    emoji: '🪐',
+    tagline: 'Cadena o empresa',
+    priceLabel: '$179.900',
+    priceSuffix: '/mes',
+    yearLabel: '$1.799.000/año · 2 meses gratis',
+    highlight: false,
+    limits: ['Usuarios ilimitados', 'Sedes ilimitadas', 'Productos ilimitados', 'Clientes ilimitados'],
+    features: [
+      'Todo lo de Altura',
+      'Factura electrónica DIAN (al liberarse)',
+      'Tienda online con pagos en línea',
+      'Integraciones / API',
+      'Gerente de cuenta y capacitación',
+    ],
+    cta: 'Hablar con ventas',
+  },
+];
+
+// Opciones para selects (panel de administración de la plataforma).
+export const PLAN_OPTIONS = PLANS.map((p) => ({ id: p.id, name: p.name }));
