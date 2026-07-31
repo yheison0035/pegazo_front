@@ -18,6 +18,22 @@ export async function login(email, password) {
   return res;
 }
 
+export async function forgotPassword(email) {
+  return apiFetch('/auth/forgot-password', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+    auth: false,
+  });
+}
+
+export async function resetPassword(token, password) {
+  return apiFetch('/auth/reset-password', {
+    method: 'POST',
+    body: JSON.stringify({ token, password }),
+    auth: false,
+  });
+}
+
 export function logout() {
   if (typeof window !== 'undefined') {
     localStorage.removeItem('token');
