@@ -63,8 +63,22 @@ export default function Login() {
             haz despegar tu negocio desde una sola plataforma, en la nube.
           </p>
 
+          <p className="mt-4 max-w-md rounded-xl border border-orange-500/20 bg-orange-500/10 px-4 py-3 text-sm text-neutral-200">
+            🛒 <b className="text-white">Tienda online conectada a tu inventario:</b>{' '}
+            vende por internet y tú eliges qué productos mostrar, sincronizados
+            en tiempo real.
+          </p>
+
           <div className="mt-6 flex flex-wrap gap-2">
-            {['Ventas', 'Inventario', 'Clientes', 'Citas', 'Reportes', 'Multi-sede'].map(
+            {[
+              'Ventas',
+              'Inventario',
+              'Clientes',
+              'Citas',
+              'Reportes',
+              'Multi-sede',
+              'Tienda online',
+            ].map(
               (t) => (
                 <span
                   key={t}
@@ -102,6 +116,10 @@ export default function Login() {
             <p className="mt-3 text-sm text-neutral-300">
               Todo tu negocio, en un solo lugar. Ventas, inventario, clientes,
               citas y reportes en la nube.
+            </p>
+            <p className="mt-2 text-xs text-neutral-400">
+              🛒 Y tu propia tienda online conectada a tu inventario: tú eliges
+              qué productos vender por internet.
             </p>
             <a
               href="/"
