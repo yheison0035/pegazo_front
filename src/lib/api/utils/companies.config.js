@@ -7,9 +7,12 @@ export const getEmptyCompany = () => ({
   status: '',
   plan: '',
   paidUntil: '',
+  adminName: '',
+  adminEmail: '',
+  adminPassword: '',
 });
 
-export const getFormFieldsCompanies = () => [
+export const getFormFieldsCompanies = (includeAdmin = false) => [
   { name: 'logo', label: 'Logo de la Empresa', type: 'text', required: true },
   { name: 'name', label: 'Nombre de la Empresa', type: 'text', required: true },
   {
@@ -44,6 +47,31 @@ export const getFormFieldsCompanies = () => [
     type: 'date',
     required: false,
   },
+
+  // Solo al crear: credenciales del administrador inicial de la empresa, para
+  // que pueda iniciar sesión y de ahí en adelante gestione todo por su cuenta.
+  ...(includeAdmin
+    ? [
+        {
+          name: 'adminName',
+          label: 'Nombre del administrador',
+          type: 'text',
+          required: false,
+        },
+        {
+          name: 'adminEmail',
+          label: 'Correo del administrador (para iniciar sesión)',
+          type: 'email',
+          required: true,
+        },
+        {
+          name: 'adminPassword',
+          label: 'Contraseña del administrador',
+          type: 'password',
+          required: true,
+        },
+      ]
+    : []),
 ];
 
 export const getHeaderTableCompanies = () => [

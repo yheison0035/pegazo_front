@@ -26,7 +26,9 @@ export default function NewCompany() {
       await createCompany(formData);
       setAlert({
         type: 'success',
-        message: 'Empresa creada correctamente.',
+        message: formData.adminEmail
+          ? `Empresa creada. El administrador ya puede iniciar sesión con: ${formData.adminEmail}`
+          : 'Empresa creada correctamente.',
         url: '/CRM/platform/companies',
       });
     } catch (err) {
@@ -48,7 +50,7 @@ export default function NewCompany() {
 
       <DinamicForm
         formData={formData}
-        formFields={getFormFieldsCompanies()}
+        formFields={getFormFieldsCompanies(true)}
         setFormData={setFormData}
         handleSubmit={handleSubmit}
         handleReset={handleReset}
