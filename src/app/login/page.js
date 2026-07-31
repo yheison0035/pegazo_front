@@ -48,7 +48,7 @@ export default function Login() {
           <img
             src="/images/logo_pegazo.png"
             alt="Pegazo"
-            className="w-96 max-w-full"
+            className="w-[28rem] max-w-full"
           />
         </div>
 

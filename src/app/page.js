@@ -10,6 +10,7 @@ import {
   ShieldCheckIcon,
   ArrowRightIcon,
   CheckCircleIcon,
+  ShoppingBagIcon,
 } from '@heroicons/react/24/outline';
 
 const FEATURES = [
@@ -73,7 +74,7 @@ export default function Landing() {
           <img
             src="/images/logo_pegazo.png"
             alt="Pegazo"
-            className="h-9 w-auto"
+            className="h-11 w-auto"
           />
           <nav className="hidden items-center gap-8 text-sm text-neutral-300 md:flex">
             <a href="#funciones" className="hover:text-white">
@@ -104,7 +105,7 @@ export default function Landing() {
           <img
             src="/images/logo_pegazo.png"
             alt="Pegazo"
-            className="mx-auto mb-8 h-40 w-auto"
+            className="mx-auto mb-8 h-56 w-auto"
           />
           <h1 className="mx-auto max-w-3xl text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl">
             Todo tu negocio,{' '}
@@ -174,6 +175,40 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ECOMMERCE */}
+      <section className="mx-auto max-w-6xl px-5 pb-10">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-orange-600 to-amber-500 p-8 text-white shadow-lg sm:p-12">
+          <ShoppingBagIcon className="pointer-events-none absolute -right-8 -top-8 h-48 w-48 text-white/10" />
+          <div className="relative max-w-2xl">
+            <p className="text-sm font-semibold uppercase tracking-wider text-white/80">
+              Vende en línea
+            </p>
+            <h2 className="mt-2 text-3xl font-bold sm:text-4xl">
+              Tu tienda online, conectada a tu inventario
+            </h2>
+            <p className="mt-4 text-white/90">
+              Lleva tu negocio a internet con tu propia tienda. Se sincroniza
+              con tu inventario en tiempo real y{' '}
+              <b>tú decides qué productos mostrar</b>: publica solo lo que
+              quieres vender por internet.
+            </p>
+            <ul className="mt-6 grid gap-x-6 gap-y-2 sm:grid-cols-2">
+              {[
+                'Sincronizada con tu inventario',
+                'Tú eliges qué productos publicar',
+                'Pagos en línea integrados',
+                'Con la imagen de tu marca',
+              ].map((item) => (
+                <li key={item} className="flex items-center gap-2">
+                  <CheckCircleIcon className="h-5 w-5 flex-none text-white" />
+                  <span className="text-sm text-white/95">{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
       {/* PARA TU NEGOCIO */}
       <section id="negocios" className="bg-neutral-50 py-20">
         <div className="mx-auto max-w-6xl px-5 text-center">
@@ -226,7 +261,7 @@ export default function Landing() {
             <img
               src="/images/logo_pegazo.png"
               alt="Pegazo"
-              className="h-8 w-auto"
+              className="h-10 w-auto"
             />
             <p className="text-xs text-neutral-500">
               Todo tu negocio, en un solo lugar.
