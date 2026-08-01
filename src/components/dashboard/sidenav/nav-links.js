@@ -93,15 +93,17 @@ export default function NavLinks() {
         ))}
       </nav>
 
-      <div className="mt-6 border-t border-orange-500/10 pt-4 px-2">
-        <Link
-          href="/dashboard/upgrade"
-          className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-amber-300 transition hover:bg-amber-500/10"
-        >
-          <RocketLaunchIcon className="w-5 h-5" />
-          <span>Mejorar mi plan</span>
-        </Link>
-      </div>
+      {usuario?.role !== 'SUPER_PLATFORM_ADMIN' && (
+        <div className="mt-6 border-t border-orange-500/10 pt-4 px-2">
+          <Link
+            href="/dashboard/upgrade"
+            className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-amber-300 transition hover:bg-amber-500/10"
+          >
+            <RocketLaunchIcon className="w-5 h-5" />
+            <span>Mejorar mi plan</span>
+          </Link>
+        </div>
+      )}
 
       <div className="pb-9 pt-2 px-2">
         <button

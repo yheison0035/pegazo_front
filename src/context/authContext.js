@@ -25,6 +25,26 @@ export const AuthProvider = ({ children }) => {
     }
 
     setLoading(false);
+
+    // Refresca el perfil en segundo plano para tener siempre datos al día
+    // (incluido el plan de la empresa), sin depender de volver a iniciar sesión.
+    if (token) {
+      apiFetch('/auth/me')
+        .then((profile) => {
+          const userData = profile?.data;
+          if (userData) {
+            localStorage.setItem('usuario', JSON.stringify(userData));
+            setUsuario(userData);
+          }
+        })
+        .catch(() => {
+          // Si el token expiró, apiFetch ya lo eliminó: se cierra la sesión.
+          if (!localStorage.getItem('token')) {
+            localStorage.removeItem('usuario');
+            setUsuario(null);
+          }
+        });
+    }
   }, []);
 
   const login = async (email, password) => {
