@@ -3,7 +3,7 @@
 import { BUSINESS_TYPES } from '@/config/businessTypes';
 import { NAVIGATION } from '@/config/navigation';
 import { PLATFORM_NAVIGATION } from '@/config/platformNavigation';
-import { planAllowsModule } from '@/lib/plans';
+import { planAllowsModule, requiredPlanForModule } from '@/lib/plans';
 import { useAuth } from '@/context/authContext';
 
 export default function useNavigation() {
@@ -22,29 +22,33 @@ export default function useNavigation() {
   const plan = usuario.company?.plan;
 
   // módulos permitidos por tipo de negocio
-  let modules = [...(BUSINESS_TYPES[businessType] || BUSINESS_TYPES.COMERCIO)];
+  const modules = [...(BUSINESS_TYPES[businessType] || BUSINESS_TYPES.COMERCIO)];
 
   // La tienda online solo aparece si la plataforma se la habilitó a la empresa.
   if (usuario.company?.websiteEnabled) {
     modules.push('website');
   }
 
-  // Gating por plan: cada plan solo ve las funciones que incluye. Empresas sin
-  // plan no se restringen (planAllowsModule devuelve true).
-  modules = modules.filter((m) => planAllowsModule(plan, m));
-
-  // filtrar por módulos + roles dentro de secciones
+  // Filtrar por módulos del negocio + rol. El gating por plan NO oculta: marca
+  // el módulo como "bloqueado" (candado) para poder ofrecer el plan superior.
   const filteredSections = NAVIGATION.map((section) => {
-    const filteredItems = section.items.filter(
-      (item) =>
-        modules.includes(item.href.split('/').pop()) && // valida módulo
-        item.roles.includes(role)
-    );
+    const items = section.items
+      .filter(
+        (item) =>
+          modules.includes(item.href.split('/').pop()) &&
+          item.roles.includes(role)
+      )
+      .map((item) => {
+        const key = item.href.split('/').pop();
+        const locked = !planAllowsModule(plan, key);
+        return {
+          ...item,
+          locked,
+          requiredPlan: locked ? requiredPlanForModule(key) : null,
+        };
+      });
 
-    return {
-      ...section,
-      items: filteredItems,
-    };
+    return { ...section, items };
   }).filter((section) => section.items.length > 0);
 
   return filteredSections;

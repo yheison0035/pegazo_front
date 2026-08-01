@@ -3,6 +3,7 @@
 import SideNavigation from '@/components/dashboard/sidenav/sidenav';
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
+import PlanUpgradeModal from '@/components/plan/PlanUpgradeModal';
 
 export default function Layout({ children }) {
   return (
@@ -15,6 +16,7 @@ export default function Layout({ children }) {
           {children}
         </div>
       </div>
+      <PlanUpgradeModal />
     </RoleGuard>
   );
 }

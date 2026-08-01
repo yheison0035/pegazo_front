@@ -2,9 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ArrowLeftOnRectangleIcon } from '@heroicons/react/24/outline';
+import {
+  ArrowLeftOnRectangleIcon,
+  LockClosedIcon,
+  RocketLaunchIcon,
+} from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/authContext';
 import useNavigation from '@/hooks/useNavigation';
+import { openPlanUpgrade } from '@/lib/planUpgrade';
 
 export default function NavLinks() {
   const { usuario, loading, logout } = useAuth();
@@ -30,6 +35,28 @@ export default function NavLinks() {
               {section.items.map((link) => {
                 const LinkIcon = link.icon;
                 const isActive = pathname.startsWith(link.href);
+
+                // Módulo bloqueado por plan: no navega, ofrece mejorar el plan.
+                if (link.locked) {
+                  return (
+                    <button
+                      key={link.name}
+                      onClick={() =>
+                        openPlanUpgrade({
+                          requiredPlan: link.requiredPlan,
+                          featureName: link.name,
+                          reason: 'feature',
+                        })
+                      }
+                      title={`Disponible desde el plan ${link.requiredPlan}`}
+                      className="group relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-white/35 hover:text-white/70 hover:bg-white/5 transition-all"
+                    >
+                      <LinkIcon className="w-5 h-5 text-white/25" />
+                      <span className="flex-1 text-left">{link.name}</span>
+                      <LockClosedIcon className="w-4 h-4 text-amber-400/70" />
+                    </button>
+                  );
+                }
 
                 return (
                   <Link
@@ -66,7 +93,17 @@ export default function NavLinks() {
         ))}
       </nav>
 
-      <div className="mt-6 pb-9 border-t border-orange-500/10 pt-4 px-2">
+      <div className="mt-6 border-t border-orange-500/10 pt-4 px-2">
+        <Link
+          href="/dashboard/upgrade"
+          className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-amber-300 transition hover:bg-amber-500/10"
+        >
+          <RocketLaunchIcon className="w-5 h-5" />
+          <span>Mejorar mi plan</span>
+        </Link>
+      </div>
+
+      <div className="pb-9 pt-2 px-2">
         <button
           onClick={logout}
           className="flex items-center w-full gap-3 px-4 py-3 rounded-xl transition

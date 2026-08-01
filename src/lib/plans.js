@@ -104,6 +104,7 @@ export const MODULE_MIN_PLAN = {
   shipping: 'ALTURA',
 };
 
+export const PLAN_ORDER = ['DESPEGUE', 'IMPULSO', 'ALTURA', 'ORBITA'];
 const PLAN_RANK = { DESPEGUE: 1, IMPULSO: 2, ALTURA: 3, ORBITA: 4 };
 
 export function planAllowsModule(plan, moduleKey) {
@@ -113,4 +114,13 @@ export function planAllowsModule(plan, moduleKey) {
   const rank = PLAN_RANK[plan];
   if (!rank) return true; // plan desconocido → sin gating
   return rank >= PLAN_RANK[min];
+}
+
+// Plan mínimo requerido por un módulo (para el mensaje de "mejora tu plan").
+export function requiredPlanForModule(moduleKey) {
+  return MODULE_MIN_PLAN[moduleKey] || null;
+}
+
+export function getPlan(planId) {
+  return PLANS.find((p) => p.id === planId) || null;
 }

@@ -1,3 +1,5 @@
+import { openPlanUpgrade } from '@/lib/planUpgrade';
+
 const API_URL = (
   process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002'
 ).replace(/\/$/, '');
@@ -55,6 +57,14 @@ async function apiFetch(path, opts = {}) {
         break;
       case 403:
         message = data?.message || 'No tienes permisos para esta acción';
+        // Error de plan (límite o función): abre el modal "Mejora tu plan".
+        if (data?.requiredPlan) {
+          openPlanUpgrade({
+            requiredPlan: data.requiredPlan,
+            reason: data.error === 'PLAN_LIMIT' ? 'limit' : 'feature',
+            message: data.message,
+          });
+        }
         break;
       case 404:
         message = data?.message || 'Recurso no encontrado';
