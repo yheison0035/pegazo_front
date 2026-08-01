@@ -43,7 +43,8 @@ export async function updateAppointment(id, dto) {
     startTime: dto.startTime,
     serviceId: Number(dto.serviceId),
     barberId: Number(dto.barberId),
-    customerId: Number(dto.customerId),
+    // Cliente opcional: si va vacío se manda null (evita FK a id 0).
+    customerId: dto.customerId ? Number(dto.customerId) : null,
     localId: Number(dto.localId),
     notes: dto.notes || '',
     status: dto.status,

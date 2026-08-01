@@ -66,9 +66,54 @@ const BUSINESS_TYPES = [
   'Distribución',
 ];
 
+const JSON_LD = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': 'https://pegazo.co/#organization',
+      name: 'Pegazo',
+      url: 'https://pegazo.co',
+      logo: 'https://pegazo.co/images/logo_pegazo.png',
+      slogan: 'Todo tu negocio, en un solo lugar',
+      description:
+        'Software en la nube para gestionar negocios: ventas, inventario, clientes, gastos, citas, reportes y tienda online.',
+    },
+    {
+      '@type': 'WebSite',
+      '@id': 'https://pegazo.co/#website',
+      url: 'https://pegazo.co',
+      name: 'Pegazo',
+      inLanguage: 'es-CO',
+      publisher: { '@id': 'https://pegazo.co/#organization' },
+    },
+    {
+      '@type': 'SoftwareApplication',
+      name: 'Pegazo',
+      applicationCategory: 'BusinessApplication',
+      operatingSystem: 'Web',
+      url: 'https://pegazo.co',
+      description:
+        'Plataforma todo en uno para gestionar y hacer despegar tu negocio, con tienda online conectada al inventario.',
+      offers: PLANS.map((p) => ({
+        '@type': 'Offer',
+        name: `Plan ${p.name}`,
+        price: p.priceMonthly ?? 0,
+        priceCurrency: 'COP',
+        description: p.tagline,
+        category: 'subscription',
+      })),
+    },
+  ],
+};
+
 export default function Landing() {
   return (
     <div className="min-h-screen bg-white text-neutral-800">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
+      />
       {/* HEADER */}
       <header className="sticky top-0 z-50 border-b border-white/10 bg-neutral-950/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
