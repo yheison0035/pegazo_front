@@ -94,8 +94,22 @@ export async function updateDeliveredSale(id, dto) {
     ...cleanDto
   } = dto;
 
+  // Los servicios deben viajar como serviceId (no inventoryVariantId); si no,
+  // el backend los busca como producto y responde "Producto inválido".
+  const items = (cleanDto.items || []).map((p) => {
+    const quantity = Number(p.quantity);
+    const discount = Number(p.discount) || 0;
+    const isService =
+      p.type === 'service' || (p.serviceId != null && !p.inventoryVariantId);
+
+    return isService
+      ? { serviceId: p.serviceId ?? p.inventoryVariantId, quantity, discount }
+      : { inventoryVariantId: p.inventoryVariantId, quantity, discount };
+  });
+
   const body = {
     ...cleanDto,
+    items,
     saleDate: dto.saleDate,
     customerId: Number(cleanDto.customerId) || null,
     userId: Number(cleanDto.userId) || null,
