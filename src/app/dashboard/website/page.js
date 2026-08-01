@@ -61,48 +61,25 @@ function Field({ label, hint, children }) {
 const inputClass =
   'w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-orange-500';
 
-// Paleta de colores lista para elegir con un clic (sin tener que escribir el hex).
+// Paleta compacta y curada para elegir con un clic (sin escribir el hex).
 const COLOR_PRESETS = [
-  '#EA580C', '#F97316', '#F59E0B', '#EAB308', '#84CC16', '#22C55E',
-  '#10B981', '#14B8A6', '#06B6D4', '#0EA5E9', '#3B82F6', '#6366F1',
-  '#8B5CF6', '#A855F7', '#D946EF', '#EC4899', '#F43F5E', '#EF4444',
-  '#DC2626', '#111827', '#374151', '#6B7280', '#F3F4F6', '#FFFFFF',
+  '#EA580C', '#F59E0B', '#EAB308', '#22C55E', '#10B981', '#06B6D4',
+  '#3B82F6', '#6366F1', '#8B5CF6', '#EC4899', '#EF4444', '#111827',
 ];
 
 function ColorField({ label, value, fallback, onChange }) {
   const current = value || fallback;
   const norm = (c) => (c || '').toLowerCase();
+  const [openPalette, setOpenPalette] = useState(false);
 
   return (
     <Field label={label}>
-      {/* Paleta de presets: un clic elige el color */}
-      <div className="mb-2 flex flex-wrap gap-1.5">
-        {COLOR_PRESETS.map((c) => {
-          const selected = norm(value) === norm(c);
-          return (
-            <button
-              key={c}
-              type="button"
-              title={c}
-              onClick={() => onChange(c)}
-              style={{ backgroundColor: c }}
-              className={`h-7 w-7 rounded-full border transition ${
-                selected
-                  ? 'border-orange-600 ring-2 ring-orange-400'
-                  : 'border-gray-300 hover:scale-110'
-              }`}
-            />
-          );
-        })}
-      </div>
-
-      {/* Personalizado (selector nativo + hex) */}
       <div className="flex items-center gap-2">
         <input
           type="color"
           value={current}
           onChange={(e) => onChange(e.target.value)}
-          className="h-9 w-12 cursor-pointer rounded border border-gray-300"
+          className="h-9 w-12 flex-none cursor-pointer rounded border border-gray-300"
           title="Color personalizado"
         />
         <input
@@ -112,6 +89,13 @@ function ColorField({ label, value, fallback, onChange }) {
           onChange={(e) => onChange(e.target.value)}
           className={inputClass}
         />
+        <button
+          type="button"
+          onClick={() => setOpenPalette((v) => !v)}
+          className="whitespace-nowrap rounded-lg border border-gray-300 px-2.5 py-2 text-xs text-gray-600 hover:border-orange-400 hover:text-orange-600"
+        >
+          Paleta
+        </button>
         {value && (
           <button
             type="button"
@@ -122,6 +106,30 @@ function ColorField({ label, value, fallback, onChange }) {
           </button>
         )}
       </div>
+
+      {/* Paleta desplegable (colapsada por defecto para no saturar) */}
+      {openPalette && (
+        <div className="mt-2 flex flex-wrap gap-1.5 rounded-lg border border-gray-200 bg-gray-50 p-2">
+          {COLOR_PRESETS.map((c) => {
+            const selected = norm(value) === norm(c);
+            return (
+              <button
+                key={c}
+                type="button"
+                title={c}
+                onClick={() => {
+                  onChange(c);
+                  setOpenPalette(false);
+                }}
+                style={{ backgroundColor: c }}
+                className={`h-6 w-6 rounded-full border transition hover:scale-110 ${
+                  selected ? 'border-orange-600 ring-2 ring-orange-400' : 'border-gray-300'
+                }`}
+              />
+            );
+          })}
+        </div>
+      )}
     </Field>
   );
 }
