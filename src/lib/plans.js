@@ -89,3 +89,28 @@ export const PLANS = [
 
 // Opciones para selects (panel de administración de la plataforma).
 export const PLAN_OPTIONS = PLANS.map((p) => ({ id: p.id, name: p.name }));
+
+// Gating de funciones por plan. Plan mínimo requerido por cada módulo del menú.
+// Los módulos que no aparecen aquí son base (todos los planes). Debe coincidir
+// con el backend (src/common/plan-limits.service.ts). Empresas sin plan o con
+// plan desconocido = sin restricción (no se les cambia lo que ya usan).
+export const MODULE_MIN_PLAN = {
+  expenses: 'IMPULSO',
+  appointments: 'IMPULSO',
+  services: 'IMPULSO',
+  users: 'IMPULSO',
+  statistics: 'IMPULSO',
+  website: 'ALTURA',
+  shipping: 'ALTURA',
+};
+
+const PLAN_RANK = { DESPEGUE: 1, IMPULSO: 2, ALTURA: 3, ORBITA: 4 };
+
+export function planAllowsModule(plan, moduleKey) {
+  const min = MODULE_MIN_PLAN[moduleKey];
+  if (!min) return true; // módulo base
+  if (!plan) return true; // sin plan → sin gating (empresas existentes)
+  const rank = PLAN_RANK[plan];
+  if (!rank) return true; // plan desconocido → sin gating
+  return rank >= PLAN_RANK[min];
+}

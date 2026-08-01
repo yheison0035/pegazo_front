@@ -3,6 +3,7 @@
 import { BUSINESS_TYPES } from '@/config/businessTypes';
 import { NAVIGATION } from '@/config/navigation';
 import { PLATFORM_NAVIGATION } from '@/config/platformNavigation';
+import { planAllowsModule } from '@/lib/plans';
 import { useAuth } from '@/context/authContext';
 
 export default function useNavigation() {
@@ -18,14 +19,19 @@ export default function useNavigation() {
   }
 
   const businessType = usuario.company?.type || 'COMERCIO';
+  const plan = usuario.company?.plan;
 
   // módulos permitidos por tipo de negocio
-  const modules = [...(BUSINESS_TYPES[businessType] || BUSINESS_TYPES.COMERCIO)];
+  let modules = [...(BUSINESS_TYPES[businessType] || BUSINESS_TYPES.COMERCIO)];
 
   // La tienda online solo aparece si la plataforma se la habilitó a la empresa.
   if (usuario.company?.websiteEnabled) {
     modules.push('website');
   }
+
+  // Gating por plan: cada plan solo ve las funciones que incluye. Empresas sin
+  // plan no se restringen (planAllowsModule devuelve true).
+  modules = modules.filter((m) => planAllowsModule(plan, m));
 
   // filtrar por módulos + roles dentro de secciones
   const filteredSections = NAVIGATION.map((section) => {
