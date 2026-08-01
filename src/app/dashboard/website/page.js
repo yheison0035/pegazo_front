@@ -61,17 +61,49 @@ function Field({ label, hint, children }) {
 const inputClass =
   'w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-orange-500';
 
+// Paleta de colores lista para elegir con un clic (sin tener que escribir el hex).
+const COLOR_PRESETS = [
+  '#EA580C', '#F97316', '#F59E0B', '#EAB308', '#84CC16', '#22C55E',
+  '#10B981', '#14B8A6', '#06B6D4', '#0EA5E9', '#3B82F6', '#6366F1',
+  '#8B5CF6', '#A855F7', '#D946EF', '#EC4899', '#F43F5E', '#EF4444',
+  '#DC2626', '#111827', '#374151', '#6B7280', '#F3F4F6', '#FFFFFF',
+];
+
 function ColorField({ label, value, fallback, onChange }) {
   const current = value || fallback;
+  const norm = (c) => (c || '').toLowerCase();
 
   return (
     <Field label={label}>
+      {/* Paleta de presets: un clic elige el color */}
+      <div className="mb-2 flex flex-wrap gap-1.5">
+        {COLOR_PRESETS.map((c) => {
+          const selected = norm(value) === norm(c);
+          return (
+            <button
+              key={c}
+              type="button"
+              title={c}
+              onClick={() => onChange(c)}
+              style={{ backgroundColor: c }}
+              className={`h-7 w-7 rounded-full border transition ${
+                selected
+                  ? 'border-orange-600 ring-2 ring-orange-400'
+                  : 'border-gray-300 hover:scale-110'
+              }`}
+            />
+          );
+        })}
+      </div>
+
+      {/* Personalizado (selector nativo + hex) */}
       <div className="flex items-center gap-2">
         <input
           type="color"
           value={current}
           onChange={(e) => onChange(e.target.value)}
           className="h-9 w-12 cursor-pointer rounded border border-gray-300"
+          title="Color personalizado"
         />
         <input
           type="text"
@@ -103,6 +135,7 @@ export default function WebsitePage() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState('');
   const [alert, setAlert] = useState({});
+  const [showAllThemes, setShowAllThemes] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -295,7 +328,10 @@ export default function WebsitePage() {
               description="Elige el estilo base de tu tienda. Puedes ajustar los colores debajo."
             >
               <div className="grid gap-3 sm:grid-cols-3">
-                {WEBSITE_THEMES.map((theme) => {
+                {(showAllThemes
+                  ? WEBSITE_THEMES
+                  : WEBSITE_THEMES.slice(0, 3)
+                ).map((theme) => {
                   const selected = form.theme === theme.id;
 
                   return (
@@ -328,6 +364,18 @@ export default function WebsitePage() {
                   );
                 })}
               </div>
+
+              {WEBSITE_THEMES.length > 3 && (
+                <button
+                  type="button"
+                  onClick={() => setShowAllThemes((v) => !v)}
+                  className="mt-3 text-sm font-medium text-orange-600 hover:underline"
+                >
+                  {showAllThemes
+                    ? 'Ver menos temas'
+                    : `Ver más temas (${WEBSITE_THEMES.length - 3})`}
+                </button>
+              )}
             </Section>
 
             <Section

@@ -23,6 +23,30 @@ export const WEBSITE_THEMES = [
     description: 'Enérgico y comercial: naranja sobre fondo oscuro.',
     preview: ['#18181b', '#27272a', '#f97316', '#ea580c'],
   },
+  {
+    id: 'esmeralda',
+    name: 'Esmeralda',
+    description: 'Fresco y natural: verdes con acento esmeralda.',
+    preview: ['#064e3b', '#065f46', '#10b981', '#059669'],
+  },
+  {
+    id: 'purpura',
+    name: 'Púrpura',
+    description: 'Elegante y premium: morados profundos.',
+    preview: ['#2e1065', '#4c1d95', '#8b5cf6', '#7c3aed'],
+  },
+  {
+    id: 'boutique',
+    name: 'Boutique',
+    description: 'Moderno y femenino: rosa fucsia sobre blanco.',
+    preview: ['#500724', '#831843', '#ec4899', '#db2777'],
+  },
+  {
+    id: 'oceano',
+    name: 'Océano',
+    description: 'Limpio y confiable: turquesa y azul océano.',
+    preview: ['#083344', '#155e75', '#06b6d4', '#0891b2'],
+  },
 ];
 
 export const WEBSITE_FONTS = [
