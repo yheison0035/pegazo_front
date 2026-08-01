@@ -137,14 +137,14 @@ export default function SalesRangeReModal({ onClose }) {
             <div>
               <label className="flex items-center gap-2 text-xs font-semibold uppercase text-gray-600">
                 <UserIcon className="w-4 h-4" />
-                Asesor
+                Asesor (opcional)
               </label>
               <select
                 value={userId}
                 onChange={(e) => setUserId(e.target.value)}
                 className="mt-2 w-full rounded-xl cursor-pointer border border-gray-300 px-4 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
               >
-                <option value="">Seleccione</option>
+                <option value="">Todos los asesores</option>
                 {users.map((u) => (
                   <option key={u.id} value={u.id}>
                     {u.name}
@@ -155,7 +155,7 @@ export default function SalesRangeReModal({ onClose }) {
           </div>
 
           <button
-            disabled={!startDate || !endDate || !localId || !userId || loading}
+            disabled={!startDate || !endDate || !localId || loading}
             onClick={handleFetch}
             className="mt-6 w-full flex items-center cursor-pointer justify-center gap-2 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-semibold transition disabled:opacity-50"
           >
