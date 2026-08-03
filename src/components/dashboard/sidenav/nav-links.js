@@ -10,10 +10,18 @@ import {
 import { useAuth } from '@/context/authContext';
 import useNavigation from '@/hooks/useNavigation';
 import { openPlanUpgrade } from '@/lib/planUpgrade';
+import { PLAN_ORDER } from '@/lib/plans';
 
 export default function NavLinks() {
   const { usuario, loading, logout } = useAuth();
   const pathname = usePathname();
+
+  // "Mejorar mi plan" solo si NO es el rol de plataforma y aún hay un plan
+  // superior al actual (si ya está en el plan más alto, no se muestra).
+  const plan = usuario?.company?.plan;
+  const topPlan = PLAN_ORDER[PLAN_ORDER.length - 1];
+  const canUpgrade =
+    usuario?.role !== 'SUPER_PLATFORM_ADMIN' && plan !== topPlan;
   const sections = useNavigation();
 
   if (loading || !usuario) return null;
@@ -93,7 +101,7 @@ export default function NavLinks() {
         ))}
       </nav>
 
-      {usuario?.role !== 'SUPER_PLATFORM_ADMIN' && (
+      {canUpgrade && (
         <div className="mt-6 border-t border-orange-500/10 pt-4 px-2">
           <Link
             href="/dashboard/upgrade"
