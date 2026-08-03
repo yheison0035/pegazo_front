@@ -71,13 +71,17 @@ export async function getDeliveredSaleById(id) {
   return apiFetch(`/sales/${id}`);
 }
 
-// Clientes que no vuelven hace entre minDays y maxDays días (reactivación).
-export async function getInactiveCustomers({ minDays = 10, maxDays = 15 } = {}) {
-  const query = new URLSearchParams({
-    minDays: String(minDays),
-    maxDays: String(maxDays),
-  });
+// Clientes por reactivar: última visita hace minDays días o más (def. 20).
+export async function getInactiveCustomers({ minDays = 20 } = {}) {
+  const query = new URLSearchParams({ minDays: String(minDays) });
   return apiFetch(`/sales/inactive-customers?${query.toString()}`);
+}
+
+// Marca que ya se le escribió al cliente (pasa a la sección "Escritos").
+export async function markWinbackContacted(customerId) {
+  return apiFetch(`/sales/inactive-customers/${customerId}/contacted`, {
+    method: 'PATCH',
+  });
 }
 
 export async function updateDeliveredSale(id, dto) {

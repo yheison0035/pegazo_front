@@ -1,13 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   XMarkIcon,
   UserPlusIcon,
   ClockIcon,
+  CheckBadgeIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/authContext';
-import { getInactiveCustomers } from '@/lib/api/routes/delivered_sales';
+import {
+  getInactiveCustomers,
+  markWinbackContacted,
+} from '@/lib/api/routes/delivered_sales';
 import { buildWinbackUrl } from '@/lib/appointmentConfirm';
 
 function WaIcon({ className = '' }) {
@@ -23,20 +27,30 @@ function WaIcon({ className = '' }) {
   );
 }
 
-// Modal con los clientes que no vuelven hace 10–15 días para reactivarlos por
-// WhatsApp con un mensaje ya escrito.
+function contactedLabel(iso) {
+  if (!iso) return 'Escrito';
+  const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+  if (days <= 0) return 'Escrito hoy';
+  if (days === 1) return 'Escrito ayer';
+  return `Escrito hace ${days} días`;
+}
+
+// Modal con los clientes que no vuelven hace 20+ días para reactivarlos por
+// WhatsApp. Se divide en "Por escribir" y "Escritos" (contactados esta semana).
 export default function ReactivateCustomersModal({ onClose }) {
   const auth = useAuth();
   const companyName = auth?.usuario?.company?.name;
   const [loading, setLoading] = useState(true);
   const [list, setList] = useState([]);
-  const [contacted, setContacted] = useState([]); // ids ya escritos (visual)
+  const [tab, setTab] = useState('pending'); // 'pending' | 'done'
+  // Contactados en esta sesión (optimista): id -> ISO
+  const [justMarked, setJustMarked] = useState({});
 
   useEffect(() => {
     let alive = true;
     (async () => {
       try {
-        const res = await getInactiveCustomers({ minDays: 10, maxDays: 15 });
+        const res = await getInactiveCustomers({ minDays: 20 });
         if (alive) setList(res?.data || []);
       } catch {
         if (alive) setList([]);
@@ -49,10 +63,56 @@ export default function ReactivateCustomersModal({ onClose }) {
     };
   }, []);
 
-  const write = (c) => {
+  const isContacted = (c) => c.contacted || Boolean(justMarked[c.id]);
+  const contactedAtOf = (c) => justMarked[c.id] || c.contactedAt;
+
+  const { pending, done } = useMemo(() => {
+    const p = [];
+    const d = [];
+    for (const c of list) (isContacted(c) ? d : p).push(c);
+    return { pending: p, done: d };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [list, justMarked]);
+
+  const write = async (c) => {
     window.open(buildWinbackUrl(c, companyName), '_blank', 'noopener,noreferrer');
-    setContacted((prev) => (prev.includes(c.id) ? prev : [...prev, c.id]));
+    if (isContacted(c)) return;
+    // Optimista: pasa a "Escritos" al momento.
+    setJustMarked((m) => ({ ...m, [c.id]: new Date().toISOString() }));
+    try {
+      await markWinbackContacted(c.id);
+    } catch {
+      // Si falla, se revierte para que se pueda reintentar.
+      setJustMarked((m) => {
+        const next = { ...m };
+        delete next[c.id];
+        return next;
+      });
+    }
   };
+
+  const rows = tab === 'pending' ? pending : done;
+
+  const TabButton = ({ id, label, count }) => (
+    <button
+      type="button"
+      onClick={() => setTab(id)}
+      className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition ${
+        tab === id
+          ? 'bg-white text-gray-800 shadow-sm'
+          : 'text-gray-500 hover:text-gray-700'
+      }`}
+    >
+      {label}
+      <span
+        className={`ml-1.5 rounded-full px-1.5 py-0.5 text-[11px] ${
+          tab === id ? 'bg-gray-100 text-gray-600' : 'bg-gray-200/70 text-gray-500'
+        }`}
+      >
+        {count}
+      </span>
+    </button>
+  );
 
   return (
     <div
@@ -76,9 +136,16 @@ export default function ReactivateCustomersModal({ onClose }) {
           </div>
           <h2 className="mt-2 text-lg font-bold">Clientes por reactivar</h2>
           <p className="text-sm text-white/80">
-            No vuelven hace 10 a 15 días. Escríbeles para que agenden de nuevo.
+            No vuelven hace 20 días o más. Escríbeles para que agenden de nuevo.
           </p>
         </div>
+
+        {!loading && list.length > 0 && (
+          <div className="flex flex-none gap-1 border-b border-gray-100 bg-gray-50 p-2">
+            <TabButton id="pending" label="Por escribir" count={pending.length} />
+            <TabButton id="done" label="Escritos" count={done.length} />
+          </div>
+        )}
 
         <div className="flex-1 overflow-y-auto bg-gray-50 p-4">
           {loading ? (
@@ -91,13 +158,19 @@ export default function ReactivateCustomersModal({ onClose }) {
                 No hay clientes por reactivar 🎉
               </p>
               <p className="mt-1 text-xs text-gray-400">
-                Nadie lleva entre 10 y 15 días sin volver.
+                Nadie lleva 20 días o más sin volver.
               </p>
             </div>
+          ) : rows.length === 0 ? (
+            <p className="py-10 text-center text-xs text-gray-400">
+              {tab === 'pending'
+                ? 'Ya les escribiste a todos. 🙌'
+                : 'Aún no has escrito a nadie esta semana.'}
+            </p>
           ) : (
             <div className="flex flex-col gap-2">
-              {list.map((c) => {
-                const done = contacted.includes(c.id);
+              {rows.map((c) => {
+                const contacted = isContacted(c);
                 return (
                   <div
                     key={c.id}
@@ -112,32 +185,29 @@ export default function ReactivateCustomersModal({ onClose }) {
                         Hace {c.days} días · {c.visits}{' '}
                         {c.visits === 1 ? 'visita' : 'visitas'}
                       </p>
+                      {contacted && (
+                        <p className="mt-0.5 flex items-center gap-1 text-[11px] font-medium text-green-600">
+                          <CheckBadgeIcon className="h-3.5 w-3.5" />
+                          {contactedLabel(contactedAtOf(c))}
+                        </p>
+                      )}
                     </div>
                     <button
                       type="button"
                       onClick={() => write(c)}
                       className={`inline-flex flex-none items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition ${
-                        done
+                        contacted
                           ? 'bg-green-50 text-green-700 hover:bg-green-100'
                           : 'bg-green-600 text-white hover:bg-green-700'
                       }`}
                     >
                       <WaIcon className="h-4 w-4" />
-                      {done ? 'Escrito' : 'Escribir'}
+                      {contacted ? 'Reenviar' : 'Escribir'}
                     </button>
                   </div>
                 );
               })}
             </div>
-          )}
-        </div>
-
-        <div className="flex-none items-center justify-between border-t border-gray-100 bg-white px-4 py-3 text-xs text-gray-400">
-          {!loading && list.length > 0 && (
-            <span>
-              {list.length}{' '}
-              {list.length === 1 ? 'cliente' : 'clientes'} por reactivar
-            </span>
           )}
         </div>
       </div>
