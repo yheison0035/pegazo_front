@@ -442,7 +442,13 @@ export default function ContentData({
                   {info.barber?.name || '---'}
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
-                  {info.customer?.name || '---'}
+                  <div>{info.customer?.name || '---'}</div>
+                  {info.customer?.document !== '222222222222' && (
+                    <WhatsappLink
+                      phone={info.customer?.phone}
+                      className="mt-1 text-xs"
+                    />
+                  )}
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
                   {info.local?.name || '---'}
