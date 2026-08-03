@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import ViewModal from '../../viewModal';
 import Table from '@/components/dashboard/tables/table';
-import Link from 'next/link';
+import Button from '@/components/ui/Button';
 import RoleGuard from '@/auth/roleGuard';
 import { useAuth } from '@/context/authContext';
 import { Roles } from '@/config/roles';
@@ -71,13 +71,13 @@ export default function Orders() {
           </h1>
 
           <div className="flex gap-2">
-            <Link
+            <Button
+              variant="add"
+              icon={PlusIcon}
               href="/dashboard/categories/new"
-              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm transition"
             >
-              <PlusIcon className="w-4 h-4" />
               Agregar categoría
-            </Link>
+            </Button>
           </div>
         </div>
 

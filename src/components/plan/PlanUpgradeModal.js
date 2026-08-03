@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import {
   XMarkIcon,
   CheckCircleIcon,
   LockClosedIcon,
 } from '@heroicons/react/24/solid';
+import Button from '@/components/ui/Button';
 import { PLAN_UPGRADE_EVENT } from '@/lib/planUpgrade';
 import { getPlan } from '@/lib/plans';
 
@@ -88,19 +88,17 @@ export default function PlanUpgradeModal() {
           )}
 
           <div className="mt-6 flex gap-3">
-            <button
-              onClick={close}
-              className="flex-1 rounded-xl border border-neutral-200 py-2.5 text-sm font-medium text-neutral-600 hover:bg-neutral-50"
-            >
+            <Button variant="ghost" className="flex-1" onClick={close}>
               Ahora no
-            </button>
-            <Link
+            </Button>
+            <Button
+              variant="primary"
+              className="flex-1"
               href="/dashboard/upgrade"
               onClick={close}
-              className="flex-1 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 py-2.5 text-center text-sm font-semibold text-white hover:opacity-90"
             >
               Ver planes
-            </Link>
+            </Button>
           </div>
         </div>
       </div>

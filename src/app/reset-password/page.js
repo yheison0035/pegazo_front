@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { resetPassword } from '@/lib/api/auth/auth';
+import Button from '@/components/ui/Button';
 
 export default function ResetPasswordPage() {
   const [token, setToken] = useState('');
@@ -101,13 +102,9 @@ export default function ResetPasswordPage() {
 
               {error && <p className="text-sm text-red-500">{error}</p>}
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full rounded-lg bg-gradient-to-r from-orange-600 to-amber-500 py-2 font-semibold text-white shadow-md transition hover:opacity-90 disabled:opacity-60"
-              >
-                {loading ? 'Guardando...' : 'Restablecer contraseña'}
-              </button>
+              <Button type="submit" variant="primary" fullWidth loading={loading}>
+                Restablecer contraseña
+              </Button>
 
               <div className="text-center">
                 <a href="/login" className="text-xs text-gray-500 hover:underline">

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 import RoleGuard from '@/auth/roleGuard';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
+import Button from '@/components/ui/Button';
 import { getGlobalUsers } from '@/lib/api/routes/users';
 
 export default function PlatformUsers() {
@@ -107,20 +108,22 @@ export default function PlatformUsers() {
                 Página {meta.page} de {meta.totalPages} · {meta.total} usuarios
               </span>
               <div className="flex gap-2">
-                <button
+                <Button
+                  variant="secondary"
+                  size="sm"
                   disabled={page <= 1}
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  className="rounded-lg border border-gray-200 px-3 py-1 disabled:opacity-40"
                 >
                   Anterior
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
                   disabled={page >= meta.totalPages}
                   onClick={() => setPage((p) => p + 1)}
-                  className="rounded-lg border border-gray-200 px-3 py-1 disabled:opacity-40"
                 >
                   Siguiente
-                </button>
+                </Button>
               </div>
             </div>
           )}

@@ -22,6 +22,7 @@ import { Roles } from '@/config/roles';
 import useLocals from '@/lib/api/hooks/useLocals';
 import { getDashboardStats } from '@/lib/api/routes/statistics';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
+import Button from '@/components/ui/Button';
 import {
   PALETTE,
   COLORS,
@@ -149,12 +150,9 @@ export default function Statistics() {
               ))}
             </select>
           </div>
-          <button
-            onClick={fetchStats}
-            className="rounded-xl bg-orange-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-orange-700"
-          >
+          <Button variant="primary" onClick={fetchStats}>
             Aplicar
-          </button>
+          </Button>
         </div>
 
         {/* KPIs */}

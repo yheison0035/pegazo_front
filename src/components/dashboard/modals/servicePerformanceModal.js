@@ -8,6 +8,7 @@ import {
   BuildingStorefrontIcon,
 } from '@heroicons/react/24/outline';
 
+import Button from '@/components/ui/Button';
 import useLocals from '@/lib/api/hooks/useLocals';
 import useDeliveredSales from '@/lib/api/hooks/useDeliveredSales';
 import { formatCOP } from '@/lib/api/utils/utils';
@@ -148,13 +149,17 @@ export default function ServicePerformanceModal({ onClose }) {
             </div>
           </div>
 
-          <button
+          <Button
+            variant="primary"
+            size="lg"
+            fullWidth
+            className="mt-6"
             onClick={handleFetch}
-            disabled={!startDate || !endDate || !localId || loading}
-            className="mt-6 w-full bg-purple-600 hover:bg-purple-700 text-white py-3 cursor-pointer rounded-xl font-semibold transition disabled:opacity-50"
+            disabled={!startDate || !endDate || !localId}
+            loading={loading}
           >
-            {loading ? 'Consultando...' : 'Generar reporte'}
-          </button>
+            Generar reporte
+          </Button>
         </div>
 
         <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6 bg-gray-100">

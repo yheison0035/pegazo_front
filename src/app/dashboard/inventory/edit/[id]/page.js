@@ -9,6 +9,7 @@ import useProducts from '@/lib/api/hooks/useProducts';
 import { getFormFieldsInventory } from '@/lib/api/utils/inventory.config';
 import { parseCOPToNumber } from '@/lib/api/utils/utils';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
+import Button from '@/components/ui/Button';
 import InventorySpecsModal from '@/components/dashboard/inventory/inventorySpecsModal';
 import { PencilIcon } from '@heroicons/react/24/outline';
 import { canSeeOldPrice } from '@/hooks/inventory.permissions';
@@ -111,14 +112,14 @@ export default function EditProduct() {
             </p>
           </div>
           {showOldPrice && (
-            <button
+            <Button
+              variant="add"
+              icon={PencilIcon}
               type="button"
               onClick={canOpenSpecsModal}
-              className="flex items-center gap-2 cursor-pointer bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm transition"
             >
-              <PencilIcon className="w-4 h-4" />
               Características y especificaciones
-            </button>
+            </Button>
           )}
         </div>
 

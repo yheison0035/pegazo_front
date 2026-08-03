@@ -4,13 +4,14 @@ import { useEffect, useState, useCallback } from 'react';
 import Table from '@/components/dashboard/tables/table';
 import Pagination from '@/components/dashboard/tables/segments/pagination';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
+import Button from '@/components/ui/Button';
 import { useAuth } from '@/context/authContext';
 import {
   Squares2X2Icon,
   CalendarDaysIcon,
   CalendarIcon,
   ChartBarIcon,
-} from '@heroicons/react/24/solid';
+} from '@heroicons/react/24/outline';
 import useDeliveredSales from '@/lib/api/hooks/useDeliveredSales';
 import {
   getHeaderTableDeliveredSales,
@@ -98,39 +99,43 @@ export default function Delivered_Sales() {
 
         <div className="flex flex-wrap gap-2 sm:gap-3">
           {usuario?.company?.type === 'SERVICIOS' && (
-            <button
+            <Button
+              variant="info"
+              icon={Squares2X2Icon}
               onClick={() => setShowServiceReport(true)}
-              className="flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm transition w-full sm:w-auto cursor-pointer"
+              className="w-full sm:w-auto"
             >
-              <Squares2X2Icon className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="whitespace-nowrap">Ventas y Servicios</span>
-            </button>
+              Ventas y Servicios
+            </Button>
           )}
           {usuario?.company?.type !== 'SERVICIOS' && (
             <>
-              <button
+              <Button
+                variant="info"
+                icon={CalendarDaysIcon}
                 onClick={() => setShowDailyReport(true)}
-                className="flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm transition w-full sm:w-auto cursor-pointer"
+                className="w-full sm:w-auto"
               >
-                <CalendarDaysIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                <span className="whitespace-nowrap">Venta por Día</span>
-              </button>
+                Venta por Día
+              </Button>
 
-              <button
+              <Button
+                variant="info"
+                icon={CalendarIcon}
                 onClick={() => setShowRangeReport(true)}
-                className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm transition w-full sm:w-auto cursor-pointer"
+                className="w-full sm:w-auto"
               >
-                <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                <span className="whitespace-nowrap">Venta por Semana</span>
-              </button>
+                Venta por Semana
+              </Button>
 
-              <button
+              <Button
+                variant="info"
+                icon={ChartBarIcon}
                 onClick={() => setShowGeneralReport(true)}
-                className="flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm transition w-full sm:w-auto cursor-pointer"
+                className="w-full sm:w-auto"
               >
-                <ChartBarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                <span className="whitespace-nowrap">Ventas Generales</span>
-              </button>
+                Ventas Generales
+              </Button>
             </>
           )}
         </div>

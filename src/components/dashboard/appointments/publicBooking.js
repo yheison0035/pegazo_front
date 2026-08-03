@@ -15,6 +15,7 @@ import {
   ClockIcon,
   CheckCircleIcon,
 } from '@heroicons/react/24/outline';
+import Button from '@/components/ui/Button';
 
 export default function PublicBooking() {
   const [locals, setLocals] = useState([]);
@@ -413,12 +414,14 @@ export default function PublicBooking() {
 
           {time && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              <button
+              <Button
+                variant="primary"
+                size="lg"
+                fullWidth
                 onClick={goToWhatsApp}
-                className="w-full bg-yellow-500 hover:bg-yellow-600 text-black py-4 rounded-xl font-semibold cursor-pointer transition duration-200 shadow-lg"
               >
                 Confirmar por WhatsApp
-              </button>
+              </Button>
             </motion.div>
           )}
         </div>

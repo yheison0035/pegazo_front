@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/authContext';
+import Button from '@/components/ui/Button';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -191,12 +192,9 @@ export default function Login() {
 
               {error && <p className="text-red-500 text-sm">{error}</p>}
 
-              <button
-                type="submit"
-                className="w-full bg-gradient-to-r cursor-pointer from-orange-600 to-amber-500 text-white py-2 rounded-lg font-semibold hover:opacity-90 transition duration-200 shadow-md"
-              >
+              <Button type="submit" variant="primary" fullWidth>
                 Iniciar sesión
-              </button>
+              </Button>
             </form>
 
             <p className="text-sm text-gray-500 text-center mt-6">

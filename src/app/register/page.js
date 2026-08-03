@@ -8,6 +8,7 @@ import { useAuth } from '@/context/authContext';
 import { validateCoupon } from '@/lib/api/auth/auth';
 import { PLANS } from '@/lib/plans';
 import LogoUploader from '@/components/ui/LogoUploader';
+import Button from '@/components/ui/Button';
 
 const BUSINESS_TYPES = [
   { id: 'COMERCIO', name: 'Tienda / Comercio' },
@@ -347,14 +348,14 @@ export default function Register() {
                 placeholder="CÓDIGO"
                 className="w-full rounded-lg border border-neutral-300 px-4 py-2 text-sm uppercase focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
-              <button
+              <Button
                 type="button"
+                variant="outline"
                 onClick={applyCoupon}
-                disabled={checkingCoupon}
-                className="whitespace-nowrap rounded-lg border border-orange-500 px-4 py-2 text-sm font-semibold text-orange-600 transition hover:bg-orange-50 disabled:opacity-50"
+                loading={checkingCoupon}
               >
-                {checkingCoupon ? 'Validando...' : 'Aplicar'}
-              </button>
+                Aplicar
+              </Button>
             </div>
             {couponMsg && (
               <p
@@ -404,13 +405,15 @@ export default function Register() {
             </p>
           )}
 
-          <button
+          <Button
             type="submit"
-            disabled={loading}
-            className="w-full rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 py-3 font-semibold text-white shadow-md transition hover:opacity-90 disabled:opacity-50"
+            variant="primary"
+            size="lg"
+            fullWidth
+            loading={loading}
           >
-            {loading ? 'Creando tu cuenta...' : 'Crear cuenta y empezar'}
-          </button>
+            Crear cuenta y empezar
+          </Button>
 
           <p className="text-center text-sm text-neutral-500">
             ¿Ya tienes cuenta?{' '}

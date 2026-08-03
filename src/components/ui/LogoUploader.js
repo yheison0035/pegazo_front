@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { uploadCompanyLogo } from '@/lib/api/routes/companies';
+import Button from '@/components/ui/Button';
 
 // Subidor de logo reutilizable (panel de empresa y registro). Sube a Cloudinary
 // (companies/logos) vía el backend y devuelve la URL a través de onChange.
@@ -58,23 +59,24 @@ export default function LogoUploader({ value, onChange, label = 'Logo' }) {
         </div>
 
         <div>
-          <button
+          <Button
             type="button"
+            variant="outline"
             onClick={() => inputRef.current?.click()}
-            disabled={uploading}
-            className="rounded-lg border border-orange-500 px-4 py-2 text-sm font-semibold text-orange-600 transition hover:bg-orange-50 disabled:opacity-50"
+            loading={uploading}
           >
-            {uploading ? 'Subiendo...' : value ? 'Cambiar logo' : 'Subir logo'}
-          </button>
+            {value ? 'Cambiar logo' : 'Subir logo'}
+          </Button>
 
           {value && !uploading && (
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              className="ml-2"
               onClick={() => onChange('')}
-              className="ml-2 text-sm text-gray-400 transition hover:text-red-600"
             >
               Quitar
-            </button>
+            </Button>
           )}
 
           <p className="mt-1 text-[11px] text-gray-400">

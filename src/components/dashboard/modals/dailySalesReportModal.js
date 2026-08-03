@@ -7,6 +7,7 @@ import {
   BuildingStorefrontIcon,
   ChartBarIcon,
 } from '@heroicons/react/24/outline';
+import Button from '@/components/ui/Button';
 import useLocals from '@/lib/api/hooks/useLocals';
 import useDeliveredSales from '@/lib/api/hooks/useDeliveredSales';
 import { formatCOP, toggleCase } from '@/lib/api/utils/utils';
@@ -105,13 +106,17 @@ export default function DailySalesReportModal({ onClose }) {
             </div>
           </div>
 
-          <button
-            disabled={!date || !localId || loading}
+          <Button
+            variant="primary"
+            size="lg"
+            fullWidth
+            className="mt-6"
+            disabled={!date || !localId}
+            loading={loading}
             onClick={handleFetch}
-            className="mt-6 w-full flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-xl font-semibold transition disabled:opacity-50 cursor-pointer"
           >
-            {loading ? 'Consultando...' : 'Generar reporte'}
-          </button>
+            Generar reporte
+          </Button>
         </div>
 
         <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6 bg-gray-100">

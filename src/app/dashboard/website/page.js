@@ -9,6 +9,7 @@ import {
 } from '@heroicons/react/24/outline';
 import RoleGuard from '@/auth/roleGuard';
 import AlertModal from '@/components/dashboard/modals/alertModal';
+import Button from '@/components/ui/Button';
 import {
   getWebsiteConfig,
   updateWebsiteConfig,
@@ -663,13 +664,9 @@ export default function WebsitePage() {
             </Section>
 
             <div className="sticky bottom-0 flex justify-end gap-3 border-t border-gray-200 bg-white/90 py-3 backdrop-blur">
-              <button
-                type="submit"
-                disabled={saving}
-                className="rounded-lg bg-orange-600 px-5 py-2 text-sm font-medium text-white hover:bg-orange-700 disabled:opacity-60"
-              >
+              <Button variant="primary" type="submit" loading={saving}>
                 {saving ? 'Guardando…' : 'Guardar cambios'}
-              </button>
+              </Button>
             </div>
           </form>
         )}
@@ -837,13 +834,15 @@ export default function WebsitePage() {
                   </Field>
                 </div>
 
-                <button
+                <Button
+                  variant="add"
+                  icon={PlusIcon}
                   type="button"
                   onClick={handleAddBanner}
-                  className="mt-4 flex items-center gap-2 rounded-lg bg-gray-800 px-4 py-2 text-sm text-white hover:bg-gray-900"
+                  className="mt-4"
                 >
-                  <PlusIcon className="h-4 w-4" /> Agregar banner
-                </button>
+                  Agregar banner
+                </Button>
               </div>
             </Section>
           </div>

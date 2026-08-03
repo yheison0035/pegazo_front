@@ -7,6 +7,7 @@ import {
   BuildingStorefrontIcon,
   ChartBarIcon,
 } from '@heroicons/react/24/outline';
+import Button from '@/components/ui/Button';
 import useLocals from '@/lib/api/hooks/useLocals';
 import { formatCOP, toggleCase } from '@/lib/api/utils/utils';
 import useDeliveredSales from '@/lib/api/hooks/useDeliveredSales';
@@ -126,13 +127,17 @@ export default function SalesRangeGeneralModal({ onClose }) {
             </div>
           </div>
 
-          <button
-            disabled={!startDate || !endDate || !localId || loading}
+          <Button
+            variant="primary"
+            size="lg"
+            fullWidth
+            className="mt-6"
+            disabled={!startDate || !endDate || !localId}
+            loading={loading}
             onClick={handleFetch}
-            className="mt-6 w-full flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-xl font-semibold transition disabled:opacity-50 cursor-pointer"
           >
-            {loading ? 'Consultando...' : 'Generar reporte'}
-          </button>
+            Generar reporte
+          </Button>
         </div>
 
         <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6 bg-gray-100">
@@ -245,14 +250,14 @@ export default function SalesRangeGeneralModal({ onClose }) {
 
               <div className="pt-3 space-y-2">
                 <div className="mt-4 pt-4 border-t border-gray-300 flex justify-center">
-                  <button
+                  <Button
+                    variant="link"
                     onClick={() => setShowMethods((prev) => !prev)}
-                    className="text-sm font-medium text-orange-700 hover:text-orange-800 transition cursor-pointer"
                   >
                     {showMethods
                       ? 'Ocultar detalle por método de pago'
                       : 'Ver detalle por método de pago'}
-                  </button>
+                  </Button>
                 </div>
               </div>
 

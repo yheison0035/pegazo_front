@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, PlusIcon } from '@heroicons/react/24/outline';
+import Button from '@/components/ui/Button';
 import useCustomers from '@/lib/api/hooks/useCustomers';
 import { validateField } from '@/lib/api/utils/validators';
 import { lookupCustomerByDocument } from '@/lib/api/routes/customers';
@@ -164,20 +165,17 @@ export default function NewCustomerModal({ localId, onClose, onCreated }) {
           )}
 
           <div className="flex justify-end gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
-            >
+            <Button type="button" variant="secondary" onClick={onClose}>
               Cancelar
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              disabled={loading}
-              className="rounded-xl bg-green-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-700 disabled:opacity-50"
+              variant="add"
+              icon={PlusIcon}
+              loading={loading}
             >
-              {loading ? 'Creando...' : 'Crear cliente'}
-            </button>
+              Crear cliente
+            </Button>
           </div>
         </form>
       </div>

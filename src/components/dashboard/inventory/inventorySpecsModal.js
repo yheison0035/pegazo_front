@@ -6,6 +6,7 @@ import {
   TrashIcon,
   CheckCircleIcon,
 } from '@heroicons/react/24/outline';
+import Button from '@/components/ui/Button';
 import { useState, useEffect } from 'react';
 
 export default function InventorySpecsModal({
@@ -83,12 +84,14 @@ export default function InventorySpecsModal({
               </div>
             ))}
 
-            <button
+            <Button
+              variant="add"
+              icon={PlusIcon}
+              className="mt-2"
               onClick={() => setFeatures([...features, { title: '' }])}
-              className="flex items-center gap-2 text-sm text-green-600 hover:text-orange-800 mt-2 cursor-pointer"
             >
-              <PlusIcon className="w-4 h-4" /> Agregar característica
-            </button>
+              Agregar característica
+            </Button>
           </div>
 
           <div>
@@ -128,34 +131,24 @@ export default function InventorySpecsModal({
               </div>
             ))}
 
-            <button
+            <Button
+              variant="add"
+              icon={PlusIcon}
+              className="mt-2"
               onClick={() => setSpecs([...specs, { key: '', value: '' }])}
-              className="flex items-center gap-2 text-sm text-green-600 hover:text-orange-800 mt-2 cursor-pointer"
             >
-              <PlusIcon className="w-4 h-4" /> Agregar especificación
-            </button>
+              Agregar especificación
+            </Button>
           </div>
         </div>
 
         <div className="border-t p-6 flex justify-end gap-3">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 rounded-lg border cursor-pointer"
-          >
+          <Button variant="secondary" onClick={onClose}>
             Cancelar
-          </button>
-          <button
-            onClick={saveData}
-            className={`inline-flex items-center gap-2 px-4 py-2 mr-2 border border-transparent 
-                bg-orange-600 hover:text-orange-600 hover:border-orange-600
-            text-white 
-      hover:bg-white
-        font-medium rounded-lg transition-colors 
-        duration-200 cursor-pointer`}
-          >
-            <CheckCircleIcon className="w-5 h-5" />
+          </Button>
+          <Button variant="primary" icon={CheckCircleIcon} onClick={saveData}>
             Guardar
-          </button>
+          </Button>
         </div>
       </div>
     </div>

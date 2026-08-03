@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
-import Link from 'next/link';
+import Button from '@/components/ui/Button';
 
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
@@ -85,13 +85,9 @@ export default function Locals() {
         <div className="flex flex-col md:flex-row justify-between mb-4 gap-4">
           <h1 className="text-2xl font-semibold">Listado de Locales</h1>
 
-          <Link
-            href="/dashboard/locals/new"
-            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm"
-          >
-            <PlusIcon className="w-4 h-4" />
+          <Button variant="add" icon={PlusIcon} href="/dashboard/locals/new">
             Agregar local
-          </Link>
+          </Button>
         </div>
 
         <div className="bg-white rounded-lg shadow relative">

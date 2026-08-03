@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { getLocals } from '@/lib/api/routes/locals';
 import { formatCOP } from '@/lib/api/utils/utils';
 import { TrashIcon, PlusIcon } from '@heroicons/react/24/outline';
+import Button from '@/components/ui/Button';
 
 export default function ServiceLocalsField({ value = [], onChange }) {
   const [localsOptions, setLocalsOptions] = useState([]);
@@ -38,14 +39,15 @@ export default function ServiceLocalsField({ value = [], onChange }) {
           Precios por Local
         </label>
 
-        <button
+        <Button
           type="button"
+          variant="add"
+          size="sm"
+          icon={PlusIcon}
           onClick={addRow}
-          className="flex items-center gap-1 text-sm text-orange-600 hover:text-orange-700 transition cursor-pointer"
         >
-          <PlusIcon className="w-4 h-4" />
           Agregar
-        </button>
+        </Button>
       </div>
 
       {value.length === 0 && (

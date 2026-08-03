@@ -12,8 +12,13 @@ import {
 import useProducts from '@/lib/api/hooks/useProducts';
 import { parseCOPToNumber } from '@/lib/api/utils/utils';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
+import Button from '@/components/ui/Button';
 import InventorySpecsModal from '@/components/dashboard/inventory/inventorySpecsModal';
-import { PlusIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
+import {
+  PlusIcon,
+  ArrowRightIcon,
+  ArrowLeftIcon,
+} from '@heroicons/react/24/outline';
 import { canSeeOldPrice } from '@/hooks/inventory.permissions';
 import { getCategories } from '@/lib/api/routes/categories';
 import { getBrands } from '@/lib/api/routes/brands';
@@ -184,19 +189,20 @@ export default function NewProduct() {
         </div>
 
         <div className="mt-6 flex items-center gap-3">
-          <button
+          <Button
+            variant="primary"
             type="button"
             onClick={checkDependencies}
-            className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700"
           >
             Ya los creé, reintentar
-          </button>
-          <Link
+          </Button>
+          <Button
+            variant="secondary"
+            icon={ArrowLeftIcon}
             href="/dashboard/inventory"
-            className="text-sm font-medium text-gray-500 hover:text-gray-700"
           >
             Volver al inventario
-          </Link>
+          </Button>
         </div>
       </div>
     );
@@ -220,14 +226,14 @@ export default function NewProduct() {
             </p>
           </div>
           {showOldPrice && (
-            <button
+            <Button
+              variant="add"
+              icon={PlusIcon}
               type="button"
               onClick={canOpenSpecsModal}
-              className="flex items-center gap-2 cursor-pointer bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm transition"
             >
-              <PlusIcon className="w-4 h-4" />
               Características y especificaciones
-            </button>
+            </Button>
           )}
         </div>
 

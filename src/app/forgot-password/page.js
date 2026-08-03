@@ -6,6 +6,7 @@ import {
   requestPasswordOtp,
   resetPasswordWithOtp,
 } from '@/lib/api/auth/auth';
+import Button from '@/components/ui/Button';
 
 export default function ForgotPasswordPage() {
   const [channel, setChannel] = useState('email'); // 'email' | 'whatsapp'
@@ -173,9 +174,9 @@ export default function ForgotPasswordPage() {
               />
             </div>
             {error && <p className="text-sm text-red-500">{error}</p>}
-            <button type="submit" disabled={loading} className={btnClass}>
-              {loading ? 'Enviando...' : 'Enviar enlace'}
-            </button>
+            <Button type="submit" variant="primary" fullWidth loading={loading}>
+              Enviar enlace
+            </Button>
           </form>
         ) : !otpStep ? (
           /* ---- WHATSAPP: pedir código ---- */
@@ -198,9 +199,9 @@ export default function ForgotPasswordPage() {
               />
             </div>
             {error && <p className="text-sm text-red-500">{error}</p>}
-            <button type="submit" disabled={loading} className={btnClass}>
-              {loading ? 'Enviando...' : 'Enviar código'}
-            </button>
+            <Button type="submit" variant="primary" fullWidth loading={loading}>
+              Enviar código
+            </Button>
           </form>
         ) : (
           /* ---- WHATSAPP: validar código + nueva contraseña ---- */
@@ -251,19 +252,20 @@ export default function ForgotPasswordPage() {
               />
             </div>
             {error && <p className="text-sm text-red-500">{error}</p>}
-            <button type="submit" disabled={loading} className={btnClass}>
-              {loading ? 'Guardando...' : 'Cambiar contraseña'}
-            </button>
-            <button
+            <Button type="submit" variant="primary" fullWidth loading={loading}>
+              Cambiar contraseña
+            </Button>
+            <Button
               type="button"
+              variant="link"
+              fullWidth
               onClick={() => {
                 setOtpStep(false);
                 setError('');
               }}
-              className="w-full text-center text-xs text-gray-500 hover:underline"
             >
               Reenviar / cambiar número
-            </button>
+            </Button>
           </form>
         )}
 

@@ -1,3 +1,6 @@
+import Button from '@/components/ui/Button';
+import { PlusIcon } from '@heroicons/react/24/outline';
+
 export default function AddComment({
   newComment,
   setNewComment,
@@ -16,15 +19,15 @@ export default function AddComment({
           rows="2"
           placeholder="Escriba un comentario..."
         />
-        <button
+        <Button
           type="button"
+          variant="add"
+          icon={PlusIcon}
           onClick={handleAddComment}
           disabled={!newComment.trim()}
-          className="bg-gradient-to-r from-green-500 to-green-600 text-white px-5 py-2 rounded-xl shadow-md 
-             hover:opacity-90 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Agregar
-        </button>
+        </Button>
       </div>
     </div>
   );

@@ -11,6 +11,7 @@ import {
 } from '@/lib/api/routes/coupons';
 import { PLANS } from '@/lib/plans';
 import AlertModal from '@/components/dashboard/modals/alertModal';
+import Button from '@/components/ui/Button';
 
 const EMPTY = {
   code: '',
@@ -133,12 +134,9 @@ export default function CouponsPage() {
               Crea códigos que tus clientes pueden aplicar al registrarse.
             </p>
           </div>
-          <button
-            onClick={openCreate}
-            className="flex items-center gap-2 rounded-lg bg-orange-600 px-4 py-2 text-sm text-white hover:bg-orange-700"
-          >
-            <PlusIcon className="h-4 w-4" /> Crear cupón
-          </button>
+          <Button variant="add" icon={PlusIcon} onClick={openCreate}>
+            Crear cupón
+          </Button>
         </div>
 
         <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white shadow">
@@ -359,20 +357,16 @@ export default function CouponsPage() {
               </div>
 
               <div className="flex justify-end gap-3 pt-2">
-                <button
+                <Button
+                  variant="secondary"
                   type="button"
                   onClick={() => setShowForm(false)}
-                  className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
                 >
                   Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700 disabled:opacity-50"
-                >
+                </Button>
+                <Button variant="primary" type="submit" loading={saving}>
                   {saving ? 'Guardando...' : editing ? 'Guardar' : 'Crear cupón'}
-                </button>
+                </Button>
               </div>
             </form>
           </div>

@@ -7,7 +7,7 @@ import {
   InformationCircleIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
-import Link from 'next/link';
+import Button from '@/components/ui/Button';
 
 export default function AlertModal({
   type = 'info',
@@ -55,19 +55,13 @@ export default function AlertModal({
 
         <div className="mt-6">
           {url ? (
-            <Link
-              href={url}
-              className="px-6 py-2 bg-orange-500 text-white font-medium rounded-lg shadow hover:bg-orange-600 transition cursor-pointer"
-            >
+            <Button variant="primary" href={url}>
               {buttonText || defaultButtonText}
-            </Link>
+            </Button>
           ) : (
-            <button
-              onClick={onClose}
-              className="px-6 py-2 bg-orange-500 text-white font-medium rounded-lg shadow hover:bg-orange-600 transition cursor-pointer"
-            >
+            <Button variant="primary" onClick={onClose}>
               {buttonText || defaultButtonText}
-            </button>
+            </Button>
           )}
         </div>
       </div>

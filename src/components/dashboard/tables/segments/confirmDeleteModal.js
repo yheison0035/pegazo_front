@@ -1,3 +1,6 @@
+import { TrashIcon } from '@heroicons/react/24/outline';
+import Button from '@/components/ui/Button';
+
 export default function ConfirmDeleteModal({
   show,
   setShow,
@@ -21,24 +24,21 @@ export default function ConfirmDeleteModal({
         <p className="text-gray-600">Esta acción no se puede deshacer.</p>
 
         <div className="flex justify-end gap-3 mt-3">
-          <button
+          <Button
+            variant="secondary"
             onClick={() => setShow(false)}
-            className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 cursor-pointer"
             disabled={loading}
           >
             Cancelar
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="danger"
+            icon={TrashIcon}
             onClick={onConfirm}
-            className={`px-4 py-2 rounded text-white ${
-              loading
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-red-600 hover:bg-red-700'
-            } cursor-pointer`}
-            disabled={loading}
+            loading={loading}
           >
-            {loading ? 'Eliminando...' : 'Eliminar'}
-          </button>
+            Eliminar
+          </Button>
         </div>
       </div>
     </div>

@@ -5,6 +5,7 @@ import { useAuth } from '@/context/authContext';
 import { PLANS, PLAN_ORDER } from '@/lib/plans';
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
 import AlertModal from '@/components/dashboard/modals/alertModal';
+import Button from '@/components/ui/Button';
 import { startPlanCheckout } from '@/lib/api/routes/subscription';
 
 export default function UpgradePage() {
@@ -91,36 +92,36 @@ export default function UpgradePage() {
 
               <div className="mt-4">
                 {isCurrent ? (
-                  <button
-                    disabled
-                    className="w-full rounded-xl bg-gray-100 py-2.5 text-sm font-semibold text-gray-500"
-                  >
+                  <Button variant="soft" disabled fullWidth>
                     Plan actual
-                  </button>
+                  </Button>
                 ) : isUpgrade ? (
-                  <button
+                  <Button
+                    variant="primary"
+                    fullWidth
                     onClick={() => handleUpgrade(plan.id)}
-                    disabled={loading === plan.id}
-                    className="w-full rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
+                    loading={loading === plan.id}
                   >
                     {loading === plan.id ? 'Procesando...' : `Mejorar a ${plan.name}`}
-                  </button>
+                  </Button>
                 ) : isLower ? (
-                  <button
+                  <Button
+                    variant="secondary"
+                    fullWidth
                     onClick={() => handleUpgrade(plan.id)}
-                    disabled={loading === plan.id}
-                    className="w-full rounded-xl border border-gray-300 py-2.5 text-sm font-medium text-gray-600 hover:border-gray-400 hover:bg-gray-50 disabled:opacity-50"
+                    loading={loading === plan.id}
                   >
                     {loading === plan.id ? 'Procesando...' : `Cambiar a ${plan.name}`}
-                  </button>
+                  </Button>
                 ) : (
-                  <button
+                  <Button
+                    variant="outline"
+                    fullWidth
                     onClick={() => handleUpgrade(plan.id)}
-                    disabled={loading === plan.id}
-                    className="w-full rounded-xl border border-orange-500 py-2.5 text-sm font-semibold text-orange-600 hover:bg-orange-50 disabled:opacity-50"
+                    loading={loading === plan.id}
                   >
                     {loading === plan.id ? 'Procesando...' : 'Elegir'}
-                  </button>
+                  </Button>
                 )}
               </div>
 

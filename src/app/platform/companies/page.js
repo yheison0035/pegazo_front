@@ -2,9 +2,9 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
-import Link from 'next/link';
 
 import RoleGuard from '@/auth/roleGuard';
+import Button from '@/components/ui/Button';
 import { useAuth } from '@/context/authContext';
 
 import Table from '@/components/dashboard/tables/table';
@@ -103,13 +103,9 @@ export default function Companies() {
         <div className="flex flex-col md:flex-row justify-between mb-4 gap-4">
           <h1 className="text-2xl font-semibold">Empresas</h1>
 
-          <Link
-            href="/platform/companies/new"
-            className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm"
-          >
-            <PlusIcon className="w-4 h-4" />
+          <Button variant="add" icon={PlusIcon} href="/platform/companies/new">
             Crear empresa
-          </Link>
+          </Button>
         </div>
 
         <div className="bg-white rounded-lg shadow relative">
