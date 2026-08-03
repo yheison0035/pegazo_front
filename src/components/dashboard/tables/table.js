@@ -93,13 +93,13 @@ const Table = ({
             <Thead header={header} />
 
             <tbody className="divide-y divide-gray-100">
-              {!loading && (
-                <InputFilters
-                  allFilters={header}
-                  filters={filters}
-                  handleFilterChange={handleFilterChange}
-                />
-              )}
+              {/* Los filtros SIEMPRE montados: si se desmontan al cargar, el
+                  calendario de fecha se cierra y pierde la selección. */}
+              <InputFilters
+                allFilters={header}
+                filters={filters}
+                handleFilterChange={handleFilterChange}
+              />
 
               {loading ? (
                 <TableSkeleton rows={8} cols={header.length + 1} />
