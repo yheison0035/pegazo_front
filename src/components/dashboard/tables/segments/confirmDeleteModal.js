@@ -12,7 +12,7 @@ export default function ConfirmDeleteModal({
   if (!show) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="bg-white p-6 rounded-lg shadow-lg w-96">
         <h2 className="text-lg font-semibold text-gray-800 mb-4">
           Confirmar eliminación

@@ -36,7 +36,7 @@ export default function AlertModal({
   const defaultButtonText = 'Aceptar';
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white max-w-md w-full rounded-2xl shadow-xl p-6 relative text-center animate-fadeIn">
         <button
           onClick={onClose}
