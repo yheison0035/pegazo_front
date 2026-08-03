@@ -1,23 +1,19 @@
 'use client';
 
-import { CheckCircleIcon } from '@heroicons/react/24/solid';
+import { CheckIcon } from '@heroicons/react/24/outline';
+import Button from '@/components/ui/Button';
 
 export default function BtnSave({ module = 'save', disabled = false }) {
+  const isSale = module === 'sales';
+
   return (
-    <button
+    <Button
       type="submit"
-      className={`inline-flex items-center gap-2 px-4 py-2 mr-2 border border-transparent ${
-        module === 'sales'
-          ? 'bg-green-600 hover:text-green-900 hover:border-green-900'
-          : 'bg-orange-600 hover:text-orange-600 hover:border-orange-600'
-      } text-white 
-      hover:bg-white
-        font-medium rounded-lg transition-colors 
-        duration-200 cursor-pointer`}
-      disabled={disabled}
+      variant={isSale ? 'add' : 'primary'}
+      icon={CheckIcon}
+      loading={disabled}
     >
-      <CheckCircleIcon className="w-5 h-5" />
-      {module === 'sales' ? 'Vender' : 'Guardar'}
-    </button>
+      {isSale ? 'Vender' : 'Guardar'}
+    </Button>
   );
 }
