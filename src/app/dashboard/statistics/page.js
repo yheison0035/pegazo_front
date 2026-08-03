@@ -35,6 +35,7 @@ import {
   truncate,
 } from '@/components/dashboard/statistics/statsUI';
 import useTerms from '@/hooks/useTerms';
+import { CheckCircleIcon } from '@heroicons/react/24/outline';
 
 const todayCol = () =>
   new Date().toLocaleDateString('en-CA', { timeZone: 'America/Bogota' });
@@ -548,8 +549,9 @@ export default function Statistics() {
                 </div>
               </div>
             ) : (
-              <div className="py-8 text-center text-sm text-gray-400">
-                No hay ventas a crédito pendientes 🎉
+              <div className="flex flex-col items-center gap-1 py-8 text-center text-sm text-gray-400">
+                <CheckCircleIcon className="h-8 w-8 text-emerald-400" />
+                No hay ventas a crédito pendientes
               </div>
             )}
           </ChartCard>

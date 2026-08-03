@@ -6,6 +6,7 @@ import {
   CheckCircleIcon,
   XCircleIcon,
   DocumentTextIcon,
+  CheckBadgeIcon,
 } from '@heroicons/react/24/solid';
 import useDeliveredSales from '@/lib/api/hooks/useDeliveredSales';
 import { formatCOP, formatDateTime } from '@/lib/api/utils/utils';
@@ -96,7 +97,10 @@ export default function VerifyCodeSaleClient() {
 
         <div className="p-6 space-y-6">
           <div className="bg-green-50 border border-green-200 text-green-800 rounded-xl p-4 text-sm">
-            <p className="font-semibold">✔ Factura válida</p>
+            <p className="flex items-center gap-1.5 font-semibold">
+              <CheckBadgeIcon className="h-5 w-5 flex-none text-green-600" />
+              Factura válida
+            </p>
             <p>
               Esta venta se encuentra registrada en nuestro sistema y es
               auténtica.

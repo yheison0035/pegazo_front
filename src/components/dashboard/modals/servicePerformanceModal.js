@@ -6,6 +6,7 @@ import {
   ChartBarIcon,
   CalendarDaysIcon,
   BuildingStorefrontIcon,
+  CubeIcon,
 } from '@heroicons/react/24/outline';
 
 import Button from '@/components/ui/Button';
@@ -273,7 +274,10 @@ export default function ServicePerformanceModal({ onClose }) {
                               <td></td>
 
                               <td className="px-4 py-2 text-gray-600">
-                                🛒 {name}
+                                <span className="inline-flex items-center gap-1.5">
+                                  <CubeIcon className="h-4 w-4 flex-none text-gray-400" />
+                                  {name}
+                                </span>
                               </td>
 
                               <td className="text-center">{p.count}</td>

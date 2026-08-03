@@ -14,6 +14,7 @@ import {
   CalendarDaysIcon,
   ClockIcon,
   CheckCircleIcon,
+  CheckIcon,
 } from '@heroicons/react/24/outline';
 import Button from '@/components/ui/Button';
 
@@ -189,7 +190,11 @@ export default function PublicBooking() {
                         }
                       `}
                   >
-                    {currentStep > stepNumber ? '✓' : stepNumber}
+                    {currentStep > stepNumber ? (
+                      <CheckIcon className="h-4 w-4" strokeWidth={3} />
+                    ) : (
+                      stepNumber
+                    )}
                   </div>
 
                   <span

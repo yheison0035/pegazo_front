@@ -6,6 +6,7 @@ import {
   CalendarDaysIcon,
   BuildingStorefrontIcon,
   ChartBarIcon,
+  TrophyIcon,
 } from '@heroicons/react/24/outline';
 import Button from '@/components/ui/Button';
 import useLocals from '@/lib/api/hooks/useLocals';
@@ -154,15 +155,11 @@ export default function DailySalesReportModal({ onClose }) {
                       `}
                     >
                       <span className="font-bold flex items-center gap-2">
-                        {index === 0 && <span className="text-xl">🐲</span>}
+                        {index === 0 && (
+                          <TrophyIcon className="h-5 w-5 flex-none text-amber-500" />
+                        )}
 
                         {toggleCase(user.name, 'uppercase')}
-
-                        {index === 0 && (
-                          <span className="text-xs text-yellow-700 font-extrabold">
-                            (LA BESTIA)
-                          </span>
-                        )}
                       </span>
 
                       <span className="font-bold">{formatCOP(user.total)}</span>

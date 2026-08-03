@@ -6,6 +6,7 @@ import InputFilters from './segments/InputsFilters';
 import ContentData from './segments/contentData';
 import TableSkeleton from '@/components/ui/tableSkeleton';
 import Pagination from './segments/pagination';
+import { InboxIcon } from '@heroicons/react/24/outline';
 
 const Table = ({
   header,
@@ -110,7 +111,7 @@ const Table = ({
                     className="px-5 py-14 text-center"
                   >
                     <div className="flex flex-col items-center gap-1 text-gray-400">
-                      <span className="text-3xl">🗂️</span>
+                      <InboxIcon className="h-10 w-10 text-gray-300" />
                       <p className="text-sm font-medium text-gray-500">
                         No se encontraron resultados
                       </p>

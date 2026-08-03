@@ -2,7 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import {
+  EyeIcon,
+  EyeSlashIcon,
+  BuildingStorefrontIcon,
+} from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/authContext';
 import Button from '@/components/ui/Button';
 
@@ -64,10 +68,13 @@ export default function Login() {
             haz despegar tu negocio desde una sola plataforma, en la nube.
           </p>
 
-          <p className="mt-4 max-w-md rounded-xl border border-orange-500/20 bg-orange-500/10 px-4 py-3 text-sm text-neutral-200">
-            🛒 <b className="text-white">Tienda online conectada a tu inventario:</b>{' '}
-            vende por internet y tú eliges qué productos mostrar, sincronizados
-            en tiempo real.
+          <p className="mt-4 flex max-w-md items-start gap-2 rounded-xl border border-orange-500/20 bg-orange-500/10 px-4 py-3 text-sm text-neutral-200">
+            <BuildingStorefrontIcon className="mt-0.5 h-5 w-5 flex-none text-orange-400" />
+            <span>
+              <b className="text-white">Tienda online conectada a tu inventario:</b>{' '}
+              vende por internet y tú eliges qué productos mostrar, sincronizados
+              en tiempo real.
+            </span>
           </p>
 
           <div className="mt-6 flex flex-wrap gap-2">
@@ -118,9 +125,12 @@ export default function Login() {
               Todo tu negocio, en un solo lugar. Ventas, inventario, clientes,
               citas y reportes en la nube.
             </p>
-            <p className="mt-2 text-xs text-neutral-400">
-              🛒 Y tu propia tienda online conectada a tu inventario: tú eliges
-              qué productos vender por internet.
+            <p className="mt-2 flex items-start gap-1.5 text-xs text-neutral-400">
+              <BuildingStorefrontIcon className="mt-0.5 h-4 w-4 flex-none text-orange-400" />
+              <span>
+                Y tu propia tienda online conectada a tu inventario: tú eliges
+                qué productos vender por internet.
+              </span>
             </p>
             <a
               href="/"
