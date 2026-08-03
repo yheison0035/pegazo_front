@@ -28,7 +28,6 @@ export default function InputFilters({
             )}
           </th>
         ))}
-      <th />
     </tr>
   );
 }
