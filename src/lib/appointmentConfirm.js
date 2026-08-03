@@ -48,15 +48,16 @@ export function buildConfirmMessage(appt, companyName) {
   const dayCap = dayLabel(appt);
 
   const lines = [
-    `¡Hola${cliente ? ` ${cliente}` : ''}! 💈`,
-    `Te confirmamos tu cita en ${companyName || 'nuestro salón'}:`,
+    `¡Hola${cliente ? ` ${cliente}` : ''}! Te confirmamos tu cita en ${
+      companyName || 'nuestro salón'
+    }:`,
     '',
-    `✂️ ${appt?.service?.name || 'Servicio'}`,
-    `📅 ${[dayCap, appt?.startTime].filter(Boolean).join(', ')}`,
+    `Servicio: ${appt?.service?.name || 'Servicio'}`,
+    `Fecha: ${[dayCap, appt?.startTime].filter(Boolean).join(', ')}`,
   ];
-  if (appt?.local?.name) lines.push(`📍 ${appt.local.name}`);
-  if (appt?.barber?.name) lines.push(`💈 Con ${firstName(appt.barber.name)}`);
-  lines.push('', '¿Nos confirmas tu asistencia? ¡Te esperamos! 🙌');
+  if (appt?.local?.name) lines.push(`Sede: ${appt.local.name}`);
+  if (appt?.barber?.name) lines.push(`Barbero: ${firstName(appt.barber.name)}`);
+  lines.push('', '¿Nos confirmas tu asistencia? ¡Te esperamos!');
 
   return lines.join('\n');
 }
@@ -72,12 +73,12 @@ export function buildWinbackMessage(customer, companyName) {
   const nombre = firstName(customer?.name);
   const dias = customer?.days;
   const lines = [
-    `¡Hola${nombre ? ` ${nombre}` : ''}! 💈`,
+    `¡Hola${nombre ? ` ${nombre}` : ''}!`,
     dias
-      ? `Notamos que hace ${dias} días no pasas por ${companyName || 'nuestro salón'} y te extrañamos. ✂️`
-      : `Hace un tiempo que no pasas por ${companyName || 'nuestro salón'} y te extrañamos. ✂️`,
+      ? `Notamos que hace ${dias} días no pasas por ${companyName || 'nuestro salón'} y te extrañamos.`
+      : `Hace un tiempo que no pasas por ${companyName || 'nuestro salón'} y te extrañamos.`,
     '',
-    '¿Listo para tu próximo servicio? Escríbenos y agendamos tu cita cuando quieras. 🙌',
+    '¿Listo para tu próximo servicio? Escríbenos y agendamos tu cita cuando quieras.',
   ];
   return lines.join('\n');
 }
