@@ -6,6 +6,7 @@ import {
   UserPlusIcon,
   ClockIcon,
   CheckBadgeIcon,
+  ScissorsIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/authContext';
 import {
@@ -185,6 +186,14 @@ export default function ReactivateCustomersModal({ onClose }) {
                         Hace {c.days} días · {c.visits}{' '}
                         {c.visits === 1 ? 'visita' : 'visitas'}
                       </p>
+                      {c.lastService && (
+                        <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-600">
+                          <ScissorsIcon className="h-3.5 w-3.5 flex-none text-gray-400" />
+                          <span className="truncate">
+                            Último: {c.lastService}
+                          </span>
+                        </p>
+                      )}
                       {contacted && (
                         <p className="mt-0.5 flex items-center gap-1 text-[11px] font-medium text-green-600">
                           <CheckBadgeIcon className="h-3.5 w-3.5" />

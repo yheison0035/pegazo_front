@@ -77,9 +77,14 @@ export function buildWinbackMessage(customer, companyName) {
     dias
       ? `Notamos que hace ${dias} días no pasas por ${companyName || 'nuestro salón'} y te extrañamos.`
       : `Hace un tiempo que no pasas por ${companyName || 'nuestro salón'} y te extrañamos.`,
-    '',
-    '¿Listo para tu próximo servicio? Escríbenos y agendamos tu cita cuando quieras.',
   ];
+  if (customer?.lastService) {
+    lines.push(`Tu último servicio con nosotros fue: ${customer.lastService}.`);
+  }
+  lines.push(
+    '',
+    '¿Quieres agendar de nuevo? Escríbenos y coordinamos tu cita cuando quieras.'
+  );
   return lines.join('\n');
 }
 
