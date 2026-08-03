@@ -25,7 +25,7 @@ const Table = ({
   setLimit,
 }) => {
   return (
-    <div className="w-full overflow-hidden rounded-2xl border border-gray-200 bg-white/70 backdrop-blur-xl shadow-sm">
+    <div className="w-full overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_-12px_rgba(0,0,0,0.12)]">
       {meta && setPage && (
         <div className="border-b border-gray-100">
           <Pagination
@@ -41,7 +41,7 @@ const Table = ({
         </div>
       )}
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto [scrollbar-width:thin]">
         <table className="min-w-full text-sm text-gray-700">
           <Thead header={header} />
 

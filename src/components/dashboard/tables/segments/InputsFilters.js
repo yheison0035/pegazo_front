@@ -7,8 +7,8 @@ export default function InputFilters({
   handleFilterChange,
 }) {
   return (
-    <tr className="bg-white/60 backdrop-blur">
-      <th></th>
+    <tr className="bg-white">
+      <th className="sticky left-0 z-[5] bg-white shadow-[inset_-10px_0_8px_-8px_rgba(0,0,0,0.06)]"></th>
       {allFilters
         .filter((f) => f.show)
         .map(({ name, title, showInput }) => (
