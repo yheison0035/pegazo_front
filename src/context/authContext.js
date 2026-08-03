@@ -88,6 +88,13 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     apiLogout();
+    // Limpia la marca de "agenda ya mostrada" para que el modal de citas
+    // vuelva a aparecer en el próximo inicio de sesión.
+    try {
+      sessionStorage.removeItem('pegazo:agenda-shown');
+    } catch {
+      /* ignora */
+    }
     setUsuario(null);
     router.push('/login');
   };

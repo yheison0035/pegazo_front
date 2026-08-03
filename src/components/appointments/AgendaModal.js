@@ -7,6 +7,7 @@ import {
   ScissorsIcon,
   UserIcon,
   BuildingStorefrontIcon,
+  ExclamationCircleIcon,
 } from '@heroicons/react/24/outline';
 import Button from '@/components/ui/Button';
 import WhatsappLink from '@/components/dashboard/tables/segments/contentData/whatsappLink';
@@ -107,22 +108,33 @@ export default function AgendaModal({ agenda, onClose }) {
         className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="relative flex-none bg-gradient-to-br from-orange-600 to-amber-500 p-5 text-white">
+        <div className="relative flex-none bg-gradient-to-br from-slate-800 to-slate-700 p-5 text-white">
           <button
             onClick={onClose}
-            className="absolute right-4 top-4 text-white/80 transition hover:text-white"
+            className="absolute right-4 top-4 text-white/70 transition hover:text-white"
             aria-label="Cerrar"
           >
             <XMarkIcon className="h-6 w-6" />
           </button>
-          <CalendarDaysIcon className="h-7 w-7" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-500/90">
+            <CalendarDaysIcon className="h-5 w-5" />
+          </div>
           <h2 className="mt-2 text-lg font-bold">Tu agenda</h2>
-          <p className="text-sm text-white/90">
+          <p className="text-sm text-white/80">
             {total > 0
               ? `Tienes ${total} cita${total === 1 ? '' : 's'} entre hoy y mañana.`
               : 'No tienes citas para hoy ni mañana.'}
           </p>
         </div>
+
+        {total > 0 && (
+          <div className="flex flex-none items-start gap-2 border-b border-amber-100 bg-amber-50 px-5 py-3">
+            <ExclamationCircleIcon className="mt-0.5 h-5 w-5 flex-none text-amber-500" />
+            <p className="text-sm font-medium text-amber-800">
+              No olvides confirmar cada cita con el cliente.
+            </p>
+          </div>
+        )}
 
         <div className="flex-1 space-y-5 overflow-y-auto bg-gray-50 p-5">
           <Section

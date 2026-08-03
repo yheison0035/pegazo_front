@@ -75,12 +75,19 @@ export default function AppointmentsHub() {
         tomorrow: data.tomorrow || [],
       });
 
-      // Modal de inicio: una sola vez por día, si hay citas hoy/mañana.
+      // Modal de inicio: se muestra una vez por sesión (cada vez que se inicia
+      // sesión vuelve a aparecer; al refrescar no se repite). La marca se borra
+      // en el logout (authContext).
       if (!modalCheckedRef.current) {
         modalCheckedRef.current = true;
-        const seenKey = `pegazo:agenda-seen:${companyId}:${day}`;
         const total = (data.today?.length || 0) + (data.tomorrow?.length || 0);
-        if (total > 0 && !lsGet(seenKey, false)) {
+        let alreadyShown = false;
+        try {
+          alreadyShown = sessionStorage.getItem('pegazo:agenda-shown') === '1';
+        } catch {
+          /* ignora */
+        }
+        if (total > 0 && !alreadyShown) {
           setShowModal(true);
         }
       }
@@ -103,7 +110,11 @@ export default function AppointmentsHub() {
 
   const closeModal = () => {
     setShowModal(false);
-    lsSet(`pegazo:agenda-seen:${companyId}:${day}`, true);
+    try {
+      sessionStorage.setItem('pegazo:agenda-shown', '1');
+    } catch {
+      /* ignora */
+    }
   };
 
   // Recordatorios activos: citas que empiezan dentro de las próximas 2 h,
@@ -161,10 +172,8 @@ export default function AppointmentsHub() {
       <div className="fixed right-3 top-3 z-40 md:right-6 md:top-4">
         <button
           onClick={() => setBellOpen((v) => !v)}
-          className={`relative flex h-10 w-10 items-center justify-center rounded-full border shadow-sm transition ${
-            count > 0
-              ? 'border-orange-200 bg-orange-50 text-orange-600 hover:bg-orange-100'
-              : 'border-gray-200 bg-white text-gray-500 hover:bg-gray-50'
+          className={`relative flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white shadow-sm transition hover:bg-gray-50 ${
+            count > 0 ? 'text-gray-700' : 'text-gray-500'
           }`}
           aria-label="Recordatorios de citas"
         >
@@ -247,7 +256,7 @@ function ReminderRow({ appt, now, onDismiss }) {
           <span className="text-sm font-semibold text-gray-800">
             {appt.startTime}
           </span>
-          <span className="rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-bold text-orange-700">
+          <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700">
             {timeUntilLabel(startMs - now)}
           </span>
         </div>
@@ -275,8 +284,8 @@ function ReminderRow({ appt, now, onDismiss }) {
 function ReminderToast({ appt, now, onClose }) {
   const startMs = new Date(appt.startAt).getTime();
   return (
-    <div className="flex items-start gap-3 rounded-2xl border border-orange-100 bg-white p-3 shadow-xl">
-      <div className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-orange-100 text-orange-600">
+    <div className="flex items-start gap-3 rounded-2xl border border-gray-100 bg-white p-3 shadow-xl">
+      <div className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-blue-50 text-blue-600">
         <BellAlertIcon className="h-5 w-5" />
       </div>
       <div className="min-w-0 flex-1">
