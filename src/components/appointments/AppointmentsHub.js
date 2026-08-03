@@ -17,7 +17,7 @@ import {
   timeUntilLabel,
 } from '@/lib/appointmentsAccess';
 import { statusMeta } from '@/lib/appointmentStatus';
-import WhatsappLink from '@/components/dashboard/tables/segments/contentData/whatsappLink';
+import ConfirmClientButton from './ConfirmClientButton';
 import AgendaModal from './AgendaModal';
 
 const TWO_HOURS = 2 * 3600 * 1000;
@@ -291,7 +291,7 @@ function ReminderRow({ appt, now, onDismiss }) {
         </p>
         {appt.customer?.phone && (
           <div className="mt-1">
-            <WhatsappLink phone={appt.customer.phone} className="text-[11px]" />
+            <ConfirmClientButton appt={appt} />
           </div>
         )}
       </div>
@@ -335,7 +335,7 @@ function ReminderToast({ appt, now, onClose }) {
         )}
         {appt.customer?.phone && (
           <div className="mt-1">
-            <WhatsappLink phone={appt.customer.phone} className="text-[11px]" />
+            <ConfirmClientButton appt={appt} />
           </div>
         )}
       </div>

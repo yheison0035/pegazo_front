@@ -71,6 +71,15 @@ export async function getDeliveredSaleById(id) {
   return apiFetch(`/sales/${id}`);
 }
 
+// Clientes que no vuelven hace entre minDays y maxDays días (reactivación).
+export async function getInactiveCustomers({ minDays = 10, maxDays = 15 } = {}) {
+  const query = new URLSearchParams({
+    minDays: String(minDays),
+    maxDays: String(maxDays),
+  });
+  return apiFetch(`/sales/inactive-customers?${query.toString()}`);
+}
+
 export async function updateDeliveredSale(id, dto) {
   const {
     id: _id,

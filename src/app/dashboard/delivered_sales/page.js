@@ -11,7 +11,9 @@ import {
   CalendarDaysIcon,
   CalendarIcon,
   ChartBarIcon,
+  UserPlusIcon,
 } from '@heroicons/react/24/outline';
+import ReactivateCustomersModal from '@/components/appointments/ReactivateCustomersModal';
 import useDeliveredSales from '@/lib/api/hooks/useDeliveredSales';
 import {
   getHeaderTableDeliveredSales,
@@ -45,6 +47,7 @@ export default function Delivered_Sales() {
   const [showRangeReport, setShowRangeReport] = useState(false);
   const [showGeneralReport, setShowGeneralReport] = useState(false);
   const [showServiceReport, setShowServiceReport] = useState(false);
+  const [showReactivate, setShowReactivate] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [alert, setAlert] = useState({});
 
@@ -99,14 +102,24 @@ export default function Delivered_Sales() {
 
         <div className="flex flex-wrap gap-2 sm:gap-3">
           {usuario?.company?.type === 'SERVICIOS' && (
-            <Button
-              variant="info"
-              icon={Squares2X2Icon}
-              onClick={() => setShowServiceReport(true)}
-              className="w-full sm:w-auto"
-            >
-              Ventas y Servicios
-            </Button>
+            <>
+              <Button
+                variant="info"
+                icon={Squares2X2Icon}
+                onClick={() => setShowServiceReport(true)}
+                className="w-full sm:w-auto"
+              >
+                Ventas y Servicios
+              </Button>
+              <Button
+                variant="add"
+                icon={UserPlusIcon}
+                onClick={() => setShowReactivate(true)}
+                className="w-full sm:w-auto"
+              >
+                Reactivar clientes
+              </Button>
+            </>
           )}
           {usuario?.company?.type !== 'SERVICIOS' && (
             <>
@@ -206,6 +219,10 @@ export default function Delivered_Sales() {
 
       {showGeneralReport && (
         <SalesRangeGeneralModal onClose={() => setShowGeneralReport(false)} />
+      )}
+
+      {showReactivate && (
+        <ReactivateCustomersModal onClose={() => setShowReactivate(false)} />
       )}
 
       <AlertModal

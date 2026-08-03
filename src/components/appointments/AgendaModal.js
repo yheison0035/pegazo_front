@@ -10,7 +10,7 @@ import {
   ExclamationCircleIcon,
 } from '@heroicons/react/24/outline';
 import Button from '@/components/ui/Button';
-import WhatsappLink from '@/components/dashboard/tables/segments/contentData/whatsappLink';
+import ConfirmClientButton from './ConfirmClientButton';
 import { statusMeta } from '@/lib/appointmentStatus';
 
 function AppointmentRow({ appt }) {
@@ -59,7 +59,7 @@ function AppointmentRow({ appt }) {
 
       {appt.customer?.phone && (
         <div className="flex-none">
-          <WhatsappLink phone={appt.customer.phone} className="text-xs" />
+          <ConfirmClientButton appt={appt} />
         </div>
       )}
     </div>

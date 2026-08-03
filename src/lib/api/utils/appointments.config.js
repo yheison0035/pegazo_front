@@ -70,6 +70,12 @@ export const getHeaderTableAppointments = () => [
   { name: 'serviceId', title: 'Servicio', show: true, showInput: true },
   { name: 'barberId', title: 'Barbero', show: true, showInput: true },
   { name: 'customerId', title: 'Cliente', show: true, showInput: true },
+  {
+    name: 'clientConfirmed',
+    title: 'Confirmación',
+    show: true,
+    showInput: false,
+  },
   { name: 'localId', title: 'Local', show: true, showInput: true },
   { name: 'notes', title: 'Notas', show: true, showInput: true },
   {

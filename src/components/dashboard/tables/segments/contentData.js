@@ -5,6 +5,7 @@ import Actions from './actions';
 import PhoneContentData from './contentData/phone';
 import WhatsappLink from './contentData/whatsappLink';
 import LastAudit from './contentData/lastAudit';
+import ConfirmClientButton from '@/components/appointments/ConfirmClientButton';
 import {
   formatCOP,
   formatDateTime,
@@ -449,6 +450,14 @@ export default function ContentData({
                       phone={info.customer?.phone}
                       className="mt-1 text-xs"
                     />
+                  )}
+                </td>
+                <td className="px-5 py-4 whitespace-nowrap">
+                  {info.customer?.document !== '222222222222' &&
+                  info.customer?.phone ? (
+                    <ConfirmClientButton appt={info} />
+                  ) : (
+                    '---'
                   )}
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">

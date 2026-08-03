@@ -16,6 +16,16 @@ export function usesAppointments(usuario) {
   return modules.includes('appointments') && planAllowsModule(plan, 'appointments');
 }
 
+// ¿La empresa es de servicios/citas? (independiente del plan). Usado para
+// mostrar herramientas propias de servicios como "reactivar clientes".
+export function isServicesBusiness(usuario) {
+  if (!usuario) return false;
+  if (usuario.role === 'SUPER_PLATFORM_ADMIN') return false;
+  const type = usuario.company?.type || 'COMERCIO';
+  const modules = BUSINESS_TYPES[type] || BUSINESS_TYPES.COMERCIO;
+  return modules.includes('appointments');
+}
+
 // Fecha de "hoy" en calendario Colombia (UTC-5) en formato YYYY-MM-DD. Se usa
 // como clave para mostrar el modal / recordatorios una sola vez por día.
 export function colombiaToday() {

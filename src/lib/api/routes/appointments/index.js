@@ -73,6 +73,16 @@ export async function updateAppointment(id, dto) {
   return res;
 }
 
+// Marca (o desmarca) la cita como confirmada con el cliente.
+export async function setAppointmentClientConfirmed(id, confirmed = true) {
+  const res = await apiFetch(`/appointments/${id}/client-confirm`, {
+    method: 'PATCH',
+    body: JSON.stringify({ confirmed }),
+  });
+  notifyAppointmentsChanged();
+  return res;
+}
+
 export async function deleteAppointment(id) {
   const res = await apiFetch(`/appointments/${id}`, {
     method: 'DELETE',
