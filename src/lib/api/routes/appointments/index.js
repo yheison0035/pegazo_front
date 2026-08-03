@@ -22,6 +22,11 @@ export async function getAppointmentById(id) {
   return apiFetch(`/appointments/${id}`);
 }
 
+// Agenda de hoy y mañana (para el modal de inicio y los recordatorios).
+export async function getAppointmentsAgenda() {
+  return apiFetch('/appointments/agenda');
+}
+
 export async function createAppointment(dto) {
   const body = {
     ...dto,

@@ -6,7 +6,8 @@ export const getEmptyAppointment = () => ({
   customerId: '',
   localId: '',
   notes: '',
-  status: '',
+  // Toda cita nace CONFIRMADA por defecto.
+  status: 'CONFIRMADA',
 });
 
 export const getFormFieldsAppointments = () => [
@@ -53,9 +54,11 @@ export const getFormFieldsAppointments = () => [
     type: 'select',
     required: true,
     options: [
-      { id: 'CONFIRMADA', name: 'CONFIRMADA' },
-      { id: 'COMPLETADA', name: 'COMPLETADA' },
-      { id: 'CANCELADA', name: 'CANCELADA' },
+      { id: 'CONFIRMADA', name: 'Confirmada' },
+      { id: 'EN_PROCESO', name: 'En proceso' },
+      { id: 'COMPLETADA', name: 'Completada' },
+      { id: 'NO_ASISTIO', name: 'No asistió' },
+      { id: 'CANCELADA', name: 'Cancelada' },
     ],
   },
 ];

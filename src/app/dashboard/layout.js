@@ -4,6 +4,7 @@ import SideNavigation from '@/components/dashboard/sidenav/sidenav';
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
 import PlanUpgradeModal from '@/components/plan/PlanUpgradeModal';
+import AppointmentsHub from '@/components/appointments/AppointmentsHub';
 
 export default function Layout({ children }) {
   return (
@@ -17,6 +18,7 @@ export default function Layout({ children }) {
         </div>
       </div>
       <PlanUpgradeModal />
+      <AppointmentsHub />
     </RoleGuard>
   );
 }

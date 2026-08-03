@@ -419,7 +419,7 @@ export default function ContentData({
                           : info.status === 'CANCELADA'
                             ? 'bg-red-100 text-red-700'
                             : info.status === 'CONFIRMADA'
-                              ? 'bg-orange-100 text-orange-700'
+                              ? 'bg-blue-100 text-blue-700'
                               : info.status === 'EN_PROCESO'
                                 ? 'bg-purple-100 text-purple-700'
                                 : info.status === 'NO_ASISTIO'
