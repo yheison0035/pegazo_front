@@ -26,6 +26,7 @@ const Table = ({
   setLimit,
 }) => {
   const scrollRef = useRef(null);
+  const tableRef = useRef(null);
   const [shadowRight, setShadowRight] = useState(false);
 
   // Muestra una sombra en el borde derecho cuando hay más columnas por ver.
@@ -39,6 +40,27 @@ const Table = ({
     updateShadow();
     window.addEventListener('resize', updateShadow);
     return () => window.removeEventListener('resize', updateShadow);
+  }, [info, loading, header]);
+
+  // Etiqueta cada celda con el nombre de su columna (data-label). En móvil, el
+  // CSS convierte cada fila en una tarjeta "etiqueta: valor" (0 scroll lateral).
+  // Es genérico: sirve para todas las tablas sin tocar cada vista.
+  useEffect(() => {
+    if (!tableRef.current) return;
+    const cols = (header || []).filter((f) => f.show);
+    const rows = tableRef.current.querySelectorAll('tbody tr');
+    rows.forEach((tr) => {
+      const tds = tr.querySelectorAll(':scope > td');
+      // Solo filas de datos (acciones + columnas); se saltan filtros/vacío.
+      if (tds.length !== cols.length + 1) return;
+      tds.forEach((td, i) => {
+        if (i === 0) {
+          td.classList.add('crm-actions');
+        } else {
+          td.setAttribute('data-label', cols[i - 1]?.title || '');
+        }
+      });
+    });
   }, [info, loading, header]);
 
   return (
@@ -64,7 +86,10 @@ const Table = ({
           onScroll={updateShadow}
           className="overflow-x-auto [scrollbar-width:thin]"
         >
-          <table className="crm-table min-w-full text-[13px] text-gray-700 sm:text-sm">
+          <table
+            ref={tableRef}
+            className="crm-table min-w-full text-[13px] text-gray-700 sm:text-sm"
+          >
             <Thead header={header} />
 
             <tbody className="divide-y divide-gray-100">
