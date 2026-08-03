@@ -48,7 +48,7 @@ export default function UpgradePage() {
         </h1>
         <p className="text-sm text-gray-500">
           {currentPlan
-            ? `Tu plan actual es ${currentPlan}. Mejora cuando lo necesites.`
+            ? `Tu plan actual es ${currentPlan}. Puedes cambiarlo cuando lo necesites.`
             : 'Elige el plan que mejor se ajuste a tu negocio.'}
         </p>
       </div>
@@ -107,10 +107,11 @@ export default function UpgradePage() {
                   </button>
                 ) : isLower ? (
                   <button
-                    disabled
-                    className="w-full rounded-xl border border-gray-200 py-2.5 text-sm font-medium text-gray-400"
+                    onClick={() => handleUpgrade(plan.id)}
+                    disabled={loading === plan.id}
+                    className="w-full rounded-xl border border-gray-300 py-2.5 text-sm font-medium text-gray-600 hover:border-gray-400 hover:bg-gray-50 disabled:opacity-50"
                   >
-                    Incluido en tu plan
+                    {loading === plan.id ? 'Procesando...' : `Cambiar a ${plan.name}`}
                   </button>
                 ) : (
                   <button

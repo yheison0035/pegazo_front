@@ -6,6 +6,7 @@ import {
   ArrowLeftOnRectangleIcon,
   LockClosedIcon,
   RocketLaunchIcon,
+  ArrowsRightLeftIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/authContext';
 import useNavigation from '@/hooks/useNavigation';
@@ -16,12 +17,13 @@ export default function NavLinks() {
   const { usuario, loading, logout } = useAuth();
   const pathname = usePathname();
 
-  // "Mejorar mi plan" solo si NO es el rol de plataforma y aún hay un plan
-  // superior al actual (si ya está en el plan más alto, no se muestra).
+  // El acceso al plan se muestra a todos los usuarios de empresa (no al rol de
+  // plataforma). Si ya está en el plan más alto, en vez de "Mejorar" se ofrece
+  // "Cambiar mi plan" (para que igual pueda gestionarlo o cambiarlo).
   const plan = usuario?.company?.plan;
   const topPlan = PLAN_ORDER[PLAN_ORDER.length - 1];
-  const canUpgrade =
-    usuario?.role !== 'SUPER_PLATFORM_ADMIN' && plan !== topPlan;
+  const showPlanLink = usuario?.role !== 'SUPER_PLATFORM_ADMIN';
+  const canUpgrade = plan !== topPlan;
   const sections = useNavigation();
 
   if (loading || !usuario) return null;
@@ -101,14 +103,18 @@ export default function NavLinks() {
         ))}
       </nav>
 
-      {canUpgrade && (
+      {showPlanLink && (
         <div className="mt-6 border-t border-orange-500/10 pt-4 px-2">
           <Link
             href="/dashboard/upgrade"
             className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-amber-300 transition hover:bg-amber-500/10"
           >
-            <RocketLaunchIcon className="w-5 h-5" />
-            <span>Mejorar mi plan</span>
+            {canUpgrade ? (
+              <RocketLaunchIcon className="w-5 h-5" />
+            ) : (
+              <ArrowsRightLeftIcon className="w-5 h-5" />
+            )}
+            <span>{canUpgrade ? 'Mejorar mi plan' : 'Cambiar mi plan'}</span>
           </Link>
         </div>
       )}
