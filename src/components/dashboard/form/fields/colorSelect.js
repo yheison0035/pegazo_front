@@ -44,9 +44,23 @@ const ColorSelect = memo(function ColorSelect({ value, onChange, disabled }) {
       (v) => v.color.toUpperCase() === colorName.toUpperCase()
     );
 
-  const filteredColors = colorOptions.filter((opt) =>
-    opt.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredColors = useMemo(() => {
+    const term = search.toLowerCase();
+    const list = colorOptions.filter((opt) =>
+      opt.name.toLowerCase().includes(term)
+    );
+
+    const isSelected = (name) =>
+      normalizedValue.some(
+        (v) => v.color.toUpperCase() === name.toUpperCase()
+      );
+
+    // Los colores ya seleccionados aparecen primero (sin tener que hacer scroll
+    // ni buscarlos). El sort es estable: conserva el orden dentro de cada grupo.
+    return [...list].sort(
+      (a, b) => (isSelected(b.name) ? 1 : 0) - (isSelected(a.name) ? 1 : 0)
+    );
+  }, [search, normalizedValue]);
 
   const increase = (color) => {
     const existing = getVariant(color);
@@ -133,7 +147,11 @@ const ColorSelect = memo(function ColorSelect({ value, onChange, disabled }) {
                 return (
                   <div
                     key={`${opt.hex}-${opt.name}`}
-                    className="flex items-center justify-between px-4 py-2 hover:bg-gray-100 transition"
+                    className={`flex items-center justify-between px-4 py-2 transition ${
+                      variant
+                        ? 'bg-orange-50 hover:bg-orange-100'
+                        : 'hover:bg-gray-100'
+                    }`}
                   >
                     <div className="flex items-center gap-2">
                       <span
