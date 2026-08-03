@@ -61,3 +61,22 @@ button:disabled {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
+
+/* ============================================================
+   TABLAS RESPONSIVE
+   En pantallas pequeñas se reduce el padding horizontal de las
+   celdas para que la tabla ocupe menos ancho y necesite menos
+   scroll. En >=640px vuelve al espaciado cómodo.
+   ============================================================ */
+.crm-table th,
+.crm-table td {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+@media (min-width: 640px) {
+  .crm-table th,
+  .crm-table td {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+}

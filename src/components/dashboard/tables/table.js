@@ -64,7 +64,7 @@ const Table = ({
           onScroll={updateShadow}
           className="overflow-x-auto [scrollbar-width:thin]"
         >
-          <table className="min-w-full text-sm text-gray-700">
+          <table className="crm-table min-w-full text-[13px] text-gray-700 sm:text-sm">
             <Thead header={header} />
 
             <tbody className="divide-y divide-gray-100">
