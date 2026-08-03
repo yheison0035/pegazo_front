@@ -22,7 +22,7 @@ import AgendaModal from './AgendaModal';
 
 const TWO_HOURS = 2 * 3600 * 1000;
 const ACTIVE = ['PENDIENTE', 'CONFIRMADA', 'EN_PROCESO'];
-const POLL_MS = 3 * 60 * 1000; // refresca la agenda cada 3 min
+const POLL_MS = 60 * 1000; // refresca la agenda cada 60 s (respaldo)
 const TICK_MS = 30 * 1000; // recalcula recordatorios cada 30 s
 
 // localStorage helpers (tolerantes a SSR / modo privado)
@@ -107,6 +107,31 @@ export default function AppointmentsHub() {
       clearInterval(tick);
     };
   }, [enabled, fetchAgenda]);
+
+  // Refresco inmediato al crear / editar / eliminar una cita (y al volver a la
+  // pestaña), para que campana, toasts y modal estén siempre al día.
+  useEffect(() => {
+    if (!enabled) return;
+    const onChange = () => fetchAgenda();
+    const onFocus = () => {
+      if (document.visibilityState === 'visible') fetchAgenda();
+    };
+    window.addEventListener('pegazo:appointments-changed', onChange);
+    document.addEventListener('visibilitychange', onFocus);
+    return () => {
+      window.removeEventListener('pegazo:appointments-changed', onChange);
+      document.removeEventListener('visibilitychange', onFocus);
+    };
+  }, [enabled, fetchAgenda]);
+
+  // Poda los toasts de citas que ya no existen en la agenda (eliminadas o
+  // canceladas): el toast no debe sobrevivir a su cita.
+  useEffect(() => {
+    const ids = new Set(
+      [...(agenda.today || []), ...(agenda.tomorrow || [])].map((a) => a.id)
+    );
+    setToasts((prev) => prev.filter((t) => ids.has(t.id)));
+  }, [agenda]);
 
   const closeModal = () => {
     setShowModal(false);

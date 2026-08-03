@@ -1,6 +1,14 @@
 import apiFetch from '../../auth/client';
 import { buildISODateTime } from '../../utils/utils';
 
+// Avisa a la app (campana/agenda) que las citas cambiaron para refrescar en el
+// acto, sin esperar al polling.
+function notifyAppointmentsChanged() {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('pegazo:appointments-changed'));
+  }
+}
+
 export async function getAppointments(params = {}) {
   const { page = 1, limit = 10, ...filters } = params;
 
@@ -36,10 +44,12 @@ export async function createAppointment(dto) {
     customerId: dto.customerId ? Number(dto.customerId) : null,
   };
 
-  return apiFetch('/appointments', {
+  const res = await apiFetch('/appointments', {
     method: 'POST',
     body: JSON.stringify(body),
   });
+  notifyAppointmentsChanged();
+  return res;
 }
 
 export async function updateAppointment(id, dto) {
@@ -55,16 +65,20 @@ export async function updateAppointment(id, dto) {
     status: dto.status,
   };
 
-  return apiFetch(`/appointments/${id}`, {
+  const res = await apiFetch(`/appointments/${id}`, {
     method: 'PUT',
     body: JSON.stringify(body),
   });
+  notifyAppointmentsChanged();
+  return res;
 }
 
 export async function deleteAppointment(id) {
-  return apiFetch(`/appointments/${id}`, {
+  const res = await apiFetch(`/appointments/${id}`, {
     method: 'DELETE',
   });
+  notifyAppointmentsChanged();
+  return res;
 }
 
 export async function getAvailability(params = {}) {
