@@ -105,19 +105,24 @@ export async function uploadProductImages(productId, images) {
 
   const formData = new FormData();
 
-  const keepImageIds = images
-    .filter((img) => img.id && !img._removed)
-    .map((img) => img.id);
+  // Lista final en el orden en que quedaron (ya sin las eliminadas).
+  const finalImages = images.filter((img) => !img._removed);
 
-  images
+  // Archivos nuevos, en su orden.
+  finalImages
     .filter((img) => img.file)
-    .forEach((img) => {
-      formData.append('images', img.file);
-    });
+    .forEach((img) => formData.append('images', img.file));
 
-  keepImageIds.forEach((id) => {
-    formData.append('keepImageIds', id);
-  });
+  // Ids de las existentes que se conservan.
+  finalImages
+    .filter((img) => img.id)
+    .forEach((img) => formData.append('keepImageIds', img.id));
+
+  // Orden final: por cada imagen, su id (existente) o 'NEW' (archivo nuevo).
+  // El backend usa esto para reposicionar TODO (incluida la "Principal").
+  finalImages.forEach((img) =>
+    formData.append('order', img.id ? String(img.id) : 'NEW')
+  );
 
   return apiFetch(`/inventory/${productId}/images`, {
     method: 'PUT',

@@ -26,17 +26,9 @@ export default function ImageUploader({
   };
 
   const removeImage = (index) => {
-    setImages((prev) => {
-      const copy = [...prev];
-
-      if (copy[index]?.id) {
-        copy[index]._removed = true;
-      } else {
-        copy.splice(index, 1);
-      }
-
-      return copy;
-    });
+    // Se quita de la lista (nueva o existente). Las existentes que ya no estén
+    // en la lista el backend las elimina al guardar (no están en keepImageIds).
+    setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   // Reordenar imágenes
