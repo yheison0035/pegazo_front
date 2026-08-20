@@ -12,3 +12,19 @@ export async function updateLoyalty(dto) {
     body: JSON.stringify(dto),
   });
 }
+
+// Datos básicos de la empresa (nombre, logo, contacto).
+export async function updateCompanyProfile(dto) {
+  return apiFetch('/company/profile', {
+    method: 'PATCH',
+    body: JSON.stringify(dto),
+  });
+}
+
+// Horario de atención.
+export async function updateCompanyHours(dto) {
+  return apiFetch('/company/hours', {
+    method: 'PATCH',
+    body: JSON.stringify(dto),
+  });
+}
