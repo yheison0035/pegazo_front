@@ -18,6 +18,7 @@ import {
   Squares2X2Icon,
   FireIcon,
   CalculatorIcon,
+  InboxArrowDownIcon,
 } from '@heroicons/react/24/outline';
 
 export const NAVIGATION = [
@@ -80,6 +81,18 @@ export const NAVIGATION = [
           'RECEPCIONISTA',
           'BODEGUERO',
           'VENTAS',
+        ],
+      },
+      {
+        name: 'Compras',
+        href: '/dashboard/purchases',
+        icon: InboxArrowDownIcon,
+        roles: [
+          'SUPER_ADMIN',
+          'ADMIN',
+          'ASESOR',
+          'RECEPCIONISTA',
+          'BODEGUERO',
         ],
       },
     ],
