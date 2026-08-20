@@ -1,11 +1,29 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import { useAuth } from '@/context/authContext';
 import DinamicForm from '@/components/dashboard/form/DinamicForm';
 import useSales from '@/lib/api/hooks/useSales';
 import { getEmptySale, getFormFieldsSales } from '@/lib/api/utils/sales.config';
+
+// Fecha/hora actual en formato datetime-local (YYYY-MM-DDTHH:mm), hora local.
+function nowLocalDatetime() {
+  const d = new Date();
+  const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 16);
+}
+
+// Venta con defaults inteligentes para agilizar el mostrador: fecha=ahora,
+// vendedor = usuario actual, local = local del usuario (si tiene uno).
+function buildInitialSale(usuario) {
+  return {
+    ...getEmptySale(),
+    saleDate: nowLocalDatetime(),
+    userId: usuario?.id ? String(usuario.id) : '',
+    localId: usuario?.localId ? String(usuario.localId) : '',
+  };
+}
 
 export default function AddSales() {
   const [formData, setFormData] = useState(getEmptySale());
@@ -15,7 +33,18 @@ export default function AddSales() {
 
   const { createSale, loading } = useSales();
 
-  const handleReset = () => setFormData(getEmptySale());
+  // Al cargar el usuario, rellena los defaults (sin pisar lo que ya haya tocado).
+  useEffect(() => {
+    if (!usuario) return;
+    setFormData((prev) => ({
+      ...prev,
+      saleDate: prev.saleDate || nowLocalDatetime(),
+      userId: prev.userId || (usuario.id ? String(usuario.id) : ''),
+      localId: prev.localId || (usuario.localId ? String(usuario.localId) : ''),
+    }));
+  }, [usuario]);
+
+  const handleReset = () => setFormData(buildInitialSale(usuario));
 
   const handleSubmit = async (e) => {
     e.preventDefault();

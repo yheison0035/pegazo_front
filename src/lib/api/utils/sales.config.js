@@ -66,11 +66,12 @@ export const getFormFieldsSales = () => [
   },
   {
     name: 'customerId',
-    label: 'Cliente',
+    label: 'Cliente (opcional)',
     type: 'searchSelect',
-    required: true,
+    required: false,
     source: 'customers',
     disabled: false,
+    hint: 'Déjalo vacío para venta de mostrador (Consumidor Final).',
   },
   {
     name: 'notes',
