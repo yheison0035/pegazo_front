@@ -17,6 +17,7 @@ import {
   GlobeAltIcon,
   Squares2X2Icon,
   FireIcon,
+  CalculatorIcon,
 } from '@heroicons/react/24/outline';
 
 export const NAVIGATION = [
@@ -144,6 +145,19 @@ export const NAVIGATION = [
         name: 'Ventas Realizadas',
         href: '/dashboard/delivered_sales',
         icon: ClipboardDocumentCheckIcon,
+        roles: [
+          'SUPER_ADMIN',
+          'ADMIN',
+          'ASESOR',
+          'RECEPCIONISTA',
+          'CAJA',
+          'VENTAS',
+        ],
+      },
+      {
+        name: 'Caja',
+        href: '/dashboard/cash',
+        icon: CalculatorIcon,
         roles: [
           'SUPER_ADMIN',
           'ADMIN',
