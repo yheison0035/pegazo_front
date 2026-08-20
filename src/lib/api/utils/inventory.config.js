@@ -15,6 +15,7 @@ export const getEmptyInventory = () => ({
   categoryId: '',
   brandId: '',
   minStock: 0,
+  unit: 'UNIDAD',
   status: 'ACTIVO',
   variants: [],
   features: [],
@@ -122,6 +123,17 @@ export const getFormFieldsInventory = (usuario) => {
       label: 'Alerta de stock bajo (opcional)',
       type: 'number',
       required: false,
+      disabled: false,
+    },
+    {
+      name: 'unit',
+      label: 'Unidad de venta',
+      type: 'select',
+      required: false,
+      options: [
+        { id: 'UNIDAD', name: 'Por unidad' },
+        { id: 'PESO', name: 'Por peso (kg)' },
+      ],
       disabled: false,
     },
     {
