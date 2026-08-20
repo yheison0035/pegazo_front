@@ -4,7 +4,11 @@ import { useEffect, useState } from 'react';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import useUsers from '@/lib/api/hooks/useUsers';
 
-export default function Avatar({ perfil = {}, setPerfil }) {
+export default function Avatar({
+  perfil = {},
+  setPerfil,
+  size = 'w-24 h-24',
+}) {
   const [alert, setAlert] = useState({ message: '' });
   const [avatarPreview, setAvatarPreview] = useState(perfil?.avatar || null);
   const { uploadUserAvatar, deleteUserAvatar } = useUsers();
@@ -99,7 +103,7 @@ export default function Avatar({ perfil = {}, setPerfil }) {
 
   return (
     <>
-      <div className="relative w-24 h-24">
+      <div className={`relative ${size}`}>
         <label className="w-full h-full block rounded-full overflow-hidden group cursor-pointer">
           <input
             type="file"
