@@ -21,6 +21,7 @@ import {
   InboxArrowDownIcon,
   GiftIcon,
   DocumentTextIcon,
+  ArrowUturnLeftIcon,
 } from '@heroicons/react/24/outline';
 
 export const NAVIGATION = [
@@ -168,6 +169,12 @@ export const NAVIGATION = [
           'CAJA',
           'VENTAS',
         ],
+      },
+      {
+        name: 'Devoluciones',
+        href: '/dashboard/returns',
+        icon: ArrowUturnLeftIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA'],
       },
       {
         name: 'Caja',
