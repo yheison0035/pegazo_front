@@ -42,12 +42,11 @@ export default function ContentData({
           <tr
             key={info.id}
             className={`
-              group transition-colors
-              ${index % 2 === 1 ? 'bg-gray-50' : 'bg-white'}
+              group bg-white transition-colors
               ${isLocked ? 'opacity-40 cursor-not-allowed' : 'hover:bg-orange-50'}
             `}
           >
-            <td className="sticky left-0 z-10 bg-inherit px-5 py-4 text-center shadow-[inset_-10px_0_8px_-8px_rgba(0,0,0,0.06)]">
+            <td className="sticky left-0 z-10 bg-white px-5 py-4 text-center transition-colors group-hover:bg-orange-50 shadow-[inset_-10px_0_8px_-8px_rgba(0,0,0,0.05)]">
               <Actions
                 isLocked={isLocked}
                 rol={rol}
