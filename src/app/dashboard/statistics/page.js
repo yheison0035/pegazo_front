@@ -190,6 +190,13 @@ export default function Statistics() {
               delta={s.deltas.profit}
               accent={PALETTE[5]}
             />
+            {s.grossMargin !== undefined && (
+              <KpiCard
+                label={`Margen bruto (${s.grossMarginPct}%)`}
+                value={formatMoney(s.grossMargin)}
+                accent={COLORS.profit}
+              />
+            )}
             <KpiCard
               label="Clientes nuevos"
               value={s.newCustomers}
