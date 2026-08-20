@@ -16,9 +16,9 @@ export function sendInvoiceWhatsapp(sale, companyName, businessType) {
   if (!raw) return { ok: false, reason: 'sin-telefono' };
   const phone = raw.length === 10 && raw.startsWith('3') ? `57${raw}` : raw;
 
-  const base =
-    process.env.NEXT_PUBLIC_VERIFY_URL ||
-    (typeof window !== 'undefined' ? window.location.origin : '');
+  // Siempre el dominio público (pegazo.co), no el origen actual del admin
+  // (que puede ser el dominio viejo admin.europeatvstore.com).
+  const base = process.env.NEXT_PUBLIC_VERIFY_URL || 'https://pegazo.co';
   const verifyUrl = `${base}/verifyCodeSale?code=${sale.code}`;
 
   const total = new Intl.NumberFormat('es-CO', {

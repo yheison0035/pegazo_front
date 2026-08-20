@@ -3,8 +3,8 @@ import { formatCOP, formatDateTime } from '@/lib/api/utils/utils';
 export function printSaleInvoice(sale, usuario) {
   if (!sale) return;
 
-  const verifyBase =
-    process.env.NEXT_PUBLIC_VERIFY_URL || window.location.origin;
+  // Dominio público (pegazo.co), no el origen del admin (puede ser el viejo).
+  const verifyBase = process.env.NEXT_PUBLIC_VERIFY_URL || 'https://pegazo.co';
 
   const verifyUrl = `${verifyBase}/verifyCodeSale?code=${sale.code}`;
 
