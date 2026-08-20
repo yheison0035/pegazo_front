@@ -10,7 +10,8 @@ export async function createSale(dto) {
     ...dto,
     saleDate: new Date(dto.saleDate),
     localId: Number(dto.localId),
-    customerId: Number(dto.customerId),
+    // Cliente opcional: vacío => null (el backend asigna Consumidor Final).
+    customerId: dto.customerId ? Number(dto.customerId) : null,
     userId: Number(dto.userId),
   };
 

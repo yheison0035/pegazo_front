@@ -48,13 +48,10 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
     return () => clearTimeout(handler);
   }, [search]);
 
-  // ✅ AJUSTE: soporte services
-  const handleSelectProduct = async (product) => {
-    const exists = selectedProducts.find(
-      (p) => p.inventoryVariantId === product.id && p.type === product.type
-    );
-    if (exists) return;
-
+  // Soporta productos y servicios. Si el ítem ya está en la lista, repetir la
+  // selección/escaneo suma una unidad (productos) — flujo natural de un lector
+  // de código de barras. Sin retrasos artificiales.
+  const handleSelectProduct = (product) => {
     const isService = product.type === 'service';
 
     if (!isService && (!product.stock || product.stock <= 0)) {
@@ -65,13 +62,21 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
       return;
     }
 
-    setProcessing(true);
-    await new Promise((res) => setTimeout(res, 300));
+    const exists = selectedProducts.find(
+      (p) => p.inventoryVariantId === product.id && p.type === product.type
+    );
+
+    if (exists) {
+      if (!isService) updateQuantity(product.id, (exists.quantity || 1) + 1);
+      setSearch('');
+      setFiltered([]);
+      return;
+    }
 
     const newList = [
       ...selectedProducts,
       {
-        type: product.type, // 👈 CLAVE
+        type: product.type,
         inventoryVariantId: product.id,
         name: isService ? product.name : `${product.name} - ${product.color}`,
         price: product.price,
@@ -87,7 +92,25 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
     setSearch('');
     setFiltered([]);
     onChange?.(newList);
-    setProcessing(false);
+  };
+
+  // Enter en el buscador: agrega el mejor resultado (lector de código de barras).
+  // Si el debounce aún no trajo resultados, busca al instante para no perder el
+  // escaneo rápido.
+  const handleEnter = async () => {
+    const term = search.trim();
+    if (term.length < 2) return;
+
+    let results = filtered;
+    if (!results || results.length === 0) {
+      try {
+        const res = await searchProducts(term);
+        results = res?.data || [];
+      } catch {
+        results = [];
+      }
+    }
+    if (results.length) handleSelectProduct(results[0]);
   };
 
   // ✅ AJUSTE: servicios sin límite
@@ -167,7 +190,7 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
 
           <input
             type="text"
-            placeholder="Buscar producto por nombre o referencia..."
+            placeholder="Buscar o escanear código de barras (Enter agrega)..."
             value={search}
             onChange={(e) => {
               const value = toggleCase(e.target.value, 'uppercase');
@@ -175,7 +198,10 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
               onTyping?.();
             }}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') e.preventDefault();
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                handleEnter();
+              }
             }}
             className="
               w-full rounded-2xl pl-11 pr-4 py-3 text-sm
