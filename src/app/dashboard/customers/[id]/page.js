@@ -12,10 +12,14 @@ import {
   MapPinIcon,
   EnvelopeIcon,
   PencilSquareIcon,
+  GiftIcon,
 } from '@heroicons/react/24/outline';
 import Button from '@/components/ui/Button';
 import WhatsappLink from '@/components/dashboard/tables/segments/contentData/whatsappLink';
-import { getCustomerSummary } from '@/lib/api/routes/customers';
+import {
+  getCustomerSummary,
+  redeemCustomerReward,
+} from '@/lib/api/routes/customers';
 import { formatCOP, formatDateOnly } from '@/lib/api/utils/utils';
 import { segmentMeta } from '@/lib/customerSegment';
 import { statusMeta } from '@/lib/appointmentStatus';
@@ -76,9 +80,19 @@ export default function CustomerProfile() {
     );
   }
 
-  const { customer, metrics, topItems, sales, appointments } = data;
+  const { customer, metrics, topItems, sales, appointments, loyalty } = data;
   const seg = segmentMeta(metrics.segment);
   const maxQty = topItems?.[0]?.qty || 1;
+
+  const redeem = async () => {
+    try {
+      const res = await redeemCustomerReward(customer.id);
+      const left = res?.data?.loyaltyRewards ?? Math.max(0, loyalty.rewards - 1);
+      setData((d) => ({ ...d, loyalty: { ...d.loyalty, rewards: left } }));
+    } catch {
+      /* ignora */
+    }
+  };
 
   return (
     <div className="mx-auto w-full max-w-5xl p-4">
@@ -178,6 +192,50 @@ export default function CustomerProfile() {
       {metrics.pendingFiado > 0 && (
         <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
           Tiene {formatCOP(metrics.pendingFiado)} pendientes por cobrar (fiado).
+        </div>
+      )}
+
+      {loyalty?.enabled && (
+        <div className="mt-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="flex items-center gap-2 text-sm font-bold text-gray-700">
+              <GiftIcon className="h-5 w-5 text-orange-500" />
+              Tarjeta de sellos
+            </h2>
+            <span className="text-xs font-semibold text-gray-500">
+              {loyalty.stamps} / {loyalty.required}
+            </span>
+          </div>
+
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {Array.from({ length: loyalty.required }).map((_, i) => (
+              <span
+                key={i}
+                className={`h-6 w-6 rounded-full border-2 ${
+                  i < loyalty.stamps
+                    ? 'border-orange-500 bg-orange-500'
+                    : 'border-gray-200 bg-gray-50'
+                }`}
+              />
+            ))}
+          </div>
+
+          <p className="mt-2 text-xs text-gray-500">
+            Al completar {loyalty.required} sellos gana:{' '}
+            <b className="text-gray-700">{loyalty.reward}</b>
+          </p>
+
+          {loyalty.rewards > 0 && (
+            <div className="mt-3 flex flex-col gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3 sm:flex-row sm:items-center sm:justify-between">
+              <span className="text-sm font-semibold text-emerald-800">
+                Tiene {loyalty.rewards} premio
+                {loyalty.rewards === 1 ? '' : 's'} por canjear: {loyalty.reward}
+              </span>
+              <Button variant="add" size="sm" onClick={redeem}>
+                Canjear premio
+              </Button>
+            </div>
+          )}
         </div>
       )}
 

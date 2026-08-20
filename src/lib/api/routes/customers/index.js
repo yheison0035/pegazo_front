@@ -33,6 +33,11 @@ export async function getCustomerSummary(id) {
   return apiFetch(`/customers/${id}/summary`);
 }
 
+// Canjea un premio de fidelización del cliente.
+export async function redeemCustomerReward(id) {
+  return apiFetch(`/customers/${id}/redeem-reward`, { method: 'PATCH' });
+}
+
 export async function createCustomer(dto) {
   const body = {
     ...dto,
