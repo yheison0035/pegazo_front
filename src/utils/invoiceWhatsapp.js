@@ -16,10 +16,9 @@ export function sendInvoiceWhatsapp(sale, companyName, businessType) {
   if (!raw) return { ok: false, reason: 'sin-telefono' };
   const phone = raw.length === 10 && raw.startsWith('3') ? `57${raw}` : raw;
 
-  // Siempre el dominio público (pegazo.co), no el origen actual del admin
-  // (que puede ser el dominio viejo admin.europeatvstore.com).
-  const base = process.env.NEXT_PUBLIC_VERIFY_URL || 'https://pegazo.co';
-  const verifyUrl = `${base}/verifyCodeSale?code=${sale.code}`;
+  // Dominio público fijo (pegazo.co). No usamos variable de entorno ni el
+  // origen actual del admin para evitar que aparezca el dominio viejo.
+  const verifyUrl = `https://pegazo.co/verifyCodeSale?code=${sale.code}`;
 
   const total = new Intl.NumberFormat('es-CO', {
     style: 'currency',

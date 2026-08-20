@@ -3,10 +3,8 @@ import { formatCOP, formatDateTime } from '@/lib/api/utils/utils';
 export function printSaleInvoice(sale, usuario) {
   if (!sale) return;
 
-  // Dominio público (pegazo.co), no el origen del admin (puede ser el viejo).
-  const verifyBase = process.env.NEXT_PUBLIC_VERIFY_URL || 'https://pegazo.co';
-
-  const verifyUrl = `${verifyBase}/verifyCodeSale?code=${sale.code}`;
+  // Dominio público fijo (pegazo.co), sin variable de entorno ni origen actual.
+  const verifyUrl = `https://pegazo.co/verifyCodeSale?code=${sale.code}`;
 
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
     verifyUrl
