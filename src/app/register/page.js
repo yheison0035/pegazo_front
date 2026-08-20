@@ -182,7 +182,7 @@ export default function Register() {
         plan,
         couponCode: appliedCoupon?.code || undefined,
       });
-      router.push('/dashboard/sales');
+      router.push('/dashboard');
     } catch (err) {
       setError(err.message || 'No se pudo crear la cuenta.');
     } finally {
