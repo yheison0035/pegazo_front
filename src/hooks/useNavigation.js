@@ -28,8 +28,11 @@ export default function useNavigation() {
     customers: t.customerPlural,
     services: t.servicePlural,
     appointments: t.appointmentPlural,
-    // "Inventario" solo cambia si la vertical tiene un término propio de producto.
-    inventory: t.productPlural !== 'Productos' ? t.productPlural : null,
+    // "Inventario" -> nombre propio: catalogLabel (ej. "Menú" en restaurante)
+    // o el plural del producto de la vertical (Medicamentos, Prendas…).
+    inventory:
+      t.catalogLabel ||
+      (t.productPlural !== 'Productos' ? t.productPlural : null),
   };
 
   // módulos permitidos por tipo de negocio
