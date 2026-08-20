@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import DinamicForm from '@/components/dashboard/form/DinamicForm';
@@ -13,22 +13,48 @@ export default function EditUser() {
   const { id } = useParams();
   const auth = useAuth();
   const usuario = auth?.usuario;
-  const { getUserById, updateUser, loading } = useUsers();
+  const setUsuario = auth?.setUsuario;
+  const {
+    getUserById,
+    updateUser,
+    getMyProfile,
+    updateMyProfile,
+    loading,
+  } = useUsers();
   const [alert, setAlert] = useState({ type: '', message: '', url: '' });
+
+  // ¿El usuario está editando su propio perfil? En ese caso cualquier rol puede
+  // hacerlo (autoservicio), pero NO puede cambiar su rol ni su correo.
+  const isSelf = !!usuario?.id && Number(id) === Number(usuario.id);
+
+  // Formulario: al editar el propio perfil, rol y correo quedan bloqueados y se
+  // ocultan los campos administrativos (local y estado), que no son datos
+  // personales y no puede cambiar por sí mismo.
+  const formFields = useMemo(() => {
+    const fields = getFormFieldsUsers();
+    if (!isSelf) return fields;
+    return fields
+      .filter((f) => f.name !== 'localId' && f.name !== 'status')
+      .map((f) =>
+        f.name === 'role' || f.name === 'email' ? { ...f, disabled: true } : f
+      );
+  }, [isSelf]);
 
   const fetchUser = useCallback(async () => {
     if (!id) return;
     try {
-      const { data } = await getUserById(Number(id));
+      const { data } = isSelf
+        ? await getMyProfile()
+        : await getUserById(Number(id));
       setFormData(data);
     } catch (err) {
       setAlert({
         type: 'warning',
         message: err.message || 'No tienes permisos',
-        url: '/dashboard/users',
+        url: isSelf ? '/dashboard' : '/dashboard/users',
       });
     }
-  }, [getUserById, id]);
+  }, [getUserById, getMyProfile, id, isSelf]);
 
   useEffect(() => {
     fetchUser();
@@ -37,30 +63,49 @@ export default function EditUser() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await updateUser(id, formData);
-      setAlert({
-        type: 'success',
-        message: 'Usuario actualizado correctamente.',
-        url: '/dashboard/users',
-      });
+      if (isSelf) {
+        const { data } = await updateMyProfile(formData);
+        // Reflejar los cambios en la sesión (nombre/avatar del sidebar, etc.)
+        if (data && setUsuario) {
+          const merged = { ...usuario, ...data };
+          setUsuario(merged);
+          localStorage.setItem('usuario', JSON.stringify(merged));
+        }
+        setAlert({
+          type: 'success',
+          message: 'Perfil actualizado correctamente.',
+          url: '/dashboard',
+        });
+      } else {
+        await updateUser(id, formData);
+        setAlert({
+          type: 'success',
+          message: 'Usuario actualizado correctamente.',
+          url: '/dashboard/users',
+        });
+      }
     } catch (err) {
       setAlert({
         type: 'error',
-        message: err.message || 'Error al crear proveedor',
+        message: err.message || 'Error al actualizar',
       });
     }
   };
 
   return (
     <div className="max-w-full mx-auto bg-white shadow-lg rounded-2xl p-8 mt-6 border border-gray-100">
-      <h2 className="text-3xl font-bold text-gray-800 mb-2">Editar Usuario</h2>
+      <h2 className="text-3xl font-bold text-gray-800 mb-2">
+        {isSelf ? 'Editar mi perfil' : 'Editar Usuario'}
+      </h2>
       <p className="text-sm text-gray-500 mb-6">
-        Modifica la información del usuario según sea necesario.
+        {isSelf
+          ? 'Actualiza tus datos personales y tu contraseña. El rol y el correo no se pueden modificar.'
+          : 'Modifica la información del usuario según sea necesario.'}
       </p>
 
       <DinamicForm
         formData={formData}
-        formFields={getFormFieldsUsers()}
+        formFields={formFields}
         setFormData={setFormData}
         handleSubmit={handleSubmit}
         loading={loading}

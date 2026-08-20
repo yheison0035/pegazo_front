@@ -4,6 +4,8 @@ import { useState, useCallback } from 'react';
 import {
   getUsers,
   getUserById,
+  getMyProfile,
+  updateMyProfile,
   createUser,
   updateUser,
   deleteUser,
@@ -35,6 +37,11 @@ export default function useUsers() {
     [wrap]
   );
   const getUserByIdFn = useCallback((id) => wrap(getUserById, id), [wrap]);
+  const getMyProfileFn = useCallback(() => wrap(getMyProfile), [wrap]);
+  const updateMyProfileFn = useCallback(
+    (dto) => wrap(updateMyProfile, dto),
+    [wrap]
+  );
   const createUserFn = useCallback((dto) => wrap(createUser, dto), [wrap]);
   const updateUserFn = useCallback(
     (id, dto) => wrap(updateUser, id, dto),
@@ -59,6 +66,8 @@ export default function useUsers() {
   return {
     getUsers: getUsersFn,
     getUserById: getUserByIdFn,
+    getMyProfile: getMyProfileFn,
+    updateMyProfile: updateMyProfileFn,
     createUser: createUserFn,
     updateUser: updateUserFn,
     deleteUser: deleteUserFn,
