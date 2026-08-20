@@ -4,6 +4,7 @@ import { BUSINESS_TYPES } from '@/config/businessTypes';
 import { NAVIGATION } from '@/config/navigation';
 import { PLATFORM_NAVIGATION } from '@/config/platformNavigation';
 import { planAllowsModule, requiredPlanForModule } from '@/lib/plans';
+import { getTerms } from '@/config/terminology';
 import { useAuth } from '@/context/authContext';
 
 export default function useNavigation() {
@@ -20,6 +21,16 @@ export default function useNavigation() {
 
   const businessType = usuario.company?.type || 'COMERCIO';
   const plan = usuario.company?.plan;
+
+  // Etiquetas del menú según la vertical (Clientes→Pacientes, etc.).
+  const t = getTerms(usuario.company);
+  const navLabelByModule = {
+    customers: t.customerPlural,
+    services: t.servicePlural,
+    appointments: t.appointmentPlural,
+    // "Inventario" solo cambia si la vertical tiene un término propio de producto.
+    inventory: t.productPlural !== 'Productos' ? t.productPlural : null,
+  };
 
   // módulos permitidos por tipo de negocio
   const modules = [...(BUSINESS_TYPES[businessType] || BUSINESS_TYPES.COMERCIO)];
@@ -43,6 +54,7 @@ export default function useNavigation() {
         const locked = !planAllowsModule(plan, key);
         return {
           ...item,
+          name: navLabelByModule[key] || item.name,
           locked,
           requiredPlan: locked ? requiredPlanForModule(key) : null,
         };
