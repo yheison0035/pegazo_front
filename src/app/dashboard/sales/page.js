@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import { useAuth } from '@/context/authContext';
+import useTerms from '@/hooks/useTerms';
 import DinamicForm from '@/components/dashboard/form/DinamicForm';
 import useSales from '@/lib/api/hooks/useSales';
 import { getEmptySale, getFormFieldsSales } from '@/lib/api/utils/sales.config';
@@ -32,6 +33,7 @@ export default function AddSales() {
   const usuario = auth?.usuario;
 
   const { createSale, loading } = useSales();
+  const t = useTerms();
 
   // Al cargar el usuario, rellena los defaults (sin pisar lo que ya haya tocado).
   useEffect(() => {
@@ -102,7 +104,7 @@ export default function AddSales() {
 
       <DinamicForm
         formData={formData}
-        formFields={getFormFieldsSales()}
+        formFields={getFormFieldsSales(t)}
         setFormData={setFormData}
         handleSubmit={handleSubmit}
         handleReset={handleReset}

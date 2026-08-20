@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
 import { useAuth } from '@/context/authContext';
+import useTerms from '@/hooks/useTerms';
 
 import Table from '@/components/dashboard/tables/table';
 import Pagination from '@/components/dashboard/tables/segments/pagination';
@@ -25,6 +26,7 @@ import usePermissions from '@/hooks/usePermissions';
 
 export default function Services() {
   const auth = useAuth();
+  const t = useTerms();
   const usuario = auth?.usuario;
   const { getServices, deleteService, loading } = useServices();
 
@@ -83,10 +85,10 @@ export default function Services() {
     <RoleGuard allowedRoles={Object.values(Roles)}>
       <div className="w-full p-4">
         <div className="flex flex-col md:flex-row justify-between mb-4 gap-4">
-          <h1 className="text-2xl font-semibold">Listado de Servicios</h1>
+          <h1 className="text-2xl font-semibold">Listado de {t.servicePlural}</h1>
 
           {can('services', 'create') && (
-            <Header type="servicio" typeUrl="services" />
+            <Header type={t.service.toLowerCase()} typeUrl="services" />
           )}
         </div>
 

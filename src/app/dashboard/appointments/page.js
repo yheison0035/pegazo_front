@@ -7,6 +7,7 @@ import Button from '@/components/ui/Button';
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
 import { useAuth } from '@/context/authContext';
+import useTerms from '@/hooks/useTerms';
 
 import Table from '@/components/dashboard/tables/table';
 import Pagination from '@/components/dashboard/tables/segments/pagination';
@@ -38,6 +39,7 @@ export default function Appointments() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [alert, setAlert] = useState({});
   const auth = useAuth();
+  const t = useTerms();
   const usuario = auth?.usuario;
 
   const { filters, handleFilterChange } = useColumnFilters({
@@ -97,7 +99,7 @@ export default function Appointments() {
           <LoadingOverlay show={loading} text="Cargando citas..." />
 
           <Table
-            header={getHeaderTableAppointments()}
+            header={getHeaderTableAppointments(t)}
             info={appointments}
             view="appointments"
             rol={usuario?.role}

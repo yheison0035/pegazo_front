@@ -10,7 +10,7 @@ export const getEmptyAppointment = () => ({
   status: 'CONFIRMADA',
 });
 
-export const getFormFieldsAppointments = () => [
+export const getFormFieldsAppointments = (t = {}) => [
   {
     name: 'localId',
     label: 'Local',
@@ -20,14 +20,14 @@ export const getFormFieldsAppointments = () => [
   },
   {
     name: 'serviceId',
-    label: 'Servicio',
+    label: t.service || 'Servicio',
     type: 'select',
     required: true,
     source: 'services',
   },
   {
     name: 'barberId',
-    label: 'Barbero',
+    label: t.attendant || 'Barbero',
     type: 'select',
     required: true,
     source: 'getUsersByRole',
@@ -42,7 +42,7 @@ export const getFormFieldsAppointments = () => [
   },
   {
     name: 'customerId',
-    label: 'Cliente',
+    label: t.customer || 'Cliente',
     type: 'searchSelect',
     required: true,
     source: 'customers',
@@ -63,13 +63,28 @@ export const getFormFieldsAppointments = () => [
   },
 ];
 
-export const getHeaderTableAppointments = () => [
+export const getHeaderTableAppointments = (t = {}) => [
   { name: 'status', title: 'Estado', show: true, showInput: true },
   { name: 'date', title: 'Fecha', show: true, showInput: true },
   { name: 'startTime', title: 'Hora cita', show: true, showInput: true },
-  { name: 'serviceId', title: 'Servicio', show: true, showInput: true },
-  { name: 'barberId', title: 'Barbero', show: true, showInput: true },
-  { name: 'customerId', title: 'Cliente', show: true, showInput: true },
+  {
+    name: 'serviceId',
+    title: t.service || 'Servicio',
+    show: true,
+    showInput: true,
+  },
+  {
+    name: 'barberId',
+    title: t.attendant || 'Barbero',
+    show: true,
+    showInput: true,
+  },
+  {
+    name: 'customerId',
+    title: t.customer || 'Cliente',
+    show: true,
+    showInput: true,
+  },
   {
     name: 'clientConfirmed',
     title: 'Confirmación',

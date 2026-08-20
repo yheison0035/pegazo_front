@@ -11,7 +11,7 @@ export const getEmptySale = () => ({
   notes: '',
 });
 
-export const getFormFieldsSales = () => [
+export const getFormFieldsSales = (t = {}) => [
   {
     name: 'items',
     label: 'Productos o servicios',
@@ -66,7 +66,7 @@ export const getFormFieldsSales = () => [
   },
   {
     name: 'customerId',
-    label: 'Cliente (opcional)',
+    label: `${t.customer || 'Cliente'} (opcional)`,
     type: 'searchSelect',
     required: false,
     source: 'customers',
