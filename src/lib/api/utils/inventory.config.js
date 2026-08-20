@@ -14,6 +14,7 @@ export const getEmptyInventory = () => ({
   salePrice: '',
   categoryId: '',
   brandId: '',
+  minStock: 0,
   status: 'ACTIVO',
   variants: [],
   features: [],
@@ -114,6 +115,13 @@ export const getFormFieldsInventory = (usuario) => {
       type: 'select',
       required: true,
       source: 'brands',
+      disabled: false,
+    },
+    {
+      name: 'minStock',
+      label: 'Alerta de stock bajo (opcional)',
+      type: 'number',
+      required: false,
       disabled: false,
     },
     {

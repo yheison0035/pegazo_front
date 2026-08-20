@@ -118,18 +118,43 @@ export default function ContentData({
                 </td>
 
                 <td className="px-5 py-4 text-center">
-                  <span
-                    className={`px-2.5 py-1 text-xs rounded-full font-medium
-                      ${
-                        info.stock <= 3
+                  {(() => {
+                    const min = Number(info.minStock) || 0;
+                    const s = Number(info.stock) || 0;
+                    let cls;
+                    let low = false;
+                    if (min > 0) {
+                      if (s <= min) {
+                        cls = 'bg-red-50 text-red-600';
+                        low = true;
+                      } else if (s <= min * 2) {
+                        cls = 'bg-yellow-50 text-yellow-600';
+                      } else {
+                        cls = 'bg-green-50 text-green-600';
+                      }
+                    } else {
+                      cls =
+                        s <= 3
                           ? 'bg-red-50 text-red-600'
-                          : info.stock <= 6
+                          : s <= 6
                             ? 'bg-yellow-50 text-yellow-600'
-                            : 'bg-green-50 text-green-600'
-                      }`}
-                  >
-                    {info.stock ?? '---'}
-                  </span>
+                            : 'bg-green-50 text-green-600';
+                    }
+                    return (
+                      <span className="inline-flex flex-col items-center">
+                        <span
+                          className={`px-2.5 py-1 text-xs rounded-full font-medium ${cls}`}
+                        >
+                          {info.stock ?? '---'}
+                        </span>
+                        {low && (
+                          <span className="mt-0.5 text-[10px] font-semibold text-red-500">
+                            Stock bajo
+                          </span>
+                        )}
+                      </span>
+                    );
+                  })()}
                 </td>
 
                 <td className="px-5 py-4 whitespace-nowrap">
