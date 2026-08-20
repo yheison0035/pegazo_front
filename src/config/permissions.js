@@ -37,6 +37,19 @@ export const ROLE_PERMISSIONS = {
     appointments: ['view'],
   },
 
+  // Restaurante ----------------------------------------------------------
+  // Mesas y Cocina no se gestionan por 'can()' (se controlan por menú), así
+  // que estos permisos solo abren lo adicional que el rol puede consultar.
+  CAJA: {
+    sales: ['view', 'create'],
+    delivered_sales: ['view'],
+    customers: ['view', 'create'],
+  },
+  MESERO: {
+    customers: ['view', 'create'],
+  },
+  COCINERO: {},
+
   // Puede todo MENOS locales, estadísticas, usuarios y roles.
   // Puede ver, crear y editar, pero NO eliminar.
   RECEPCIONISTA: {

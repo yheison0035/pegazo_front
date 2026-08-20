@@ -37,6 +37,16 @@ export default function Login() {
         return;
       }
 
+      // Roles de restaurante: van directo a su módulo de trabajo.
+      if (role === 'MESERO' || role === 'CAJA') {
+        router.push('/dashboard/mesas');
+        return;
+      }
+      if (role === 'COCINERO') {
+        router.push('/dashboard/kitchen');
+        return;
+      }
+
       router.push('/dashboard');
     } catch (err) {
       setError(err.message || 'Error en login');
