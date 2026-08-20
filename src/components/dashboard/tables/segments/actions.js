@@ -24,6 +24,7 @@ export default function Actions({
   const { can } = usePermissions();
   const auth = useAuth();
   const companyName = auth?.usuario?.company?.name;
+  const businessType = auth?.usuario?.company?.type;
 
   const canView = can(view, 'view');
   const canEdit = can(view, 'edit');
@@ -86,7 +87,7 @@ export default function Actions({
         info?.customer?.phone &&
         info?.customer?.document !== '222222222222' && (
           <button
-            onClick={() => sendInvoiceWhatsapp(info, companyName)}
+            onClick={() => sendInvoiceWhatsapp(info, companyName, businessType)}
             disabled={isLocked}
             title="Enviar factura por WhatsApp"
             className="p-2 rounded-lg text-green-600 transition hover:bg-green-50 cursor-pointer"

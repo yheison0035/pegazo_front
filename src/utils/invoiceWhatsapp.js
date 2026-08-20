@@ -1,6 +1,17 @@
+// Frase de agradecimiento según el tipo de negocio.
+function thanksPhrase(businessType) {
+  const services = ['SERVICIOS', 'ODONTOLOGIA'];
+  const food = ['RESTAURANTE', 'COMIDA_RAPIDA'];
+  if (services.includes(businessType)) {
+    return 'Gracias por confiar en nuestros servicios';
+  }
+  if (food.includes(businessType)) return 'Gracias por tu pedido';
+  return 'Gracias por tu compra';
+}
+
 // Abre WhatsApp con un mensaje que incluye la factura y su enlace de
-// verificación, para enviársela al cliente.
-export function sendInvoiceWhatsapp(sale, companyName) {
+// verificación, para enviársela al cliente. El saludo se adapta a la vertical.
+export function sendInvoiceWhatsapp(sale, companyName, businessType) {
   const raw = String(sale?.customer?.phone || '').replace(/\D/g, '');
   if (!raw) return { ok: false, reason: 'sin-telefono' };
   const phone = raw.length === 10 && raw.startsWith('3') ? `57${raw}` : raw;
@@ -21,7 +32,9 @@ export function sendInvoiceWhatsapp(sale, companyName) {
     : '';
 
   const msg = [
-    `¡Hola${nombre}! Gracias por tu compra en ${companyName || 'nuestro negocio'}.`,
+    `¡Hola${nombre}! ${thanksPhrase(businessType)} en ${
+      companyName || 'nuestro negocio'
+    }.`,
     `Factura N° ${sale.code}`,
     `Total: ${total}`,
     '',
