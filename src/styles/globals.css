@@ -100,12 +100,14 @@ button:disabled {
   }
   .crm-table tbody tr {
     display: block;
-    margin-bottom: 0.75rem;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.85rem;
+    margin-bottom: 0.85rem;
+    border: 1px solid #eceef1;
+    border-radius: 1rem;
     background: #ffffff !important;
     overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow:
+      0 1px 2px rgba(16, 24, 40, 0.04),
+      0 8px 20px -14px rgba(16, 24, 40, 0.18);
   }
   .crm-table td {
     display: flex !important;
@@ -115,9 +117,11 @@ button:disabled {
     align-items: center;
     gap: 1rem;
     text-align: right;
-    padding: 0.6rem 0.9rem !important;
-    border-bottom: 1px solid #f3f4f6;
+    padding: 0.7rem 1rem !important;
+    border-bottom: 1px solid #f4f5f7;
     white-space: normal !important;
+    font-weight: 500;
+    color: #374151;
   }
   .crm-table td:last-child {
     border-bottom: none;
@@ -128,14 +132,16 @@ button:disabled {
     text-align: left;
     font-size: 10px;
     font-weight: 700;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
-    color: #9ca3af;
+    color: #9aa1ab;
   }
   /* Fila de acciones: franja superior de la tarjeta */
   .crm-table td.crm-actions {
     justify-content: flex-end;
-    background: #f9fafb;
+    background: #fafbfc;
+    border-bottom: 1px solid #eceef1;
+    padding: 0.55rem 0.9rem !important;
   }
   /* Estado vacío ocupa toda la tarjeta */
   .crm-table td[colspan] {
