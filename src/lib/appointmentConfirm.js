@@ -79,11 +79,11 @@ export function buildWinbackMessage(customer, companyName) {
       : `Hace un tiempo que no pasas por ${companyName || 'nuestro salón'} y te extrañamos.`,
   ];
   if (customer?.lastService) {
-    lines.push(`Tu último servicio con nosotros fue: ${customer.lastService}.`);
+    lines.push(`Lo último que llevaste con nosotros: ${customer.lastService}.`);
   }
   lines.push(
     '',
-    '¿Quieres agendar de nuevo? Escríbenos y coordinamos tu cita cuando quieras.'
+    '¡Te esperamos de nuevo! Escríbenos y con gusto te atendemos.'
   );
   return lines.join('\n');
 }

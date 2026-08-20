@@ -14,6 +14,7 @@ import {
   UserPlusIcon,
 } from '@heroicons/react/24/outline';
 import ReactivateCustomersModal from '@/components/appointments/ReactivateCustomersModal';
+import { isServicesBusiness } from '@/lib/appointmentsAccess';
 import useDeliveredSales from '@/lib/api/hooks/useDeliveredSales';
 import {
   getHeaderTableDeliveredSales,
@@ -35,6 +36,7 @@ export default function Delivered_Sales() {
   const usuario = auth?.usuario;
   const { getDeliveredSales, deleteDeliveredSale, loading } =
     useDeliveredSales();
+  const isServices = isServicesBusiness(usuario);
 
   const [sales, setSales] = useState([]);
   const [meta, setMeta] = useState(null);
@@ -101,27 +103,16 @@ export default function Delivered_Sales() {
         <h1 className="text-2xl font-semibold">Listado de Ventas Realizadas</h1>
 
         <div className="flex flex-wrap gap-2 sm:gap-3">
-          {usuario?.company?.type === 'SERVICIOS' && (
-            <>
-              <Button
-                variant="info"
-                icon={Squares2X2Icon}
-                onClick={() => setShowServiceReport(true)}
-                className="w-full sm:w-auto"
-              >
-                Ventas y Servicios
-              </Button>
-              <Button
-                variant="add"
-                icon={UserPlusIcon}
-                onClick={() => setShowReactivate(true)}
-                className="w-full sm:w-auto"
-              >
-                Reactivar clientes
-              </Button>
-            </>
-          )}
-          {usuario?.company?.type !== 'SERVICIOS' && (
+          {isServices ? (
+            <Button
+              variant="info"
+              icon={Squares2X2Icon}
+              onClick={() => setShowServiceReport(true)}
+              className="w-full sm:w-auto"
+            >
+              Ventas y Servicios
+            </Button>
+          ) : (
             <>
               <Button
                 variant="info"
@@ -151,6 +142,16 @@ export default function Delivered_Sales() {
               </Button>
             </>
           )}
+
+          {/* Reactivar clientes: útil para cualquier negocio con clientes. */}
+          <Button
+            variant="add"
+            icon={UserPlusIcon}
+            onClick={() => setShowReactivate(true)}
+            className="w-full sm:w-auto"
+          >
+            Reactivar clientes
+          </Button>
         </div>
       </div>
 
