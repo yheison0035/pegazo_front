@@ -81,6 +81,7 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
         name: isService ? product.name : `${product.name} - ${product.color}`,
         price: product.price,
         stock: isService ? null : product.stock,
+        unit: product.unit || 'UNIDAD',
         originalQuantity: 0,
         quantity: 1,
         discount: product.discount,
@@ -123,6 +124,13 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
 
         if (isService) {
           safeQty = Math.max(1, Number(quantity) || 1);
+        } else if (p.unit === 'PESO') {
+          // Venta por peso: admite decimales (kg), sin forzar mínimo 1.
+          const maxAllowed = p.stock + p.originalQuantity;
+          safeQty = Math.max(
+            0.001,
+            Math.min(Number(quantity) || 0.001, maxAllowed)
+          );
         } else {
           const maxAllowed = p.stock + p.originalQuantity;
 
@@ -318,23 +326,31 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
                   </td>
 
                   <td className="px-6 py-4 text-center">
-                    <input
-                      type="number"
-                      min={1}
-                      max={
-                        p.type === 'service'
-                          ? undefined
-                          : p.stock + p.originalQuantity
-                      }
-                      value={p.quantity}
-                      onChange={(e) =>
-                        updateQuantity(
-                          p.inventoryVariantId,
-                          Number(e.target.value)
-                        )
-                      }
-                      className="w-16 h-9 text-center rounded-lg border border-gray-200 bg-white focus:ring-2 focus:ring-orange-500/20 outline-none"
-                    />
+                    <div className="flex items-center justify-center gap-1">
+                      <input
+                        type="number"
+                        min={p.unit === 'PESO' ? 0.001 : 1}
+                        step={p.unit === 'PESO' ? 0.001 : 1}
+                        max={
+                          p.type === 'service'
+                            ? undefined
+                            : p.stock + p.originalQuantity
+                        }
+                        value={p.quantity}
+                        onChange={(e) =>
+                          updateQuantity(
+                            p.inventoryVariantId,
+                            Number(e.target.value)
+                          )
+                        }
+                        className="w-20 h-9 text-center rounded-lg border border-gray-200 bg-white focus:ring-2 focus:ring-orange-500/20 outline-none"
+                      />
+                      {p.unit === 'PESO' && (
+                        <span className="text-xs font-medium text-gray-400">
+                          kg
+                        </span>
+                      )}
+                    </div>
                   </td>
 
                   <td className="px-6 py-4 text-center">
