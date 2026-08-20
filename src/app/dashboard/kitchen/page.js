@@ -90,6 +90,11 @@ export default function Kitchen() {
                           #{c.id}
                         </span>
                       </div>
+                      {c.user?.name && (
+                        <p className="text-[11px] text-gray-400">
+                          Mesero: {c.user.name}
+                        </p>
+                      )}
                       <ul className="mt-2 space-y-0.5">
                         {c.items.map((it) => (
                           <li

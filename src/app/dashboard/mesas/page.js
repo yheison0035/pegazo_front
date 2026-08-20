@@ -6,12 +6,15 @@ import {
   XMarkIcon,
   BanknotesIcon,
   PaperAirplaneIcon,
+  PrinterIcon,
+  TrashIcon,
 } from '@heroicons/react/24/outline';
 import Button from '@/components/ui/Button';
 import ProductSelector from '@/components/dashboard/form/fields/ProductSelectField/productSelector';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import { useAuth } from '@/context/authContext';
 import { formatCOP } from '@/lib/api/utils/utils';
+import { printComanda } from '@/utils/printComanda';
 import {
   getMesas,
   createMesa,
@@ -22,6 +25,7 @@ import {
   createComanda,
   addComandaItems,
   chargeComanda,
+  setComandaStatus,
 } from '@/lib/api/routes/comandas';
 import { getLocals } from '@/lib/api/routes/locals';
 
@@ -120,6 +124,21 @@ export default function Mesas() {
       load();
     } catch (e) {
       setAlert({ type: 'error', message: e.message || 'No se pudo enviar.' });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const cancelComanda = async () => {
+    if (!comanda) return;
+    setBusy(true);
+    try {
+      await setComandaStatus(comanda.id, 'CANCELADA');
+      setAlert({ type: 'success', message: 'Pedido cancelado.' });
+      closePanel();
+      load();
+    } catch (e) {
+      setAlert({ type: 'error', message: e.message || 'No se pudo cancelar.' });
     } finally {
       setBusy(false);
     }
@@ -271,9 +290,22 @@ export default function Mesas() {
             <div className="flex-1 space-y-4 overflow-y-auto p-5">
               {comanda && comanda.items?.length > 0 && (
                 <div className="rounded-xl border border-gray-100 bg-gray-50 p-3">
-                  <p className="mb-1 text-xs font-bold uppercase text-gray-400">
-                    En cocina · {comanda.status}
-                  </p>
+                  <div className="mb-1 flex items-center justify-between">
+                    <p className="text-xs font-bold uppercase text-gray-400">
+                      En cocina · {comanda.status}
+                      {comanda.user?.name ? ` · ${comanda.user.name}` : ''}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        printComanda(comanda, selected.name)
+                      }
+                      className="inline-flex items-center gap-1 rounded-lg bg-white px-2 py-1 text-[11px] font-semibold text-gray-600 shadow-sm hover:bg-gray-100"
+                    >
+                      <PrinterIcon className="h-3.5 w-3.5" />
+                      Imprimir
+                    </button>
+                  </div>
                   {comanda.items.map((it) => (
                     <div
                       key={it.id}
@@ -316,15 +348,25 @@ export default function Mesas() {
                 Enviar a cocina
               </Button>
               {comanda && (
-                <Button
-                  variant="primary"
-                  icon={BanknotesIcon}
-                  onClick={charge}
-                  loading={busy}
-                  className="flex-1"
-                >
-                  Cobrar {formatCOP(comanda.total)}
-                </Button>
+                <>
+                  <Button
+                    variant="danger-soft"
+                    icon={TrashIcon}
+                    onClick={cancelComanda}
+                    loading={busy}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    variant="primary"
+                    icon={BanknotesIcon}
+                    onClick={charge}
+                    loading={busy}
+                    className="flex-1"
+                  >
+                    Cobrar {formatCOP(comanda.total)}
+                  </Button>
+                </>
               )}
             </div>
           </div>
