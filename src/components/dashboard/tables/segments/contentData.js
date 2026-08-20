@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { canSeeOldPrice } from '@/hooks/inventory.permissions';
 import { getProductFields } from '@/config/verticalProfiles';
+import { roleLabel } from '@/config/roleLabels';
 import Actions from './actions';
 import PhoneContentData from './contentData/phone';
 import WhatsappLink from './contentData/whatsappLink';
@@ -211,7 +212,7 @@ export default function ContentData({
             {view === 'users' && (
               <>
                 <td className="px-5 py-4 whitespace-nowrap">
-                  {info.role || '---'}
+                  {info.role ? roleLabel(info.role, usuario?.company) : '---'}
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
                   {info.name || '---'}

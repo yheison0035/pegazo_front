@@ -12,4 +12,5 @@ export const Roles = {
   CAJA: 'CAJA',
   MESERO: 'MESERO',
   COCINERO: 'COCINERO',
+  PROFESIONAL: 'PROFESIONAL',
 };
