@@ -10,6 +10,7 @@ import RoleGuard from '@/auth/roleGuard';
 import { useAuth } from '@/context/authContext';
 import { Roles } from '@/config/roles';
 import useCustomers from '@/lib/api/hooks/useCustomers';
+import useTerms from '@/hooks/useTerms';
 import {
   getHeaderTableCustomers,
   viewModalConfig,
@@ -23,6 +24,7 @@ import { useDebounce } from '@/components/dashboard/tables/hooks/useDebounce';
 export default function Customers() {
   const auth = useAuth();
   const usuario = auth?.usuario;
+  const t = useTerms();
   const { getCustomers, deleteCustomer, loading } = useCustomers();
 
   const [customers, setCustomers] = useState([]);
@@ -79,14 +81,16 @@ export default function Customers() {
     <RoleGuard allowedRoles={Object.values(Roles)}>
       <div className="w-full p-4">
         <div className="flex justify-between mb-4">
-          <h1 className="text-2xl font-semibold">Listado de Clientes</h1>
+          <h1 className="text-2xl font-semibold">
+            Listado de {t.customerPlural}
+          </h1>
 
           <Button
             variant="add"
             icon={PlusIcon}
             href="/dashboard/customers/new"
           >
-            Agregar cliente
+            Agregar {t.customer.toLowerCase()}
           </Button>
         </div>
 

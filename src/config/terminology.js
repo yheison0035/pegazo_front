@@ -57,6 +57,52 @@ const TERMS_BY_TYPE = {
     sale: 'Pedido',
     salePlural: 'Pedidos',
   },
+
+  // ---- Verticales específicas ----
+  ODONTOLOGIA: {
+    attendant: 'Doctor',
+    attendantPlural: 'Doctores',
+    customer: 'Paciente',
+    customerPlural: 'Pacientes',
+    service: 'Tratamiento',
+    servicePlural: 'Tratamientos',
+  },
+  SUPERMERCADO: {
+    attendant: 'Cajero',
+    attendantPlural: 'Cajeros',
+  },
+  DROGUERIA: {
+    attendant: 'Cajero',
+    attendantPlural: 'Cajeros',
+    product: 'Medicamento',
+    productPlural: 'Medicamentos',
+  },
+  ROPA: {
+    attendant: 'Vendedor',
+    attendantPlural: 'Vendedores',
+    product: 'Prenda',
+    productPlural: 'Prendas',
+  },
+  FRUVER: {
+    attendant: 'Cajero',
+    attendantPlural: 'Cajeros',
+  },
+  FLORISTERIA: {
+    attendant: 'Vendedor',
+    attendantPlural: 'Vendedores',
+    product: 'Arreglo',
+    productPlural: 'Arreglos',
+  },
+  COMIDA_RAPIDA: {
+    attendant: 'Cajero',
+    attendantPlural: 'Cajeros',
+    sale: 'Pedido',
+    salePlural: 'Pedidos',
+  },
+  CAFETERIA: {
+    attendant: 'Cajero',
+    attendantPlural: 'Cajeros',
+  },
 };
 
 // Devuelve los términos para una empresa: DEFAULT + por tipo + overrides propios.

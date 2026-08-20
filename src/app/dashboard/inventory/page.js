@@ -18,11 +18,13 @@ import useColumnFilters from '@/components/dashboard/tables/hooks/useColumnFilte
 import { useDebounce } from '@/components/dashboard/tables/hooks/useDebounce';
 import usePermissions from '@/hooks/usePermissions';
 import LowStockBanner from '@/components/dashboard/inventory/LowStockBanner';
+import useTerms from '@/hooks/useTerms';
 
 export default function Inventory() {
   const auth = useAuth();
   const usuario = auth?.usuario;
   const { getProducts, deleteProduct, loading } = useProducts();
+  const t = useTerms();
 
   const [products, setProducts] = useState([]);
   const [meta, setMeta] = useState(null);
@@ -78,9 +80,11 @@ export default function Inventory() {
   return (
     <div className="w-full p-4">
       <div className="flex justify-between mb-4">
-        <h1 className="text-2xl font-semibold">Listado de Inventario</h1>
+        <h1 className="text-2xl font-semibold">
+          Listado de {t.productPlural}
+        </h1>
         {can('inventory', 'create') && (
-          <Header type="producto" typeUrl="inventory" />
+          <Header type={t.product.toLowerCase()} typeUrl="inventory" />
         )}
       </div>
 
