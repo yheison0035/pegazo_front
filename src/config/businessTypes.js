@@ -13,7 +13,14 @@ export const BUSINESS_TYPES = {
     'users',
   ],
 
-  FERIA: ['inventory', 'customers', 'sales', 'expenses'],
+  FERIA: [
+    'inventory',
+    'customers',
+    'sales',
+    'delivered_sales',
+    'expenses',
+    'statistics',
+  ],
 
   // Televentas: comercio completo (inventario, catálogo, proveedores…) con
   // gestión de pedidos como su operación central.
@@ -38,6 +45,7 @@ export const BUSINESS_TYPES = {
     'sales',
     'inventory',
     'categories',
+    'providers',
     'customers',
     'delivered_sales',
     'expenses',
@@ -62,22 +70,38 @@ export const BUSINESS_TYPES = {
     'statistics',
   ],
 
+  // Ecommerce: comercio completo + pedidos web + envíos. La "Tienda online"
+  // aparece sola cuando la plataforma habilita websiteEnabled.
   ECOMMERCE: [
-    'inventory',
-    'orders',
-    'customers',
-    'sales',
-    'shipping',
-    'statistics',
-  ],
-
-  DISTRIBUCION: [
-    'inventory',
+    'locals',
+    'categories',
+    'brands',
     'providers',
+    'inventory',
     'customers',
+    'orders',
     'sales',
+    'delivered_sales',
+    'shipping',
     'expenses',
     'statistics',
+    'users',
+  ],
+
+  // Distribución / mayorista: comercio completo con pedidos (B2B).
+  DISTRIBUCION: [
+    'locals',
+    'categories',
+    'brands',
+    'providers',
+    'inventory',
+    'customers',
+    'orders',
+    'sales',
+    'delivered_sales',
+    'expenses',
+    'statistics',
+    'users',
   ],
 
   // ---- Verticales específicas ----
@@ -159,6 +183,7 @@ export const BUSINESS_TYPES = {
   FLORISTERIA: [
     'locals',
     'categories',
+    'providers',
     'inventory',
     'customers',
     'sales',
@@ -171,11 +196,13 @@ export const BUSINESS_TYPES = {
 
   // Comidas rápidas: mesas/pedidos + cocina + inventario.
   COMIDA_RAPIDA: [
+    'locals',
     'mesas',
     'kitchen',
     'sales',
     'inventory',
     'categories',
+    'providers',
     'customers',
     'delivered_sales',
     'expenses',
@@ -187,6 +214,7 @@ export const BUSINESS_TYPES = {
   CAFETERIA: [
     'locals',
     'categories',
+    'providers',
     'inventory',
     'customers',
     'sales',
