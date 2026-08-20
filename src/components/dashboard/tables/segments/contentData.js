@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { canSeeOldPrice } from '@/hooks/inventory.permissions';
 import Actions from './actions';
 import PhoneContentData from './contentData/phone';
@@ -240,7 +241,14 @@ export default function ContentData({
                   {info.type_document}
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">{info.document}</td>
-                <td className="px-5 py-4 whitespace-nowrap">{info.name}</td>
+                <td className="px-5 py-4 whitespace-nowrap">
+                  <Link
+                    href={`/dashboard/customers/${info.id}`}
+                    className="font-medium text-orange-600 hover:underline"
+                  >
+                    {info.name}
+                  </Link>
+                </td>
                 <td className="px-5 py-4 whitespace-nowrap">
                   {info.email || '---'}
                 </td>
