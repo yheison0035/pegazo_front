@@ -41,6 +41,9 @@ const PRODUCT_FIELDS_BY_TYPE = {
   // Cafetería / panadería: sin marca
   CAFETERIA: { brand: false, provider: false },
 
+  // Carnicería: sin marca ni código de barras, venta por peso, perecedero
+  CARNICERIA: { brand: false, barcode: false, unit: true, expiry: true },
+
   // Servicios (barbería, spa): los "productos" son insumos simples, sin marca
   SERVICIOS: { brand: false, provider: false, barcode: false, oldPrice: false },
 

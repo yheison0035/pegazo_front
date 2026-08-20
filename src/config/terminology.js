@@ -103,6 +103,12 @@ const TERMS_BY_TYPE = {
     attendant: 'Cajero',
     attendantPlural: 'Cajeros',
   },
+  CARNICERIA: {
+    attendant: 'Cajero',
+    attendantPlural: 'Cajeros',
+    product: 'Corte',
+    productPlural: 'Cortes',
+  },
 };
 
 // Devuelve los términos para una empresa: DEFAULT + por tipo + overrides propios.
