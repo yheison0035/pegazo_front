@@ -3,11 +3,18 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
-  CheckCircleIcon,
+  ShieldCheckIcon,
   XCircleIcon,
   DocumentTextIcon,
-  CheckBadgeIcon,
 } from '@heroicons/react/24/solid';
+import {
+  MapPinIcon,
+  PhoneIcon,
+  EnvelopeIcon,
+  UserIcon,
+  CalendarDaysIcon,
+  CreditCardIcon,
+} from '@heroicons/react/24/outline';
 import useDeliveredSales from '@/lib/api/hooks/useDeliveredSales';
 import { formatCOP, formatDateTime } from '@/lib/api/utils/utils';
 
@@ -21,175 +28,258 @@ export default function VerifyCodeSaleClient() {
 
   useEffect(() => {
     if (!code) return;
-
-    const fetchSale = async () => {
+    (async () => {
       try {
         const res = await getVerifyCodeSale(code);
         setSale(res?.data || res);
         setNotFound(false);
-      } catch (err) {
+      } catch {
         setNotFound(true);
       }
-    };
-
-    fetchSale();
+    })();
   }, [code, getVerifyCodeSale]);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <DocumentTextIcon className="w-12 h-12 text-orange-600 mx-auto mb-3 animate-pulse" />
-          <p className="text-gray-600 text-sm">Verificando factura...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (notFound || error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-        <div className="bg-white shadow-lg rounded-2xl p-8 max-w-md w-full text-center">
-          <XCircleIcon className="w-14 h-14 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-gray-800 mb-2">
-            Factura no válida
-          </h2>
-          <p className="text-gray-500 text-sm mb-4">
-            El código ingresado no corresponde a una venta registrada en nuestro
-            sistema.
-          </p>
-          <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-2 text-sm">
-            Código: <span className="font-semibold">{code || '---'}</span>
-          </div>
-        </div>
-      </div>
+      <Centered>
+        <DocumentTextIcon className="mx-auto mb-3 h-12 w-12 animate-pulse text-orange-600" />
+        <p className="text-sm text-gray-600">Verificando factura…</p>
+      </Centered>
     );
   }
 
   if (!code) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-        <div className="bg-white shadow-lg rounded-2xl p-8 max-w-md w-full text-center">
-          <DocumentTextIcon className="w-14 h-14 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-gray-800 mb-2">
-            Verificación de Factura
-          </h2>
-          <p className="text-gray-500 text-sm">
-            No se ha proporcionado un código de factura para validar.
-          </p>
-        </div>
-      </div>
+      <Centered>
+        <DocumentTextIcon className="mx-auto mb-4 h-14 w-14 text-gray-400" />
+        <h2 className="mb-1 text-xl font-bold text-gray-800">
+          Verificación de factura
+        </h2>
+        <p className="text-sm text-gray-500">
+          No se proporcionó un código de factura para validar.
+        </p>
+      </Centered>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gray-100 py-10 px-4">
-      <div className="max-w-3xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-200">
-        <div className="bg-gradient-to-r from-orange-600 to-gray-900 text-white px-6 py-5 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div>
-              <h1 className="text-2xl font-bold">Verificación de Factura</h1>
-            </div>
-          </div>
+  if (notFound || error || !sale) {
+    return (
+      <Centered>
+        <XCircleIcon className="mx-auto mb-4 h-16 w-16 text-red-500" />
+        <h2 className="mb-2 text-xl font-bold text-gray-800">
+          Factura no válida
+        </h2>
+        <p className="mb-4 text-sm text-gray-500">
+          Este código no corresponde a una venta registrada en nuestro sistema.
+        </p>
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+          Código: <span className="font-semibold">{code}</span>
+        </div>
+      </Centered>
+    );
+  }
 
-          <CheckCircleIcon className="w-10 h-10 text-green-400" />
+  const c = sale.company || {};
+  const local = sale.local || {};
+
+  return (
+    <div className="min-h-screen bg-gray-100 px-4 py-8">
+      <div className="mx-auto max-w-2xl overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-xl">
+        {/* Sello de verificación */}
+        <div className="flex items-center gap-3 bg-emerald-600 px-6 py-4 text-white">
+          <ShieldCheckIcon className="h-8 w-8 flex-none" />
+          <div>
+            <p className="text-sm font-bold uppercase tracking-wide">
+              Factura verificada
+            </p>
+            <p className="text-xs text-emerald-50">
+              Este comprobante es auténtico y está registrado en nuestro
+              sistema.
+            </p>
+          </div>
         </div>
 
-        <div className="p-6 space-y-6">
-          <div className="bg-green-50 border border-green-200 text-green-800 rounded-xl p-4 text-sm">
-            <p className="flex items-center gap-1.5 font-semibold">
-              <CheckBadgeIcon className="h-5 w-5 flex-none text-green-600" />
-              Factura válida
-            </p>
-            <p>
-              Esta venta se encuentra registrada en nuestro sistema y es
-              auténtica.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Info label="Factura" value={sale?.code} />
-            <Info
-              label="Fecha de venta"
-              value={formatDateTime(sale?.createdAt) || '---'}
-            />
-            <Info
-              label="Cliente"
-              value={sale?.customer || 'CONSUMIDOR FINAL'}
-            />
-            <Info label="Documento" value={sale?.document || ''} />
-            <Info label="Vendedor" value={sale?.user || '---'} />
-            <Info label="Local" value={sale?.local || '---'} />
-            <Info label="Método de pago" value={sale?.paymentMethod} />
-            <Info label="Estado" value={sale?.paymentStatus} />
-            <Info label="Observación" value={sale?.notes} />
-          </div>
-
-          {Array.isArray(sale?.items) && sale?.items.length > 0 && (
-            <div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-3">
-                Productos comprados
-              </h3>
-
-              <div className="overflow-x-auto border border-gray-200 rounded-xl">
-                <table className="min-w-full text-sm text-gray-700">
-                  <thead className="bg-gray-50 border-b">
-                    <tr>
-                      <th className="px-4 py-2 text-left">Producto</th>
-                      <th className="px-4 py-2 text-center">Cant.</th>
-                      <th className="px-4 py-2 text-right">Precio</th>
-                      <th className="px-4 py-2 text-right">Descuento</th>
-                      <th className="px-4 py-2 text-right">Subtotal</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {sale.items.map((item) => (
-                      <tr key={item.id} className="border-b last:border-none">
-                        <td className="px-4 py-2">
-                          {item.product} - {item.color}
-                        </td>
-                        <td className="px-4 py-2 text-center">
-                          {item.quantity}
-                        </td>
-                        <td className="px-4 py-2 text-right">
-                          {formatCOP(item.price)}
-                        </td>
-                        <td className="px-4 py-2 text-right font-semibold">
-                          {formatCOP(item.discount)}
-                        </td>
-                        <td className="px-4 py-2 text-right font-semibold">
-                          {formatCOP(item.subtotal)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+        {/* Encabezado de la empresa */}
+        <div className="flex flex-col items-center gap-3 border-b border-dashed border-gray-200 px-6 py-6 text-center sm:flex-row sm:items-start sm:text-left">
+          {c.logo && (
+            <div className="flex h-16 w-16 flex-none items-center justify-center overflow-hidden rounded-xl bg-[#0B0F19]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={c.logo}
+                alt={c.name || 'logo'}
+                className="h-full w-full object-contain"
+              />
             </div>
           )}
-
-          <div className="flex justify-end">
-            <div className="bg-gray-900 text-white px-6 py-3 rounded-xl text-lg font-bold">
-              TOTAL: {formatCOP(sale?.totalAmount)}
+          <div className="min-w-0">
+            <h1 className="text-xl font-extrabold text-gray-900">
+              {c.name || 'Comprobante de venta'}
+            </h1>
+            {c.nit && <p className="text-sm text-gray-500">NIT: {c.nit}</p>}
+            <div className="mt-1 flex flex-col gap-0.5 text-xs text-gray-500 sm:items-start">
+              {(local.address || local.city) && (
+                <span className="inline-flex items-center gap-1">
+                  <MapPinIcon className="h-3.5 w-3.5" />
+                  {[local.name, local.address, local.city]
+                    .filter(Boolean)
+                    .join(' · ')}
+                </span>
+              )}
+              {(c.phone || local.phone) && (
+                <span className="inline-flex items-center gap-1">
+                  <PhoneIcon className="h-3.5 w-3.5" />
+                  {c.phone || local.phone}
+                </span>
+              )}
+              {c.email && (
+                <span className="inline-flex items-center gap-1">
+                  <EnvelopeIcon className="h-3.5 w-3.5" />
+                  {c.email}
+                </span>
+              )}
             </div>
           </div>
         </div>
 
-        <div className="bg-gray-50 text-center py-4 text-xs text-gray-500">
-          Esta verificación fue generada automáticamente.
+        {/* Datos de la factura */}
+        <div className="grid grid-cols-2 gap-3 px-6 py-5 text-sm sm:grid-cols-3">
+          <Field label="Factura N°" value={sale.code} strong />
+          <Field
+            label="Fecha"
+            icon={CalendarDaysIcon}
+            value={formatDateTime(sale.saleDate)}
+          />
+          <Field
+            label="Estado"
+            value={sale.paymentStatus}
+            badge={
+              sale.paymentStatus === 'PAGADA'
+                ? 'bg-emerald-50 text-emerald-700'
+                : 'bg-amber-50 text-amber-700'
+            }
+          />
+          <Field
+            label="Cliente"
+            icon={UserIcon}
+            value={sale.customer?.name}
+          />
+          {sale.customer?.document && (
+            <Field label="Documento" value={sale.customer.document} />
+          )}
+          <Field
+            label="Método de pago"
+            icon={CreditCardIcon}
+            value={sale.paymentMethod}
+          />
+          {sale.seller && <Field label="Atendido por" value={sale.seller} />}
+        </div>
+
+        {/* Ítems */}
+        <div className="px-6 pb-4">
+          <div className="overflow-x-auto rounded-xl border border-gray-200">
+            <table className="min-w-full text-sm">
+              <thead className="bg-gray-50 text-xs uppercase text-gray-500">
+                <tr>
+                  <th className="px-3 py-2 text-left">Detalle</th>
+                  <th className="px-3 py-2 text-center">Cant.</th>
+                  <th className="px-3 py-2 text-right">Precio</th>
+                  <th className="px-3 py-2 text-right">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {(sale.items || []).map((it, i) => (
+                  <tr key={i}>
+                    <td className="px-3 py-2 text-gray-800">
+                      {it.name}
+                      {it.color ? (
+                        <span className="text-gray-400"> · {it.color}</span>
+                      ) : null}
+                    </td>
+                    <td className="px-3 py-2 text-center text-gray-600">
+                      {it.quantity}
+                    </td>
+                    <td className="px-3 py-2 text-right text-gray-600">
+                      {formatCOP(it.price)}
+                    </td>
+                    <td className="px-3 py-2 text-right font-semibold text-gray-900">
+                      {formatCOP(it.subtotal)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Totales */}
+        <div className="px-6 pb-6">
+          <div className="ml-auto w-full max-w-xs space-y-1 text-sm">
+            <div className="flex justify-between text-gray-500">
+              <span>Subtotal</span>
+              <span>{formatCOP(sale.subtotal)}</span>
+            </div>
+            {sale.discount > 0 && (
+              <div className="flex justify-between text-gray-500">
+                <span>Descuento</span>
+                <span>- {formatCOP(sale.discount)}</span>
+              </div>
+            )}
+            <div className="mt-2 flex items-center justify-between rounded-xl bg-gray-900 px-4 py-2.5 text-base font-bold text-white">
+              <span>TOTAL</span>
+              <span>{formatCOP(sale.totalAmount)}</span>
+            </div>
+          </div>
+        </div>
+
+        {sale.notes && (
+          <div className="mx-6 mb-4 rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-500">
+            <span className="font-semibold">Observación: </span>
+            {sale.notes}
+          </div>
+        )}
+
+        <div className="border-t border-gray-100 bg-gray-50 px-6 py-4 text-center text-[11px] text-gray-400">
+          Conserva este comprobante para soporte o garantías.
           <br />
-          Para soporte o garantías, conserve este comprobante.
+          Verificación auténtica generada automáticamente.
         </div>
       </div>
     </div>
   );
 }
 
-function Info({ label, value }) {
+function Centered({ children }) {
   return (
-    <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3">
-      <p className="text-xs text-gray-500">{label}</p>
-      <p className="text-sm font-semibold text-gray-800">{value || '---'}</p>
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+      <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-lg">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function Field({ label, value, icon: Icon, strong, badge }) {
+  return (
+    <div className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
+      <p className="text-[11px] uppercase tracking-wide text-gray-400">
+        {label}
+      </p>
+      {badge ? (
+        <span
+          className={`mt-0.5 inline-block rounded-full px-2 py-0.5 text-xs font-semibold ${badge}`}
+        >
+          {value || '—'}
+        </span>
+      ) : (
+        <p
+          className={`flex items-center gap-1 ${
+            strong ? 'text-base font-bold text-gray-900' : 'text-sm font-medium text-gray-800'
+          }`}
+        >
+          {Icon && <Icon className="h-3.5 w-3.5 flex-none text-gray-400" />}
+          {value || '—'}
+        </p>
+      )}
     </div>
   );
 }
