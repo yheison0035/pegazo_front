@@ -24,6 +24,7 @@ import { getCategories } from '@/lib/api/routes/categories';
 import { getBrands } from '@/lib/api/routes/brands';
 import { getProviders } from '@/lib/api/routes/providers';
 import { getLocals } from '@/lib/api/routes/locals';
+import { getProductFields } from '@/config/verticalProfiles';
 
 export default function NewProduct() {
   const [formData, setFormData] = useState(getEmptyInventory());
@@ -50,14 +51,15 @@ export default function NewProduct() {
         getBrands({ all: true }),
         getProviders({ all: true }),
       ]);
+      const pf = getProductFields(usuario?.company?.type);
       const missing = [];
       if (!locs?.data?.length)
         missing.push({ label: 'Sedes / locales', href: '/dashboard/locals/new' });
       if (!cats?.data?.length)
         missing.push({ label: 'Categorías', href: '/dashboard/categories/new' });
-      if (!brs?.data?.length)
+      if (pf.brand && !brs?.data?.length)
         missing.push({ label: 'Marcas', href: '/dashboard/brands/new' });
-      if (!provs?.data?.length)
+      if (pf.provider && !provs?.data?.length)
         missing.push({ label: 'Proveedores', href: '/dashboard/providers/new' });
       setDeps({ loading: false, missing });
     } catch {
