@@ -21,6 +21,42 @@ export async function getUserById(id) {
   return apiFetch(`/users/${id}`);
 }
 
+// Autoservicio de perfil: cualquier rol puede leer/editar sus propios datos.
+export async function getMyProfile() {
+  return apiFetch('/users/me/profile');
+}
+
+// Solo datos personales + contraseña. El rol y el correo NUNCA se envían: no
+// se pueden cambiar desde el perfil (y el backend igual los ignora).
+export async function updateMyProfile(dto = {}) {
+  const {
+    name,
+    phone,
+    address,
+    birthdate,
+    document,
+    department,
+    city,
+    password,
+  } = dto;
+
+  const body = {
+    name,
+    phone,
+    address,
+    document,
+    department,
+    city,
+    ...(birthdate ? { birthdate: new Date(birthdate) } : {}),
+    ...(password ? { password } : {}),
+  };
+
+  return apiFetch('/users/me/profile', {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+  });
+}
+
 // Listado global de usuarios (todas las empresas) — plataforma
 export async function getGlobalUsers(params = {}) {
   const { page = 1, limit = 20, ...filters } = params;
