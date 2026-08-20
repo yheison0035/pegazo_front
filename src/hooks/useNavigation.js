@@ -39,8 +39,11 @@ export default function useNavigation() {
   const modules = [...(BUSINESS_TYPES[businessType] || BUSINESS_TYPES.COMERCIO)];
 
   // La tienda online solo aparece si la plataforma se la habilitó a la empresa.
+  // Además, toda empresa con tienda online vende por su web y esas ventas
+  // entran como pedidos: siempre debe poder verlos en "Pedidos".
   if (usuario.company?.websiteEnabled) {
     modules.push('website');
+    if (!modules.includes('orders')) modules.push('orders');
   }
 
   // Filtrar por módulos del negocio + rol. El gating por plan NO oculta: marca
