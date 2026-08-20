@@ -90,17 +90,18 @@ export default function SideNavigation() {
           </button>
         </div>
 
-        {/* Perfil del usuario */}
-        <div className="flex items-center gap-3 px-4 py-4 border-b border-orange-500/10">
+        {/* Perfil del usuario: solo visible con el menú desplegado. Colapsado
+            se muestra únicamente el logo para mantener el rail limpio. */}
+        <div
+          className={`items-center gap-3 px-4 py-3 border-b border-orange-500/10 ${
+            expanded ? 'flex' : 'hidden'
+          }`}
+        >
           <div className="flex-none">
-            <Avatar perfil={usuario} setPerfil={() => {}} />
+            <Avatar perfil={usuario} setPerfil={() => {}} size="w-11 h-11" />
           </div>
 
-          <div
-            className={`flex flex-col min-w-0 transition-all duration-200 ${
-              expanded ? 'opacity-100 max-w-[12rem]' : 'opacity-0 max-w-0'
-            }`}
-          >
+          <div className="flex flex-col min-w-0">
             <span className="text-sm font-medium truncate">{usuario?.name}</span>
             <Link
               href={'/dashboard/users/edit/' + usuario?.id}
