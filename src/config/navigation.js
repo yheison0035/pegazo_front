@@ -131,7 +131,14 @@ export const NAVIGATION = [
         name: 'Pedidos',
         href: '/dashboard/orders',
         icon: ShoppingCartIcon,
-        roles: ['SUPER_ADMIN'],
+        roles: [
+          'SUPER_ADMIN',
+          'ADMIN',
+          'ASESOR',
+          'RECEPCIONISTA',
+          'VENTAS',
+          'CAJA',
+        ],
       },
       {
         name: 'Ventas Realizadas',
