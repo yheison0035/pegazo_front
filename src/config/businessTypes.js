@@ -172,4 +172,18 @@ export const BUSINESS_TYPES = {
     'statistics',
     'users',
   ],
+
+  // Carnicería: venta por peso, perecederos (vencimiento), sin marcas.
+  CARNICERIA: [
+    'locals',
+    'categories',
+    'providers',
+    'inventory',
+    'customers',
+    'sales',
+    'delivered_sales',
+    'expenses',
+    'statistics',
+    'users',
+  ],
 };
