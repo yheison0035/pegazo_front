@@ -12,9 +12,12 @@ import {
   CalendarIcon,
   ChartBarIcon,
   UserPlusIcon,
+  ArrowDownTrayIcon,
 } from '@heroicons/react/24/outline';
 import ReactivateCustomersModal from '@/components/appointments/ReactivateCustomersModal';
 import { isServicesBusiness } from '@/lib/appointmentsAccess';
+import { downloadCsv } from '@/utils/exportCsv';
+import { formatCOP, formatDateSafe } from '@/lib/api/utils/utils';
 import useDeliveredSales from '@/lib/api/hooks/useDeliveredSales';
 import {
   getHeaderTableDeliveredSales,
@@ -93,6 +96,34 @@ export default function Delivered_Sales() {
     fetchSales();
   };
 
+  const [exporting, setExporting] = useState(false);
+  const exportCsv = async () => {
+    setExporting(true);
+    try {
+      const res = await getDeliveredSales({
+        page: 1,
+        limit: 5000,
+        ...debouncedFilters,
+      });
+      const rows = (res.data || []).map((s) => ({
+        Fecha: formatDateSafe(s.saleDate),
+        Codigo: s.code,
+        Cliente: s.customer?.name || 'Consumidor final',
+        Total: s.totalAmount,
+        Metodo: s.paymentMethod,
+        Estado: s.paymentStatus,
+        Local: s.local?.name || '',
+        Vendedor: s.user?.name || '',
+      }));
+      downloadCsv(
+        `ventas_${new Date().toISOString().slice(0, 10)}.csv`,
+        rows
+      );
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const setPrinterInvoice = (sale) => {
     printSaleInvoice(sale, usuario);
   };
@@ -151,6 +182,16 @@ export default function Delivered_Sales() {
             className="w-full sm:w-auto"
           >
             Reactivar clientes
+          </Button>
+
+          <Button
+            variant="secondary"
+            icon={ArrowDownTrayIcon}
+            onClick={exportCsv}
+            loading={exporting}
+            className="w-full sm:w-auto"
+          >
+            Exportar CSV
           </Button>
         </div>
       </div>
