@@ -184,15 +184,18 @@ export default function Delivered_Sales() {
             Reactivar clientes
           </Button>
 
-          <Button
-            variant="secondary"
-            icon={ArrowDownTrayIcon}
-            onClick={exportCsv}
-            loading={exporting}
-            className="w-full sm:w-auto"
-          >
-            Exportar CSV
-          </Button>
+          {/* Exportar CSV: solo el dueño o el administrador. */}
+          {['SUPER_ADMIN', 'ADMIN'].includes(usuario?.role) && (
+            <Button
+              variant="secondary"
+              icon={ArrowDownTrayIcon}
+              onClick={exportCsv}
+              loading={exporting}
+              className="w-full sm:w-auto"
+            >
+              Exportar CSV
+            </Button>
+          )}
         </div>
       </div>
 

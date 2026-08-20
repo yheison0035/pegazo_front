@@ -284,7 +284,7 @@ export const NAVIGATION = [
         name: 'Configuración',
         href: '/dashboard/settings',
         icon: Cog6ToothIcon,
-        roles: ['SUPER_ADMIN'],
+        roles: ['SUPER_ADMIN', 'ADMIN'],
       },
     ],
   },

@@ -334,8 +334,11 @@ function ThemeSettings() {
 function LoyaltySettings() {
   const [form, setForm] = useState({
     loyaltyEnabled: false,
-    loyaltyStampsRequired: 10,
-    loyaltyReward: '1 servicio gratis',
+    loyaltyTier1Visits: 4,
+    loyaltyTier1Percent: 50,
+    loyaltyTier2Visits: 8,
+    loyaltyTier2Percent: 100,
+    loyaltyMaxDays: 25,
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -349,8 +352,11 @@ function LoyaltySettings() {
         if (d) {
           setForm({
             loyaltyEnabled: !!d.loyaltyEnabled,
-            loyaltyStampsRequired: d.loyaltyStampsRequired ?? 10,
-            loyaltyReward: d.loyaltyReward ?? '1 servicio gratis',
+            loyaltyTier1Visits: d.loyaltyTier1Visits ?? 4,
+            loyaltyTier1Percent: d.loyaltyTier1Percent ?? 50,
+            loyaltyTier2Visits: d.loyaltyTier2Visits ?? 8,
+            loyaltyTier2Percent: d.loyaltyTier2Percent ?? 100,
+            loyaltyMaxDays: d.loyaltyMaxDays ?? 25,
           });
         }
       } catch {
@@ -361,13 +367,18 @@ function LoyaltySettings() {
     })();
   }, []);
 
+  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+
   const save = async () => {
     setSaving(true);
     try {
       await updateLoyalty({
         loyaltyEnabled: form.loyaltyEnabled,
-        loyaltyStampsRequired: Number(form.loyaltyStampsRequired) || 10,
-        loyaltyReward: form.loyaltyReward,
+        loyaltyTier1Visits: Number(form.loyaltyTier1Visits) || 4,
+        loyaltyTier1Percent: Number(form.loyaltyTier1Percent) || 0,
+        loyaltyTier2Visits: Number(form.loyaltyTier2Visits) || 8,
+        loyaltyTier2Percent: Number(form.loyaltyTier2Percent) || 0,
+        loyaltyMaxDays: Number(form.loyaltyMaxDays) || 25,
       });
       setAlert({ type: 'success', message: 'Fidelización actualizada.' });
     } catch (e) {
@@ -378,10 +389,11 @@ function LoyaltySettings() {
   };
 
   if (loading) {
-    return (
-      <p className="text-sm text-gray-400">Cargando configuración…</p>
-    );
+    return <p className="text-sm text-gray-400">Cargando configuración…</p>;
   }
+
+  const numCls =
+    'w-full rounded-xl border border-gray-200 px-4 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20';
 
   return (
     <div className="max-w-xl rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
@@ -390,12 +402,10 @@ function LoyaltySettings() {
           <GiftIcon className="h-5 w-5" />
         </div>
         <div>
-          <h2 className="text-base font-bold text-gray-800">
-            Fidelización (tarjeta de sellos)
-          </h2>
+          <h2 className="text-base font-bold text-gray-800">Fidelización</h2>
           <p className="text-sm text-gray-500">
-            Premia a tus clientes: cada visita suma un sello y al completarlos
-            ganan un premio.
+            Premia a tus clientes frecuentes con descuentos en dos escalones de
+            visitas.
           </p>
         </div>
       </div>
@@ -415,42 +425,70 @@ function LoyaltySettings() {
       </label>
 
       <div
-        className={`mt-4 grid gap-4 transition ${
+        className={`mt-4 space-y-4 transition ${
           form.loyaltyEnabled ? 'opacity-100' : 'pointer-events-none opacity-50'
         }`}
       >
+        {/* Escalón 1 */}
+        <div className="rounded-xl border border-gray-100 p-3">
+          <p className="mb-2 text-xs font-semibold uppercase text-gray-400">
+            Primer escalón
+          </p>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">
+                En la visita #
+              </label>
+              <input type="number" min={1} value={form.loyaltyTier1Visits} onChange={set('loyaltyTier1Visits')} className={numCls} />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">
+                Descuento (%)
+              </label>
+              <input type="number" min={0} max={100} value={form.loyaltyTier1Percent} onChange={set('loyaltyTier1Percent')} className={numCls} />
+            </div>
+          </div>
+        </div>
+
+        {/* Escalón 2 */}
+        <div className="rounded-xl border border-gray-100 p-3">
+          <p className="mb-2 text-xs font-semibold uppercase text-gray-400">
+            Segundo escalón (reinicia el ciclo)
+          </p>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">
+                En la visita #
+              </label>
+              <input type="number" min={1} value={form.loyaltyTier2Visits} onChange={set('loyaltyTier2Visits')} className={numCls} />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">
+                Descuento (%)
+              </label>
+              <input type="number" min={0} max={100} value={form.loyaltyTier2Percent} onChange={set('loyaltyTier2Percent')} className={numCls} />
+            </div>
+          </div>
+        </div>
+
+        {/* Ventana de días */}
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700">
-            Sellos para ganar el premio
+            Máximo de días entre visitas
           </label>
-          <input
-            type="number"
-            min={1}
-            value={form.loyaltyStampsRequired}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, loyaltyStampsRequired: e.target.value }))
-            }
-            className="w-full rounded-xl border border-gray-200 px-4 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
-          />
+          <input type="number" min={1} value={form.loyaltyMaxDays} onChange={set('loyaltyMaxDays')} className={numCls} />
+          <p className="mt-1 text-xs text-gray-400">
+            Si el cliente se demora más de estos días en volver, la racha se
+            reinicia y empieza de cero.
+          </p>
         </div>
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
-            Premio
-          </label>
-          <input
-            type="text"
-            value={form.loyaltyReward}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, loyaltyReward: e.target.value }))
-            }
-            placeholder="Ej. 1 corte gratis"
-            className="w-full rounded-xl border border-gray-200 px-4 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
-          />
-        </div>
+
         <p className="rounded-lg bg-orange-50 px-3 py-2 text-xs text-orange-700">
-          Con esta configuración, tras{' '}
-          <b>{form.loyaltyStampsRequired || 10} visitas</b> el cliente gana:{' '}
-          <b>{form.loyaltyReward || '1 servicio gratis'}</b>.
+          En la visita <b>#{form.loyaltyTier1Visits}</b> el cliente recibe{' '}
+          <b>{form.loyaltyTier1Percent}%</b> de descuento; en la visita{' '}
+          <b>#{form.loyaltyTier2Visits}</b>, <b>{form.loyaltyTier2Percent}%</b>{' '}
+          (y el ciclo vuelve a empezar). Debe volver dentro de{' '}
+          <b>{form.loyaltyMaxDays} días</b> para no perder la racha.
         </p>
       </div>
 

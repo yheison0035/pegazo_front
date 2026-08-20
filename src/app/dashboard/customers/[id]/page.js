@@ -16,10 +16,7 @@ import {
 } from '@heroicons/react/24/outline';
 import Button from '@/components/ui/Button';
 import WhatsappLink from '@/components/dashboard/tables/segments/contentData/whatsappLink';
-import {
-  getCustomerSummary,
-  redeemCustomerReward,
-} from '@/lib/api/routes/customers';
+import { getCustomerSummary } from '@/lib/api/routes/customers';
 import { formatCOP, formatDateOnly } from '@/lib/api/utils/utils';
 import { segmentMeta } from '@/lib/customerSegment';
 import { statusMeta } from '@/lib/appointmentStatus';
@@ -83,16 +80,6 @@ export default function CustomerProfile() {
   const { customer, metrics, topItems, sales, appointments, loyalty } = data;
   const seg = segmentMeta(metrics.segment);
   const maxQty = topItems?.[0]?.qty || 1;
-
-  const redeem = async () => {
-    try {
-      const res = await redeemCustomerReward(customer.id);
-      const left = res?.data?.loyaltyRewards ?? Math.max(0, loyalty.rewards - 1);
-      setData((d) => ({ ...d, loyalty: { ...d.loyalty, rewards: left } }));
-    } catch {
-      /* ignora */
-    }
-  };
 
   return (
     <div className="mx-auto w-full max-w-5xl p-4">
@@ -200,41 +187,68 @@ export default function CustomerProfile() {
           <div className="flex items-center justify-between gap-3">
             <h2 className="flex items-center gap-2 text-sm font-bold text-gray-700">
               <GiftIcon className="h-5 w-5 text-orange-500" />
-              Tarjeta de sellos
+              Fidelización
             </h2>
             <span className="text-xs font-semibold text-gray-500">
-              {loyalty.stamps} / {loyalty.required}
+              {loyalty.currentCount} / {loyalty.tier2?.visits} visitas
             </span>
           </div>
 
+          {/* Círculos de progreso con marcas de los escalones */}
           <div className="mt-3 flex flex-wrap gap-1.5">
-            {Array.from({ length: loyalty.required }).map((_, i) => (
-              <span
-                key={i}
-                className={`h-6 w-6 rounded-full border-2 ${
-                  i < loyalty.stamps
-                    ? 'border-orange-500 bg-orange-500'
-                    : 'border-gray-200 bg-gray-50'
-                }`}
-              />
-            ))}
+            {Array.from({ length: loyalty.tier2?.visits || 8 }).map((_, i) => {
+              const n = i + 1;
+              const done = n <= loyalty.currentCount;
+              const isTier =
+                n === loyalty.tier1?.visits || n === loyalty.tier2?.visits;
+              return (
+                <span
+                  key={i}
+                  title={
+                    n === loyalty.tier1?.visits
+                      ? `${loyalty.tier1.percent}% de descuento`
+                      : n === loyalty.tier2?.visits
+                        ? `${loyalty.tier2.percent}% de descuento`
+                        : ''
+                  }
+                  className={`flex h-6 w-6 items-center justify-center rounded-full border-2 text-[10px] font-bold ${
+                    done
+                      ? 'border-orange-500 bg-orange-500 text-white'
+                      : isTier
+                        ? 'border-orange-300 bg-orange-50 text-orange-500'
+                        : 'border-gray-200 bg-gray-50 text-gray-300'
+                  }`}
+                >
+                  {isTier
+                    ? n === loyalty.tier1?.visits
+                      ? `${loyalty.tier1.percent}%`
+                      : `${loyalty.tier2.percent}%`
+                    : ''}
+                </span>
+              );
+            })}
           </div>
 
-          <p className="mt-2 text-xs text-gray-500">
-            Al completar {loyalty.required} sellos gana:{' '}
-            <b className="text-gray-700">{loyalty.reward}</b>
-          </p>
-
-          {loyalty.rewards > 0 && (
-            <div className="mt-3 flex flex-col gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3 sm:flex-row sm:items-center sm:justify-between">
-              <span className="text-sm font-semibold text-emerald-800">
-                Tiene {loyalty.rewards} premio
-                {loyalty.rewards === 1 ? '' : 's'} por canjear: {loyalty.reward}
-              </span>
-              <Button variant="add" size="sm" onClick={redeem}>
-                Canjear premio
-              </Button>
+          {/* Estado condicional: descuento del próximo corte */}
+          {loyalty.nextDiscount > 0 ? (
+            <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">
+              🎉 En su próximo corte (visita #{loyalty.nextVisit}) tiene{' '}
+              {loyalty.nextDiscount}% de descuento.
             </div>
+          ) : (
+            <p className="mt-2 text-xs text-gray-500">
+              Próxima visita: #{loyalty.nextVisit}. En la visita #
+              {loyalty.tier1?.visits} obtiene {loyalty.tier1?.percent}% y en la #
+              {loyalty.tier2?.visits}, {loyalty.tier2?.percent}%.
+            </p>
+          )}
+
+          {loyalty.expired && (
+            <p className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-xs font-medium text-red-600">
+              No vuelve hace {loyalty.daysSinceLastVisit} días (máx.{' '}
+              {loyalty.maxDays}): la racha se reinició, su próxima visita cuenta
+              como la #1.
+            </p>
           )}
         </div>
       )}
