@@ -21,6 +21,11 @@ export async function getProductById(id) {
   return apiFetch(`/inventory/${id}`);
 }
 
+// Productos con stock bajo (stock total <= alerta de stock mínimo).
+export async function getLowStock() {
+  return apiFetch('/inventory/low-stock');
+}
+
 export async function createProduct(dto) {
   const { id: _id, createdAt, updatedAt, color, sku, stock, ...cleanDto } = dto;
 
@@ -30,6 +35,7 @@ export async function createProduct(dto) {
     categoryId: Number(cleanDto.categoryId) || null,
     localId: Number(cleanDto.localId) || null,
     providerId: Number(cleanDto.providerId) || null,
+    minStock: Number(cleanDto.minStock) || 0,
   };
 
   return apiFetch('/inventory', { method: 'POST', body: JSON.stringify(body) });
@@ -88,6 +94,7 @@ export async function updateProduct(id, dto) {
     providerId: Number(cleanDto.providerId) || null,
     categoryId: Number(cleanDto.categoryId) || null,
     brandId: Number(cleanDto.brandId) || null,
+    minStock: Number(cleanDto.minStock) || 0,
   };
 
   return apiFetch(`/inventory/${id}`, {

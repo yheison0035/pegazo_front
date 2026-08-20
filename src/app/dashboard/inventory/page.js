@@ -17,6 +17,7 @@ import {
 import useColumnFilters from '@/components/dashboard/tables/hooks/useColumnFilters';
 import { useDebounce } from '@/components/dashboard/tables/hooks/useDebounce';
 import usePermissions from '@/hooks/usePermissions';
+import LowStockBanner from '@/components/dashboard/inventory/LowStockBanner';
 
 export default function Inventory() {
   const auth = useAuth();
@@ -82,6 +83,8 @@ export default function Inventory() {
           <Header type="producto" typeUrl="inventory" />
         )}
       </div>
+
+      <LowStockBanner refreshKey={products} />
 
       <div className="bg-white rounded-lg shadow relative">
         <LoadingOverlay show={loading} text="Cargando inventario..." />
