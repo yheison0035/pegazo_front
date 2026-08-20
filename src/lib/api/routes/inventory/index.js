@@ -26,6 +26,11 @@ export async function getLowStock() {
   return apiFetch('/inventory/low-stock');
 }
 
+// Productos por vencer (próximos 30 días o ya vencidos).
+export async function getExpiring() {
+  return apiFetch('/inventory/expiring');
+}
+
 export async function createProduct(dto) {
   const { id: _id, createdAt, updatedAt, color, sku, stock, ...cleanDto } = dto;
 

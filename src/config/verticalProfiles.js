@@ -19,14 +19,15 @@ const DEFAULT_PRODUCT_FIELDS = {
   unit: false,
   category: true,
   oldPrice: true,
+  expiry: false, // vencimiento + lote (droguería / perecederos)
 };
 
 // Solo se declara lo que difiere del DEFAULT.
 const PRODUCT_FIELDS_BY_TYPE = {
   // Retail con marca + código de barras
   COMERCIO: {},
-  SUPERMERCADO: { unit: true },
-  DROGUERIA: { unit: true }, // + vencimiento/lote (próxima fase)
+  SUPERMERCADO: { unit: true, expiry: true },
+  DROGUERIA: { unit: true, expiry: true },
 
   // Ropa: marca + talla, sin venta por peso
   ROPA: { size: true },

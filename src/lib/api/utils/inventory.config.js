@@ -17,6 +17,8 @@ export const getEmptyInventory = () => ({
   brandId: '',
   minStock: 0,
   unit: 'UNIDAD',
+  expiryDate: '',
+  lot: '',
   status: 'ACTIVO',
   variants: [],
   features: [],
@@ -34,6 +36,10 @@ export const getFormFieldsInventory = (usuario) => {
   if (!fields.provider) hidden.add('providerId');
   if (!fields.barcode) hidden.add('barcode');
   if (!fields.unit) hidden.add('unit');
+  if (!fields.expiry) {
+    hidden.add('expiryDate');
+    hidden.add('lot');
+  }
 
   const list = [
     {
@@ -144,6 +150,20 @@ export const getFormFieldsInventory = (usuario) => {
         { id: 'UNIDAD', name: 'Por unidad' },
         { id: 'PESO', name: 'Por peso (kg)' },
       ],
+      disabled: false,
+    },
+    {
+      name: 'expiryDate',
+      label: 'Fecha de vencimiento',
+      type: 'date',
+      required: false,
+      disabled: false,
+    },
+    {
+      name: 'lot',
+      label: 'Lote',
+      type: 'text',
+      required: false,
       disabled: false,
     },
     {
