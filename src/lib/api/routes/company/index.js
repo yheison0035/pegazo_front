@@ -28,3 +28,11 @@ export async function updateCompanyHours(dto) {
     body: JSON.stringify(dto),
   });
 }
+
+// Tema de diseño del panel/CRM (orange | blue | emerald).
+export async function updateCrmTheme(theme) {
+  return apiFetch('/company/theme', {
+    method: 'PATCH',
+    body: JSON.stringify({ theme }),
+  });
+}
