@@ -65,6 +65,7 @@ export async function updateProduct(id, dto) {
     ? cleanDto.variants.map((v) => ({
         ...(v.id ? { id: v.id } : {}),
         color: v.color,
+        ...(v.size ? { size: v.size } : {}),
         stock: Number(v.stock),
       }))
     : [];

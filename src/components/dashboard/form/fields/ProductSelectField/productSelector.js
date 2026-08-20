@@ -78,7 +78,11 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
       {
         type: product.type,
         inventoryVariantId: product.id,
-        name: isService ? product.name : `${product.name} - ${product.color}`,
+        name: isService
+          ? product.name
+          : `${product.name} - ${product.color}${
+              product.size ? ` / ${product.size}` : ''
+            }`,
         price: product.price,
         stock: isService ? null : product.stock,
         unit: product.unit || 'UNIDAD',
@@ -260,7 +264,10 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
                         </span>
                         {product.type !== 'service' && (
                           <div className="flex items-center gap-2 text-xs text-gray-400">
-                            <span>{product.color}</span>
+                            <span>
+                              {product.color}
+                              {product.size ? ` / ${product.size}` : ''}
+                            </span>
                             <span>•</span>
                             <span>Stock: {product.stock}</span>
 
