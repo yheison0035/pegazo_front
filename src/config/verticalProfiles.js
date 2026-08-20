@@ -7,7 +7,7 @@
 //  - provider    : proveedor
 //  - barcode     : código de barras
 //  - variantType : cómo se maneja la cantidad/variante del producto:
-//        'color'  -> color (+ talla en ropa): ropa, ecommerce, televentas, feria
+//        'color'  -> color (+ talla en ropa): ropa, ecommerce, televentas
 //        'weight' -> cantidad por peso (kg / libra / arroba): carnicería, fruver, súper
 //        'simple' -> solo cantidad (unidad): droguería, tienda, restaurante, servicios…
 //  - size        : talla (solo ropa; requiere variantType 'color')
@@ -33,7 +33,7 @@ const PRODUCT_FIELDS_BY_TYPE = {
   TELEVENTAS: { variantType: 'color' },
   DISTRIBUCION: {},
   ECOMMERCE: { variantType: 'color' },
-  FERIA: { variantType: 'color' },
+  FERIA: {},
 
   // Súper: cantidad, con opción de peso (algunos productos por kg)
   SUPERMERCADO: { variantType: 'weight', expiry: true },
