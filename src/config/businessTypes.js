@@ -59,4 +59,117 @@ export const BUSINESS_TYPES = {
     'expenses',
     'statistics',
   ],
+
+  // ---- Verticales específicas ----
+
+  // Salud con citas (odontología): pacientes, tratamientos (servicios) y agenda.
+  ODONTOLOGIA: [
+    'locals',
+    'users',
+    'categories',
+    'providers',
+    'inventory',
+    'customers',
+    'services',
+    'appointments',
+    'sales',
+    'delivered_sales',
+    'expenses',
+    'statistics',
+  ],
+
+  // Retail con inventario + POS (código de barras).
+  SUPERMERCADO: [
+    'locals',
+    'categories',
+    'brands',
+    'providers',
+    'inventory',
+    'customers',
+    'sales',
+    'delivered_sales',
+    'expenses',
+    'statistics',
+    'users',
+  ],
+
+  DROGUERIA: [
+    'locals',
+    'categories',
+    'brands',
+    'providers',
+    'inventory',
+    'customers',
+    'sales',
+    'delivered_sales',
+    'expenses',
+    'statistics',
+    'users',
+  ],
+
+  ROPA: [
+    'locals',
+    'categories',
+    'brands',
+    'providers',
+    'inventory',
+    'customers',
+    'sales',
+    'delivered_sales',
+    'expenses',
+    'statistics',
+    'users',
+  ],
+
+  // Frutas y verduras: sin marcas.
+  FRUVER: [
+    'locals',
+    'categories',
+    'providers',
+    'inventory',
+    'customers',
+    'sales',
+    'delivered_sales',
+    'expenses',
+    'statistics',
+    'users',
+  ],
+
+  // Floristería: retail + domicilios (envíos).
+  FLORISTERIA: [
+    'locals',
+    'categories',
+    'inventory',
+    'customers',
+    'sales',
+    'delivered_sales',
+    'shipping',
+    'expenses',
+    'statistics',
+    'users',
+  ],
+
+  // Comidas rápidas: pedidos + inventario.
+  COMIDA_RAPIDA: [
+    'orders',
+    'sales',
+    'inventory',
+    'customers',
+    'expenses',
+    'statistics',
+    'users',
+  ],
+
+  // Cafetería / panadería.
+  CAFETERIA: [
+    'locals',
+    'categories',
+    'inventory',
+    'customers',
+    'sales',
+    'delivered_sales',
+    'expenses',
+    'statistics',
+    'users',
+  ],
 };

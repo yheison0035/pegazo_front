@@ -12,8 +12,16 @@ import Button from '@/components/ui/Button';
 
 const BUSINESS_TYPES = [
   { id: 'COMERCIO', name: 'Tienda / Comercio' },
+  { id: 'SUPERMERCADO', name: 'Supermercado / Minimercado' },
+  { id: 'DROGUERIA', name: 'Droguería / Farmacia' },
+  { id: 'ROPA', name: 'Tienda de ropa' },
+  { id: 'FRUVER', name: 'Fruver (frutas y verduras)' },
+  { id: 'FLORISTERIA', name: 'Floristería' },
+  { id: 'CAFETERIA', name: 'Cafetería / Panadería' },
   { id: 'RESTAURANTE', name: 'Restaurante / Bar' },
+  { id: 'COMIDA_RAPIDA', name: 'Comidas rápidas' },
   { id: 'SERVICIOS', name: 'Servicios (barbería, spa, salón)' },
+  { id: 'ODONTOLOGIA', name: 'Consultorio odontológico / Salud' },
   { id: 'ECOMMERCE', name: 'Tienda online' },
   { id: 'DISTRIBUCION', name: 'Distribución / Mayorista' },
 ];
