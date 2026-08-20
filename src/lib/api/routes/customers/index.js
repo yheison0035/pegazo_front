@@ -38,6 +38,18 @@ export async function redeemCustomerReward(id) {
   return apiFetch(`/customers/${id}/redeem-reward`, { method: 'PATCH' });
 }
 
+// Clientes con actividad de fidelización (sellos/premios) + config de la empresa.
+export async function getLoyaltyCustomers(params = {}) {
+  const { page = 1, limit = 20, ...filters } = params;
+  const query = new URLSearchParams();
+  query.set('page', String(page));
+  query.set('limit', String(limit));
+  Object.entries(filters).forEach(([k, v]) => {
+    if (v !== '' && v !== null && v !== undefined) query.set(k, String(v));
+  });
+  return apiFetch(`/customers/loyalty?${query.toString()}`);
+}
+
 export async function createCustomer(dto) {
   const body = {
     ...dto,

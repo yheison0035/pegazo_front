@@ -19,6 +19,7 @@ import {
   FireIcon,
   CalculatorIcon,
   InboxArrowDownIcon,
+  GiftIcon,
 } from '@heroicons/react/24/outline';
 
 export const NAVIGATION = [
@@ -198,6 +199,12 @@ export const NAVIGATION = [
           'VENTAS',
           'CAJA',
         ],
+      },
+      {
+        name: 'Fidelización',
+        href: '/dashboard/loyalty',
+        icon: GiftIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA'],
       },
     ],
   },

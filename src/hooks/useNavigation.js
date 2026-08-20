@@ -48,6 +48,11 @@ export default function useNavigation() {
     modules.push('purchases');
   }
 
+  // Fidelización: donde hay clientes (tarjeta de sellos, opt-in por empresa).
+  if (modules.includes('customers') && !modules.includes('loyalty')) {
+    modules.push('loyalty');
+  }
+
   // La tienda online solo aparece si la plataforma se la habilitó a la empresa.
   // Además, toda empresa con tienda online vende por su web y esas ventas
   // entran como pedidos: siempre debe poder verlos en "Pedidos".
