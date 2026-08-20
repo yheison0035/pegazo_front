@@ -15,7 +15,22 @@ export const BUSINESS_TYPES = {
 
   FERIA: ['inventory', 'customers', 'sales', 'expenses'],
 
-  TELEVENTAS: ['customers', 'orders', 'sales', 'statistics'],
+  // Televentas: comercio completo (inventario, catálogo, proveedores…) con
+  // gestión de pedidos como su operación central.
+  TELEVENTAS: [
+    'locals',
+    'categories',
+    'brands',
+    'providers',
+    'inventory',
+    'customers',
+    'orders',
+    'sales',
+    'delivered_sales',
+    'expenses',
+    'statistics',
+    'users',
+  ],
 
   RESTAURANTE: [
     'mesas',
