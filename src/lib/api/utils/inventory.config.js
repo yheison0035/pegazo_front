@@ -1,4 +1,5 @@
 import { canSeeOldPrice } from '@/hooks/inventory.permissions';
+import { getProductFields } from '@/config/verticalProfiles';
 
 export const getEmptyInventory = () => ({
   sku: '',
@@ -23,9 +24,18 @@ export const getEmptyInventory = () => ({
 });
 
 export const getFormFieldsInventory = (usuario) => {
-  const showOldPrice = canSeeOldPrice(usuario);
+  const canOldPrice = canSeeOldPrice(usuario);
+  const fields = getProductFields(usuario?.company?.type);
+  const showOldPrice = canOldPrice && fields.oldPrice;
 
-  return [
+  // Qué campos ocultar según la vertical (no todos manejan marca, etc.).
+  const hidden = new Set();
+  if (!fields.brand) hidden.add('brandId');
+  if (!fields.provider) hidden.add('providerId');
+  if (!fields.barcode) hidden.add('barcode');
+  if (!fields.unit) hidden.add('unit');
+
+  const list = [
     {
       name: 'name',
       label: 'Nombre del Producto',
@@ -148,6 +158,8 @@ export const getFormFieldsInventory = (usuario) => {
       disabled: false,
     },
   ];
+
+  return list.filter((f) => !hidden.has(f.name));
 };
 
 export const getHeaderTableInventory = (usuario) => {
