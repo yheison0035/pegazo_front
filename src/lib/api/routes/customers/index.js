@@ -37,16 +37,28 @@ export async function createCustomer(dto) {
   const body = {
     ...dto,
     localId: Number(dto.localId),
+    // Fecha vacía => se omite (evita fallar @IsDateString con '').
+    birthday: dto.birthday || undefined,
   };
   return apiFetch('/customers', { method: 'POST', body: JSON.stringify(body) });
 }
 
 export async function updateCustomer(id, dto) {
-  const { id: _id, createdAt, updatedAt, local, companyId, ...cleanDto } = dto;
+  const {
+    id: _id,
+    createdAt,
+    updatedAt,
+    local,
+    companyId,
+    lastWinbackAt,
+    ...cleanDto
+  } = dto;
 
   const body = {
     ...cleanDto,
     localId: Number(cleanDto.localId) || null,
+    // Fecha vacía => null (limpia el cumpleaños).
+    birthday: cleanDto.birthday || null,
   };
 
   return apiFetch(`/customers/${id}`, {
