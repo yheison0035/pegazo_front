@@ -29,6 +29,12 @@ export async function updateCompanyHours(dto) {
   });
 }
 
+// Recalcula la fidelización de todos los clientes a partir del historial de
+// ventas (backfill). Re-ejecutable.
+export async function syncLoyaltyFromSales() {
+  return apiFetch('/company/loyalty/sync', { method: 'POST' });
+}
+
 // Tema de diseño del panel/CRM (orange | blue | emerald).
 export async function updateCrmTheme(theme) {
   return apiFetch('/company/theme', {

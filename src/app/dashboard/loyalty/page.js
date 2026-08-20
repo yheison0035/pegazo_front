@@ -8,15 +8,21 @@ import {
   MagnifyingGlassIcon,
   TrophyIcon,
   ClockIcon,
+  ArrowPathIcon,
 } from '@heroicons/react/24/outline';
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
+import { useAuth } from '@/context/authContext';
 import { getLoyaltyCustomers } from '@/lib/api/routes/customers';
+import { syncLoyaltyFromSales } from '@/lib/api/routes/company';
 import Pagination from '@/components/dashboard/tables/segments/pagination';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 
 export default function LoyaltyPage() {
+  const { usuario } = useAuth();
+  const isOwnerAdmin = ['SUPER_ADMIN', 'ADMIN'].includes(usuario?.role);
+  const [syncing, setSyncing] = useState(false);
   const [data, setData] = useState([]);
   const [config, setConfig] = useState(null);
   const [meta, setMeta] = useState(null);
@@ -45,6 +51,23 @@ export default function LoyaltyPage() {
     return () => clearTimeout(t);
   }, [fetch]);
 
+  const sync = async () => {
+    setSyncing(true);
+    try {
+      const res = await syncLoyaltyFromSales();
+      const d = res?.data || {};
+      setAlert({
+        type: 'success',
+        message: `Sincronizado: ${d.customersUpdated} clientes con ${d.salesProcessed} ventas.`,
+      });
+      fetch();
+    } catch (err) {
+      setAlert({ type: 'error', message: err.message || 'No se pudo sincronizar' });
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   const t1v = config?.loyaltyTier1Visits ?? 4;
   const t1p = config?.loyaltyTier1Percent ?? 50;
   const t2v = config?.loyaltyTier2Visits ?? 8;
@@ -61,12 +84,27 @@ export default function LoyaltyPage() {
               Descuentos por visitas frecuentes.
             </p>
           </div>
-          <Link
-            href="/dashboard/settings"
-            className="inline-flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
-          >
-            <Cog6ToothIcon className="w-5 h-5" /> Configurar
-          </Link>
+          <div className="flex gap-2">
+            {isOwnerAdmin && (
+              <button
+                onClick={sync}
+                disabled={syncing}
+                title="Recalcula los sellos de todos los clientes a partir del historial de ventas"
+                className="inline-flex items-center gap-2 rounded-xl bg-orange-500 px-4 py-2 text-sm font-medium text-white hover:bg-orange-600 disabled:opacity-50"
+              >
+                <ArrowPathIcon
+                  className={`w-5 h-5 ${syncing ? 'animate-spin' : ''}`}
+                />
+                {syncing ? 'Sincronizando...' : 'Sincronizar con ventas'}
+              </button>
+            )}
+            <Link
+              href="/dashboard/settings"
+              className="inline-flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
+            >
+              <Cog6ToothIcon className="w-5 h-5" /> Configurar
+            </Link>
+          </div>
         </div>
 
         {config && !config.loyaltyEnabled && (
