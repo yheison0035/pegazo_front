@@ -44,11 +44,13 @@ export default function useNavigation() {
   // el módulo como "bloqueado" (candado) para poder ofrecer el plan superior.
   const filteredSections = NAVIGATION.map((section) => {
     const items = section.items
-      .filter(
-        (item) =>
-          modules.includes(item.href.split('/').pop()) &&
-          item.roles.includes(role)
-      )
+      .filter((item) => {
+        const key = item.href.split('/').pop();
+        // El Inicio (home) siempre está disponible; los demás dependen del
+        // conjunto de módulos de la vertical.
+        const allowedByModule = key === 'dashboard' || modules.includes(key);
+        return allowedByModule && item.roles.includes(role);
+      })
       .map((item) => {
         const key = item.href.split('/').pop();
         const locked = !planAllowsModule(plan, key);

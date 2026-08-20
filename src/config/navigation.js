@@ -22,10 +22,19 @@ export const NAVIGATION = [
     section: 'General',
     items: [
       {
-        name: 'Dashboard',
+        name: 'Inicio',
         href: '/dashboard',
         icon: HomeIcon,
-        roles: ['SUPER_ADMIN', 'ADMIN'],
+        roles: [
+          'SUPER_ADMIN',
+          'ADMIN',
+          'RECEPCIONISTA',
+          'COORDINADOR',
+          'AUXILIAR',
+          'ASESOR',
+          'BODEGUERO',
+          'VENTAS',
+        ],
       },
       {
         name: 'Locales',

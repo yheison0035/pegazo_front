@@ -37,7 +37,7 @@ export default function Login() {
         return;
       }
 
-      router.push('/dashboard/sales');
+      router.push('/dashboard');
     } catch (err) {
       setError(err.message || 'Error en login');
     }
