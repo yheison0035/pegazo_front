@@ -183,12 +183,19 @@ export const getFormFieldsInventory = (usuario) => {
 };
 
 export const getHeaderTableInventory = (usuario) => {
-  const showOldPrice = canSeeOldPrice(usuario);
+  const canOldPrice = canSeeOldPrice(usuario);
+  const fields = getProductFields(usuario?.company?.type);
+  const showOldPrice = canOldPrice && fields.oldPrice;
 
   return [
     { name: 'image', title: 'Imagen Principal', show: true, showInput: false },
     { name: 'name', title: 'Nombre del Producto', show: true, showInput: true },
-    { name: 'barcode', title: 'Codigo de barras', show: true, showInput: true },
+    {
+      name: 'barcode',
+      title: 'Codigo de barras',
+      show: fields.barcode,
+      showInput: fields.barcode,
+    },
     { name: 'stock', title: 'Cantidad', show: true, showInput: false },
     {
       name: 'localId',
@@ -196,7 +203,12 @@ export const getHeaderTableInventory = (usuario) => {
       show: true,
       showInput: true,
     },
-    { name: 'providerId', title: 'Proveedor', show: true, showInput: true },
+    {
+      name: 'providerId',
+      title: 'Proveedor',
+      show: fields.provider,
+      showInput: fields.provider,
+    },
     {
       name: 'purchasePrice',
       title: 'Precio de Compra',

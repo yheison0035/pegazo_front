@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { canSeeOldPrice } from '@/hooks/inventory.permissions';
+import { getProductFields } from '@/config/verticalProfiles';
 import Actions from './actions';
 import PhoneContentData from './contentData/phone';
 import WhatsappLink from './contentData/whatsappLink';
@@ -29,7 +30,8 @@ export default function ContentData({
 }) {
   const auth = useAuth();
   const usuario = auth?.usuario;
-  const showOldPrice = canSeeOldPrice(usuario);
+  const pf = getProductFields(usuario?.company?.type);
+  const showOldPrice = canSeeOldPrice(usuario) && pf.oldPrice;
 
   return (
     <>
@@ -114,9 +116,11 @@ export default function ContentData({
                 <td className="px-5 py-4 whitespace-nowrap">
                   {info.name || '---'}
                 </td>
-                <td className="px-5 py-4 whitespace-nowrap">
-                  {info.barcode || '---'}
-                </td>
+                {pf.barcode && (
+                  <td className="px-5 py-4 whitespace-nowrap">
+                    {info.barcode || '---'}
+                  </td>
+                )}
 
                 <td className="px-5 py-4 text-center">
                   {(() => {
@@ -161,9 +165,11 @@ export default function ContentData({
                 <td className="px-5 py-4 whitespace-nowrap">
                   {info.local?.name || '---'}
                 </td>
-                <td className="px-5 py-4 whitespace-nowrap">
-                  {info.provider?.name || '---'}
-                </td>
+                {pf.provider && (
+                  <td className="px-5 py-4 whitespace-nowrap">
+                    {info.provider?.name || '---'}
+                  </td>
+                )}
                 <td className="px-5 py-4 whitespace-nowrap">
                   {formatCOP(info.salePrice) || '---'}
                 </td>
