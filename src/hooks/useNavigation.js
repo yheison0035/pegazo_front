@@ -58,6 +58,11 @@ export default function useNavigation() {
     modules.push('quotes');
   }
 
+  // Devoluciones/notas crédito: donde hay ventas.
+  if (modules.includes('sales') && !modules.includes('returns')) {
+    modules.push('returns');
+  }
+
   // La tienda online solo aparece si la plataforma se la habilitó a la empresa.
   // Además, toda empresa con tienda online vende por su web y esas ventas
   // entran como pedidos: siempre debe poder verlos en "Pedidos".
