@@ -14,6 +14,7 @@ import {
   UserIcon,
   CalendarDaysIcon,
   CreditCardIcon,
+  PrinterIcon,
 } from '@heroicons/react/24/outline';
 import useDeliveredSales from '@/lib/api/hooks/useDeliveredSales';
 import { formatCOP, formatDateTime } from '@/lib/api/utils/utils';
@@ -31,8 +32,13 @@ export default function VerifyCodeSaleClient() {
     (async () => {
       try {
         const res = await getVerifyCodeSale(code);
-        setSale(res?.data || res);
+        const data = res?.data || res;
+        setSale(data);
         setNotFound(false);
+        // El título define el nombre por defecto del PDF al imprimir.
+        if (typeof document !== 'undefined' && data?.code) {
+          document.title = `Factura ${data.code}`;
+        }
       } catch {
         setNotFound(true);
       }
@@ -83,8 +89,26 @@ export default function VerifyCodeSaleClient() {
   const local = sale.local || {};
 
   return (
-    <div className="min-h-screen bg-gray-100 px-4 py-8">
-      <div className="mx-auto max-w-2xl overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-xl">
+    <div className="min-h-screen bg-gray-100 px-4 py-8 print:bg-white print:p-0">
+      <style>{`
+        @media print {
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          @page { margin: 12mm; }
+        }
+      `}</style>
+      {/* Barra de acciones (no se imprime) */}
+      <div className="mx-auto mb-3 flex max-w-2xl justify-end print:hidden">
+        <button
+          type="button"
+          onClick={() => window.print()}
+          className="inline-flex items-center gap-2 rounded-xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-gray-800"
+        >
+          <PrinterIcon className="h-5 w-5" />
+          Imprimir / Guardar PDF
+        </button>
+      </div>
+
+      <div className="mx-auto max-w-2xl overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-xl print:max-w-full print:rounded-none print:border-0 print:shadow-none">
         {/* Sello de verificación */}
         <div className="flex items-center gap-3 bg-emerald-600 px-6 py-4 text-white">
           <ShieldCheckIcon className="h-8 w-8 flex-none" />
