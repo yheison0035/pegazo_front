@@ -20,6 +20,7 @@ import {
   CalculatorIcon,
   InboxArrowDownIcon,
   GiftIcon,
+  DocumentTextIcon,
 } from '@heroicons/react/24/outline';
 
 export const NAVIGATION = [
@@ -178,6 +179,18 @@ export const NAVIGATION = [
           'ASESOR',
           'RECEPCIONISTA',
           'CAJA',
+          'VENTAS',
+        ],
+      },
+      {
+        name: 'Cotizaciones',
+        href: '/dashboard/quotes',
+        icon: DocumentTextIcon,
+        roles: [
+          'SUPER_ADMIN',
+          'ADMIN',
+          'ASESOR',
+          'RECEPCIONISTA',
           'VENTAS',
         ],
       },
