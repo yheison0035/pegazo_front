@@ -37,6 +37,15 @@ export default function NewProduct() {
   const usuario = auth?.usuario;
   const showOldPrice = canSeeOldPrice(usuario);
 
+  // En verticales por peso (carnicería, fruver, súper) el producto arranca en kg.
+  useEffect(() => {
+    if (getProductFields(usuario?.company?.type).variantType === 'weight') {
+      setFormData((prev) =>
+        prev.unit === 'UNIDAD' ? { ...prev, unit: 'KG' } : prev
+      );
+    }
+  }, [usuario]);
+
   const { createProduct, uploadProductImages, loading } = useProducts();
 
   // Precheck: antes de dejar llenar el formulario, verifica que la empresa ya
@@ -84,7 +93,7 @@ export default function NewProduct() {
     if (!formData.variants || formData.variants.length === 0) {
       return setAlert({
         type: 'warning',
-        message: 'Debes agregar al menos un color con stock.',
+        message: 'Debes indicar la cantidad del producto.',
       });
     }
 
@@ -108,7 +117,7 @@ export default function NewProduct() {
     if (invalidVariant) {
       return setAlert({
         type: 'warning',
-        message: 'Todas las variantes deben tener color y stock mayor a 0.',
+        message: 'La cantidad debe ser mayor a 0.',
       });
     }
 
