@@ -38,6 +38,11 @@ export default function useNavigation() {
   // módulos permitidos por tipo de negocio
   const modules = [...(BUSINESS_TYPES[businessType] || BUSINESS_TYPES.COMERCIO)];
 
+  // Caja/arqueo: disponible en cualquier negocio con punto de venta (ventas).
+  if (modules.includes('sales') && !modules.includes('cash')) {
+    modules.push('cash');
+  }
+
   // La tienda online solo aparece si la plataforma se la habilitó a la empresa.
   // Además, toda empresa con tienda online vende por su web y esas ventas
   // entran como pedidos: siempre debe poder verlos en "Pedidos".
