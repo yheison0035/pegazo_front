@@ -1,5 +1,8 @@
 import { canSeeOldPrice } from '@/hooks/inventory.permissions';
-import { getProductFields } from '@/config/verticalProfiles';
+import {
+  getProductFields,
+  WEIGHT_UNIT_OPTIONS,
+} from '@/config/verticalProfiles';
 
 export const getEmptyInventory = () => ({
   sku: '',
@@ -30,12 +33,19 @@ export const getFormFieldsInventory = (usuario) => {
   const fields = getProductFields(usuario?.company?.type);
   const showOldPrice = canOldPrice && fields.oldPrice;
 
+  const vt = fields.variantType; // 'color' | 'weight' | 'simple'
+
   // Qué campos ocultar según la vertical (no todos manejan marca, etc.).
   const hidden = new Set();
   if (!fields.brand) hidden.add('brandId');
   if (!fields.provider) hidden.add('providerId');
   if (!fields.barcode) hidden.add('barcode');
-  if (!fields.unit) hidden.add('unit');
+  // La unidad de venta (kg/libra/arroba) solo aplica a verticales por peso.
+  if (vt !== 'weight') hidden.add('unit');
+  // La "Cantidad" fija (disabled) solo se muestra con variantes de color
+  // (el total sale de las variantes); en simple/peso, el editor de cantidad
+  // reemplaza ese campo.
+  if (vt !== 'color') hidden.add('stock');
   if (!fields.expiry) {
     hidden.add('expiryDate');
     hidden.add('lot');
@@ -179,7 +189,32 @@ export const getFormFieldsInventory = (usuario) => {
     },
   ];
 
-  return list.filter((f) => !hidden.has(f.name));
+  return list
+    .filter((f) => !hidden.has(f.name))
+    .map((f) => {
+      // El campo 'color' se transforma según el tipo de variante de la vertical.
+      if (f.name === 'color') {
+        if (vt === 'color') {
+          return {
+            ...f,
+            type: 'colorSelect',
+            label: fields.size ? 'Colores y tallas' : 'Colores y stock',
+          };
+        }
+        return {
+          ...f,
+          type: 'variantQty',
+          label: 'Cantidad',
+          required: true,
+          weight: vt === 'weight',
+        };
+      }
+      // Unidad de venta por peso: kg / libra / arroba.
+      if (f.name === 'unit' && vt === 'weight') {
+        return { ...f, options: WEIGHT_UNIT_OPTIONS };
+      }
+      return f;
+    });
 };
 
 export const getHeaderTableInventory = (usuario) => {

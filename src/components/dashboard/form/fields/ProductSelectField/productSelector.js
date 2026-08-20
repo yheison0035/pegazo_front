@@ -11,6 +11,14 @@ import {
 import useSales from '@/lib/api/hooks/useSales';
 import { TrashIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import AlertModal from '@/components/dashboard/modals/alertModal';
+import { WEIGHT_UNITS, unitShortLabel } from '@/config/verticalProfiles';
+
+const isWeightUnit = (u) => WEIGHT_UNITS.includes(u);
+// Oculta el color placeholder de productos sin variantes de color.
+const realColor = (c) =>
+  c && !['ÚNICO', 'UNICO', 'GENERAL'].includes(String(c).toUpperCase())
+    ? c
+    : '';
 
 export default function ProductSelector({ value = [], onChange, onTyping }) {
   const [search, setSearch] = useState('');
@@ -80,9 +88,9 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
         inventoryVariantId: product.id,
         name: isService
           ? product.name
-          : `${product.name} - ${product.color}${
-              product.size ? ` / ${product.size}` : ''
-            }`,
+          : `${product.name}${
+              realColor(product.color) ? ` - ${realColor(product.color)}` : ''
+            }${product.size ? ` / ${product.size}` : ''}`,
         price: product.price,
         stock: isService ? null : product.stock,
         unit: product.unit || 'UNIDAD',
@@ -128,8 +136,8 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
 
         if (isService) {
           safeQty = Math.max(1, Number(quantity) || 1);
-        } else if (p.unit === 'PESO') {
-          // Venta por peso: admite decimales (kg), sin forzar mínimo 1.
+        } else if (isWeightUnit(p.unit)) {
+          // Venta por peso: admite decimales, sin forzar mínimo 1.
           const maxAllowed = p.stock + p.originalQuantity;
           safeQty = Math.max(
             0.001,
@@ -264,12 +272,21 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
                         </span>
                         {product.type !== 'service' && (
                           <div className="flex items-center gap-2 text-xs text-gray-400">
+                            {(realColor(product.color) || product.size) && (
+                              <>
+                                <span>
+                                  {realColor(product.color)}
+                                  {product.size ? ` / ${product.size}` : ''}
+                                </span>
+                                <span>•</span>
+                              </>
+                            )}
                             <span>
-                              {product.color}
-                              {product.size ? ` / ${product.size}` : ''}
+                              Stock: {product.stock}
+                              {isWeightUnit(product.unit)
+                                ? ` ${unitShortLabel(product.unit)}`
+                                : ''}
                             </span>
-                            <span>•</span>
-                            <span>Stock: {product.stock}</span>
 
                             {noStock && (
                               <span className="text-red-500 font-medium">
@@ -336,8 +353,8 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
                     <div className="flex items-center justify-center gap-1">
                       <input
                         type="number"
-                        min={p.unit === 'PESO' ? 0.001 : 1}
-                        step={p.unit === 'PESO' ? 0.001 : 1}
+                        min={isWeightUnit(p.unit) ? 0.001 : 1}
+                        step={isWeightUnit(p.unit) ? 0.001 : 1}
                         max={
                           p.type === 'service'
                             ? undefined
@@ -352,9 +369,9 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
                         }
                         className="w-20 h-9 text-center rounded-lg border border-gray-200 bg-white focus:ring-2 focus:ring-orange-500/20 outline-none"
                       />
-                      {p.unit === 'PESO' && (
+                      {isWeightUnit(p.unit) && (
                         <span className="text-xs font-medium text-gray-400">
-                          kg
+                          {unitShortLabel(p.unit)}
                         </span>
                       )}
                     </div>

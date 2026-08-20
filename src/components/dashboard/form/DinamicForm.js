@@ -137,6 +137,29 @@ export default function DinamicForm({
     [setFormData]
   );
 
+  // Producto sin variantes de color: una sola variante que solo lleva cantidad
+  // (unidad o peso). Conserva el id de la variante existente al editar.
+  const handleSingleQty = useCallback(
+    (raw) => {
+      const stock = Number(raw) || 0;
+      setFormData((prev) => {
+        const existing = (prev.variants || [])[0];
+        return {
+          ...prev,
+          stock,
+          variants: [
+            {
+              ...(existing?.id ? { id: existing.id } : {}),
+              color: existing?.color || 'ÚNICO',
+              stock,
+            },
+          ],
+        };
+      });
+    },
+    [setFormData]
+  );
+
   const ALL_SOURCES = [
     'brands',
     'categories',
@@ -385,6 +408,41 @@ export default function DinamicForm({
                     options={options}
                     disabled={isLocked}
                   />
+                </div>
+              );
+            }
+
+            if (type === 'variantQty') {
+              const isWeight = field.weight;
+              const unit = formData.unit;
+              const unitLabel = isWeight
+                ? unit === 'LIBRA'
+                  ? 'lb'
+                  : unit === 'ARROBA'
+                    ? '@'
+                    : 'kg'
+                : 'und';
+              const current = (formData.variants || [])[0]?.stock ?? '';
+              return (
+                <div key={name} className="flex flex-col">
+                  <label className="mb-1 text-sm font-medium text-gray-700">
+                    {label} {isWeight ? `(${unitLabel})` : ''}
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      min={0}
+                      step={isWeight ? 0.001 : 1}
+                      value={current}
+                      disabled={isLocked}
+                      onChange={(e) => handleSingleQty(e.target.value)}
+                      placeholder={isWeight ? 'Ej: 12.5' : 'Ej: 20'}
+                      className="w-40 rounded-xl border border-gray-200 px-4 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                    />
+                    <span className="text-sm font-medium text-gray-400">
+                      {unitLabel}
+                    </span>
+                  </div>
                 </div>
               );
             }
