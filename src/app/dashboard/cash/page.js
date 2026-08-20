@@ -6,6 +6,8 @@ import {
   ArrowDownCircleIcon,
   ArrowUpCircleIcon,
   LockClosedIcon,
+  InformationCircleIcon,
+  ChevronDownIcon,
 } from '@heroicons/react/24/outline';
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
@@ -38,6 +40,7 @@ export default function CashPage() {
   const [openingAmount, setOpeningAmount] = useState('');
   const [mov, setMov] = useState({ type: 'INGRESO', amount: '', concept: '' });
   const [counted, setCounted] = useState('');
+  const [showHelp, setShowHelp] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -140,6 +143,53 @@ export default function CashPage() {
                 </option>
               ))}
             </select>
+          )}
+        </div>
+
+        {/* Instructivo: cómo funciona la caja */}
+        <div className="mb-4 rounded-2xl border border-blue-100 bg-blue-50/60 overflow-hidden">
+          <button
+            onClick={() => setShowHelp((v) => !v)}
+            className="w-full flex items-center gap-2 px-4 py-3 text-left"
+          >
+            <InformationCircleIcon className="w-5 h-5 flex-none text-blue-500" />
+            <span className="text-sm font-semibold text-blue-800 flex-1">
+              ¿Cómo funciona la caja? (instructivo)
+            </span>
+            <ChevronDownIcon
+              className={`w-5 h-5 text-blue-500 transition ${
+                showHelp ? 'rotate-180' : ''
+              }`}
+            />
+          </button>
+          {showHelp && (
+            <div className="px-4 pb-4 text-sm text-blue-900/80 space-y-2">
+              <p>
+                <b>1. Abrir caja:</b> al iniciar el turno, ingresa el{' '}
+                <b>fondo inicial (base)</b> — el efectivo con el que arrancas.
+                Solo puede haber una caja abierta por sede a la vez.
+              </p>
+              <p>
+                <b>2. Durante el turno:</b> cada <b>venta en efectivo</b> se suma
+                automáticamente a la caja. Si sacas o metes dinero por otro
+                motivo (un retiro, pagar un domicilio, un abono), regístralo como{' '}
+                <b>ingreso</b> o <b>egreso</b> con su concepto.
+              </p>
+              <p>
+                <b>3. Esperado en caja:</b> es lo que debería haber físicamente ={' '}
+                <i>base + ingresos − egresos</i>. Se calcula solo.
+              </p>
+              <p>
+                <b>4. Cerrar caja (arqueo):</b> al terminar el turno,{' '}
+                <b>cuenta el efectivo real</b> y escríbelo. El sistema lo compara
+                con lo esperado y guarda la <b>diferencia</b> (sobrante o
+                faltante). Tras cerrar, la caja queda en el historial.
+              </p>
+              <p className="text-blue-700">
+                Consejo: cierra la caja al final de cada turno para detectar
+                descuadres a tiempo.
+              </p>
+            </div>
           )}
         </div>
 
