@@ -28,6 +28,11 @@ export async function getCustomerById(id) {
   return apiFetch(`/customers/${id}`);
 }
 
+// Ficha 360°: métricas, historial de ventas/citas y segmento.
+export async function getCustomerSummary(id) {
+  return apiFetch(`/customers/${id}/summary`);
+}
+
 export async function createCustomer(dto) {
   const body = {
     ...dto,
