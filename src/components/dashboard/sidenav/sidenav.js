@@ -8,19 +8,28 @@ import { useAuth } from '@/context/authContext';
 import Avatar from '../profile/avatar';
 
 export default function SideNavigation() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false); // drawer en móvil
+  const [hovered, setHovered] = useState(false); // hover/enfoque en escritorio
   const auth = useAuth();
   const usuario = auth?.usuario;
 
+  // En escritorio el menú vive colapsado (solo iconos) y se despliega al pasar
+  // el mouse o al enfocar con teclado. En móvil se ve completo con el drawer.
+  const expanded = isOpen || hovered;
+
+  const isPlatform = usuario?.role === 'SUPER_PLATFORM_ADMIN';
+
   return (
     <>
+      {/* Botón hamburguesa (solo móvil) */}
       <button
         onClick={() => setIsOpen(true)}
-        className="md:hidden fixed top-4 left-4 z-50 p-2 b-4 rounded-xl bg-[#0B0F19]/90 backdrop-blur border border-orange-500/20 shadow-lg"
+        className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-xl bg-[#0B0F19]/90 backdrop-blur border border-orange-500/20 shadow-lg"
       >
         <Bars3Icon className="w-6 h-6 text-orange-400" />
       </button>
 
+      {/* Fondo oscuro del drawer (solo móvil) */}
       {isOpen && (
         <div
           onClick={() => setIsOpen(false)}
@@ -29,71 +38,82 @@ export default function SideNavigation() {
       )}
 
       <aside
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        onFocusCapture={() => setHovered(true)}
+        onBlurCapture={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget)) setHovered(false);
+        }}
         className={`
-          fixed top-0 left-0 z-50 h-full w-72 
+          group fixed top-0 left-0 z-50 h-full
+          w-72 ${expanded ? 'md:w-72' : 'md:w-20'}
+          overflow-hidden
           bg-gradient-to-b from-[#0B0F19] to-[#05070d]
           text-white flex flex-col
           border-r border-orange-500/10
           shadow-2xl
-          transform transition-all duration-300 ease-in-out
+          transition-[width,transform] duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-          md:translate-x-0 md:static
+          md:translate-x-0
         `}
       >
-        <div className="flex items-center justify-between px-6 py-5 border-b border-orange-500/10">
-          <div className="flex items-center gap-3">
-            <img
-              src={
-                usuario?.role === 'SUPER_PLATFORM_ADMIN'
-                  ? '/images/logo_pegazo_icon.png'
-                  : usuario?.company?.logo || '/images/no-image.png'
-              }
-              alt={
-                usuario?.role === 'SUPER_PLATFORM_ADMIN' ? 'Pegazo' : 'Company'
-              }
-              className="w-12 h-12 rounded-xl object-contain border border-orange-400/20 shadow"
-            />
+        {/* Cabecera: logo + nombre de la empresa */}
+        <div className="flex items-center gap-3 px-4 py-4 border-b border-orange-500/10 min-h-[72px]">
+          <img
+            src={
+              isPlatform
+                ? '/images/logo_pegazo_icon.png'
+                : usuario?.company?.logo || '/images/no-image.png'
+            }
+            alt={isPlatform ? 'Pegazo' : 'Company'}
+            className="w-12 h-12 rounded-xl object-contain border border-orange-400/20 shadow flex-none"
+          />
 
-            <div className="flex flex-col leading-tight">
-              <span className="text-sm font-semibold tracking-wide">
-                {usuario?.role === 'SUPER_PLATFORM_ADMIN'
-                  ? 'Pegazo'
-                  : usuario?.company?.name || 'Pegazo'}
-              </span>
-              <span className="text-[11px] text-orange-400/60">
-                {usuario?.role === 'SUPER_PLATFORM_ADMIN'
-                  ? 'Plataforma'
-                  : 'Workspace'}
-              </span>
-            </div>
+          <div
+            className={`flex flex-col leading-tight min-w-0 transition-all duration-200 ${
+              expanded ? 'opacity-100 max-w-[12rem]' : 'opacity-0 max-w-0'
+            }`}
+          >
+            <span className="text-sm font-semibold tracking-wide truncate">
+              {isPlatform ? 'Pegazo' : usuario?.company?.name || 'Pegazo'}
+            </span>
+            <span className="text-[11px] text-orange-400/60">
+              {isPlatform ? 'Plataforma' : 'Workspace'}
+            </span>
           </div>
 
           <button
             onClick={() => setIsOpen(false)}
-            className="md:hidden text-white/60 hover:text-white transition"
+            className="md:hidden ml-auto text-white/60 hover:text-white transition"
           >
             <XMarkIcon className="w-6 h-6" />
           </button>
         </div>
 
-        <div className="px-6 py-5 border-b border-orange-500/10">
-          <div className="flex items-center gap-3">
+        {/* Perfil del usuario */}
+        <div className="flex items-center gap-3 px-4 py-4 border-b border-orange-500/10">
+          <div className="flex-none">
             <Avatar perfil={usuario} setPerfil={() => {}} />
+          </div>
 
-            <div className="flex flex-col">
-              <span className="text-sm font-medium">{usuario?.name}</span>
-              <Link
-                href={'/dashboard/users/edit/' + usuario?.id}
-                className="text-xs text-orange-400 hover:text-orange-300"
-              >
-                Editar perfil
-              </Link>
-            </div>
+          <div
+            className={`flex flex-col min-w-0 transition-all duration-200 ${
+              expanded ? 'opacity-100 max-w-[12rem]' : 'opacity-0 max-w-0'
+            }`}
+          >
+            <span className="text-sm font-medium truncate">{usuario?.name}</span>
+            <Link
+              href={'/dashboard/users/edit/' + usuario?.id}
+              className="text-xs text-orange-400 hover:text-orange-300 whitespace-nowrap"
+            >
+              Editar perfil
+            </Link>
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-3 py-4 custom-scroll">
-          <NavLinks />
+        {/* Navegación */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-4 custom-scroll">
+          <NavLinks expanded={expanded} />
         </div>
       </aside>
     </>

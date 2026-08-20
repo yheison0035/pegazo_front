@@ -10,10 +10,13 @@ export default function Layout({ children }) {
   return (
     <RoleGuard allowedRoles={Object.values(Roles)}>
       <div className="flex h-screen flex-col md:flex-row md:overflow-hidden">
-        <div className="w-full flex-none md:w-64">
+        {/* El sidebar vive fijo y colapsado (solo iconos); aquí reservamos el
+            ancho del rail para que el contenido ocupe el resto. Al hacer hover
+            el menú se expande por encima sin mover el contenido. */}
+        <div className="w-full flex-none md:w-20">
           <SideNavigation />
         </div>
-        <div className="grow p-6 pt-16 md:overflow-y-auto md:p-12 md:pt-12">
+        <div className="grow p-6 pt-16 md:overflow-y-auto md:p-10 md:pt-10">
           {children}
         </div>
       </div>
