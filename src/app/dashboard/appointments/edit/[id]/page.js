@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import DinamicForm from '@/components/dashboard/form/DinamicForm';
 import { useAuth } from '@/context/authContext';
+import useTerms from '@/hooks/useTerms';
 import useAppointments from '@/lib/api/hooks/useAppointments';
 import { getFormFieldsAppointments } from '@/lib/api/utils/appointments.config';
 
@@ -20,6 +21,7 @@ export default function EditAppointment() {
   const appointmentId = Number(id);
 
   const auth = useAuth();
+  const t = useTerms();
   const usuario = auth?.usuario;
 
   const { getAppointmentById, updateAppointment, loading } = useAppointments();
@@ -106,7 +108,7 @@ export default function EditAppointment() {
 
       <DinamicForm
         formData={formData}
-        formFields={getFormFieldsAppointments()}
+        formFields={getFormFieldsAppointments(t)}
         setFormData={setFormData}
         handleSubmit={handleSubmit}
         loading={loading}

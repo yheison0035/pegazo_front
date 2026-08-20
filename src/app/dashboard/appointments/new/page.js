@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import { useAuth } from '@/context/authContext';
+import useTerms from '@/hooks/useTerms';
 import DinamicForm from '@/components/dashboard/form/DinamicForm';
 import useAppointments from '@/lib/api/hooks/useAppointments';
 import {
@@ -12,6 +13,7 @@ import {
 
 export default function NewAppointment() {
   const auth = useAuth();
+  const t = useTerms();
   const usuario = auth?.usuario;
   const { createAppointment, loading } = useAppointments();
 
@@ -56,7 +58,7 @@ export default function NewAppointment() {
 
       <DinamicForm
         formData={formData}
-        formFields={getFormFieldsAppointments()}
+        formFields={getFormFieldsAppointments(t)}
         setFormData={setFormData}
         handleSubmit={handleSubmit}
         handleReset={handleReset}
