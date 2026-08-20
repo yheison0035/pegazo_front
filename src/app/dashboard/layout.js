@@ -5,10 +5,12 @@ import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
 import PlanUpgradeModal from '@/components/plan/PlanUpgradeModal';
 import AppointmentsHub from '@/components/appointments/AppointmentsHub';
+import CrmThemeApplier from '@/components/theme/CrmThemeApplier';
 
 export default function Layout({ children }) {
   return (
     <RoleGuard allowedRoles={Object.values(Roles)}>
+      <CrmThemeApplier />
       <div className="flex h-screen flex-col md:flex-row md:overflow-hidden">
         {/* El sidebar vive fijo y colapsado (solo iconos); aquí reservamos el
             ancho del rail para que el contenido ocupe el resto. Al hacer hover

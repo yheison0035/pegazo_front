@@ -3,7 +3,13 @@
 import { useEffect, useState } from 'react';
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
-import { GiftIcon, BuildingStorefrontIcon, ClockIcon } from '@heroicons/react/24/outline';
+import {
+  GiftIcon,
+  BuildingStorefrontIcon,
+  ClockIcon,
+  SwatchIcon,
+  CheckIcon,
+} from '@heroicons/react/24/outline';
 import Button from '@/components/ui/Button';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import LogoUploader from '@/components/ui/LogoUploader';
@@ -14,6 +20,7 @@ import {
   updateLoyalty,
   updateCompanyProfile,
   updateCompanyHours,
+  updateCrmTheme,
 } from '@/lib/api/routes/company';
 
 function CompanyProfileCard({ initial }) {
@@ -208,6 +215,122 @@ function HoursCard({ initial }) {
   );
 }
 
+const THEMES = [
+  {
+    id: 'orange',
+    name: 'Naranja',
+    desc: 'El tema clásico de Pegazo.',
+    colors: ['#fe6e00', '#fb923c', '#fbbf24'],
+  },
+  {
+    id: 'blue',
+    name: 'Azul',
+    desc: 'Sobrio y corporativo.',
+    colors: ['#3b82f6', '#60a5fa', '#38bdf8'],
+  },
+  {
+    id: 'emerald',
+    name: 'Esmeralda',
+    desc: 'Fresco y natural.',
+    colors: ['#10b981', '#34d399', '#2dd4bf'],
+  },
+];
+
+function ThemeSettings() {
+  const auth = useAuth();
+  const usuario = auth?.usuario;
+  const setUsuario = auth?.setUsuario;
+  const [current, setCurrent] = useState(usuario?.company?.crmTheme || 'orange');
+  const [saving, setSaving] = useState(false);
+  const [alert, setAlert] = useState({});
+
+  const apply = async (themeId) => {
+    const prev = current;
+    setCurrent(themeId);
+    // Aplica en vivo de inmediato.
+    document.documentElement.dataset.crmTheme = themeId;
+    setSaving(true);
+    try {
+      await updateCrmTheme(themeId);
+      // Refleja el cambio en la sesión para que persista al navegar.
+      if (setUsuario && usuario) {
+        const merged = {
+          ...usuario,
+          company: { ...usuario.company, crmTheme: themeId },
+        };
+        setUsuario(merged);
+        localStorage.setItem('usuario', JSON.stringify(merged));
+      }
+      setAlert({ type: 'success', message: 'Tema actualizado.' });
+    } catch (e) {
+      // revierte si falla
+      setCurrent(prev);
+      document.documentElement.dataset.crmTheme = prev;
+      setAlert({ type: 'error', message: e.message || 'No se pudo guardar.' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="max-w-xl rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+      <div className="flex items-start gap-3">
+        <div className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-orange-50 text-orange-600">
+          <SwatchIcon className="h-5 w-5" />
+        </div>
+        <div>
+          <h2 className="text-base font-bold text-gray-800">Tema de diseño</h2>
+          <p className="text-sm text-gray-500">
+            Elige los colores de tu panel. El cambio se aplica al instante para
+            toda tu empresa.
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        {THEMES.map((t) => {
+          const active = current === t.id;
+          return (
+            <button
+              key={t.id}
+              onClick={() => apply(t.id)}
+              disabled={saving}
+              className={`relative rounded-xl border p-3 text-left transition ${
+                active
+                  ? 'border-orange-400 ring-2 ring-orange-500/30'
+                  : 'border-gray-200 hover:border-gray-300'
+              }`}
+            >
+              {active && (
+                <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-orange-500 text-white">
+                  <CheckIcon className="h-3.5 w-3.5" />
+                </span>
+              )}
+              <div className="flex gap-1.5">
+                {t.colors.map((c) => (
+                  <span
+                    key={c}
+                    className="h-8 w-8 rounded-lg"
+                    style={{ backgroundColor: c }}
+                  />
+                ))}
+              </div>
+              <p className="mt-2 text-sm font-semibold text-gray-800">{t.name}</p>
+              <p className="text-xs text-gray-500">{t.desc}</p>
+            </button>
+          );
+        })}
+      </div>
+
+      <AlertModal
+        type={alert.type}
+        message={alert.message}
+        onClose={() => setAlert({})}
+      />
+    </div>
+  );
+}
+
 function LoyaltySettings() {
   const [form, setForm] = useState({
     loyaltyEnabled: false,
@@ -368,6 +491,7 @@ export default function Settings() {
         </div>
 
         <div className="flex flex-col gap-5">
+          <ThemeSettings />
           <CompanyProfileCard initial={settings} />
           {isServices && <HoursCard initial={settings} />}
           <LoyaltySettings />

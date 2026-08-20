@@ -148,3 +148,41 @@ button:disabled {
     justify-content: center;
   }
 }
+
+/* ============================================================
+   TEMAS DE DISEÑO DEL CRM (elegibles por el dueño en Ajustes)
+   Sobrescriben las variables de color de Tailwind v4, así que
+   todas las utilidades (bg-orange-500, text-orange-600, gradientes
+   y variantes con opacidad) siguen el tema sin tocar los componentes.
+   Tema por defecto = naranja (sin override).
+   ============================================================ */
+
+/* AZUL */
+:root[data-crm-theme='blue'] {
+  --color-orange-50: #eff6ff;
+  --color-orange-100: #dbeafe;
+  --color-orange-200: #bfdbfe;
+  --color-orange-300: #93c5fd;
+  --color-orange-400: #60a5fa;
+  --color-orange-500: #3b82f6;
+  --color-orange-600: #2563eb;
+  --color-orange-700: #1d4ed8;
+  --color-amber-300: #7dd3fc;
+  --color-amber-400: #38bdf8;
+  --color-amber-500: #0ea5e9;
+}
+
+/* ESMERALDA / VERDE */
+:root[data-crm-theme='emerald'] {
+  --color-orange-50: #ecfdf5;
+  --color-orange-100: #d1fae5;
+  --color-orange-200: #a7f3d0;
+  --color-orange-300: #6ee7b7;
+  --color-orange-400: #34d399;
+  --color-orange-500: #10b981;
+  --color-orange-600: #059669;
+  --color-orange-700: #047857;
+  --color-amber-300: #5eead4;
+  --color-amber-400: #2dd4bf;
+  --color-amber-500: #14b8a6;
+}
