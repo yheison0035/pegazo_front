@@ -44,7 +44,12 @@ export default function NavLinks() {
             <div className="flex flex-col space-y-1">
               {section.items.map((link) => {
                 const LinkIcon = link.icon;
-                const isActive = pathname.startsWith(link.href);
+                // El Inicio (/dashboard) solo se marca activo en su ruta exacta;
+                // los demás módulos aceptan subrutas (ej. /inventory/new).
+                const isActive =
+                  link.href === '/dashboard'
+                    ? pathname === '/dashboard'
+                    : pathname.startsWith(link.href);
 
                 // Módulo bloqueado por plan: no navega, ofrece mejorar el plan.
                 if (link.locked) {
