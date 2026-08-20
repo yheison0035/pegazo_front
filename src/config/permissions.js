@@ -33,8 +33,30 @@ export const ROLE_PERMISSIONS = {
     expenses: ['view', 'create', 'edit'],
   },
 
+  // Profesional que presta el servicio (Barbero, Doctor, Estilista…). Ve solo
+  // sus citas. BARBERO se mantiene como alias heredado con el mismo alcance.
+  PROFESIONAL: {
+    appointments: ['view'],
+  },
   BARBERO: {
     appointments: ['view'],
+  },
+
+  // Vendedor de mostrador (retail): vende y gestiona clientes; ve el catálogo.
+  VENTAS: {
+    sales: ['view', 'create'],
+    customers: ['view', 'create'],
+    delivered_sales: ['view'],
+    inventory: ['view'],
+  },
+
+  // Bodeguero: gestiona el inventario y su cadena (proveedores/categorías/
+  // marcas). No vende ni ve clientes.
+  BODEGUERO: {
+    inventory: ['view', 'create', 'edit'],
+    providers: ['view', 'create', 'edit'],
+    categories: ['view', 'create', 'edit'],
+    brands: ['view', 'create', 'edit'],
   },
 
   // Restaurante ----------------------------------------------------------

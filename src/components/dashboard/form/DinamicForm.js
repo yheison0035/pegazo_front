@@ -29,6 +29,8 @@ import useServices from '@/lib/api/hooks/useServices';
 import useAppointments from '@/lib/api/hooks/useAppointments';
 import { validateField, validateForm } from '@/lib/api/utils/validators';
 import NewCustomerModal from '@/components/dashboard/modals/newCustomerModal';
+import { useAuth } from '@/context/authContext';
+import { roleLabel, assignableRolesForType } from '@/config/roleLabels';
 
 export default function DinamicForm({
   formData,
@@ -52,6 +54,9 @@ export default function DinamicForm({
   const [errors, setErrors] = useState({});
   const [showNewCustomer, setShowNewCustomer] = useState(false);
   const [createdCustomers, setCreatedCustomers] = useState([]);
+
+  const { usuario } = useAuth();
+  const company = usuario?.company;
 
   const { getUsers, getUsersByRole } = useUsers();
   const { getLocals } = useLocals();
@@ -179,7 +184,17 @@ export default function DinamicForm({
       categories: getCategories,
       brands: getBrands,
       customers: getCustomers,
-      roles: getRoles,
+      roles: async () => {
+        const res = await getRoles();
+        const data = Array.isArray(res) ? res : res?.data || [];
+        const allowed = assignableRolesForType(company?.type);
+        // Se ofrecen los roles de la vertical. El rol que ya trae el usuario
+        // (al editar) se conserva aunque sea heredado, para no vaciar el select.
+        const current = formData?.role;
+        return data
+          .filter((r) => allowed.includes(r.id) || r.id === current)
+          .map((r) => ({ id: r.id, name: roleLabel(r.id, company) }));
+      },
       status: getStatus,
       paymentMethod: getPaymentMethods,
       paymentStatus: getPaymentStatus,

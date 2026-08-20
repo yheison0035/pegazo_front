@@ -160,7 +160,7 @@ export const viewModalConfig = {
   sections: [
     {
       fields: [
-        { name: 'role', label: 'Role' },
+        { name: 'role', label: 'Rol', type: 'role' },
         { name: 'name', label: 'Nombre' },
         { name: 'local', label: 'Local Asignado', type: 'locals' },
         { name: 'document', label: 'Documento' },

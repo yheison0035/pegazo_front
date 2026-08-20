@@ -32,7 +32,9 @@ export default function Login() {
         return;
       }
 
-      if (role === 'BARBERO') {
+      // El profesional que presta el servicio (Barbero, Doctor, Estilista…)
+      // entra directo a su agenda de citas.
+      if (role === 'BARBERO' || role === 'PROFESIONAL') {
         router.push('/dashboard/appointments');
         return;
       }

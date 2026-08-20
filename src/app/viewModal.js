@@ -13,6 +13,8 @@ import {
 import ImageGallery from '@/components/dashboard/viewModal/imageGallery';
 import SaleItemsTable from '@/components/dashboard/viewModal/saleItemsTable';
 import InventorySpecsView from '@/components/dashboard/viewModal/inventorySpecsView';
+import { useAuth } from '@/context/authContext';
+import { roleLabel } from '@/config/roleLabels';
 
 export default function ViewModal({
   data,
@@ -21,6 +23,8 @@ export default function ViewModal({
   viewModalConfig,
   view = '',
 }) {
+  const { usuario } = useAuth();
+
   if (!data) return null;
 
   if (type === 'variants') {
@@ -89,6 +93,10 @@ export default function ViewModal({
 
                   if (field.type === 'dateOnly') {
                     value = formatDateOnly(value);
+                  }
+
+                  if (field.type === 'role') {
+                    value = roleLabel(value, usuario?.company);
                   }
 
                   if (field.type === 'status') {
