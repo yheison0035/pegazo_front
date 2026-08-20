@@ -15,6 +15,8 @@ import {
   CalendarDaysIcon,
   WrenchScrewdriverIcon,
   GlobeAltIcon,
+  Squares2X2Icon,
+  FireIcon,
 } from '@heroicons/react/24/outline';
 
 export const NAVIGATION = [
@@ -83,6 +85,18 @@ export const NAVIGATION = [
         href: '/dashboard/sales',
         icon: BanknotesIcon,
         roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA'],
+      },
+      {
+        name: 'Mesas',
+        href: '/dashboard/mesas',
+        icon: Squares2X2Icon,
+        roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA'],
+      },
+      {
+        name: 'Cocina',
+        href: '/dashboard/kitchen',
+        icon: FireIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA', 'AUXILIAR'],
       },
       {
         name: 'Pedidos',

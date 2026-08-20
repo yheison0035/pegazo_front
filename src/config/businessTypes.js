@@ -18,12 +18,17 @@ export const BUSINESS_TYPES = {
   TELEVENTAS: ['customers', 'orders', 'sales', 'statistics'],
 
   RESTAURANTE: [
-    'orders',
+    'mesas',
+    'kitchen',
     'sales',
     'inventory',
+    'categories',
     'customers',
+    'delivered_sales',
     'expenses',
     'statistics',
+    'users',
+    'locals',
   ],
 
   SERVICIOS: [
@@ -149,12 +154,15 @@ export const BUSINESS_TYPES = {
     'users',
   ],
 
-  // Comidas rápidas: pedidos + inventario.
+  // Comidas rápidas: mesas/pedidos + cocina + inventario.
   COMIDA_RAPIDA: [
-    'orders',
+    'mesas',
+    'kitchen',
     'sales',
     'inventory',
+    'categories',
     'customers',
+    'delivered_sales',
     'expenses',
     'statistics',
     'users',
