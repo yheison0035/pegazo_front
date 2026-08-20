@@ -35,33 +35,12 @@ export default function useNavigation() {
       (t.productPlural !== 'Productos' ? t.productPlural : null),
   };
 
-  // módulos permitidos por tipo de negocio
-  const modules = [...(BUSINESS_TYPES[businessType] || BUSINESS_TYPES.COMERCIO)];
-
-  // Caja/arqueo: disponible en cualquier negocio con punto de venta (ventas).
-  if (modules.includes('sales') && !modules.includes('cash')) {
-    modules.push('cash');
-  }
-
-  // Compras/órdenes de compra: donde se maneja inventario (reabastecimiento).
-  if (modules.includes('inventory') && !modules.includes('purchases')) {
-    modules.push('purchases');
-  }
-
-  // Fidelización: donde hay clientes (tarjeta de sellos, opt-in por empresa).
-  if (modules.includes('customers') && !modules.includes('loyalty')) {
-    modules.push('loyalty');
-  }
-
-  // Cotizaciones/presupuestos: donde hay punto de venta.
-  if (modules.includes('sales') && !modules.includes('quotes')) {
-    modules.push('quotes');
-  }
-
-  // Devoluciones/notas crédito: donde hay ventas.
-  if (modules.includes('sales') && !modules.includes('returns')) {
-    modules.push('returns');
-  }
+  // Módulos del tipo de negocio (lista curada y explícita por vertical).
+  // 'settings' (Configuración) siempre está disponible para el dueño.
+  const modules = [
+    ...(BUSINESS_TYPES[businessType] || BUSINESS_TYPES.COMERCIO),
+    'settings',
+  ];
 
   // La tienda online solo aparece si la plataforma se la habilitó a la empresa.
   // Además, toda empresa con tienda online vende por su web y esas ventas

@@ -17,7 +17,13 @@ import {
 } from '@/lib/api/routes/company';
 
 function CompanyProfileCard({ initial }) {
-  const [form, setForm] = useState({ name: '', logo: '', phone: '', email: '' });
+  const [form, setForm] = useState({
+    name: '',
+    logo: '',
+    phone: '',
+    email: '',
+    nit: '',
+  });
   const [saving, setSaving] = useState(false);
   const [alert, setAlert] = useState({});
 
@@ -28,6 +34,7 @@ function CompanyProfileCard({ initial }) {
         logo: initial.logo || '',
         phone: initial.phone || '',
         email: initial.email || '',
+        nit: initial.nit || '',
       });
     }
   }, [initial]);
@@ -92,6 +99,17 @@ function CompanyProfileCard({ initial }) {
             <input
               value={form.email}
               onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+              className="w-full rounded-xl border border-gray-200 px-4 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              NIT / documento fiscal
+            </label>
+            <input
+              value={form.nit}
+              onChange={(e) => setForm((f) => ({ ...f, nit: e.target.value }))}
+              placeholder="Aparece en las facturas"
               className="w-full rounded-xl border border-gray-200 px-4 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
             />
           </div>
