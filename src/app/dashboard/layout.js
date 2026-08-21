@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import SideNavigation from '@/components/dashboard/sidenav/sidenav';
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
@@ -7,6 +8,7 @@ import PlanUpgradeModal from '@/components/plan/PlanUpgradeModal';
 import AppointmentsHub from '@/components/appointments/AppointmentsHub';
 import { useAuth } from '@/context/authContext';
 import DayBanner from '@/components/pos/DayBanner';
+import { isDark, DARK_EVENT } from '@/lib/darkMode';
 
 export default function Layout({ children }) {
   const { usuario } = useAuth();
@@ -15,17 +17,27 @@ export default function Layout({ children }) {
   // defecto. Los overrides de color en globals.css usan [data-crm-theme].
   const theme = usuario?.company?.crmTheme || 'orange';
 
+  // Modo oscuro (preferencia personal por dispositivo). Se aplica con
+  // data-theme="dark" solo a este contenedor del panel.
+  const [dark, setDark] = useState(false);
+  useEffect(() => {
+    const sync = () => setDark(isDark());
+    sync();
+    window.addEventListener(DARK_EVENT, sync);
+    return () => window.removeEventListener(DARK_EVENT, sync);
+  }, []);
+
   return (
     <RoleGuard allowedRoles={Object.values(Roles)}>
-      <div data-crm-theme={theme}>
-        <div className="flex h-screen flex-col md:flex-row md:overflow-hidden">
+      <div data-crm-theme={theme} data-theme={dark ? 'dark' : undefined}>
+        <div className="flex h-screen flex-col bg-gray-50 md:flex-row md:overflow-hidden">
           {/* El sidebar vive fijo y colapsado (solo iconos); aquí reservamos el
               ancho del rail para que el contenido ocupe el resto. Al hacer hover
               el menú se expande por encima sin mover el contenido. */}
           <div className="w-full flex-none md:w-20">
             <SideNavigation />
           </div>
-          <div className="grow p-6 pt-16 md:overflow-y-auto md:p-10 md:pt-10">
+          <div className="grow bg-gray-50 p-6 pt-16 text-gray-800 md:overflow-y-auto md:p-10 md:pt-10">
             <DayBanner />
             {children}
           </div>

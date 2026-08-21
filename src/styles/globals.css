@@ -228,3 +228,23 @@ button:disabled {
   --color-amber-400: #38bdf8;
   --color-amber-500: #0ea5e9;
 }
+
+/* ===================== MODO OSCURO =====================
+   Se remapea la escala de grises + blanco: las superficies (white, gray-50/100)
+   pasan a tonos oscuros y los textos (gray-500..900) a tonos claros. Así todo el
+   panel se oscurece sin tocar cada componente. El color de marca (orange/amber)
+   y los semánticos (emerald/red/amber) NO se tocan: siguen resaltando.
+   NO se remapea --color-black para que los overlays de los modales sigan oscuros. */
+[data-theme='dark'] {
+  --color-white: #1a1f2b; /* superficie de tarjetas */
+  --color-gray-50: #0f131c; /* fondo del panel (más oscuro) */
+  --color-gray-100: #262c3a; /* bordes / hover / divisores suaves */
+  --color-gray-200: #333a4a; /* bordes */
+  --color-gray-300: #414a5c;
+  --color-gray-400: #7a8397; /* íconos / texto muy tenue */
+  --color-gray-500: #98a1b3; /* texto secundario */
+  --color-gray-600: #b3bccc;
+  --color-gray-700: #ccd3df;
+  --color-gray-800: #e6eaf1; /* texto principal */
+  --color-gray-900: #f5f7fa; /* texto/acento más fuerte */
+}

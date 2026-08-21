@@ -1,17 +1,31 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import {
+  Bars3Icon,
+  XMarkIcon,
+  MoonIcon,
+  SunIcon,
+} from '@heroicons/react/24/outline';
 import NavLinks from './nav-links';
 import { useAuth } from '@/context/authContext';
 import Avatar from '../profile/avatar';
+import { isDark, toggleDark, DARK_EVENT } from '@/lib/darkMode';
 
 export default function SideNavigation() {
   const [isOpen, setIsOpen] = useState(false); // drawer en móvil
   const [hovered, setHovered] = useState(false); // hover/enfoque en escritorio
+  const [dark, setDark] = useState(false);
   const auth = useAuth();
   const usuario = auth?.usuario;
+
+  useEffect(() => {
+    const sync = () => setDark(isDark());
+    sync();
+    window.addEventListener(DARK_EVENT, sync);
+    return () => window.removeEventListener(DARK_EVENT, sync);
+  }, []);
 
   // En escritorio el menú vive colapsado (solo iconos) y se despliega al pasar
   // el mouse o al enfocar con teclado. En móvil se ve completo con el drawer.
@@ -115,6 +129,26 @@ export default function SideNavigation() {
         {/* Navegación */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-4 custom-scroll">
           <NavLinks expanded={expanded} />
+        </div>
+
+        {/* Modo oscuro (preferencia personal) */}
+        <div className="border-t border-white/10 px-2 py-3">
+          <button
+            onClick={() => toggleDark()}
+            title={dark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-gray-300 transition hover:bg-white/10"
+          >
+            {dark ? (
+              <SunIcon className="h-6 w-6 flex-none text-amber-300" />
+            ) : (
+              <MoonIcon className="h-6 w-6 flex-none text-orange-300" />
+            )}
+            {expanded && (
+              <span className="whitespace-nowrap text-sm font-medium">
+                {dark ? 'Modo claro' : 'Modo oscuro'}
+              </span>
+            )}
+          </button>
         </div>
       </aside>
     </>
