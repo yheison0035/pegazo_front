@@ -5,7 +5,7 @@ export default function Variants({ data, view }) {
 
   return (
     <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
-      <div className="bg-gradient-to-r from-orange-600 to-gray-900 px-6 py-5 text-white">
+      <div className="bg-gradient-to-r from-orange-600 to-[#111827] px-6 py-5 text-white">
         <h2 className="text-2xl font-bold">{data.name || 'Detalles'}</h2>
         <p className="text-sm opacity-80">
           {isService

@@ -46,7 +46,7 @@ export default function InventorySpecsModal({
           <XMarkIcon className="w-6 h-6" />
         </button>
 
-        <div className="bg-gradient-to-r from-orange-600 to-gray-900 text-white px-6 py-5 rounded-t-2xl">
+        <div className="bg-gradient-to-r from-orange-600 to-[#111827] text-white px-6 py-5 rounded-t-2xl">
           <h2 className="text-2xl font-bold">
             Características y especificaciones
           </h2>

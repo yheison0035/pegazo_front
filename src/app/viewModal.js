@@ -63,7 +63,7 @@ export default function ViewModal({
           <XMarkIcon className="w-6 h-6" />
         </button>
 
-        <div className="bg-gradient-to-r from-orange-600 to-gray-900 text-white px-6 py-5 rounded-t-2xl shrink-0">
+        <div className="bg-gradient-to-r from-orange-600 to-[#111827] text-white px-6 py-5 rounded-t-2xl shrink-0">
           <h2 className="text-2xl font-bold">{config.title}</h2>
           <p className="text-sm opacity-80">{config.subtitle}</p>
         </div>

@@ -59,6 +59,7 @@ export default function SideNavigation() {
           if (!e.currentTarget.contains(e.relatedTarget)) setHovered(false);
         }}
         className={`
+          pos-sidenav
           fixed top-0 left-0 z-50 h-full
           w-72 ${expanded ? 'md:w-72' : 'md:w-20'}
           overflow-hidden

@@ -19,7 +19,7 @@ function AppointmentRow({ appt }) {
     <div className="flex flex-col gap-2 rounded-xl border border-gray-100 bg-white p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0">
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1 rounded-lg bg-gray-900 px-2 py-1 text-xs font-bold text-white">
+          <span className="inline-flex items-center gap-1 rounded-lg bg-[#111827] px-2 py-1 text-xs font-bold text-white">
             <ClockIcon className="h-3.5 w-3.5" />
             {appt.startTime}
           </span>

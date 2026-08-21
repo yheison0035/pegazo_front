@@ -85,7 +85,7 @@ export default function AuditHistoryModal({ entity, id, onClose }) {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Encabezado */}
-        <div className="flex items-center justify-between bg-gradient-to-r from-orange-600 to-gray-900 px-6 py-4 text-white">
+        <div className="flex items-center justify-between bg-gradient-to-r from-orange-600 to-[#111827] px-6 py-4 text-white">
           <div>
             <h2 className="text-lg font-bold">Historial de cambios</h2>
             <p className="text-xs opacity-80">

@@ -248,3 +248,27 @@ button:disabled {
   --color-gray-800: #e6eaf1; /* texto principal */
   --color-gray-900: #f5f7fa; /* texto/acento más fuerte */
 }
+
+/* El menú lateral SIEMPRE es oscuro (en claro y en oscuro). Por eso, dentro de
+   él restauramos la escala de grises/blanco a sus valores CLAROS de Tailwind,
+   para que su texto e íconos (text-white, text-gray-300/400…) sigan siendo
+   claros sobre su fondo oscuro y no se inviertan con el modo oscuro. */
+[data-theme='dark'] .pos-sidenav {
+  --color-white: #ffffff;
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1f2937;
+  --color-gray-900: #111827;
+}
+
+/* En oscuro, el texto blanco sobre botones/badges de color debe seguir blanco
+   (si no, al remapear --color-white se pondría oscuro y perdería contraste). */
+[data-theme='dark'] .text-white {
+  color: #ffffff;
+}

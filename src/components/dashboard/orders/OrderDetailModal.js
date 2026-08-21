@@ -67,7 +67,7 @@ export default function OrderDetailModal({ orderId, onClose, onUpdated }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="bg-white w-full max-w-3xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
         {/* Cabecera */}
-        <div className="flex items-center justify-between bg-gradient-to-r from-orange-600 to-gray-900 text-white px-6 py-4">
+        <div className="flex items-center justify-between bg-gradient-to-r from-orange-600 to-[#111827] text-white px-6 py-4">
           <div>
             <h2 className="text-xl font-bold">
               Pedido {order?.code || `#${orderId}`}
