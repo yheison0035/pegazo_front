@@ -248,6 +248,19 @@ export default function VerifyCodeSaleClient() {
                 <span>- {formatCOP(sale.discount)}</span>
               </div>
             )}
+            {/* Desglose fiscal cuando la empresa cobra IVA */}
+            {sale.responsableIVA && sale.taxTotal > 0 && (
+              <>
+                <div className="flex justify-between text-gray-500">
+                  <span>Base gravable</span>
+                  <span>{formatCOP(sale.taxable)}</span>
+                </div>
+                <div className="flex justify-between text-gray-500">
+                  <span>IVA</span>
+                  <span>{formatCOP(sale.taxTotal)}</span>
+                </div>
+              </>
+            )}
             <div className="mt-2 flex items-center justify-between rounded-xl bg-gray-900 px-4 py-2.5 text-base font-bold text-white">
               <span>TOTAL</span>
               <span>{formatCOP(sale.totalAmount)}</span>

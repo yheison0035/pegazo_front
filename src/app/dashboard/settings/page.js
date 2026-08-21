@@ -11,6 +11,7 @@ import {
   CheckIcon,
   LockClosedIcon,
   CalculatorIcon,
+  ReceiptPercentIcon,
 } from '@heroicons/react/24/outline';
 import Button from '@/components/ui/Button';
 import AlertModal from '@/components/dashboard/modals/alertModal';
@@ -24,6 +25,7 @@ import {
   updateCompanyHours,
   updateCrmTheme,
   updateCashPolicy,
+  updateFiscal,
 } from '@/lib/api/routes/company';
 
 function CompanyProfileCard({ initial }) {
@@ -338,6 +340,149 @@ function ThemeSettings() {
   );
 }
 
+function FiscalCard({ initial }) {
+  const [form, setForm] = useState({
+    responsableIVA: false,
+    preciosIncluyenIVA: true,
+    defaultTaxRate: 19,
+    businessName: '',
+  });
+  const [saving, setSaving] = useState(false);
+  const [alert, setAlert] = useState({});
+
+  useEffect(() => {
+    if (initial) {
+      setForm({
+        responsableIVA: !!initial.responsableIVA,
+        preciosIncluyenIVA: initial.preciosIncluyenIVA ?? true,
+        defaultTaxRate: Number(initial.defaultTaxRate ?? 19),
+        businessName: initial.businessName || '',
+      });
+    }
+  }, [initial]);
+
+  const save = async () => {
+    setSaving(true);
+    try {
+      await updateFiscal({
+        responsableIVA: form.responsableIVA,
+        preciosIncluyenIVA: form.preciosIncluyenIVA,
+        defaultTaxRate: Number(form.defaultTaxRate) || 0,
+        businessName: form.businessName,
+      });
+      setAlert({ type: 'success', message: 'Configuración fiscal guardada.' });
+    } catch (e) {
+      setAlert({ type: 'error', message: e.message || 'No se pudo guardar.' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const numCls =
+    'w-full rounded-xl border border-gray-200 px-4 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20';
+
+  return (
+    <div className="max-w-xl rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+      <div className="flex items-start gap-3">
+        <div className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-orange-50 text-orange-600">
+          <ReceiptPercentIcon className="h-5 w-5" />
+        </div>
+        <div>
+          <h2 className="text-base font-bold text-gray-800">Impuestos (IVA)</h2>
+          <p className="text-sm text-gray-500">
+            Si tu negocio cobra IVA, actívalo y el sistema desglosa la base y el
+            IVA en cada factura.
+          </p>
+        </div>
+      </div>
+
+      <label className="mt-4 flex cursor-pointer items-center justify-between rounded-xl border border-gray-100 bg-gray-50 px-4 py-3">
+        <span className="text-sm font-medium text-gray-700">
+          Soy responsable de IVA
+        </span>
+        <input
+          type="checkbox"
+          checked={form.responsableIVA}
+          onChange={(e) =>
+            setForm((f) => ({ ...f, responsableIVA: e.target.checked }))
+          }
+          className="h-5 w-5 accent-orange-500"
+        />
+      </label>
+
+      <div
+        className={`mt-4 space-y-4 transition ${
+          form.responsableIVA ? 'opacity-100' : 'pointer-events-none opacity-50'
+        }`}
+      >
+        <label className="flex cursor-pointer items-center justify-between rounded-xl border border-gray-100 px-4 py-3">
+          <span className="text-sm font-medium text-gray-700">
+            Los precios ya incluyen IVA
+          </span>
+          <input
+            type="checkbox"
+            checked={form.preciosIncluyenIVA}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, preciosIncluyenIVA: e.target.checked }))
+            }
+            className="h-5 w-5 accent-orange-500"
+          />
+        </label>
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">
+            IVA por defecto (%)
+          </label>
+          <input
+            type="number"
+            min={0}
+            max={100}
+            value={form.defaultTaxRate}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, defaultTaxRate: e.target.value }))
+            }
+            className={numCls}
+          />
+          <p className="mt-1 text-xs text-gray-400">
+            Se aplica a los productos/servicios que no tengan un IVA propio (0,
+            5 o 19% en Colombia).
+          </p>
+        </div>
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">
+            Razón social (para la factura)
+          </label>
+          <input
+            type="text"
+            value={form.businessName}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, businessName: e.target.value }))
+            }
+            placeholder="Nombre legal de la empresa"
+            className={numCls}
+          />
+        </div>
+        <p className="rounded-lg bg-orange-50 px-3 py-2 text-xs text-orange-700">
+          {form.preciosIncluyenIVA
+            ? `Con precios que incluyen IVA, un producto de $100.000 se factura como base $${Math.round(100000 / (1 + (Number(form.defaultTaxRate) || 0) / 100)).toLocaleString('es-CO')} + IVA. El cliente sigue pagando $100.000.`
+            : `Con precios sin IVA, a $100.000 se le suma el ${form.defaultTaxRate}% de IVA en la factura.`}
+        </p>
+      </div>
+
+      <div className="mt-5">
+        <Button variant="primary" onClick={save} loading={saving}>
+          Guardar
+        </Button>
+      </div>
+
+      <AlertModal
+        type={alert.type}
+        message={alert.message}
+        onClose={() => setAlert({})}
+      />
+    </div>
+  );
+}
+
 function CashPolicyCard({ initial }) {
   const auth = useAuth();
   const usuario = auth?.usuario;
@@ -639,6 +784,7 @@ export default function Settings() {
           <div className="flex flex-col gap-5">
             <ThemeSettings />
             <CompanyProfileCard initial={settings} />
+            <FiscalCard initial={settings} />
             <CashPolicyCard initial={settings} />
             {isServices && <HoursCard initial={settings} />}
             {isServices && <LoyaltySettings />}
