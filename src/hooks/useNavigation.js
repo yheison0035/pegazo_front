@@ -1,6 +1,6 @@
 'use client';
 
-import { BUSINESS_TYPES } from '@/config/businessTypes';
+import { BUSINESS_TYPES, HIDDEN_MODULES } from '@/config/businessTypes';
 import { NAVIGATION } from '@/config/navigation';
 import { PLATFORM_NAVIGATION } from '@/config/platformNavigation';
 import { planAllowsModule, requiredPlanForModule } from '@/lib/plans';
@@ -50,6 +50,9 @@ export default function useNavigation() {
     if (!modules.includes('orders')) modules.push('orders');
   }
 
+  // Oculta los módulos que aún no están 100% terminados/comprobados.
+  const visibleModules = modules.filter((m) => !HIDDEN_MODULES.has(m));
+
   // Filtrar por módulos del negocio + rol. El gating por plan NO oculta: marca
   // el módulo como "bloqueado" (candado) para poder ofrecer el plan superior.
   const filteredSections = NAVIGATION.map((section) => {
@@ -58,7 +61,8 @@ export default function useNavigation() {
         const key = item.href.split('/').pop();
         // El Inicio (home) siempre está disponible; los demás dependen del
         // conjunto de módulos de la vertical.
-        const allowedByModule = key === 'dashboard' || modules.includes(key);
+        const allowedByModule =
+          key === 'dashboard' || visibleModules.includes(key);
         return allowedByModule && item.roles.includes(role);
       })
       .map((item) => {
