@@ -25,6 +25,7 @@ import useSales from '@/lib/api/hooks/useSales';
 import useUsers from '@/lib/api/hooks/useUsers';
 import useLocals from '@/lib/api/hooks/useLocals';
 import { getCustomers, getCustomerSummary } from '@/lib/api/routes/customers';
+import { getFiscalConfig } from '@/lib/api/routes/company';
 import { getProductFields } from '@/config/verticalProfiles';
 import { formatCOP } from '@/lib/api/utils/utils';
 import AlertModal from '@/components/dashboard/modals/alertModal';
@@ -102,6 +103,20 @@ export default function PosSale({
   );
   const [submitting, setSubmitting] = useState(false);
   const [alert, setAlert] = useState({ type: '', message: '', url: '' });
+
+  // Config fiscal de la empresa (IVA). El POS la necesita para mostrar el IVA y
+  // el total REAL a cobrar, igual que lo calcula el backend al guardar la venta.
+  const [fiscal, setFiscal] = useState(null);
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await getFiscalConfig();
+        setFiscal(res?.data || res || null);
+      } catch (_) {
+        setFiscal(null);
+      }
+    })();
+  }, []);
 
   // Política "abrir el día": si la empresa lo exige, se bloquea el POS hasta
   // que haya una caja abierta de hoy en la sede.
@@ -198,6 +213,7 @@ export default function PosSale({
           size: r.size,
           stock: r.stock,
           price: r.price || 0,
+          taxRate: r.taxRate, // IVA propio del ítem (si lo tiene); si no, usa el de la empresa
           quantity: 1,
           discount: 0,
         },
@@ -244,7 +260,45 @@ export default function PosSale({
     (s, i) => s + Math.min(i.discount, i.price * i.quantity),
     0
   );
-  const total = subtotal - discountTotal;
+  // Neto de líneas (con IVA dentro si los precios ya lo incluyen).
+  const netTotal = subtotal - discountTotal;
+
+  // IVA: misma lógica exacta que el backend (taxParts + itemTaxRate) para que el
+  // total mostrado al cajero coincida al centavo con el que se guarda.
+  const r2 = (n) => Math.round(n * 100) / 100;
+  const responsableIVA = !!fiscal?.responsableIVA;
+  const includeIva = fiscal?.preciosIncluyenIVA ?? true;
+  const defRate = Number(fiscal?.defaultTaxRate) || 0;
+  let baseTotal = 0;
+  let taxTotal = 0;
+  for (const i of cart) {
+    const gross = Math.max(
+      0,
+      i.price * i.quantity - Math.min(i.discount, i.price * i.quantity)
+    );
+    const rate = responsableIVA
+      ? Number(i.taxRate) > 0
+        ? Number(i.taxRate)
+        : defRate
+      : 0;
+    if (rate <= 0) {
+      baseTotal += gross;
+      continue;
+    }
+    if (includeIva) {
+      const base = r2(gross / (1 + rate / 100));
+      baseTotal += base;
+      taxTotal += r2(gross - base);
+    } else {
+      baseTotal += gross;
+      taxTotal += r2((gross * rate) / 100);
+    }
+  }
+  baseTotal = r2(baseTotal);
+  taxTotal = r2(taxTotal);
+  const showTax = responsableIVA && taxTotal > 0;
+  // Total a cobrar: si el precio ya incluye IVA no cambia; si no, se le suma.
+  const total = includeIva ? netTotal : r2(netTotal + taxTotal);
   const itemCount = cart.reduce((s, i) => s + i.quantity, 0);
 
   const clearAll = () => {
@@ -672,6 +726,25 @@ export default function PosSale({
                       <span>Descuentos</span>
                       <span>− {formatCOP(discountTotal)}</span>
                     </div>
+                  )}
+                  {showTax && (
+                    <>
+                      <div className="flex justify-between text-gray-500">
+                        <span>Base gravable</span>
+                        <span>{formatCOP(baseTotal)}</span>
+                      </div>
+                      <div className="flex justify-between text-gray-500">
+                        <span>
+                          {includeIva
+                            ? `IVA incluido (${defRate}%)`
+                            : `IVA (${defRate}%)`}
+                        </span>
+                        <span>
+                          {includeIva ? '' : '+ '}
+                          {formatCOP(taxTotal)}
+                        </span>
+                      </div>
+                    </>
                   )}
                   <div className="flex justify-between text-lg font-bold text-gray-800">
                     <span>Total</span>

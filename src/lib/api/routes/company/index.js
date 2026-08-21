@@ -35,6 +35,11 @@ export async function syncLoyaltyFromSales() {
   return apiFetch('/company/loyalty/sync', { method: 'POST' });
 }
 
+// Config fiscal mínima para el POS (accesible a cualquier vendedor).
+export async function getFiscalConfig() {
+  return apiFetch('/company/fiscal-config');
+}
+
 // Configuración fiscal (IVA / datos para facturar).
 export async function updateFiscal(dto) {
   return apiFetch('/company/fiscal', {

@@ -153,7 +153,7 @@ export default function ViewModal({
           </div>
 
           {Array.isArray(data.items) && data.items.length > 0 && (
-            <SaleItemsTable items={data.items} />
+            <SaleItemsTable items={data.items} sale={data} />
           )}
 
           <InventorySpecsView title="Características" data={data.features} />

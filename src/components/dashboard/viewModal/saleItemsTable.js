@@ -2,10 +2,16 @@
 
 import { formatCOP, formatPrice, formatText } from '@/lib/api/utils/utils';
 
-export default function SaleItemsTable({ items = [] }) {
+export default function SaleItemsTable({ items = [], sale = null }) {
   if (!Array.isArray(items) || items.length === 0) return null;
 
-  const total = items.reduce((acc, item) => acc + (item.subtotal || 0), 0);
+  const itemsSum = items.reduce((acc, item) => acc + (item.subtotal || 0), 0);
+  // Si la venta trae desglose fiscal, se usan sus valores reales (base + IVA);
+  // si no, el total es la simple suma de líneas.
+  const taxTotal = Number(sale?.taxTotal) || 0;
+  const showTax = taxTotal > 0;
+  const base = Number(sale?.subtotal) || itemsSum;
+  const total = sale?.totalAmount != null ? Number(sale.totalAmount) : itemsSum;
 
   return (
     <div className="border-t p-6">
@@ -50,6 +56,26 @@ export default function SaleItemsTable({ items = [] }) {
             })}
           </tbody>
           <tfoot className="bg-gray-50 text-sm">
+            {showTax && (
+              <>
+                <tr>
+                  <td colSpan={5} className="px-4 py-2 text-right text-gray-500">
+                    Base gravable
+                  </td>
+                  <td className="px-4 py-2 text-right text-gray-600">
+                    {formatCOP(base)}
+                  </td>
+                </tr>
+                <tr>
+                  <td colSpan={5} className="px-4 py-2 text-right text-gray-500">
+                    IVA
+                  </td>
+                  <td className="px-4 py-2 text-right text-gray-600">
+                    {formatCOP(taxTotal)}
+                  </td>
+                </tr>
+              </>
+            )}
             <tr>
               <td colSpan={5} className="px-4 py-3 text-right font-semibold">
                 Total
