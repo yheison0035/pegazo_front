@@ -70,6 +70,13 @@ export default function PosSale({
   const t = useTerms();
   const showColor =
     getProductFields(usuario?.company?.type).variantType === 'color';
+  // Verticales que venden por peso (fruver, carnicería, supermercado): el POS
+  // debe aceptar cantidades decimales (1,5 kg) en vez de solo enteros.
+  const isWeightVertical =
+    getProductFields(usuario?.company?.type).variantType === 'weight';
+  // Un ítem se cobra por peso si su producto es de unidad PESO; si el producto
+  // no trae `unit`, se usa el default del vertical.
+  const isByWeight = (i) => (i.unit ? i.unit === 'PESO' : isWeightVertical);
   const { searchProducts } = useSales();
   const { getUsers } = useUsers();
   const { getLocals } = useLocals();
@@ -199,7 +206,9 @@ export default function PosSale({
       const found = prev.find((i) => i.key === key);
       if (found) {
         return prev.map((i) =>
-          i.key === key ? { ...i, quantity: i.quantity + 1 } : i
+          i.key === key
+            ? { ...i, quantity: Number(i.quantity) + 1 }
+            : i
         );
       }
       return [
@@ -214,6 +223,7 @@ export default function PosSale({
           stock: r.stock,
           price: r.price || 0,
           taxRate: r.taxRate, // IVA propio del ítem (si lo tiene); si no, usa el de la empresa
+          unit: r.unit, // 'UNIDAD' | 'PESO' → habilita cantidades decimales
           quantity: 1,
           discount: 0,
         },
@@ -221,10 +231,38 @@ export default function PosSale({
     });
   }, []);
 
+  // Ajuste numérico (botones + / −). Peso: permite decimales y baja hasta 0;
+  // unidad: entero con mínimo 1.
   const setQty = (key, q) =>
     setCart((prev) =>
-      prev.map((i) => (i.key === key ? { ...i, quantity: Math.max(1, q) } : i))
+      prev.map((i) => {
+        if (i.key !== key) return i;
+        const w = isByWeight(i);
+        let val = Number(q);
+        if (Number.isNaN(val)) val = w ? 0 : 1;
+        val = w
+          ? Math.max(0, Math.round(val * 1000) / 1000)
+          : Math.max(1, Math.round(val));
+        return { ...i, quantity: val };
+      })
     );
+
+  // Entrada de texto de la cantidad. En peso deja escribir decimales (coma o
+  // punto) guardando el texto crudo; en unidad solo dígitos.
+  const onQtyInput = (key, text, byWeight) => {
+    const clean = byWeight
+      ? String(text)
+          .replace(',', '.')
+          .replace(/[^\d.]/g, '')
+          .replace(/(\..*)\./g, '$1') // un solo punto
+      : String(text).replace(/[^\d]/g, '');
+    setCart((prev) =>
+      prev.map((i) => (i.key === key ? { ...i, quantity: clean } : i))
+    );
+  };
+
+  // Paso de los botones + / − según el tipo (0,5 kg vs 1 unidad).
+  const qtyStep = (i) => (isByWeight(i) ? 0.5 : 1);
   const setDiscount = (key, d) =>
     setCart((prev) =>
       prev.map((i) => (i.key === key ? { ...i, discount: Math.max(0, d) } : i))
@@ -299,7 +337,7 @@ export default function PosSale({
   const showTax = responsableIVA && taxTotal > 0;
   // Total a cobrar: si el precio ya incluye IVA no cambia; si no, se le suma.
   const total = includeIva ? netTotal : r2(netTotal + taxTotal);
-  const itemCount = cart.reduce((s, i) => s + i.quantity, 0);
+  const itemCount = cart.reduce((s, i) => s + Number(i.quantity || 0), 0);
 
   const clearAll = () => {
     setCart([]);
@@ -332,12 +370,12 @@ export default function PosSale({
           i.type === 'service'
             ? {
                 serviceId: i.refId,
-                quantity: i.quantity,
+                quantity: Number(i.quantity) || 0,
                 discount: Math.round(i.discount) || 0,
               }
             : {
                 inventoryVariantId: i.refId,
-                quantity: i.quantity,
+                quantity: Number(i.quantity) || 0,
                 discount: Math.round(i.discount) || 0,
               }
         ),
@@ -662,29 +700,43 @@ export default function PosSale({
                         <div className="mt-2 flex items-center justify-between gap-2">
                           <div className="flex items-center rounded-lg border border-gray-200">
                             <button
-                              onClick={() => setQty(i.key, i.quantity - 1)}
+                              onClick={() =>
+                                setQty(
+                                  i.key,
+                                  Number(i.quantity || 0) - qtyStep(i)
+                                )
+                              }
                               className="px-2 py-1 text-gray-500 hover:bg-gray-50"
                             >
                               <MinusIcon className="w-4 h-4" />
                             </button>
                             <input
                               value={i.quantity}
+                              inputMode={isByWeight(i) ? 'decimal' : 'numeric'}
                               onChange={(e) =>
-                                setQty(
-                                  i.key,
-                                  Number(e.target.value.replace(/[^\d]/g, '')) ||
-                                    1
-                                )
+                                onQtyInput(i.key, e.target.value, isByWeight(i))
                               }
-                              className="w-10 text-center text-sm focus:outline-none"
+                              className={`text-center text-sm focus:outline-none ${
+                                isByWeight(i) ? 'w-14' : 'w-10'
+                              }`}
                             />
                             <button
-                              onClick={() => setQty(i.key, i.quantity + 1)}
+                              onClick={() =>
+                                setQty(
+                                  i.key,
+                                  Number(i.quantity || 0) + qtyStep(i)
+                                )
+                              }
                               className="px-2 py-1 text-gray-500 hover:bg-gray-50"
                             >
                               <PlusIcon className="w-4 h-4" />
                             </button>
                           </div>
+                          {isByWeight(i) && (
+                            <span className="text-[10px] font-medium text-gray-400">
+                              por peso
+                            </span>
+                          )}
                           <span className="text-xs text-gray-400">
                             {formatCOP(i.price)} c/u
                           </span>
