@@ -11,6 +11,17 @@
 //   customers, loyalty, services, appointments, sales, orders, delivered_sales,
 //   returns, quotes, cash, mesas, kitchen, expenses, statistics.
 
+// Módulos ocultos temporalmente en TODOS los negocios: aún no están 100%
+// terminados y comprobados. Para reactivar uno, quítalo de este conjunto.
+//   - website / orders : tienda online + pedidos (storefront/checkout pendiente)
+//   - mesas / kitchen  : flujo de restaurante (sin verificar de punta a punta)
+export const HIDDEN_MODULES = new Set([
+  'website',
+  'orders',
+  'mesas',
+  'kitchen',
+]);
+
 export const BUSINESS_TYPES = {
   // ---------- RETAIL (mostrador con productos) ----------
   COMERCIO: [
