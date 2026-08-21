@@ -59,7 +59,7 @@ export default function SalesRangeGeneralModal({ onClose }) {
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white w-full max-w-6xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
-        <div className="relative bg-gradient-to-r from-gray-900 to-gray-700 px-8 py-6 text-white">
+        <div className="relative bg-gradient-to-r from-[#111827] to-[#374151] px-8 py-6 text-white">
           <button
             onClick={onClose}
             className="absolute top-5 right-5 text-gray-300 hover:text-white transition cursor-pointer"

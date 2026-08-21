@@ -82,7 +82,7 @@ export default function AbonoModal({ sale, onClose, onSaved }) {
         className="flex max-h-[88vh] w-full max-w-md flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between bg-gradient-to-r from-orange-600 to-gray-900 px-5 py-4 text-white">
+        <div className="flex items-center justify-between bg-gradient-to-r from-orange-600 to-[#111827] px-5 py-4 text-white">
           <div className="flex items-center gap-2">
             <BanknotesIcon className="h-6 w-6" />
             <div>
