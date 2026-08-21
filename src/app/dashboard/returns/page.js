@@ -317,7 +317,7 @@ export default function ReturnsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-gray-500 border-b border-gray-100">
+                <tr className="text-left text-[11px] uppercase tracking-wider text-gray-400 border-b border-gray-100">
                   <th className="px-5 py-3 font-medium">Devolución</th>
                   <th className="px-5 py-3 font-medium">Venta</th>
                   <th className="px-5 py-3 font-medium text-center">Ítems</th>
@@ -336,7 +336,7 @@ export default function ReturnsPage() {
                   </tr>
                 )}
                 {returns.map((r) => (
-                  <tr key={r.id} className="border-b border-gray-50 hover:bg-orange-50/40">
+                  <tr key={r.id} className="border-b border-gray-50 hover:bg-orange-50">
                     <td className="px-5 py-3 font-medium text-gray-800">{r.code}</td>
                     <td className="px-5 py-3 text-gray-600">{r.sale?.code}</td>
                     <td className="px-5 py-3 text-center">{r._count?.items ?? 0}</td>
