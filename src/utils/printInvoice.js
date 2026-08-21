@@ -33,6 +33,35 @@ export function printSaleInvoice(sale, usuario) {
     )
     .join('');
 
+  // Config fiscal de la venta (respeta el IVA que calculó el POS/backend).
+  // responsableIVA puede venir en la venta (verify) o en la empresa del usuario;
+  // como respaldo, si hay IVA cobrado se asume responsable.
+  const taxTotal = Number(sale?.taxTotal) || 0;
+  const totalAmount = Number(sale?.totalAmount) || 0;
+  const baseGravable = Number(sale?.subtotal) || totalAmount;
+  const showTax = taxTotal > 0;
+  const responsableIVA =
+    sale?.responsableIVA ??
+    usuario?.company?.responsableIVA ??
+    showTax;
+  const regimenText = responsableIVA
+    ? 'Responsable de IVA'
+    : 'No responsable de IVA';
+  // El pie legal (letra de cambio / centrales de riesgo) solo aplica a ventas a
+  // crédito (fiado), no a las de contado.
+  const isCredito = sale?.paymentStatus === 'FIADO';
+
+  const totalsHTML = showTax
+    ? `
+      <div class="right">Base gravable: ${formatCOP(baseGravable)}</div>
+      <div class="right">IVA: ${formatCOP(taxTotal)}</div>
+      <div class="right bold">Total: ${formatCOP(totalAmount)}</div>
+    `
+    : `
+      <div class="right bold">Subtotal: ${formatCOP(totalAmount)}</div>
+      <div class="right bold">Total: ${formatCOP(totalAmount)}</div>
+    `;
+
   const html = `
   <html>
     <head>
@@ -130,7 +159,7 @@ export function printSaleInvoice(sale, usuario) {
       <div class="center">${sale?.local?.address || ''}</div>
       ${usuario?.company?.phone ? `<div class="center">+57 ${usuario.company.phone}</div>` : ''}
       <div class="center">${usuario?.company?.email || ''}</div>
-      <div class="center">Régimen: No responsable de IVA</div>
+      <div class="center">Régimen: ${regimenText}</div>
 
       <hr />
 
@@ -188,8 +217,7 @@ export function printSaleInvoice(sale, usuario) {
 
       <hr />
 
-      <div class="right bold">Subtotal: ${formatCOP(sale?.totalAmount)}</div>
-      <div class="right bold">Total: ${formatCOP(sale?.totalAmount)}</div>
+      ${totalsHTML}
 
       <hr />
 
@@ -229,11 +257,15 @@ export function printSaleInvoice(sale, usuario) {
 
       <hr />
 
-      <div class="footer">
+      ${
+        isCredito
+          ? `<div class="footer">
         Este documento se asimila en todos sus efectos a una letra de cambio
         de conformidad con el Art. 774 del código de comercio.
         En caso de incumplimiento, podrá reportarse a centrales de riesgo.
-      </div>
+      </div>`
+          : `<div class="footer">Gracias por su compra.</div>`
+      }
 
       <script>
         const images = document.images;
