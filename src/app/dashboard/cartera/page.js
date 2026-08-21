@@ -8,9 +8,14 @@ import {
 } from '@heroicons/react/24/outline';
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
-import { getReceivables, getPaymentsHistory } from '@/lib/api/routes/sales';
+import {
+  getReceivables,
+  getPaymentsHistory,
+  getCreditsHistory,
+} from '@/lib/api/routes/sales';
 import { formatCOP, formatDateOnly, formatDateTime } from '@/lib/api/utils/utils';
 import Button from '@/components/ui/Button';
+import StatusBadge from '@/components/ui/StatusBadge';
 import EmptyState from '@/components/ui/EmptyState';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import AbonoModal from '@/components/cartera/AbonoModal';
@@ -43,6 +48,12 @@ export default function CarteraPage() {
   const [tab, setTab] = useState('por_cobrar');
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState({ totalSaldo: 0, count: 0, rows: [] });
+  const [credits, setCredits] = useState({
+    count: 0,
+    pendiente: 0,
+    cobrado: 0,
+    rows: [],
+  });
   const [history, setHistory] = useState({ total: 0, count: 0, rows: [] });
   const [search, setSearch] = useState('');
   const [abonoSale, setAbonoSale] = useState(null);
@@ -50,14 +61,19 @@ export default function CarteraPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [rec, hist] = await Promise.all([
+      const [rec, cred, hist] = await Promise.all([
         getReceivables(),
+        getCreditsHistory(),
         getPaymentsHistory(),
       ]);
       setData(rec?.data || { totalSaldo: 0, count: 0, rows: [] });
+      setCredits(
+        cred?.data || { count: 0, pendiente: 0, cobrado: 0, rows: [] },
+      );
       setHistory(hist?.data || { total: 0, count: 0, rows: [] });
     } catch (_) {
       setData({ totalSaldo: 0, count: 0, rows: [] });
+      setCredits({ count: 0, pendiente: 0, cobrado: 0, rows: [] });
       setHistory({ total: 0, count: 0, rows: [] });
     } finally {
       setLoading(false);
@@ -102,6 +118,7 @@ export default function CarteraPage() {
         <div className="mb-5 flex gap-1 border-b border-gray-200">
           {[
             { id: 'por_cobrar', label: 'Por cobrar' },
+            { id: 'creditos', label: 'Todos los créditos' },
             { id: 'historial', label: 'Historial de abonos' },
           ].map((tb) => (
             <button
@@ -229,6 +246,116 @@ export default function CarteraPage() {
             </table>
           </div>
         </div>
+          </>
+        )}
+
+        {tab === 'creditos' && (
+          <>
+            <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+                <p className="text-xs uppercase tracking-wide text-gray-400">
+                  Créditos realizados
+                </p>
+                <p className="mt-1 text-2xl font-bold text-gray-900">
+                  {credits.count}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+                <p className="text-xs uppercase tracking-wide text-gray-400">
+                  Pendiente por cobrar
+                </p>
+                <p className="mt-1 text-2xl font-bold text-orange-700">
+                  {formatCOP(credits.pendiente)}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+                <p className="text-xs uppercase tracking-wide text-gray-400">
+                  Total abonado
+                </p>
+                <p className="mt-1 text-2xl font-bold text-emerald-600">
+                  {formatCOP(credits.cobrado)}
+                </p>
+              </div>
+            </div>
+
+            <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-sm">
+                  <thead className="bg-gray-50 text-left text-[11px] uppercase tracking-wider text-gray-400">
+                    <tr>
+                      <th className="px-5 py-3">Factura</th>
+                      <th className="px-5 py-3">Cliente</th>
+                      <th className="px-5 py-3">Fecha</th>
+                      <th className="px-5 py-3">Vence</th>
+                      <th className="px-5 py-3">Estado</th>
+                      <th className="px-5 py-3 text-right">Total</th>
+                      <th className="px-5 py-3 text-right">Abonado</th>
+                      <th className="px-5 py-3 text-right">Saldo</th>
+                      <th className="px-5 py-3 text-center">Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {!loading && credits.rows.length === 0 && (
+                      <tr>
+                        <td colSpan={9} className="px-5 py-4">
+                          <EmptyState
+                            icon={CreditCardIcon}
+                            title="Aún no hay créditos"
+                            subtitle="Las ventas con pago 'Crédito / Fiado' aparecerán aquí, activas o pagadas."
+                          />
+                        </td>
+                      </tr>
+                    )}
+                    {credits.rows.map((r) => (
+                      <tr key={r.id} className="hover:bg-orange-50">
+                        <td className="px-5 py-3 font-medium text-gray-700 whitespace-nowrap">
+                          {r.code}
+                        </td>
+                        <td className="px-5 py-3 whitespace-nowrap">
+                          {r.customer?.name || 'Consumidor final'}
+                        </td>
+                        <td className="px-5 py-3 whitespace-nowrap text-gray-500">
+                          {formatDateOnly(r.saleDate)}
+                        </td>
+                        <td className="px-5 py-3 whitespace-nowrap text-gray-500">
+                          {r.dueDate ? formatDateOnly(r.dueDate) : '—'}
+                        </td>
+                        <td className="px-5 py-3 whitespace-nowrap">
+                          {r.status === 'PAGADA' ? (
+                            <StatusBadge status="PAGADA" />
+                          ) : r.overdueDays > 0 ? (
+                            <OverdueBadge
+                              days={r.overdueDays}
+                              dueDate={r.dueDate}
+                            />
+                          ) : (
+                            <StatusBadge status="PENDIENTE" />
+                          )}
+                        </td>
+                        <td className="px-5 py-3 text-right whitespace-nowrap text-gray-600">
+                          {formatCOP(r.total)}
+                        </td>
+                        <td className="px-5 py-3 text-right whitespace-nowrap text-emerald-600">
+                          {formatCOP(r.paid)}
+                        </td>
+                        <td className="px-5 py-3 text-right whitespace-nowrap font-bold text-gray-900">
+                          {formatCOP(r.saldo)}
+                        </td>
+                        <td className="px-5 py-3 text-center whitespace-nowrap">
+                          <Button
+                            size="sm"
+                            variant={r.status === 'PAGADA' ? 'secondary' : 'primary'}
+                            onClick={() => setAbonoSale(r)}
+                          >
+                            {r.status === 'PAGADA' ? 'Ver' : 'Abonar'}
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </>
         )}
 
