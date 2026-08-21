@@ -16,6 +16,7 @@ import Pagination from '@/components/dashboard/tables/segments/pagination';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import Button from '@/components/ui/Button';
+import EmptyState from '@/components/ui/EmptyState';
 
 export default function ReturnsPage() {
   const {
@@ -298,13 +299,13 @@ export default function ReturnsPage() {
                       {formatCOP(refundTotal)}
                     </span>
                   </div>
-                  <button
+                  <Button
+                    variant="primary"
                     onClick={handleCreate}
                     disabled={loading || refundTotal <= 0}
-                    className="rounded-lg bg-orange-500 px-6 py-2 text-sm font-semibold text-white hover:bg-orange-600 disabled:opacity-50"
                   >
                     Registrar devolución
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}
@@ -330,8 +331,8 @@ export default function ReturnsPage() {
               <tbody>
                 {returns.length === 0 && !loading && (
                   <tr>
-                    <td colSpan={7} className="px-5 py-10 text-center text-gray-400">
-                      Aún no hay devoluciones.
+                    <td colSpan={7} className="px-5 py-4">
+                      <EmptyState title="Aún no hay devoluciones." />
                     </td>
                   </tr>
                 )}

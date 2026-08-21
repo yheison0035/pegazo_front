@@ -10,6 +10,7 @@ import {
   ChevronDownIcon,
 } from '@heroicons/react/24/outline';
 import RoleGuard from '@/auth/roleGuard';
+import Button from '@/components/ui/Button';
 import { Roles } from '@/config/roles';
 import { useAuth } from '@/context/authContext';
 import useCash from '@/lib/api/hooks/useCash';
@@ -240,13 +241,13 @@ export default function CashPage() {
                   placeholder="Base inicial (ej: $ 100.000)"
                   className="flex-1 rounded-xl border border-gray-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
-                <button
+                <Button
+                  variant="primary"
                   onClick={handleOpen}
                   disabled={loading}
-                  className="rounded-xl bg-orange-500 px-6 py-2 text-sm font-semibold text-white hover:bg-orange-600 disabled:opacity-50"
                 >
                   Abrir caja
-                </button>
+                </Button>
               </div>
             </div>
           )}
@@ -388,13 +389,14 @@ export default function CashPage() {
                     placeholder="Efectivo contado"
                     className="w-full mb-3 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
-                  <button
+                  <Button
+                    variant="primary"
                     onClick={handleClose}
                     disabled={loading || counted === ''}
-                    className="w-full rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600 disabled:opacity-50"
+                    fullWidth
                   >
                     Cerrar caja
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
