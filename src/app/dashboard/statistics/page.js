@@ -61,7 +61,9 @@ export default function Statistics() {
 
   const [locals, setLocals] = useState([]);
   const [localId, setLocalId] = useState('');
-  const [startDate, setStartDate] = useState(daysAgoCol(29));
+  // "Desde" arranca vacío: el backend lo resuelve a la primera venta registrada
+  // y lo poblamos con el rango que devuelve.
+  const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState(todayCol());
 
   const [data, setData] = useState(null);
@@ -82,6 +84,12 @@ export default function Statistics() {
         ...(localId ? { localId: String(localId) } : {}),
       });
       setData(res?.data || null);
+      // Si "Desde" venía vacío, mostramos la fecha que el backend resolvió
+      // (la de la primera venta registrada).
+      const range = res?.data?.range;
+      if (range?.startDate) {
+        setStartDate((prev) => prev || range.startDate);
+      }
     } catch (err) {
       console.error(err);
     } finally {
