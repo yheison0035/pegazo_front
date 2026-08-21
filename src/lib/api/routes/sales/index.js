@@ -34,6 +34,16 @@ export async function getSalePayments(saleId) {
   return apiFetch(`/sales/${saleId}/payments`);
 }
 
+// Historial de todos los créditos (activos + pagados).
+export async function getCreditsHistory(params = {}) {
+  const query = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== '' && v !== null && v !== undefined) query.set(k, String(v));
+  });
+  const qs = query.toString();
+  return apiFetch(`/sales/credits/history${qs ? `?${qs}` : ''}`);
+}
+
 // Historial de abonos (movimientos de cartera) de la empresa.
 export async function getPaymentsHistory(params = {}) {
   const query = new URLSearchParams();
