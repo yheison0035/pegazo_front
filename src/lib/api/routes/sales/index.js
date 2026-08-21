@@ -34,6 +34,16 @@ export async function getSalePayments(saleId) {
   return apiFetch(`/sales/${saleId}/payments`);
 }
 
+// Historial de abonos (movimientos de cartera) de la empresa.
+export async function getPaymentsHistory(params = {}) {
+  const query = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== '' && v !== null && v !== undefined) query.set(k, String(v));
+  });
+  const qs = query.toString();
+  return apiFetch(`/sales/payments/history${qs ? `?${qs}` : ''}`);
+}
+
 // Registra un abono (pago parcial) contra una venta a crédito.
 export async function addSalePayment(saleId, dto) {
   return apiFetch(`/sales/${saleId}/payments`, {
