@@ -170,10 +170,12 @@ export default function CashPage() {
                 Solo puede haber una caja abierta por sede a la vez.
               </p>
               <p>
-                <b>2. Durante el turno:</b> cada <b>venta en efectivo</b> se suma
-                automáticamente a la caja. Si sacas o metes dinero por otro
-                motivo (un retiro, pagar un domicilio, un abono), regístralo como{' '}
-                <b>ingreso</b> o <b>egreso</b> con su concepto.
+                <b>2. Automático (no lo registras a mano):</b> las{' '}
+                <b>ventas en efectivo</b> entran solas como ingreso y los{' '}
+                <b>gastos en efectivo</b> salen solos como egreso. Solo registra
+                un movimiento manual cuando <b>no</b> sea una venta ni un gasto:
+                un <b>retiro</b> (sacar plata para el banco), meter{' '}
+                <b>base/cambio</b> extra o un <b>ajuste</b>.
               </p>
               <p>
                 <b>3. Esperado en caja:</b> es lo que debería haber físicamente ={' '}
@@ -251,9 +253,13 @@ export default function CashPage() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                 {/* Movimientos */}
                 <div className="bg-white rounded-2xl shadow border border-gray-100 p-5">
-                  <h3 className="font-semibold text-gray-800 mb-3">
-                    Registrar movimiento
+                  <h3 className="font-semibold text-gray-800">
+                    Otro movimiento de efectivo
                   </h3>
+                  <p className="mb-3 text-xs text-gray-400">
+                    Solo para retiros, base/cambio o ajustes. Las ventas y los
+                    gastos en efectivo ya entran y salen solos.
+                  </p>
                   <div className="flex gap-2 mb-3">
                     <button
                       onClick={() => setMov((m) => ({ ...m, type: 'INGRESO' }))}
