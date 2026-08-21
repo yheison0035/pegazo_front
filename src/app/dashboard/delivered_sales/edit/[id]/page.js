@@ -3,53 +3,64 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import AlertModal from '@/components/dashboard/modals/alertModal';
-import DinamicForm from '@/components/dashboard/form/DinamicForm';
-import { useAuth } from '@/context/authContext';
+import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import useDeliveredSales from '@/lib/api/hooks/useDeliveredSales';
-import { getFormFieldsSales } from '@/lib/api/utils/sales.config';
+import PosSale from '@/components/pos/PosSale';
+
+// ISO -> datetime-local (YYYY-MM-DDTHH:mm) en hora local.
+function toDatetimeLocal(iso) {
+  if (!iso) return undefined;
+  const d = new Date(iso);
+  const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 16);
+}
 
 export default function EditDeliveredSales() {
-  const [formData, setFormData] = useState({});
-  const [alert, setAlert] = useState({ type: '', message: '', url: '' });
   const { id } = useParams();
-  const auth = useAuth();
-  const usuario = auth?.usuario;
-  const { getDeliveredSaleById, updateDeliveredSale, loading } =
-    useDeliveredSales();
+  const { getDeliveredSaleById, updateDeliveredSale } = useDeliveredSales();
+  const [initial, setInitial] = useState(null);
+  const [alert, setAlert] = useState({ type: '', message: '', url: '' });
 
-  const fetchDeliveredSale = useCallback(async () => {
+  const fetchSale = useCallback(async () => {
     if (!id) return;
-
     try {
       const { data } = await getDeliveredSaleById(Number(id));
 
-      const formattedItems = (data.items || []).map((item) => ({
-        ...(item.type === 'service'
+      const cart = (data.items || []).map((it) => {
+        const isService =
+          it.type === 'service' || (it.serviceId && !it.inventoryVariantId);
+        const refId = isService ? it.serviceId : it.inventoryVariantId;
+        return {
+          key: isService ? `s${refId}` : `p${refId}`,
+          type: isService ? 'service' : 'product',
+          refId,
+          name: it.name,
+          color: it.color,
+          size: it.size,
+          stock: it.stock,
+          price: it.price,
+          quantity: it.quantity,
+          discount: it.discount || 0,
+        };
+      });
+
+      const customer =
+        data.customer && data.customer.document !== '222222222222'
           ? {
-              serviceId: item.serviceId,
+              id: data.customer.id,
+              name: data.customer.name,
+              phone: data.customer.phone,
             }
-          : {
-              inventoryVariantId: item.inventoryVariantId,
-            }),
+          : null;
 
-        name: item.name,
-
-        price: item.price,
-
-        stock: item.type === 'service' ? null : item.stock || 0,
-
-        originalQuantity: item.quantity,
-
-        quantity: item.quantity,
-
-        discount: item.discount || 0,
-
-        subtotal: item.subtotal,
-      }));
-
-      setFormData({
-        ...data,
-        items: formattedItems,
+      setInitial({
+        cart,
+        customer,
+        paymentMethod: data.paymentMethod,
+        notes: data.notes || '',
+        saleDate: toDatetimeLocal(data.saleDate),
+        sellerId: data.userId,
+        localId: data.localId,
       });
     } catch (err) {
       setAlert({
@@ -61,50 +72,31 @@ export default function EditDeliveredSales() {
   }, [getDeliveredSaleById, id]);
 
   useEffect(() => {
-    fetchDeliveredSale();
-  }, [fetchDeliveredSale]);
+    fetchSale();
+  }, [fetchSale]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await updateDeliveredSale(id, formData);
-      setAlert({
-        type: 'success',
-        message: 'Venta actualizada correctamente.',
-        url: '/dashboard/delivered_sales',
-      });
-    } catch (err) {
-      setAlert({
-        type: 'error',
-        message: err.message || 'Error al actualizar venta',
-      });
-    }
-  };
+  if (!initial) {
+    return (
+      <div className="relative min-h-[60vh]">
+        <LoadingOverlay show text="Cargando venta..." />
+        <AlertModal
+          type={alert.type}
+          message={alert.message}
+          onClose={() => setAlert({ type: '', message: '', url: '' })}
+          url={alert.url}
+        />
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-full mx-auto bg-white shadow-lg rounded-2xl p-8 mt-6 border border-gray-100">
-      <h2 className="text-3xl font-bold text-gray-800 mb-2">Editar Venta</h2>
-      <p className="text-sm text-gray-500 mb-6">
-        Modifica la información de la venta según sea necesario.
-      </p>
-
-      <DinamicForm
-        formData={formData}
-        formFields={getFormFieldsSales()}
-        setFormData={setFormData}
-        handleSubmit={handleSubmit}
-        loading={loading}
-        mode="edit"
-        usuario={usuario}
-        module="delivered_sales"
-      />
-
-      <AlertModal
-        type={alert.type}
-        message={alert.message}
-        onClose={() => setAlert({ type: '', message: '', url: '' })}
-        url={alert.url}
-      />
-    </div>
+    <PosSale
+      mode="edit"
+      title="Editar Venta"
+      initial={initial}
+      onSubmit={(payload) => updateDeliveredSale(id, payload)}
+      successMessage="Venta actualizada correctamente."
+      successUrl="/dashboard/delivered_sales"
+    />
   );
 }
