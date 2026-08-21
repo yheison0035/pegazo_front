@@ -46,8 +46,12 @@ const TERM_FIELDS = [
 ];
 
 function TerminologyCard({ initial }) {
-  const { usuario } = useAuth();
-  const defaults = getTerms(usuario?.company || {});
+  const auth = useAuth();
+  const usuario = auth?.usuario;
+  const setUsuario = auth?.setUsuario;
+  // Placeholder = término por tipo de negocio, SIN los overrides propios (para
+  // que muestre a qué volvería si se deja en blanco).
+  const defaults = getTerms({ type: usuario?.company?.type });
   const [form, setForm] = useState({});
   const [saving, setSaving] = useState(false);
   const [ok, setOk] = useState(false);
@@ -70,6 +74,17 @@ function TerminologyCard({ initial }) {
         if (v) dto[f.key] = v;
       }
       await updateTerminology(dto);
+      // Aplica en vivo: actualiza el contexto para que el menú y los textos
+      // cambien al instante sin recargar.
+      if (setUsuario && usuario) {
+        setUsuario({
+          ...usuario,
+          company: {
+            ...usuario.company,
+            terminology: Object.keys(dto).length ? dto : null,
+          },
+        });
+      }
       setOk(true);
       setTimeout(() => setOk(false), 2500);
     } catch (e) {
@@ -129,7 +144,7 @@ function TerminologyCard({ initial }) {
         )}
       </div>
       <p className="mt-3 text-xs text-gray-400">
-        Los cambios se ven al recargar el panel.
+        Los cambios se aplican al instante en el menú y los textos del panel.
       </p>
     </div>
   );
