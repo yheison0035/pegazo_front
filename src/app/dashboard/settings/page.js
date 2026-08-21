@@ -10,6 +10,7 @@ import {
   SwatchIcon,
   CheckIcon,
   LockClosedIcon,
+  CalculatorIcon,
 } from '@heroicons/react/24/outline';
 import Button from '@/components/ui/Button';
 import AlertModal from '@/components/dashboard/modals/alertModal';
@@ -22,6 +23,7 @@ import {
   updateCompanyProfile,
   updateCompanyHours,
   updateCrmTheme,
+  updateCashPolicy,
 } from '@/lib/api/routes/company';
 
 function CompanyProfileCard({ initial }) {
@@ -336,6 +338,89 @@ function ThemeSettings() {
   );
 }
 
+function CashPolicyCard({ initial }) {
+  const auth = useAuth();
+  const usuario = auth?.usuario;
+  const setUsuario = auth?.setUsuario;
+  const [enabled, setEnabled] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [alert, setAlert] = useState({});
+
+  useEffect(() => {
+    if (initial) setEnabled(!!initial.requireCashOpen);
+  }, [initial]);
+
+  const toggle = async (val) => {
+    const prev = enabled;
+    setEnabled(val);
+    setSaving(true);
+    try {
+      await updateCashPolicy(val);
+      // Refleja el cambio en la sesión para que el POS/aviso reaccionen.
+      if (setUsuario && usuario) {
+        const merged = {
+          ...usuario,
+          company: { ...usuario.company, requireCashOpen: val },
+        };
+        setUsuario(merged);
+        localStorage.setItem('usuario', JSON.stringify(merged));
+      }
+      setAlert({ type: 'success', message: 'Preferencia guardada.' });
+    } catch (e) {
+      setEnabled(prev);
+      setAlert({ type: 'error', message: e.message || 'No se pudo guardar.' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="max-w-xl rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+      <div className="flex items-start gap-3">
+        <div className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-orange-50 text-orange-600">
+          <CalculatorIcon className="h-5 w-5" />
+        </div>
+        <div>
+          <h2 className="text-base font-bold text-gray-800">
+            Abrir el día para vender
+          </h2>
+          <p className="text-sm text-gray-500">
+            Si lo activas, no se podrá facturar sin haber <b>abierto la caja del
+            día</b> en la sede. Además, obliga a <b>cerrar el día anterior</b>{' '}
+            antes de vender. Ideal para llevar el control diario del efectivo y
+            que el arqueo siempre cuadre.
+          </p>
+        </div>
+      </div>
+
+      <label className="mt-4 flex cursor-pointer items-center justify-between rounded-xl border border-gray-100 bg-gray-50 px-4 py-3">
+        <span className="text-sm font-medium text-gray-700">
+          Exigir apertura de caja para vender
+        </span>
+        <input
+          type="checkbox"
+          checked={enabled}
+          disabled={saving}
+          onChange={(e) => toggle(e.target.checked)}
+          className="h-5 w-5 accent-orange-500"
+        />
+      </label>
+
+      <p className="mt-2 text-xs text-gray-400">
+        {enabled
+          ? 'Activado: el cajero debe “Abrir el día” en Caja antes de poder facturar.'
+          : 'Desactivado: se puede vender en cualquier momento, sin abrir caja.'}
+      </p>
+
+      <AlertModal
+        type={alert.type}
+        message={alert.message}
+        onClose={() => setAlert({})}
+      />
+    </div>
+  );
+}
+
 function LoyaltySettings() {
   const [form, setForm] = useState({
     loyaltyEnabled: false,
@@ -554,6 +639,7 @@ export default function Settings() {
           <div className="flex flex-col gap-5">
             <ThemeSettings />
             <CompanyProfileCard initial={settings} />
+            <CashPolicyCard initial={settings} />
             {isServices && <HoursCard initial={settings} />}
             {isServices && <LoyaltySettings />}
           </div>
