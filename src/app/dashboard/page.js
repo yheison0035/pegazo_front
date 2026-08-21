@@ -12,14 +12,18 @@ import {
   PlusIcon,
   CubeIcon,
   UsersIcon,
+  CreditCardIcon,
+  ClockIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/authContext';
 import useTerms from '@/hooks/useTerms';
 import Button from '@/components/ui/Button';
 import { getHomeSummary } from '@/lib/api/routes/statistics';
-import { getLowStock } from '@/lib/api/routes/inventory';
+import { getLowStock, getExpiring } from '@/lib/api/routes/inventory';
+import { getReceivables } from '@/lib/api/routes/sales';
 import { getAppointmentsAgenda } from '@/lib/api/routes/appointments';
 import { isServicesBusiness } from '@/lib/appointmentsAccess';
+import { getProductFields } from '@/config/verticalProfiles';
 import { formatCOP } from '@/lib/api/utils/utils';
 
 function firstName(name) {
@@ -48,6 +52,11 @@ export default function DashboardHome() {
   const [home, setHome] = useState(null);
   const [todayAppts, setTodayAppts] = useState(null);
   const [lowStock, setLowStock] = useState([]);
+  const [receivable, setReceivable] = useState(0);
+  const [expiring, setExpiring] = useState([]);
+
+  // Verticales que manejan vencimiento (droguería / perecederos).
+  const hasExpiry = !!getProductFields(usuario?.company?.type).expiry;
 
   useEffect(() => {
     if (!usuario) return;
@@ -57,12 +66,20 @@ export default function DashboardHome() {
     getLowStock()
       .then((r) => setLowStock(r?.data || []))
       .catch(() => setLowStock([]));
+    getReceivables()
+      .then((r) => setReceivable(r?.data?.totalSaldo || 0))
+      .catch(() => setReceivable(0));
     if (isServices) {
       getAppointmentsAgenda()
         .then((r) => setTodayAppts(r?.data?.today || []))
         .catch(() => setTodayAppts([]));
     }
-  }, [usuario, isServices]);
+    if (hasExpiry) {
+      getExpiring()
+        .then((r) => setExpiring(r?.data || []))
+        .catch(() => setExpiring([]));
+    }
+  }, [usuario, isServices, hasExpiry]);
 
   const setup = home?.setup;
   const catalogStep = isServices
@@ -174,6 +191,24 @@ export default function DashboardHome() {
             label="Por agotarse"
             value={lowStock.length}
             accent="text-red-600"
+            href="/dashboard/inventory"
+          />
+        )}
+        {receivable > 0 && (
+          <Kpi
+            icon={CreditCardIcon}
+            label="Por cobrar (fiado)"
+            value={formatCOP(receivable)}
+            accent="text-orange-600"
+            href="/dashboard/cartera"
+          />
+        )}
+        {hasExpiry && expiring.length > 0 && (
+          <Kpi
+            icon={ClockIcon}
+            label="Por vencer"
+            value={expiring.length}
+            accent="text-amber-600"
             href="/dashboard/inventory"
           />
         )}
