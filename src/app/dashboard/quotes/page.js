@@ -9,6 +9,7 @@ import {
   ArrowRightCircleIcon,
 } from '@heroicons/react/24/outline';
 import RoleGuard from '@/auth/roleGuard';
+import StatusBadge from '@/components/ui/StatusBadge';
 import { Roles } from '@/config/roles';
 import { useAuth } from '@/context/authContext';
 import useQuotes from '@/lib/api/hooks/useQuotes';
@@ -21,22 +22,7 @@ import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import Button from '@/components/ui/Button';
 
-const STATUS_STYLES = {
-  PENDIENTE: 'bg-amber-100 text-amber-700',
-  ACEPTADA: 'bg-blue-100 text-blue-700',
-  RECHAZADA: 'bg-red-100 text-red-700',
-  CONVERTIDA: 'bg-green-100 text-green-700',
-  VENCIDA: 'bg-gray-200 text-gray-600',
-};
-const statusBadge = (s) => (
-  <span
-    className={`inline-block px-2.5 py-1 rounded-full text-xs font-medium ${
-      STATUS_STYLES[s] || 'bg-gray-100 text-gray-600'
-    }`}
-  >
-    {s}
-  </span>
-);
+const statusBadge = (s) => <StatusBadge status={s} />;
 
 export default function QuotesPage() {
   const { usuario } = useAuth();

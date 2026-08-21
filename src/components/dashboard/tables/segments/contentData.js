@@ -8,13 +8,13 @@ import Actions from './actions';
 import PhoneContentData from './contentData/phone';
 import WhatsappLink from './contentData/whatsappLink';
 import LastAudit from './contentData/lastAudit';
+import StatusBadge from '@/components/ui/StatusBadge';
 import ConfirmClientButton from '@/components/appointments/ConfirmClientButton';
 import {
   formatCOP,
   formatDateTime,
   formatDateSafe,
   formatDateOnly,
-  toggleCase,
 } from '@/lib/api/utils/utils';
 import { useAuth } from '@/context/authContext';
 
@@ -74,7 +74,7 @@ export default function ContentData({
                   {info.manager?.name || '---'}
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
-                  {info?.status || '---'}
+                  <StatusBadge status={info.status} />
                 </td>
                 <PhoneContentData info={info} />
               </>
@@ -92,7 +92,7 @@ export default function ContentData({
                 <td className="px-5 py-4 whitespace-nowrap">{info.address}</td>
                 <td className="px-5 py-4 whitespace-nowrap">{info.city}</td>
                 <td className="px-5 py-4 whitespace-nowrap">
-                  {info?.status || '---'}
+                  <StatusBadge status={info.status} />
                 </td>
                 <PhoneContentData info={info} />
                 <td className="px-5 py-4">
@@ -181,7 +181,7 @@ export default function ContentData({
                 )}
 
                 <td className="px-5 py-4 whitespace-nowrap">
-                  {info.status || '---'}
+                  <StatusBadge status={info.status} />
                 </td>
                 <td className="px-5 py-4">
                   <LastAudit audit={info.lastAudit} />
@@ -198,7 +198,7 @@ export default function ContentData({
                   {info.description || '---'}
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
-                  {info.status || '---'}
+                  <StatusBadge status={info.status} />
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
                   {info.local?.name || '---'}
@@ -236,7 +236,7 @@ export default function ContentData({
                   {info.address || '---'}
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
-                  {info.status || '---'}
+                  <StatusBadge status={info.status} />
                 </td>
               </>
             )}
@@ -266,7 +266,7 @@ export default function ContentData({
                   {info.city || '---'}
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
-                  {info.status || '---'}
+                  <StatusBadge status={info.status} />
                 </td>
                 <td className="px-5 py-4">
                   <LastAudit audit={info.lastAudit} />
@@ -301,7 +301,7 @@ export default function ContentData({
                   {info.user?.name || '---'}
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
-                  {info.paymentStatus || '---'}
+                  <StatusBadge status={info.paymentStatus} />
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
                   {formatDateTime(info.saleDate) || '---'}
@@ -335,7 +335,7 @@ export default function ContentData({
                   {formatDateOnly(info.expenseDate) || '---'}
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
-                  {info.status || '---'}
+                  <StatusBadge status={info.status} />
                 </td>
                 <td className="px-5 py-4">
                   <LastAudit audit={info.lastAudit} />
@@ -379,7 +379,7 @@ export default function ContentData({
                   {info.phone || '---'}
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
-                  {info.status || '---'}
+                  <StatusBadge status={info.status} />
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
                   {info.plan ? (
@@ -438,7 +438,7 @@ export default function ContentData({
                   {info.duration ? `${info.duration} min` : '---'}
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
-                  {info.status || '---'}
+                  <StatusBadge status={info.status} />
                 </td>
                 <td className="px-5 py-4">
                   <LastAudit audit={info.lastAudit} />
@@ -449,26 +449,7 @@ export default function ContentData({
             {view === 'appointments' && (
               <>
                 <td className="px-5 py-4 whitespace-nowrap">
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-medium
-                    ${
-                      info.status === 'COMPLETADA'
-                        ? 'bg-green-100 text-green-700'
-                        : info.status === 'PENDIENTE'
-                          ? 'bg-orange-100 text-orange-700'
-                          : info.status === 'CANCELADA'
-                            ? 'bg-red-100 text-red-700'
-                            : info.status === 'CONFIRMADA'
-                              ? 'bg-blue-100 text-blue-700'
-                              : info.status === 'EN_PROCESO'
-                                ? 'bg-purple-100 text-purple-700'
-                                : info.status === 'NO_ASISTIO'
-                                  ? 'bg-gray-100 text-gray-700'
-                                  : 'bg-slate-100 text-slate-700'
-                    }`}
-                  >
-                    {toggleCase(info.status, 'uppercase') || '---'}
-                  </span>
+                  <StatusBadge status={info.status} />
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
                   {formatDateOnly(info.date) || '---'}
