@@ -358,6 +358,9 @@ export default function DinamicForm({
 
             if (name === 'department' || name === 'city') return null;
 
+            // Ocultar condicionalmente según el estado del formulario.
+            if (field.hideWhen && field.hideWhen(formData)) return null;
+
             const inputValue =
               type === 'datetime-local'
                 ? normalizeDateTimeForInput(formData[name])
@@ -372,6 +375,37 @@ export default function DinamicForm({
                   : name === 'stock'
                     ? (formData[name] ?? 0)
                     : formData[name] || '';
+
+            if (type === 'checkbox') {
+              const checked = !!formData[name];
+              return (
+                <div key={name} className="col-span-full">
+                  <label className="flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50/60 p-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          [name]: e.target.checked,
+                        }))
+                      }
+                      className="mt-0.5 h-5 w-5 flex-none accent-orange-500 cursor-pointer"
+                    />
+                    <span className="flex flex-col">
+                      <span className="text-sm font-medium text-gray-800">
+                        {label}
+                      </span>
+                      {field.helperText && (
+                        <span className="text-xs text-gray-500">
+                          {field.helperText}
+                        </span>
+                      )}
+                    </span>
+                  </label>
+                </div>
+              );
+            }
 
             if (type === 'logo') {
               return (

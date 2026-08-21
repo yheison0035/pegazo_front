@@ -20,6 +20,7 @@ export const getEmptyInventory = () => ({
   brandId: '',
   minStock: 0,
   unit: 'UNIDAD',
+  trackStock: true,
   expiryDate: '',
   lot: '',
   status: 'ACTIVO',
@@ -74,11 +75,20 @@ export const getFormFieldsInventory = (usuario) => {
       disabled: false,
     },
     {
+      name: 'trackStock',
+      label: 'Controlar inventario (existencias)',
+      type: 'checkbox',
+      required: false,
+      helperText:
+        'Actívalo para productos con existencias (bebidas, retail). Desactívalo para elaborados al momento sin stock (platos de un menú): se pueden vender siempre.',
+    },
+    {
       name: 'color',
       label: 'Color',
       type: 'colorSelect',
       required: true,
       disabled: false,
+      hideWhen: (fd) => fd.trackStock === false,
     },
     {
       name: 'stock',
@@ -86,6 +96,7 @@ export const getFormFieldsInventory = (usuario) => {
       type: 'number',
       required: true,
       disabled: true,
+      hideWhen: (fd) => fd.trackStock === false,
     },
     {
       name: 'localId',
