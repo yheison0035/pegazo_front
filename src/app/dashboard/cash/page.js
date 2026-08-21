@@ -15,6 +15,12 @@ import { useAuth } from '@/context/authContext';
 import useCash from '@/lib/api/hooks/useCash';
 import useLocals from '@/lib/api/hooks/useLocals';
 import { formatCOP, formatDateTime } from '@/lib/api/utils/utils';
+
+// Formato de dinero en vivo para los inputs: guarda solo dígitos y muestra
+// el valor con separador de miles ($ 100.000).
+const fmtMoney = (v) =>
+  v === '' || v === null || v === undefined ? '' : formatCOP(v);
+const parseMoney = (s) => (s || '').toString().replace(/[^\d]/g, '');
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 
@@ -213,10 +219,11 @@ export default function CashPage() {
               </p>
               <div className="flex flex-col sm:flex-row gap-3">
                 <input
-                  type="number"
-                  value={openingAmount}
-                  onChange={(e) => setOpeningAmount(e.target.value)}
-                  placeholder="Base inicial (ej: 100000)"
+                  type="text"
+                  inputMode="numeric"
+                  value={fmtMoney(openingAmount)}
+                  onChange={(e) => setOpeningAmount(parseMoney(e.target.value))}
+                  placeholder="Base inicial (ej: $ 100.000)"
                   className="flex-1 rounded-xl border border-gray-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
                 <button
@@ -283,9 +290,12 @@ export default function CashPage() {
                     </button>
                   </div>
                   <input
-                    type="number"
-                    value={mov.amount}
-                    onChange={(e) => setMov((m) => ({ ...m, amount: e.target.value }))}
+                    type="text"
+                    inputMode="numeric"
+                    value={fmtMoney(mov.amount)}
+                    onChange={(e) =>
+                      setMov((m) => ({ ...m, amount: parseMoney(e.target.value) }))
+                    }
                     placeholder="Monto"
                     className="w-full mb-2 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
@@ -357,9 +367,10 @@ export default function CashPage() {
                     )}
                   </div>
                   <input
-                    type="number"
-                    value={counted}
-                    onChange={(e) => setCounted(e.target.value)}
+                    type="text"
+                    inputMode="numeric"
+                    value={fmtMoney(counted)}
+                    onChange={(e) => setCounted(parseMoney(e.target.value))}
                     placeholder="Efectivo contado"
                     className="w-full mb-3 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
