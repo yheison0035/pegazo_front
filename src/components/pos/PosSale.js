@@ -98,6 +98,8 @@ export default function PosSale({
   const [notes, setNotes] = useState(initial?.notes || '');
   // Vencimiento del fiado (solo cuando el pago es a crédito).
   const [dueDate, setDueDate] = useState(initial?.dueDate || '');
+  // Efectivo recibido (para calcular el vuelto). Solo ayuda al cajero.
+  const [cashReceived, setCashReceived] = useState('');
   const [saleDate, setSaleDate] = useState(
     initial?.saleDate || nowLocalDatetime()
   );
@@ -341,6 +343,11 @@ export default function PosSale({
   const total = includeIva ? netTotal : r2(netTotal + taxTotal);
   const itemCount = cart.reduce((s, i) => s + Number(i.quantity || 0), 0);
 
+  // Vuelto (solo pago en efectivo): efectivo recibido − total a cobrar.
+  const cashReceivedNum =
+    Number(String(cashReceived).replace(/[^\d]/g, '')) || 0;
+  const change = cashReceivedNum - total;
+
   const clearAll = () => {
     setCart([]);
     setCustomer(null);
@@ -348,6 +355,7 @@ export default function PosSale({
     setPaymentMethod('EFECTIVO');
     setSaleDate(nowLocalDatetime());
     setDueDate('');
+    setCashReceived('');
   };
 
   const submit = async () => {
@@ -497,10 +505,32 @@ export default function PosSale({
                   autoFocus
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && shownResults[0]) {
+                  onKeyDown={async (e) => {
+                    if (e.key !== 'Enter') return;
+                    e.preventDefault();
+                    // Si ya hay resultados, añade el primero.
+                    if (shownResults[0]) {
                       addToCart(shownResults[0]);
                       setQuery('');
+                      return;
+                    }
+                    // Lector de código de barras: teclea rápido + Enter antes de
+                    // que cargue la búsqueda → se busca al vuelo y se añade.
+                    const term = query.trim();
+                    if (term.length >= 2) {
+                      try {
+                        const res = await searchProducts(term);
+                        const list = (res?.data || res || []).filter(
+                          (r) =>
+                            r.type !== 'service' ||
+                            !r.localId ||
+                            String(r.localId) === String(localId)
+                        );
+                        if (list[0]) {
+                          addToCart(list[0]);
+                          setQuery('');
+                        }
+                      } catch (_) {}
                     }
                   }}
                   placeholder={`Buscar ${
@@ -854,6 +884,52 @@ export default function PosSale({
                     </button>
                   ))}
                 </div>
+
+                {paymentMethod === 'EFECTIVO' && total > 0 && (
+                  <div className="rounded-lg border border-gray-100 bg-gray-50/70 p-2">
+                    <label className="text-[11px] font-medium text-gray-500">
+                      Efectivo recibido (para el vuelto)
+                    </label>
+                    <input
+                      inputMode="numeric"
+                      value={
+                        cashReceivedNum ? formatCOP(cashReceivedNum) : ''
+                      }
+                      onChange={(e) => setCashReceived(e.target.value)}
+                      placeholder="$ 0"
+                      className="mt-0.5 w-full rounded-lg border border-gray-200 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    />
+                    <div className="mt-1.5 flex flex-wrap gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setCashReceived(String(total))}
+                        className="rounded-md bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-600 hover:bg-gray-200"
+                      >
+                        Exacto
+                      </button>
+                      {[20000, 50000, 100000].map((v) => (
+                        <button
+                          key={v}
+                          type="button"
+                          onClick={() => setCashReceived(String(v))}
+                          className="rounded-md bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-600 hover:bg-gray-200"
+                        >
+                          {formatCOP(v)}
+                        </button>
+                      ))}
+                    </div>
+                    {cashReceivedNum > 0 && (
+                      <div
+                        className={`mt-1.5 flex justify-between text-sm font-semibold ${
+                          change >= 0 ? 'text-emerald-600' : 'text-red-600'
+                        }`}
+                      >
+                        <span>{change >= 0 ? 'Vuelto' : 'Faltan'}</span>
+                        <span>{formatCOP(Math.abs(change))}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {paymentMethod === 'CREDITO' && (
                   <div>
