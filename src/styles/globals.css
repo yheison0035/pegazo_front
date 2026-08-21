@@ -272,3 +272,14 @@ button:disabled {
 [data-theme='dark'] .text-white {
   color: #ffffff;
 }
+
+/* Móvil: los campos con letra <16px hacen que iOS/Safari haga zoom automático
+   al enfocarlos (y descuadra el scroll). Forzamos 16px en pantallas pequeñas
+   para que nunca haga zoom; en escritorio se respeta el tamaño de diseño. */
+@media (max-width: 640px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}

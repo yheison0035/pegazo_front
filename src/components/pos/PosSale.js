@@ -541,7 +541,7 @@ export default function PosSale({
                   } o ${
                     t.servicePlural?.toLowerCase() || 'servicios'
                   } (nombre o código)`}
-                  className="flex-1 text-sm focus:outline-none"
+                  className="flex-1 text-base focus:outline-none sm:text-sm"
                 />
                 {query && (
                   <button onClick={() => setQuery('')}>
