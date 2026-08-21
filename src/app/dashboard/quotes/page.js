@@ -452,7 +452,7 @@ export default function QuotesPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-gray-500 border-b border-gray-100">
+                <tr className="text-left text-[11px] uppercase tracking-wider text-gray-400 border-b border-gray-100">
                   <th className="px-5 py-3 font-medium">Cotización</th>
                   <th className="px-5 py-3 font-medium">Cliente</th>
                   <th className="px-5 py-3 font-medium text-center">Ítems</th>
@@ -471,7 +471,7 @@ export default function QuotesPage() {
                   </tr>
                 )}
                 {quotes.map((q) => (
-                  <tr key={q.id} className="border-b border-gray-50 hover:bg-orange-50/40">
+                  <tr key={q.id} className="border-b border-gray-50 hover:bg-orange-50">
                     <td className="px-5 py-3 font-medium text-gray-800">{q.code}</td>
                     <td className="px-5 py-3 text-gray-600">
                       {q.customer?.name || '—'}
