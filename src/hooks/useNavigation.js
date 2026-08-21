@@ -42,10 +42,11 @@ export default function useNavigation() {
     'settings',
   ];
 
-  // La tienda online solo aparece si la plataforma se la habilitó a la empresa.
-  // Además, toda empresa con tienda online vende por su web y esas ventas
-  // entran como pedidos: siempre debe poder verlos en "Pedidos".
-  if (usuario.company?.websiteEnabled) {
+  // La Tienda online (y Pedidos) SOLO aparecen cuando la plataforma ya montó el
+  // sitio del cliente: requiere `websiteEnabled` Y un `domain` cargado. Mientras
+  // superplatform no le adquiera/asigne el dominio y cargue el sitio, el dueño
+  // no ve el módulo. Así queda 100% dinámico según el estado real de su tienda.
+  if (usuario.company?.websiteEnabled && usuario.company?.domain) {
     modules.push('website');
     if (!modules.includes('orders')) modules.push('orders');
   }
