@@ -96,6 +96,8 @@ export default function PosSale({
     initial?.paymentMethod || 'EFECTIVO'
   );
   const [notes, setNotes] = useState(initial?.notes || '');
+  // Vencimiento del fiado (solo cuando el pago es a crédito).
+  const [dueDate, setDueDate] = useState(initial?.dueDate || '');
   const [saleDate, setSaleDate] = useState(
     initial?.saleDate || nowLocalDatetime()
   );
@@ -345,6 +347,7 @@ export default function PosSale({
     setNotes('');
     setPaymentMethod('EFECTIVO');
     setSaleDate(nowLocalDatetime());
+    setDueDate('');
   };
 
   const submit = async () => {
@@ -361,6 +364,7 @@ export default function PosSale({
       await onSubmit({
         paymentMethod,
         paymentStatus: paymentMethod === 'CREDITO' ? 'FIADO' : 'PAGADA',
+        dueDate: paymentMethod === 'CREDITO' && dueDate ? dueDate : null,
         localId: Number(localId),
         userId: Number(sellerId) || usuario?.id,
         customerId: customer?.id,
@@ -850,6 +854,20 @@ export default function PosSale({
                     </button>
                   ))}
                 </div>
+
+                {paymentMethod === 'CREDITO' && (
+                  <div>
+                    <label className="text-[11px] font-medium text-gray-500">
+                      Fecha de vencimiento (opcional)
+                    </label>
+                    <input
+                      type="date"
+                      value={dueDate}
+                      onChange={(e) => setDueDate(e.target.value)}
+                      className="mt-0.5 w-full rounded-lg border border-gray-200 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    />
+                  </div>
+                )}
 
                 <div className="flex gap-2">
                   {mode === 'new' && cart.length > 0 && (

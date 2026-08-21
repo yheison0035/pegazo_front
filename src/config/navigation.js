@@ -22,6 +22,7 @@ import {
   GiftIcon,
   DocumentTextIcon,
   ArrowUturnLeftIcon,
+  CreditCardIcon,
 } from '@heroicons/react/24/outline';
 
 export const NAVIGATION = [
@@ -180,6 +181,12 @@ export const NAVIGATION = [
         href: '/dashboard/returns',
         icon: ArrowUturnLeftIcon,
         roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA'],
+      },
+      {
+        name: 'Cartera',
+        href: '/dashboard/cartera',
+        icon: CreditCardIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA', 'CAJA'],
       },
       {
         name: 'Caja',
