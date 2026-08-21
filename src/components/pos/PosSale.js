@@ -570,7 +570,11 @@ export default function PosSale({
                   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
                     {shownResults.map((r) => {
                       const isService = r.type === 'service';
-                      const noStock = !isService && r.stock <= 0;
+                      // Los elaborados sin control de stock (platos) se venden
+                      // siempre, como un servicio: no muestran "Sin stock".
+                      const isPrepared = r.trackStock === false;
+                      const noStock =
+                        !isService && !isPrepared && r.stock <= 0;
                       return (
                         <button
                           key={`${r.type}-${r.id}`}
@@ -606,7 +610,7 @@ export default function PosSale({
                             <span className="text-sm font-bold text-gray-800">
                               {formatCOP(r.price)}
                             </span>
-                            {!isService && (
+                            {!isService && !isPrepared && (
                               <span
                                 className={`text-[11px] ${
                                   noStock ? 'text-red-500' : 'text-gray-400'

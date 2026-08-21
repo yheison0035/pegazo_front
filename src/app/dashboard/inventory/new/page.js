@@ -38,11 +38,17 @@ export default function NewProduct() {
   const showOldPrice = canSeeOldPrice(usuario);
 
   // En verticales por peso (carnicería, fruver, súper) el producto arranca en kg.
+  // En comida (restaurante/comida rápida/cafetería) arranca SIN control de stock
+  // (los platos se elaboran al momento); el dueño lo activa para las bebidas.
   useEffect(() => {
-    if (getProductFields(usuario?.company?.type).variantType === 'weight') {
+    const type = usuario?.company?.type;
+    if (getProductFields(type).variantType === 'weight') {
       setFormData((prev) =>
         prev.unit === 'UNIDAD' ? { ...prev, unit: 'KG' } : prev
       );
+    }
+    if (['RESTAURANTE', 'COMIDA_RAPIDA', 'CAFETERIA'].includes(type)) {
+      setFormData((prev) => ({ ...prev, trackStock: false }));
     }
   }, [usuario]);
 
@@ -90,14 +96,22 @@ export default function NewProduct() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.variants || formData.variants.length === 0) {
+    // Elaborado sin control de stock (plato): no exige cantidad ni ficha; se
+    // crea una variante por defecto para que sea vendible.
+    const noStock = formData.trackStock === false;
+    let variants = formData.variants || [];
+    if (noStock && variants.length === 0) {
+      variants = [{ color: 'ÚNICO', stock: 0 }];
+    }
+
+    if (!noStock && variants.length === 0) {
       return setAlert({
         type: 'warning',
         message: 'Debes indicar la cantidad del producto.',
       });
     }
 
-    if (showOldPrice) {
+    if (showOldPrice && !noStock) {
       if (
         !formData.features ||
         (formData.features.length === 0 && !formData.specifications) ||
@@ -110,19 +124,21 @@ export default function NewProduct() {
       }
     }
 
-    const invalidVariant = formData.variants.find(
-      (v) => !v.color || !v.stock || v.stock <= 0
-    );
-
-    if (invalidVariant) {
-      return setAlert({
-        type: 'warning',
-        message: 'La cantidad debe ser mayor a 0.',
-      });
+    if (!noStock) {
+      const invalidVariant = variants.find(
+        (v) => !v.color || !v.stock || v.stock <= 0
+      );
+      if (invalidVariant) {
+        return setAlert({
+          type: 'warning',
+          message: 'La cantidad debe ser mayor a 0.',
+        });
+      }
     }
 
     const payload = {
       ...formData,
+      variants,
       purchasePrice: parseCOPToNumber(formData.purchasePrice),
       salePrice: parseCOPToNumber(formData.salePrice),
       oldPrice: parseCOPToNumber(formData.oldPrice),

@@ -50,15 +50,18 @@ export default function EditProduct() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const invalidVariant = formData.variants.find(
-      (v) => !v.color || !v.stock || v.stock <= 0
-    );
-
-    if (invalidVariant) {
-      return setAlert({
-        type: 'warning',
-        message: 'Todas las variantes deben tener color y stock mayor a 0.',
-      });
+    // Los elaborados sin control de stock (platos) no exigen cantidad/color.
+    const noStock = formData.trackStock === false;
+    if (!noStock) {
+      const invalidVariant = (formData.variants || []).find(
+        (v) => !v.color || !v.stock || v.stock <= 0
+      );
+      if (invalidVariant) {
+        return setAlert({
+          type: 'warning',
+          message: 'Todas las variantes deben tener color y stock mayor a 0.',
+        });
+      }
     }
 
     const payload = {
