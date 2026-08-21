@@ -186,7 +186,7 @@ function CompanyProfileCard({ initial }) {
   };
 
   return (
-    <div className="max-w-xl rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
       <div className="flex items-start gap-3">
         <div className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-orange-50 text-orange-600">
           <BuildingStorefrontIcon className="h-5 w-5" />
@@ -288,7 +288,7 @@ function HoursCard({ initial }) {
   const hours = Array.from({ length: 24 }, (_, i) => i);
 
   return (
-    <div className="max-w-xl rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
       <div className="flex items-start gap-3">
         <div className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-orange-50 text-orange-600">
           <ClockIcon className="h-5 w-5" />
@@ -361,6 +361,24 @@ const THEMES = [
     desc: 'Fresco y natural.',
     colors: ['#10b981', '#34d399', '#2dd4bf'],
   },
+  {
+    id: 'rose',
+    name: 'Rosa',
+    desc: 'Cálido y moderno.',
+    colors: ['#e11d48', '#fb7185', '#ec4899'],
+  },
+  {
+    id: 'violet',
+    name: 'Violeta',
+    desc: 'Creativo y elegante.',
+    colors: ['#7c3aed', '#a78bfa', '#d946ef'],
+  },
+  {
+    id: 'cyan',
+    name: 'Turquesa',
+    desc: 'Vivo y tecnológico.',
+    colors: ['#0891b2', '#22d3ee', '#0ea5e9'],
+  },
 ];
 
 function ThemeSettings() {
@@ -404,7 +422,7 @@ function ThemeSettings() {
   };
 
   return (
-    <div className="max-w-xl rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
       <div className="flex items-start gap-3">
         <div className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-orange-50 text-orange-600">
           <SwatchIcon className="h-5 w-5" />
@@ -504,7 +522,7 @@ function FiscalCard({ initial }) {
     'w-full rounded-xl border border-gray-200 px-4 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20';
 
   return (
-    <div className="max-w-xl rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
       <div className="flex items-start gap-3">
         <div className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-orange-50 text-orange-600">
           <ReceiptPercentIcon className="h-5 w-5" />
@@ -642,7 +660,7 @@ function CashPolicyCard({ initial }) {
   };
 
   return (
-    <div className="max-w-xl rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
       <div className="flex items-start gap-3">
         <div className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-orange-50 text-orange-600">
           <CalculatorIcon className="h-5 w-5" />
@@ -753,7 +771,7 @@ function LoyaltySettings() {
     'w-full rounded-xl border border-gray-200 px-4 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20';
 
   return (
-    <div className="max-w-xl rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
       <div className="flex items-start gap-3">
         <div className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-orange-50 text-orange-600">
           <GiftIcon className="h-5 w-5" />
@@ -903,10 +921,13 @@ export default function Settings() {
             </p>
           </div>
         ) : (
-          <div className="flex flex-col gap-5">
+          <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-2">
             <ThemeSettings />
             <CompanyProfileCard initial={settings} />
-            <TerminologyCard initial={settings} />
+            {/* La terminología es ancha (muchos campos): ocupa toda la fila. */}
+            <div className="lg:col-span-2">
+              <TerminologyCard initial={settings} />
+            </div>
             <FiscalCard initial={settings} />
             <CashPolicyCard initial={settings} />
             {isServices && <HoursCard initial={settings} />}
