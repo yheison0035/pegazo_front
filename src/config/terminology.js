@@ -22,8 +22,7 @@ const TERMS_BY_TYPE = {
   SERVICIOS: {
     attendant: 'Barbero',
     attendantPlural: 'Barberos',
-    service: 'Corte',
-    servicePlural: 'Cortes',
+    // El módulo se llama "Servicios" (usa el vocabulario por defecto).
   },
   COMERCIO: {
     attendant: 'Cajero',

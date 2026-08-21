@@ -20,6 +20,7 @@ import useSales from '@/lib/api/hooks/useSales';
 import useUsers from '@/lib/api/hooks/useUsers';
 import useLocals from '@/lib/api/hooks/useLocals';
 import { getCustomers, getCustomerSummary } from '@/lib/api/routes/customers';
+import { getProductFields } from '@/config/verticalProfiles';
 import { formatCOP } from '@/lib/api/utils/utils';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import NewCustomerModal from '@/components/dashboard/modals/newCustomerModal';
@@ -45,6 +46,9 @@ const keyOf = (r) => (r.type === 'service' ? `s${r.id}` : `p${r.id}`);
 export default function POS() {
   const { usuario } = useAuth();
   const t = useTerms();
+  // Solo negocios con variantes de color muestran el color/talla del producto.
+  const showColor =
+    getProductFields(usuario?.company?.type).variantType === 'color';
   const { searchProducts, createSale, loading } = useSales();
   const { getUsers } = useUsers();
   const { getLocals } = useLocals();
@@ -264,10 +268,13 @@ export default function POS() {
       String(r.localId) === String(localId)
   );
 
+  // El color/talla solo se muestra en negocios con variantes de color.
   const variantLabel = (i) =>
-    [i.color && i.color !== 'ÚNICO' ? i.color : null, i.size]
-      .filter(Boolean)
-      .join(' · ');
+    !showColor
+      ? ''
+      : [i.color && i.color !== 'ÚNICO' ? i.color : null, i.size]
+          .filter(Boolean)
+          .join(' · ');
 
   return (
     <RoleGuard allowedRoles={Object.values(Roles)}>
