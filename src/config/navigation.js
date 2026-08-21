@@ -41,6 +41,11 @@ export const NAVIGATION = [
           'ASESOR',
           'BODEGUERO',
           'VENTAS',
+          'CAJA',
+          'MESERO',
+          'COCINERO',
+          'PROFESIONAL',
+          'BARBERO',
         ],
       },
       {

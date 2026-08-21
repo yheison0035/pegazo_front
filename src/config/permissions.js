@@ -33,6 +33,32 @@ export const ROLE_PERMISSIONS = {
     expenses: ['view', 'create', 'edit'],
   },
 
+  // Coordinador: perfil amplio de apoyo a la administración (sin borrar ni
+  // gestionar usuarios/config).
+  COORDINADOR: {
+    locals: ['view'],
+    inventory: ['view', 'create', 'edit'],
+    customers: ['view', 'create', 'edit'],
+    sales: ['view', 'create'],
+    delivered_sales: ['view'],
+    expenses: ['view', 'create', 'edit'],
+    providers: ['view', 'create', 'edit'],
+    categories: ['view', 'create', 'edit'],
+    brands: ['view', 'create', 'edit'],
+    services: ['view'],
+    appointments: ['view', 'create', 'edit'],
+    statistics: ['view'],
+  },
+
+  // Auxiliar: apoyo operativo con permisos de solo consulta / registro básico.
+  AUXILIAR: {
+    inventory: ['view'],
+    customers: ['view', 'create'],
+    delivered_sales: ['view'],
+    appointments: ['view'],
+    services: ['view'],
+  },
+
   // Profesional que presta el servicio (Barbero, Doctor, Estilista…). Ve solo
   // sus citas. BARBERO se mantiene como alias heredado con el mismo alcance.
   PROFESIONAL: {
