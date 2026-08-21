@@ -14,7 +14,16 @@ import {
   UsersIcon,
   CreditCardIcon,
   ClockIcon,
+  ArrowPathIcon,
+  GiftIcon,
 } from '@heroicons/react/24/outline';
+import {
+  AreaChart,
+  Area,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+} from 'recharts';
 import { useAuth } from '@/context/authContext';
 import useTerms from '@/hooks/useTerms';
 import Button from '@/components/ui/Button';
@@ -28,6 +37,117 @@ import { formatCOP } from '@/lib/api/utils/utils';
 
 function firstName(name) {
   return String(name || '').trim().split(/\s+/)[0] || '';
+}
+
+// Fecha "solo día" (ISO a medianoche UTC) -> DD/MM, con Hoy/Mañana.
+function apptDay(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const dd = String(d.getUTCDate()).padStart(2, '0');
+  const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const key = `${d.getUTCFullYear()}-${mm}-${dd}`;
+  const now = new Date();
+  const t0 = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const tom = new Date(now.getTime() + 86400000);
+  const t1 = `${tom.getFullYear()}-${String(tom.getMonth() + 1).padStart(2, '0')}-${String(tom.getDate()).padStart(2, '0')}`;
+  if (key === t0) return 'Hoy';
+  if (key === t1) return 'Mañana';
+  return `${dd}/${mm}`;
+}
+
+// Mini gráfica de ventas de la semana (usa el color del tema).
+function WeekChart({ data }) {
+  const rows = (data || []).map((x) => ({
+    label: x.date.slice(8) + '/' + x.date.slice(5, 7),
+    total: x.total,
+  }));
+  return (
+    <div className="h-40 w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart data={rows} margin={{ top: 5, right: 6, left: 6, bottom: 0 }}>
+          <defs>
+            <linearGradient id="wk" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="var(--color-orange-500)" stopOpacity={0.35} />
+              <stop offset="100%" stopColor="var(--color-orange-500)" stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <XAxis
+            dataKey="label"
+            tick={{ fontSize: 11, fill: 'var(--color-gray-400)' }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <Tooltip
+            formatter={(v) => formatCOP(v)}
+            labelStyle={{ color: 'var(--color-gray-500)' }}
+            contentStyle={{
+              background: 'var(--color-white)',
+              border: '1px solid var(--color-gray-200)',
+              borderRadius: 12,
+              fontSize: 12,
+            }}
+          />
+          <Area
+            type="monotone"
+            dataKey="total"
+            stroke="var(--color-orange-500)"
+            strokeWidth={2}
+            fill="url(#wk)"
+          />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+// Tarjeta de alerta clicable (cartera vencida / por reactivar).
+function AlertCard({ href, icon: Icon, tone, title, value, sub }) {
+  const tones = {
+    red: 'border-red-100 bg-red-50/60 text-red-600',
+    amber: 'border-amber-100 bg-amber-50/60 text-amber-600',
+  };
+  const body = (
+    <div className={`rounded-2xl border p-4 shadow-sm transition hover:shadow-md ${tones[tone] || 'border-gray-100 bg-white'}`}>
+      <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide">
+        <Icon className="h-4 w-4" />
+        {title}
+      </div>
+      <p className="mt-1 text-xl font-bold">{value}</p>
+      <p className="text-xs opacity-80">{sub}</p>
+    </div>
+  );
+  return href ? <Link href={href}>{body}</Link> : body;
+}
+
+// Tarjeta de lista corta (próximas citas / cumpleaños).
+function ListCard({ title, icon, items, href }) {
+  const inner = (
+    <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+      <div className="mb-2 flex items-center gap-2 text-sm font-bold text-gray-700">
+        {icon}
+        {title}
+      </div>
+      <ul className="space-y-1.5">
+        {items.map((it) => (
+          <li key={it.id} className="flex items-center justify-between gap-2 text-sm">
+            <span className="truncate text-gray-800">{it.main}</span>
+            <span className="flex-none text-xs text-gray-400">{it.sub}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+  return href ? <Link href={href}>{inner}</Link> : inner;
+}
+
+function MiniStat({ label, value, accent = 'text-gray-900', href }) {
+  const body = (
+    <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+      <p className="text-xs uppercase tracking-wide text-gray-400">{label}</p>
+      <p className={`mt-1 text-xl font-bold ${accent}`}>{value}</p>
+    </div>
+  );
+  return href ? <Link href={href}>{body}</Link> : body;
 }
 
 function Kpi({ icon: Icon, label, value, accent = 'text-gray-900', href }) {
@@ -48,6 +168,8 @@ export default function DashboardHome() {
   const usuario = auth?.usuario;
   const t = useTerms();
   const isServices = isServicesBusiness(usuario);
+  // Datos financieros (utilidad, IVA) solo para dueño/administrador.
+  const isAdmin = ['SUPER_ADMIN', 'ADMIN'].includes(usuario?.role);
 
   const [home, setHome] = useState(null);
   const [todayAppts, setTodayAppts] = useState(null);
@@ -213,6 +335,97 @@ export default function DashboardHome() {
           />
         )}
       </div>
+
+      {/* Ventas de la semana + panel de alertas/agenda */}
+      {home && (
+        <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm lg:col-span-2">
+            <div className="mb-1 flex items-center justify-between">
+              <h2 className="text-sm font-bold text-gray-700">
+                {t.salePlural} de la semana
+              </h2>
+              <span className="text-xs text-gray-400">Últimos 7 días</span>
+            </div>
+            <WeekChart data={home.weekSales} />
+          </div>
+
+          <div className="space-y-3">
+            {home.overdue?.count > 0 && (
+              <AlertCard
+                href="/dashboard/cartera"
+                icon={ExclamationTriangleIcon}
+                tone="red"
+                title="Cartera vencida"
+                value={formatCOP(home.overdue.total)}
+                sub={`${home.overdue.count} ${
+                  home.overdue.count === 1 ? 'cuenta' : 'cuentas'
+                } en mora`}
+              />
+            )}
+            {home.winbackCount > 0 && (
+              <AlertCard
+                href="/dashboard/customers"
+                icon={ArrowPathIcon}
+                tone="amber"
+                title="Por reactivar"
+                value={home.winbackCount}
+                sub={`${t.customerPlural} sin volver hace 20+ días`}
+              />
+            )}
+            {isServices && home.nextAppointments?.length > 0 && (
+              <ListCard
+                title="Próximas citas"
+                href="/dashboard/appointments"
+                items={home.nextAppointments.map((a) => ({
+                  id: a.id,
+                  main: a.customer?.name || '—',
+                  sub: `${apptDay(a.date)} · ${a.startTime || ''}`,
+                }))}
+              />
+            )}
+            {home.birthdays?.length > 0 && (
+              <ListCard
+                title="Cumpleaños esta semana"
+                icon={<GiftIcon className="h-4 w-4 text-orange-500" />}
+                items={home.birthdays.map((b) => ({
+                  id: b.id,
+                  main: b.name,
+                  sub: b.date,
+                }))}
+              />
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Resumen del mes (solo dueño/admin) */}
+      {isAdmin && home?.month && (
+        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <MiniStat
+            label="Ventas del mes"
+            value={formatCOP(home.month.sales)}
+            accent="text-emerald-600"
+          />
+          <MiniStat
+            label="Gastos del mes"
+            value={formatCOP(home.month.expenses)}
+            accent="text-red-500"
+          />
+          <MiniStat
+            label="Utilidad del mes"
+            value={formatCOP(home.month.profit)}
+            accent={home.month.profit >= 0 ? 'text-emerald-600' : 'text-red-600'}
+          />
+          {home.iva && (
+            <MiniStat
+              label="IVA generado (mes)"
+              value={formatCOP(home.iva.generado)}
+              accent="text-orange-600"
+              href="/dashboard/impuestos"
+            />
+          )}
+        </div>
+      )}
 
       {/* Accesos rápidos */}
       <div className="mt-6">
