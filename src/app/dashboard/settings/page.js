@@ -42,6 +42,8 @@ const TERM_FIELDS = [
   { key: 'productPlural', label: 'Productos (plural)', hint: 'Ej: Productos, Prendas' },
   { key: 'service', label: 'Servicio (singular)', hint: 'Ej: Servicio, Tratamiento' },
   { key: 'servicePlural', label: 'Servicios (plural)', hint: 'Ej: Servicios, Tratamientos' },
+  { key: 'sale', label: 'Venta (singular)', hint: 'Ej: Venta, Pedido' },
+  { key: 'salePlural', label: 'Ventas (plural)', hint: 'Ej: Ventas, Pedidos' },
   { key: 'catalogLabel', label: 'Nombre del catálogo', hint: 'Ej: Inventario, Menú, Medicamentos' },
 ];
 
