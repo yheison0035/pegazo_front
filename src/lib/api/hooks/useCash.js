@@ -7,6 +7,7 @@ import {
   openCash,
   addCashMovement,
   closeCash,
+  reopenCash,
 } from '../routes/cash';
 
 export default function useCash() {
@@ -32,6 +33,7 @@ export default function useCash() {
     openCash: useCallback((dto) => wrap(openCash, dto), [wrap]),
     addCashMovement: useCallback((id, dto) => wrap(addCashMovement, id, dto), [wrap]),
     closeCash: useCallback((id, dto) => wrap(closeCash, id, dto), [wrap]),
+    reopenCash: useCallback((id) => wrap(reopenCash, id), [wrap]),
     loading,
     error,
   };

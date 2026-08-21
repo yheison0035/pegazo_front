@@ -32,3 +32,7 @@ export async function closeCash(id, dto) {
     body: JSON.stringify(dto),
   });
 }
+
+export async function reopenCash(id) {
+  return apiFetch(`/cash/${id}/reopen`, { method: 'POST' });
+}

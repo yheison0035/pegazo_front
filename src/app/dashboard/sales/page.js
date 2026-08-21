@@ -22,6 +22,14 @@ import useLocals from '@/lib/api/hooks/useLocals';
 import { getCustomers, getCustomerSummary } from '@/lib/api/routes/customers';
 import { formatCOP } from '@/lib/api/utils/utils';
 import AlertModal from '@/components/dashboard/modals/alertModal';
+import NewCustomerModal from '@/components/dashboard/modals/newCustomerModal';
+
+// Fecha/hora actual en formato datetime-local (YYYY-MM-DDTHH:mm), hora local.
+function nowLocalDatetime() {
+  const d = new Date();
+  const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 16);
+}
 
 const PAYMENT_METHODS = [
   { id: 'EFECTIVO', name: 'Efectivo' },
@@ -58,6 +66,8 @@ export default function POS() {
   // Config de la venta
   const [paymentMethod, setPaymentMethod] = useState('EFECTIVO');
   const [notes, setNotes] = useState('');
+  const [saleDate, setSaleDate] = useState(nowLocalDatetime());
+  const [showNewCustomer, setShowNewCustomer] = useState(false);
   const [locals, setLocals] = useState([]);
   const [localId, setLocalId] = useState(usuario?.localId || '');
   const [sellers, setSellers] = useState([]);
@@ -199,6 +209,7 @@ export default function POS() {
     setCustomer(null);
     setNotes('');
     setPaymentMethod('EFECTIVO');
+    setSaleDate(nowLocalDatetime());
   };
 
   const submit = async () => {
@@ -217,6 +228,7 @@ export default function POS() {
         localId: Number(localId),
         userId: Number(sellerId) || usuario?.id,
         customerId: customer?.id,
+        saleDate,
         notes,
         items: cart.map((i) =>
           i.type === 'service'
@@ -414,6 +426,13 @@ export default function POS() {
                         placeholder="Cliente (opcional) — Consumidor Final"
                         className="flex-1 text-sm focus:outline-none"
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowNewCustomer(true)}
+                        className="flex-none inline-flex items-center gap-1 rounded-lg bg-orange-50 px-2 py-1 text-xs font-medium text-orange-600 hover:bg-orange-100"
+                      >
+                        <PlusIcon className="w-3.5 h-3.5" /> Crear
+                      </button>
                     </div>
                     {custResults.length > 0 && (
                       <div className="absolute z-20 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg max-h-56 overflow-y-auto">
@@ -568,6 +587,19 @@ export default function POS() {
                   </div>
                 )}
 
+                {/* Fecha y hora de la venta */}
+                <div>
+                  <label className="text-[11px] font-medium text-gray-500">
+                    Fecha y hora
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={saleDate}
+                    onChange={(e) => setSaleDate(e.target.value)}
+                    className="mt-0.5 w-full rounded-lg border border-gray-200 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+
                 {/* Método de pago */}
                 <div className="grid grid-cols-3 gap-1.5">
                   {PAYMENT_METHODS.map((pm) => (
@@ -610,6 +642,17 @@ export default function POS() {
             </div>
           </div>
         </div>
+
+        {showNewCustomer && (
+          <NewCustomerModal
+            localId={localId}
+            onClose={() => setShowNewCustomer(false)}
+            onCreated={(c) => {
+              setShowNewCustomer(false);
+              if (c) pickCustomer(c);
+            }}
+          />
+        )}
 
         <AlertModal
           type={alert.type}
