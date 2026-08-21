@@ -18,6 +18,7 @@ import usePurchases from '@/lib/api/hooks/usePurchases';
 import useSales from '@/lib/api/hooks/useSales';
 import useLocals from '@/lib/api/hooks/useLocals';
 import { getProviders } from '@/lib/api/routes/providers';
+import { getFiscalConfig } from '@/lib/api/routes/company';
 import { formatCOP, formatDateTime } from '@/lib/api/utils/utils';
 import Pagination from '@/components/dashboard/tables/segments/pagination';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
@@ -55,6 +56,7 @@ export default function PurchasesPage() {
 
   const [locals, setLocals] = useState([]);
   const [providers, setProviders] = useState([]);
+  const [fiscal, setFiscal] = useState(null);
 
   // formulario de nueva compra
   const [localId, setLocalId] = useState(usuario?.localId || '');
@@ -89,6 +91,10 @@ export default function PurchasesPage() {
       try {
         const p = await getProviders({ all: true });
         setProviders(p?.data || []);
+      } catch (_) {}
+      try {
+        const f = await getFiscalConfig();
+        setFiscal(f?.data || f || null);
       } catch (_) {}
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -147,6 +153,11 @@ export default function PurchasesPage() {
     (s, i) => s + (Number(i.quantity) || 0) * (Number(i.unitCost) || 0),
     0
   );
+  // IVA descontable de la compra (solo si la empresa es responsable de IVA).
+  const responsableIVA = !!fiscal?.responsableIVA;
+  const defRate = Number(fiscal?.defaultTaxRate) || 0;
+  const ivaTotal = responsableIVA ? Math.round((total * defRate) / 100) : 0;
+  const grandTotal = total + ivaTotal;
 
   const resetForm = () => {
     setItems([]);
@@ -384,9 +395,17 @@ export default function PurchasesPage() {
                 className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
               <div className="text-right">
+                {responsableIVA && ivaTotal > 0 && (
+                  <div className="text-xs text-gray-500">
+                    <span className="mr-2">Base {formatCOP(total)}</span>
+                    <span>
+                      IVA ({defRate}%) {formatCOP(ivaTotal)}
+                    </span>
+                  </div>
+                )}
                 <span className="text-sm text-gray-500 mr-2">Total:</span>
                 <span className="text-lg font-bold text-gray-800">
-                  {formatCOP(total)}
+                  {formatCOP(responsableIVA ? grandTotal : total)}
                 </span>
               </div>
               <Button
