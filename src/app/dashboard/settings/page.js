@@ -245,28 +245,32 @@ function ThemeSettings() {
   const [saving, setSaving] = useState(false);
   const [alert, setAlert] = useState({});
 
+  // Actualiza la sesión (empresa) para que el panel cambie al instante; el
+  // contenedor del dashboard lee company.crmTheme y aplica el tema en su
+  // subárbol (no toca el <html>, así el login no se ve afectado).
+  const setSessionTheme = (themeId) => {
+    if (setUsuario && usuario) {
+      const merged = {
+        ...usuario,
+        company: { ...usuario.company, crmTheme: themeId },
+      };
+      setUsuario(merged);
+      localStorage.setItem('usuario', JSON.stringify(merged));
+    }
+  };
+
   const apply = async (themeId) => {
     const prev = current;
     setCurrent(themeId);
-    // Aplica en vivo de inmediato.
-    document.documentElement.dataset.crmTheme = themeId;
+    setSessionTheme(themeId); // aplica en vivo (optimista)
     setSaving(true);
     try {
       await updateCrmTheme(themeId);
-      // Refleja el cambio en la sesión para que persista al navegar.
-      if (setUsuario && usuario) {
-        const merged = {
-          ...usuario,
-          company: { ...usuario.company, crmTheme: themeId },
-        };
-        setUsuario(merged);
-        localStorage.setItem('usuario', JSON.stringify(merged));
-      }
       setAlert({ type: 'success', message: 'Tema actualizado.' });
     } catch (e) {
       // revierte si falla
       setCurrent(prev);
-      document.documentElement.dataset.crmTheme = prev;
+      setSessionTheme(prev);
       setAlert({ type: 'error', message: e.message || 'No se pudo guardar.' });
     } finally {
       setSaving(false);

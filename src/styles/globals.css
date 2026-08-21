@@ -158,7 +158,7 @@ button:disabled {
    ============================================================ */
 
 /* AZUL */
-:root[data-crm-theme='blue'] {
+[data-crm-theme='blue'] {
   --color-orange-50: #eff6ff;
   --color-orange-100: #dbeafe;
   --color-orange-200: #bfdbfe;
@@ -173,7 +173,7 @@ button:disabled {
 }
 
 /* ESMERALDA / VERDE */
-:root[data-crm-theme='emerald'] {
+[data-crm-theme='emerald'] {
   --color-orange-50: #ecfdf5;
   --color-orange-100: #d1fae5;
   --color-orange-200: #a7f3d0;
