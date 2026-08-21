@@ -155,39 +155,38 @@ export default function AuditHistoryModal({ entity, id, onClose }) {
                     </div>
 
                     {rows.length > 0 ? (
-                      <div className="mt-2 overflow-hidden rounded-xl border border-gray-200">
-                        <table className="min-w-full text-sm">
-                          <thead className="bg-gray-50 text-[11px] uppercase tracking-wider text-gray-400">
-                            <tr>
-                              <th className="px-3 py-1.5 text-left">Campo</th>
-                              <th className="px-3 py-1.5 text-left">Antes</th>
-                              <th className="px-3 py-1.5 text-left">Después</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-gray-100">
-                            {rows.map((r) => (
-                              <tr key={r.field}>
-                                <td className="px-3 py-1.5 font-medium text-gray-700">
-                                  {r.label}
-                                </td>
-                                <td className="px-3 py-1.5 text-gray-400 line-through">
+                      <div className="mt-2 space-y-2">
+                        <p className="text-xs text-gray-500">
+                          {rows.length === 1
+                            ? 'Se modificó 1 dato:'
+                            : `Se modificaron ${rows.length} datos:`}
+                        </p>
+                        <ul className="space-y-2">
+                          {rows.map((r) => (
+                            <li
+                              key={r.field}
+                              className="rounded-xl border border-gray-200 bg-gray-50/60 px-3 py-2"
+                            >
+                              <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                                {r.label}
+                              </p>
+                              <div className="mt-1 flex flex-wrap items-center gap-2 text-sm">
+                                <span className="rounded-md bg-white px-2 py-0.5 text-gray-400 line-through ring-1 ring-gray-200">
                                   {formatValue(r.field, r.before)}
-                                </td>
-                                <td className="px-3 py-1.5">
-                                  <span className="inline-flex items-center gap-1 font-medium text-gray-800">
-                                    <ArrowRightIcon className="h-3 w-3 flex-none text-orange-500" />
-                                    {formatValue(r.field, r.after)}
-                                  </span>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                                </span>
+                                <ArrowRightIcon className="h-4 w-4 flex-none text-orange-500" />
+                                <span className="rounded-md bg-white px-2 py-0.5 font-semibold text-gray-900 ring-1 ring-orange-200">
+                                  {formatValue(r.field, r.after)}
+                                </span>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
                       </div>
                     ) : (
                       <p className="mt-1 text-xs text-gray-500">
                         {log.action === 'CREATE'
-                          ? 'Se creó el registro.'
+                          ? 'Se creó el registro por primera vez.'
                           : log.action === 'DELETE'
                             ? 'Se eliminó el registro.'
                             : 'Sin cambios de campos registrados.'}
