@@ -7,7 +7,7 @@ import { roleLabel } from '@/config/roleLabels';
 import Actions from './actions';
 import PhoneContentData from './contentData/phone';
 import WhatsappLink from './contentData/whatsappLink';
-import LastAudit from './contentData/lastAudit';
+import LastAudit, { VIEW_TO_ENTITY } from './contentData/lastAudit';
 import StatusBadge from '@/components/ui/StatusBadge';
 import ConfirmClientButton from '@/components/appointments/ConfirmClientButton';
 import {
@@ -38,6 +38,7 @@ export default function ContentData({
     <>
       {paginatedData.map((info, index) => {
         const isLocked = false;
+        const auditEntity = VIEW_TO_ENTITY[view];
 
         return (
           <tr
@@ -96,7 +97,11 @@ export default function ContentData({
                 </td>
                 <PhoneContentData info={info} />
                 <td className="px-5 py-4">
-                  <LastAudit audit={info.lastAudit} />
+                  <LastAudit
+                    audit={info.lastAudit}
+                    entity={auditEntity}
+                    id={info.id}
+                  />
                 </td>
               </>
             )}
@@ -184,7 +189,11 @@ export default function ContentData({
                   <StatusBadge status={info.status} />
                 </td>
                 <td className="px-5 py-4">
-                  <LastAudit audit={info.lastAudit} />
+                  <LastAudit
+                    audit={info.lastAudit}
+                    entity={auditEntity}
+                    id={info.id}
+                  />
                 </td>
               </>
             )}
@@ -204,7 +213,11 @@ export default function ContentData({
                   {info.local?.name || '---'}
                 </td>
                 <td className="px-5 py-4">
-                  <LastAudit audit={info.lastAudit} />
+                  <LastAudit
+                    audit={info.lastAudit}
+                    entity={auditEntity}
+                    id={info.id}
+                  />
                 </td>
               </>
             )}
@@ -269,7 +282,11 @@ export default function ContentData({
                   <StatusBadge status={info.status} />
                 </td>
                 <td className="px-5 py-4">
-                  <LastAudit audit={info.lastAudit} />
+                  <LastAudit
+                    audit={info.lastAudit}
+                    entity={auditEntity}
+                    id={info.id}
+                  />
                 </td>
               </>
             )}
@@ -307,7 +324,11 @@ export default function ContentData({
                   {formatDateTime(info.saleDate) || '---'}
                 </td>
                 <td className="px-5 py-4">
-                  <LastAudit audit={info.lastAudit} />
+                  <LastAudit
+                    audit={info.lastAudit}
+                    entity={auditEntity}
+                    id={info.id}
+                  />
                 </td>
               </>
             )}
@@ -338,7 +359,11 @@ export default function ContentData({
                   <StatusBadge status={info.status} />
                 </td>
                 <td className="px-5 py-4">
-                  <LastAudit audit={info.lastAudit} />
+                  <LastAudit
+                    audit={info.lastAudit}
+                    entity={auditEntity}
+                    id={info.id}
+                  />
                 </td>
               </>
             )}
@@ -441,7 +466,11 @@ export default function ContentData({
                   <StatusBadge status={info.status} />
                 </td>
                 <td className="px-5 py-4">
-                  <LastAudit audit={info.lastAudit} />
+                  <LastAudit
+                    audit={info.lastAudit}
+                    entity={auditEntity}
+                    id={info.id}
+                  />
                 </td>
               </>
             )}
@@ -481,7 +510,11 @@ export default function ContentData({
                   {info.notes || '---'}
                 </td>
                 <td className="px-5 py-4">
-                  <LastAudit audit={info.lastAudit} />
+                  <LastAudit
+                    audit={info.lastAudit}
+                    entity={auditEntity}
+                    id={info.id}
+                  />
                 </td>
               </>
             )}
