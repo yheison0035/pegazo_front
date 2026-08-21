@@ -11,6 +11,7 @@ import {
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
 import { useAuth } from '@/context/authContext';
+import { getProductFields } from '@/config/verticalProfiles';
 import usePurchases from '@/lib/api/hooks/usePurchases';
 import useSales from '@/lib/api/hooks/useSales';
 import useLocals from '@/lib/api/hooks/useLocals';
@@ -38,6 +39,11 @@ const statusBadge = (s) => (
 
 export default function PurchasesPage() {
   const { usuario } = useAuth();
+  // Solo los negocios con variantes de color muestran el color del producto.
+  const showColor =
+    getProductFields(usuario?.company?.type).variantType === 'color';
+  const colorLabel = (c) =>
+    showColor && c && c !== 'ÚNICO' ? ` · ${c}` : '';
   const {
     getPurchases,
     getPurchaseById,
@@ -307,7 +313,7 @@ export default function PurchasesPage() {
                     >
                       <span>
                         {r.name}
-                        {r.color && r.color !== 'ÚNICO' ? ` · ${r.color}` : ''}
+                        {colorLabel(r.color)}
                         {r.size ? ` · ${r.size}` : ''}
                       </span>
                       <span className="text-gray-400">Stock: {r.stock}</span>
@@ -335,7 +341,7 @@ export default function PurchasesPage() {
                       <tr key={i.inventoryVariantId} className="border-t border-gray-50">
                         <td className="px-3 py-2">
                           {i.name}
-                          {i.color && i.color !== 'ÚNICO' ? ` · ${i.color}` : ''}
+                          {colorLabel(i.color)}
                           {i.size ? ` · ${i.size}` : ''}
                         </td>
                         <td className="px-3 py-2">
@@ -498,10 +504,10 @@ export default function PurchasesPage() {
                       <tr key={it.id} className="border-b border-gray-50">
                         <td className="py-2">
                           {it.variant?.inventory?.name}
-                          {it.variant?.color && it.variant.color !== 'ÚNICO'
-                            ? ` · ${it.variant.color}`
+                          {colorLabel(it.variant?.color)}
+                          {showColor && it.variant?.size
+                            ? ` · ${it.variant.size}`
                             : ''}
-                          {it.variant?.size ? ` · ${it.variant.size}` : ''}
                         </td>
                         <td className="py-2 text-center">{it.quantity}</td>
                         <td className="py-2 text-right">{formatCOP(it.unitCost)}</td>
