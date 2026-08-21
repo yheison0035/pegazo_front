@@ -11,3 +11,11 @@ export async function getDashboardStats(dto = {}) {
     body: JSON.stringify(dto),
   });
 }
+
+// Reporte de IVA (generado vs descontable) de un periodo.
+export async function getTaxReport(dto = {}) {
+  return apiFetch('/statistics/tax-report', {
+    method: 'POST',
+    body: JSON.stringify(dto),
+  });
+}

@@ -23,6 +23,7 @@ import {
   DocumentTextIcon,
   ArrowUturnLeftIcon,
   CreditCardIcon,
+  ReceiptPercentIcon,
 } from '@heroicons/react/24/outline';
 
 export const NAVIGATION = [
@@ -273,6 +274,12 @@ export const NAVIGATION = [
         href: '/dashboard/statistics',
         icon: ChartBarSquareIcon,
         roles: ['SUPER_ADMIN'],
+      },
+      {
+        name: 'Impuestos (IVA)',
+        href: '/dashboard/impuestos',
+        icon: ReceiptPercentIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN'],
       },
     ],
   },
