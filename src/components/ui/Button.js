@@ -26,12 +26,12 @@ const BASE =
 
 const VARIANTS = {
   primary:
-    'bg-gradient-to-r from-orange-600 to-amber-500 text-white shadow-sm hover:shadow-md hover:brightness-[1.05] focus-visible:ring-orange-400/60',
-  add: 'bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 focus-visible:ring-emerald-400/60',
+    'bg-gradient-to-r from-orange-600 to-amber-500 text-[#fff] shadow-sm hover:shadow-md hover:brightness-[1.05] focus-visible:ring-orange-400/60',
+  add: 'bg-emerald-600 text-[#fff] shadow-sm hover:bg-emerald-700 focus-visible:ring-emerald-400/60',
   success:
-    'bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 focus-visible:ring-emerald-400/60',
+    'bg-emerald-600 text-[#fff] shadow-sm hover:bg-emerald-700 focus-visible:ring-emerald-400/60',
   danger:
-    'bg-red-600 text-white shadow-sm hover:bg-red-700 focus-visible:ring-red-400/60',
+    'bg-red-600 text-[#fff] shadow-sm hover:bg-red-700 focus-visible:ring-red-400/60',
   secondary:
     'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-gray-400 focus-visible:ring-gray-300',
   outline:
