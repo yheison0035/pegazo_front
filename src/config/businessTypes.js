@@ -13,14 +13,12 @@
 
 // Módulos ocultos temporalmente en TODOS los negocios: aún no están 100%
 // terminados y comprobados. Para reactivar uno, quítalo de este conjunto.
-//   - website / orders : tienda online + pedidos (storefront/checkout pendiente)
 //   - mesas / kitchen  : flujo de restaurante (sin verificar de punta a punta)
-export const HIDDEN_MODULES = new Set([
-  'website',
-  'orders',
-  'mesas',
-  'kitchen',
-]);
+//
+// La Tienda online (website) y Pedidos (orders) NO se ocultan aquí: tienen su
+// propio gateo doble → solo aparecen si la empresa tiene `websiteEnabled` y el
+// plan requerido (website: ALTURA+). Ver useNavigation + lib/plans.
+export const HIDDEN_MODULES = new Set(['mesas', 'kitchen']);
 
 export const BUSINESS_TYPES = {
   // ---------- RETAIL (mostrador con productos) ----------
