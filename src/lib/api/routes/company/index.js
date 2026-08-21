@@ -48,6 +48,14 @@ export async function updateFiscal(dto) {
   });
 }
 
+// Overrides de vocabulario propios de la empresa (terminología).
+export async function updateTerminology(dto) {
+  return apiFetch('/company/terminology', {
+    method: 'PATCH',
+    body: JSON.stringify(dto),
+  });
+}
+
 // Política de caja: exigir abrir el día (caja) para poder vender.
 export async function updateCashPolicy(requireCashOpen) {
   return apiFetch('/company/cash-policy', {

@@ -12,7 +12,9 @@ import {
   LockClosedIcon,
   CalculatorIcon,
   ReceiptPercentIcon,
+  ChatBubbleBottomCenterTextIcon,
 } from '@heroicons/react/24/outline';
+import { getTerms } from '@/config/terminology';
 import Button from '@/components/ui/Button';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import LogoUploader from '@/components/ui/LogoUploader';
@@ -26,7 +28,112 @@ import {
   updateCrmTheme,
   updateCashPolicy,
   updateFiscal,
+  updateTerminology,
 } from '@/lib/api/routes/company';
+
+// Editor de vocabulario propio de la empresa (barbería vs estética, etc.).
+// Solo guarda lo que el dueño cambia; lo vacío usa el término del tipo de negocio.
+const TERM_FIELDS = [
+  { key: 'attendant', label: 'Quien atiende (singular)', hint: 'Ej: Barbero, Especialista, Doctor' },
+  { key: 'attendantPlural', label: 'Quien atiende (plural)', hint: 'Ej: Barberos, Especialistas' },
+  { key: 'customer', label: 'Cliente (singular)', hint: 'Ej: Cliente, Paciente' },
+  { key: 'customerPlural', label: 'Clientes (plural)', hint: 'Ej: Clientes, Pacientes' },
+  { key: 'product', label: 'Producto (singular)', hint: 'Ej: Producto, Prenda, Plato' },
+  { key: 'productPlural', label: 'Productos (plural)', hint: 'Ej: Productos, Prendas' },
+  { key: 'service', label: 'Servicio (singular)', hint: 'Ej: Servicio, Tratamiento' },
+  { key: 'servicePlural', label: 'Servicios (plural)', hint: 'Ej: Servicios, Tratamientos' },
+  { key: 'catalogLabel', label: 'Nombre del catálogo', hint: 'Ej: Inventario, Menú, Medicamentos' },
+];
+
+function TerminologyCard({ initial }) {
+  const { usuario } = useAuth();
+  const defaults = getTerms(usuario?.company || {});
+  const [form, setForm] = useState({});
+  const [saving, setSaving] = useState(false);
+  const [ok, setOk] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    // Solo los overrides propios (lo vacío = usar el término por defecto).
+    setForm(initial?.terminology || {});
+  }, [initial]);
+
+  const save = async () => {
+    setSaving(true);
+    setError('');
+    setOk(false);
+    try {
+      // Enviar solo los que tienen texto.
+      const dto = {};
+      for (const f of TERM_FIELDS) {
+        const v = (form[f.key] || '').trim();
+        if (v) dto[f.key] = v;
+      }
+      await updateTerminology(dto);
+      setOk(true);
+      setTimeout(() => setOk(false), 2500);
+    } catch (e) {
+      setError(e?.message || 'No se pudo guardar');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+      <div className="mb-4 flex items-start gap-3">
+        <div className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-orange-50">
+          <ChatBubbleBottomCenterTextIcon className="h-5 w-5 text-orange-500" />
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-800">Terminología</h3>
+          <p className="text-sm text-gray-500">
+            Adapta las palabras del CRM a tu negocio. Deja en blanco para usar el
+            término por defecto de tu tipo de negocio.
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {TERM_FIELDS.map((f) => (
+          <div key={f.key}>
+            <label className="text-xs font-medium text-gray-500">
+              {f.label}
+            </label>
+            <input
+              value={form[f.key] || ''}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, [f.key]: e.target.value }))
+              }
+              placeholder={defaults[f.key] || f.hint}
+              className="mt-0.5 w-full rounded-xl border border-gray-200 px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+          </div>
+        ))}
+      </div>
+
+      {error && (
+        <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+          {error}
+        </p>
+      )}
+
+      <div className="mt-4 flex items-center gap-3">
+        <Button variant="primary" onClick={save} loading={saving} disabled={saving}>
+          Guardar
+        </Button>
+        {ok && (
+          <span className="inline-flex items-center gap-1 text-sm font-medium text-emerald-600">
+            <CheckIcon className="h-4 w-4" /> Guardado
+          </span>
+        )}
+      </div>
+      <p className="mt-3 text-xs text-gray-400">
+        Los cambios se ven al recargar el panel.
+      </p>
+    </div>
+  );
+}
 
 function CompanyProfileCard({ initial }) {
   const [form, setForm] = useState({
@@ -784,6 +891,7 @@ export default function Settings() {
           <div className="flex flex-col gap-5">
             <ThemeSettings />
             <CompanyProfileCard initial={settings} />
+            <TerminologyCard initial={settings} />
             <FiscalCard initial={settings} />
             <CashPolicyCard initial={settings} />
             {isServices && <HoursCard initial={settings} />}
