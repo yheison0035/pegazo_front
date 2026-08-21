@@ -35,6 +35,14 @@ export async function syncLoyaltyFromSales() {
   return apiFetch('/company/loyalty/sync', { method: 'POST' });
 }
 
+// Configuración fiscal (IVA / datos para facturar).
+export async function updateFiscal(dto) {
+  return apiFetch('/company/fiscal', {
+    method: 'PATCH',
+    body: JSON.stringify(dto),
+  });
+}
+
 // Política de caja: exigir abrir el día (caja) para poder vender.
 export async function updateCashPolicy(requireCashOpen) {
   return apiFetch('/company/cash-policy', {
