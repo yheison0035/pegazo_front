@@ -10,6 +10,7 @@ import {
 } from '@heroicons/react/24/outline';
 import RoleGuard from '@/auth/roleGuard';
 import StatusBadge from '@/components/ui/StatusBadge';
+import EmptyState from '@/components/ui/EmptyState';
 import { Roles } from '@/config/roles';
 import { useAuth } from '@/context/authContext';
 import { getProductFields } from '@/config/verticalProfiles';
@@ -388,13 +389,13 @@ export default function PurchasesPage() {
                   {formatCOP(total)}
                 </span>
               </div>
-              <button
+              <Button
+                variant="primary"
                 onClick={handleCreate}
                 disabled={loading || items.length === 0}
-                className="rounded-lg bg-orange-500 px-6 py-2 text-sm font-semibold text-white hover:bg-orange-600 disabled:opacity-50"
               >
                 Registrar compra
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -418,8 +419,8 @@ export default function PurchasesPage() {
               <tbody>
                 {purchases.length === 0 && !loading && (
                   <tr>
-                    <td colSpan={7} className="px-5 py-10 text-center text-gray-400">
-                      Aún no hay compras.
+                    <td colSpan={7} className="px-5 py-4">
+                      <EmptyState title="Aún no hay compras." />
                     </td>
                   </tr>
                 )}

@@ -11,6 +11,7 @@ import {
   ArrowPathIcon,
 } from '@heroicons/react/24/outline';
 import RoleGuard from '@/auth/roleGuard';
+import Button from '@/components/ui/Button';
 import { Roles } from '@/config/roles';
 import { useAuth } from '@/context/authContext';
 import { getLoyaltyCustomers } from '@/lib/api/routes/customers';
@@ -86,17 +87,16 @@ export default function LoyaltyPage() {
           </div>
           <div className="flex gap-2">
             {isOwnerAdmin && (
-              <button
+              <Button
+                variant="primary"
                 onClick={sync}
+                loading={syncing}
                 disabled={syncing}
+                icon={ArrowPathIcon}
                 title="Recalcula los sellos de todos los clientes a partir del historial de ventas"
-                className="inline-flex items-center gap-2 rounded-xl bg-orange-500 px-4 py-2 text-sm font-medium text-white hover:bg-orange-600 disabled:opacity-50"
               >
-                <ArrowPathIcon
-                  className={`w-5 h-5 ${syncing ? 'animate-spin' : ''}`}
-                />
                 {syncing ? 'Sincronizando...' : 'Sincronizar con ventas'}
-              </button>
+              </Button>
             )}
             <Link
               href="/dashboard/settings"
