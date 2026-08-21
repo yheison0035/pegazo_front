@@ -32,9 +32,13 @@ export default function CashPage() {
     openCash,
     addCashMovement,
     closeCash,
+    reopenCash,
     loading,
   } = useCash();
   const { getLocals } = useLocals();
+
+  // Solo el dueño/admin puede reabrir una caja (por si se cerró por error).
+  const canReopen = ['SUPER_ADMIN', 'ADMIN'].includes(usuario?.role);
 
   const [locals, setLocals] = useState([]);
   const [localId, setLocalId] = useState(usuario?.localId || '');
@@ -102,6 +106,16 @@ export default function CashPage() {
       refresh();
     } catch (err) {
       setAlert({ type: 'error', message: err.message || 'No se pudo registrar' });
+    }
+  };
+
+  const handleReopen = async (id) => {
+    try {
+      await reopenCash(id);
+      setAlert({ type: 'success', message: 'Caja reabierta.' });
+      refresh();
+    } catch (err) {
+      setAlert({ type: 'error', message: err.message || 'No se pudo reabrir' });
     }
   };
 
@@ -402,6 +416,7 @@ export default function CashPage() {
                       <th className="px-5 py-2 font-medium text-right">Esperado</th>
                       <th className="px-5 py-2 font-medium text-right">Contado</th>
                       <th className="px-5 py-2 font-medium text-right">Diferencia</th>
+                      {canReopen && <th className="px-5 py-2 font-medium text-center">Acción</th>}
                     </tr>
                   </thead>
                   <tbody>
@@ -425,6 +440,22 @@ export default function CashPage() {
                         >
                           {formatCOP(c.difference)}
                         </td>
+                        {canReopen && (
+                          <td className="px-5 py-2 text-center">
+                            <button
+                              onClick={() => handleReopen(c.id)}
+                              disabled={loading || !!current}
+                              title={
+                                current
+                                  ? 'Cierra la caja abierta antes de reabrir otra'
+                                  : 'Reabrir esta caja'
+                              }
+                              className="rounded-lg border border-orange-200 px-2.5 py-1 text-xs font-medium text-orange-600 hover:bg-orange-50 disabled:opacity-40"
+                            >
+                              Reabrir
+                            </button>
+                          </td>
+                        )}
                       </tr>
                     ))}
                   </tbody>

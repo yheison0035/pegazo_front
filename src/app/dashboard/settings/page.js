@@ -9,6 +9,7 @@ import {
   ClockIcon,
   SwatchIcon,
   CheckIcon,
+  LockClosedIcon,
 } from '@heroicons/react/24/outline';
 import Button from '@/components/ui/Button';
 import AlertModal from '@/components/dashboard/modals/alertModal';
@@ -512,12 +513,15 @@ export default function Settings() {
   const usuario = auth?.usuario;
   const [settings, setSettings] = useState(null);
   const isServices = isServicesBusiness(usuario);
+  // La configuración del CRM solo la maneja el dueño o el administrador.
+  const canConfig = ['SUPER_ADMIN', 'ADMIN'].includes(usuario?.role);
 
   useEffect(() => {
+    if (!canConfig) return;
     getCompanySettings()
       .then((r) => setSettings(r?.data || null))
       .catch(() => setSettings(null));
-  }, []);
+  }, [canConfig]);
 
   return (
     <RoleGuard allowedRoles={Object.values(Roles)}>
@@ -528,12 +532,28 @@ export default function Settings() {
           </h1>
         </div>
 
-        <div className="flex flex-col gap-5">
-          <ThemeSettings />
-          <CompanyProfileCard initial={settings} />
-          {isServices && <HoursCard initial={settings} />}
-          <LoyaltySettings />
-        </div>
+        {!canConfig ? (
+          <div className="mx-auto mt-10 max-w-md rounded-2xl border border-gray-100 bg-white p-8 text-center shadow-sm">
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-orange-500">
+              <LockClosedIcon className="h-6 w-6" />
+            </div>
+            <h2 className="text-lg font-bold text-gray-800">
+              No tienes acceso a la configuración
+            </h2>
+            <p className="mt-1 text-sm text-gray-500">
+              La configuración del negocio solo la puede modificar el dueño o el
+              administrador. Si necesitas un cambio, <b>solicítalo al
+              administrador</b>.
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-5">
+            <ThemeSettings />
+            <CompanyProfileCard initial={settings} />
+            {isServices && <HoursCard initial={settings} />}
+            {isServices && <LoyaltySettings />}
+          </div>
+        )}
       </div>
     </RoleGuard>
   );

@@ -26,51 +26,51 @@ export const BUSINESS_TYPES = {
   // ---------- RETAIL (mostrador con productos) ----------
   COMERCIO: [
     'locals', 'users', 'categories', 'brands', 'providers', 'inventory',
-    'purchases', 'customers', 'loyalty', 'sales', 'delivered_sales',
+    'purchases', 'customers', 'sales', 'delivered_sales',
     'returns', 'cash', 'expenses', 'statistics',
   ],
 
   SUPERMERCADO: [
     'locals', 'users', 'categories', 'brands', 'providers', 'inventory',
-    'purchases', 'customers', 'loyalty', 'sales', 'delivered_sales',
+    'purchases', 'customers', 'sales', 'delivered_sales',
     'returns', 'cash', 'expenses', 'statistics',
   ],
 
   DROGUERIA: [
     'locals', 'users', 'categories', 'brands', 'providers', 'inventory',
-    'purchases', 'customers', 'loyalty', 'sales', 'delivered_sales',
+    'purchases', 'customers', 'sales', 'delivered_sales',
     'returns', 'cash', 'expenses', 'statistics',
   ],
 
   ROPA: [
     'locals', 'users', 'categories', 'brands', 'providers', 'inventory',
-    'purchases', 'customers', 'loyalty', 'sales', 'delivered_sales',
+    'purchases', 'customers', 'sales', 'delivered_sales',
     'returns', 'cash', 'expenses', 'statistics',
   ],
 
   // Perecederos por peso: sin marcas, sin devoluciones (producto perecedero).
   FRUVER: [
     'locals', 'users', 'categories', 'providers', 'inventory', 'purchases',
-    'customers', 'loyalty', 'sales', 'delivered_sales', 'cash',
+    'customers', 'sales', 'delivered_sales', 'cash',
     'expenses', 'statistics',
   ],
 
   CARNICERIA: [
     'locals', 'users', 'categories', 'providers', 'inventory', 'purchases',
-    'customers', 'loyalty', 'sales', 'delivered_sales', 'cash',
+    'customers', 'sales', 'delivered_sales', 'cash',
     'expenses', 'statistics',
   ],
 
   CAFETERIA: [
     'locals', 'users', 'categories', 'providers', 'inventory', 'purchases',
-    'customers', 'loyalty', 'sales', 'delivered_sales', 'cash',
+    'customers', 'sales', 'delivered_sales', 'cash',
     'expenses', 'statistics',
   ],
 
   // Floristería: cotiza arreglos para eventos (domicilios: módulo futuro).
   FLORISTERIA: [
     'locals', 'users', 'categories', 'providers', 'inventory', 'purchases',
-    'customers', 'loyalty', 'quotes', 'sales', 'delivered_sales',
+    'customers', 'quotes', 'sales', 'delivered_sales',
     'cash', 'expenses', 'statistics',
   ],
 
@@ -83,13 +83,13 @@ export const BUSINESS_TYPES = {
   // ---------- COMIDA (salón + cocina) ----------
   RESTAURANTE: [
     'locals', 'users', 'categories', 'providers', 'inventory', 'purchases',
-    'customers', 'loyalty', 'mesas', 'kitchen', 'sales', 'delivered_sales',
+    'customers', 'mesas', 'kitchen', 'sales', 'delivered_sales',
     'cash', 'expenses', 'statistics',
   ],
 
   COMIDA_RAPIDA: [
     'locals', 'users', 'categories', 'providers', 'inventory', 'purchases',
-    'customers', 'loyalty', 'mesas', 'kitchen', 'sales', 'delivered_sales',
+    'customers', 'mesas', 'kitchen', 'sales', 'delivered_sales',
     'cash', 'expenses', 'statistics',
   ],
 
@@ -112,14 +112,14 @@ export const BUSINESS_TYPES = {
   // Televentas: pedidos por teléfono/redes, con cotización previa.
   TELEVENTAS: [
     'locals', 'users', 'categories', 'brands', 'providers', 'inventory',
-    'purchases', 'customers', 'loyalty', 'orders', 'quotes', 'sales',
+    'purchases', 'customers', 'orders', 'quotes', 'sales',
     'delivered_sales', 'returns', 'expenses', 'statistics',
   ],
 
   // Ecommerce: pedidos web + devoluciones (el estado de envío se gestiona en Pedidos).
   ECOMMERCE: [
     'locals', 'users', 'categories', 'brands', 'providers', 'inventory',
-    'purchases', 'customers', 'loyalty', 'orders', 'sales', 'delivered_sales',
+    'purchases', 'customers', 'orders', 'sales', 'delivered_sales',
     'returns', 'expenses', 'statistics',
   ],
 
