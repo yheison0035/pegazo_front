@@ -35,6 +35,14 @@ export async function syncLoyaltyFromSales() {
   return apiFetch('/company/loyalty/sync', { method: 'POST' });
 }
 
+// Política de caja: exigir abrir el día (caja) para poder vender.
+export async function updateCashPolicy(requireCashOpen) {
+  return apiFetch('/company/cash-policy', {
+    method: 'PATCH',
+    body: JSON.stringify({ requireCashOpen }),
+  });
+}
+
 // Tema de diseño del panel/CRM (orange | blue | emerald).
 export async function updateCrmTheme(theme) {
   return apiFetch('/company/theme', {

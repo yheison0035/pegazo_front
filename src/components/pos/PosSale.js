@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import {
   MagnifyingGlassIcon,
   PlusIcon,
@@ -11,7 +12,11 @@ import {
   GiftIcon,
   ShoppingBagIcon,
   WrenchScrewdriverIcon,
+  CalculatorIcon,
+  LockClosedIcon,
 } from '@heroicons/react/24/outline';
+import { getCurrentCash } from '@/lib/api/routes/cash';
+import { dayStateFromRegister } from '@/lib/dayStatus';
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
 import { useAuth } from '@/context/authContext';
@@ -97,6 +102,26 @@ export default function PosSale({
   );
   const [submitting, setSubmitting] = useState(false);
   const [alert, setAlert] = useState({ type: '', message: '', url: '' });
+
+  // Política "abrir el día": si la empresa lo exige, se bloquea el POS hasta
+  // que haya una caja abierta de hoy en la sede.
+  const requireCashOpen = !!usuario?.company?.requireCashOpen;
+  const [dayState, setDayState] = useState(
+    requireCashOpen ? 'loading' : 'ok'
+  );
+
+  useEffect(() => {
+    if (!requireCashOpen || !localId) return;
+    setDayState('loading');
+    (async () => {
+      try {
+        const res = await getCurrentCash(localId);
+        setDayState(dayStateFromRegister(res?.data));
+      } catch (_) {
+        setDayState('not_open');
+      }
+    })();
+  }, [requireCashOpen, localId]);
 
   useEffect(() => {
     (async () => {
@@ -294,6 +319,53 @@ export default function PosSale({
       : submitting
         ? 'Procesando...'
         : `Cobrar ${formatCOP(total)}${itemCount ? ` · ${itemCount} ít.` : ''}`;
+
+  // Bloqueo por política de caja (solo al crear; editar no se bloquea).
+  if (mode === 'new' && requireCashOpen && dayState !== 'ok') {
+    const prev = dayState === 'prev_day';
+    return (
+      <RoleGuard allowedRoles={Object.values(Roles)}>
+        <div className="w-full p-4 flex items-center justify-center min-h-[70vh]">
+          {dayState === 'loading' ? (
+            <p className="text-sm text-gray-400">Verificando el estado del día…</p>
+          ) : (
+            <div className="max-w-md rounded-2xl border border-gray-100 bg-white p-8 text-center shadow-sm">
+              <div
+                className={`mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl ${
+                  prev
+                    ? 'bg-red-50 text-red-500'
+                    : 'bg-orange-50 text-orange-500'
+                }`}
+              >
+                {prev ? (
+                  <LockClosedIcon className="h-7 w-7" />
+                ) : (
+                  <CalculatorIcon className="h-7 w-7" />
+                )}
+              </div>
+              <h2 className="text-lg font-bold text-gray-800">
+                {prev
+                  ? 'El día de ayer no se ha cerrado'
+                  : 'Debes abrir el día para vender'}
+              </h2>
+              <p className="mt-1 text-sm text-gray-500">
+                {prev
+                  ? 'Quedó una caja abierta de un día anterior. Ciérrala (haz el arqueo) para poder facturar hoy.'
+                  : 'Abre la caja del día en esta sede para empezar a facturar. Así el efectivo del día queda controlado.'}
+              </p>
+              <Link
+                href="/dashboard/cash"
+                className="mt-5 inline-flex items-center gap-2 rounded-xl bg-orange-500 px-6 py-2.5 text-sm font-semibold text-white hover:bg-orange-600"
+              >
+                <CalculatorIcon className="h-5 w-5" />
+                {prev ? 'Cerrar el día' : 'Abrir el día'}
+              </Link>
+            </div>
+          )}
+        </div>
+      </RoleGuard>
+    );
+  }
 
   return (
     <RoleGuard allowedRoles={Object.values(Roles)}>

@@ -6,6 +6,7 @@ import { Roles } from '@/config/roles';
 import PlanUpgradeModal from '@/components/plan/PlanUpgradeModal';
 import AppointmentsHub from '@/components/appointments/AppointmentsHub';
 import { useAuth } from '@/context/authContext';
+import DayBanner from '@/components/pos/DayBanner';
 
 export default function Layout({ children }) {
   const { usuario } = useAuth();
@@ -25,6 +26,7 @@ export default function Layout({ children }) {
             <SideNavigation />
           </div>
           <div className="grow p-6 pt-16 md:overflow-y-auto md:p-10 md:pt-10">
+            <DayBanner />
             {children}
           </div>
         </div>
