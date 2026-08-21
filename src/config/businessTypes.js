@@ -3,8 +3,10 @@
 //
 //  - 'settings' (Configuración) siempre está disponible para el dueño (ver
 //    useNavigation), no hace falta listarlo aquí.
-//  - 'website' (Tienda online) y 'orders' (Pedidos) se activan cuando la
-//    plataforma habilita la tienda online de la empresa (websiteEnabled).
+//  - 'website' (Tienda online) y 'orders' (Pedidos) NO se listan por vertical:
+//    aparecen SOLO cuando la plataforma ya montó el sitio del cliente, es decir
+//    cuando la empresa tiene `websiteEnabled` Y un `domain` cargado (ver
+//    useNavigation). Antes de eso el dueño no ve el módulo.
 //
 // Claves de módulo disponibles:
 //   locals, users, categories, brands, providers, inventory, purchases,
@@ -110,21 +112,21 @@ export const BUSINESS_TYPES = {
   // Televentas: pedidos por teléfono/redes, con cotización previa.
   TELEVENTAS: [
     'locals', 'users', 'categories', 'brands', 'providers', 'inventory',
-    'purchases', 'customers', 'cartera', 'impuestos', 'orders', 'quotes', 'sales',
+    'purchases', 'customers', 'cartera', 'impuestos','quotes', 'sales',
     'delivered_sales', 'returns', 'expenses', 'statistics',
   ],
 
   // Ecommerce: pedidos web + devoluciones (el estado de envío se gestiona en Pedidos).
   ECOMMERCE: [
     'locals', 'users', 'categories', 'brands', 'providers', 'inventory',
-    'purchases', 'customers', 'cartera', 'impuestos', 'orders', 'sales', 'delivered_sales',
+    'purchases', 'customers', 'cartera', 'impuestos','sales', 'delivered_sales',
     'returns', 'expenses', 'statistics',
   ],
 
   // Distribución / mayorista: pedidos B2B con cotización.
   DISTRIBUCION: [
     'locals', 'users', 'categories', 'brands', 'providers', 'inventory',
-    'purchases', 'customers', 'cartera', 'impuestos', 'orders', 'quotes', 'sales', 'delivered_sales',
+    'purchases', 'customers', 'cartera', 'impuestos','quotes', 'sales', 'delivered_sales',
     'returns', 'expenses', 'statistics',
   ],
 
