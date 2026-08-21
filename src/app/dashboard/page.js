@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import {
   BanknotesIcon,
   ShoppingCartIcon,
@@ -35,7 +36,7 @@ function Kpi({ icon: Icon, label, value, accent = 'text-gray-900', href }) {
       <p className={`mt-1 text-2xl font-bold ${accent}`}>{value}</p>
     </div>
   );
-  return href ? <a href={href}>{inner}</a> : inner;
+  return href ? <Link href={href}>{inner}</Link> : inner;
 }
 
 export default function DashboardHome() {
@@ -116,7 +117,7 @@ export default function DashboardHome() {
           </p>
           <div className="mt-4 flex flex-col gap-2">
             {steps.map((s) => (
-              <a
+              <Link
                 key={s.label}
                 href={s.href}
                 className={`flex items-center justify-between rounded-xl border px-4 py-3 transition ${
@@ -138,7 +139,7 @@ export default function DashboardHome() {
                 {!s.done && (
                   <ArrowRightIcon className="h-4 w-4 text-orange-500" />
                 )}
-              </a>
+              </Link>
             ))}
           </div>
         </div>

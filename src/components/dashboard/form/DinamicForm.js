@@ -719,7 +719,7 @@ export default function DinamicForm({
         {module !== 'sales' && (
           <BtnReturn route={`/dashboard/${module}`} disabled={loading} />
         )}
-        {mode === 'new' && handleReset && (
+        {mode !== 'edit' && handleReset && (
           <button
             type="button"
             onClick={handleReset}
