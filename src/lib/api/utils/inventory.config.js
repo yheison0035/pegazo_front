@@ -36,8 +36,15 @@ export const getFormFieldsInventory = (usuario) => {
 
   const vt = fields.variantType; // 'color' | 'weight' | 'simple'
 
+  // Solo en comida tiene sentido elegir si el producto lleva existencias
+  // (plato elaborado = sin stock vs. bebida = con stock). En el resto de
+  // verticales todo lleva inventario, así que el interruptor se oculta.
+  const type = usuario?.company?.type;
+  const isFood = ['RESTAURANTE', 'COMIDA_RAPIDA', 'CAFETERIA'].includes(type);
+
   // Qué campos ocultar según la vertical (no todos manejan marca, etc.).
   const hidden = new Set();
+  if (!isFood) hidden.add('trackStock');
   if (!fields.brand) hidden.add('brandId');
   if (!fields.provider) hidden.add('providerId');
   if (!fields.barcode) hidden.add('barcode');
@@ -113,6 +120,8 @@ export const getFormFieldsInventory = (usuario) => {
       required: true,
       source: 'providers',
       disabled: false,
+      // El proveedor solo aplica a productos con existencias (bebidas, insumos).
+      hideWhen: (fd) => fd.trackStock === false,
     },
     {
       name: 'purchasePrice',
@@ -120,6 +129,8 @@ export const getFormFieldsInventory = (usuario) => {
       type: 'text',
       required: true,
       disabled: false,
+      // Un plato elaborado no tiene "precio de compra".
+      hideWhen: (fd) => fd.trackStock === false,
     },
 
     {
@@ -161,6 +172,7 @@ export const getFormFieldsInventory = (usuario) => {
       type: 'number',
       required: false,
       disabled: false,
+      hideWhen: (fd) => fd.trackStock === false,
     },
     {
       name: 'unit',

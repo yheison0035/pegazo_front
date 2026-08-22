@@ -66,7 +66,7 @@ export default function EditProduct() {
 
     const payload = {
       ...formData,
-      purchasePrice: parseCOPToNumber(formData.purchasePrice),
+      purchasePrice: parseCOPToNumber(formData.purchasePrice) || 0,
       salePrice: parseCOPToNumber(formData.salePrice),
       oldPrice: parseCOPToNumber(formData.oldPrice),
     };
