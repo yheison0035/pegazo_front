@@ -85,13 +85,13 @@ export const BUSINESS_TYPES = {
 
   // ---------- COMIDA (salón + cocina) ----------
   RESTAURANTE: [
-    'locals', 'users', 'categories', 'providers', 'inventory', 'purchases',
+    'locals', 'users', 'categories', 'providers', 'inventory', 'supplies', 'purchases',
     'customers', 'cartera', 'impuestos', 'mesas', 'kitchen', 'sales', 'delivered_sales',
     'cash', 'expenses', 'statistics',
   ],
 
   COMIDA_RAPIDA: [
-    'locals', 'users', 'categories', 'providers', 'inventory', 'purchases',
+    'locals', 'users', 'categories', 'providers', 'inventory', 'supplies', 'purchases',
     'customers', 'cartera', 'impuestos', 'mesas', 'kitchen', 'sales', 'delivered_sales',
     'cash', 'expenses', 'statistics',
   ],
