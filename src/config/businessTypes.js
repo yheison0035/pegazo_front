@@ -9,7 +9,7 @@
 //    useNavigation). Antes de eso el dueño no ve el módulo.
 //
 // Claves de módulo disponibles:
-//   locals, users, categories, brands, providers, inventory, purchases,
+//   locals, users, categories, brands, providers, inventory, supplies, purchases,
 //   customers, cartera, loyalty, services, appointments, sales, orders,
 //   delivered_sales, returns, quotes, cash, mesas, kitchen, expenses, statistics.
 
