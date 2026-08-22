@@ -15,12 +15,15 @@
 
 // Módulos ocultos temporalmente en TODOS los negocios: aún no están 100%
 // terminados y comprobados. Para reactivar uno, quítalo de este conjunto.
-//   - mesas / kitchen  : flujo de restaurante (sin verificar de punta a punta)
+//   - (mesas / kitchen ya están activos: flujo de restaurante completo —
+//      mesero toma pedidos como tarjetas con estado, cocina en KDS, caja
+//      cobra toda la mesa en una venta. Solo los listan RESTAURANTE y
+//      COMIDA_RAPIDA, así que solo aparecen ahí.)
 //
 // La Tienda online (website) y Pedidos (orders) NO se ocultan aquí: tienen su
 // propio gateo doble → solo aparecen si la empresa tiene `websiteEnabled` y el
 // plan requerido (website: ALTURA+). Ver useNavigation + lib/plans.
-export const HIDDEN_MODULES = new Set(['mesas', 'kitchen']);
+export const HIDDEN_MODULES = new Set([]);
 
 export const BUSINESS_TYPES = {
   // ---------- RETAIL (mostrador con productos) ----------

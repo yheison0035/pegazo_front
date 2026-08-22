@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { FireIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import Button from '@/components/ui/Button';
+import { useAuth } from '@/context/authContext';
 import { getKitchen, setComandaStatus } from '@/lib/api/routes/comandas';
 
 const NEXT = {
@@ -18,6 +19,9 @@ const STATUS_META = {
 };
 
 export default function Kitchen() {
+  const auth = useAuth();
+  // La cocina marca Preparando/Listo; "Entregar" es acción del mesero.
+  const isCocinero = auth?.usuario?.role === 'COCINERO';
   const [comandas, setComandas] = useState([]);
   const [loaded, setLoaded] = useState(false);
 
@@ -112,17 +116,18 @@ export default function Kitchen() {
                           {c.notes}
                         </p>
                       )}
-                      {NEXT[c.status] && (
-                        <Button
-                          variant="add"
-                          size="sm"
-                          iconRight={ArrowRightIcon}
-                          onClick={() => advance(c)}
-                          className="mt-2 w-full"
-                        >
-                          {NEXT[c.status].label}
-                        </Button>
-                      )}
+                      {NEXT[c.status] &&
+                        !(isCocinero && c.status === 'LISTO') && (
+                          <Button
+                            variant="add"
+                            size="sm"
+                            iconRight={ArrowRightIcon}
+                            onClick={() => advance(c)}
+                            className="mt-2 w-full"
+                          >
+                            {NEXT[c.status].label}
+                          </Button>
+                        )}
                     </div>
                   ))}
                   {list.length === 0 && (
