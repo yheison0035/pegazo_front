@@ -61,8 +61,10 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
   // de código de barras. Sin retrasos artificiales.
   const handleSelectProduct = (product) => {
     const isService = product.type === 'service';
+    // Plato elaborado (sin control de stock): se puede vender siempre.
+    const isPrepared = product.trackStock === false;
 
-    if (!isService && (!product.stock || product.stock <= 0)) {
+    if (!isService && !isPrepared && (!product.stock || product.stock <= 0)) {
       setAlert({
         type: 'info',
         message: 'Este producto no tiene stock disponible',
@@ -93,6 +95,7 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
             }${product.size ? ` / ${product.size}` : ''}`,
         price: product.price,
         stock: isService ? null : product.stock,
+        trackStock: product.trackStock,
         unit: product.unit || 'UNIDAD',
         originalQuantity: 0,
         quantity: 1,
@@ -131,10 +134,12 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
     const updated = selectedProducts.map((p) => {
       if (p.inventoryVariantId === id) {
         const isService = p.type === 'service';
+        // Plato elaborado (sin stock): cantidad libre, como un servicio.
+        const isPrepared = p.trackStock === false;
 
         let safeQty;
 
-        if (isService) {
+        if (isService || isPrepared) {
           safeQty = Math.max(1, Number(quantity) || 1);
         } else if (isWeightUnit(p.unit)) {
           // Venta por peso: admite decimales, sin forzar mínimo 1.
@@ -245,7 +250,9 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
               <div className="max-h-72 overflow-auto">
                 {filtered.map((product) => {
                   const noStock =
-                    product.type !== 'service' && product.stock <= 0;
+                    product.type !== 'service' &&
+                    product.trackStock !== false &&
+                    product.stock <= 0;
 
                   return (
                     <div
@@ -281,12 +288,18 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
                                 <span>•</span>
                               </>
                             )}
-                            <span>
-                              Stock: {product.stock}
-                              {isWeightUnit(product.unit)
-                                ? ` ${unitShortLabel(product.unit)}`
-                                : ''}
-                            </span>
+                            {product.trackStock === false ? (
+                              <span className="text-emerald-600">
+                                Al momento
+                              </span>
+                            ) : (
+                              <span>
+                                Stock: {product.stock}
+                                {isWeightUnit(product.unit)
+                                  ? ` ${unitShortLabel(product.unit)}`
+                                  : ''}
+                              </span>
+                            )}
 
                             {noStock && (
                               <span className="text-red-500 font-medium">
@@ -356,7 +369,7 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
                         min={isWeightUnit(p.unit) ? 0.001 : 1}
                         step={isWeightUnit(p.unit) ? 0.001 : 1}
                         max={
-                          p.type === 'service'
+                          p.type === 'service' || p.trackStock === false
                             ? undefined
                             : p.stock + p.originalQuantity
                         }
