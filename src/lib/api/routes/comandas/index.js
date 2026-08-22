@@ -32,3 +32,11 @@ export async function chargeComanda(id, dto) {
     body: JSON.stringify(dto),
   });
 }
+
+// Cobra toda la mesa (todas sus comandas abiertas en una sola venta).
+export async function chargeMesa(mesaId, dto) {
+  return apiFetch(`/comandas/mesa/${mesaId}/charge`, {
+    method: 'POST',
+    body: JSON.stringify(dto),
+  });
+}
