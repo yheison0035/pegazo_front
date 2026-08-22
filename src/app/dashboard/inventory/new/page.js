@@ -25,6 +25,7 @@ import { getBrands } from '@/lib/api/routes/brands';
 import { getProviders } from '@/lib/api/routes/providers';
 import { getLocals } from '@/lib/api/routes/locals';
 import { getProductFields } from '@/config/verticalProfiles';
+import { getTerms } from '@/config/terminology';
 
 export default function NewProduct() {
   const [formData, setFormData] = useState(getEmptyInventory());
@@ -36,6 +37,13 @@ export default function NewProduct() {
   const auth = useAuth();
   const usuario = auth?.usuario;
   const showOldPrice = canSeeOldPrice(usuario);
+  const terms = getTerms(usuario?.company);
+  // En comida el módulo es un "Menú" (carta): el texto cambia a "Agregar al menú".
+  const isMenu = terms.catalogLabel === 'Menú';
+  const newTitle = isMenu ? 'Agregar al menú' : `Crear ${terms.product} nuevo`;
+  const newSubtitle = isMenu
+    ? 'Agrega un plato o bebida a tu carta. Para platos elaborados no necesitas proveedor ni existencias.'
+    : 'Ingrese la información del producto para registrar un nuevo producto.';
 
   // En verticales por peso (carnicería, fruver, súper) el producto arranca en kg.
   // En comida (restaurante/comida rápida/cafetería) arranca SIN control de stock
@@ -139,7 +147,7 @@ export default function NewProduct() {
     const payload = {
       ...formData,
       variants,
-      purchasePrice: parseCOPToNumber(formData.purchasePrice),
+      purchasePrice: parseCOPToNumber(formData.purchasePrice) || 0,
       salePrice: parseCOPToNumber(formData.salePrice),
       oldPrice: parseCOPToNumber(formData.oldPrice),
     };
@@ -245,12 +253,9 @@ export default function NewProduct() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
           <div>
             <h2 className="text-3xl font-bold text-gray-800">
-              Crear Producto Nuevo
+              {newTitle}
             </h2>
-            <p className="text-sm text-gray-500 mt-1">
-              Ingrese la información del producto para registrar un nuevo
-              producto.
-            </p>
+            <p className="text-sm text-gray-500 mt-1">{newSubtitle}</p>
           </div>
           {showOldPrice && (
             <Button

@@ -98,6 +98,8 @@ const TERMS_BY_TYPE = {
   COMIDA_RAPIDA: {
     attendant: 'Cajero',
     attendantPlural: 'Cajeros',
+    product: 'Plato',
+    productPlural: 'Platos',
     catalogLabel: 'Menú', // nombre del módulo (antes "Inventario")
     sale: 'Pedido',
     salePlural: 'Pedidos',
