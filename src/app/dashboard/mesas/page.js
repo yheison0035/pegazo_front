@@ -58,6 +58,8 @@ export default function Mesas() {
   const usuario = auth?.usuario;
   const canCharge = CHARGE_ROLES.includes(usuario?.role);
   const canOrder = ORDER_ROLES.includes(usuario?.role);
+  // Crear/eliminar mesas es solo del dueño/admin (el backend lo restringe igual).
+  const canManageMesas = ['SUPER_ADMIN', 'ADMIN'].includes(usuario?.role);
 
   const [mesas, setMesas] = useState([]);
   const [locals, setLocals] = useState([]);
@@ -191,9 +193,11 @@ export default function Mesas() {
     <div className="w-full p-4">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-gray-800">Mesas</h1>
-        <Button variant="add" icon={PlusIcon} onClick={() => setCreating(true)}>
-          Nueva mesa
-        </Button>
+        {canManageMesas && (
+          <Button variant="add" icon={PlusIcon} onClick={() => setCreating(true)}>
+            Nueva mesa
+          </Button>
+        )}
       </div>
 
       {mesas.length === 0 ? (
@@ -236,7 +240,7 @@ export default function Mesas() {
                     {m.openCount} pedido{m.openCount > 1 ? 's' : ''}
                   </span>
                 )}
-                {!ocupada && (
+                {!ocupada && canManageMesas && (
                   <span
                     onClick={(e) => {
                       e.stopPropagation();
