@@ -18,12 +18,25 @@ const STATUS_META = {
   LISTO: { label: 'Listo', chip: 'bg-green-100 text-green-700' },
 };
 
+// Minutos transcurridos desde que entró el pedido (para priorizar por espera).
+function minutesSince(dateStr, now) {
+  const ms = now - new Date(dateStr).getTime();
+  return Math.max(0, Math.floor(ms / 60000));
+}
+function elapsedLabel(min) {
+  if (min < 1) return 'ahora';
+  if (min < 60) return `hace ${min} min`;
+  const h = Math.floor(min / 60);
+  return `hace ${h} h ${min % 60} min`;
+}
+
 export default function Kitchen() {
   const auth = useAuth();
   // La cocina marca Preparando/Listo; "Entregar" es acción del mesero.
   const isCocinero = auth?.usuario?.role === 'COCINERO';
   const [comandas, setComandas] = useState([]);
   const [loaded, setLoaded] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
 
   const load = useCallback(async () => {
     try {
@@ -38,8 +51,14 @@ export default function Kitchen() {
 
   useEffect(() => {
     load();
-    const t = setInterval(load, 20000);
-    return () => clearInterval(t);
+    // Casi en tiempo real: refresca datos cada 12s.
+    const t = setInterval(load, 12000);
+    // El reloj de espera avanza cada 20s aunque no haya recarga.
+    const clock = setInterval(() => setNow(Date.now()), 20000);
+    return () => {
+      clearInterval(t);
+      clearInterval(clock);
+    };
   }, [load]);
 
   const advance = async (c) => {
@@ -81,22 +100,41 @@ export default function Kitchen() {
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  {list.map((c) => (
+                  {list.map((c) => {
+                    const min = minutesSince(c.createdAt, now);
+                    // Prioridad por espera: >15 min urgente, 8–15 min atención.
+                    const urgent = col !== 'LISTO' && min >= 15;
+                    const warn = col !== 'LISTO' && min >= 8 && min < 15;
+                    return (
                     <div
                       key={c.id}
-                      className="rounded-xl border border-gray-100 bg-white p-3 shadow-sm"
+                      className={`rounded-xl border bg-white p-3 shadow-sm ${
+                        urgent
+                          ? 'border-red-300 ring-1 ring-red-200'
+                          : warn
+                            ? 'border-amber-300'
+                            : 'border-gray-100'
+                      }`}
                     >
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-bold text-gray-800">
                           {c.mesa?.name || 'Para llevar'}
                         </span>
-                        <span className="text-[11px] text-gray-400">
-                          #{c.id}
+                        <span
+                          className={`text-[11px] font-semibold ${
+                            urgent
+                              ? 'text-red-600'
+                              : warn
+                                ? 'text-amber-600'
+                                : 'text-gray-400'
+                          }`}
+                        >
+                          {elapsedLabel(min)}
                         </span>
                       </div>
                       {c.user?.name && (
                         <p className="text-[11px] text-gray-400">
-                          Mesero: {c.user.name}
+                          Mesero: {c.user.name} · #{c.id}
                         </p>
                       )}
                       <ul className="mt-2 space-y-0.5">
@@ -129,7 +167,8 @@ export default function Kitchen() {
                           </Button>
                         )}
                     </div>
-                  ))}
+                    );
+                  })}
                   {list.length === 0 && (
                     <p className="py-4 text-center text-[11px] text-gray-300">
                       —
