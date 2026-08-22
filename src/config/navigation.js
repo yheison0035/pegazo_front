@@ -24,6 +24,7 @@ import {
   ArrowUturnLeftIcon,
   CreditCardIcon,
   ReceiptPercentIcon,
+  BeakerIcon,
 } from '@heroicons/react/24/outline';
 
 export const NAVIGATION = [
@@ -91,6 +92,18 @@ export const NAVIGATION = [
           'RECEPCIONISTA',
           'BODEGUERO',
           'VENTAS',
+        ],
+      },
+      {
+        name: 'Insumos',
+        href: '/dashboard/supplies',
+        icon: BeakerIcon,
+        roles: [
+          'SUPER_ADMIN',
+          'ADMIN',
+          'RECEPCIONISTA',
+          'CAJA',
+          'COCINERO',
         ],
       },
       {
