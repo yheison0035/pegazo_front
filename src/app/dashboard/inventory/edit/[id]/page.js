@@ -11,7 +11,8 @@ import { parseCOPToNumber } from '@/lib/api/utils/utils';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import Button from '@/components/ui/Button';
 import InventorySpecsModal from '@/components/dashboard/inventory/inventorySpecsModal';
-import { PencilIcon } from '@heroicons/react/24/outline';
+import RecipeModal from '@/components/dashboard/inventory/recipeModal';
+import { PencilIcon, BeakerIcon } from '@heroicons/react/24/outline';
 import { canSeeOldPrice } from '@/hooks/inventory.permissions';
 
 export default function EditProduct() {
@@ -20,10 +21,16 @@ export default function EditProduct() {
   const [images, setImages] = useState([]);
   const [showImages, setShowImages] = useState(false);
   const [showSpecsModal, setShowSpecsModal] = useState(false);
+  const [showRecipeModal, setShowRecipeModal] = useState(false);
   const { id } = useParams();
   const auth = useAuth();
   const usuario = auth?.usuario;
   const showOldPrice = canSeeOldPrice(usuario);
+  // La receta solo aplica a platos elaborados (sin stock) en verticales de comida.
+  const isFood = ['RESTAURANTE', 'COMIDA_RAPIDA', 'CAFETERIA'].includes(
+    usuario?.company?.type
+  );
+  const showRecipe = isFood && formData?.trackStock === false;
 
   const { getProductById, updateProduct, uploadProductImages, loading } =
     useProducts();
@@ -114,16 +121,28 @@ export default function EditProduct() {
               Modifica la información del producto según sea necesario.
             </p>
           </div>
-          {showOldPrice && (
-            <Button
-              variant="add"
-              icon={PencilIcon}
-              type="button"
-              onClick={canOpenSpecsModal}
-            >
-              Características y especificaciones
-            </Button>
-          )}
+          <div className="flex flex-wrap gap-2">
+            {showRecipe && (
+              <Button
+                variant="add"
+                icon={BeakerIcon}
+                type="button"
+                onClick={() => setShowRecipeModal(true)}
+              >
+                Receta (insumos)
+              </Button>
+            )}
+            {showOldPrice && (
+              <Button
+                variant="add"
+                icon={PencilIcon}
+                type="button"
+                onClick={canOpenSpecsModal}
+              >
+                Características y especificaciones
+              </Button>
+            )}
+          </div>
         </div>
 
         <DinamicForm
@@ -153,6 +172,13 @@ export default function EditProduct() {
           onClose={() => setShowSpecsModal(false)}
           formData={formData}
           setFormData={setFormData}
+        />
+
+        <RecipeModal
+          open={showRecipeModal}
+          onClose={() => setShowRecipeModal(false)}
+          inventoryId={id}
+          dishName={formData?.name}
         />
       </div>
     </>
