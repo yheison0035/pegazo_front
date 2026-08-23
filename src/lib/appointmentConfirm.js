@@ -68,23 +68,24 @@ export function buildConfirmUrl(appt, companyName) {
   return `https://wa.me/${phone}?text=${text}`;
 }
 
-// Mensaje para reactivar a un cliente que no vuelve hace varios días.
+// Mensaje LLAMATIVO para reactivar a un cliente que no vuelve hace varios días,
+// con un regalo (mascarilla sencilla) para incentivarlo a volver.
 export function buildWinbackMessage(customer, companyName) {
   const nombre = firstName(customer?.name);
-  const dias = customer?.days;
+  const salon = companyName || 'nuestro salón';
+  const dias = customer?.days ?? customer?.daysSinceLastVisit;
   const lines = [
-    `¡Hola${nombre ? ` ${nombre}` : ''}!`,
+    `¡Hola${nombre ? ` ${nombre}` : ''}! 👋✨`,
     dias
-      ? `Notamos que hace ${dias} días no pasas por ${companyName || 'nuestro salón'} y te extrañamos.`
-      : `Hace un tiempo que no pasas por ${companyName || 'nuestro salón'} y te extrañamos.`,
+      ? `Hace ${dias} días que no pasas por ${salon} y te extrañamos. 🥺`
+      : `¡Hace rato no te vemos por ${salon} y te extrañamos! 🥺`,
+    '',
+    `🎁 Tenemos un regalo para ti: vuelve y te obsequiamos una *mascarilla sencilla* en tu próximo corte.`,
   ];
   if (customer?.lastService) {
-    lines.push(`Lo último que llevaste con nosotros: ${customer.lastService}.`);
+    lines.push(`Lo último que llevaste fue: ${customer.lastService}.`);
   }
-  lines.push(
-    '',
-    '¡Te esperamos de nuevo! Escríbenos y con gusto te atendemos.'
-  );
+  lines.push('', '¿Cuándo te agendamos tu cita? ¡Te esperamos! 💈');
   return lines.join('\n');
 }
 
