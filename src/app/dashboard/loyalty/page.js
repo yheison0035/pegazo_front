@@ -20,6 +20,8 @@ import { SALES_CHANGED_EVENT } from '@/lib/api/routes/sales';
 import Pagination from '@/components/dashboard/tables/segments/pagination';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import AlertModal from '@/components/dashboard/modals/alertModal';
+import WhatsappLink from '@/components/dashboard/tables/segments/contentData/whatsappLink';
+import { loyaltyWhatsappMessage } from '@/lib/loyaltyMessage';
 
 export default function LoyaltyPage() {
   const { usuario } = useAuth();
@@ -31,13 +33,19 @@ export default function LoyaltyPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
   const [search, setSearch] = useState('');
+  const [tab, setTab] = useState('active'); // 'active' | 'completed'
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState({ type: '', message: '' });
 
   const fetch = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await getLoyaltyCustomers({ page, limit, search });
+      const res = await getLoyaltyCustomers({
+        page,
+        limit,
+        search,
+        completed: tab === 'completed',
+      });
       setData(res.data || []);
       setConfig(res.config || null);
       setMeta(res.meta || null);
@@ -46,7 +54,7 @@ export default function LoyaltyPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, limit, search]);
+  }, [page, limit, search, tab]);
 
   useEffect(() => {
     const t = setTimeout(fetch, 300);
@@ -168,6 +176,37 @@ export default function LoyaltyPage() {
           </div>
         )}
 
+        {/* Pestañas: activos (aún acumulan) vs antiguos (ya graduados). */}
+        <div className="mb-4 inline-flex rounded-xl bg-gray-100 p-1">
+          {[
+            { id: 'active', label: 'Acumulando' },
+            { id: 'completed', label: 'Clientes antiguos' },
+          ].map((tb) => (
+            <button
+              key={tb.id}
+              onClick={() => {
+                setPage(1);
+                setTab(tb.id);
+              }}
+              className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
+                tab === tb.id
+                  ? 'bg-white text-orange-600 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              {tb.label}
+            </button>
+          ))}
+        </div>
+
+        {tab === 'completed' && (
+          <div className="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+            Estos clientes ya <b>completaron el rango de fidelización</b> (son
+            clientes antiguos): la fidelización queda desactivada y pagan normal.
+            Aquí los tienes a la mano para pensar qué ofrecerles más adelante.
+          </div>
+        )}
+
         <div className="flex flex-col sm:flex-row gap-3 mb-4">
           <div className="flex-1 flex items-center gap-2 rounded-xl border border-gray-200 px-3 py-2 bg-white">
             <MagnifyingGlassIcon className="w-5 h-5 text-gray-400" />
@@ -188,12 +227,18 @@ export default function LoyaltyPage() {
           <div className="divide-y divide-gray-50">
             {data.length === 0 && !loading && (
               <p className="px-5 py-10 text-center text-gray-400">
-                Aún no hay clientes con visitas acumuladas.
+                {tab === 'completed'
+                  ? 'Aún no hay clientes antiguos (que completaron la fidelización).'
+                  : 'Aún no hay clientes acumulando visitas.'}
               </p>
             )}
             {data.map((c) => {
               const L = c.loyalty || {};
-              const pct = Math.min(100, ((L.currentCount || 0) / t2v) * 100);
+              const isDone = tab === 'completed' || L.completed;
+              const pct = isDone
+                ? 100
+                : Math.min(100, ((L.currentCount || 0) / t2v) * 100);
+              const waMsg = loyaltyWhatsappMessage(c, usuario?.company?.name);
               return (
                 <div
                   key={c.id}
@@ -207,30 +252,47 @@ export default function LoyaltyPage() {
                       >
                         {c.name}
                       </Link>
-                      {L.nextDiscount > 0 && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5">
-                          <GiftIcon className="w-3.5 h-3.5" />
-                          Próximo corte: {L.nextDiscount}% dcto
+                      {isDone ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-medium px-2 py-0.5">
+                          <TrophyIcon className="w-3.5 h-3.5" />
+                          Cliente antiguo · fidelización completada
                         </span>
-                      )}
-                      {L.expired && (
-                        <span className="rounded-full bg-red-50 text-red-600 text-xs font-medium px-2 py-0.5">
-                          Racha vencida
-                        </span>
+                      ) : (
+                        <>
+                          {L.nextDiscount > 0 && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5">
+                              <GiftIcon className="w-3.5 h-3.5" />
+                              Próximo corte: {L.nextDiscount}% dcto
+                            </span>
+                          )}
+                          {L.expired && (
+                            <span className="rounded-full bg-red-50 text-red-600 text-xs font-medium px-2 py-0.5">
+                              Racha vencida
+                            </span>
+                          )}
+                        </>
                       )}
                     </div>
-                    <p className="text-xs text-gray-400">{c.phone || 'Sin teléfono'}</p>
-                    <div className="mt-2 flex items-center gap-2">
-                      <div className="flex-1 h-2 rounded-full bg-gray-100 overflow-hidden max-w-xs">
-                        <div
-                          className="h-full bg-gradient-to-r from-orange-500 to-amber-400"
-                          style={{ width: `${pct}%` }}
-                        />
+                    <div className="mt-0.5 flex items-center gap-3">
+                      {c.phone ? (
+                        <WhatsappLink phone={c.phone} message={waMsg} className="text-xs" />
+                      ) : (
+                        <span className="text-xs text-gray-400">Sin teléfono</span>
+                      )}
+                    </div>
+                    {!isDone && (
+                      <div className="mt-2 flex items-center gap-2">
+                        <div className="flex-1 h-2 rounded-full bg-gray-100 overflow-hidden max-w-xs">
+                          <div
+                            className="h-full bg-gradient-to-r from-orange-500 to-amber-400"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                        <span className="text-xs text-gray-500 whitespace-nowrap">
+                          {L.currentCount || 0}/{t2v} visitas
+                        </span>
                       </div>
-                      <span className="text-xs text-gray-500 whitespace-nowrap">
-                        {L.currentCount || 0}/{t2v} visitas
-                      </span>
-                    </div>
+                    )}
                   </div>
                 </div>
               );
