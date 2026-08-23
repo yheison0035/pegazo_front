@@ -16,6 +16,7 @@ import { Roles } from '@/config/roles';
 import { useAuth } from '@/context/authContext';
 import { getLoyaltyCustomers } from '@/lib/api/routes/customers';
 import { syncLoyaltyFromSales } from '@/lib/api/routes/company';
+import { SALES_CHANGED_EVENT } from '@/lib/api/routes/sales';
 import Pagination from '@/components/dashboard/tables/segments/pagination';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import AlertModal from '@/components/dashboard/modals/alertModal';
@@ -50,6 +51,18 @@ export default function LoyaltyPage() {
   useEffect(() => {
     const t = setTimeout(fetch, 300);
     return () => clearTimeout(t);
+  }, [fetch]);
+
+  // Tiempo real: al facturar/anular una venta (o al reenfocar la pestaña), la
+  // fidelización se recalcula sola en el backend; aquí refrescamos la tabla.
+  useEffect(() => {
+    const onChange = () => fetch();
+    window.addEventListener(SALES_CHANGED_EVENT, onChange);
+    window.addEventListener('focus', onChange);
+    return () => {
+      window.removeEventListener(SALES_CHANGED_EVENT, onChange);
+      window.removeEventListener('focus', onChange);
+    };
   }, [fetch]);
 
   const sync = async () => {

@@ -1,4 +1,5 @@
 import apiFetch from '../../auth/client';
+import { notifySalesChanged } from '../sales';
 
 export async function getVerifyCodeSale(code) {
   return apiFetch(`sales/verify/${code}`);
@@ -129,12 +130,16 @@ export async function updateDeliveredSale(id, dto) {
     localId: Number(cleanDto.localId) || null,
   };
 
-  return apiFetch(`/sales/${id}`, {
+  const res = await apiFetch(`/sales/${id}`, {
     method: 'PUT',
     body: JSON.stringify(body),
   });
+  notifySalesChanged();
+  return res;
 }
 
 export async function deleteDeliveredSale(id) {
-  return apiFetch(`/sales/${id}`, { method: 'DELETE' });
+  const res = await apiFetch(`/sales/${id}`, { method: 'DELETE' });
+  notifySalesChanged();
+  return res;
 }

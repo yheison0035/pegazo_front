@@ -1,5 +1,15 @@
 import apiFetch from '../../auth/client';
 
+// Aviso global de que una venta cambió (creada/anulada/editada/abono). Los
+// módulos que muestran datos derivados de ventas —fidelización, detalle de
+// cliente, cartera, etc.— lo escuchan para refrescar EN TIEMPO REAL.
+export const SALES_CHANGED_EVENT = 'pegazo:sales-changed';
+export function notifySalesChanged() {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent(SALES_CHANGED_EVENT));
+  }
+}
+
 // Lista/busca ventas (para elegir una, p. ej. al hacer una devolución).
 export async function getSales(params = {}) {
   const { page = 1, limit = 10, ...filters } = params;
@@ -56,10 +66,12 @@ export async function getPaymentsHistory(params = {}) {
 
 // Registra un abono (pago parcial) contra una venta a crédito.
 export async function addSalePayment(saleId, dto) {
-  return apiFetch(`/sales/${saleId}/payments`, {
+  const res = await apiFetch(`/sales/${saleId}/payments`, {
     method: 'POST',
     body: JSON.stringify(dto),
   });
+  notifySalesChanged();
+  return res;
 }
 
 export async function createSale(dto) {
@@ -72,8 +84,10 @@ export async function createSale(dto) {
     userId: Number(dto.userId),
   };
 
-  return apiFetch('/sales', {
+  const res = await apiFetch('/sales', {
     method: 'POST',
     body: JSON.stringify(body),
   });
+  notifySalesChanged();
+  return res;
 }
