@@ -36,3 +36,11 @@ export async function closeCash(id, dto) {
 export async function reopenCash(id) {
   return apiFetch(`/cash/${id}/reopen`, { method: 'POST' });
 }
+
+// Corregir la base inicial de una caja abierta (dueño/admin).
+export async function updateCashOpening(id, openingAmount) {
+  return apiFetch(`/cash/${id}/opening`, {
+    method: 'PATCH',
+    body: JSON.stringify({ openingAmount }),
+  });
+}

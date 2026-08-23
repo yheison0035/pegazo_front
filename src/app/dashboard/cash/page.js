@@ -34,12 +34,16 @@ export default function CashPage() {
     addCashMovement,
     closeCash,
     reopenCash,
+    updateCashOpening,
     loading,
   } = useCash();
   const { getLocals } = useLocals();
 
-  // Solo el dueño/admin puede reabrir una caja (por si se cerró por error).
+  // Solo el dueño/admin puede reabrir una caja (por si se cerró por error) o
+  // corregir la base inicial de la caja abierta (olvido/confusión).
   const canReopen = ['SUPER_ADMIN', 'ADMIN'].includes(usuario?.role);
+  const canEditBase = canReopen;
+  const [editBase, setEditBase] = useState(null); // string en edición o null
 
   const [locals, setLocals] = useState([]);
   const [localId, setLocalId] = useState(usuario?.localId || '');
@@ -80,6 +84,21 @@ export default function CashPage() {
   useEffect(() => {
     refresh();
   }, [refresh]);
+
+  // Corrige la base inicial de la caja abierta (dueño/admin).
+  const handleUpdateOpening = async () => {
+    try {
+      await updateCashOpening(current.id, Number(editBase) || 0);
+      setEditBase(null);
+      setAlert({ type: 'success', message: 'Base inicial actualizada.' });
+      refresh();
+    } catch (err) {
+      setAlert({
+        type: 'error',
+        message: err.message || 'No se pudo actualizar la base',
+      });
+    }
+  };
 
   const handleOpen = async () => {
     try {
@@ -266,11 +285,53 @@ export default function CashPage() {
                   tone="orange"
                 />
               </div>
-              <p className="text-xs text-gray-400">
-                Caja abierta {formatDateTime(current.openedAt)} por{' '}
-                {current.openedBy?.name || '—'}. Las ventas en efectivo se suman
-                automáticamente.
-              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-xs text-gray-400">
+                  Caja abierta {formatDateTime(current.openedAt)} por{' '}
+                  {current.openedBy?.name || '—'}. Las ventas en efectivo se
+                  suman automáticamente.
+                </p>
+                {canEditBase && editBase === null && (
+                  <button
+                    onClick={() => setEditBase(String(current.openingAmount ?? 0))}
+                    className="rounded-lg border border-orange-200 px-2.5 py-1 text-xs font-medium text-orange-600 hover:bg-orange-50"
+                  >
+                    Corregir base inicial
+                  </button>
+                )}
+              </div>
+
+              {canEditBase && editBase !== null && (
+                <div className="flex flex-col gap-2 rounded-xl border border-orange-200 bg-orange-50 p-3 sm:flex-row sm:items-center">
+                  <span className="text-sm font-medium text-orange-800">
+                    Nueva base inicial:
+                  </span>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    autoFocus
+                    value={fmtMoney(editBase)}
+                    onChange={(e) => setEditBase(parseMoney(e.target.value))}
+                    placeholder="Base inicial (ej: $ 100.000)"
+                    className="flex-1 rounded-xl border border-gray-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      variant="primary"
+                      onClick={handleUpdateOpening}
+                      disabled={loading}
+                    >
+                      Guardar
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => setEditBase(null)}
+                    >
+                      Cancelar
+                    </Button>
+                  </div>
+                </div>
+              )}
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                 {/* Movimientos */}
