@@ -5,6 +5,7 @@ import Link from 'next/link';
 import {
   MagnifyingGlassIcon,
   PlusIcon,
+  CheckIcon,
   MinusIcon,
   TrashIcon,
   UserIcon,
@@ -612,6 +613,7 @@ export default function PosSale({
                       const isPrepared = r.trackStock === false;
                       const noStock =
                         !isService && !isPrepared && r.stock <= 0;
+                      const inCart = cart.find((i) => i.key === keyOf(r));
                       return (
                         <button
                           key={`${r.type}-${r.id}`}
@@ -620,7 +622,9 @@ export default function PosSale({
                           className={`group flex flex-col rounded-xl border p-3 text-left transition ${
                             noStock
                               ? 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed'
-                              : 'border-gray-200 hover:border-orange-400 hover:bg-orange-50/40'
+                              : inCart
+                                ? 'border-orange-400 bg-orange-50 ring-1 ring-orange-200'
+                                : 'border-gray-200 hover:border-orange-400 hover:bg-orange-50/40'
                           }`}
                         >
                           <div className="flex items-start justify-between gap-2">
@@ -632,7 +636,14 @@ export default function PosSale({
                               )}
                               {isService ? t.service : t.product}
                             </span>
-                            <PlusIcon className="w-4 h-4 text-orange-500 opacity-0 group-hover:opacity-100" />
+                            {inCart ? (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-orange-500 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                                <CheckIcon className="h-3 w-3" />
+                                {inCart.quantity}
+                              </span>
+                            ) : (
+                              <PlusIcon className="w-4 h-4 text-orange-500 opacity-0 group-hover:opacity-100" />
+                            )}
                           </div>
                           <span className="mt-1 line-clamp-2 text-sm font-medium text-gray-800">
                             {r.name}
