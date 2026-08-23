@@ -6,6 +6,7 @@ import { getProductFields } from '@/config/verticalProfiles';
 import { roleLabel } from '@/config/roleLabels';
 import Actions from './actions';
 import PhoneContentData from './contentData/phone';
+import { customerWhatsappMessage } from '@/lib/loyaltyMessage';
 import WhatsappLink from './contentData/whatsappLink';
 import LastAudit, { VIEW_TO_ENTITY } from './contentData/lastAudit';
 import StatusBadge from '@/components/ui/StatusBadge';
@@ -274,7 +275,14 @@ export default function ContentData({
                 <td className="px-5 py-4 whitespace-nowrap">
                   {info.local?.name || '---'}
                 </td>
-                <PhoneContentData info={info} />
+                <PhoneContentData
+                  info={info}
+                  message={
+                    info.document !== '222222222222'
+                      ? customerWhatsappMessage(info)
+                      : undefined
+                  }
+                />
                 <td className="px-5 py-4 whitespace-nowrap">
                   {info.city || '---'}
                 </td>
@@ -312,6 +320,7 @@ export default function ContentData({
                   {info.customer?.document !== '222222222222' && (
                     <WhatsappLink
                       phone={info.customer?.phone}
+                      message={customerWhatsappMessage(info.customer)}
                       className="mt-1 text-xs"
                     />
                   )}
