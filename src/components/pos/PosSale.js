@@ -471,6 +471,9 @@ export default function PosSale({
       !r.localId ||
       String(r.localId) === String(localId)
   );
+  // Si el negocio tiene fotos de sus productos, mostramos tarjetas con imagen;
+  // si ninguno tiene foto (p.ej. barbería de solo servicios), diseño compacto.
+  const resultsHaveImages = shownResults.some((r) => r.image);
 
   const variantLabel = (i) =>
     !showColor
@@ -631,7 +634,13 @@ export default function PosSale({
                     Sin resultados para “{query}”.
                   </p>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
+                  <div
+                    className={`grid gap-2 ${
+                      resultsHaveImages
+                        ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4'
+                        : 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3'
+                    }`}
+                  >
                     {shownResults.map((r) => {
                       const isService = r.type === 'service';
                       // Los elaborados sin control de stock (platos) se venden
@@ -640,59 +649,101 @@ export default function PosSale({
                       const noStock =
                         !isService && !isPrepared && r.stock <= 0;
                       const inCart = cart.find((i) => i.key === keyOf(r));
+                      const TypeIcon = isService
+                        ? WrenchScrewdriverIcon
+                        : ShoppingBagIcon;
                       return (
                         <button
                           key={`${r.type}-${r.id}`}
                           onClick={() => addToCart(r)}
                           disabled={noStock}
-                          className={`group flex flex-col rounded-xl border p-3 text-left transition ${
+                          className={`group relative flex flex-col overflow-hidden rounded-xl border text-left transition ${
                             noStock
                               ? 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed'
                               : inCart
-                                ? 'border-orange-400 bg-orange-50 ring-1 ring-orange-200'
-                                : 'border-gray-200 hover:border-orange-400 hover:bg-orange-50/40'
+                                ? 'border-orange-400 bg-orange-50/40 shadow-sm ring-1 ring-orange-200'
+                                : 'border-gray-200 hover:-translate-y-0.5 hover:border-orange-300 hover:shadow-md'
                           }`}
                         >
-                          <div className="flex items-start justify-between gap-2">
-                            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-gray-400">
-                              {isService ? (
-                                <WrenchScrewdriverIcon className="w-3.5 h-3.5" />
+                          {resultsHaveImages && (
+                            <div className="relative aspect-square w-full overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
+                              {r.image ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                  src={r.image}
+                                  alt={r.name}
+                                  loading="lazy"
+                                  className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                                />
                               ) : (
-                                <ShoppingBagIcon className="w-3.5 h-3.5" />
+                                <div className="flex h-full w-full items-center justify-center">
+                                  <TypeIcon className="h-9 w-9 text-gray-300" />
+                                </div>
                               )}
-                              {isService ? t.service : t.product}
-                            </span>
-                            {inCart ? (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-orange-500 px-1.5 py-0.5 text-[10px] font-semibold text-white">
-                                <CheckIcon className="h-3 w-3" />
-                                {inCart.quantity}
+                              <span className="absolute left-1.5 top-1.5 inline-flex items-center gap-1 rounded-full bg-white/85 px-1.5 py-0.5 text-[10px] font-medium text-gray-500 shadow-sm backdrop-blur">
+                                <TypeIcon className="h-3 w-3" />
+                                {isService ? t.service : t.product}
                               </span>
-                            ) : (
-                              <PlusIcon className="w-4 h-4 text-orange-500 opacity-0 group-hover:opacity-100" />
+                              {inCart && (
+                                <span className="absolute right-1.5 top-1.5 inline-flex items-center gap-1 rounded-full bg-orange-500 px-1.5 py-0.5 text-[10px] font-semibold text-white shadow">
+                                  <CheckIcon className="h-3 w-3" />
+                                  {inCart.quantity}
+                                </span>
+                              )}
+                              {noStock && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-white/60">
+                                  <span className="rounded-full bg-red-500/90 px-2 py-0.5 text-[11px] font-semibold text-white">
+                                    Sin stock
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          <div className="flex flex-1 flex-col p-2.5">
+                            {!resultsHaveImages && (
+                              <div className="flex items-start justify-between gap-2">
+                                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-gray-400">
+                                  <TypeIcon className="h-3.5 w-3.5" />
+                                  {isService ? t.service : t.product}
+                                </span>
+                                {inCart ? (
+                                  <span className="inline-flex items-center gap-1 rounded-full bg-orange-500 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                                    <CheckIcon className="h-3 w-3" />
+                                    {inCart.quantity}
+                                  </span>
+                                ) : (
+                                  <PlusIcon className="h-4 w-4 text-orange-500 opacity-0 group-hover:opacity-100" />
+                                )}
+                              </div>
                             )}
-                          </div>
-                          <span className="mt-1 line-clamp-2 text-sm font-medium text-gray-800">
-                            {r.name}
-                            {variantLabel(r) ? (
-                              <span className="text-gray-400">
-                                {' '}
-                                · {variantLabel(r)}
-                              </span>
-                            ) : null}
-                          </span>
-                          <div className="mt-1 flex items-center justify-between">
-                            <span className="text-sm font-bold text-gray-800">
-                              {formatCOP(r.price)}
+                            <span
+                              className={`line-clamp-2 text-sm font-medium text-gray-800 ${
+                                resultsHaveImages ? '' : 'mt-1'
+                              }`}
+                            >
+                              {r.name}
+                              {variantLabel(r) ? (
+                                <span className="text-gray-400">
+                                  {' '}
+                                  · {variantLabel(r)}
+                                </span>
+                              ) : null}
                             </span>
-                            {!isService && !isPrepared && (
-                              <span
-                                className={`text-[11px] ${
-                                  noStock ? 'text-red-500' : 'text-gray-400'
-                                }`}
-                              >
-                                {noStock ? 'Sin stock' : `Stock: ${r.stock}`}
+                            <div className="mt-1 flex items-center justify-between">
+                              <span className="text-sm font-bold text-gray-900">
+                                {formatCOP(r.price)}
                               </span>
-                            )}
+                              {!isService && !isPrepared && (
+                                <span
+                                  className={`text-[11px] ${
+                                    noStock ? 'text-red-500' : 'text-gray-400'
+                                  }`}
+                                >
+                                  {noStock ? 'Sin stock' : `Stock: ${r.stock}`}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </button>
                       );
