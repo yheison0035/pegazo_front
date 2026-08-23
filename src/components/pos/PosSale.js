@@ -465,11 +465,10 @@ export default function PosSale({
     }
   };
 
+  // Solo se muestran productos/servicios de la SEDE seleccionada arriba (para
+  // no vender por error el stock de otro local). Cada resultado trae su localId.
   const shownResults = results.filter(
-    (r) =>
-      r.type !== 'service' ||
-      !r.localId ||
-      String(r.localId) === String(localId)
+    (r) => !r.localId || String(r.localId) === String(localId)
   );
   // Si el negocio tiene fotos de sus productos, mostramos tarjetas con imagen;
   // si ninguno tiene foto (p.ej. barbería de solo servicios), diseño compacto.
@@ -591,10 +590,7 @@ export default function PosSale({
                       try {
                         const res = await searchProducts(term);
                         const list = (res?.data || res || []).filter(
-                          (r) =>
-                            r.type !== 'service' ||
-                            !r.localId ||
-                            String(r.localId) === String(localId)
+                          (r) => !r.localId || String(r.localId) === String(localId)
                         );
                         if (list[0]) {
                           addToCart(list[0]);
@@ -637,7 +633,7 @@ export default function PosSale({
                   <div
                     className={`grid gap-2 ${
                       resultsHaveImages
-                        ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4'
+                        ? 'grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'
                         : 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3'
                     }`}
                   >
