@@ -976,6 +976,19 @@ export default function PosSale({
                   />
                 </div>
 
+                <div>
+                  <label className="text-[11px] font-medium text-gray-500">
+                    Observaciones (salen en la factura)
+                  </label>
+                  <textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    rows={2}
+                    placeholder="Ej: garantía de 3 meses, cómo reclamarla, novedad del pedido…"
+                    className="mt-0.5 w-full resize-y rounded-lg border border-gray-200 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+
                 <div className="grid grid-cols-3 gap-1.5">
                   {PAYMENT_METHODS.map((pm) => (
                     <button
