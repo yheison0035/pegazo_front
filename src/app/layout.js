@@ -1,4 +1,5 @@
 import { AuthProvider } from '@/context/authContext';
+import { ToastProvider } from '@/context/toastContext';
 import { monserrat } from '@/styles/fonts';
 import '@/styles/globals.css';
 
@@ -90,7 +91,9 @@ export default function RootLayout({ children }) {
   return (
     <AuthProvider>
       <html lang="es">
-        <body className={`${monserrat.className} antialiased`}>{children}</body>
+        <body className={`${monserrat.className} antialiased`}>
+          <ToastProvider>{children}</ToastProvider>
+        </body>
       </html>
     </AuthProvider>
   );
