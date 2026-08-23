@@ -16,6 +16,7 @@ import {
 } from '@heroicons/react/24/outline';
 import Button from '@/components/ui/Button';
 import WhatsappLink from '@/components/dashboard/tables/segments/contentData/whatsappLink';
+import { loyaltyWhatsappMessage } from '@/lib/loyaltyMessage';
 import { getCustomerSummary } from '@/lib/api/routes/customers';
 import { SALES_CHANGED_EVENT } from '@/lib/api/routes/sales';
 import { formatCOP, formatDateOnly } from '@/lib/api/utils/utils';
@@ -153,7 +154,10 @@ export default function CustomerProfile() {
           </div>
           {customer.phone && (
             <div className="flex-none">
-              <WhatsappLink phone={customer.phone} />
+              <WhatsappLink
+                phone={customer.phone}
+                message={loyaltyWhatsappMessage({ ...customer, loyalty }, null)}
+              />
             </div>
           )}
         </div>
@@ -237,8 +241,13 @@ export default function CustomerProfile() {
             })}
           </div>
 
-          {/* Estado condicional: descuento del próximo corte */}
-          {loyalty.nextDiscount > 0 ? (
+          {/* Estado condicional: graduado / descuento del próximo corte */}
+          {loyalty.completed ? (
+            <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">
+              🏆 Cliente antiguo: ya completó la fidelización. La fidelización
+              queda desactivada y paga normal cada visita.
+            </div>
+          ) : loyalty.nextDiscount > 0 ? (
             <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">
               🎉 En su próximo corte (visita #{loyalty.nextVisit}) tiene{' '}
               {loyalty.nextDiscount}% de descuento.
@@ -251,7 +260,7 @@ export default function CustomerProfile() {
             </p>
           )}
 
-          {loyalty.expired && (
+          {!loyalty.completed && loyalty.expired && (
             <p className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-xs font-medium text-red-600">
               No vuelve hace {loyalty.daysSinceLastVisit} días (máx.{' '}
               {loyalty.maxDays}): la racha se reinició, su próxima visita cuenta

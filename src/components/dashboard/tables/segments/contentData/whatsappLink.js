@@ -1,15 +1,15 @@
-export default function WhatsappLink({ phone, className = '' }) {
+export default function WhatsappLink({ phone, message, className = '' }) {
   if (!phone) return null;
 
   const number = String(phone).replace(/\s+/g, '');
+  const text = message || 'Hola, te contacto ---';
 
   return (
     <a
-      href={`https://wa.me/${number}?text=${encodeURIComponent(
-        'Hola, te contacto ---'
-      )}`}
+      href={`https://wa.me/${number}?text=${encodeURIComponent(text)}`}
       target="_blank"
       rel="noopener noreferrer"
+      onClick={(e) => e.stopPropagation()}
       className={`flex items-center gap-1 text-green-600 hover:underline ${className}`}
     >
       <svg
