@@ -15,7 +15,7 @@ import {
   CalculatorIcon,
   LockClosedIcon,
 } from '@heroicons/react/24/outline';
-import { getCurrentCash } from '@/lib/api/routes/cash';
+import { getCurrentCash, CASH_CHANGED_EVENT } from '@/lib/api/routes/cash';
 import { dayStateFromRegister } from '@/lib/dayStatus';
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
@@ -156,15 +156,25 @@ export default function PosSale({
 
   useEffect(() => {
     if (!requireCashOpen || !localId) return;
-    setDayState('loading');
-    (async () => {
+    const check = async () => {
       try {
         const res = await getCurrentCash(localId);
         setDayState(dayStateFromRegister(res?.data));
       } catch (_) {
         setDayState('not_open');
       }
-    })();
+    };
+    setDayState('loading');
+    check();
+    // Se desbloquea/rebloquea en tiempo real al abrir/cerrar caja (evento) o al
+    // volver a la pestaña, sin recargar.
+    const onChange = () => check();
+    window.addEventListener(CASH_CHANGED_EVENT, onChange);
+    window.addEventListener('focus', onChange);
+    return () => {
+      window.removeEventListener(CASH_CHANGED_EVENT, onChange);
+      window.removeEventListener('focus', onChange);
+    };
   }, [requireCashOpen, localId]);
 
   useEffect(() => {

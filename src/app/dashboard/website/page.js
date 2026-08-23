@@ -9,6 +9,7 @@ import {
 } from '@heroicons/react/24/outline';
 import RoleGuard from '@/auth/roleGuard';
 import AlertModal from '@/components/dashboard/modals/alertModal';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 import Button from '@/components/ui/Button';
 import {
   getWebsiteConfig,
@@ -144,6 +145,7 @@ export default function WebsitePage() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState('');
   const [alert, setAlert] = useState({});
+  const [bannerToDelete, setBannerToDelete] = useState(null);
   const [showAllThemes, setShowAllThemes] = useState(false);
 
   const load = useCallback(async () => {
@@ -269,14 +271,15 @@ export default function WebsitePage() {
     }
   };
 
-  const handleDeleteBanner = async (banner) => {
-    if (!window.confirm('¿Eliminar este banner?')) return;
-
+  const confirmDeleteBanner = async () => {
+    const banner = bannerToDelete;
     try {
       await deleteWebsiteBanner(banner.id);
+      setBannerToDelete(null);
       setAlert({ type: 'success', message: 'Banner eliminado' });
       load();
     } catch (err) {
+      setBannerToDelete(null);
       setAlert({ type: 'error', message: err.message });
     }
   };
@@ -721,7 +724,7 @@ export default function WebsitePage() {
 
                     <button
                       type="button"
-                      onClick={() => handleDeleteBanner(banner)}
+                      onClick={() => setBannerToDelete(banner)}
                       className="text-gray-400 hover:text-red-500"
                       aria-label="Eliminar banner"
                     >
@@ -852,6 +855,16 @@ export default function WebsitePage() {
           type={alert.type}
           message={alert.message}
           onClose={() => setAlert({})}
+        />
+
+        <ConfirmModal
+          open={!!bannerToDelete}
+          title="¿Eliminar banner?"
+          message="Se eliminará este banner de la tienda."
+          confirmText="Eliminar"
+          tone="danger"
+          onConfirm={confirmDeleteBanner}
+          onCancel={() => setBannerToDelete(null)}
         />
       </div>
     </RoleGuard>

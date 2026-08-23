@@ -11,6 +11,7 @@ import {
 } from '@/lib/api/routes/coupons';
 import { PLANS } from '@/lib/plans';
 import AlertModal from '@/components/dashboard/modals/alertModal';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 import Button from '@/components/ui/Button';
 
 const EMPTY = {
@@ -42,6 +43,7 @@ export default function CouponsPage() {
   const [form, setForm] = useState(EMPTY);
   const [saving, setSaving] = useState(false);
   const [alert, setAlert] = useState({});
+  const [couponToDelete, setCouponToDelete] = useState(null);
 
   const fetch = useCallback(async () => {
     setLoading(true);
@@ -113,13 +115,15 @@ export default function CouponsPage() {
     }
   };
 
-  const handleDelete = async (c) => {
-    if (!window.confirm(`¿Eliminar el cupón ${c.code}?`)) return;
+  const confirmDelete = async () => {
+    const c = couponToDelete;
     try {
       await deleteCoupon(c.id);
+      setCouponToDelete(null);
       setAlert({ type: 'success', message: 'Cupón eliminado' });
       fetch();
     } catch (err) {
+      setCouponToDelete(null);
       setAlert({ type: 'error', message: err.message });
     }
   };
@@ -210,7 +214,7 @@ export default function CouponsPage() {
                           <PencilIcon className="h-5 w-5" />
                         </button>
                         <button
-                          onClick={() => handleDelete(c)}
+                          onClick={() => setCouponToDelete(c)}
                           className="text-gray-400 hover:text-red-600"
                         >
                           <TrashIcon className="h-5 w-5" />
@@ -376,6 +380,18 @@ export default function CouponsPage() {
           type={alert.type}
           message={alert.message}
           onClose={() => setAlert({})}
+        />
+
+        <ConfirmModal
+          open={!!couponToDelete}
+          title="¿Eliminar cupón?"
+          message={
+            couponToDelete ? `Se eliminará el cupón ${couponToDelete.code}.` : ''
+          }
+          confirmText="Eliminar"
+          tone="danger"
+          onConfirm={confirmDelete}
+          onCancel={() => setCouponToDelete(null)}
         />
       </div>
     </RoleGuard>
