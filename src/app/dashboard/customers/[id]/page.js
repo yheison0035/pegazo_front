@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import {
   ArrowLeftIcon,
@@ -17,6 +17,7 @@ import {
 import Button from '@/components/ui/Button';
 import WhatsappLink from '@/components/dashboard/tables/segments/contentData/whatsappLink';
 import { getCustomerSummary } from '@/lib/api/routes/customers';
+import { SALES_CHANGED_EVENT } from '@/lib/api/routes/sales';
 import { formatCOP, formatDateOnly } from '@/lib/api/utils/utils';
 import { segmentMeta } from '@/lib/customerSegment';
 import { statusMeta } from '@/lib/appointmentStatus';
@@ -39,22 +40,29 @@ export default function CustomerProfile() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      try {
-        const res = await getCustomerSummary(id);
-        if (alive) setData(res?.data || null);
-      } catch {
-        if (alive) setError(true);
-      } finally {
-        if (alive) setLoading(false);
-      }
-    })();
-    return () => {
-      alive = false;
-    };
+  const load = useCallback(async () => {
+    try {
+      const res = await getCustomerSummary(id);
+      setData(res?.data || null);
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
   }, [id]);
+
+  useEffect(() => {
+    load();
+    // Tiempo real: si se factura/anula una venta de este cliente (o se vuelve a
+    // la pestaña), se refresca su resumen (compras, fidelización, etc.).
+    const onChange = () => load();
+    window.addEventListener(SALES_CHANGED_EVENT, onChange);
+    window.addEventListener('focus', onChange);
+    return () => {
+      window.removeEventListener(SALES_CHANGED_EVENT, onChange);
+      window.removeEventListener('focus', onChange);
+    };
+  }, [load]);
 
   if (loading) {
     return (

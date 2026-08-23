@@ -12,6 +12,7 @@ import {
   getReceivables,
   getPaymentsHistory,
   getCreditsHistory,
+  SALES_CHANGED_EVENT,
 } from '@/lib/api/routes/sales';
 import { formatCOP, formatDateOnly, formatDateTime } from '@/lib/api/utils/utils';
 import Button from '@/components/ui/Button';
@@ -82,6 +83,14 @@ export default function CarteraPage() {
 
   useEffect(() => {
     load();
+    // Tiempo real: una venta fiada nueva o un abono refrescan la cartera sola.
+    const onChange = () => load();
+    window.addEventListener(SALES_CHANGED_EVENT, onChange);
+    window.addEventListener('focus', onChange);
+    return () => {
+      window.removeEventListener(SALES_CHANGED_EVENT, onChange);
+      window.removeEventListener('focus', onChange);
+    };
   }, [load]);
 
   const rows = data.rows.filter((r) => {
