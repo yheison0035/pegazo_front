@@ -297,7 +297,18 @@ export default function ContentData({
                   {info.code || '---'}
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
-                  <div>{info.customer?.name || '---'}</div>
+                  {info.customer?.id &&
+                  info.customer?.document !== '222222222222' ? (
+                    <Link
+                      href={`/dashboard/customers/${info.customer.id}`}
+                      className="font-medium text-orange-600 hover:underline"
+                      title="Ver historial del cliente"
+                    >
+                      {info.customer.name}
+                    </Link>
+                  ) : (
+                    <div>{info.customer?.name || '---'}</div>
+                  )}
                   {info.customer?.document !== '222222222222' && (
                     <WhatsappLink
                       phone={info.customer?.phone}

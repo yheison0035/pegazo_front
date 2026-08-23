@@ -6,6 +6,7 @@ import { PLANS, PLAN_ORDER } from '@/lib/plans';
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import Button from '@/components/ui/Button';
+import RoleGuard from '@/auth/roleGuard';
 import { startPlanCheckout } from '@/lib/api/routes/subscription';
 
 export default function UpgradePage() {
@@ -42,6 +43,7 @@ export default function UpgradePage() {
   };
 
   return (
+    <RoleGuard allowedRoles={['SUPER_ADMIN']}>
     <div className="w-full">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-gray-800">
@@ -152,5 +154,6 @@ export default function UpgradePage() {
         onClose={() => setAlert({})}
       />
     </div>
+    </RoleGuard>
   );
 }
