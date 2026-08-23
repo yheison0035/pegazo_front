@@ -109,11 +109,29 @@ export default function PosSale({
     initial?.localId ?? usuario?.localId ?? ''
   );
   const [sellers, setSellers] = useState([]);
+  // En negocios de servicios (barbería, spa, odontología) hay dos grupos de
+  // "atendido por": quien PRESTA el servicio (barbero/profesional) y el resto
+  // (recepción/caja/admin). Se elige SOLO uno. Por defecto se exige elegir al
+  // barbero para que la recepcionista no se auto-asigne el corte por error.
+  const isServiceVertical = ['SERVICIOS', 'ODONTOLOGIA'].includes(
+    usuario?.company?.type
+  );
+  const [sellerGroup, setSellerGroup] = useState('attendant'); // 'attendant' | 'other'
   const [sellerId, setSellerId] = useState(
-    initial?.sellerId ?? usuario?.id ?? ''
+    initial?.sellerId ?? (isServiceVertical ? '' : usuario?.id) ?? ''
   );
   const [submitting, setSubmitting] = useState(false);
   const [alert, setAlert] = useState({ type: '', message: '', url: '' });
+
+  // Roles que PRESTAN el servicio (el "atiende"): barbero / profesional.
+  const ATTENDANT_ROLES = ['BARBERO', 'PROFESIONAL'];
+  const barbers = sellers.filter((s) => ATTENDANT_ROLES.includes(s.role));
+  const others = sellers.filter((s) => !ATTENDANT_ROLES.includes(s.role));
+  const sellerOptions = !isServiceVertical
+    ? sellers
+    : sellerGroup === 'attendant'
+      ? barbers
+      : others;
 
   // Config fiscal de la empresa (IVA). El POS la necesita para mostrar el IVA y
   // el total REAL a cobrar, igual que lo calcula el backend al guardar la venta.
@@ -365,6 +383,15 @@ export default function PosSale({
     }
     if (!localId) {
       setAlert({ type: 'error', message: 'Selecciona la sede.' });
+      return;
+    }
+    // En servicios se debe elegir explícitamente quién atendió (evita que la
+    // recepcionista se asigne el corte por error).
+    if (isServiceVertical && !sellerId) {
+      setAlert({
+        type: 'warning',
+        message: `Selecciona quién atendió (${(t.attendant || 'barbero').toLowerCase()} u otro).`,
+      });
       return;
     }
     setSubmitting(true);
@@ -846,7 +873,7 @@ export default function PosSale({
                   </div>
                 </div>
 
-                {sellers.length > 0 && (
+                {sellers.length > 0 && !isServiceVertical && (
                   <div>
                     <label className="text-[11px] font-medium text-gray-500">
                       {t.attendant || 'Atendido por'}
@@ -862,6 +889,68 @@ export default function PosSale({
                         </option>
                       ))}
                     </select>
+                  </div>
+                )}
+
+                {/* Servicios (barbería/spa/odontología): elegir SOLO uno —
+                    quien prestó el servicio (barbero) u otro (recepción). */}
+                {sellers.length > 0 && isServiceVertical && (
+                  <div>
+                    <label className="text-[11px] font-medium text-gray-500">
+                      ¿Quién atendió?
+                    </label>
+                    <div className="mt-0.5 grid grid-cols-2 gap-1 rounded-lg bg-gray-100 p-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSellerGroup('attendant');
+                          setSellerId('');
+                        }}
+                        className={`rounded-md px-2 py-1.5 text-sm font-medium transition ${
+                          sellerGroup === 'attendant'
+                            ? 'bg-white text-orange-600 shadow-sm'
+                            : 'text-gray-500 hover:text-gray-700'
+                        }`}
+                      >
+                        {t.attendant || 'Barbero'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSellerGroup('other');
+                          setSellerId('');
+                        }}
+                        className={`rounded-md px-2 py-1.5 text-sm font-medium transition ${
+                          sellerGroup === 'other'
+                            ? 'bg-white text-orange-600 shadow-sm'
+                            : 'text-gray-500 hover:text-gray-700'
+                        }`}
+                      >
+                        Otro
+                      </button>
+                    </div>
+                    <select
+                      value={sellerId}
+                      onChange={(e) => setSellerId(e.target.value)}
+                      className="mt-1 w-full rounded-lg border border-gray-200 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    >
+                      <option value="">
+                        {sellerGroup === 'attendant'
+                          ? `Selecciona el ${(t.attendant || 'barbero').toLowerCase()}…`
+                          : 'Selecciona quién atendió…'}
+                      </option>
+                      {sellerOptions.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.name}
+                        </option>
+                      ))}
+                    </select>
+                    {sellerGroup === 'attendant' && barbers.length === 0 && (
+                      <p className="mt-1 text-[11px] text-amber-600">
+                        No hay {(t.attendantPlural || 'barberos').toLowerCase()}{' '}
+                        registrados. Créalos en Usuarios o usa “Otro”.
+                      </p>
+                    )}
                   </div>
                 )}
 
