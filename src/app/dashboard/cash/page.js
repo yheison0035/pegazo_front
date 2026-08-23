@@ -35,14 +35,24 @@ export default function CashPage() {
     closeCash,
     reopenCash,
     updateCashOpening,
+    deleteCash,
     loading,
   } = useCash();
   const { getLocals } = useLocals();
 
-  // Solo el dueño/admin puede reabrir una caja (por si se cerró por error) o
-  // corregir la base inicial de la caja abierta (olvido/confusión).
+  // Reabrir o eliminar/reiniciar una caja: solo dueño/admin.
   const canReopen = ['SUPER_ADMIN', 'ADMIN'].includes(usuario?.role);
-  const canEditBase = canReopen;
+  const canDelete = canReopen;
+  // Corregir la base inicial: cualquier rol de caja (quien la abrió pudo
+  // olvidarla o ponerla mal).
+  const canEditBase = [
+    'SUPER_ADMIN',
+    'ADMIN',
+    'RECEPCIONISTA',
+    'ASESOR',
+    'CAJA',
+    'VENTAS',
+  ].includes(usuario?.role);
   const [editBase, setEditBase] = useState(null); // string en edición o null
 
   const [locals, setLocals] = useState([]);
@@ -97,6 +107,25 @@ export default function CashPage() {
         type: 'error',
         message: err.message || 'No se pudo actualizar la base',
       });
+    }
+  };
+
+  // Elimina/reinicia la caja (dueño/admin): la borra para poder abrir una nueva.
+  const handleDelete = async (id) => {
+    if (
+      !confirm(
+        '¿Eliminar esta caja? Se borrará junto con sus movimientos manuales. ' +
+          'Las ventas NO se pierden: al abrir una caja nueva se vuelven a sumar ' +
+          'las ventas en efectivo del día.'
+      )
+    )
+      return;
+    try {
+      await deleteCash(id);
+      setAlert({ type: 'success', message: 'Caja eliminada. Ya puedes abrir una nueva.' });
+      refresh();
+    } catch (err) {
+      setAlert({ type: 'error', message: err.message || 'No se pudo eliminar la caja' });
     }
   };
 
@@ -297,6 +326,14 @@ export default function CashPage() {
                     className="rounded-lg border border-orange-200 px-2.5 py-1 text-xs font-medium text-orange-600 hover:bg-orange-50"
                   >
                     Corregir base inicial
+                  </button>
+                )}
+                {canDelete && (
+                  <button
+                    onClick={() => handleDelete(current.id)}
+                    className="rounded-lg border border-red-200 px-2.5 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
+                  >
+                    Eliminar / reiniciar caja
                   </button>
                 )}
               </div>
