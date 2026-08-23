@@ -62,9 +62,22 @@ export default function EditUser() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Campos internos que no se editan y que el validador del backend rechaza
+    // si se reenvían (OTP de recuperación, marcas de tiempo, relaciones).
+    const {
+      resetOtpHash,
+      resetOtpExpires,
+      resetOtpAttempts,
+      createdAt,
+      updatedAt,
+      company,
+      local,
+      managedLocals,
+      ...payload
+    } = formData;
     try {
       if (isSelf) {
-        const { data } = await updateMyProfile(formData);
+        const { data } = await updateMyProfile(payload);
         // Reflejar los cambios en la sesión (nombre/avatar del sidebar, etc.)
         if (data && setUsuario) {
           const merged = { ...usuario, ...data };
@@ -77,7 +90,7 @@ export default function EditUser() {
           url: '/dashboard',
         });
       } else {
-        await updateUser(id, formData);
+        await updateUser(id, payload);
         setAlert({
           type: 'success',
           message: 'Usuario actualizado correctamente.',

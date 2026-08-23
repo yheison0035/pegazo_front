@@ -24,12 +24,13 @@ export default function NavLinks({ expanded = true }) {
   const { usuario, loading, logout } = useAuth();
   const pathname = usePathname();
 
-  // El acceso al plan se muestra a todos los usuarios de empresa (no al rol de
-  // plataforma). Si ya está en el plan más alto, en vez de "Mejorar" se ofrece
-  // "Cambiar mi plan" (para que igual pueda gestionarlo o cambiarlo).
+  // El acceso al plan es del DUEÑO del negocio (SUPER_ADMIN): solo él gestiona
+  // la suscripción. Los demás roles (recepción, cajero, barbero, admin
+  // secundario) no lo ven. Si ya está en el plan más alto, en vez de "Mejorar"
+  // se ofrece "Cambiar mi plan".
   const plan = usuario?.company?.plan;
   const topPlan = PLAN_ORDER[PLAN_ORDER.length - 1];
-  const showPlanLink = usuario?.role !== 'SUPER_PLATFORM_ADMIN';
+  const showPlanLink = usuario?.role === 'SUPER_ADMIN';
   const canUpgrade = plan !== topPlan;
   const sections = useNavigation();
 
