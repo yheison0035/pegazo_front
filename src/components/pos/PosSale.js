@@ -335,17 +335,33 @@ export default function PosSale({
     } catch (_) {}
   };
 
-  const applyLoyalty = () => {
+  // Fidelización AUTOMÁTICA: si el cliente tiene descuento de recompensa, se
+  // aplica solo a los servicios (sin que el cajero tenga que dar clic, así no se
+  // puede olvidar ni quemar la recompensa). Preserva descuentos manuales de
+  // ítems que no son de fidelización, y lo retira si se quita el cliente.
+  useEffect(() => {
     const pct = customer?.loyalty?.nextDiscount || 0;
-    if (!pct) return;
-    setCart((prev) =>
-      prev.map((i) =>
-        i.type === 'service'
-          ? { ...i, discount: Math.round(i.price * i.quantity * (pct / 100)) }
-          : i
-      )
-    );
-  };
+    setCart((prev) => {
+      let changed = false;
+      const next = prev.map((i) => {
+        if (i.type !== 'service') return i;
+        if (pct > 0) {
+          const want = Math.round(i.price * i.quantity * (pct / 100));
+          if (!i.loyaltyApplied || i.discount !== want) {
+            changed = true;
+            return { ...i, discount: want, loyaltyApplied: true };
+          }
+          return i;
+        }
+        if (i.loyaltyApplied) {
+          changed = true;
+          return { ...i, discount: 0, loyaltyApplied: false };
+        }
+        return i;
+      });
+      return changed ? next : prev;
+    });
+  }, [customer?.loyalty?.nextDiscount, cart]);
 
   const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
   const discountTotal = cart.reduce(
@@ -811,18 +827,13 @@ export default function PosSale({
                 )}
 
                 {customer?.loyalty?.nextDiscount > 0 && (
-                  <div className="mt-2 flex items-center justify-between gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
-                    <span className="flex items-center gap-1 text-xs font-medium text-emerald-800">
-                      <GiftIcon className="w-4 h-4" />
-                      Fidelización: {customer.loyalty.nextDiscount}% en{' '}
-                      {t.service?.toLowerCase() || 'el servicio'}
+                  <div className="mt-2 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
+                    <GiftIcon className="h-4 w-4 flex-none text-emerald-600" />
+                    <span className="text-xs font-medium text-emerald-800">
+                      Fidelización: <b>{customer.loyalty.nextDiscount}%</b> en{' '}
+                      {t.servicePlural?.toLowerCase() || 'servicios'} —{' '}
+                      <b>aplicado automáticamente</b>
                     </span>
-                    <button
-                      onClick={applyLoyalty}
-                      className="rounded-lg bg-emerald-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-emerald-700"
-                    >
-                      Aplicar
-                    </button>
                   </div>
                 )}
               </div>
