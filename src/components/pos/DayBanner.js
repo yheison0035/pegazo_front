@@ -8,15 +8,33 @@ import {
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/authContext';
 import { getCurrentCash } from '@/lib/api/routes/cash';
+import { getLocals } from '@/lib/api/routes/locals';
 import { dayStateFromRegister } from '@/lib/dayStatus';
 
 // Aviso arriba del panel cuando la empresa exige abrir el día y aún no está
-// abierto (o el día anterior quedó sin cerrar). Solo para usuarios con sede.
+// abierto (o el día anterior quedó sin cerrar). Aparece para TODOS los roles:
+// si el usuario no tiene sede asignada (p.ej. el dueño/admin), se toma la
+// primera sede para saber el estado del día.
 export default function DayBanner() {
   const { usuario } = useAuth();
   const require = !!usuario?.company?.requireCashOpen;
-  const localId = usuario?.localId;
+  const [localId, setLocalId] = useState(usuario?.localId || null);
   const [state, setState] = useState('ok');
+
+  // Resolver la sede: la del usuario o, si no tiene, la primera de la empresa.
+  useEffect(() => {
+    if (!require || usuario?.localId) return;
+    let active = true;
+    getLocals({ all: true })
+      .then((r) => {
+        const first = r?.data?.[0]?.id;
+        if (active && first) setLocalId(first);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [require, usuario?.localId]);
 
   useEffect(() => {
     if (!require || !localId) return;
