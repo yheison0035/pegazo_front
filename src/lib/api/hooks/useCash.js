@@ -9,6 +9,7 @@ import {
   closeCash,
   reopenCash,
   updateCashOpening,
+  deleteCash,
 } from '../routes/cash';
 
 export default function useCash() {
@@ -39,6 +40,7 @@ export default function useCash() {
       (id, amount) => wrap(updateCashOpening, id, amount),
       [wrap]
     ),
+    deleteCash: useCallback((id) => wrap(deleteCash, id), [wrap]),
     loading,
     error,
   };
