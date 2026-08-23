@@ -12,6 +12,7 @@ import Pagination from '@/components/dashboard/tables/segments/pagination';
 import ViewModal from '../../viewModal';
 import ConfirmDeleteModal from '@/components/dashboard/tables/segments/confirmDeleteModal';
 import AlertModal from '@/components/dashboard/modals/alertModal';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 
 import useColumnFilters from '@/components/dashboard/tables/hooks/useColumnFilters';
@@ -38,6 +39,7 @@ export default function Companies() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [alert, setAlert] = useState({});
+  const [statusTarget, setStatusTarget] = useState(null);
 
   const { filters, handleFilterChange } = useColumnFilters({
     name: '',
@@ -75,24 +77,22 @@ export default function Companies() {
 
   // Activar / desactivar empresa (suspensión por impago). Es reversible, pero
   // desactivar corta el acceso a todo el negocio, así que se confirma.
-  const handleToggleStatus = async (company) => {
+  // Abre el diálogo de confirmación (activar/desactivar empresa).
+  const handleToggleStatus = (company) => setStatusTarget(company);
+
+  const confirmToggle = async () => {
+    const company = statusTarget;
     const next = company.status === 'ACTIVO' ? 'INACTIVO' : 'ACTIVO';
-
-    const ok = window.confirm(
-      next === 'INACTIVO'
-        ? `¿Desactivar "${company.name}"? Se cortará el acceso a todos sus usuarios (útil cuando no ha pagado).`
-        : `¿Reactivar "${company.name}"? Sus usuarios podrán volver a ingresar.`
-    );
-    if (!ok) return;
-
     try {
       await setCompanyStatus(company.id, next);
+      setStatusTarget(null);
       setAlert({
         type: 'success',
         message: next === 'ACTIVO' ? 'Empresa activada' : 'Empresa desactivada',
       });
       fetchCompanies();
     } catch (err) {
+      setStatusTarget(null);
       setAlert({ type: 'error', message: err.message || 'No se pudo cambiar el estado' });
     }
   };
@@ -169,6 +169,28 @@ export default function Companies() {
           type={alert.type}
           message={alert.message}
           onClose={() => setAlert({})}
+        />
+
+        <ConfirmModal
+          open={!!statusTarget}
+          title={
+            statusTarget?.status === 'ACTIVO'
+              ? '¿Desactivar empresa?'
+              : '¿Reactivar empresa?'
+          }
+          message={
+            statusTarget
+              ? statusTarget.status === 'ACTIVO'
+                ? `Se cortará el acceso a todos los usuarios de "${statusTarget.name}" (útil cuando no ha pagado).`
+                : `Los usuarios de "${statusTarget.name}" podrán volver a ingresar.`
+              : ''
+          }
+          confirmText={
+            statusTarget?.status === 'ACTIVO' ? 'Desactivar' : 'Reactivar'
+          }
+          tone={statusTarget?.status === 'ACTIVO' ? 'danger' : 'primary'}
+          onConfirm={confirmToggle}
+          onCancel={() => setStatusTarget(null)}
         />
       </div>
     </RoleGuard>

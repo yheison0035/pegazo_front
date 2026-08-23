@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   ExclamationTriangleIcon,
   CalculatorIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/authContext';
-import { getCurrentCash } from '@/lib/api/routes/cash';
+import { getCurrentCash, CASH_CHANGED_EVENT } from '@/lib/api/routes/cash';
 import { getLocals } from '@/lib/api/routes/locals';
 import { dayStateFromRegister } from '@/lib/dayStatus';
 
@@ -36,21 +36,28 @@ export default function DayBanner() {
     };
   }, [require, usuario?.localId]);
 
-  useEffect(() => {
+  const check = useCallback(async () => {
     if (!require || !localId) return;
-    let active = true;
-    (async () => {
-      try {
-        const res = await getCurrentCash(localId);
-        if (active) setState(dayStateFromRegister(res?.data));
-      } catch (_) {
-        if (active) setState('not_open');
-      }
-    })();
-    return () => {
-      active = false;
-    };
+    try {
+      const res = await getCurrentCash(localId);
+      setState(dayStateFromRegister(res?.data));
+    } catch (_) {
+      setState('not_open');
+    }
   }, [require, localId]);
+
+  useEffect(() => {
+    check();
+    // Refresca en tiempo real cuando la caja cambia (abrir/cerrar/reiniciar) o
+    // al volver a enfocar la pestaña — sin recargar la página.
+    const onChange = () => check();
+    window.addEventListener(CASH_CHANGED_EVENT, onChange);
+    window.addEventListener('focus', onChange);
+    return () => {
+      window.removeEventListener(CASH_CHANGED_EVENT, onChange);
+      window.removeEventListener('focus', onChange);
+    };
+  }, [check]);
 
   if (!require || !localId || state === 'ok' || state === 'loading') return null;
 

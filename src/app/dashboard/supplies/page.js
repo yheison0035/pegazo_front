@@ -11,6 +11,7 @@ import {
 } from '@heroicons/react/24/outline';
 import Button from '@/components/ui/Button';
 import AlertModal from '@/components/dashboard/modals/alertModal';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 import { useAuth } from '@/context/authContext';
 import { formatCOP } from '@/lib/api/utils/utils';
 import {
@@ -54,6 +55,7 @@ export default function Supplies() {
 
   const [form, setForm] = useState(null); // insumo en edición/creación
   const [adjust, setAdjust] = useState(null); // { supply, type, quantity, reason }
+  const [toDelete, setToDelete] = useState(null); // insumo a eliminar
 
   const load = useCallback(async () => {
     try {
@@ -158,12 +160,14 @@ export default function Supplies() {
     }
   };
 
-  const remove = async (s) => {
-    if (!confirm(`¿Eliminar el insumo "${s.name}"?`)) return;
+  const confirmRemove = async () => {
+    const s = toDelete;
     try {
       await deleteSupply(s.id);
+      setToDelete(null);
       load();
     } catch (e) {
+      setToDelete(null);
       setAlert({ type: 'error', message: e.message || 'No se pudo eliminar.' });
     }
   };
@@ -257,7 +261,7 @@ export default function Supplies() {
                             <PencilIcon className="h-4 w-4" />
                           </button>
                           <button
-                            onClick={() => remove(s)}
+                            onClick={() => setToDelete(s)}
                             className="rounded-lg bg-red-50 p-1.5 text-red-600 hover:bg-red-100"
                             title="Eliminar"
                           >
@@ -513,6 +517,18 @@ export default function Supplies() {
         type={alert.type}
         message={alert.message}
         onClose={() => setAlert({})}
+      />
+
+      <ConfirmModal
+        open={!!toDelete}
+        title="¿Eliminar insumo?"
+        message={
+          toDelete ? `Se eliminará el insumo "${toDelete.name}".` : ''
+        }
+        confirmText="Eliminar"
+        tone="danger"
+        onConfirm={confirmRemove}
+        onCancel={() => setToDelete(null)}
       />
     </div>
   );

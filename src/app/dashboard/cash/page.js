@@ -23,6 +23,7 @@ const fmtMoney = (v) =>
   v === '' || v === null || v === undefined ? '' : formatCOP(v);
 const parseMoney = (s) => (s || '').toString().replace(/[^\d]/g, '');
 import AlertModal from '@/components/dashboard/modals/alertModal';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 
 export default function CashPage() {
@@ -54,6 +55,7 @@ export default function CashPage() {
     'VENTAS',
   ].includes(usuario?.role);
   const [editBase, setEditBase] = useState(null); // string en edición o null
+  const [deleteTarget, setDeleteTarget] = useState(null); // id de caja a eliminar
 
   const [locals, setLocals] = useState([]);
   const [localId, setLocalId] = useState(usuario?.localId || '');
@@ -111,20 +113,15 @@ export default function CashPage() {
   };
 
   // Elimina/reinicia la caja (dueño/admin): la borra para poder abrir una nueva.
-  const handleDelete = async (id) => {
-    if (
-      !confirm(
-        '¿Eliminar esta caja? Se borrará junto con sus movimientos manuales. ' +
-          'Las ventas NO se pierden: al abrir una caja nueva se vuelven a sumar ' +
-          'las ventas en efectivo del día.'
-      )
-    )
-      return;
+  const confirmDelete = async () => {
+    const id = deleteTarget;
     try {
       await deleteCash(id);
+      setDeleteTarget(null);
       setAlert({ type: 'success', message: 'Caja eliminada. Ya puedes abrir una nueva.' });
       refresh();
     } catch (err) {
+      setDeleteTarget(null);
       setAlert({ type: 'error', message: err.message || 'No se pudo eliminar la caja' });
     }
   };
@@ -330,7 +327,7 @@ export default function CashPage() {
                 )}
                 {canDelete && (
                   <button
-                    onClick={() => handleDelete(current.id)}
+                    onClick={() => setDeleteTarget(current.id)}
                     className="rounded-lg border border-red-200 px-2.5 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
                   >
                     Eliminar / reiniciar caja
@@ -569,6 +566,17 @@ export default function CashPage() {
           type={alert.type}
           message={alert.message}
           onClose={() => setAlert({ type: '', message: '' })}
+        />
+
+        <ConfirmModal
+          open={!!deleteTarget}
+          title="¿Eliminar / reiniciar caja?"
+          message="Se borrará esta caja junto con sus movimientos manuales. Las ventas NO se pierden: al abrir una caja nueva se vuelven a sumar las ventas en efectivo del día."
+          confirmText="Eliminar caja"
+          tone="danger"
+          loading={loading}
+          onConfirm={confirmDelete}
+          onCancel={() => setDeleteTarget(null)}
         />
       </div>
     </RoleGuard>
