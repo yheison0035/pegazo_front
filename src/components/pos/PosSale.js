@@ -233,6 +233,13 @@ export default function PosSale({
     return () => clearTimeout(to);
   }, [custSearch, customer]);
 
+  // Tope de cantidad: servicios y elaborados (sin control de stock) son
+  // ilimitados; el resto no puede pasar de las existencias.
+  const maxQty = (i) =>
+    i.type === 'service' || i.trackStock === false
+      ? Infinity
+      : Number(i.stock) || 0;
+
   const addToCart = useCallback((r) => {
     const key = keyOf(r);
     setCart((prev) => {
@@ -240,7 +247,7 @@ export default function PosSale({
       if (found) {
         return prev.map((i) =>
           i.key === key
-            ? { ...i, quantity: Number(i.quantity) + 1 }
+            ? { ...i, quantity: Math.min(Number(i.quantity) + 1, maxQty(i)) }
             : i
         );
       }
@@ -254,6 +261,7 @@ export default function PosSale({
           color: r.color,
           size: r.size,
           stock: r.stock,
+          trackStock: r.trackStock, // false = elaborado sin stock (ilimitado)
           price: r.price || 0,
           taxRate: r.taxRate, // IVA propio del ítem (si lo tiene); si no, usa el de la empresa
           unit: r.unit, // 'UNIDAD' | 'PESO' → habilita cantidades decimales
@@ -276,12 +284,15 @@ export default function PosSale({
         val = w
           ? Math.max(0, Math.round(val * 1000) / 1000)
           : Math.max(1, Math.round(val));
+        // No dejar pasar de las existencias (servicios/elaborados: ilimitado).
+        val = Math.min(val, maxQty(i));
         return { ...i, quantity: val };
       })
     );
 
   // Entrada de texto de la cantidad. En peso deja escribir decimales (coma o
-  // punto) guardando el texto crudo; en unidad solo dígitos.
+  // punto) guardando el texto crudo; en unidad solo dígitos. No permite superar
+  // las existencias del producto.
   const onQtyInput = (key, text, byWeight) => {
     const clean = byWeight
       ? String(text)
@@ -290,7 +301,17 @@ export default function PosSale({
           .replace(/(\..*)\./g, '$1') // un solo punto
       : String(text).replace(/[^\d]/g, '');
     setCart((prev) =>
-      prev.map((i) => (i.key === key ? { ...i, quantity: clean } : i))
+      prev.map((i) => {
+        if (i.key !== key) return i;
+        const num = Number(clean);
+        const max = maxQty(i);
+        // Si ya es un número completo y supera el stock, se topa al stock.
+        const capped =
+          clean !== '' && Number.isFinite(num) && num > max
+            ? String(max)
+            : clean;
+        return { ...i, quantity: capped };
+      })
     );
   };
 
@@ -416,6 +437,11 @@ export default function PosSale({
         customerId: customer?.id,
         saleDate,
         notes,
+        // Efectivo recibido (para el cambio/vuelto en la factura impresa).
+        cashReceived:
+          paymentMethod === 'EFECTIVO' && cashReceivedNum > 0
+            ? cashReceivedNum
+            : null,
         items: cart.map((i) =>
           i.type === 'service'
             ? {
@@ -995,7 +1021,7 @@ export default function PosSale({
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     rows={2}
-                    placeholder="Ej: garantía de 3 meses, cómo reclamarla, novedad del pedido…"
+                    placeholder="Nota para esta factura (opcional)"
                     className="mt-0.5 w-full resize-y rounded-lg border border-gray-200 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
                 </div>
