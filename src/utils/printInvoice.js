@@ -39,6 +39,10 @@ export function printSaleInvoice(sale, usuario) {
   const taxTotal = Number(sale?.taxTotal) || 0;
   const totalAmount = Number(sale?.totalAmount) || 0;
   const baseGravable = Number(sale?.subtotal) || totalAmount;
+  // Efectivo recibido y cambio (solo ventas en efectivo con recibido guardado).
+  const cashReceived = Number(sale?.cashReceived) || 0;
+  const showCash = sale?.paymentMethod === 'EFECTIVO' && cashReceived > 0;
+  const changeDue = showCash ? Math.max(0, cashReceived - totalAmount) : 0;
   const showTax = taxTotal > 0;
   const responsableIVA =
     sale?.responsableIVA ??
@@ -194,6 +198,14 @@ export function printSaleInvoice(sale, usuario) {
       <div><span class="bold">Método de pago:</span> ${
         sale?.paymentMethod || '---'
       }</div>
+      ${
+        showCash
+          ? `<div><span class="bold">Efectivo recibido:</span> ${formatCOP(
+              cashReceived
+            )}</div>
+      <div><span class="bold">Cambio:</span> ${formatCOP(changeDue)}</div>`
+          : ''
+      }
       <div><span class="bold">Vendedor:</span> ${sale?.user?.name || '---'}</div>
 
       <hr />
