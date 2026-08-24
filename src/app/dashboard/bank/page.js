@@ -21,6 +21,7 @@ import {
   disableBank,
   regenerateBankToken,
   getBankDeposits,
+  testBankDeposit,
 } from '@/lib/api/routes/bank';
 
 const API = process.env.NEXT_PUBLIC_API_URL || '';
@@ -110,20 +111,15 @@ export default function BankPage() {
   // Envía una consignación de PRUEBA al webhook (como lo haría el celular), para
   // comprobar la voz y la notificación.
   const test = async () => {
-    if (!webhook) return;
     setBusy(true);
     try {
-      await fetch(webhook, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          text: 'Bancolombia le informa Recepcion de transferencia por $50.000 de JUAN DE PRUEBA en su cuenta *1234',
-        }),
-      });
+      await testBankDeposit();
       setAlert({
         type: 'success',
-        message: 'Consignación de prueba enviada. En unos segundos deberías oír la voz y ver la notificación.',
+        message:
+          'Consignación de prueba creada. En unos segundos deberías oír la voz y ver la notificación (haz un clic en la página si es la primera vez, para habilitar la voz).',
       });
+      load();
     } catch (e) {
       setAlert({ type: 'error', message: 'No se pudo enviar la prueba.' });
     } finally {

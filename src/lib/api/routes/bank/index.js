@@ -12,6 +12,9 @@ export async function disableBank() {
 export async function regenerateBankToken() {
   return apiFetch('/bank/regenerate', { method: 'POST' });
 }
+export async function testBankDeposit() {
+  return apiFetch('/bank/test', { method: 'POST' });
+}
 export async function getBankDeposits(params = {}) {
   const qs = new URLSearchParams(params).toString();
   return apiFetch(`/bank/deposits${qs ? `?${qs}` : ''}`);
