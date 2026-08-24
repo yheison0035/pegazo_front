@@ -14,6 +14,16 @@ function firstName(name) {
   return first ? first[0].toUpperCase() + first.slice(1).toLowerCase() : '';
 }
 
+// Usuario logueado (para firmar el mensaje "Soy {nombre} de {empresa}").
+function sessionUser() {
+  try {
+    if (typeof window === 'undefined') return null;
+    return JSON.parse(localStorage.getItem('usuario') || 'null');
+  } catch {
+    return null;
+  }
+}
+
 // Etiqueta del día ("Lunes 4 de agosto"). Desde la agenda llega `startAt` (un
 // instante real → zona Colombia); desde la tabla llega `date` (medianoche UTC
 // que ya representa el día de calendario → se formatea en UTC).
@@ -43,14 +53,16 @@ function dayLabel(appt) {
   return '';
 }
 
-export function buildConfirmMessage(appt, companyName) {
+export function buildConfirmMessage(appt, companyName, senderName) {
+  const me = sessionUser();
+  const salon = companyName || me?.company?.name || 'nuestro salón';
+  const sender = firstName(senderName || me?.name);
   const cliente = firstName(appt?.customer?.name);
   const dayCap = dayLabel(appt);
 
+  const soy = sender ? ` Soy ${sender} de ${salon}.` : '';
   const lines = [
-    `¡Hola${cliente ? ` ${cliente}` : ''}! Te confirmamos tu cita en ${
-      companyName || 'nuestro salón'
-    }:`,
+    `¡Hola${cliente ? ` ${cliente}` : ''}!${soy} Te confirmamos tu cita en ${salon}:`,
     '',
     `Servicio: ${appt?.service?.name || 'Servicio'}`,
     `Fecha: ${[dayCap, appt?.startTime].filter(Boolean).join(', ')}`,
@@ -62,20 +74,26 @@ export function buildConfirmMessage(appt, companyName) {
   return lines.join('\n');
 }
 
-export function buildConfirmUrl(appt, companyName) {
+export function buildConfirmUrl(appt, companyName, senderName) {
   const phone = normalizePhone(appt?.customer?.phone);
-  const text = encodeURIComponent(buildConfirmMessage(appt, companyName));
+  const text = encodeURIComponent(
+    buildConfirmMessage(appt, companyName, senderName)
+  );
   return `https://wa.me/${phone}?text=${text}`;
 }
 
 // Mensaje LLAMATIVO para reactivar a un cliente que no vuelve hace varios días,
 // con un regalo (mascarilla sencilla) para incentivarlo a volver.
-export function buildWinbackMessage(customer, companyName) {
+export function buildWinbackMessage(customer, companyName, senderName) {
+  const me = sessionUser();
+  const salon = companyName || me?.company?.name || 'nuestro salón';
+  const sender = firstName(senderName || me?.name);
   const nombre = firstName(customer?.name);
-  const salon = companyName || 'nuestro salón';
   const dias = customer?.days ?? customer?.daysSinceLastVisit;
+
+  const soy = sender ? ` Soy ${sender} de ${salon}.` : '';
   const lines = [
-    `¡Hola${nombre ? ` ${nombre}` : ''}! 👋✨`,
+    `¡Hola${nombre ? ` ${nombre}` : ''}! 👋✨${soy}`,
     dias
       ? `Hace ${dias} días que no pasas por ${salon} y te extrañamos. 🥺`
       : `¡Hace rato no te vemos por ${salon} y te extrañamos! 🥺`,
@@ -89,8 +107,10 @@ export function buildWinbackMessage(customer, companyName) {
   return lines.join('\n');
 }
 
-export function buildWinbackUrl(customer, companyName) {
+export function buildWinbackUrl(customer, companyName, senderName) {
   const phone = normalizePhone(customer?.phone);
-  const text = encodeURIComponent(buildWinbackMessage(customer, companyName));
+  const text = encodeURIComponent(
+    buildWinbackMessage(customer, companyName, senderName)
+  );
   return `https://wa.me/${phone}?text=${text}`;
 }
