@@ -26,8 +26,24 @@ import {
 const API = process.env.NEXT_PUBLIC_API_URL || '';
 
 export default function BankPage() {
-  const { usuario } = useAuth();
+  const { usuario, setUsuario } = useAuth();
   const isOwner = ['SUPER_ADMIN', 'ADMIN'].includes(usuario?.role);
+
+  // Refleja al instante el activar/desactivar en la sesión (y en localStorage),
+  // así el aviso de voz empieza a funcionar sin tener que cerrar sesión.
+  const syncSession = (enabled) => {
+    if (!usuario || !setUsuario) return;
+    const merged = {
+      ...usuario,
+      company: { ...(usuario.company || {}), bankNotifyEnabled: enabled },
+    };
+    setUsuario(merged);
+    try {
+      localStorage.setItem('usuario', JSON.stringify(merged));
+    } catch {
+      /* ignora */
+    }
+  };
 
   const [status, setStatus] = useState(null); // {enabled, token}
   const [deposits, setDeposits] = useState([]);
@@ -64,6 +80,7 @@ export default function BankPage() {
     try {
       const res = status?.enabled ? await disableBank() : await enableBank();
       setStatus((s) => ({ ...(s || {}), ...res.data }));
+      syncSession(!!res.data?.enabled);
     } catch (e) {
       setAlert({ type: 'error', message: e.message || 'No se pudo cambiar' });
     } finally {
