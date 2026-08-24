@@ -15,6 +15,7 @@ import AlertModal from '@/components/dashboard/modals/alertModal';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import { useAuth } from '@/context/authContext';
 import { formatCOP, formatDateTime } from '@/lib/api/utils/utils';
+import { announceDeposit } from '@/lib/bankSound';
 import {
   getBankStatus,
   enableBank,
@@ -111,6 +112,8 @@ export default function BankPage() {
   // Envía una consignación de PRUEBA al webhook (como lo haría el celular), para
   // comprobar la voz y la notificación.
   const test = async () => {
+    // Suena de inmediato desde el clic (así el navegador no bloquea el audio).
+    announceDeposit(50000, 'Juan de Prueba');
     setBusy(true);
     try {
       await testBankDeposit();

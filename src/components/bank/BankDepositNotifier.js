@@ -8,6 +8,7 @@ import {
   getPendingBankDeposits,
   markBankDepositSeen,
 } from '@/lib/api/routes/bank';
+import { announceDeposit } from '@/lib/bankSound';
 
 const VIEW_ROLES = [
   'SUPER_ADMIN',
@@ -17,19 +18,6 @@ const VIEW_ROLES = [
   'ASESOR',
   'VENTAS',
 ];
-
-// Anuncia con VOZ el valor y (si viene) el nombre de quien consignó.
-function speak(text) {
-  try {
-    if (typeof window === 'undefined' || !window.speechSynthesis) return;
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'es-CO';
-    u.rate = 1;
-    window.speechSynthesis.speak(u);
-  } catch {
-    /* el navegador puede bloquear la voz hasta que el usuario interactúe */
-  }
-}
 
 // Vigila las consignaciones nuevas a la cuenta del banco y las anuncia en
 // tiempo real (voz + notificación). Sondea cada pocos segundos.
@@ -87,11 +75,7 @@ export default function BankDepositNotifier() {
             message: `${formatCOP(d.amount)}${nombre}`,
             duration: 12000,
           });
-          speak(
-            `Recibiste una consignación de ${Math.round(d.amount)} pesos${
-              d.senderName ? `, de ${d.senderName}` : ''
-            }`
-          );
+          announceDeposit(d.amount, d.senderName);
         }
       } catch {
         /* silencioso: reintenta en el siguiente ciclo */
