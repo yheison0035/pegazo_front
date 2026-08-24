@@ -65,31 +65,42 @@ export default function BankPage() {
 
   const webhook = status?.token ? `${API}/bank/sms/${status.token}` : '';
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  // Refresca SOLO el historial (esto sí corre en intervalo, no toca la config
+  // que el dueño esté escribiendo).
+  const loadDeposits = useCallback(async () => {
     try {
-      const [dep, st] = await Promise.all([
-        getBankDeposits({ limit: 100 }),
-        isOwner ? getBankStatus() : Promise.resolve(null),
-      ]);
+      const dep = await getBankDeposits({ limit: 100 });
       setDeposits(dep?.data || []);
+    } catch (e) {
+      setAlert({ type: 'error', message: e.message || 'Error al cargar' });
+    }
+  }, []);
+
+  // Carga la configuración UNA sola vez (al entrar). No se re-consulta en
+  // intervalo para no pisar lo que el dueño esté escribiendo.
+  const loadStatus = useCallback(async () => {
+    if (!isOwner) return;
+    try {
+      const st = await getBankStatus();
       if (st) {
         setStatus(st.data);
         setIdent(st.data?.identifier || '');
         setEmail(st.data?.email || '');
       }
-    } catch (e) {
-      setAlert({ type: 'error', message: e.message || 'Error al cargar' });
-    } finally {
-      setLoading(false);
+    } catch {
+      /* ignora: la config se puede reintentar recargando la página */
     }
   }, [isOwner]);
 
   useEffect(() => {
-    load();
-    const t = setInterval(load, 15000); // refresca el historial
+    (async () => {
+      setLoading(true);
+      await Promise.all([loadDeposits(), loadStatus()]);
+      setLoading(false);
+    })();
+    const t = setInterval(loadDeposits, 15000); // solo el historial
     return () => clearInterval(t);
-  }, [load]);
+  }, [loadDeposits, loadStatus]);
 
   const toggle = async () => {
     setBusy(true);
@@ -166,7 +177,7 @@ export default function BankPage() {
         message:
           'Consignación de prueba creada. En unos segundos deberías oír la voz y ver la notificación (haz un clic en la página si es la primera vez, para habilitar la voz).',
       });
-      load();
+      loadDeposits();
     } catch (e) {
       setAlert({ type: 'error', message: 'No se pudo enviar la prueba.' });
     } finally {
