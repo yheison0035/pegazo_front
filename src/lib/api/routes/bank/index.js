@@ -28,3 +28,9 @@ export async function markBankDepositSeen(id) {
 export async function markAllBankSeen() {
   return apiFetch('/bank/deposits/seen-all', { method: 'PATCH' });
 }
+export async function deleteBankDeposit(id) {
+  return apiFetch(`/bank/deposits/${id}`, { method: 'DELETE' });
+}
+export async function clearBankDeposits() {
+  return apiFetch('/bank/deposits/all', { method: 'DELETE' });
+}
