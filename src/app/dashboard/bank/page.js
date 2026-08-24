@@ -7,11 +7,13 @@ import {
   CheckCircleIcon,
   ArrowPathIcon,
   SpeakerWaveIcon,
+  TrashIcon,
 } from '@heroicons/react/24/outline';
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
 import Button from '@/components/ui/Button';
 import AlertModal from '@/components/dashboard/modals/alertModal';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import { useAuth } from '@/context/authContext';
 import { formatCOP, formatDateTime } from '@/lib/api/utils/utils';
@@ -23,6 +25,8 @@ import {
   regenerateBankToken,
   getBankDeposits,
   testBankDeposit,
+  deleteBankDeposit,
+  clearBankDeposits,
 } from '@/lib/api/routes/bank';
 
 const API = process.env.NEXT_PUBLIC_API_URL || '';
@@ -52,6 +56,8 @@ export default function BankPage() {
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [alert, setAlert] = useState({});
+  const [toDelete, setToDelete] = useState(null); // id de registro a borrar
+  const [clearing, setClearing] = useState(false); // confirmación de borrar todo
 
   const webhook = status?.token ? `${API}/bank/sms/${status.token}` : '';
 
@@ -127,6 +133,28 @@ export default function BankPage() {
       setAlert({ type: 'error', message: 'No se pudo enviar la prueba.' });
     } finally {
       setBusy(false);
+    }
+  };
+
+  const confirmDelete = async () => {
+    try {
+      await deleteBankDeposit(toDelete);
+      setDeposits((d) => d.filter((x) => x.id !== toDelete));
+      setToDelete(null);
+    } catch (e) {
+      setToDelete(null);
+      setAlert({ type: 'error', message: e.message || 'No se pudo eliminar' });
+    }
+  };
+
+  const confirmClear = async () => {
+    try {
+      await clearBankDeposits();
+      setDeposits([]);
+      setClearing(false);
+    } catch (e) {
+      setClearing(false);
+      setAlert({ type: 'error', message: e.message || 'No se pudo borrar' });
     }
   };
 
@@ -234,8 +262,16 @@ export default function BankPage() {
         {/* Historial */}
         <div className="relative rounded-2xl border border-gray-100 bg-white shadow-sm">
           <LoadingOverlay show={loading} text="Cargando..." />
-          <div className="border-b border-gray-50 px-5 py-3">
+          <div className="flex items-center justify-between border-b border-gray-50 px-5 py-3">
             <h2 className="font-semibold text-gray-800">Últimas consignaciones</h2>
+            {isOwner && deposits.length > 0 && (
+              <button
+                onClick={() => setClearing(true)}
+                className="inline-flex items-center gap-1 rounded-lg border border-red-200 px-2.5 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
+              >
+                <TrashIcon className="h-4 w-4" /> Borrar historial
+              </button>
+            )}
           </div>
           {deposits.length === 0 ? (
             <p className="px-5 py-10 text-center text-sm text-gray-400">
@@ -263,9 +299,20 @@ export default function BankPage() {
                       {d.reference ? ` · ${d.reference}` : ''}
                     </p>
                   </div>
-                  {d.seen && (
-                    <CheckCircleIcon className="h-5 w-5 flex-none text-emerald-500" />
-                  )}
+                  <div className="flex flex-none items-center gap-2">
+                    {d.seen && (
+                      <CheckCircleIcon className="h-5 w-5 text-emerald-500" />
+                    )}
+                    {isOwner && (
+                      <button
+                        onClick={() => setToDelete(d.id)}
+                        className="rounded-lg p-1 text-gray-300 hover:bg-red-50 hover:text-red-500"
+                        title="Eliminar registro"
+                      >
+                        <TrashIcon className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -276,6 +323,26 @@ export default function BankPage() {
           type={alert.type}
           message={alert.message}
           onClose={() => setAlert({})}
+        />
+
+        <ConfirmModal
+          open={!!toDelete}
+          title="¿Eliminar este registro?"
+          message="Se quitará esta consignación del historial de Pegazo (no afecta tu cuenta del banco)."
+          confirmText="Eliminar"
+          tone="danger"
+          onConfirm={confirmDelete}
+          onCancel={() => setToDelete(null)}
+        />
+
+        <ConfirmModal
+          open={clearing}
+          title="¿Borrar todo el historial?"
+          message="Se eliminarán todas las consignaciones registradas en Pegazo. Esto no afecta tu cuenta del banco."
+          confirmText="Borrar todo"
+          tone="danger"
+          onConfirm={confirmClear}
+          onCancel={() => setClearing(false)}
         />
       </div>
     </RoleGuard>
