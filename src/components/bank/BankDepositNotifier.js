@@ -42,6 +42,29 @@ export default function BankDepositNotifier() {
   const enabled = !!usuario?.company?.bankNotifyEnabled;
   const canSee = VIEW_ROLES.includes(usuario?.role);
 
+  // Desbloquea la voz del navegador en la primera interacción del usuario
+  // (política de autoplay): así los avisos programados sí suenan después.
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+    const unlock = () => {
+      try {
+        window.speechSynthesis.resume();
+        const u = new SpeechSynthesisUtterance('');
+        window.speechSynthesis.speak(u);
+      } catch {
+        /* ignora */
+      }
+      window.removeEventListener('pointerdown', unlock);
+      window.removeEventListener('keydown', unlock);
+    };
+    window.addEventListener('pointerdown', unlock);
+    window.addEventListener('keydown', unlock);
+    return () => {
+      window.removeEventListener('pointerdown', unlock);
+      window.removeEventListener('keydown', unlock);
+    };
+  }, []);
+
   useEffect(() => {
     if (!enabled || !canSee) return;
 
