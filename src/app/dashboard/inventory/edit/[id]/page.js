@@ -71,11 +71,44 @@ export default function EditProduct() {
       }
     }
 
+    // Enviamos SOLO los campos que el backend acepta. El producto cargado trae
+    // extras (id, companyId, taxRate, relaciones, fechas…) que la validación
+    // rechaza; por eso armamos un payload limpio en vez de reenviar todo.
+    const numOrUndef = (v) =>
+      v === '' || v === null || v === undefined ? undefined : Number(v);
+
     const payload = {
-      ...formData,
+      name: formData.name,
+      barcode: formData.barcode || undefined,
+      description: formData.description ?? undefined,
       purchasePrice: parseCOPToNumber(formData.purchasePrice) || 0,
-      salePrice: parseCOPToNumber(formData.salePrice),
-      oldPrice: parseCOPToNumber(formData.oldPrice),
+      salePrice: parseCOPToNumber(formData.salePrice) ?? undefined,
+      oldPrice: parseCOPToNumber(formData.oldPrice) ?? undefined,
+      minStock: numOrUndef(formData.minStock),
+      unit: formData.unit || undefined,
+      trackStock: formData.trackStock,
+      expiryDate: formData.expiryDate || undefined,
+      lot: formData.lot || undefined,
+      status: formData.status || undefined,
+      localId: numOrUndef(formData.localId),
+      providerId: numOrUndef(formData.providerId),
+      categoryId: numOrUndef(formData.categoryId),
+      brandId: numOrUndef(formData.brandId),
+      variants: (formData.variants || []).map((v) => ({
+        ...(v.id ? { id: v.id } : {}),
+        color: v.color,
+        ...(v.size ? { size: v.size } : {}),
+        stock: Number(v.stock) || 0,
+      })),
+      features: (formData.features || []).map((f) => ({
+        title: f.title,
+        ...(f.order != null ? { order: f.order } : {}),
+      })),
+      specifications: (formData.specifications || []).map((s) => ({
+        key: s.key,
+        value: s.value,
+        ...(s.order != null ? { order: s.order } : {}),
+      })),
     };
 
     try {
