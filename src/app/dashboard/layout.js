@@ -6,6 +6,7 @@ import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
 import PlanUpgradeModal from '@/components/plan/PlanUpgradeModal';
 import AppointmentsHub from '@/components/appointments/AppointmentsHub';
+import BankDepositNotifier from '@/components/bank/BankDepositNotifier';
 import { useAuth } from '@/context/authContext';
 import DayBanner from '@/components/pos/DayBanner';
 import { isDark, DARK_EVENT } from '@/lib/darkMode';
@@ -44,6 +45,7 @@ export default function Layout({ children }) {
         </div>
         <PlanUpgradeModal />
         <AppointmentsHub />
+        <BankDepositNotifier />
       </div>
     </RoleGuard>
   );
