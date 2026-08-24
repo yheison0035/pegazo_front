@@ -23,6 +23,7 @@ import {
   enableBank,
   disableBank,
   regenerateBankToken,
+  setBankIdentifier,
   getBankDeposits,
   testBankDeposit,
   deleteBankDeposit,
@@ -58,6 +59,8 @@ export default function BankPage() {
   const [alert, setAlert] = useState({});
   const [toDelete, setToDelete] = useState(null); // id de registro a borrar
   const [clearing, setClearing] = useState(false); // confirmación de borrar todo
+  const [ident, setIdent] = useState(''); // identificador en el banco
+  const [shareToken, setShareToken] = useState(''); // enlace compartido a usar
 
   const webhook = status?.token ? `${API}/bank/sms/${status.token}` : '';
 
@@ -69,7 +72,10 @@ export default function BankPage() {
         isOwner ? getBankStatus() : Promise.resolve(null),
       ]);
       setDeposits(dep?.data || []);
-      if (st) setStatus(st.data);
+      if (st) {
+        setStatus(st.data);
+        setIdent(st.data?.identifier || '');
+      }
     } catch (e) {
       setAlert({ type: 'error', message: e.message || 'Error al cargar' });
     } finally {
@@ -113,6 +119,36 @@ export default function BankPage() {
   const copy = () => {
     navigator.clipboard?.writeText(webhook);
     setAlert({ type: 'success', message: 'Enlace copiado.' });
+  };
+
+  const saveIdent = async () => {
+    setBusy(true);
+    try {
+      await setBankIdentifier(ident);
+      setAlert({ type: 'success', message: 'Identificador guardado.' });
+    } catch (e) {
+      setAlert({ type: 'error', message: e.message || 'No se pudo guardar' });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  // Usar un enlace de otra empresa (compartir el mismo buzón).
+  const useShared = async () => {
+    const tk = shareToken.trim().replace(/.*\/bank\/sms\//, ''); // acepta URL o token
+    if (!tk) return;
+    setBusy(true);
+    try {
+      const res = await enableBank({ token: tk, identifier: ident });
+      setStatus((s) => ({ ...(s || {}), ...res.data }));
+      syncSession(true);
+      setShareToken('');
+      setAlert({ type: 'success', message: 'Enlace compartido aplicado.' });
+    } catch (e) {
+      setAlert({ type: 'error', message: e.message || 'No se pudo aplicar' });
+    } finally {
+      setBusy(false);
+    }
   };
 
   // Envía una consignación de PRUEBA al webhook (como lo haría el celular), para
@@ -216,23 +252,77 @@ export default function BankPage() {
                   </div>
                 </div>
 
+                <div>
+                  <label className="text-xs font-semibold text-gray-500">
+                    Identificador de esta empresa en el banco
+                  </label>
+                  <p className="mb-1 text-[11px] text-gray-400">
+                    Cómo aparece tu negocio en la notificación (nombre y/o llave
+                    del QR). Sirve para que, si varias empresas comparten el
+                    mismo buzón, cada consignación llegue a la correcta. Ej:{' '}
+                    <code>{status?.companyName || 'MI EMPRESA'}, @millave</code>
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <input
+                      value={ident}
+                      onChange={(e) => setIdent(e.target.value)}
+                      placeholder="Nombre en el banco y/o @llave (separados por coma)"
+                      className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                    />
+                    <Button variant="primary" onClick={saveIdent} loading={busy}>
+                      Guardar
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-gray-100 bg-gray-50/60 p-3">
+                  <label className="text-xs font-semibold text-gray-500">
+                    ¿Otra empresa usa el mismo buzón/cuenta?
+                  </label>
+                  <p className="mb-1 text-[11px] text-gray-400">
+                    Pega aquí el enlace (o token) de la otra empresa para
+                    compartir el mismo buzón. Así ambas reciben del mismo correo
+                    y se separan por el identificador de arriba.
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <input
+                      value={shareToken}
+                      onChange={(e) => setShareToken(e.target.value)}
+                      placeholder="Pega el enlace de la otra empresa"
+                      className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-xs"
+                    />
+                    <Button
+                      variant="secondary"
+                      onClick={useShared}
+                      disabled={busy || !shareToken.trim()}
+                    >
+                      Usar
+                    </Button>
+                  </div>
+                </div>
+
                 <div className="rounded-xl bg-blue-50 border border-blue-100 p-3 text-xs text-blue-900/80 space-y-1.5">
                   <p className="font-semibold text-blue-900">
                     Cómo conectarlo (una sola vez):
                   </p>
                   <p>
-                    1. En un celular Android (puede ser uno dedicado) instala una
-                    app gratis de automatización, ej. <b>MacroDroid</b>.
+                    <b>Por correo (recomendado, funciona con iPhone):</b> haz que
+                    las alertas de Bancolombia lleguen a un Gmail y crea un
+                    automatismo en <b>script.google.com</b> que reenvíe cada
+                    correo a la URL de arriba (cuerpo{' '}
+                    <code>{'{ "text": "cuerpo del correo" }'}</code>), con un
+                    activador de tiempo cada 1 minuto. Pídele el script a tu
+                    asesor de Pegazo.
                   </p>
                   <p>
-                    2. Crea una macro: <b>Disparador</b> = SMS recibido de
-                    “Bancolombia”. <b>Acción</b> = Petición HTTP <b>POST</b> a la
-                    URL de arriba, con cuerpo JSON{' '}
+                    <b>Por SMS (Android):</b> en un celular Android con{' '}
+                    <b>MacroDroid</b>, disparador = SMS de “Bancolombia”, acción =
+                    HTTP <b>POST</b> a la URL de arriba con{' '}
                     <code>{'{ "text": "[sms_message]" }'}</code>.
                   </p>
                   <p>
-                    3. Listo: cada SMS de consignación llegará a Pegazo y sonará
-                    la voz aquí.
+                    Pegazo ignora las salidas (“Transferiste…”) y enruta cada
+                    pago a la empresa según su identificador.
                   </p>
                 </div>
 
