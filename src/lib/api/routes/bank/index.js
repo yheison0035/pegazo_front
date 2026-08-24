@@ -9,10 +9,10 @@ export async function enableBank(dto = {}) {
     body: JSON.stringify(dto),
   });
 }
-export async function setBankIdentifier(identifier) {
+export async function setBankConfig(dto = {}) {
   return apiFetch('/bank/config', {
     method: 'PATCH',
-    body: JSON.stringify({ identifier }),
+    body: JSON.stringify(dto),
   });
 }
 export async function disableBank() {
