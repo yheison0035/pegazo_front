@@ -23,7 +23,7 @@ import {
   enableBank,
   disableBank,
   regenerateBankToken,
-  setBankIdentifier,
+  setBankConfig,
   getBankDeposits,
   testBankDeposit,
   deleteBankDeposit,
@@ -60,6 +60,7 @@ export default function BankPage() {
   const [toDelete, setToDelete] = useState(null); // id de registro a borrar
   const [clearing, setClearing] = useState(false); // confirmación de borrar todo
   const [ident, setIdent] = useState(''); // identificador en el banco
+  const [email, setEmail] = useState(''); // correo donde llegan las confirmaciones
   const [shareToken, setShareToken] = useState(''); // enlace compartido a usar
 
   const webhook = status?.token ? `${API}/bank/sms/${status.token}` : '';
@@ -75,6 +76,7 @@ export default function BankPage() {
       if (st) {
         setStatus(st.data);
         setIdent(st.data?.identifier || '');
+        setEmail(st.data?.email || '');
       }
     } catch (e) {
       setAlert({ type: 'error', message: e.message || 'Error al cargar' });
@@ -121,11 +123,11 @@ export default function BankPage() {
     setAlert({ type: 'success', message: 'Enlace copiado.' });
   };
 
-  const saveIdent = async () => {
+  const saveConfig = async () => {
     setBusy(true);
     try {
-      await setBankIdentifier(ident);
-      setAlert({ type: 'success', message: 'Identificador guardado.' });
+      await setBankConfig({ identifier: ident, email });
+      setAlert({ type: 'success', message: 'Configuración guardada.' });
     } catch (e) {
       setAlert({ type: 'error', message: e.message || 'No se pudo guardar' });
     } finally {
@@ -235,7 +237,7 @@ export default function BankPage() {
               <div className="mt-4 space-y-3">
                 <div>
                   <label className="text-xs font-semibold text-gray-500">
-                    Enlace para el reenviador de SMS
+                    Tu enlace (webhook) para el reenviador
                   </label>
                   <div className="mt-1 flex items-center gap-2">
                     <input
@@ -252,25 +254,47 @@ export default function BankPage() {
                   </div>
                 </div>
 
-                <div>
-                  <label className="text-xs font-semibold text-gray-500">
-                    Identificador de esta empresa en el banco
-                  </label>
-                  <p className="mb-1 text-[11px] text-gray-400">
-                    Cómo aparece tu negocio en la notificación (nombre y/o llave
-                    del QR). Sirve para que, si varias empresas comparten el
-                    mismo buzón, cada consignación llegue a la correcta. Ej:{' '}
-                    <code>{status?.companyName || 'MI EMPRESA'}, @millave</code>
-                  </p>
-                  <div className="flex items-center gap-2">
+                <div className="rounded-xl border border-gray-100 bg-gray-50/60 p-3 space-y-3">
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500">
+                      Correo donde recibes las confirmaciones del banco
+                    </label>
+                    <p className="mb-1 text-[11px] text-gray-400">
+                      Es el correo al que tu banco te envía el aviso de cada pago
+                      (Bancolombia, Nequi, Daviplata, etc.). Ahí conectarás el
+                      reenviador para que las consignaciones lleguen a Pegazo.
+                    </p>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="tucorreo@gmail.com"
+                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500">
+                      Identificador de esta empresa en el banco
+                    </label>
+                    <p className="mb-1 text-[11px] text-gray-400">
+                      Cómo aparece tu negocio en la notificación (nombre y/o
+                      llave del QR). Solo hace falta si <b>varias empresas</b>{' '}
+                      reciben en el mismo correo: separa cada consignación hacia
+                      la correcta. Ej:{' '}
+                      <code>{status?.companyName || 'MI EMPRESA'}, @millave</code>
+                    </p>
                     <input
                       value={ident}
                       onChange={(e) => setIdent(e.target.value)}
                       placeholder="Nombre en el banco y/o @llave (separados por coma)"
-                      className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
                     />
-                    <Button variant="primary" onClick={saveIdent} loading={busy}>
-                      Guardar
+                  </div>
+
+                  <div className="flex justify-end">
+                    <Button variant="primary" onClick={saveConfig} loading={busy}>
+                      Guardar configuración
                     </Button>
                   </div>
                 </div>
@@ -306,23 +330,26 @@ export default function BankPage() {
                     Cómo conectarlo (una sola vez):
                   </p>
                   <p>
-                    <b>Por correo (recomendado, funciona con iPhone):</b> haz que
-                    las alertas de Bancolombia lleguen a un Gmail y crea un
-                    automatismo en <b>script.google.com</b> que reenvíe cada
-                    correo a la URL de arriba (cuerpo{' '}
-                    <code>{'{ "text": "cuerpo del correo" }'}</code>), con un
-                    activador de tiempo cada 1 minuto. Pídele el script a tu
-                    asesor de Pegazo.
+                    <b>Por correo (recomendado, sirve con iPhone o Android):</b>{' '}
+                    en el Gmail{' '}
+                    <b>{email || 'donde recibes las confirmaciones'}</b> entra a{' '}
+                    <b>script.google.com</b>, crea un proyecto que busque los
+                    correos de tu banco y reenvíe cada uno a{' '}
+                    <b>tu enlace de arriba</b> (cuerpo{' '}
+                    <code>{'{ "text": "cuerpo del correo" }'}</code>), y ponle un
+                    activador de tiempo cada 1 minuto. Pídele el script listo a tu
+                    asesor de Pegazo (te lo damos con tu enlace ya puesto).
                   </p>
                   <p>
                     <b>Por SMS (Android):</b> en un celular Android con{' '}
-                    <b>MacroDroid</b>, disparador = SMS de “Bancolombia”, acción =
-                    HTTP <b>POST</b> a la URL de arriba con{' '}
+                    <b>MacroDroid</b>, disparador = SMS de tu banco, acción = HTTP{' '}
+                    <b>POST</b> a tu enlace con{' '}
                     <code>{'{ "text": "[sms_message]" }'}</code>.
                   </p>
                   <p>
-                    Pegazo ignora las salidas (“Transferiste…”) y enruta cada
-                    pago a la empresa según su identificador.
+                    Pegazo entiende el aviso de cualquier banco/billetera, ignora
+                    las salidas (“Transferiste…”) y, si compartes correo con otro
+                    negocio, enruta cada pago según el identificador.
                   </p>
                 </div>
 
