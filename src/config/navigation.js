@@ -216,6 +216,19 @@ export const NAVIGATION = [
         ],
       },
       {
+        name: 'Consignaciones',
+        href: '/dashboard/bank',
+        icon: BanknotesIcon,
+        roles: [
+          'SUPER_ADMIN',
+          'ADMIN',
+          'ASESOR',
+          'RECEPCIONISTA',
+          'CAJA',
+          'VENTAS',
+        ],
+      },
+      {
         name: 'Cotizaciones',
         href: '/dashboard/quotes',
         icon: DocumentTextIcon,

@@ -40,6 +40,8 @@ export default function useNavigation() {
   const modules = [
     ...(BUSINESS_TYPES[businessType] || BUSINESS_TYPES.COMERCIO),
     'settings',
+    // Aviso de consignaciones al banco: disponible para cualquier negocio.
+    'bank',
   ];
 
   // La Tienda online (y Pedidos) SOLO aparecen cuando la plataforma ya montó el
