@@ -3,8 +3,17 @@ import apiFetch from '../../auth/client';
 export async function getBankStatus() {
   return apiFetch('/bank/status');
 }
-export async function enableBank() {
-  return apiFetch('/bank/enable', { method: 'POST' });
+export async function enableBank(dto = {}) {
+  return apiFetch('/bank/enable', {
+    method: 'POST',
+    body: JSON.stringify(dto),
+  });
+}
+export async function setBankIdentifier(identifier) {
+  return apiFetch('/bank/config', {
+    method: 'PATCH',
+    body: JSON.stringify({ identifier }),
+  });
 }
 export async function disableBank() {
   return apiFetch('/bank/disable', { method: 'POST' });
