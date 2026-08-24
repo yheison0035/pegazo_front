@@ -25,7 +25,6 @@ export default function BankDepositNotifier() {
   const { usuario } = useAuth();
   const toast = useToast();
   const processed = useRef(new Set());
-  const primed = useRef(false);
 
   const enabled = !!usuario?.company?.bankNotifyEnabled;
   const canSee = VIEW_ROLES.includes(usuario?.role);
@@ -57,6 +56,11 @@ export default function BankDepositNotifier() {
     if (!enabled || !canSee) return;
 
     let alive = true;
+    // Todo lo que llegó ANTES de este momento (menos un pequeño margen) se
+    // considera "viejo" y se marca visto en silencio, para no gritar el
+    // historial al abrir el CRM. Lo que llegue de aquí en adelante —o justo
+    // segundos antes de cargar— SÍ se anuncia en tiempo real.
+    const cutoff = Date.now() - 90 * 1000; // 90s de margen
 
     const check = async () => {
       try {
@@ -65,8 +69,12 @@ export default function BankDepositNotifier() {
         for (const d of list) {
           if (processed.current.has(d.id)) continue;
           processed.current.add(d.id);
-          // Marca vista en el backend para no repetirla.
+          // Marca vista en el backend para no repetirla (en cualquier caso).
           markBankDepositSeen(d.id).catch(() => {});
+
+          const created = new Date(d.createdAt).getTime();
+          const esViejo = Number.isFinite(created) && created < cutoff;
+          if (esViejo) continue; // historial: no anunciar, solo marcar visto
 
           const nombre = d.senderName ? ` de ${d.senderName}` : '';
           toast.show({
@@ -82,26 +90,10 @@ export default function BankDepositNotifier() {
       }
     };
 
-    // Primera pasada: marca lo pendiente como "ya visto" SIN anunciar, para no
-    // gritar consignaciones viejas al abrir el CRM. Luego sí anuncia lo nuevo.
-    const prime = async () => {
-      try {
-        const res = await getPendingBankDeposits();
-        for (const d of res?.data || []) {
-          processed.current.add(d.id);
-          markBankDepositSeen(d.id).catch(() => {});
-        }
-      } catch {
-        /* ignora */
-      } finally {
-        primed.current = true;
-      }
-    };
-
-    prime();
+    check(); // primera pasada inmediata (anuncia lo reciente)
     const t = setInterval(() => {
-      if (alive && primed.current) check();
-    }, 7000);
+      if (alive) check();
+    }, 5000);
 
     return () => {
       alive = false;
