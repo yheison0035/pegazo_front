@@ -99,19 +99,32 @@ export function speak(text) {
 
     const doSpeak = () => {
       try {
-        // Limpia cualquier locución atascada y reanuda (Chrome se queda "paused").
-        if (synth.paused) synth.resume();
+        // Limpia la cola (a veces queda una locución atascada que bloquea las
+        // siguientes) y reanuda.
+        synth.cancel();
+        synth.resume();
         const u = new SpeechSynthesisUtterance(text);
-        const v = pickSpanishVoice();
+        const voices = loadVoices();
+        // Voz en español; si no hay ninguna, se usa la voz por defecto del
+        // sistema (mejor que forzar un idioma sin voz, que deja todo mudo).
+        const v = pickSpanishVoice() || voices[0] || null;
         if (v) {
           u.voice = v;
-          u.lang = v.lang;
+          u.lang = v.lang || 'es-CO';
         } else {
           u.lang = 'es-CO';
         }
         u.rate = 1;
+        u.pitch = 1;
         u.volume = 1;
-        synth.speak(u);
+        // Pequeño respiro tras el cancel() para evitar la carrera en Chrome.
+        setTimeout(() => {
+          try {
+            synth.speak(u);
+          } catch {
+            /* ignora */
+          }
+        }, 60);
       } catch {
         /* ignora */
       }
