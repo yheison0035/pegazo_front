@@ -8,6 +8,7 @@ import DinamicForm from '@/components/dashboard/form/DinamicForm';
 import {
   getEmptyInventory,
   getFormFieldsInventory,
+  validateProductVariants,
 } from '@/lib/api/utils/inventory.config';
 import useProducts from '@/lib/api/hooks/useProducts';
 import { parseCOPToNumber } from '@/lib/api/utils/utils';
@@ -133,20 +134,23 @@ export default function NewProduct() {
     }
 
     if (!noStock) {
-      const invalidVariant = variants.find(
-        (v) => !v.color || !v.stock || v.stock <= 0
-      );
-      if (invalidVariant) {
-        return setAlert({
-          type: 'warning',
-          message: 'La cantidad debe ser mayor a 0.',
-        });
+      const check = validateProductVariants(variants, usuario);
+      if (!check.ok) {
+        return setAlert({ type: 'warning', message: check.message });
       }
     }
 
+    // En verticales sin color (simple/peso) la variante no lleva color: se
+    // guarda 'ÚNICO' para que el backend tenga un valor válido.
+    const normVariants = (variants || []).map((v) => ({
+      ...v,
+      color: String(v.color || '').trim() || 'ÚNICO',
+      stock: Number(v.stock) || 0,
+    }));
+
     const payload = {
       ...formData,
-      variants,
+      variants: normVariants,
       purchasePrice: parseCOPToNumber(formData.purchasePrice) || 0,
       salePrice: parseCOPToNumber(formData.salePrice),
       oldPrice: parseCOPToNumber(formData.oldPrice),
