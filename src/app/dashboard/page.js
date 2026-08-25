@@ -187,17 +187,9 @@ export default function DashboardHome() {
   const [expiring, setExpiring] = useState([]);
   const [bankDeposits, setBankDeposits] = useState([]);
 
-  // Consignaciones: solo si el negocio las tiene activas y el rol ve dinero.
-  const BANK_ROLES = [
-    'SUPER_ADMIN',
-    'ADMIN',
-    'RECEPCIONISTA',
-    'CAJA',
-    'ASESOR',
-    'VENTAS',
-  ];
+  // Consignaciones: visible para CUALQUIER rol si el negocio las tiene activas.
   const showBank =
-    !!usuario?.company?.bankNotifyEnabled && BANK_ROLES.includes(usuario?.role);
+    !!usuario?.company?.bankNotifyEnabled && !!usuario?.role;
 
   // Verticales que manejan vencimiento (droguería / perecederos).
   const hasExpiry = !!getProductFields(usuario?.company?.type).expiry;
