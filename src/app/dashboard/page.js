@@ -34,7 +34,8 @@ import { getAppointmentsAgenda } from '@/lib/api/routes/appointments';
 import { isServicesBusiness } from '@/lib/appointmentsAccess';
 import { getProductFields } from '@/config/verticalProfiles';
 import ReactivateCustomersModal from '@/components/appointments/ReactivateCustomersModal';
-import { formatCOP } from '@/lib/api/utils/utils';
+import { formatCOP, formatDateTime } from '@/lib/api/utils/utils';
+import { getBankDeposits } from '@/lib/api/routes/bank';
 
 function firstName(name) {
   return String(name || '').trim().split(/\s+/)[0] || '';
@@ -184,6 +185,19 @@ export default function DashboardHome() {
   const [lowStock, setLowStock] = useState([]);
   const [receivable, setReceivable] = useState(0);
   const [expiring, setExpiring] = useState([]);
+  const [bankDeposits, setBankDeposits] = useState([]);
+
+  // Consignaciones: solo si el negocio las tiene activas y el rol ve dinero.
+  const BANK_ROLES = [
+    'SUPER_ADMIN',
+    'ADMIN',
+    'RECEPCIONISTA',
+    'CAJA',
+    'ASESOR',
+    'VENTAS',
+  ];
+  const showBank =
+    !!usuario?.company?.bankNotifyEnabled && BANK_ROLES.includes(usuario?.role);
 
   // Verticales que manejan vencimiento (droguería / perecederos).
   const hasExpiry = !!getProductFields(usuario?.company?.type).expiry;
@@ -209,7 +223,18 @@ export default function DashboardHome() {
         .then((r) => setExpiring(r?.data || []))
         .catch(() => setExpiring([]));
     }
-  }, [usuario, isServices, hasExpiry]);
+    if (showBank) {
+      const loadBank = () =>
+        getBankDeposits({ limit: 6 })
+          .then((r) => setBankDeposits(r?.data || []))
+          .catch(() => {});
+      loadBank();
+      // Refresca el contenedor de consignaciones cada 10s (además del aviso
+      // de voz global, que llega solo).
+      const bt = setInterval(loadBank, 10000);
+      return () => clearInterval(bt);
+    }
+  }, [usuario, isServices, hasExpiry, showBank]);
 
   const setup = home?.setup;
   const catalogStep = isServices
@@ -358,6 +383,52 @@ export default function DashboardHome() {
           </div>
 
           <div className="space-y-3">
+            {showBank && (
+              <div className="rounded-2xl border border-emerald-100 bg-emerald-50/50 p-4 shadow-sm">
+                <div className="mb-2 flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-emerald-700">
+                    <BanknotesIcon className="h-4 w-4" />
+                    Consignaciones confirmadas
+                  </div>
+                  <Link
+                    href="/dashboard/bank"
+                    className="text-xs font-medium text-emerald-700 hover:underline"
+                  >
+                    Ver todas
+                  </Link>
+                </div>
+                {bankDeposits.length === 0 ? (
+                  <p className="py-2 text-xs text-emerald-700/70">
+                    Aún no hay consignaciones. Cuando entre una transferencia,
+                    aparecerá aquí y sonará el aviso.
+                  </p>
+                ) : (
+                  <ul className="divide-y divide-emerald-100/70">
+                    {bankDeposits.map((d) => (
+                      <li
+                        key={d.id}
+                        className="flex items-center justify-between gap-2 py-1.5"
+                      >
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-gray-800">
+                            {formatCOP(d.amount)}
+                            {d.senderName && (
+                              <span className="font-normal text-gray-500">
+                                {' '}
+                                · {d.senderName}
+                              </span>
+                            )}
+                          </p>
+                          <p className="truncate text-[11px] text-gray-400">
+                            {formatDateTime(d.createdAt)}
+                          </p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
             {home.overdue?.count > 0 && (
               <AlertCard
                 href="/dashboard/cartera"
