@@ -25,11 +25,10 @@ export default function BankDepositNotifier() {
   // (política de autoplay): así los avisos programados sí suenan después.
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const unlock = () => {
-      primeAudio();
-      window.removeEventListener('pointerdown', unlock);
-      window.removeEventListener('keydown', unlock);
-    };
+    // Se mantiene activo: cada interacción reactiva el audio (los navegadores
+    // suspenden el AudioContext/voz tras un rato de inactividad; así seguimos
+    // "desbloqueados" para el próximo aviso).
+    const unlock = () => primeAudio();
     window.addEventListener('pointerdown', unlock);
     window.addEventListener('keydown', unlock);
     return () => {

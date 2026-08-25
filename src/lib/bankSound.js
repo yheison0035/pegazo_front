@@ -5,6 +5,7 @@
 
 let audioCtx = null; // contexto compartido (se resume en el gesto)
 let cachedVoices = [];
+let voicePrimed = false; // la locución-prime inaudible se hace una sola vez
 
 function getCtx() {
   if (typeof window === 'undefined') return null;
@@ -49,13 +50,15 @@ export function primeAudio() {
     if (synth) {
       synth.resume();
       loadVoices();
-      // Locución real pero inaudible: satisface el requisito de gesto en Chrome
-      // de forma fiable (una cadena vacía no lo desbloquea).
-      const u = new SpeechSynthesisUtterance('.');
-      u.volume = 0;
-      synth.speak(u);
-      // Algunas plataformas cargan las voces de forma asíncrona.
       synth.onvoiceschanged = loadVoices;
+      // Locución real pero inaudible SOLO la primera vez: satisface el requisito
+      // de gesto en Chrome de forma fiable (una cadena vacía no lo desbloquea).
+      if (!voicePrimed) {
+        const u = new SpeechSynthesisUtterance('.');
+        u.volume = 0;
+        synth.speak(u);
+        voicePrimed = true;
+      }
     }
   } catch {
     /* ignora */
