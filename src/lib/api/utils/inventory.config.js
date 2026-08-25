@@ -4,6 +4,40 @@ import {
   WEIGHT_UNIT_OPTIONS,
 } from '@/config/verticalProfiles';
 
+// Valida las variantes/cantidad de un producto SEGÚN la vertical del negocio.
+// - variantType 'color' (televentas, ecommerce, ropa): cada variante necesita
+//   color; el nombre del color lo maneja el selector.
+// - 'simple' / 'weight' (la mayoría: tienda, droguería, restaurante, peso…): el
+//   color NO aplica; solo importa que la cantidad sea válida (0 o más).
+// Devuelve { ok, message }.
+export function validateProductVariants(variants, usuario) {
+  const fields = getProductFields(usuario?.company?.type);
+  const vt = fields.variantType; // 'color' | 'weight' | 'simple'
+  const list = Array.isArray(variants) ? variants : [];
+
+  if (!list.length) {
+    return {
+      ok: false,
+      message:
+        vt === 'color'
+          ? 'Agrega al menos un color con su cantidad.'
+          : 'Ingresa la cantidad del producto.',
+    };
+  }
+
+  for (const v of list) {
+    const stock = Number(v?.stock);
+    if (!Number.isFinite(stock) || stock < 0) {
+      return { ok: false, message: 'La cantidad no puede ser negativa.' };
+    }
+    if (vt === 'color' && !String(v?.color || '').trim()) {
+      return { ok: false, message: 'Cada color debe tener su nombre y cantidad.' };
+    }
+  }
+
+  return { ok: true };
+}
+
 export const getEmptyInventory = () => ({
   sku: '',
   name: '',

@@ -6,7 +6,10 @@ import AlertModal from '@/components/dashboard/modals/alertModal';
 import DinamicForm from '@/components/dashboard/form/DinamicForm';
 import { useAuth } from '@/context/authContext';
 import useProducts from '@/lib/api/hooks/useProducts';
-import { getFormFieldsInventory } from '@/lib/api/utils/inventory.config';
+import {
+  getFormFieldsInventory,
+  validateProductVariants,
+} from '@/lib/api/utils/inventory.config';
 import { parseCOPToNumber } from '@/lib/api/utils/utils';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import Button from '@/components/ui/Button';
@@ -60,14 +63,9 @@ export default function EditProduct() {
     // Los elaborados sin control de stock (platos) no exigen cantidad/color.
     const noStock = formData.trackStock === false;
     if (!noStock) {
-      const invalidVariant = (formData.variants || []).find(
-        (v) => !v.color || !v.stock || v.stock <= 0
-      );
-      if (invalidVariant) {
-        return setAlert({
-          type: 'warning',
-          message: 'Todas las variantes deben tener color y stock mayor a 0.',
-        });
+      const check = validateProductVariants(formData.variants, usuario);
+      if (!check.ok) {
+        return setAlert({ type: 'warning', message: check.message });
       }
     }
 
@@ -96,7 +94,7 @@ export default function EditProduct() {
       brandId: numOrUndef(formData.brandId),
       variants: (formData.variants || []).map((v) => ({
         ...(v.id ? { id: v.id } : {}),
-        color: v.color,
+        color: String(v.color || '').trim() || 'ÚNICO',
         ...(v.size ? { size: v.size } : {}),
         stock: Number(v.stock) || 0,
       })),

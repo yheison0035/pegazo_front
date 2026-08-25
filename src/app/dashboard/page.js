@@ -33,6 +33,7 @@ import { getReceivables } from '@/lib/api/routes/sales';
 import { getAppointmentsAgenda } from '@/lib/api/routes/appointments';
 import { isServicesBusiness } from '@/lib/appointmentsAccess';
 import { getProductFields } from '@/config/verticalProfiles';
+import ReactivateCustomersModal from '@/components/appointments/ReactivateCustomersModal';
 import { formatCOP } from '@/lib/api/utils/utils';
 
 function firstName(name) {
@@ -101,7 +102,7 @@ function WeekChart({ data }) {
 }
 
 // Tarjeta de alerta clicable (cartera vencida / por reactivar).
-function AlertCard({ href, icon: Icon, tone, title, value, sub }) {
+function AlertCard({ href, onClick, icon: Icon, tone, title, value, sub }) {
   const tones = {
     red: 'border-red-100 bg-red-50/60 text-red-600',
     amber: 'border-amber-100 bg-amber-50/60 text-amber-600',
@@ -116,6 +117,12 @@ function AlertCard({ href, icon: Icon, tone, title, value, sub }) {
       <p className="text-xs opacity-80">{sub}</p>
     </div>
   );
+  if (onClick)
+    return (
+      <button type="button" onClick={onClick} className="w-full text-left">
+        {body}
+      </button>
+    );
   return href ? <Link href={href}>{body}</Link> : body;
 }
 
@@ -172,6 +179,7 @@ export default function DashboardHome() {
   const isAdmin = ['SUPER_ADMIN', 'ADMIN'].includes(usuario?.role);
 
   const [home, setHome] = useState(null);
+  const [showReactivate, setShowReactivate] = useState(false);
   const [todayAppts, setTodayAppts] = useState(null);
   const [lowStock, setLowStock] = useState([]);
   const [receivable, setReceivable] = useState(0);
@@ -364,7 +372,7 @@ export default function DashboardHome() {
             )}
             {home.winbackCount > 0 && (
               <AlertCard
-                href="/dashboard/customers"
+                onClick={() => setShowReactivate(true)}
                 icon={ArrowPathIcon}
                 tone="amber"
                 title="Por reactivar"
@@ -455,6 +463,10 @@ export default function DashboardHome() {
           </Button>
         </div>
       </div>
+
+      {showReactivate && (
+        <ReactivateCustomersModal onClose={() => setShowReactivate(false)} />
+      )}
     </div>
   );
 }
