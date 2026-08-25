@@ -52,25 +52,33 @@ export default function BankDepositNotifier() {
       try {
         const res = await getPendingBankDeposits();
         const list = res?.data || [];
+
+        // Recolecta las NUEVAS de esta pasada (aún no procesadas). A todas se
+        // les marca "vista" para no repetirlas.
+        const nuevas = [];
         for (const d of list) {
           if (processed.current.has(d.id)) continue;
           processed.current.add(d.id);
-          // Marca vista en el backend para no repetirla (en cualquier caso).
           markBankDepositSeen(d.id).catch(() => {});
-
           const created = new Date(d.createdAt).getTime();
-          const esViejo = Number.isFinite(created) && created < cutoff;
-          if (esViejo) continue; // historial: no anunciar, solo marcar visto
-
-          const nombre = d.senderName ? ` de ${d.senderName}` : '';
-          toast.show({
-            type: 'success',
-            title: '💰 Consignación recibida',
-            message: `${formatCOP(d.amount)}${nombre}`,
-            duration: 12000,
-          });
-          announceDeposit(d.amount, d.senderName);
+          if (Number.isFinite(created) && created >= cutoff) nuevas.push(d);
         }
+        if (!nuevas.length) return;
+
+        // Si llegan VARIAS de golpe (p. ej. un reenvío en lote del correo), se
+        // anuncia SOLO la más reciente; el resto se marca vista en silencio.
+        nuevas.sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        );
+        const d = nuevas[0];
+        const nombre = d.senderName ? ` de ${d.senderName}` : '';
+        toast.show({
+          type: 'success',
+          title: '💰 Consignación recibida',
+          message: `${formatCOP(d.amount)}${nombre}`,
+          duration: 12000,
+        });
+        announceDeposit(d.amount, d.senderName);
       } catch {
         /* silencioso: reintenta en el siguiente ciclo */
       }
