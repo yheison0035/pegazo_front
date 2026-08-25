@@ -5,6 +5,11 @@ export async function getHomeSummary() {
   return apiFetch('/statistics/home');
 }
 
+// Serie de ventas para la gráfica del Home: period = 'week' | 'month' | 'year'.
+export async function getSalesTrend(period = 'week') {
+  return apiFetch(`/statistics/sales-trend?period=${period}`);
+}
+
 export async function getDashboardStats(dto = {}) {
   return apiFetch('/statistics/dashboard', {
     method: 'POST',

@@ -23,7 +23,11 @@ import {
   ResponsiveContainer,
   Tooltip,
   XAxis,
+  YAxis,
+  CartesianGrid,
 } from 'recharts';
+import { memo } from 'react';
+import { getSalesTrend } from '@/lib/api/routes/statistics';
 import { useAuth } from '@/context/authContext';
 import useTerms from '@/hooks/useTerms';
 import Button from '@/components/ui/Button';
@@ -58,49 +62,156 @@ function apptDay(iso) {
 }
 
 // Mini gráfica de ventas de la semana (usa el color del tema).
-function WeekChart({ data }) {
-  const rows = (data || []).map((x) => ({
-    label: x.date.slice(8) + '/' + x.date.slice(5, 7),
-    total: x.total,
-  }));
+const TREND_PERIODS = [
+  { key: 'week', label: 'Semana' },
+  { key: 'month', label: 'Mes' },
+  { key: 'year', label: 'Año' },
+];
+
+// Abrevia valores para el eje Y: 45000 -> $45k, 8777500 -> $8.8M.
+function abbrevCOP(n) {
+  const v = Number(n) || 0;
+  if (v >= 1_000_000)
+    return `$${(v / 1_000_000).toFixed(v % 1_000_000 === 0 ? 0 : 1)}M`;
+  if (v >= 1_000) return `$${Math.round(v / 1_000)}k`;
+  return `$${v}`;
+}
+
+// Gráfica de ventas del Home. Autónoma (trae sus propios datos según el
+// periodo) y memoizada, así el refresco de otras tarjetas —como las
+// consignaciones— no la re-renderiza ni la "daña".
+const SalesTrendChart = memo(function SalesTrendChart({ title }) {
+  const [period, setPeriod] = useState('week');
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    getSalesTrend(period)
+      .then((r) => {
+        if (alive) setRows(r?.data || []);
+      })
+      .catch(() => {
+        if (alive) setRows([]);
+      })
+      .finally(() => {
+        if (alive) setLoading(false);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [period]);
+
+  const total = rows.reduce((a, b) => a + (b.total || 0), 0);
+  const hasData = rows.some((r) => (r.total || 0) > 0);
+  const subLabel =
+    period === 'week'
+      ? 'Últimos 7 días'
+      : period === 'month'
+        ? 'Últimos 30 días'
+        : 'Últimos 12 meses';
+
   return (
-    <div className="h-40 w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={rows} margin={{ top: 5, right: 6, left: 6, bottom: 0 }}>
-          <defs>
-            <linearGradient id="wk" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="var(--color-orange-500)" stopOpacity={0.35} />
-              <stop offset="100%" stopColor="var(--color-orange-500)" stopOpacity={0} />
-            </linearGradient>
-          </defs>
-          <XAxis
-            dataKey="label"
-            tick={{ fontSize: 11, fill: 'var(--color-gray-400)' }}
-            axisLine={false}
-            tickLine={false}
-          />
-          <Tooltip
-            formatter={(v) => formatCOP(v)}
-            labelStyle={{ color: 'var(--color-gray-500)' }}
-            contentStyle={{
-              background: 'var(--color-white)',
-              border: '1px solid var(--color-gray-200)',
-              borderRadius: 12,
-              fontSize: 12,
-            }}
-          />
-          <Area
-            type="monotone"
-            dataKey="total"
-            stroke="var(--color-orange-500)"
-            strokeWidth={2}
-            fill="url(#wk)"
-          />
-        </AreaChart>
-      </ResponsiveContainer>
+    <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-sm font-bold text-gray-700">{title}</h2>
+          <p className="text-xs text-gray-400">
+            {subLabel} ·{' '}
+            <span className="font-semibold text-gray-600">
+              {formatCOP(total)}
+            </span>
+          </p>
+        </div>
+        <div className="inline-flex rounded-lg border border-gray-200 p-0.5">
+          {TREND_PERIODS.map((p) => (
+            <button
+              key={p.key}
+              type="button"
+              onClick={() => setPeriod(p.key)}
+              className={`rounded-md px-3 py-1 text-xs font-medium transition ${
+                period === p.key
+                  ? 'bg-orange-500 text-white shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="h-56 w-full">
+        {!hasData && !loading ? (
+          <div className="flex h-full items-center justify-center text-xs text-gray-400">
+            Aún no hay ventas en este periodo.
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart
+              data={rows}
+              margin={{ top: 8, right: 10, left: 0, bottom: 0 }}
+            >
+              <defs>
+                <linearGradient id="trend" x1="0" y1="0" x2="0" y2="1">
+                  <stop
+                    offset="0%"
+                    stopColor="var(--color-orange-500)"
+                    stopOpacity={0.3}
+                  />
+                  <stop
+                    offset="100%"
+                    stopColor="var(--color-orange-500)"
+                    stopOpacity={0}
+                  />
+                </linearGradient>
+              </defs>
+              <CartesianGrid
+                vertical={false}
+                stroke="var(--color-gray-100)"
+                strokeDasharray="3 3"
+              />
+              <XAxis
+                dataKey="label"
+                tick={{ fontSize: 11, fill: 'var(--color-gray-400)' }}
+                axisLine={false}
+                tickLine={false}
+                interval="preserveStartEnd"
+                minTickGap={16}
+              />
+              <YAxis
+                width={48}
+                tick={{ fontSize: 11, fill: 'var(--color-gray-400)' }}
+                axisLine={false}
+                tickLine={false}
+                tickFormatter={abbrevCOP}
+              />
+              <Tooltip
+                formatter={(v) => [formatCOP(v), 'Ventas']}
+                labelStyle={{ color: 'var(--color-gray-500)' }}
+                contentStyle={{
+                  background: 'var(--color-white)',
+                  border: '1px solid var(--color-gray-200)',
+                  borderRadius: 12,
+                  fontSize: 12,
+                }}
+              />
+              <Area
+                type="monotone"
+                dataKey="total"
+                stroke="var(--color-orange-500)"
+                strokeWidth={2.5}
+                fill="url(#trend)"
+                dot={false}
+                activeDot={{ r: 4 }}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        )}
+      </div>
     </div>
   );
-}
+});
 
 // Tarjeta de alerta clicable (cartera vencida / por reactivar).
 function AlertCard({ href, onClick, icon: Icon, tone, title, value, sub }) {
@@ -364,14 +475,8 @@ export default function DashboardHome() {
       {/* Ventas de la semana + panel de alertas/agenda */}
       {home && (
         <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
-          <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm lg:col-span-2">
-            <div className="mb-1 flex items-center justify-between">
-              <h2 className="text-sm font-bold text-gray-700">
-                {t.salePlural} de la semana
-              </h2>
-              <span className="text-xs text-gray-400">Últimos 7 días</span>
-            </div>
-            <WeekChart data={home.weekSales} />
+          <div className="lg:col-span-2">
+            <SalesTrendChart title={t.salePlural} />
           </div>
 
           <div className="space-y-3">
