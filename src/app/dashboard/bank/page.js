@@ -8,6 +8,7 @@ import {
   ArrowPathIcon,
   SpeakerWaveIcon,
   TrashIcon,
+  BookOpenIcon,
 } from '@heroicons/react/24/outline';
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
@@ -15,6 +16,7 @@ import Button from '@/components/ui/Button';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
+import BankSetupModal from '@/components/bank/BankSetupModal';
 import { useAuth } from '@/context/authContext';
 import { formatCOP, formatDateTime } from '@/lib/api/utils/utils';
 import { announceDeposit } from '@/lib/bankSound';
@@ -25,7 +27,6 @@ import {
   regenerateBankToken,
   setBankConfig,
   getBankDeposits,
-  testBankDeposit,
   deleteBankDeposit,
   clearBankDeposits,
 } from '@/lib/api/routes/bank';
@@ -62,6 +63,7 @@ export default function BankPage() {
   const [ident, setIdent] = useState(''); // identificador en el banco
   const [email, setEmail] = useState(''); // correo donde llegan las confirmaciones
   const [shareToken, setShareToken] = useState(''); // enlace compartido a usar
+  const [showSetup, setShowSetup] = useState(false); // modal guía paso a paso
 
   const webhook = status?.token ? `${API}/bank/sms/${status.token}` : '';
 
@@ -164,25 +166,15 @@ export default function BankPage() {
     }
   };
 
-  // Envía una consignación de PRUEBA al webhook (como lo haría el celular), para
-  // comprobar la voz y la notificación.
-  const test = async () => {
-    // Suena de inmediato desde el clic (así el navegador no bloquea el audio).
+  // Prueba SOLO la voz y la notificación (no crea ningún registro en el
+  // historial). Suena desde el clic, así el navegador no bloquea el audio.
+  const test = () => {
     announceDeposit(50000, 'Juan de Prueba');
-    setBusy(true);
-    try {
-      await testBankDeposit();
-      setAlert({
-        type: 'success',
-        message:
-          'Consignación de prueba creada. En unos segundos deberías oír la voz y ver la notificación (haz un clic en la página si es la primera vez, para habilitar la voz).',
-      });
-      loadDeposits();
-    } catch (e) {
-      setAlert({ type: 'error', message: 'No se pudo enviar la prueba.' });
-    } finally {
-      setBusy(false);
-    }
+    setAlert({
+      type: 'success',
+      message:
+        'Así se verá y sonará cuando entre una consignación real. (Esto es solo una prueba, no queda en el historial.)',
+    });
   };
 
   const confirmDelete = async () => {
@@ -336,42 +328,35 @@ export default function BankPage() {
                   </div>
                 </div>
 
-                <div className="rounded-xl bg-blue-50 border border-blue-100 p-3 text-xs text-blue-900/80 space-y-1.5">
-                  <p className="font-semibold text-blue-900">
-                    Cómo conectarlo (una sola vez):
-                  </p>
-                  <p>
-                    <b>Por correo (recomendado, sirve con iPhone o Android):</b>{' '}
-                    en el Gmail{' '}
-                    <b>{email || 'donde recibes las confirmaciones'}</b> entra a{' '}
-                    <b>script.google.com</b>, crea un proyecto que busque los
-                    correos de tu banco y reenvíe cada uno a{' '}
-                    <b>tu enlace de arriba</b> (cuerpo{' '}
-                    <code>{'{ "text": "cuerpo del correo" }'}</code>), y ponle un
-                    activador de tiempo cada 1 minuto. Pídele el script listo a tu
-                    asesor de Pegazo (te lo damos con tu enlace ya puesto).
-                  </p>
-                  <p>
-                    <b>Por SMS (Android):</b> en un celular Android con{' '}
-                    <b>MacroDroid</b>, disparador = SMS de tu banco, acción = HTTP{' '}
-                    <b>POST</b> a tu enlace con{' '}
-                    <code>{'{ "text": "[sms_message]" }'}</code>.
-                  </p>
-                  <p>
-                    Pegazo entiende el aviso de cualquier banco/billetera, ignora
-                    las salidas (“Transferiste…”) y, si compartes correo con otro
-                    negocio, enruta cada pago según el identificador.
-                  </p>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowSetup(true)}
+                  className="flex w-full items-center justify-between gap-3 rounded-xl border border-blue-200 bg-blue-50 p-3 text-left transition hover:bg-blue-100"
+                >
+                  <span className="flex items-center gap-3">
+                    <BookOpenIcon className="h-6 w-6 flex-none text-blue-600" />
+                    <span>
+                      <span className="block text-sm font-semibold text-blue-900">
+                        ¿Cómo conectarlo? Guía paso a paso
+                      </span>
+                      <span className="block text-xs text-blue-800/70">
+                        Te llevamos de la mano, con tu enlace ya listo. Se hace
+                        una sola vez.
+                      </span>
+                    </span>
+                  </span>
+                  <span className="flex-none rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white">
+                    Abrir guía
+                  </span>
+                </button>
 
                 <div className="flex flex-wrap gap-2">
                   <Button
                     variant="secondary"
                     icon={SpeakerWaveIcon}
                     onClick={test}
-                    loading={busy}
                   >
-                    Enviar consignación de prueba
+                    Probar voz y aviso
                   </Button>
                   <Button
                     variant="secondary"
@@ -446,6 +431,14 @@ export default function BankPage() {
             </div>
           )}
         </div>
+
+        {showSetup && (
+          <BankSetupModal
+            webhook={webhook}
+            correo={email}
+            onClose={() => setShowSetup(false)}
+          />
+        )}
 
         <AlertModal
           type={alert.type}
