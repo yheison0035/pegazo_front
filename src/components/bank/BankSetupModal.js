@@ -40,7 +40,7 @@ function revisarBanco() {
         UrlFetchApp.fetch(WEBHOOK, {
           method: 'post',
           contentType: 'application/json',
-          payload: JSON.stringify({ text: msg.getPlainBody() }),
+          payload: JSON.stringify({ text: msg.getPlainBody(), sourceId: msg.getId() }),
           muteHttpExceptions: true,
         });
       } catch (e) {}
