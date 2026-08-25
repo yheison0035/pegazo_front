@@ -1,5 +1,6 @@
 import { AuthProvider } from '@/context/authContext';
 import { ToastProvider } from '@/context/toastContext';
+import ServiceWorkerRegister from '@/components/pwa/ServiceWorkerRegister';
 import { monserrat } from '@/styles/fonts';
 import '@/styles/globals.css';
 
@@ -72,10 +73,16 @@ export const metadata = {
     },
   },
   category: 'business',
+  applicationName: 'Pegazo',
+  appleWebApp: {
+    capable: true,
+    title: 'Pegazo',
+    statusBarStyle: 'default',
+  },
   icons: {
     icon: '/favicon.ico',
     shortcut: '/favicon.ico',
-    apple: '/images/logo_pegazo_icon.png',
+    apple: '/icons/apple-touch-icon.png',
   },
 };
 
@@ -92,6 +99,7 @@ export default function RootLayout({ children }) {
     <AuthProvider>
       <html lang="es">
         <body className={`${monserrat.className} antialiased`}>
+          <ServiceWorkerRegister />
           <ToastProvider>{children}</ToastProvider>
         </body>
       </html>
