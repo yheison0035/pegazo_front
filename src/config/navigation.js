@@ -219,13 +219,21 @@ export const NAVIGATION = [
         name: 'Consignaciones',
         href: '/dashboard/bank',
         icon: BanknotesIcon,
+        // Cualquier rol del negocio puede ver las consignaciones.
         roles: [
           'SUPER_ADMIN',
+          'COORDINADOR',
           'ADMIN',
           'ASESOR',
-          'RECEPCIONISTA',
-          'CAJA',
+          'AUXILIAR',
+          'BODEGUERO',
           'VENTAS',
+          'BARBERO',
+          'CAJA',
+          'RECEPCIONISTA',
+          'MESERO',
+          'COCINERO',
+          'PROFESIONAL',
         ],
       },
       {

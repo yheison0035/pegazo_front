@@ -10,24 +10,16 @@ import {
 } from '@/lib/api/routes/bank';
 import { announceDeposit } from '@/lib/bankSound';
 
-const VIEW_ROLES = [
-  'SUPER_ADMIN',
-  'ADMIN',
-  'RECEPCIONISTA',
-  'CAJA',
-  'ASESOR',
-  'VENTAS',
-];
-
 // Vigila las consignaciones nuevas a la cuenta del banco y las anuncia en
-// tiempo real (voz + notificación). Sondea cada pocos segundos.
+// tiempo real (voz + notificación). Sondea cada pocos segundos. Lo puede oír/ver
+// CUALQUIER rol del negocio (todos deben enterarse de que entró plata).
 export default function BankDepositNotifier() {
   const { usuario } = useAuth();
   const toast = useToast();
   const processed = useRef(new Set());
 
   const enabled = !!usuario?.company?.bankNotifyEnabled;
-  const canSee = VIEW_ROLES.includes(usuario?.role);
+  const canSee = !!usuario?.role; // cualquier rol autenticado
 
   // Desbloquea la voz del navegador en la primera interacción del usuario
   // (política de autoplay): así los avisos programados sí suenan después.
