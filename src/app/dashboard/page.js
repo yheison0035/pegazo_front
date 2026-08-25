@@ -80,9 +80,26 @@ function abbrevCOP(n) {
 // Gráfica de ventas del Home. Autónoma (trae sus propios datos según el
 // periodo) y memoizada, así el refresco de otras tarjetas —como las
 // consignaciones— no la re-renderiza ni la "daña".
+// Tooltip: muestra el valor en pesos solo si el rol puede ver dinero; si no,
+// solo la fecha (para no exponer cifras).
+function TrendTooltip({ active, payload, label, showValues }) {
+  if (!active || !payload || !payload.length) return null;
+  return (
+    <div className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs shadow-sm">
+      <p className="font-medium text-gray-500">{label}</p>
+      {showValues && (
+        <p className="font-semibold text-gray-800">
+          {formatCOP(payload[0].value)}
+        </p>
+      )}
+    </div>
+  );
+}
+
 const SalesTrendChart = memo(function SalesTrendChart({ title }) {
   const [period, setPeriod] = useState('week');
   const [rows, setRows] = useState([]);
+  const [showValues, setShowValues] = useState(true);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -90,7 +107,9 @@ const SalesTrendChart = memo(function SalesTrendChart({ title }) {
     setLoading(true);
     getSalesTrend(period)
       .then((r) => {
-        if (alive) setRows(r?.data || []);
+        if (!alive) return;
+        setRows(r?.data || []);
+        setShowValues(r?.values !== false);
       })
       .catch(() => {
         if (alive) setRows([]);
@@ -118,10 +137,15 @@ const SalesTrendChart = memo(function SalesTrendChart({ title }) {
         <div>
           <h2 className="text-sm font-bold text-gray-700">{title}</h2>
           <p className="text-xs text-gray-400">
-            {subLabel} ·{' '}
-            <span className="font-semibold text-gray-600">
-              {formatCOP(total)}
-            </span>
+            {subLabel}
+            {showValues && (
+              <>
+                {' · '}
+                <span className="font-semibold text-gray-600">
+                  {formatCOP(total)}
+                </span>
+              </>
+            )}
           </p>
         </div>
         <div className="inline-flex rounded-lg border border-gray-200 p-0.5">
@@ -179,22 +203,18 @@ const SalesTrendChart = memo(function SalesTrendChart({ title }) {
                 interval="preserveStartEnd"
                 minTickGap={16}
               />
-              <YAxis
-                width={48}
-                tick={{ fontSize: 11, fill: 'var(--color-gray-400)' }}
-                axisLine={false}
-                tickLine={false}
-                tickFormatter={abbrevCOP}
-              />
+              {showValues && (
+                <YAxis
+                  width={48}
+                  tick={{ fontSize: 11, fill: 'var(--color-gray-400)' }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={abbrevCOP}
+                />
+              )}
               <Tooltip
-                formatter={(v) => [formatCOP(v), 'Ventas']}
-                labelStyle={{ color: 'var(--color-gray-500)' }}
-                contentStyle={{
-                  background: 'var(--color-white)',
-                  border: '1px solid var(--color-gray-200)',
-                  borderRadius: 12,
-                  fontSize: 12,
-                }}
+                content={<TrendTooltip showValues={showValues} />}
+                cursor={{ stroke: 'var(--color-gray-200)' }}
               />
               <Area
                 type="monotone"
