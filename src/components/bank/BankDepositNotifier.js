@@ -41,16 +41,17 @@ export default function BankDepositNotifier() {
     if (!enabled || !canSee) return;
 
     let alive = true;
-    // Todo lo que llegó ANTES de este momento (menos un pequeño margen) se
-    // considera "viejo" y se marca visto en silencio, para no gritar el
-    // historial al abrir el CRM. Lo que llegue de aquí en adelante —o justo
-    // segundos antes de cargar— SÍ se anuncia en tiempo real.
-    const cutoff = Date.now() - 90 * 1000; // 90s de margen
+    // Ventana de "reciente": se anuncian las consignaciones de los últimos 10
+    // minutos (evaluado en cada chequeo, no fijo al montar). Así, si entras a la
+    // sesión de otra empresa y hay una consignación de hace un rato, IGUAL suena.
+    // Las más viejas se marcan vistas en silencio (para no gritar el historial).
+    const RECIENTE_MS = 10 * 60 * 1000;
 
     const check = async () => {
       try {
         const res = await getPendingBankDeposits();
         const list = res?.data || [];
+        const reciente = Date.now() - RECIENTE_MS;
 
         // Recolecta las NUEVAS de esta pasada (aún no procesadas). A todas se
         // les marca "vista" para no repetirlas.
@@ -60,7 +61,7 @@ export default function BankDepositNotifier() {
           processed.current.add(d.id);
           markBankDepositSeen(d.id).catch(() => {});
           const created = new Date(d.createdAt).getTime();
-          if (Number.isFinite(created) && created >= cutoff) nuevas.push(d);
+          if (Number.isFinite(created) && created >= reciente) nuevas.push(d);
         }
         if (!nuevas.length) return;
 
