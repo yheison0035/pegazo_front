@@ -46,7 +46,7 @@ function Stat({ label, value, accent = 'text-gray-800' }) {
   return (
     <div className="min-w-0 rounded-xl bg-gray-50 px-3 py-2">
       <p
-        className={`truncate text-base font-bold leading-tight tabular-nums ${accent}`}
+        className={`text-base font-bold leading-tight tabular-nums ${accent}`}
       >
         {value}
       </p>
@@ -139,26 +139,25 @@ export const WIDGETS = [
     name: 'Resumen de hoy',
     applies: () => true,
     Render: ({ data }) => {
-      const { home, todayAppts, isServices } = data;
+      const { home } = data;
       const byMethod = home?.today?.byMethod || [];
+      // Fecha de hoy en zona Colombia para llevar al listado ya filtrado.
+      const todayCol = new Date().toLocaleDateString('en-CA', {
+        timeZone: 'America/Bogota',
+      });
       return (
-        <ShortcutCard href="/dashboard/sales" hint="Ver ventas">
+        <ShortcutCard
+          href={`/dashboard/delivered_sales?date=${todayCol}`}
+          hint="Ver ventas de hoy"
+        >
           <Label>Hoy</Label>
-          <div
-            className={`grid gap-2 ${isServices ? 'grid-cols-3' : 'grid-cols-2'}`}
-          >
+          <div className="grid grid-cols-2 gap-2">
             <Stat
               label={`${data.t.salePlural}`}
               value={home ? formatCOP(home.today.total) : '—'}
               accent="text-emerald-600"
             />
             <Stat label="Nº de hoy" value={home ? home.today.count : '—'} />
-            {isServices && (
-              <Stat
-                label="Citas"
-                value={todayAppts ? todayAppts.length : '—'}
-              />
-            )}
           </div>
 
           {/* Desglose por medio de pago (para no abrir el historial) */}
