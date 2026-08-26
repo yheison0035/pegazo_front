@@ -7,6 +7,7 @@ import { Roles } from '@/config/roles';
 import PlanUpgradeModal from '@/components/plan/PlanUpgradeModal';
 import AppointmentsHub from '@/components/appointments/AppointmentsHub';
 import BankDepositNotifier from '@/components/bank/BankDepositNotifier';
+import SplashScreen from '@/components/pwa/SplashScreen';
 import { useAuth } from '@/context/authContext';
 import DayBanner from '@/components/pos/DayBanner';
 import { isDark, DARK_EVENT } from '@/lib/darkMode';
@@ -30,6 +31,7 @@ export default function Layout({ children }) {
 
   return (
     <RoleGuard allowedRoles={Object.values(Roles)}>
+      <SplashScreen />
       <div data-crm-theme={theme} data-theme={dark ? 'dark' : undefined}>
         <div className="flex h-screen flex-col bg-gray-50 md:flex-row md:overflow-hidden">
           {/* El sidebar vive fijo y colapsado (solo iconos); aquí reservamos el
