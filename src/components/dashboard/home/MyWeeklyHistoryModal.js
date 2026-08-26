@@ -8,7 +8,7 @@ import { formatCOP } from '@/lib/api/utils/utils';
 // Historial del barbero por SEMANA o por MES, con su ganancia y el desglose de
 // cortes y productos al desplegar.
 export default function MyWeeklyHistoryModal({ onClose }) {
-  const [group, setGroup] = useState('week'); // 'week' | 'month'
+  const [group, setGroup] = useState('week'); // 'day' | 'week' | 'month'
   const [rows, setRows] = useState([]);
   const [conf, setConf] = useState(true);
   const [open, setOpen] = useState(0); // índice desplegado
@@ -67,6 +67,7 @@ export default function MyWeeklyHistoryModal({ onClose }) {
             </button>
           </div>
           <div className="mt-3 inline-flex rounded-lg bg-white/15 p-0.5">
+            <Tab value="day">Por día</Tab>
             <Tab value="week">Por semana</Tab>
             <Tab value="month">Por mes</Tab>
           </div>

@@ -35,6 +35,11 @@ export async function getAppointmentsAgenda() {
   return apiFetch('/appointments/agenda');
 }
 
+// Mis citas por rango: 'today' | 'tomorrow' | 'week' | 'month'.
+export async function getMyAppointments(range = 'today') {
+  return apiFetch(`/appointments/mine?range=${encodeURIComponent(range)}`);
+}
+
 export async function createAppointment(dto) {
   const body = {
     ...dto,
