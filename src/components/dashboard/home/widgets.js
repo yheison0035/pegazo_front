@@ -369,15 +369,12 @@ export const WIDGETS = [
             </p>
           ) : (
             <ul className="space-y-1">
-              {items.slice(0, 5).map((b, i) => (
-                <li
-                  key={b.id ?? i}
-                  className="flex items-center justify-between gap-2 text-sm"
-                >
-                  <span className="truncate text-gray-700">{b.name}</span>
-                  <span className="flex-none text-xs text-gray-400">
-                    {b.date}
-                  </span>
+              {items.slice(0, 6).map((b, i) => (
+                <li key={b.id ?? i} className="min-w-0">
+                  <p className="truncate text-sm font-medium text-gray-700">
+                    {b.name}
+                  </p>
+                  <p className="text-xs text-gray-400">🎂 {b.date}</p>
                 </li>
               ))}
             </ul>
