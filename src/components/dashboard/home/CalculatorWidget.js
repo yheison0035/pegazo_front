@@ -101,8 +101,13 @@ export default function CalculatorWidget() {
       <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
         Calculadora
       </p>
-      <div className="mb-3 rounded-xl bg-gray-900 px-4 py-3 text-right text-2xl font-bold text-white">
-        <span className="block truncate">{display}</span>
+      {/* Colores fijos por estilo en línea: los tokens gray/white se remapean
+          con el tema y dejaban el número invisible en modo oscuro. */}
+      <div
+        style={{ background: '#111827', color: '#ffffff' }}
+        className="mb-3 rounded-xl px-4 py-3 text-right text-2xl font-bold"
+      >
+        <span className="block truncate">{display || '0'}</span>
       </div>
       <div className="grid grid-cols-4 gap-2">
         <Btn variant="fn" onClick={clearAll}>
