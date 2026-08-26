@@ -38,6 +38,7 @@ import { getAppointmentsAgenda } from '@/lib/api/routes/appointments';
 import { isServicesBusiness } from '@/lib/appointmentsAccess';
 import { getProductFields } from '@/config/verticalProfiles';
 import ReactivateCustomersModal from '@/components/appointments/ReactivateCustomersModal';
+import LowStockModal from '@/components/dashboard/inventory/LowStockModal';
 import { formatCOP, formatDateTime } from '@/lib/api/utils/utils';
 import { getBankDeposits } from '@/lib/api/routes/bank';
 
@@ -312,6 +313,7 @@ export default function DashboardHome() {
 
   const [home, setHome] = useState(null);
   const [showReactivate, setShowReactivate] = useState(false);
+  const [showLowStock, setShowLowStock] = useState(false);
   const [todayAppts, setTodayAppts] = useState(null);
   const [lowStock, setLowStock] = useState([]);
   const [receivable, setReceivable] = useState(0);
@@ -463,15 +465,6 @@ export default function DashboardHome() {
             href="/dashboard/appointments"
           />
         )}
-        {lowStock.length > 0 && (
-          <Kpi
-            icon={ExclamationTriangleIcon}
-            label="Por agotarse"
-            value={lowStock.length}
-            accent="text-red-600"
-            href="/dashboard/inventory"
-          />
-        )}
         {receivable > 0 && (
           <Kpi
             icon={CreditCardIcon}
@@ -545,6 +538,52 @@ export default function DashboardHome() {
                   </ul>
                 )}
               </div>
+            )}
+            {lowStock.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setShowLowStock(true)}
+                className="w-full rounded-2xl border border-amber-100 bg-amber-50/60 p-4 text-left shadow-sm transition hover:shadow-md"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-amber-700">
+                    <ExclamationTriangleIcon className="h-4 w-4" />
+                    {t.productPlural} por agotarse
+                  </span>
+                  <span className="text-xs font-medium text-amber-700">
+                    Ver detalle
+                  </span>
+                </div>
+                <p className="mt-1 text-xl font-bold text-amber-800">
+                  {lowStock.length}
+                </p>
+                <ul className="mt-1 space-y-1">
+                  {lowStock.slice(0, 3).map((it) => (
+                    <li
+                      key={it.id}
+                      className="flex items-center justify-between gap-2 text-xs"
+                    >
+                      <span className="truncate text-gray-600">{it.name}</span>
+                      <span
+                        className={`flex-none font-semibold ${
+                          (it.stock || 0) <= 0
+                            ? 'text-red-600'
+                            : 'text-amber-700'
+                        }`}
+                      >
+                        {(it.stock || 0) <= 0
+                          ? 'Agotado'
+                          : `Quedan ${it.stock}`}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                {lowStock.length > 3 && (
+                  <p className="mt-1 text-[11px] text-amber-600">
+                    +{lowStock.length - 3} más
+                  </p>
+                )}
+              </button>
             )}
             {home.overdue?.count > 0 && (
               <AlertCard
@@ -654,6 +693,12 @@ export default function DashboardHome() {
 
       {showReactivate && (
         <ReactivateCustomersModal onClose={() => setShowReactivate(false)} />
+      )}
+      {showLowStock && (
+        <LowStockModal
+          items={lowStock}
+          onClose={() => setShowLowStock(false)}
+        />
       )}
     </div>
   );
