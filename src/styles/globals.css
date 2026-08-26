@@ -318,6 +318,14 @@ textarea {
   max-width: 100%;
 }
 
+/* La pantalla de bienvenida es SOLO para móvil (la PWA se usa en el celular).
+   En escritorio no se muestra. */
+@media (min-width: 768px) {
+  #pegazo-splash {
+    display: none !important;
+  }
+}
+
 /* Spinner de la pantalla de bienvenida (PWA). */
 .pegazo-splash-spinner {
   width: 34px;

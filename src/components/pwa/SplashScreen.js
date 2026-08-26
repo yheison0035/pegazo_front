@@ -22,6 +22,7 @@ export default function SplashScreen() {
 
   return (
     <div
+      id="pegazo-splash"
       aria-hidden="true"
       style={{
         position: 'fixed',
