@@ -46,7 +46,19 @@ export default function EditUser() {
       const { data } = isSelf
         ? await getMyProfile()
         : await getUserById(Number(id));
-      setFormData(data);
+      // Comisiones vienen como Decimal (o null); normalizamos a texto para el
+      // input controlado ('' cuando no hay valor).
+      setFormData({
+        ...data,
+        commissionServiceRate:
+          data?.commissionServiceRate == null
+            ? ''
+            : String(data.commissionServiceRate),
+        commissionProductRate:
+          data?.commissionProductRate == null
+            ? ''
+            : String(data.commissionProductRate),
+      });
     } catch (err) {
       setAlert({
         type: 'warning',
@@ -75,6 +87,16 @@ export default function EditUser() {
       managedLocals,
       ...payload
     } = formData;
+
+    // Comisiones: vacío → null (sin configurar); si hay valor → número.
+    const rate = (v) => {
+      if (v === '' || v === null || v === undefined) return null;
+      const n = Number(v);
+      return Number.isFinite(n) ? n : null;
+    };
+    payload.commissionServiceRate = rate(payload.commissionServiceRate);
+    payload.commissionProductRate = rate(payload.commissionProductRate);
+
     try {
       if (isSelf) {
         const { data } = await updateMyProfile(payload);

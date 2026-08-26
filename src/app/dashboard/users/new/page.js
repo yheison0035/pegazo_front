@@ -19,8 +19,18 @@ export default function NewUser() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const rate = (v) => {
+      if (v === '' || v === null || v === undefined) return null;
+      const n = Number(v);
+      return Number.isFinite(n) ? n : null;
+    };
+    const payload = {
+      ...formData,
+      commissionServiceRate: rate(formData.commissionServiceRate),
+      commissionProductRate: rate(formData.commissionProductRate),
+    };
     try {
-      await createUser(formData);
+      await createUser(payload);
       setAlert({
         type: 'success',
         message: 'Usuario creado correctamente.',
