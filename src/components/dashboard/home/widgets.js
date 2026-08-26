@@ -506,11 +506,17 @@ export const WIDGETS = [
           <Label icon={GiftIcon} accent="text-violet-500">
             Este mes
           </Label>
+          {p.range && (
+            <p className="-mt-1 mb-1.5 text-[11px] font-medium text-gray-400">
+              {p.range}
+            </p>
+          )}
           {perf.ratesConfigured ? (
             <>
               <div className="rounded-xl bg-emerald-500/10 p-3">
                 <p className="text-[11px] font-medium text-emerald-700">
-                  Comisión de productos ({rates.product}%) · se paga el 3
+                  Comisión de productos ({rates.product}%)
+                  {p.payDay ? ` · se paga el ${p.payDay}` : ' · se paga el 3'}
                 </p>
                 <p className="text-2xl font-bold text-emerald-600">
                   {formatCOP(p.earnings.product)}
@@ -533,8 +539,9 @@ export const WIDGETS = [
                 </li>
               </ul>
               <p className="mt-1.5 text-[11px] text-gray-400">
-                Los cortes se pagan por semana; los productos se acumulan y se
-                pagan el 3 de cada mes.
+                Cierre del {p.range || 'mes'}. Los cortes se pagan por semana;
+                los productos se acumulan y se pagan el{' '}
+                {p.payDay || '3 de cada mes'}.
               </p>
             </>
           ) : (
