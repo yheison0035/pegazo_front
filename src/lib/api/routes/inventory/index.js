@@ -22,6 +22,12 @@ export async function getProductById(id) {
 }
 
 // Productos con stock bajo (stock total <= alerta de stock mínimo).
+export async function restockProduct(id, amount) {
+  return apiFetch(`/inventory/${id}/restock`, {
+    method: 'PATCH',
+    body: JSON.stringify({ amount }),
+  });
+}
 export async function getLowStock() {
   return apiFetch('/inventory/low-stock');
 }
