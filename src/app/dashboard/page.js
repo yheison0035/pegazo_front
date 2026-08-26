@@ -540,10 +540,14 @@ export default function DashboardHome() {
               </div>
             )}
             {lowStock.length > 0 && (
-              <button
-                type="button"
+              <div
+                role="button"
+                tabIndex={0}
                 onClick={() => setShowLowStock(true)}
-                className="w-full rounded-2xl border border-amber-100 bg-amber-50/60 p-4 text-left shadow-sm transition hover:shadow-md"
+                onKeyDown={(e) =>
+                  (e.key === 'Enter' || e.key === ' ') && setShowLowStock(true)
+                }
+                className="w-full cursor-pointer rounded-2xl border border-amber-100 bg-amber-50/60 p-4 text-left shadow-sm transition hover:shadow-md"
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-amber-700">
@@ -583,7 +587,7 @@ export default function DashboardHome() {
                     +{lowStock.length - 3} más
                   </p>
                 )}
-              </button>
+              </div>
             )}
             {home.overdue?.count > 0 && (
               <AlertCard
