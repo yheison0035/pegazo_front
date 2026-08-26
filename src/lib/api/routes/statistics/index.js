@@ -6,8 +6,9 @@ export async function getHomeSummary() {
 }
 
 // Serie de ventas para la gráfica del Home: period = 'week' | 'month' | 'year'.
-export async function getSalesTrend(period = 'week') {
-  return apiFetch(`/statistics/sales-trend?period=${period}`);
+// offset = cuántos periodos hacia atrás (0 = actual).
+export async function getSalesTrend(period = 'week', offset = 0) {
+  return apiFetch(`/statistics/sales-trend?period=${period}&offset=${offset}`);
 }
 
 export async function getDashboardStats(dto = {}) {
