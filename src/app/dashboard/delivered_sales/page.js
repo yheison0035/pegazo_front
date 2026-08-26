@@ -56,7 +56,7 @@ export default function Delivered_Sales() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [alert, setAlert] = useState({});
 
-  const { filters, handleFilterChange } = useColumnFilters({
+  const { filters, handleFilterChange, setFilters } = useColumnFilters({
     code: '',
     customer: '',
     totalAmount: '',
@@ -66,6 +66,18 @@ export default function Delivered_Sales() {
     paymentStatus: '',
     saleDate: '',
   });
+
+  // Si llega ?date=YYYY-MM-DD (p. ej. desde el widget "Hoy" del inicio),
+  // prefiltrar el listado por esa fecha para ver solo esas ventas.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const qsDate = new URLSearchParams(window.location.search).get('date');
+    if (qsDate && /^\d{4}-\d{2}-\d{2}$/.test(qsDate)) {
+      setFilters((prev) => ({ ...prev, saleDate: qsDate }));
+    }
+    // solo al montar
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const debouncedFilters = useDebounce(filters, 400);
 
