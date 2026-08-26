@@ -303,3 +303,18 @@ select,
 textarea {
   max-width: 100%;
 }
+
+/* Spinner de la pantalla de bienvenida (PWA). */
+.pegazo-splash-spinner {
+  width: 34px;
+  height: 34px;
+  border-radius: 9999px;
+  border: 3px solid #fed7aa;
+  border-top-color: #ea580c;
+  animation: pegazo-splash-spin 0.7s linear infinite;
+}
+@keyframes pegazo-splash-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

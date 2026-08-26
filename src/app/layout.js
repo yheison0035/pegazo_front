@@ -1,6 +1,7 @@
 import { AuthProvider } from '@/context/authContext';
 import { ToastProvider } from '@/context/toastContext';
 import ServiceWorkerRegister from '@/components/pwa/ServiceWorkerRegister';
+import SplashScreen from '@/components/pwa/SplashScreen';
 import { monserrat } from '@/styles/fonts';
 import '@/styles/globals.css';
 
@@ -100,6 +101,7 @@ export default function RootLayout({ children }) {
       <html lang="es">
         <body className={`${monserrat.className} antialiased`}>
           <ServiceWorkerRegister />
+          <SplashScreen />
           <ToastProvider>{children}</ToastProvider>
         </body>
       </html>
