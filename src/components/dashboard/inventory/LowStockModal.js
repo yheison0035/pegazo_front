@@ -1,11 +1,13 @@
 'use client';
 
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import {
   XMarkIcon,
   ExclamationTriangleIcon,
   ArrowRightIcon,
   CubeIcon,
+  MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/authContext';
 import useTerms from '@/hooks/useTerms';
@@ -18,21 +20,66 @@ function fmtQty(n) {
   return Number.isInteger(v) ? String(v) : v.toFixed(2).replace(/\.?0+$/, '');
 }
 
+// Quita tildes/mayúsculas para buscar sin importar acentos.
+function norm(s) {
+  return (s || '')
+    .toString()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
 // Detalle de productos por agotarse. Adaptado a cualquier negocio: usa el
 // vocabulario del vertical (producto/plato/artículo…) y la unidad (und/kg/lb).
+// Incluye buscador y filtros para cuando hay muchos.
 export default function LowStockModal({ items = [], onClose }) {
   const { usuario } = useAuth();
   const t = useTerms();
   const canEdit = ['SUPER_ADMIN', 'ADMIN', 'BODEGUERO', 'COORDINADOR'].includes(
     usuario?.role,
   );
-  // Si la empresa tiene varias sedes, mostramos el local de cada producto.
-  const multiLocal = new Set(items.map((i) => i.local).filter(Boolean)).size > 1;
+
+  const [query, setQuery] = useState('');
+  const [status, setStatus] = useState('all'); // 'all' | 'out' | 'low'
+  const [local, setLocal] = useState('');
+
+  const unitOf = (u) => unitShortLabel(u) || 'und';
+
+  // Locales presentes (para el filtro por sede).
+  const locals = useMemo(
+    () => [...new Set(items.map((i) => i.local).filter(Boolean))].sort(),
+    [items],
+  );
+  const multiLocal = locals.length > 1;
 
   const agotados = items.filter((i) => (i.stock || 0) <= 0).length;
   const porAgotarse = items.length - agotados;
 
-  const unitOf = (u) => unitShortLabel(u) || 'und';
+  const filtered = useMemo(() => {
+    const q = norm(query.trim());
+    return items.filter((it) => {
+      if (status === 'out' && (it.stock || 0) > 0) return false;
+      if (status === 'low' && (it.stock || 0) <= 0) return false;
+      if (local && it.local !== local) return false;
+      if (q && !norm(it.name).includes(q)) return false;
+      return true;
+    });
+  }, [items, query, status, local]);
+
+  const chip = (key, label) => (
+    <button
+      key={key}
+      type="button"
+      onClick={() => setStatus(key)}
+      className={`rounded-full px-3 py-1 text-xs font-medium transition ${
+        status === key
+          ? 'bg-amber-500 text-white shadow-sm'
+          : 'bg-white text-gray-500 ring-1 ring-gray-200 hover:text-gray-700'
+      }`}
+    >
+      {label}
+    </button>
+  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -69,15 +116,49 @@ export default function LowStockModal({ items = [], onClose }) {
           </button>
         </div>
 
+        {/* Buscador + filtros */}
+        <div className="space-y-2.5 border-b border-gray-100 bg-gray-50 px-4 py-3">
+          <div className="relative">
+            <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={`Buscar ${t.productSingular.toLowerCase()}…`}
+              className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-3 text-sm focus:border-amber-400 focus:ring-2 focus:ring-amber-200"
+            />
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {chip('all', `Todos (${items.length})`)}
+            {chip('out', `Agotados (${agotados})`)}
+            {chip('low', `Bajos (${porAgotarse})`)}
+            {multiLocal && (
+              <select
+                value={local}
+                onChange={(e) => setLocal(e.target.value)}
+                className="ml-auto rounded-full border border-gray-200 bg-white px-3 py-1 text-xs text-gray-600"
+              >
+                <option value="">Todas las sedes</option>
+                {locals.map((l) => (
+                  <option key={l} value={l}>
+                    {l}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+        </div>
+
         {/* Lista */}
         <div className="flex-1 overflow-y-auto bg-gray-50">
-          {items.length === 0 ? (
+          {filtered.length === 0 ? (
             <p className="px-5 py-12 text-center text-sm text-gray-400">
-              No hay {t.productPlural.toLowerCase()} por agotarse. 🎉
+              {items.length === 0
+                ? `No hay ${t.productPlural.toLowerCase()} por agotarse. 🎉`
+                : 'Nada coincide con la búsqueda.'}
             </p>
           ) : (
             <ul className="divide-y divide-gray-100">
-              {items.map((it) => {
+              {filtered.map((it) => {
                 const stock = Number(it.stock) || 0;
                 const min = Number(it.minStock) || 0;
                 const agotado = stock <= 0;
@@ -154,9 +235,8 @@ export default function LowStockModal({ items = [], onClose }) {
         {/* Pie */}
         <div className="flex items-center justify-between gap-2 border-t border-gray-100 px-5 py-3">
           <p className="text-xs text-gray-400">
-            {canEdit
-              ? 'Toca un producto para reponer su stock.'
-              : 'Avísale al encargado para reponer.'}
+            {filtered.length} de {items.length} ·{' '}
+            {canEdit ? 'toca para reponer' : 'avisa al encargado'}
           </p>
           <Link
             href="/dashboard/inventory"
