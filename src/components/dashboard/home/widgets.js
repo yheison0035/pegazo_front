@@ -14,6 +14,24 @@ import { formatCOP, formatDateTime } from '@/lib/api/utils/utils';
 import SalesTrendChart from './SalesTrendChart';
 import CalculatorWidget from './CalculatorWidget';
 
+// Medios de pago: etiqueta legible y un color para el punto.
+const PAY_LABEL = {
+  EFECTIVO: 'Efectivo',
+  BANCOLOMBIA: 'Bancolombia',
+  TRANSFERENCIA: 'Transferencia',
+  DATAFONO: 'Datáfono',
+  ADDI: 'Addi',
+  CREDITO: 'Crédito (fiado)',
+};
+const PAY_DOT = {
+  EFECTIVO: 'bg-emerald-500',
+  BANCOLOMBIA: 'bg-yellow-500',
+  TRANSFERENCIA: 'bg-sky-500',
+  DATAFONO: 'bg-violet-500',
+  ADDI: 'bg-pink-500',
+  CREDITO: 'bg-orange-500',
+};
+
 // Tarjeta base reutilizable.
 function Card({ children, className = '' }) {
   return (
@@ -52,6 +70,7 @@ export const WIDGETS = [
     applies: () => true,
     Render: ({ data }) => {
       const { home, todayAppts, isServices } = data;
+      const byMethod = home?.today?.byMethod || [];
       return (
         <Card>
           <Label>Hoy</Label>
@@ -71,6 +90,35 @@ export const WIDGETS = [
               />
             )}
           </div>
+
+          {/* Desglose por medio de pago (para no abrir el historial) */}
+          {byMethod.length > 0 && (
+            <div className="mt-3 border-t border-gray-100 pt-2">
+              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                Por medio de pago
+              </p>
+              <ul className="space-y-1">
+                {byMethod.map((m) => (
+                  <li
+                    key={m.method}
+                    className="flex items-center justify-between gap-2 text-sm"
+                  >
+                    <span className="flex items-center gap-2 text-gray-600">
+                      <span
+                        className={`inline-block h-2 w-2 rounded-full ${
+                          PAY_DOT[m.method] || 'bg-gray-400'
+                        }`}
+                      />
+                      {PAY_LABEL[m.method] || m.method}
+                    </span>
+                    <span className="font-semibold text-gray-800">
+                      {formatCOP(m.total)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </Card>
       );
     },

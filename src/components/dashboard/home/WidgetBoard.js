@@ -62,31 +62,34 @@ function SortableWidget({ id, wide, editing, onRemove, children }) {
         isDragging ? 'opacity-80' : ''
       }`}
     >
-      {/* Controles: al hacer hover (escritorio) o en modo Organizar (móvil). */}
+      {/* Controles: pill flotante por ENCIMA del borde para no tapar el
+          contenido del widget (títulos, "Ver detalle", etc.). Aparece al hacer
+          hover (escritorio) o en modo Organizar (móvil). */}
       <div
-        className={`absolute right-2 top-2 z-10 flex items-center gap-1 transition ${
+        className={`absolute -top-3 right-3 z-30 flex items-center overflow-hidden rounded-full bg-white shadow-md ring-1 ring-gray-200 transition ${
           editing ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
         }`}
       >
-          {/* Mano para mover (arrastra desde aquí) */}
-          <button
-            type="button"
-            {...attributes}
-            {...listeners}
-            title="Mover"
-            className="cursor-grab touch-none rounded-lg bg-white/90 p-1 text-gray-400 shadow ring-1 ring-gray-200 hover:text-gray-600 active:cursor-grabbing"
-          >
-            <GripIcon className="h-4 w-4" />
-          </button>
-          {/* Quitar */}
-          <button
-            type="button"
-            onClick={() => onRemove(id)}
-            title="Quitar"
-            className="rounded-lg bg-white/90 p-1 text-gray-400 shadow ring-1 ring-gray-200 hover:text-red-500"
-          >
-            <XMarkIcon className="h-4 w-4" />
-          </button>
+        {/* Mano para mover (arrastra desde aquí) */}
+        <button
+          type="button"
+          {...attributes}
+          {...listeners}
+          title="Mover"
+          className="cursor-grab touch-none px-2 py-1 text-gray-400 hover:bg-gray-50 hover:text-gray-600 active:cursor-grabbing"
+        >
+          <GripIcon className="h-4 w-4" />
+        </button>
+        <span className="h-4 w-px bg-gray-200" />
+        {/* Quitar */}
+        <button
+          type="button"
+          onClick={() => onRemove(id)}
+          title="Quitar"
+          className="px-2 py-1 text-gray-400 hover:bg-red-50 hover:text-red-500"
+        >
+          <XMarkIcon className="h-4 w-4" />
+        </button>
       </div>
       {children}
     </div>
