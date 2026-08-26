@@ -289,7 +289,7 @@ export default function DashboardHome() {
       )}
       {showTodayAppts && (
         <TodayAppointmentsModal
-          items={todayAppts || []}
+          initialRange="today"
           onClose={() => setShowTodayAppts(false)}
         />
       )}
