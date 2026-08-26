@@ -84,7 +84,9 @@ function LowStockRow({ item, canEdit, onClose, onRestocked }) {
       <div className="flex items-center gap-3">
         <span
           className={`flex h-9 w-9 flex-none items-center justify-center rounded-lg ${
-            agotado ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'
+            agotado
+              ? 'bg-red-500/15 text-red-600'
+              : 'bg-amber-500/15 text-amber-600'
           }`}
         >
           <CubeIcon className="h-5 w-5" />
@@ -110,7 +112,9 @@ function LowStockRow({ item, canEdit, onClose, onRestocked }) {
         <div className="flex-none text-right">
           <span
             className={`inline-block rounded-full px-2 py-0.5 text-xs font-bold ${
-              agotado ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'
+              agotado
+                ? 'bg-red-500/15 text-red-600'
+                : 'bg-amber-500/15 text-amber-600'
             }`}
           >
             {agotado ? 'Agotado' : `${fmtQty(stock)} ${u}`}
@@ -255,7 +259,7 @@ export default function LowStockModal({ items = [], onClose }) {
             <ExclamationTriangleIcon className="h-6 w-6 flex-none" />
             <div>
               <h3 className="text-base font-bold leading-tight">
-                {t.productPlural} por agotarse
+                Inventario · {t.productPlural}
               </h3>
               <p className="text-xs text-white/85">
                 {agotados > 0 && (
@@ -266,8 +270,7 @@ export default function LowStockModal({ items = [], onClose }) {
                 )}
                 {porAgotarse > 0 && (
                   <>
-                    <b>{porAgotarse}</b> bajo{porAgotarse === 1 ? '' : 's'} de
-                    mínimo
+                    <b>{porAgotarse}</b> por agotarse
                   </>
                 )}
                 {list.length === 0 && 'Todo en orden'}
@@ -296,7 +299,7 @@ export default function LowStockModal({ items = [], onClose }) {
           <div className="flex flex-wrap items-center gap-2">
             {chip('all', `Todos (${list.length})`)}
             {chip('out', `Agotados (${agotados})`)}
-            {chip('low', `Bajos (${porAgotarse})`)}
+            {chip('low', `Por agotarse (${porAgotarse})`)}
             {multiLocal && (
               <select
                 value={local}
