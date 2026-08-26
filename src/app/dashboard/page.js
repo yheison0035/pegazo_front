@@ -697,7 +697,13 @@ export default function DashboardHome() {
       {showLowStock && (
         <LowStockModal
           items={lowStock}
-          onClose={() => setShowLowStock(false)}
+          onClose={() => {
+            setShowLowStock(false);
+            // Al cerrar, refresca el stock bajo del Inicio (por si repuso algo).
+            getLowStock()
+              .then((r) => setLowStock(r?.data || []))
+              .catch(() => {});
+          }}
         />
       )}
     </div>
