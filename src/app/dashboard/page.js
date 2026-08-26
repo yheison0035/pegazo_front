@@ -539,56 +539,53 @@ export default function DashboardHome() {
                 )}
               </div>
             )}
-            {lowStock.length > 0 && (
-              <div
-                role="button"
-                tabIndex={0}
-                onClick={() => setShowLowStock(true)}
-                onKeyDown={(e) =>
-                  (e.key === 'Enter' || e.key === ' ') && setShowLowStock(true)
-                }
-                className="w-full cursor-pointer rounded-2xl border border-amber-100 bg-amber-50/60 p-4 text-left shadow-sm transition hover:shadow-md"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-amber-700">
-                    <ExclamationTriangleIcon className="h-4 w-4" />
-                    {t.productPlural} por agotarse
-                  </span>
-                  <span className="text-xs font-medium text-amber-700">
-                    Ver detalle
-                  </span>
-                </div>
-                <p className="mt-1 text-xl font-bold text-amber-800">
-                  {lowStock.length}
-                </p>
-                <ul className="mt-1 space-y-1">
-                  {lowStock.slice(0, 3).map((it) => (
-                    <li
-                      key={it.id}
-                      className="flex items-center justify-between gap-2 text-xs"
-                    >
-                      <span className="truncate text-gray-600">{it.name}</span>
-                      <span
-                        className={`flex-none font-semibold ${
-                          (it.stock || 0) <= 0
-                            ? 'text-red-600'
-                            : 'text-amber-700'
-                        }`}
-                      >
-                        {(it.stock || 0) <= 0
-                          ? 'Agotado'
-                          : `Quedan ${it.stock}`}
+            {lowStock.length > 0 &&
+              (() => {
+                const agotados = lowStock.filter(
+                  (i) => (i.stock || 0) <= 0,
+                ).length;
+                const porAgotarse = lowStock.length - agotados;
+                return (
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setShowLowStock(true)}
+                    onKeyDown={(e) =>
+                      (e.key === 'Enter' || e.key === ' ') &&
+                      setShowLowStock(true)
+                    }
+                    className="w-full cursor-pointer rounded-2xl border border-gray-100 bg-white p-4 text-left shadow-sm transition hover:shadow-md"
+                  >
+                    <div className="mb-2 flex items-center justify-between gap-2">
+                      <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                        <ExclamationTriangleIcon className="h-4 w-4 text-amber-500" />
+                        Inventario
                       </span>
-                    </li>
-                  ))}
-                </ul>
-                {lowStock.length > 3 && (
-                  <p className="mt-1 text-[11px] text-amber-600">
-                    +{lowStock.length - 3} más
-                  </p>
-                )}
-              </div>
-            )}
+                      <span className="text-xs font-medium text-amber-600">
+                        Ver detalle
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="rounded-xl bg-red-500/10 px-3 py-2">
+                        <p className="text-xl font-bold text-red-600">
+                          {agotados}
+                        </p>
+                        <p className="text-[11px] font-medium text-red-700">
+                          {t.productPlural} agotados
+                        </p>
+                      </div>
+                      <div className="rounded-xl bg-amber-500/10 px-3 py-2">
+                        <p className="text-xl font-bold text-amber-600">
+                          {porAgotarse}
+                        </p>
+                        <p className="text-[11px] font-medium text-amber-700">
+                          {t.productPlural} por agotarse
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
             {home.overdue?.count > 0 && (
               <AlertCard
                 href="/dashboard/cartera"
