@@ -289,7 +289,7 @@ export default function LowStockModal({ items = [], onClose }) {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder={`Buscar ${t.productSingular.toLowerCase()}…`}
+              placeholder={`Buscar ${(t.product || 'producto').toLowerCase()}…`}
               className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-3 text-sm focus:border-amber-400 focus:ring-2 focus:ring-amber-200"
             />
           </div>
