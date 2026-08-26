@@ -293,8 +293,22 @@ input[type='datetime-local'],
 input[type='month'],
 input[type='time'],
 input[type='week'] {
+  /* iOS le da a estos campos un ancho fijo propio y no lo respeta con width:100%.
+     Quitando la apariencia nativa se comportan como un input normal y caben. */
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
   min-width: 0;
   max-width: 100%;
+  box-sizing: border-box;
+}
+/* El indicador del calendario nativo no debe empujar el ancho. */
+input[type='date']::-webkit-date-and-time-value {
+  text-align: left;
+  min-width: 0;
+}
+input::-webkit-calendar-picker-indicator {
+  margin-left: 0;
 }
 
 /* Ningún campo de formulario debe empujar el ancho más allá de su contenedor. */
