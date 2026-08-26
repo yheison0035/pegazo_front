@@ -81,7 +81,7 @@ export default function SalesRangeGeneralModal({ onClose }) {
         </div>
 
         <div className="bg-gray-50 px-4 py-5 sm:px-8 sm:py-6 border-b border-gray-300">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 [&>*]:min-w-0">
             <div>
               <label className="flex items-center gap-2 text-xs font-semibold uppercase text-gray-600">
                 <CalendarDaysIcon className="w-4 h-4" />

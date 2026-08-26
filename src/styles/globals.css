@@ -283,3 +283,23 @@ button:disabled {
     font-size: 16px;
   }
 }
+
+/* iOS/Safari: los inputs de fecha/hora traen un ANCHO MÍNIMO propio y, dentro de
+   grids/flex, se desbordan del contenedor (se salen del borde en móvil). Esto
+   los deja encoger para respetar el ancho del contenedor. Aplica en TODO el
+   sitio (reportes, ventas, citas, etc.). */
+input[type='date'],
+input[type='datetime-local'],
+input[type='month'],
+input[type='time'],
+input[type='week'] {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Ningún campo de formulario debe empujar el ancho más allá de su contenedor. */
+input,
+select,
+textarea {
+  max-width: 100%;
+}
