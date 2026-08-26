@@ -8,7 +8,6 @@ import {
   CalendarDaysIcon,
   CreditCardIcon,
   GiftIcon,
-  ArrowRightIcon,
   ChevronRightIcon,
 } from '@heroicons/react/24/outline';
 import { formatCOP, formatDateTime } from '@/lib/api/utils/utils';
@@ -45,10 +44,36 @@ function Card({ children, className = '' }) {
 }
 function Stat({ label, value, accent = 'text-gray-800' }) {
   return (
-    <div className="rounded-xl bg-gray-50 px-3 py-2">
-      <p className={`text-lg font-bold ${accent}`}>{value}</p>
-      <p className="text-[11px] font-medium text-gray-500">{label}</p>
+    <div className="min-w-0 rounded-xl bg-gray-50 px-3 py-2">
+      <p
+        className={`truncate text-base font-bold leading-tight tabular-nums ${accent}`}
+      >
+        {value}
+      </p>
+      <p className="truncate text-[11px] font-medium text-gray-500">{label}</p>
     </div>
+  );
+}
+// Fila de dinero adaptable: etiqueta a la izquierda (se recorta si no cabe) y
+// valor a la derecha en una sola línea (nunca se sale del contenedor).
+function MoneyRow({ label, value, accent = 'text-gray-800', strong = false }) {
+  return (
+    <li
+      className={`flex items-center justify-between gap-2 ${
+        strong ? 'border-t border-gray-100 pt-1.5' : ''
+      }`}
+    >
+      <span className="min-w-0 flex-1 truncate text-xs font-medium text-gray-500">
+        {label}
+      </span>
+      <span
+        className={`flex-none whitespace-nowrap tabular-nums ${
+          strong ? 'text-base font-bold' : 'text-sm font-semibold'
+        } ${accent}`}
+      >
+        {value}
+      </span>
+    </li>
   );
 }
 function Label({ icon: Icon, children, accent = 'text-gray-400' }) {
@@ -69,8 +94,27 @@ function NoRateNote() {
     </div>
   );
 }
-// Tarjeta que es un ATAJO: al tocarla abre su detalle.
-function ShortcutCard({ onClick, hint, children }) {
+// Tarjeta que es un ATAJO: al tocarla abre su detalle (modal con onClick, o
+// navega si se pasa href). Aplica a TODOS los roles, no solo al barbero.
+const SHORTCUT_CLASS =
+  'relative block h-full cursor-pointer rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition hover:shadow-md';
+function HintChip({ hint }) {
+  if (!hint) return null;
+  return (
+    <span className="absolute right-4 top-4 inline-flex items-center gap-0.5 text-xs font-medium text-orange-600">
+      {hint} <ChevronRightIcon className="h-3.5 w-3.5" />
+    </span>
+  );
+}
+function ShortcutCard({ onClick, href, hint, children }) {
+  if (href) {
+    return (
+      <Link href={href} className={SHORTCUT_CLASS}>
+        <HintChip hint={hint} />
+        {children}
+      </Link>
+    );
+  }
   return (
     <div
       role="button"
@@ -79,13 +123,9 @@ function ShortcutCard({ onClick, hint, children }) {
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') onClick?.();
       }}
-      className="relative h-full cursor-pointer rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition hover:shadow-md"
+      className={SHORTCUT_CLASS}
     >
-      {hint && (
-        <span className="absolute right-4 top-4 inline-flex items-center gap-0.5 text-xs font-medium text-orange-600">
-          {hint} <ChevronRightIcon className="h-3.5 w-3.5" />
-        </span>
-      )}
+      <HintChip hint={hint} />
       {children}
     </div>
   );
@@ -102,7 +142,7 @@ export const WIDGETS = [
       const { home, todayAppts, isServices } = data;
       const byMethod = home?.today?.byMethod || [];
       return (
-        <Card>
+        <ShortcutCard href="/dashboard/sales" hint="Ver ventas">
           <Label>Hoy</Label>
           <div
             className={`grid gap-2 ${isServices ? 'grid-cols-3' : 'grid-cols-2'}`}
@@ -149,7 +189,7 @@ export const WIDGETS = [
               </ul>
             </div>
           )}
-        </Card>
+        </ShortcutCard>
       );
     },
   },
@@ -168,22 +208,11 @@ export const WIDGETS = [
       const items = data.lowStock || [];
       const agotados = items.filter((i) => (i.stock || 0) <= 0).length;
       const porAgotarse = items.length - agotados;
-      return (
-        <Card>
-          <div className="mb-2 flex items-center justify-between">
-            <Label icon={ExclamationTriangleIcon} accent="text-gray-500">
-              Inventario
-            </Label>
-            {items.length > 0 && (
-              <button
-                type="button"
-                onClick={actions.openLowStock}
-                className="text-xs font-medium text-amber-600"
-              >
-                Ver detalle
-              </button>
-            )}
-          </div>
+      const inner = (
+        <>
+          <Label icon={ExclamationTriangleIcon} accent="text-gray-500">
+            Inventario
+          </Label>
           {items.length === 0 ? (
             <p className="py-3 text-center text-xs text-gray-400">
               Todo con stock suficiente. 🎉
@@ -206,7 +235,14 @@ export const WIDGETS = [
               </div>
             </div>
           )}
-        </Card>
+        </>
+      );
+      return items.length > 0 ? (
+        <ShortcutCard onClick={actions.openLowStock} hint="Ver detalle">
+          {inner}
+        </ShortcutCard>
+      ) : (
+        <Card>{inner}</Card>
       );
     },
   },
@@ -217,18 +253,10 @@ export const WIDGETS = [
     Render: ({ data }) => {
       const deposits = data.bankDeposits || [];
       return (
-        <Card>
-          <div className="mb-2 flex items-center justify-between">
-            <Label icon={BanknotesIcon} accent="text-emerald-600">
-              Consignaciones
-            </Label>
-            <Link
-              href="/dashboard/bank"
-              className="text-xs font-medium text-emerald-600 hover:underline"
-            >
-              Ver todas
-            </Link>
-          </div>
+        <ShortcutCard href="/dashboard/bank" hint="Ver todas">
+          <Label icon={BanknotesIcon} accent="text-emerald-600">
+            Consignaciones
+          </Label>
           {deposits.length === 0 ? (
             <p className="py-3 text-center text-xs text-gray-400">
               Aún no hay consignaciones.
@@ -253,7 +281,7 @@ export const WIDGETS = [
               ))}
             </ul>
           )}
-        </Card>
+        </ShortcutCard>
       );
     },
   },
@@ -261,28 +289,27 @@ export const WIDGETS = [
     id: 'por-reactivar',
     name: 'Clientes por reactivar',
     applies: () => true,
-    Render: ({ data, actions }) => (
-      <Card>
-        <Label icon={ArrowPathIcon} accent="text-amber-600">
-          Por reactivar
-        </Label>
-        <p className="text-2xl font-bold text-amber-600">
-          {data.home?.winbackCount || 0}
-        </p>
-        <p className="text-xs text-gray-500">
-          {data.t.customerPlural} sin volver hace 20+ días
-        </p>
-        {(data.home?.winbackCount || 0) > 0 && (
-          <button
-            type="button"
-            onClick={actions.openReactivate}
-            className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-amber-600"
-          >
-            Ver y contactar <ArrowRightIcon className="h-3.5 w-3.5" />
-          </button>
-        )}
-      </Card>
-    ),
+    Render: ({ data, actions }) => {
+      const count = data.home?.winbackCount || 0;
+      const inner = (
+        <>
+          <Label icon={ArrowPathIcon} accent="text-amber-600">
+            Por reactivar
+          </Label>
+          <p className="text-2xl font-bold text-amber-600">{count}</p>
+          <p className="text-xs text-gray-500">
+            {data.t.customerPlural} sin volver hace 20+ días
+          </p>
+        </>
+      );
+      return count > 0 ? (
+        <ShortcutCard onClick={actions.openReactivate} hint="Ver y contactar">
+          {inner}
+        </ShortcutCard>
+      ) : (
+        <Card>{inner}</Card>
+      );
+    },
   },
   {
     id: 'proximas-citas',
@@ -291,18 +318,10 @@ export const WIDGETS = [
     Render: ({ data }) => {
       const items = data.home?.nextAppointments || [];
       return (
-        <Card>
-          <div className="mb-2 flex items-center justify-between">
-            <Label icon={CalendarDaysIcon} accent="text-gray-500">
-              Próximas citas
-            </Label>
-            <Link
-              href="/dashboard/appointments"
-              className="text-xs font-medium text-gray-500 hover:underline"
-            >
-              Ver
-            </Link>
-          </div>
+        <ShortcutCard href="/dashboard/appointments" hint="Ver">
+          <Label icon={CalendarDaysIcon} accent="text-gray-500">
+            Próximas citas
+          </Label>
           {items.length === 0 ? (
             <p className="py-3 text-center text-xs text-gray-400">
               Sin citas próximas.
@@ -325,7 +344,7 @@ export const WIDGETS = [
               ))}
             </ul>
           )}
-        </Card>
+        </ShortcutCard>
       );
     },
   },
@@ -335,29 +354,30 @@ export const WIDGETS = [
     applies: (data) => data.isAdmin,
     Render: ({ data }) => {
       const mth = data.home?.month;
+      const profitAccent =
+        (mth?.profit || 0) >= 0 ? 'text-emerald-600' : 'text-red-600';
       return (
-        <Card>
+        <ShortcutCard href="/dashboard/statistics" hint="Ver detalle">
           <Label>Este mes</Label>
-          <div className="grid grid-cols-3 gap-2">
-            <Stat
+          <ul className="space-y-1.5">
+            <MoneyRow
               label={data.t.salePlural}
               value={mth ? formatCOP(mth.sales) : '—'}
               accent="text-emerald-600"
             />
-            <Stat
+            <MoneyRow
               label="Gastos"
               value={mth ? formatCOP(mth.expenses) : '—'}
               accent="text-red-600"
             />
-            <Stat
+            <MoneyRow
               label="Utilidad"
               value={mth ? formatCOP(mth.profit) : '—'}
-              accent={
-                (mth?.profit || 0) >= 0 ? 'text-emerald-600' : 'text-red-600'
-              }
+              accent={profitAccent}
+              strong
             />
-          </div>
-        </Card>
+          </ul>
+        </ShortcutCard>
       );
     },
   },
@@ -366,20 +386,14 @@ export const WIDGETS = [
     name: 'Por cobrar (fiado)',
     applies: () => true,
     Render: ({ data }) => (
-      <Card>
+      <ShortcutCard href="/dashboard/cartera" hint="Ver cartera">
         <Label icon={CreditCardIcon} accent="text-orange-600">
           Por cobrar
         </Label>
-        <p className="text-2xl font-bold text-orange-600">
+        <p className="truncate text-2xl font-bold tabular-nums text-orange-600">
           {formatCOP(data.receivable || 0)}
         </p>
-        <Link
-          href="/dashboard/cartera"
-          className="mt-1 inline-block text-xs font-medium text-gray-500 hover:underline"
-        >
-          Ver cartera
-        </Link>
-      </Card>
+      </ShortcutCard>
     ),
   },
   {
