@@ -354,18 +354,18 @@ export const WIDGETS = [
   },
   {
     id: 'cumpleanos',
-    name: 'Cumpleaños',
+    name: 'Cumpleaños del equipo',
     applies: () => true,
     Render: ({ data }) => {
-      const items = data.home?.birthdays || [];
+      const items = data.home?.teamBirthdays || [];
       return (
         <Card>
           <Label icon={GiftIcon} accent="text-pink-500">
-            Cumpleaños
+            Cumpleaños del equipo
           </Label>
           {items.length === 0 ? (
             <p className="py-3 text-center text-xs text-gray-400">
-              Ninguno esta semana.
+              El equipo no tiene fechas de cumpleaños registradas.
             </p>
           ) : (
             <ul className="space-y-1">

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   DndContext,
+  DragOverlay,
   closestCenter,
   PointerSensor,
   TouchSensor,
@@ -58,40 +59,50 @@ function SortableWidget({ id, wide, editing, onRemove, children }) {
     <div
       ref={setNodeRef}
       style={style}
-      className={`group relative ${wide ? 'md:col-span-2' : ''} ${
-        isDragging ? 'opacity-80' : ''
-      }`}
+      data-widget-id={id}
+      className={`group relative ${wide ? 'md:col-span-2' : ''}`}
     >
       {/* Controles: pill flotante por ENCIMA del borde para no tapar el
           contenido del widget (títulos, "Ver detalle", etc.). Aparece al hacer
           hover (escritorio) o en modo Organizar (móvil). */}
-      <div
-        className={`absolute -top-3 right-3 z-30 flex items-center overflow-hidden rounded-full bg-white shadow-md ring-1 ring-gray-200 transition ${
-          editing ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-        }`}
-      >
-        {/* Mano para mover (arrastra desde aquí) */}
-        <button
-          type="button"
-          {...attributes}
-          {...listeners}
-          title="Mover"
-          className="cursor-grab touch-none px-2 py-1 text-gray-400 hover:bg-gray-50 hover:text-gray-600 active:cursor-grabbing"
+      {!isDragging && (
+        <div
+          className={`absolute -top-3 right-3 z-30 flex items-center overflow-hidden rounded-full bg-white shadow-md ring-1 ring-gray-200 transition ${
+            editing ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+          }`}
         >
-          <GripIcon className="h-4 w-4" />
-        </button>
-        <span className="h-4 w-px bg-gray-200" />
-        {/* Quitar */}
-        <button
-          type="button"
-          onClick={() => onRemove(id)}
-          title="Quitar"
-          className="px-2 py-1 text-gray-400 hover:bg-red-50 hover:text-red-500"
-        >
-          <XMarkIcon className="h-4 w-4" />
-        </button>
-      </div>
-      {children}
+          {/* Mano para mover (arrastra desde aquí) */}
+          <button
+            type="button"
+            {...attributes}
+            {...listeners}
+            title="Mover"
+            className="cursor-grab touch-none px-2 py-1 text-gray-400 hover:bg-gray-50 hover:text-gray-600 active:cursor-grabbing"
+          >
+            <GripIcon className="h-4 w-4" />
+          </button>
+          <span className="h-4 w-px bg-gray-200" />
+          {/* Quitar */}
+          <button
+            type="button"
+            onClick={() => onRemove(id)}
+            title="Quitar"
+            className="px-2 py-1 text-gray-400 hover:bg-red-500/60 hover:text-red-500"
+          >
+            <XMarkIcon className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
+      {isDragging ? (
+        // Recuadro (placeholder) que muestra DÓNDE va a quedar. Mantiene el
+        // tamaño del widget con los hijos invisibles.
+        <div className="rounded-2xl border-2 border-dashed border-orange-400 bg-orange-500/10">
+          <div className="invisible">{children}</div>
+        </div>
+      ) : (
+        children
+      )}
     </div>
   );
 }
@@ -109,6 +120,8 @@ export default function WidgetBoard({ data, actions }) {
   const [editing, setEditing] = useState(false);
   const [showCatalog, setShowCatalog] = useState(false);
   const [ready, setReady] = useState(false);
+  const [activeId, setActiveId] = useState(null); // widget que se arrastra
+  const [activeWidth, setActiveWidth] = useState(null); // ancho para el overlay
 
   // Cargar layout guardado (o el por defecto), filtrado a lo aplicable.
   useEffect(() => {
@@ -147,7 +160,19 @@ export default function WidgetBoard({ data, actions }) {
     }),
   );
 
+  const onDragStart = (e) => {
+    setActiveId(e.active.id);
+    // Medir el ancho del widget para que la copia flotante no se deforme.
+    try {
+      const el = document.querySelector(`[data-widget-id="${e.active.id}"]`);
+      setActiveWidth(el ? el.getBoundingClientRect().width : null);
+    } catch {
+      setActiveWidth(null);
+    }
+  };
+
   const onDragEnd = (e) => {
+    setActiveId(null);
     const { active, over } = e;
     if (!over || active.id === over.id) return;
     const from = order.indexOf(active.id);
@@ -234,7 +259,9 @@ export default function WidgetBoard({ data, actions }) {
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
+          onDragStart={onDragStart}
           onDragEnd={onDragEnd}
+          onDragCancel={() => setActiveId(null)}
         >
           <SortableContext items={order} strategy={rectSortingStrategy}>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -256,6 +283,21 @@ export default function WidgetBoard({ data, actions }) {
               })}
             </div>
           </SortableContext>
+
+          {/* Copia limpia que sigue el dedo/cursor (no se deforma). */}
+          <DragOverlay dropAnimation={null}>
+            {activeId && REGISTRY[activeId] ? (
+              <div
+                style={activeWidth ? { width: activeWidth } : undefined}
+                className="rotate-1 cursor-grabbing opacity-95 shadow-2xl"
+              >
+                {(() => {
+                  const R = REGISTRY[activeId].Render;
+                  return <R data={data} actions={actions} />;
+                })()}
+              </div>
+            ) : null}
+          </DragOverlay>
         </DndContext>
       )}
     </div>
