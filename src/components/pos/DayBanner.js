@@ -17,7 +17,9 @@ import { dayStateFromRegister } from '@/lib/dayStatus';
 // primera sede para saber el estado del día.
 export default function DayBanner() {
   const { usuario } = useAuth();
-  const require = !!usuario?.company?.requireCashOpen;
+  // El barbero/profesional no vende: no le mostramos "Abrir el día".
+  const isSelfOnly = ['BARBERO', 'PROFESIONAL'].includes(usuario?.role);
+  const require = !!usuario?.company?.requireCashOpen && !isSelfOnly;
   const [localId, setLocalId] = useState(usuario?.localId || null);
   const [state, setState] = useState('ok');
 

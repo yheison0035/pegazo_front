@@ -84,15 +84,22 @@ export default function Appointments() {
     <RoleGuard allowedRoles={Object.values(Roles)}>
       <div className="w-full p-4">
         <div className="flex flex-col md:flex-row justify-between mb-4 gap-4">
-          <h1 className="text-2xl font-semibold">Listado de Citas</h1>
+          <h1 className="text-2xl font-semibold">
+            {['BARBERO', 'PROFESIONAL'].includes(usuario?.role)
+              ? 'Mis citas'
+              : 'Listado de Citas'}
+          </h1>
 
-          <Button
-            variant="add"
-            icon={PlusIcon}
-            href="/dashboard/appointments/new"
-          >
-            Agregar cita
-          </Button>
+          {/* El barbero solo visualiza: no puede crear citas. */}
+          {!['BARBERO', 'PROFESIONAL'].includes(usuario?.role) && (
+            <Button
+              variant="add"
+              icon={PlusIcon}
+              href="/dashboard/appointments/new"
+            >
+              Agregar cita
+            </Button>
+          )}
         </div>
 
         <div className="bg-white rounded-lg shadow relative">

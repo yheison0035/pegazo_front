@@ -20,10 +20,19 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { XMarkIcon, PlusIcon } from '@heroicons/react/24/outline';
-import { WIDGETS, DEFAULT_LAYOUT } from './widgets';
+import { WIDGETS, DEFAULT_LAYOUT, WIDGET_AUDIENCE } from './widgets';
 
 const REGISTRY = Object.fromEntries(WIDGETS.map((w) => [w.id, w]));
-const KEY = (uid) => `pegazo_home_layout_v2_${uid || 'anon'}`;
+// Clave de layout distinta por audiencia (barbero vs dueño) para que no se
+// mezclen si un usuario cambia de rol.
+const KEY = (uid, aud) => `pegazo_home_layout_v3_${aud}_${uid || 'anon'}`;
+
+// ¿El widget corresponde a la audiencia del usuario?
+function audienceOk(id, isBarber) {
+  const a = WIDGET_AUDIENCE[id] || 'all';
+  if (a === 'all') return true;
+  return a === 'barber' ? !!isBarber : !isBarber;
+}
 
 // Ícono de agarre (para la "mano" de mover).
 function GripIcon({ className = '' }) {
@@ -109,11 +118,16 @@ function SortableWidget({ id, wide, editing, onRemove, children }) {
 
 export default function WidgetBoard({ data, actions }) {
   const uid = data?.usuario?.id;
-  // Widgets que aplican a este negocio/rol.
+  const isBarber = !!data?.isBarber;
+  const layoutKey = KEY(uid, isBarber ? 'barber' : 'owner');
+  // Widgets que aplican a este negocio/rol y audiencia.
   const applicable = useMemo(
-    () => WIDGETS.filter((w) => w.applies(data)).map((w) => w.id),
+    () =>
+      WIDGETS.filter(
+        (w) => audienceOk(w.id, isBarber) && w.applies(data),
+      ).map((w) => w.id),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data?.isServices, data?.isAdmin, data?.showBank],
+    [data?.isServices, data?.isAdmin, data?.showBank, isBarber],
   );
 
   const [order, setOrder] = useState([]);
@@ -128,7 +142,7 @@ export default function WidgetBoard({ data, actions }) {
     if (!uid) return;
     let saved = null;
     try {
-      const raw = localStorage.getItem(KEY(uid));
+      const raw = localStorage.getItem(layoutKey);
       if (raw) saved = JSON.parse(raw);
     } catch {
       /* ignora */
@@ -142,7 +156,7 @@ export default function WidgetBoard({ data, actions }) {
   const persist = (next) => {
     setOrder(next);
     try {
-      localStorage.setItem(KEY(uid), JSON.stringify({ order: next }));
+      localStorage.setItem(layoutKey, JSON.stringify({ order: next }));
     } catch {
       /* ignora */
     }

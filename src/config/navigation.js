@@ -219,7 +219,7 @@ export const NAVIGATION = [
         name: 'Consignaciones',
         href: '/dashboard/bank',
         icon: BanknotesIcon,
-        // Cualquier rol del negocio puede ver las consignaciones.
+        // Roles del negocio que ven dinero. El BARBERO NO (información financiera).
         roles: [
           'SUPER_ADMIN',
           'COORDINADOR',
@@ -228,7 +228,6 @@ export const NAVIGATION = [
           'AUXILIAR',
           'BODEGUERO',
           'VENTAS',
-          'BARBERO',
           'CAJA',
           'RECEPCIONISTA',
           'MESERO',
