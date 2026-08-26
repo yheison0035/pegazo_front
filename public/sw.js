@@ -2,7 +2,7 @@
 // una pantalla "sin conexión" de respaldo. NO cachea datos del CRM (para no
 // mostrar información vieja): las navegaciones van a la red y solo si no hay
 // internet se muestra la página offline.
-const CACHE = 'pegazo-v2';
+const CACHE = 'pegazo-v3';
 const OFFLINE_URL = '/offline.html';
 
 self.addEventListener('install', (event) => {
