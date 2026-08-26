@@ -3,17 +3,18 @@
 import { useEffect, useState } from 'react';
 import {
   ExclamationTriangleIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
+  ArrowRightIcon,
 } from '@heroicons/react/24/outline';
 import { getLowStock } from '@/lib/api/routes/inventory';
+import LowStockModal from './LowStockModal';
 
-// Aviso de "productos por agotarse": stock total <= alerta de stock mínimo.
-// Se refresca cuando cambia `refreshKey` (p. ej. tras editar el inventario).
+// Barra de "inventario por agotarse" del módulo de inventario. Muestra el mismo
+// resumen que el Inicio (agotados / por agotarse) y abre el MISMO modal de
+// detalle. Se refresca cuando cambia `refreshKey` (p. ej. tras editar).
 export default function LowStockBanner({ refreshKey }) {
   const [items, setItems] = useState([]);
-  const [open, setOpen] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -34,51 +35,49 @@ export default function LowStockBanner({ refreshKey }) {
 
   if (!loaded || items.length === 0) return null;
 
-  return (
-    <div className="mb-4 overflow-hidden rounded-xl border border-amber-200 bg-amber-50">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
-      >
-        <span className="flex items-center gap-2 text-sm font-semibold text-amber-800">
-          <ExclamationTriangleIcon className="h-5 w-5 flex-none text-amber-500" />
-          {items.length}{' '}
-          {items.length === 1
-            ? 'producto por agotarse'
-            : 'productos por agotarse'}
-        </span>
-        {open ? (
-          <ChevronUpIcon className="h-4 w-4 text-amber-500" />
-        ) : (
-          <ChevronDownIcon className="h-4 w-4 text-amber-500" />
-        )}
-      </button>
+  const agotados = items.filter((i) => (i.stock || 0) <= 0).length;
+  const porAgotarse = items.length - agotados;
 
-      {open && (
-        <div className="border-t border-amber-200 bg-white/60 px-4 py-2">
-          <div className="flex flex-col divide-y divide-amber-100">
-            {items.map((p) => (
-              <div
-                key={p.id}
-                className="flex items-center justify-between gap-3 py-2 text-sm"
-              >
-                <span className="truncate font-medium text-gray-800">
-                  {p.name}
-                  {p.local ? (
-                    <span className="ml-1 text-xs text-gray-400">
-                      · {p.local}
-                    </span>
-                  ) : null}
+  return (
+    <>
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={() => setOpen(true)}
+        onKeyDown={(e) =>
+          (e.key === 'Enter' || e.key === ' ') && setOpen(true)
+        }
+        className="mb-4 flex w-full cursor-pointer items-center justify-between gap-3 rounded-xl border border-gray-100 bg-white px-4 py-3 shadow-sm transition hover:shadow-md"
+      >
+        <div className="flex min-w-0 items-center gap-3">
+          <ExclamationTriangleIcon className="h-5 w-5 flex-none text-amber-500" />
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+            {agotados > 0 && (
+              <span className="inline-flex items-center gap-1.5">
+                <span className="inline-block h-2 w-2 rounded-full bg-red-500" />
+                <b className="text-red-600">{agotados}</b>
+                <span className="text-gray-600">
+                  agotado{agotados === 1 ? '' : 's'}
                 </span>
-                <span className="flex-none text-xs font-semibold text-red-600">
-                  {p.stock} / mín {p.minStock}
-                </span>
-              </div>
-            ))}
+              </span>
+            )}
+            {porAgotarse > 0 && (
+              <span className="inline-flex items-center gap-1.5">
+                <span className="inline-block h-2 w-2 rounded-full bg-amber-500" />
+                <b className="text-amber-600">{porAgotarse}</b>
+                <span className="text-gray-600">por agotarse</span>
+              </span>
+            )}
           </div>
         </div>
+        <span className="flex flex-none items-center gap-1 text-xs font-semibold text-amber-600">
+          Ver detalle <ArrowRightIcon className="h-4 w-4" />
+        </span>
+      </div>
+
+      {open && (
+        <LowStockModal items={items} onClose={() => setOpen(false)} />
       )}
-    </div>
+    </>
   );
 }
