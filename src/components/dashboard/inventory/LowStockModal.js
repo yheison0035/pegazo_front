@@ -66,13 +66,15 @@ function LowStockRow({ item, canEdit, onClose, onRestocked }) {
         type: 'success',
         message: `${item.name}: +${fmtQty(amount)} ${u} (ahora ${fmtQty(newStock)}).`,
       });
+      // setState ANTES de onRestocked, que puede desmontar esta fila.
+      setSaving(false);
+      setOpen(false);
       onRestocked(item.id, newStock);
     } catch (e) {
       toast.show({
         type: 'error',
         message: e.message || 'No se pudo reponer.',
       });
-    } finally {
       setSaving(false);
     }
   };
