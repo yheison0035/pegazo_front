@@ -51,7 +51,7 @@ export default function DailySalesReportModal({ onClose }) {
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white w-full max-w-5xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
-        <div className="relative bg-gradient-to-r from-[#111827] to-[#374151] px-8 py-6 text-white">
+        <div className="relative bg-gradient-to-r from-[#111827] to-[#374151] px-4 py-5 sm:px-8 sm:py-6 text-white">
           <button
             onClick={onClose}
             className="absolute top-5 right-5 text-gray-300 hover:text-white transition cursor-pointer"
@@ -72,7 +72,7 @@ export default function DailySalesReportModal({ onClose }) {
           </div>
         </div>
 
-        <div className="bg-gray-50 px-8 py-6 border-b">
+        <div className="bg-gray-50 px-4 py-5 sm:px-8 sm:py-6 border-b">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
               <label className="flex items-center gap-2 text-xs font-semibold uppercase text-gray-600">
@@ -120,7 +120,7 @@ export default function DailySalesReportModal({ onClose }) {
           </Button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6 bg-gray-100">
+        <div className="flex-1 overflow-y-auto px-4 py-5 sm:px-8 sm:py-6 space-y-6 bg-gray-100">
           {!result && (
             <div className="text-center text-gray-400 py-20">
               Selecciona una fecha y un local para visualizar el reporte
