@@ -357,7 +357,7 @@ export const WIDGETS = [
     name: 'Cumpleaños del equipo',
     applies: () => true,
     Render: ({ data }) => {
-      const items = data.home?.teamBirthdays || [];
+      const items = data.teamBirthdays || [];
       return (
         <Card>
           <Label icon={GiftIcon} accent="text-pink-500">
@@ -389,10 +389,148 @@ export const WIDGETS = [
     applies: () => true,
     Render: () => <CalculatorWidget />,
   },
+
+  // ---- Widgets del BARBERO (solo lo suyo) ----
+  {
+    id: 'mi-hoy',
+    name: 'Mi día',
+    applies: () => true,
+    Render: ({ data }) => {
+      const p = data.myPerf?.today;
+      return (
+        <Card>
+          <Label>Hoy</Label>
+          <div className="grid grid-cols-2 gap-2">
+            <Stat
+              label="Vendido"
+              value={p ? formatCOP(p.total) : '—'}
+              accent="text-emerald-600"
+            />
+            <Stat label="Atenciones" value={p ? p.count : '—'} />
+          </div>
+        </Card>
+      );
+    },
+  },
+  {
+    id: 'mi-semana',
+    name: 'Mi semana',
+    applies: () => true,
+    Render: ({ data, actions }) => {
+      const p = data.myPerf?.week;
+      return (
+        <button
+          type="button"
+          onClick={actions.openWeeklyHistory}
+          className="h-full w-full rounded-2xl border border-gray-100 bg-white p-4 text-left shadow-sm transition hover:shadow-md"
+        >
+          <div className="mb-1 flex items-center justify-between">
+            <Label>Esta semana</Label>
+            <span className="text-xs font-medium text-orange-600">
+              Ver historial
+            </span>
+          </div>
+          <p className="text-2xl font-bold text-emerald-600">
+            {p ? formatCOP(p.total) : '—'}
+          </p>
+          <p className="text-xs text-gray-500">
+            {p ? `${p.count} atenciones · ${p.range}` : 'domingo a sábado'}
+          </p>
+        </button>
+      );
+    },
+  },
+  {
+    id: 'mi-mes',
+    name: 'Mi mes y comisión',
+    applies: () => true,
+    Render: ({ data }) => {
+      const p = data.myPerf?.month;
+      if (!p) {
+        return (
+          <Card>
+            <Label>Este mes</Label>
+            <p className="py-3 text-center text-xs text-gray-400">—</p>
+          </Card>
+        );
+      }
+      return (
+        <Card>
+          <Label>Este mes</Label>
+          <div className="grid grid-cols-2 gap-2">
+            <Stat
+              label="Vendido"
+              value={formatCOP(p.total)}
+              accent="text-emerald-600"
+            />
+            <Stat
+              label="% en productos"
+              value={`${p.productShare}%`}
+              accent="text-amber-600"
+            />
+          </div>
+
+          {p.ratesConfigured ? (
+            <div className="mt-3 border-t border-gray-100 pt-2">
+              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                Tu ganancia
+              </p>
+              <ul className="space-y-1 text-sm">
+                <li className="flex items-center justify-between text-gray-600">
+                  <span>Cortes ({p.rates.service}%)</span>
+                  <span className="font-semibold text-gray-800">
+                    {formatCOP(p.earnings.service)}
+                  </span>
+                </li>
+                <li className="flex items-center justify-between text-gray-600">
+                  <span>Productos ({p.rates.product}%)</span>
+                  <span className="font-semibold text-gray-800">
+                    {formatCOP(p.earnings.product)}
+                  </span>
+                </li>
+                <li className="flex items-center justify-between border-t border-gray-100 pt-1 font-bold text-emerald-700">
+                  <span>Total</span>
+                  <span>{formatCOP(p.earnings.total)}</span>
+                </li>
+              </ul>
+            </div>
+          ) : (
+            <div className="mt-3 rounded-xl bg-amber-500/10 p-2.5 text-center text-xs text-amber-700">
+              Aún no tienes tu porcentaje configurado. Pídele al administrador
+              que lo ajuste para ver tu ganancia.
+            </div>
+          )}
+        </Card>
+      );
+    },
+  },
 ];
 
-// Widgets visibles por defecto (el resto se agregan desde el catálogo).
+// Audiencia de cada widget: 'owner' (dueño/staff), 'barber' (barbero) o 'all'.
+export const WIDGET_AUDIENCE = {
+  'mi-hoy': 'barber',
+  'mi-semana': 'barber',
+  'mi-mes': 'barber',
+  hoy: 'owner',
+  grafica: 'owner',
+  inventario: 'owner',
+  consignaciones: 'owner',
+  'por-reactivar': 'owner',
+  'proximas-citas': 'owner',
+  mes: 'owner',
+  'por-cobrar': 'owner',
+  cumpleanos: 'all',
+  calculadora: 'all',
+};
+
+// Widgets visibles por defecto (se filtran por audiencia según el rol; el
+// resto se agregan desde el catálogo).
 export const DEFAULT_LAYOUT = [
+  // Barbero
+  'mi-hoy',
+  'mi-semana',
+  'mi-mes',
+  // Dueño / staff
   'hoy',
   'grafica',
   'inventario',
@@ -401,4 +539,6 @@ export const DEFAULT_LAYOUT = [
   'proximas-citas',
   'mes',
   'por-cobrar',
+  // Común
+  'cumpleanos',
 ];

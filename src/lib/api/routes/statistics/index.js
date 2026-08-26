@@ -11,6 +11,14 @@ export async function getSalesTrend(period = 'week', offset = 0) {
   return apiFetch(`/statistics/sales-trend?period=${period}&offset=${offset}`);
 }
 
+// "Mi rendimiento" del empleado que consulta (solo lo suyo).
+export async function getMyPerformance() {
+  return apiFetch('/statistics/my-performance');
+}
+export async function getMyWeeklyHistory() {
+  return apiFetch('/statistics/my-weekly-history');
+}
+
 export async function getDashboardStats(dto = {}) {
   return apiFetch('/statistics/dashboard', {
     method: 'POST',
