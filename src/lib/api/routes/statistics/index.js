@@ -15,8 +15,13 @@ export async function getSalesTrend(period = 'week', offset = 0) {
 export async function getMyPerformance() {
   return apiFetch('/statistics/my-performance');
 }
-export async function getMyWeeklyHistory() {
-  return apiFetch('/statistics/my-weekly-history');
+// Detalle de un periodo: period = 'today' | 'week' | 'month'.
+export async function getMyDetail(period = 'today') {
+  return apiFetch(`/statistics/my-detail?period=${period}`);
+}
+// Historial: group = 'week' | 'month'.
+export async function getMyHistory(group = 'week') {
+  return apiFetch(`/statistics/my-history?group=${group}`);
 }
 
 export async function getDashboardStats(dto = {}) {

@@ -22,6 +22,8 @@ import { isServicesBusiness } from '@/lib/appointmentsAccess';
 import ReactivateCustomersModal from '@/components/appointments/ReactivateCustomersModal';
 import LowStockModal from '@/components/dashboard/inventory/LowStockModal';
 import MyWeeklyHistoryModal from '@/components/dashboard/home/MyWeeklyHistoryModal';
+import MyDetailModal from '@/components/dashboard/home/MyDetailModal';
+import TodayAppointmentsModal from '@/components/dashboard/home/TodayAppointmentsModal';
 import WidgetBoard from '@/components/dashboard/home/WidgetBoard';
 
 // Roles que solo ven SU información (empleado de servicio, no dueño/caja).
@@ -55,19 +57,23 @@ export default function DashboardHome() {
   const [showReactivate, setShowReactivate] = useState(false);
   const [showLowStock, setShowLowStock] = useState(false);
   const [showWeekly, setShowWeekly] = useState(false);
+  const [detailPeriod, setDetailPeriod] = useState(null); // 'today'|'week'|'month'
+  const [showTodayAppts, setShowTodayAppts] = useState(false);
 
   useEffect(() => {
     if (!usuario) return;
 
-    // Barbero: SOLO su rendimiento. No pedimos datos del negocio.
+    // Barbero: SOLO su rendimiento + sus citas de hoy. Nada del negocio.
     if (isBarber) {
       getMyPerformance()
         .then((r) => setMyPerf(r?.data || null))
         .catch(() => setMyPerf(null));
-      // Cumpleaños del equipo salen del home summary (permitido leer).
       getHomeSummary()
         .then((r) => setHome(r?.data || null))
         .catch(() => setHome(null));
+      getAppointmentsAgenda()
+        .then((r) => setTodayAppts(r?.data?.today || []))
+        .catch(() => setTodayAppts([]));
       return;
     }
 
@@ -167,6 +173,8 @@ export default function DashboardHome() {
       openReactivate: () => setShowReactivate(true),
       openLowStock: () => setShowLowStock(true),
       openWeeklyHistory: () => setShowWeekly(true),
+      openDetail: (period) => setDetailPeriod(period || 'today'),
+      openTodayAppts: () => setShowTodayAppts(true),
     }),
     [],
   );
@@ -272,6 +280,18 @@ export default function DashboardHome() {
 
       {showWeekly && (
         <MyWeeklyHistoryModal onClose={() => setShowWeekly(false)} />
+      )}
+      {detailPeriod && (
+        <MyDetailModal
+          period={detailPeriod}
+          onClose={() => setDetailPeriod(null)}
+        />
+      )}
+      {showTodayAppts && (
+        <TodayAppointmentsModal
+          items={todayAppts || []}
+          onClose={() => setShowTodayAppts(false)}
+        />
       )}
       {showReactivate && (
         <ReactivateCustomersModal onClose={() => setShowReactivate(false)} />

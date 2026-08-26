@@ -9,6 +9,7 @@ import {
   CreditCardIcon,
   GiftIcon,
   ArrowRightIcon,
+  ChevronRightIcon,
 } from '@heroicons/react/24/outline';
 import { formatCOP, formatDateTime } from '@/lib/api/utils/utils';
 import SalesTrendChart from './SalesTrendChart';
@@ -65,6 +66,27 @@ function NoRateNote() {
     <div className="mt-2 rounded-xl bg-amber-500/10 p-2.5 text-center text-xs text-amber-700">
       Aún no tienes tu porcentaje configurado. Pídele al administrador que lo
       ajuste para ver tu ganancia.
+    </div>
+  );
+}
+// Tarjeta que es un ATAJO: al tocarla abre su detalle.
+function ShortcutCard({ onClick, hint, children }) {
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') onClick?.();
+      }}
+      className="relative h-full cursor-pointer rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition hover:shadow-md"
+    >
+      {hint && (
+        <span className="absolute right-4 top-4 inline-flex items-center gap-0.5 text-xs font-medium text-orange-600">
+          {hint} <ChevronRightIcon className="h-3.5 w-3.5" />
+        </span>
+      )}
+      {children}
     </div>
   );
 }
@@ -403,12 +425,12 @@ export const WIDGETS = [
     id: 'mi-hoy',
     name: 'Mi día',
     applies: () => true,
-    Render: ({ data }) => {
+    Render: ({ data, actions }) => {
       const perf = data.myPerf;
       const p = perf?.today;
       const conf = perf?.ratesConfigured;
       return (
-        <Card>
+        <ShortcutCard onClick={() => actions.openDetail('today')} hint="Ver detalle">
           <Label>Hoy en cortes</Label>
           <div className="grid grid-cols-2 gap-2">
             <Stat
@@ -419,7 +441,7 @@ export const WIDGETS = [
             <Stat label="Cortes" value={p ? p.cuts : '—'} />
           </div>
           {perf && !conf && <NoRateNote />}
-        </Card>
+        </ShortcutCard>
       );
     },
   },
@@ -432,14 +454,24 @@ export const WIDGETS = [
       const p = perf?.week;
       const conf = perf?.ratesConfigured;
       return (
-        <button
-          type="button"
-          onClick={actions.openWeeklyHistory}
-          className="h-full w-full rounded-2xl border border-gray-100 bg-white p-4 text-left shadow-sm transition hover:shadow-md"
-        >
+        <ShortcutCard onClick={() => actions.openDetail('week')}>
           <div className="mb-1 flex items-center justify-between">
             <Label>Esta semana en cortes</Label>
-            <span className="text-xs font-medium text-orange-600">
+            <span
+              role="button"
+              tabIndex={0}
+              onClick={(e) => {
+                e.stopPropagation();
+                actions.openWeeklyHistory();
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.stopPropagation();
+                  actions.openWeeklyHistory();
+                }
+              }}
+              className="text-xs font-medium text-orange-600 hover:underline"
+            >
               Ver historial
             </span>
           </div>
@@ -449,7 +481,7 @@ export const WIDGETS = [
           <p className="text-xs text-gray-500">
             {p ? `${p.cuts} cortes · ${p.range}` : 'domingo a sábado'}
           </p>
-        </button>
+        </ShortcutCard>
       );
     },
   },
@@ -457,7 +489,7 @@ export const WIDGETS = [
     id: 'mi-mes',
     name: 'Mi mes y comisión',
     applies: () => true,
-    Render: ({ data }) => {
+    Render: ({ data, actions }) => {
       const perf = data.myPerf;
       const p = perf?.month;
       if (!p) {
@@ -470,13 +502,12 @@ export const WIDGETS = [
       }
       const rates = perf?.rates || {};
       return (
-        <Card>
+        <ShortcutCard onClick={() => actions.openDetail('month')} hint="Ver detalle">
           <Label icon={GiftIcon} accent="text-violet-500">
             Este mes
           </Label>
           {perf.ratesConfigured ? (
             <>
-              {/* Productos: comisión mensual, se paga el 3 del siguiente mes */}
               <div className="rounded-xl bg-emerald-500/10 p-3">
                 <p className="text-[11px] font-medium text-emerald-700">
                   Comisión de productos ({rates.product}%) · se paga el 3
@@ -486,6 +517,10 @@ export const WIDGETS = [
                 </p>
               </div>
               <ul className="mt-2 space-y-1 border-t border-gray-100 pt-2 text-sm">
+                <li className="flex items-center justify-between border-b border-gray-100 pb-1 font-bold text-emerald-700">
+                  <span>Total ganado este mes</span>
+                  <span>{formatCOP(p.earnings.total)}</span>
+                </li>
                 <li className="flex items-center justify-between text-gray-600">
                   <span>Cortes del mes ({rates.service}%)</span>
                   <span className="font-semibold text-gray-800">
@@ -508,7 +543,48 @@ export const WIDGETS = [
               <NoRateNote />
             </>
           )}
-        </Card>
+        </ShortcutCard>
+      );
+    },
+  },
+  {
+    id: 'mis-citas-hoy',
+    name: 'Mis citas de hoy',
+    applies: () => true,
+    Render: ({ data, actions }) => {
+      const items = data.todayAppts || [];
+      return (
+        <ShortcutCard onClick={() => actions.openTodayAppts()} hint="Ver todas">
+          <Label icon={CalendarDaysIcon} accent="text-blue-500">
+            Mis citas de hoy
+          </Label>
+          {items.length === 0 ? (
+            <p className="py-3 text-center text-xs text-gray-400">
+              No tienes citas hoy.
+            </p>
+          ) : (
+            <ul className="space-y-1.5">
+              {items.slice(0, 4).map((a) => (
+                <li
+                  key={a.id}
+                  className="flex items-center justify-between gap-2 text-sm"
+                >
+                  <span className="truncate text-gray-700">
+                    {a.customer?.name || 'Cliente'}
+                  </span>
+                  <span className="flex-none text-xs text-gray-400">
+                    {a.startTime || ''}
+                  </span>
+                </li>
+              ))}
+              {items.length > 4 && (
+                <li className="text-[11px] text-blue-600">
+                  +{items.length - 4} más
+                </li>
+              )}
+            </ul>
+          )}
+        </ShortcutCard>
       );
     },
   },
@@ -519,6 +595,7 @@ export const WIDGET_AUDIENCE = {
   'mi-hoy': 'barber',
   'mi-semana': 'barber',
   'mi-mes': 'barber',
+  'mis-citas-hoy': 'barber',
   hoy: 'owner',
   grafica: 'owner',
   inventario: 'owner',
@@ -536,6 +613,7 @@ export const WIDGET_AUDIENCE = {
 export const DEFAULT_LAYOUT = [
   // Barbero
   'mi-hoy',
+  'mis-citas-hoy',
   'mi-semana',
   'mi-mes',
   // Dueño / staff
