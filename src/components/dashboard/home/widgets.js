@@ -60,6 +60,14 @@ function Label({ icon: Icon, children, accent = 'text-gray-400' }) {
     </p>
   );
 }
+function NoRateNote() {
+  return (
+    <div className="mt-2 rounded-xl bg-amber-500/10 p-2.5 text-center text-xs text-amber-700">
+      Aún no tienes tu porcentaje configurado. Pídele al administrador que lo
+      ajuste para ver tu ganancia.
+    </div>
+  );
+}
 
 // Cada widget: id, nombre (catálogo), wide (ocupa toda la fila), applies(data)
 // y Render({data, actions}). Todo se sincroniza con el tema vía tokens.
@@ -390,24 +398,27 @@ export const WIDGETS = [
     Render: () => <CalculatorWidget />,
   },
 
-  // ---- Widgets del BARBERO (solo lo suyo) ----
+  // ---- Widgets del BARBERO (SOLO lo que él gana) ----
   {
     id: 'mi-hoy',
     name: 'Mi día',
     applies: () => true,
     Render: ({ data }) => {
-      const p = data.myPerf?.today;
+      const perf = data.myPerf;
+      const p = perf?.today;
+      const conf = perf?.ratesConfigured;
       return (
         <Card>
-          <Label>Hoy</Label>
+          <Label>Hoy en cortes</Label>
           <div className="grid grid-cols-2 gap-2">
             <Stat
-              label="Vendido"
-              value={p ? formatCOP(p.total) : '—'}
+              label="Ganas hoy"
+              value={conf && p ? formatCOP(p.earnings.service) : '—'}
               accent="text-emerald-600"
             />
-            <Stat label="Atenciones" value={p ? p.count : '—'} />
+            <Stat label="Cortes" value={p ? p.cuts : '—'} />
           </div>
+          {perf && !conf && <NoRateNote />}
         </Card>
       );
     },
@@ -417,7 +428,9 @@ export const WIDGETS = [
     name: 'Mi semana',
     applies: () => true,
     Render: ({ data, actions }) => {
-      const p = data.myPerf?.week;
+      const perf = data.myPerf;
+      const p = perf?.week;
+      const conf = perf?.ratesConfigured;
       return (
         <button
           type="button"
@@ -425,16 +438,16 @@ export const WIDGETS = [
           className="h-full w-full rounded-2xl border border-gray-100 bg-white p-4 text-left shadow-sm transition hover:shadow-md"
         >
           <div className="mb-1 flex items-center justify-between">
-            <Label>Esta semana</Label>
+            <Label>Esta semana en cortes</Label>
             <span className="text-xs font-medium text-orange-600">
               Ver historial
             </span>
           </div>
           <p className="text-2xl font-bold text-emerald-600">
-            {p ? formatCOP(p.total) : '—'}
+            {conf && p ? formatCOP(p.earnings.service) : '—'}
           </p>
           <p className="text-xs text-gray-500">
-            {p ? `${p.count} atenciones · ${p.range}` : 'domingo a sábado'}
+            {p ? `${p.cuts} cortes · ${p.range}` : 'domingo a sábado'}
           </p>
         </button>
       );
@@ -445,7 +458,8 @@ export const WIDGETS = [
     name: 'Mi mes y comisión',
     applies: () => true,
     Render: ({ data }) => {
-      const p = data.myPerf?.month;
+      const perf = data.myPerf;
+      const p = perf?.month;
       if (!p) {
         return (
           <Card>
@@ -454,51 +468,45 @@ export const WIDGETS = [
           </Card>
         );
       }
+      const rates = perf?.rates || {};
       return (
         <Card>
-          <Label>Este mes</Label>
-          <div className="grid grid-cols-2 gap-2">
-            <Stat
-              label="Vendido"
-              value={formatCOP(p.total)}
-              accent="text-emerald-600"
-            />
-            <Stat
-              label="% en productos"
-              value={`${p.productShare}%`}
-              accent="text-amber-600"
-            />
-          </div>
-
-          {p.ratesConfigured ? (
-            <div className="mt-3 border-t border-gray-100 pt-2">
-              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
-                Tu ganancia
-              </p>
-              <ul className="space-y-1 text-sm">
+          <Label icon={GiftIcon} accent="text-violet-500">
+            Este mes
+          </Label>
+          {perf.ratesConfigured ? (
+            <>
+              {/* Productos: comisión mensual, se paga el 3 del siguiente mes */}
+              <div className="rounded-xl bg-emerald-500/10 p-3">
+                <p className="text-[11px] font-medium text-emerald-700">
+                  Comisión de productos ({rates.product}%) · se paga el 3
+                </p>
+                <p className="text-2xl font-bold text-emerald-600">
+                  {formatCOP(p.earnings.product)}
+                </p>
+              </div>
+              <ul className="mt-2 space-y-1 border-t border-gray-100 pt-2 text-sm">
                 <li className="flex items-center justify-between text-gray-600">
-                  <span>Cortes ({p.rates.service}%)</span>
+                  <span>Cortes del mes ({rates.service}%)</span>
                   <span className="font-semibold text-gray-800">
                     {formatCOP(p.earnings.service)}
                   </span>
                 </li>
-                <li className="flex items-center justify-between text-gray-600">
-                  <span>Productos ({p.rates.product}%)</span>
-                  <span className="font-semibold text-gray-800">
-                    {formatCOP(p.earnings.product)}
-                  </span>
-                </li>
-                <li className="flex items-center justify-between border-t border-gray-100 pt-1 font-bold text-emerald-700">
-                  <span>Total</span>
-                  <span>{formatCOP(p.earnings.total)}</span>
+                <li className="flex items-center justify-between text-gray-500">
+                  <span>Nº de cortes</span>
+                  <span className="font-semibold text-gray-700">{p.cuts}</span>
                 </li>
               </ul>
-            </div>
+              <p className="mt-1.5 text-[11px] text-gray-400">
+                Los cortes se pagan por semana; los productos se acumulan y se
+                pagan el 3 de cada mes.
+              </p>
+            </>
           ) : (
-            <div className="mt-3 rounded-xl bg-amber-500/10 p-2.5 text-center text-xs text-amber-700">
-              Aún no tienes tu porcentaje configurado. Pídele al administrador
-              que lo ajuste para ver tu ganancia.
-            </div>
+            <>
+              <p className="text-sm text-gray-600">{p.cuts} cortes este mes</p>
+              <NoRateNote />
+            </>
           )}
         </Card>
       );
