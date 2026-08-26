@@ -12,6 +12,8 @@ export const getEmptyUser = () => {
     localId: '',
     status: '',
     password: '',
+    commissionServiceRate: '',
+    commissionProductRate: '',
   };
 };
 
@@ -99,6 +101,20 @@ export const getFormFieldsUsers = () => [
     ],
     source: 'status',
     disabled: false,
+  },
+  {
+    name: 'commissionServiceRate',
+    label: 'Comisión por servicios/cortes (%) — opcional',
+    type: 'number',
+    source: null,
+    required: false,
+  },
+  {
+    name: 'commissionProductRate',
+    label: 'Comisión por productos (%) — opcional',
+    type: 'number',
+    source: null,
+    required: false,
   },
   {
     name: 'password',
