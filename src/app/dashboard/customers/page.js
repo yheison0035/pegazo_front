@@ -46,6 +46,7 @@ export default function Customers() {
     phone: '',
     city: '',
     status: '',
+    source: '',
   });
 
   const debouncedFilters = useDebounce(filters, 400);
