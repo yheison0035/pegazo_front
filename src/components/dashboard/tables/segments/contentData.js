@@ -19,6 +19,27 @@ import {
 } from '@/lib/api/utils/utils';
 import { useAuth } from '@/context/authContext';
 
+// Origen del cliente: creado en el CRM o registrado desde la tienda online.
+function CustomerSourceBadge({ source }) {
+  const isEcommerce = source === 'ECOMMERCE';
+  return (
+    <span
+      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+        isEcommerce
+          ? 'bg-blue-500/10 text-blue-600'
+          : 'bg-gray-500/10 text-gray-600'
+      }`}
+    >
+      <span
+        className={`inline-block h-1.5 w-1.5 rounded-full ${
+          isEcommerce ? 'bg-blue-500' : 'bg-gray-400'
+        }`}
+      />
+      {isEcommerce ? 'Tienda online' : 'CRM'}
+    </span>
+  );
+}
+
 export default function ContentData({
   paginatedData = [],
   rol,
@@ -288,6 +309,9 @@ export default function ContentData({
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
                   <StatusBadge status={info.status} />
+                </td>
+                <td className="px-5 py-4 whitespace-nowrap">
+                  <CustomerSourceBadge source={info.source} />
                 </td>
                 <td className="px-5 py-4">
                   <LastAudit
