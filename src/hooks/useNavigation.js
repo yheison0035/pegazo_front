@@ -22,6 +22,13 @@ export default function useNavigation() {
   const businessType = usuario.company?.type || 'COMERCIO';
   const plan = usuario.company?.plan;
 
+  // Control MANUAL de módulos por empresa (definido por la plataforma). Si tiene
+  // valores, MANDA: el cliente solo ve los módulos marcados. Vacío = por defecto
+  // (según su tipo de negocio). 'dashboard' y 'settings' siempre disponibles.
+  const manual = usuario.company?.enabledModules;
+  const useManual = Array.isArray(manual) && manual.length > 0;
+  const CORE = new Set(['dashboard', 'settings']);
+
   // Etiquetas del menú según la vertical (Clientes→Pacientes, etc.).
   const t = getTerms(usuario.company);
   const navLabelByModule = {
@@ -62,15 +69,18 @@ export default function useNavigation() {
     const items = section.items
       .filter((item) => {
         const key = item.href.split('/').pop();
-        // El Inicio (home) siempre está disponible; los demás dependen del
-        // conjunto de módulos de la vertical.
+        // Inicio/Configuración siempre; los demás: si hay control manual, solo
+        // los marcados; si no, los de la vertical.
         const allowedByModule =
-          key === 'dashboard' || visibleModules.includes(key);
+          CORE.has(key) ||
+          (useManual ? manual.includes(key) : visibleModules.includes(key));
         return allowedByModule && item.roles.includes(role);
       })
       .map((item) => {
         const key = item.href.split('/').pop();
-        const locked = !planAllowsModule(plan, key);
+        // Con control manual no hay candado (el módulo está explícitamente
+        // habilitado); si no, el candado del plan para hacer upsell.
+        const locked = useManual ? false : !planAllowsModule(plan, key);
         return {
           ...item,
           name: navLabelByModule[key] || item.name,
