@@ -55,19 +55,11 @@ export default function PlanUpgradeModal() {
         <div className="p-6">
           {plan ? (
             <>
-              <div className="flex items-baseline justify-between">
-                <div>
-                  <p className="text-lg font-bold text-neutral-900">
-                    {plan.emoji} Plan {plan.name}
-                  </p>
-                  <p className="text-sm text-neutral-500">{plan.tagline}</p>
-                </div>
-                <p className="text-xl font-extrabold text-neutral-900">
-                  {plan.priceLabel}
-                  <span className="text-xs font-normal text-neutral-500">
-                    {plan.priceSuffix}
-                  </span>
+              <div>
+                <p className="text-lg font-bold text-neutral-900">
+                  {plan.emoji} Plan {plan.name}
                 </p>
+                <p className="text-sm text-neutral-500">{plan.tagline}</p>
               </div>
               <ul className="mt-4 space-y-2">
                 {plan.features.slice(0, 5).map((f) => (
