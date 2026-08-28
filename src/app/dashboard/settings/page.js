@@ -1166,7 +1166,6 @@ export default function Settings() {
               <TerminologyCard initial={settings} />
             </div>
             <FiscalCard initial={settings} />
-            <MailCard initial={settings} />
             <CashPolicyCard initial={settings} />
             {isServices && <HoursCard initial={settings} />}
             {isServices && <LoyaltySettings />}
