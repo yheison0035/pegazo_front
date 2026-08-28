@@ -13,6 +13,7 @@ import {
   CalculatorIcon,
   ReceiptPercentIcon,
   ChatBubbleBottomCenterTextIcon,
+  EnvelopeIcon,
 } from '@heroicons/react/24/outline';
 import { getTerms } from '@/config/terminology';
 import Button from '@/components/ui/Button';
@@ -29,6 +30,8 @@ import {
   updateCashPolicy,
   updateFiscal,
   updateTerminology,
+  updateCompanyMail,
+  testCompanyMail,
 } from '@/lib/api/routes/company';
 
 // Editor de vocabulario propio de la empresa (barbería vs estética, etc.).
@@ -258,6 +261,233 @@ function CompanyProfileCard({ initial }) {
         </Button>
       </div>
       <AlertModal type={alert.type} message={alert.message} onClose={() => setAlert({})} />
+    </div>
+  );
+}
+
+const inputCls =
+  'w-full rounded-xl border border-gray-200 px-4 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20';
+
+function MailCard({ initial }) {
+  const [form, setForm] = useState({
+    mailFromName: '',
+    mailHost: '',
+    mailPort: '',
+    mailUser: '',
+    mailFromEmail: '',
+    mailPassword: '',
+  });
+  const [configured, setConfigured] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [testTo, setTestTo] = useState('');
+  const [alert, setAlert] = useState({});
+  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  useEffect(() => {
+    if (initial) {
+      setForm((f) => ({
+        ...f,
+        mailFromName: initial.mailFromName || '',
+        mailHost: initial.mailHost || '',
+        mailPort: initial.mailPort ? String(initial.mailPort) : '',
+        mailUser: initial.mailUser || '',
+        mailFromEmail: initial.mailFromEmail || '',
+        mailPassword: '',
+      }));
+      setConfigured(!!initial.mailConfigured);
+      setTestTo(initial.mailUser || initial.email || '');
+    }
+  }, [initial]);
+
+  const usarGmail = () =>
+    setForm((f) => ({ ...f, mailHost: 'smtp.gmail.com', mailPort: '587' }));
+
+  const save = async () => {
+    setSaving(true);
+    try {
+      const dto = {
+        mailFromName: form.mailFromName,
+        mailHost: form.mailHost,
+        mailPort: form.mailPort ? Number(form.mailPort) : null,
+        mailUser: form.mailUser,
+        mailFromEmail: form.mailFromEmail || form.mailUser,
+      };
+      // La contraseña solo se envía si el usuario escribió una nueva.
+      if (form.mailPassword) dto.mailPassword = form.mailPassword;
+      const res = await updateCompanyMail(dto);
+      setConfigured(!!res?.data?.mailConfigured);
+      setForm((f) => ({ ...f, mailPassword: '' }));
+      setAlert({ type: 'success', message: 'Correo del negocio guardado.' });
+    } catch (e) {
+      setAlert({ type: 'error', message: e.message || 'No se pudo guardar.' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const test = async () => {
+    if (!testTo) {
+      setAlert({ type: 'error', message: 'Escribe un correo para la prueba.' });
+      return;
+    }
+    setTesting(true);
+    try {
+      const res = await testCompanyMail(testTo);
+      setAlert({
+        type: 'success',
+        message: res?.message || 'Correo de prueba enviado.',
+      });
+    } catch (e) {
+      setAlert({ type: 'error', message: e.message || 'No se pudo enviar.' });
+    } finally {
+      setTesting(false);
+    }
+  };
+
+  return (
+    <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+      <div className="flex items-start gap-3">
+        <div className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-orange-50 text-orange-600">
+          <EnvelopeIcon className="h-5 w-5" />
+        </div>
+        <div>
+          <h2 className="text-base font-bold text-gray-800">
+            Correo del negocio
+          </h2>
+          <p className="text-sm text-gray-500">
+            Tu propio correo para enviar a tus clientes (restablecer contraseña,
+            etc.). Los correos salen a tu nombre, con tu logo y color.
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-3">
+        <span
+          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+            configured
+              ? 'bg-emerald-500/10 text-emerald-600'
+              : 'bg-amber-500/10 text-amber-600'
+          }`}
+        >
+          <span
+            className={`inline-block h-1.5 w-1.5 rounded-full ${
+              configured ? 'bg-emerald-500' : 'bg-amber-500'
+            }`}
+          />
+          {configured ? 'Correo configurado' : 'Sin configurar'}
+        </span>
+      </div>
+
+      <div className="mt-4 space-y-3">
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">
+            Nombre que verá el cliente (remitente)
+          </label>
+          <input
+            value={form.mailFromName}
+            onChange={set('mailFromName')}
+            placeholder="Ej: Mi Tienda"
+            className={inputCls}
+          />
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              Servidor SMTP (host)
+            </label>
+            <input
+              value={form.mailHost}
+              onChange={set('mailHost')}
+              placeholder="smtp.gmail.com"
+              className={inputCls}
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              Puerto
+            </label>
+            <input
+              value={form.mailPort}
+              onChange={set('mailPort')}
+              inputMode="numeric"
+              placeholder="587"
+              className={inputCls}
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              Usuario (tu correo)
+            </label>
+            <input
+              value={form.mailUser}
+              onChange={set('mailUser')}
+              placeholder="tucorreo@gmail.com"
+              className={inputCls}
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              Contraseña / clave de aplicación
+            </label>
+            <input
+              type="password"
+              value={form.mailPassword}
+              onChange={set('mailPassword')}
+              placeholder={
+                configured ? '•••••••• (guardada)' : 'clave de aplicación'
+              }
+              autoComplete="new-password"
+              className={inputCls}
+            />
+          </div>
+        </div>
+        <p className="text-xs text-gray-400">
+          Con Gmail usa una{' '}
+          <b>contraseña de aplicación</b> (Cuenta de Google → Seguridad →
+          Contraseñas de aplicaciones), no tu clave normal.{' '}
+          <button
+            type="button"
+            onClick={usarGmail}
+            className="font-medium text-orange-600 hover:underline"
+          >
+            Usar datos de Gmail
+          </button>
+        </p>
+      </div>
+
+      <div className="mt-5 flex flex-wrap items-center gap-2">
+        <Button variant="primary" onClick={save} loading={saving}>
+          Guardar
+        </Button>
+      </div>
+
+      {/* Probar envío */}
+      <div className="mt-4 rounded-xl border border-gray-100 bg-gray-50 p-3">
+        <label className="mb-1 block text-sm font-medium text-gray-700">
+          Enviar un correo de prueba a:
+        </label>
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            value={testTo}
+            onChange={(e) => setTestTo(e.target.value)}
+            placeholder="correo@ejemplo.com"
+            className={`${inputCls} flex-1`}
+          />
+          <Button variant="secondary" onClick={test} loading={testing}>
+            Enviar prueba
+          </Button>
+        </div>
+        <p className="mt-1 text-xs text-gray-400">
+          Guarda primero, luego envía la prueba para confirmar que funciona.
+        </p>
+      </div>
+
+      <AlertModal
+        type={alert.type}
+        message={alert.message}
+        onClose={() => setAlert({})}
+      />
     </div>
   );
 }
@@ -931,6 +1161,7 @@ export default function Settings() {
               <TerminologyCard initial={settings} />
             </div>
             <FiscalCard initial={settings} />
+            <MailCard initial={settings} />
             <CashPolicyCard initial={settings} />
             {isServices && <HoursCard initial={settings} />}
             {isServices && <LoyaltySettings />}
