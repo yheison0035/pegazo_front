@@ -20,7 +20,14 @@ const realColor = (c) =>
     ? c
     : '';
 
-export default function ProductSelector({ value = [], onChange, onTyping }) {
+export default function ProductSelector({
+  value = [],
+  onChange,
+  onTyping,
+  // Cuando true, la lista de resultados fluye en el layout (no es "absolute"),
+  // para que no la recorte un contenedor con overflow (ej. modal de mesa).
+  inlineResults = false,
+}) {
   const [search, setSearch] = useState('');
   const [filtered, setFiltered] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
@@ -239,7 +246,11 @@ export default function ProductSelector({ value = [], onChange, onTyping }) {
         </div>
 
         {search.trim().length >= 2 && (
-          <div className="absolute z-30 mt-2 w-full bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden">
+          <div
+            className={`${
+              inlineResults ? 'relative' : 'absolute z-30'
+            } mt-2 w-full bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden`}
+          >
             {loading && (
               <div className="px-4 py-4 text-sm text-gray-400 flex items-center gap-2">
                 <span className="animate-pulse">Buscando productos...</span>

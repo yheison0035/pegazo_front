@@ -422,6 +422,7 @@ export default function Mesas() {
                     key={selKey}
                     value={[]}
                     onChange={setNewItems}
+                    inlineResults
                   />
                 </div>
               )}
