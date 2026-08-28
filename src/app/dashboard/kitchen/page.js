@@ -139,13 +139,15 @@ export default function Kitchen() {
                       )}
                       <ul className="mt-2 space-y-0.5">
                         {c.items.map((it) => (
-                          <li
-                            key={it.id}
-                            className="flex justify-between text-xs text-gray-600"
-                          >
-                            <span className="truncate">
+                          <li key={it.id} className="text-xs text-gray-600">
+                            <span className="font-medium">
                               {it.quantity}× {it.name}
                             </span>
+                            {it.notes && (
+                              <span className="mt-0.5 block font-semibold text-orange-600">
+                                📝 {it.notes}
+                              </span>
+                            )}
                           </li>
                         ))}
                       </ul>

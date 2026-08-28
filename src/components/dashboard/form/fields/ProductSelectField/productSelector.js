@@ -27,6 +27,8 @@ export default function ProductSelector({
   // Cuando true, la lista de resultados fluye en el layout (no es "absolute"),
   // para que no la recorte un contenedor con overflow (ej. modal de mesa).
   inlineResults = false,
+  // Cuando true, cada ítem muestra un campo de observación (ej. "sin arroz").
+  allowNotes = false,
 }) {
   const [search, setSearch] = useState('');
   const [filtered, setFiltered] = useState([]);
@@ -200,6 +202,15 @@ export default function ProductSelector({
     onChange?.(updated);
   };
 
+  // Observación por ítem (ej. "sin arroz", "poca ensalada").
+  const updateNotes = (id, notes) => {
+    const updated = selectedProducts.map((p) =>
+      p.inventoryVariantId === id ? { ...p, notes } : p
+    );
+    setSelectedProducts(updated);
+    onChange?.(updated);
+  };
+
   // AJUSTE: eliminar correcto con type
   const removeProduct = (id) => {
     const updated = selectedProducts.filter((p) => p.inventoryVariantId !== id);
@@ -367,6 +378,17 @@ export default function ProductSelector({
                 >
                   <td className="px-6 py-4 font-medium text-gray-800">
                     {p.name}
+                    {allowNotes && (
+                      <input
+                        type="text"
+                        value={p.notes || ''}
+                        onChange={(e) =>
+                          updateNotes(p.inventoryVariantId, e.target.value)
+                        }
+                        placeholder="Observación: sin arroz, poca ensalada..."
+                        className="mt-1.5 w-full max-w-xs rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-normal text-gray-700 placeholder:text-gray-400 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                      />
+                    )}
                   </td>
 
                   <td className="px-6 py-4 text-center text-gray-700">
