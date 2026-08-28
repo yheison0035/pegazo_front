@@ -353,11 +353,16 @@ function MailCard({ initial }) {
         </div>
         <div>
           <h2 className="text-base font-bold text-gray-800">
-            Correo del negocio
+            Correo del negocio{' '}
+            <span className="ml-1 rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-semibold text-gray-500 align-middle">
+              Opcional
+            </span>
           </h2>
           <p className="text-sm text-gray-500">
-            Tu propio correo para enviar a tus clientes (restablecer contraseña,
-            etc.). Los correos salen a tu nombre, con tu logo y color.
+            No necesitas configurar nada: tus correos a clientes (restablecer
+            contraseña, etc.) ya salen automáticamente con tu logo, color y
+            nombre. Configura esto <b>solo si quieres usar tu propio correo</b>{' '}
+            como remitente.
           </p>
         </div>
       </div>
