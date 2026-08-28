@@ -32,7 +32,38 @@ import {
   DocumentChartBarIcon,
   ClockIcon,
 } from '@heroicons/react/24/outline';
-import { PLANS } from '@/lib/plans';
+
+// Cotización directa por WhatsApp (venta punto a punto; los precios se acuerdan
+// con cada cliente). Los planes y sus límites siguen aplicados en el CRM.
+const WHATSAPP =
+  'https://wa.me/573186356609?text=' +
+  encodeURIComponent('Hola, quiero cotizar Pegazo para mi negocio.');
+
+// Todo lo que incluye la plataforma (para el plan a la medida).
+const INCLUDED = [
+  'Punto de venta y facturación',
+  'Control de inventario en tiempo real',
+  'Variantes (color, talla) y código de barras',
+  'Productos por agotarse y agotados',
+  'Varios locales, cada uno con su inventario',
+  'Clientes (CRM), historial y notas',
+  'Cartera y fiado',
+  'Apertura y cierre de caja',
+  'Gastos y utilidad',
+  'IVA e impuestos (Colombia)',
+  'Cotizaciones',
+  'Citas y agenda de servicios',
+  'Comisiones por empleado',
+  'Fidelización de clientes',
+  'Reportes de ventas y estadísticas',
+  'Roles, permisos y auditoría',
+  'WhatsApp a tus clientes',
+  'Mesas e insumos (restaurantes)',
+  'Aviso de consignaciones en tiempo real',
+  'Tu tienda online conectada al inventario',
+  'App instalable en el celular',
+  'Personalización de panel y tienda',
+];
 
 // ── Lo que nos diferencia de la competencia (Siigo, Treinta, Alegra…) ──
 const DIFFERENTIATORS = [
@@ -378,14 +409,13 @@ const JSON_LD = {
         'Comisiones por empleado',
         'Aviso de consignaciones en tiempo real',
       ],
-      offers: PLANS.map((p) => ({
+      offers: {
         '@type': 'Offer',
-        name: `Plan ${p.name}`,
-        price: p.priceMonthly ?? 0,
         priceCurrency: 'COP',
-        description: p.tagline,
-        category: 'subscription',
-      })),
+        availability: 'https://schema.org/InStock',
+        description:
+          'Plan a la medida de tu negocio. Cotiza por WhatsApp, sin permanencia.',
+      },
     },
     {
       '@type': 'FAQPage',
@@ -904,72 +934,54 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* PLANES */}
+      {/* PLAN A TU MEDIDA (cotización por WhatsApp) */}
       <section id="planes" className="mx-auto max-w-6xl px-5 py-20">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold text-neutral-900">
-            Un plan para cada momento de tu negocio
+            Un plan a la medida de tu negocio
           </h2>
           <p className="mt-3 text-neutral-500">
-            Empieza gratis y sube de nivel cuando crezcas. Sin permanencia, con
-            14 días de prueba en los planes pagos.
+            Nosotros te asesoramos y armamos el plan según lo que necesitas. Sin
+            permanencia. Escríbenos y te cotizamos al instante.
           </p>
         </div>
-        <div className="mt-12 grid items-start gap-6 lg:grid-cols-4">
-          {PLANS.map((plan) => (
-            <div
-              key={plan.id}
-              className={`relative flex h-full flex-col rounded-2xl border p-6 shadow-sm transition ${
-                plan.highlight
-                  ? 'border-orange-500 bg-white ring-2 ring-orange-500'
-                  : 'border-neutral-200 bg-white hover:border-orange-300'
-              }`}
-            >
-              {plan.highlight && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-orange-600 to-amber-500 px-3 py-1 text-xs font-semibold text-white shadow">
-                  Más popular
-                </span>
-              )}
-              <div className="text-2xl">{plan.emoji}</div>
-              <h3 className="mt-2 text-lg font-bold text-neutral-900">
-                {plan.name}
+
+        <div className="mx-auto mt-12 max-w-4xl overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-sm">
+          <div className="grid md:grid-cols-2">
+            {/* Lado marca / CTA */}
+            <div className="relative flex flex-col justify-center overflow-hidden bg-gradient-to-br from-neutral-900 via-neutral-950 to-black p-8 text-white sm:p-10">
+              <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-orange-500 opacity-20 blur-3xl" />
+              <p className="text-sm font-semibold uppercase tracking-wider text-orange-400">
+                Plan a tu medida
+              </p>
+              <h3 className="mt-2 text-2xl font-bold">
+                Todo Pegazo, ajustado a tu negocio
               </h3>
-              <p className="text-sm text-neutral-500">{plan.tagline}</p>
-              <div className="mt-4">
-                <span className="text-3xl font-extrabold text-neutral-900">
-                  {plan.priceLabel}
-                </span>
-                <span className="text-sm text-neutral-500">
-                  {plan.priceSuffix}
-                </span>
-                {plan.yearLabel && (
-                  <p className="mt-1 text-xs text-neutral-400">
-                    {plan.yearLabel}
-                  </p>
-                )}
-              </div>
-              <Link
-                href={`/register?plan=${plan.id}`}
-                className={`mt-5 block rounded-xl px-4 py-2.5 text-center text-sm font-semibold transition ${
-                  plan.highlight
-                    ? 'bg-gradient-to-r from-orange-600 to-amber-500 text-white hover:opacity-90'
-                    : 'border border-neutral-300 text-neutral-800 hover:border-orange-400 hover:text-orange-600'
-                }`}
+              <p className="mt-3 text-neutral-300">
+                Pagas por lo que tu negocio necesita. Te asesoramos según tu
+                tipo de negocio, tus sedes y tu equipo.
+              </p>
+              <a
+                href={WHATSAPP}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 px-6 py-3.5 font-semibold text-white shadow-lg transition hover:opacity-90"
               >
-                {plan.cta}
-              </Link>
-              <div className="mt-5 flex flex-wrap gap-1.5">
-                {plan.limits.map((l) => (
-                  <span
-                    key={l}
-                    className="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-medium text-neutral-600"
-                  >
-                    {l}
-                  </span>
-                ))}
-              </div>
-              <ul className="mt-5 space-y-2 border-t border-neutral-100 pt-5">
-                {plan.features.map((f) => (
+                <ChatBubbleLeftRightIcon className="h-5 w-5" />
+                Cotizar por WhatsApp
+              </a>
+              <p className="mt-3 text-xs text-neutral-400">
+                Respuesta rápida · Sin compromiso
+              </p>
+            </div>
+
+            {/* Lado incluido */}
+            <div className="p-8 sm:p-10">
+              <p className="mb-4 font-semibold text-neutral-900">
+                Incluye todo lo que ofrece Pegazo:
+              </p>
+              <ul className="grid gap-x-4 gap-y-2 sm:grid-cols-2">
+                {INCLUDED.map((f) => (
                   <li key={f} className="flex items-start gap-2 text-sm">
                     <CheckCircleIcon className="mt-0.5 h-4 w-4 flex-none text-orange-500" />
                     <span className="text-neutral-600">{f}</span>
@@ -977,11 +989,12 @@ export default function Landing() {
                 ))}
               </ul>
             </div>
-          ))}
+          </div>
         </div>
+
         <p className="mt-8 text-center text-sm text-neutral-400">
-          Todos los planes incluyen datos en la nube y respaldados. Precios en
-          pesos colombianos (COP).
+          Datos en la nube y respaldados. Te ayudamos a montar tu negocio en el
+          sistema.
         </p>
       </section>
 
@@ -1021,16 +1034,19 @@ export default function Landing() {
             Haz despegar tu negocio con Pegazo
           </h2>
           <p className="mt-4 text-white/90">
-            Todo tu negocio, en un solo lugar. Crea tu cuenta gratis y empieza
-            hoy.
+            Todo tu negocio, en un solo lugar. Escríbenos y te armamos el plan a
+            tu medida.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link
-              href="/register"
+            <a
+              href={WHATSAPP}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-neutral-950 px-8 py-3.5 font-semibold text-white shadow-lg hover:bg-neutral-800 sm:w-auto"
             >
-              Crear cuenta gratis <ArrowRightIcon className="h-5 w-5" />
-            </Link>
+              <ChatBubbleLeftRightIcon className="h-5 w-5" /> Cotizar por
+              WhatsApp
+            </a>
             <Link
               href="/login"
               className="w-full rounded-xl border border-white/40 px-8 py-3.5 text-center font-semibold text-white hover:bg-white/10 sm:w-auto"
