@@ -214,10 +214,12 @@ export default function Login() {
             <p className="mt-6 text-center text-sm text-gray-500">
               ¿No tienes cuenta?{' '}
               <a
-                href="/register"
+                href="https://wa.me/573186356609?text=Hola%2C%20quiero%20cotizar%20Pegazo%20para%20mi%20negocio."
+                target="_blank"
+                rel="noopener noreferrer"
                 className="font-semibold text-orange-600 hover:underline"
               >
-                Crea tu negocio gratis
+                Cotiza tu plan por WhatsApp
               </a>
             </p>
 
