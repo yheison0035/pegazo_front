@@ -246,6 +246,25 @@ const BENEFITS = [
   },
 ];
 
+// ── Cómo funciona (3 pasos) ──
+const HOW_STEPS = [
+  {
+    n: '1',
+    title: 'Crea tu cuenta gratis',
+    desc: 'Regístrate en minutos y elige tu tipo de negocio. Sin instalaciones ni técnicos.',
+  },
+  {
+    n: '2',
+    title: 'Carga tus productos y tu equipo',
+    desc: 'Sube tu inventario, tus servicios y tus colaboradores con sus permisos.',
+  },
+  {
+    n: '3',
+    title: 'Vende y controla todo',
+    desc: 'Factura, gestiona citas, cobra, mira tus reportes y activa tu tienda online.',
+  },
+];
+
 // ── Roadmap ──
 const ROADMAP = [
   {
@@ -282,20 +301,36 @@ const ROADMAP = [
 
 const FAQ = [
   {
+    q: '¿Qué es Pegazo?',
+    a: 'Pegazo es un software de gestión en la nube (POS + CRM) para administrar tu negocio: ventas y facturación, inventario, clientes, cartera, citas, reportes y tu propia tienda online. Todo en una sola plataforma, desde el navegador o como app en tu celular.',
+  },
+  {
     q: '¿Sirve para mi tipo de negocio?',
-    a: 'Sí. Pegazo se adapta a barberías, consultorios, restaurantes, supermercados, moda, distribución y servicios. El vocabulario y las funciones cambian según lo que vendes.',
+    a: 'Sí. Pegazo se adapta a barberías y salones, consultorios y clínicas (odontología, estética), restaurantes y bares, supermercados y minimercados, tiendas de ropa, distribución y servicios. El vocabulario y las funciones cambian según lo que vendes.',
   },
   {
-    q: '¿Puedo manejar varios locales?',
-    a: 'Sí. Puedes tener varias sedes desde una sola cuenta, y cada local con su propio inventario, ventas y reportes.',
+    q: '¿Puedo manejar varios locales o sedes?',
+    a: 'Sí. Puedes tener varias sedes desde una sola cuenta, y cada local con su propio inventario, ventas, caja y reportes, con control de roles para tu equipo.',
   },
   {
-    q: '¿Necesito instalar algo?',
-    a: 'No. Funciona en la nube desde el navegador y se instala como app en tu celular. Empiezas en minutos.',
+    q: '¿Necesito instalar algo o un técnico?',
+    a: 'No. Pegazo funciona en la nube desde cualquier navegador y se instala como app en tu celular (PWA). Creas tu cuenta, cargas tus productos y empiezas a vender en minutos.',
   },
   {
-    q: '¿La tienda online tiene costo aparte?',
-    a: 'Tu tienda online se conecta a tu inventario y usa tu marca. Se activa según tu plan, sin montar otra plataforma.',
+    q: '¿Incluye tienda online?',
+    a: 'Sí. Tu tienda online se conecta a tu inventario en tiempo real y usa tu marca (logo y colores). Tú eliges qué productos publicar y tus clientes crean su cuenta y siguen sus pedidos. Se activa según tu plan, sin montar otra plataforma.',
+  },
+  {
+    q: '¿Puedo controlar el fiado y la cartera?',
+    a: 'Sí. Registras ventas a crédito (fiado), controlas cuánto te deben, los abonos y el saldo de cada cliente, y haces el cierre de caja con arqueo cada día.',
+  },
+  {
+    q: '¿Cuánto cuesta y hay permanencia?',
+    a: 'Puedes empezar gratis y subir de plan cuando crezcas. Los planes son en pesos colombianos, sin permanencia, con prueba gratis en los planes pagos. Cancela cuando quieras.',
+  },
+  {
+    q: '¿Pegazo factura electrónicamente ante la DIAN?',
+    a: 'La facturación electrónica DIAN está en camino. Hoy imprimes tu factura y controlas tus ventas e IVA; muy pronto podrás emitir facturas electrónicas válidas desde el mismo sistema.',
   },
 ];
 
@@ -324,10 +359,25 @@ const JSON_LD = {
       '@type': 'SoftwareApplication',
       name: 'Pegazo',
       applicationCategory: 'BusinessApplication',
-      operatingSystem: 'Web',
+      applicationSubCategory: 'POS, CRM, Inventario, Ecommerce',
+      operatingSystem: 'Web, iOS, Android',
       url: 'https://pegazo.co',
+      inLanguage: 'es-CO',
       description:
         'Plataforma todo en uno para gestionar y hacer despegar tu negocio, con tienda online conectada al inventario.',
+      featureList: [
+        'Punto de venta y facturación',
+        'Control de inventario en tiempo real con multi-local',
+        'Clientes (CRM), cartera y fiado',
+        'Citas y agenda de servicios',
+        'Cierre de caja y control de gastos',
+        'Reportes de ventas y estadísticas',
+        'Fidelización de clientes',
+        'Tienda online conectada al inventario',
+        'Roles, permisos y auditoría',
+        'Comisiones por empleado',
+        'Aviso de consignaciones en tiempo real',
+      ],
       offers: PLANS.map((p) => ({
         '@type': 'Offer',
         name: `Plan ${p.name}`,
@@ -335,6 +385,15 @@ const JSON_LD = {
         priceCurrency: 'COP',
         description: p.tagline,
         category: 'subscription',
+      })),
+    },
+    {
+      '@type': 'FAQPage',
+      '@id': 'https://pegazo.co/#faq',
+      mainEntity: FAQ.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
       })),
     },
   ],
@@ -568,6 +627,26 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ¿QUÉ ES PEGAZO? (contenido para SEO) */}
+      <section className="mx-auto max-w-4xl px-5 pt-16 text-center">
+        <h2 className="text-2xl font-bold text-neutral-900 sm:text-3xl">
+          ¿Qué es Pegazo?
+        </h2>
+        <p className="mx-auto mt-4 max-w-3xl text-neutral-600">
+          <b>Pegazo</b> es un <b>software de gestión en la nube</b> —punto de
+          venta (POS) y CRM— para administrar tu negocio desde un solo lugar:{' '}
+          <b>ventas y facturación</b>, <b>control de inventario</b>, clientes,
+          <b> cartera y fiado</b>, gastos, <b>cierre de caja</b>, citas,
+          <b> reportes y estadísticas</b>, fidelización y tu propia{' '}
+          <b>tienda online</b> conectada al inventario. Funciona en cualquier
+          navegador y como app en tu celular, y se <b>adapta a tu tipo de
+          negocio</b>: barberías, consultorios, restaurantes, supermercados,
+          tiendas de ropa, distribución y servicios. Ideal para negocios y pymes
+          en Colombia que quieren vender más y controlar mejor —sin planillas de
+          Excel ni pagar varias herramientas.
+        </p>
+      </section>
+
       {/* DIFERENCIADORES */}
       <section id="diferencia" className="mx-auto max-w-6xl px-5 py-20">
         <div className="mx-auto max-w-2xl text-center">
@@ -750,6 +829,44 @@ export default function Landing() {
               <p className="mt-1.5 text-sm text-neutral-500">{b.desc}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* CÓMO FUNCIONA */}
+      <section className="bg-neutral-50 py-20">
+        <div className="mx-auto max-w-5xl px-5">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="text-3xl font-bold text-neutral-900">
+              Empieza en 3 pasos
+            </h2>
+            <p className="mt-3 text-neutral-500">
+              Sin instalaciones ni complicaciones. Hoy mismo estás vendiendo.
+            </p>
+          </div>
+          <div className="mt-12 grid gap-6 sm:grid-cols-3">
+            {HOW_STEPS.map((s) => (
+              <div
+                key={s.n}
+                className="relative rounded-2xl border border-neutral-200 bg-white p-6 text-center shadow-sm"
+              >
+                <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-orange-600 to-amber-500 text-lg font-bold text-white shadow">
+                  {s.n}
+                </span>
+                <h3 className="mt-4 font-semibold text-neutral-900">
+                  {s.title}
+                </h3>
+                <p className="mt-1.5 text-sm text-neutral-500">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-10 text-center">
+            <Link
+              href="/register"
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 px-7 py-3 font-semibold text-white shadow-lg hover:opacity-90"
+            >
+              Crear cuenta gratis <ArrowRightIcon className="h-5 w-5" />
+            </Link>
+          </div>
         </div>
       </section>
 
