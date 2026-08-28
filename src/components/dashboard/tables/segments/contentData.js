@@ -478,16 +478,49 @@ export default function ContentData({
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
                   {info.paidUntil ? (
-                    <span
-                      className={
-                        new Date(info.paidUntil) < new Date()
-                          ? 'font-semibold text-red-600'
-                          : 'text-gray-700'
+                    (() => {
+                      // Días hasta el vencimiento (por día calendario).
+                      const t = new Date(info.paidUntil);
+                      const now = new Date();
+                      const a = new Date(
+                        now.getFullYear(),
+                        now.getMonth(),
+                        now.getDate(),
+                      );
+                      const b = new Date(
+                        t.getFullYear(),
+                        t.getMonth(),
+                        t.getDate(),
+                      );
+                      const days = Math.round(
+                        (b - a) / (1000 * 60 * 60 * 24),
+                      );
+                      let badge, label;
+                      if (days < 0) {
+                        badge = 'bg-red-50 text-red-700 ring-red-600/20';
+                        label = `Vencido (${Math.abs(days)}d)`;
+                      } else if (days <= 7) {
+                        badge =
+                          'bg-amber-50 text-amber-700 ring-amber-600/20';
+                        label = days === 0 ? 'Vence hoy' : `Vence en ${days}d`;
+                      } else {
+                        badge =
+                          'bg-emerald-50 text-emerald-700 ring-emerald-600/20';
+                        label = 'Al día';
                       }
-                    >
-                      {formatDateOnly(info.paidUntil)}
-                      {new Date(info.paidUntil) < new Date() && ' (vencido)'}
-                    </span>
+                      return (
+                        <div className="flex flex-col gap-1">
+                          <span
+                            className={`inline-flex w-fit items-center rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${badge}`}
+                          >
+                            {label}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            {formatDateOnly(info.paidUntil)}
+                          </span>
+                        </div>
+                      );
+                    })()
                   ) : (
                     <span className="text-gray-400">—</span>
                   )}

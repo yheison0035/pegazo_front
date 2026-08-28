@@ -53,6 +53,17 @@ async function apiFetch(path, opts = {}) {
         message = data?.message || 'Credenciales incorrectas o sesión expirada';
         if (typeof window !== 'undefined') {
           localStorage.removeItem('token');
+          // Si la empresa fue suspendida (impago) en medio de la sesión, el
+          // backend corta el acceso en cada petición. Llevamos al usuario al
+          // login con el motivo, en vez de dejarlo con un error suelto.
+          if (/suspend/i.test(message) && !location.pathname.startsWith('/login')) {
+            try {
+              localStorage.setItem('pegazo_login_notice', message);
+            } catch {
+              /* almacenamiento no disponible */
+            }
+            location.href = '/login';
+          }
         }
         break;
       case 403:

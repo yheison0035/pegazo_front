@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   EyeIcon,
@@ -30,6 +30,20 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const router = useRouter();
+
+  // Si llegamos aquí por una empresa suspendida (impago) en medio de la sesión,
+  // el cliente API dejó el motivo guardado. Lo mostramos y lo limpiamos.
+  useEffect(() => {
+    try {
+      const notice = localStorage.getItem('pegazo_login_notice');
+      if (notice) {
+        setError(notice);
+        localStorage.removeItem('pegazo_login_notice');
+      }
+    } catch {
+      /* almacenamiento no disponible */
+    }
+  }, []);
 
   async function handleSubmit(e) {
     e.preventDefault();
