@@ -65,6 +65,20 @@ export async function updateCashPolicy(requireCashOpen) {
 }
 
 // Tema de diseño del panel/CRM (orange | blue | emerald).
+export async function updateCompanyMail(dto) {
+  return apiFetch('/company/mail', {
+    method: 'PATCH',
+    body: JSON.stringify(dto),
+  });
+}
+
+export async function testCompanyMail(to) {
+  return apiFetch('/company/mail/test', {
+    method: 'POST',
+    body: JSON.stringify({ to }),
+  });
+}
+
 export async function updateCrmTheme(theme) {
   return apiFetch('/company/theme', {
     method: 'PATCH',
