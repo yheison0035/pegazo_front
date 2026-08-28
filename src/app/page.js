@@ -80,7 +80,7 @@ const DIFFERENTIATORS = [
   {
     icon: BellAlertIcon,
     title: 'Aviso de consignaciones en tiempo real',
-    desc: 'Cuando te transfieren o consignan, Pegazo te avisa al instante —con voz y notificación— sin revisar el banco. Nadie más lo tiene.',
+    desc: 'Cuando te transfieren o consignan, Pegazo te avisa al instante (con voz y notificación) sin revisar el banco. Nadie más lo tiene.',
   },
   {
     icon: GiftIcon,
@@ -281,18 +281,18 @@ const BENEFITS = [
 const HOW_STEPS = [
   {
     n: '1',
-    title: 'Crea tu cuenta gratis',
-    desc: 'Regístrate en minutos y elige tu tipo de negocio. Sin instalaciones ni técnicos.',
+    title: 'Cotiza tu plan',
+    desc: 'Escríbenos por WhatsApp y te asesoramos según tu tipo de negocio, tus sedes y tu equipo.',
   },
   {
     n: '2',
-    title: 'Carga tus productos y tu equipo',
-    desc: 'Sube tu inventario, tus servicios y tus colaboradores con sus permisos.',
+    title: 'Montamos tu negocio',
+    desc: 'Te configuramos la cuenta y te ayudamos a cargar tu inventario, servicios y colaboradores.',
   },
   {
     n: '3',
-    title: 'Vende y controla todo',
-    desc: 'Factura, gestiona citas, cobra, mira tus reportes y activa tu tienda online.',
+    title: 'Empieza a vender',
+    desc: 'Factura, gestiona citas, cobra, mira tus reportes y activa tu tienda online desde el primer día.',
   },
 ];
 
@@ -591,12 +591,14 @@ export default function Landing() {
             >
               Iniciar sesión
             </Link>
-            <Link
-              href="/register"
+            <a
+              href={WHATSAPP}
+              target="_blank"
+              rel="noopener noreferrer"
               className="rounded-lg bg-gradient-to-r from-orange-600 to-amber-500 px-4 py-2 text-sm font-semibold text-white shadow hover:opacity-90"
             >
-              Crear cuenta
-            </Link>
+              Cotizar
+            </a>
           </div>
         </div>
       </header>
@@ -621,16 +623,19 @@ export default function Landing() {
             <p className="mx-auto mt-5 max-w-xl text-lg text-neutral-300 lg:mx-0">
               Ventas, inventario, clientes, citas, cartera, reportes y tu propia
               tienda online. Pegazo se adapta a lo que vendes y hace despegar tu
-              negocio —todo desde la nube.
+              negocio, todo desde la nube.
             </p>
 
             <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row lg:justify-start">
-              <Link
-                href="/register"
+              <a
+                href={WHATSAPP}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 px-7 py-3 font-semibold text-white shadow-lg hover:opacity-90 sm:w-auto"
               >
-                Crear cuenta gratis <ArrowRightIcon className="h-5 w-5" />
-              </Link>
+                <ChatBubbleLeftRightIcon className="h-5 w-5" /> Cotizar por
+                WhatsApp
+              </a>
               <Link
                 href="/login"
                 className="w-full rounded-xl border border-white/20 px-7 py-3 text-center font-semibold text-white hover:bg-white/5 sm:w-auto"
@@ -663,17 +668,16 @@ export default function Landing() {
           ¿Qué es Pegazo?
         </h2>
         <p className="mx-auto mt-4 max-w-3xl text-neutral-600">
-          <b>Pegazo</b> es un <b>software de gestión en la nube</b> —punto de
-          venta (POS) y CRM— para administrar tu negocio desde un solo lugar:{' '}
-          <b>ventas y facturación</b>, <b>control de inventario</b>, clientes,
-          <b> cartera y fiado</b>, gastos, <b>cierre de caja</b>, citas,
-          <b> reportes y estadísticas</b>, fidelización y tu propia{' '}
-          <b>tienda online</b> conectada al inventario. Funciona en cualquier
-          navegador y como app en tu celular, y se <b>adapta a tu tipo de
-          negocio</b>: barberías, consultorios, restaurantes, supermercados,
-          tiendas de ropa, distribución y servicios. Ideal para negocios y pymes
-          en Colombia que quieren vender más y controlar mejor —sin planillas de
-          Excel ni pagar varias herramientas.
+          <b>Pegazo</b> es un software de gestión en la nube (punto de venta y
+          CRM) para administrar tu negocio desde un solo lugar: ventas y
+          facturación, control de inventario, clientes, cartera y fiado, gastos,
+          cierre de caja, citas, reportes y estadísticas, fidelización y tu
+          propia tienda online conectada al inventario. Funciona en cualquier
+          navegador y como app en tu celular, y se adapta a tu tipo de negocio:
+          barberías, consultorios, restaurantes, supermercados, tiendas de ropa,
+          distribución y servicios. Ideal para negocios y pymes en Colombia que
+          quieren vender más y controlar mejor, sin planillas de Excel ni pagar
+          varias herramientas.
         </p>
       </section>
 
@@ -890,12 +894,15 @@ export default function Landing() {
             ))}
           </div>
           <div className="mt-10 text-center">
-            <Link
-              href="/register"
+            <a
+              href={WHATSAPP}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 px-7 py-3 font-semibold text-white shadow-lg hover:opacity-90"
             >
-              Crear cuenta gratis <ArrowRightIcon className="h-5 w-5" />
-            </Link>
+              <ChatBubbleLeftRightIcon className="h-5 w-5" /> Cotizar por
+              WhatsApp
+            </a>
           </div>
         </div>
       </section>
