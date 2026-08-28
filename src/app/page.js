@@ -375,15 +375,26 @@ function DashboardMockup() {
         <p className="mb-2 text-[11px] font-medium text-neutral-300">
           Ventas de la semana
         </p>
+        {/* Barras: hijas DIRECTAS de un contenedor con altura fija para que el
+            height en % se calcule bien. */}
         <div className="flex h-24 items-end gap-2">
           {bars.map((h, i) => (
-            <div key={i} className="flex flex-1 flex-col items-center gap-1">
-              <div
-                className="w-full rounded-t bg-gradient-to-t from-orange-600 to-amber-400"
-                style={{ height: `${h}%` }}
-              />
-              <span className="text-[9px] text-neutral-500">{days[i]}</span>
-            </div>
+            <div
+              key={i}
+              className="flex-1 rounded-t bg-gradient-to-t from-orange-600 to-amber-400"
+              style={{ height: `${h}%` }}
+              title={days[i]}
+            />
+          ))}
+        </div>
+        <div className="mt-1 flex gap-2">
+          {days.map((d, i) => (
+            <span
+              key={i}
+              className="flex-1 text-center text-[9px] text-neutral-500"
+            >
+              {d}
+            </span>
           ))}
         </div>
       </div>
