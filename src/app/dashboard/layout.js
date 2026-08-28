@@ -10,6 +10,7 @@ import BankDepositNotifier from '@/components/bank/BankDepositNotifier';
 import SplashScreen from '@/components/pwa/SplashScreen';
 import { useAuth } from '@/context/authContext';
 import DayBanner from '@/components/pos/DayBanner';
+import RenewalBanner from '@/components/billing/RenewalBanner';
 import { isDark, DARK_EVENT } from '@/lib/darkMode';
 
 export default function Layout({ children }) {
@@ -41,6 +42,7 @@ export default function Layout({ children }) {
             <SideNavigation />
           </div>
           <div className="grow bg-gray-50 p-6 pt-16 text-gray-800 md:overflow-y-auto md:p-10 md:pt-10">
+            <RenewalBanner />
             <DayBanner />
             {children}
           </div>
