@@ -148,7 +148,13 @@ export default function WidgetBoard({ data, actions }) {
       /* ignora */
     }
     const base = Array.isArray(saved?.order) ? saved.order : DEFAULT_LAYOUT;
-    setOrder(base.filter((id) => REGISTRY[id] && applicable.includes(id)));
+    // Añade los widgets nuevos (del layout por defecto) que aún no estén en el
+    // guardado, para que aparezcan solos sin tener que agregarlos a mano.
+    const merged = [...base];
+    for (const id of DEFAULT_LAYOUT) {
+      if (!merged.includes(id)) merged.push(id);
+    }
+    setOrder(merged.filter((id) => REGISTRY[id] && applicable.includes(id)));
     setReady(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uid, applicable.join(',')]);
