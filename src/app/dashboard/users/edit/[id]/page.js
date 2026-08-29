@@ -27,18 +27,28 @@ export default function EditUser() {
   // hacerlo (autoservicio), pero NO puede cambiar su rol ni su correo.
   const isSelf = !!usuario?.id && Number(id) === Number(usuario.id);
 
+  // Solo el dueño/administrador puede EDITAR las comisiones. Los demás roles las
+  // ven pero no las pueden modificar (ni en su propio perfil).
+  const canEditCommission = ['SUPER_ADMIN', 'ADMIN'].includes(usuario?.role);
+
   // Formulario: al editar el propio perfil, rol y correo quedan bloqueados y se
   // ocultan los campos administrativos (local y estado), que no son datos
-  // personales y no puede cambiar por sí mismo.
+  // personales y no puede cambiar por sí mismo. La comisión es solo-lectura
+  // salvo para dueño/administrador.
   const formFields = useMemo(() => {
-    const fields = getFormFieldsUsers();
-    if (!isSelf) return fields;
-    return fields
+    const withCommission = getFormFieldsUsers().map((f) =>
+      !canEditCommission &&
+      (f.name === 'commissionServiceRate' || f.name === 'commissionProductRate')
+        ? { ...f, disabled: true }
+        : f,
+    );
+    if (!isSelf) return withCommission;
+    return withCommission
       .filter((f) => f.name !== 'localId' && f.name !== 'status')
       .map((f) =>
-        f.name === 'role' || f.name === 'email' ? { ...f, disabled: true } : f
+        f.name === 'role' || f.name === 'email' ? { ...f, disabled: true } : f,
       );
-  }, [isSelf]);
+  }, [isSelf, canEditCommission]);
 
   const fetchUser = useCallback(async () => {
     if (!id) return;
@@ -94,8 +104,14 @@ export default function EditUser() {
       const n = Number(v);
       return Number.isFinite(n) ? n : null;
     };
-    payload.commissionServiceRate = rate(payload.commissionServiceRate);
-    payload.commissionProductRate = rate(payload.commissionProductRate);
+    if (canEditCommission) {
+      payload.commissionServiceRate = rate(payload.commissionServiceRate);
+      payload.commissionProductRate = rate(payload.commissionProductRate);
+    } else {
+      // Sin permiso: nunca enviamos la comisión (no la puede cambiar).
+      delete payload.commissionServiceRate;
+      delete payload.commissionProductRate;
+    }
 
     try {
       if (isSelf) {

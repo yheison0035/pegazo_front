@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import {
   BanknotesIcon,
   ArrowPathIcon,
@@ -106,6 +107,106 @@ function HintChip({ hint }) {
     </span>
   );
 }
+// Estados de cita para el barbero (informativo, sin poder contactar al cliente).
+const APPT_STATUS = {
+  CONFIRMADA: { label: 'Confirmada', cls: 'bg-blue-100 text-blue-700' },
+  PENDIENTE: { label: 'Pendiente', cls: 'bg-amber-100 text-amber-800' },
+  EN_PROCESO: { label: 'En proceso', cls: 'bg-violet-100 text-violet-700' },
+  COMPLETADA: { label: 'Completada', cls: 'bg-emerald-100 text-emerald-700' },
+  NO_ASISTIO: { label: 'No asistió', cls: 'bg-gray-100 text-gray-600' },
+  CANCELADA: { label: 'Cancelada', cls: 'bg-red-100 text-red-700' },
+};
+
+// Tarjeta "Mis citas": pestañas Hoy / Mañana / Semana (del día actual en
+// adelante). Solo informativa: muestra cliente, servicio, hora y ESTADO; el
+// barbero NO puede contactar al cliente ni ve su número.
+function MisCitasCard({ agenda }) {
+  const [tab, setTab] = useState('today');
+  const a = agenda || { today: [], tomorrow: [], week: [] };
+  const list = a[tab] || [];
+  const TABS = [
+    { id: 'today', label: 'Hoy', n: (a.today || []).length },
+    { id: 'tomorrow', label: 'Mañana', n: (a.tomorrow || []).length },
+    { id: 'week', label: 'Semana', n: (a.week || []).length },
+  ];
+  const empty =
+    tab === 'today'
+      ? 'No tienes citas hoy.'
+      : tab === 'tomorrow'
+        ? 'No tienes citas mañana.'
+        : 'No tienes citas esta semana.';
+  return (
+    <Card>
+      <Label icon={CalendarDaysIcon} accent="text-blue-500">
+        Mis citas
+      </Label>
+      <div className="mb-2 inline-flex rounded-lg bg-gray-100 p-0.5 text-xs">
+        {TABS.map((tb) => (
+          <button
+            key={tb.id}
+            type="button"
+            onClick={() => setTab(tb.id)}
+            className={`cursor-pointer rounded-md px-2.5 py-1 font-medium transition ${
+              tab === tb.id
+                ? 'bg-white text-blue-600 shadow-sm'
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            {tb.label}
+            {tb.n > 0 ? ` · ${tb.n}` : ''}
+          </button>
+        ))}
+      </div>
+      {list.length === 0 ? (
+        <p className="py-3 text-center text-xs text-gray-400">{empty}</p>
+      ) : (
+        <ul className="space-y-1.5">
+          {list.slice(0, 6).map((ap) => {
+            const st = APPT_STATUS[ap.status] || {
+              label: ap.status,
+              cls: 'bg-gray-100 text-gray-600',
+            };
+            const day =
+              tab === 'week' && ap.startAt
+                ? new Date(ap.startAt).toLocaleDateString('es-CO', {
+                    weekday: 'short',
+                    day: '2-digit',
+                  })
+                : '';
+            return (
+              <li
+                key={ap.id}
+                className="flex items-center justify-between gap-2 text-sm"
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-gray-700">
+                    {ap.customer?.name || 'Cliente'}
+                  </p>
+                  <p className="truncate text-[11px] text-gray-400">
+                    {day ? `${day} · ` : ''}
+                    {ap.startTime || ''}
+                    {ap.service?.name ? ` · ${ap.service.name}` : ''}
+                  </p>
+                </div>
+                <span
+                  className={`flex-none rounded-full px-2 py-0.5 text-[10px] font-semibold ${st.cls}`}
+                >
+                  {st.label}
+                </span>
+              </li>
+            );
+          })}
+          {list.length > 6 && (
+            <li className="text-[11px] text-blue-600">
+              +{list.length - 6} más
+            </li>
+          )}
+        </ul>
+      )}
+    </Card>
+  );
+}
+
 function ShortcutCard({ onClick, href, hint, children }) {
   if (href) {
     return (
@@ -581,44 +682,9 @@ export const WIDGETS = [
   },
   {
     id: 'mis-citas-hoy',
-    name: 'Mis citas de hoy',
+    name: 'Mis citas',
     applies: () => true,
-    Render: ({ data, actions }) => {
-      const items = data.todayAppts || [];
-      return (
-        <ShortcutCard onClick={() => actions.openTodayAppts()} hint="Ver todas">
-          <Label icon={CalendarDaysIcon} accent="text-blue-500">
-            Mis citas de hoy
-          </Label>
-          {items.length === 0 ? (
-            <p className="py-3 text-center text-xs text-gray-400">
-              No tienes citas hoy.
-            </p>
-          ) : (
-            <ul className="space-y-1.5">
-              {items.slice(0, 4).map((a) => (
-                <li
-                  key={a.id}
-                  className="flex items-center justify-between gap-2 text-sm"
-                >
-                  <span className="truncate text-gray-700">
-                    {a.customer?.name || 'Cliente'}
-                  </span>
-                  <span className="flex-none text-xs text-gray-400">
-                    {a.startTime || ''}
-                  </span>
-                </li>
-              ))}
-              {items.length > 4 && (
-                <li className="text-[11px] text-blue-600">
-                  +{items.length - 4} más
-                </li>
-              )}
-            </ul>
-          )}
-        </ShortcutCard>
-      );
-    },
+    Render: ({ data }) => <MisCitasCard agenda={data.myAgenda} />,
   },
   {
     // Lo que el empleado (cualquier rol no-dueño) debe actualmente al negocio.
