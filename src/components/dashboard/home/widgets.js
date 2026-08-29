@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   BanknotesIcon,
   ArrowPathIcon,
@@ -120,8 +120,15 @@ const APPT_STATUS = {
 // Tarjeta "Mis citas": pestañas Hoy / Mañana / Semana (del día actual en
 // adelante). Solo informativa: muestra cliente, servicio, hora y ESTADO; el
 // barbero NO puede contactar al cliente ni ve su número.
+// Alto aproximado de cada fila de cita (px), para calcular cuántas caben.
+const APPT_ROW_H = 46;
+
 function MisCitasCard({ agenda }) {
   const [tab, setTab] = useState('today');
+  // Cuántas citas caben en el alto disponible de la tarjeta (se mide en vivo).
+  const [fit, setFit] = useState(4);
+  const listRef = useRef(null);
+
   const a = agenda || { today: [], tomorrow: [], week: [] };
   const list = a[tab] || [];
   const TABS = [
@@ -135,12 +142,32 @@ function MisCitasCard({ agenda }) {
       : tab === 'tomorrow'
         ? 'No tienes citas mañana.'
         : 'No tienes citas esta semana.';
+
+  // La cantidad de citas se adapta al tamaño del contenedor: medimos el alto
+  // libre de la lista y mostramos las que caben; el resto va en "Ver todas".
+  useEffect(() => {
+    const el = listRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const measure = () => {
+      const h = el.clientHeight;
+      if (h > 0) setFit(Math.max(1, Math.floor(h / APPT_ROW_H)));
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  // Si sobran citas, reservamos una fila para el enlace "Ver todas".
+  const overflow = list.length > fit;
+  const shown = overflow ? Math.max(1, fit - 1) : list.length;
+
   return (
-    <Card>
+    <Card className="flex flex-col">
       <Label icon={CalendarDaysIcon} accent="text-blue-500">
         Mis citas
       </Label>
-      <div className="mb-2 inline-flex rounded-lg bg-gray-100 p-0.5 text-xs">
+      <div className="mb-2 inline-flex flex-none rounded-lg bg-gray-100 p-0.5 text-xs">
         {TABS.map((tb) => (
           <button
             key={tb.id}
@@ -157,51 +184,56 @@ function MisCitasCard({ agenda }) {
           </button>
         ))}
       </div>
-      {list.length === 0 ? (
-        <p className="py-3 text-center text-xs text-gray-400">{empty}</p>
-      ) : (
-        <ul className="space-y-1.5">
-          {list.slice(0, 6).map((ap) => {
-            const st = APPT_STATUS[ap.status] || {
-              label: ap.status,
-              cls: 'bg-gray-100 text-gray-600',
-            };
-            const day =
-              tab === 'week' && ap.startAt
-                ? new Date(ap.startAt).toLocaleDateString('es-CO', {
-                    weekday: 'short',
-                    day: '2-digit',
-                  })
-                : '';
-            return (
-              <li
-                key={ap.id}
-                className="flex items-center justify-between gap-2 text-sm"
-              >
-                <div className="min-w-0">
-                  <p className="truncate text-gray-700">
-                    {ap.customer?.name || 'Cliente'}
-                  </p>
-                  <p className="truncate text-[11px] text-gray-400">
-                    {day ? `${day} · ` : ''}
-                    {ap.startTime || ''}
-                    {ap.service?.name ? ` · ${ap.service.name}` : ''}
-                  </p>
-                </div>
-                <span
-                  className={`flex-none rounded-full px-2 py-0.5 text-[10px] font-semibold ${st.cls}`}
+      <div ref={listRef} className="min-h-[92px] flex-1 overflow-hidden">
+        {list.length === 0 ? (
+          <p className="py-3 text-center text-xs text-gray-400">{empty}</p>
+        ) : (
+          <ul className="space-y-1.5">
+            {list.slice(0, shown).map((ap) => {
+              const st = APPT_STATUS[ap.status] || {
+                label: ap.status,
+                cls: 'bg-gray-100 text-gray-600',
+              };
+              const day =
+                tab === 'week' && ap.startAt
+                  ? new Date(ap.startAt).toLocaleDateString('es-CO', {
+                      weekday: 'short',
+                      day: '2-digit',
+                    })
+                  : '';
+              return (
+                <li
+                  key={ap.id}
+                  className="flex items-center justify-between gap-2 text-sm"
                 >
-                  {st.label}
-                </span>
-              </li>
-            );
-          })}
-          {list.length > 6 && (
-            <li className="text-[11px] text-blue-600">
-              +{list.length - 6} más
-            </li>
-          )}
-        </ul>
+                  <div className="min-w-0">
+                    <p className="truncate text-gray-700">
+                      {ap.customer?.name || 'Cliente'}
+                    </p>
+                    <p className="truncate text-[11px] text-gray-400">
+                      {day ? `${day} · ` : ''}
+                      {ap.startTime || ''}
+                      {ap.service?.name ? ` · ${ap.service.name}` : ''}
+                    </p>
+                  </div>
+                  <span
+                    className={`flex-none rounded-full px-2 py-0.5 text-[10px] font-semibold ${st.cls}`}
+                  >
+                    {st.label}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+      {overflow && (
+        <Link
+          href="/dashboard/appointments"
+          className="mt-1.5 flex-none text-center text-xs font-medium text-blue-600 hover:underline"
+        >
+          Ver todas (+{list.length - shown})
+        </Link>
       )}
     </Card>
   );
