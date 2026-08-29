@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import {
   BanknotesIcon,
   ArrowPathIcon,
@@ -127,14 +127,11 @@ const APPT_STATUS = {
 // Tarjeta "Mis citas": pestañas Hoy / Mañana / Semana (del día actual en
 // adelante). Solo informativa: muestra cliente, servicio, hora y ESTADO; el
 // barbero NO puede contactar al cliente ni ve su número.
-// Alto aproximado de cada fila de cita (px), para calcular cuántas caben.
-const APPT_ROW_H = 46;
+// Máximo de citas visibles en la tarjeta; el resto va en "Ver todas".
+const MAX_CITAS = 10;
 
 function MisCitasCard({ agenda }) {
   const [tab, setTab] = useState('today');
-  // Cuántas citas caben en el alto disponible de la tarjeta (se mide en vivo).
-  const [fit, setFit] = useState(4);
-  const listRef = useRef(null);
 
   const a = agenda || { today: [], tomorrow: [], week: [] };
   const list = a[tab] || [];
@@ -150,26 +147,9 @@ function MisCitasCard({ agenda }) {
         ? 'No tienes citas mañana.'
         : 'No tienes citas esta semana.';
 
-  // La cantidad de citas se adapta al tamaño del contenedor: medimos el alto
-  // libre de la lista y mostramos las que caben; el resto va en "Ver todas".
-  useEffect(() => {
-    const el = listRef.current;
-    if (!el || typeof ResizeObserver === 'undefined') return;
-    const measure = () => {
-      const h = el.clientHeight;
-      // Máximo 10 citas visibles (sobre todo en móvil, donde la tarjeta es
-      // alta); el resto queda en "Ver todas".
-      if (h > 0) setFit(Math.min(10, Math.max(1, Math.floor(h / APPT_ROW_H))));
-    };
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-
-  // Si sobran citas, reservamos una fila para el enlace "Ver todas".
-  const overflow = list.length > fit;
-  const shown = overflow ? Math.max(1, fit - 1) : list.length;
+  // Se muestran hasta 10; si hay más, aparece "Ver todas"; si no, no se muestra.
+  const shown = Math.min(MAX_CITAS, list.length);
+  const overflow = list.length > shown;
 
   return (
     <Card className="flex flex-col">
@@ -193,7 +173,7 @@ function MisCitasCard({ agenda }) {
           </button>
         ))}
       </div>
-      <div ref={listRef} className="min-h-[92px] flex-1 overflow-hidden">
+      <div className="flex-1">
         {list.length === 0 ? (
           <p className="py-3 text-center text-xs text-gray-400">{empty}</p>
         ) : (
