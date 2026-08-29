@@ -309,6 +309,41 @@ export default function ServicePerformanceModal({ onClose }) {
                             </td>
                             <td></td>
                           </tr>
+
+                          {/* Cargos/descuentos del barbero + neto a pagar */}
+                          {data.totals.charges > 0 && (
+                            <>
+                              {(data.chargesList || []).map((c) => (
+                                <tr key={`ch-${c.id}`} className="border-b border-red-100 bg-red-50/40">
+                                  <td></td>
+                                  <td className="px-4 py-2 text-red-600">
+                                    − {c.concept}
+                                  </td>
+                                  <td></td>
+                                  <td></td>
+                                  <td className="text-right font-semibold text-red-600">
+                                    −{formatCOP(c.amount)}
+                                  </td>
+                                  <td></td>
+                                </tr>
+                              ))}
+                              <tr className="bg-orange-50 font-bold">
+                                <td></td>
+                                <td className="px-4 py-3 text-gray-800">
+                                  Neto a pagar
+                                  <span className="ml-1 text-xs font-normal text-gray-500">
+                                    (comisión − cargos)
+                                  </span>
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td className="text-right text-orange-700">
+                                  {formatCOP(data.totals.netCommission)}
+                                </td>
+                                <td></td>
+                              </tr>
+                            </>
+                          )}
                         </React.Fragment>
                       ))}
                     </tbody>
