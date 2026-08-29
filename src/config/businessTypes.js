@@ -101,14 +101,14 @@ export const BUSINESS_TYPES = {
   SERVICIOS: [
     'locals', 'users', 'categories', 'brands', 'providers', 'inventory',
     'purchases', 'customers', 'cartera', 'impuestos', 'loyalty', 'services', 'appointments',
-    'sales', 'delivered_sales', 'cash', 'expenses', 'statistics',
+    'sales', 'delivered_sales', 'cash', 'expenses', 'employee-charges', 'statistics',
   ],
 
   // Odontología: presupuestos de tratamiento (quotes) + agenda de pacientes.
   ODONTOLOGIA: [
     'locals', 'users', 'categories', 'providers', 'inventory', 'purchases',
     'customers', 'cartera', 'impuestos', 'loyalty', 'services', 'appointments', 'quotes',
-    'sales', 'delivered_sales', 'cash', 'expenses', 'statistics',
+    'sales', 'delivered_sales', 'cash', 'expenses', 'employee-charges', 'statistics',
   ],
 
   // ---------- CANALES DE VENTA (remoto / online / mayorista) ----------

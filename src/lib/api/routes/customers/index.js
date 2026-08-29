@@ -38,6 +38,14 @@ export async function redeemCustomerReward(id) {
   return apiFetch(`/customers/${id}/redeem-reward`, { method: 'PATCH' });
 }
 
+// Gradúa (o desgradúa) la tarjeta de fidelización del cliente a mano.
+export async function setLoyaltyComplete(id, complete = true) {
+  return apiFetch(`/customers/${id}/loyalty-complete`, {
+    method: 'PATCH',
+    body: JSON.stringify({ complete }),
+  });
+}
+
 // Clientes con actividad de fidelización (sellos/premios) + config de la empresa.
 export async function getLoyaltyCustomers(params = {}) {
   const { page = 1, limit = 20, ...filters } = params;
