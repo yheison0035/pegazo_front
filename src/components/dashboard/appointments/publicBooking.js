@@ -175,21 +175,34 @@ export default function PublicBooking() {
       </div>
 
       {/* Encabezado */}
-      <header className="relative z-10 px-5 pt-8 text-center">
-        <img src={LOGO} alt="RAGNOR BARBER" className="mx-auto h-16 w-auto" />
-        <h1 className="mt-4 text-2xl font-bold tracking-tight sm:text-3xl">
+      <header className="relative z-10 px-4 pt-6 text-center sm:pt-8">
+        <img src={LOGO} alt="RAGNOR BARBER" className="mx-auto h-12 w-auto sm:h-16" />
+        <h1 className="mt-3 text-xl font-bold tracking-tight sm:text-3xl">
           Agenda tu cita
         </h1>
-        <p className="mt-1 text-sm text-amber-400/80">Experiencia premium</p>
+        <p className="mt-0.5 text-xs text-amber-400/80 sm:text-sm">
+          Experiencia premium
+        </p>
       </header>
 
       {/* Stepper */}
-      <div className="relative z-10 mx-auto mt-6 w-full max-w-2xl px-5">
+      <div className="relative z-10 mx-auto mt-4 w-full max-w-2xl px-4 sm:mt-6 sm:px-5">
         <Stepper step={step} />
       </div>
 
+      {/* Contexto de la selección (incluye la sede aunque sea única) */}
+      {(local || service || barber) && !success && (
+        <div className="relative z-10 mx-auto mt-4 flex w-full max-w-2xl flex-wrap gap-1.5 px-4 sm:px-5">
+          {local && (
+            <Chip icon={BuildingStorefrontIcon} text={local.name} />
+          )}
+          {service && <Chip icon={ScissorsIcon} text={service.name} />}
+          {barber && <Chip icon={UserIcon} text={barber.name} />}
+        </div>
+      )}
+
       {/* Contenido */}
-      <main className="relative z-10 mx-auto w-full max-w-2xl flex-1 px-5 pb-32 pt-6">
+      <main className="relative z-10 mx-auto w-full max-w-2xl flex-1 px-4 pb-32 pt-5 sm:px-5">
         {step > (locals.length === 1 ? 1 : 0) && !success && (
           <button
             type="button"
@@ -292,7 +305,7 @@ export default function PublicBooking() {
                           )}`
                         }
                         alt={b.name}
-                        className="mx-auto mb-2 h-20 w-20 rounded-xl object-cover"
+                        className="mx-auto mb-2 h-16 w-16 rounded-xl object-cover sm:h-20 sm:w-20"
                       />
                       <p className="truncate text-sm font-semibold">{b.name}</p>
                     </OptionCard>
@@ -308,16 +321,16 @@ export default function PublicBooking() {
                       key={d.value}
                       type="button"
                       onClick={() => pickDate(d.value)}
-                      className={`flex flex-col items-center rounded-xl border px-2 py-3 transition ${
+                      className={`flex flex-col items-center rounded-xl border px-2 py-2 transition ${
                         date === d.value
                           ? 'border-amber-500 bg-amber-500/10 text-white'
                           : 'border-gray-800 text-gray-300 hover:border-gray-600'
                       }`}
                     >
-                      <span className="text-[11px] uppercase text-gray-400">
+                      <span className="text-[10px] uppercase text-gray-400">
                         {d.isToday ? 'Hoy' : d.isTomorrow ? 'Mañana' : d.dow}
                       </span>
-                      <span className="text-xl font-bold leading-tight">
+                      <span className="text-lg font-bold leading-tight sm:text-xl">
                         {d.day}
                       </span>
                       <span className="text-[11px] text-gray-400">
@@ -425,7 +438,7 @@ function Stepper({ step }) {
           <div key={s.key} className="flex flex-1 items-center last:flex-none">
             <div className="flex flex-col items-center">
               <div
-                className={`flex h-9 w-9 items-center justify-center rounded-full border-2 transition ${
+                className={`flex h-7 w-7 items-center justify-center rounded-full border-2 transition sm:h-9 sm:w-9 ${
                   active
                     ? 'border-amber-500 bg-amber-500/10 text-amber-400 shadow-[0_0_14px_rgba(245,158,11,0.35)]'
                     : done
@@ -482,13 +495,22 @@ function StepTitle({ index }) {
   );
 }
 
+function Chip({ icon: Icon, text }) {
+  return (
+    <span className="inline-flex max-w-[47%] items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] font-medium text-amber-300 sm:max-w-none">
+      <Icon className="h-3 w-3 flex-none" />
+      <span className="truncate">{text}</span>
+    </span>
+  );
+}
+
 function OptionCard({ active, onClick, children, className = '' }) {
   return (
     <motion.button
       type="button"
-      whileTap={{ scale: 0.97 }}
+      whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      className={`w-full rounded-2xl border p-4 text-left transition ${
+      className={`w-full rounded-xl border p-3 text-left transition sm:rounded-2xl sm:p-3.5 ${
         active
           ? 'border-amber-500 bg-amber-500/10'
           : 'border-gray-800 bg-white/[0.02] hover:border-gray-600'
