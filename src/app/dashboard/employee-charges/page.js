@@ -1,0 +1,421 @@
+'use client';
+
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  PlusIcon,
+  BanknotesIcon,
+  ReceiptPercentIcon,
+  TrashIcon,
+  ArrowUturnLeftIcon,
+} from '@heroicons/react/24/outline';
+import RoleGuard from '@/auth/roleGuard';
+import Button from '@/components/ui/Button';
+import AlertModal from '@/components/dashboard/modals/alertModal';
+import { useAuth } from '@/context/authContext';
+import { formatCOP } from '@/lib/api/utils/utils';
+import { getUsers } from '@/lib/api/routes/users';
+import {
+  getEmployeeCharges,
+  getEmployeeChargesSummary,
+  createEmployeeCharge,
+  settleEmployeeCharge,
+  unsettleEmployeeCharge,
+  deleteEmployeeCharge,
+} from '@/lib/api/routes/employeeCharges';
+
+const TYPES = [
+  { id: 'MEMBRESIA', label: 'Error de membresía' },
+  { id: 'PRESTAMO', label: 'Préstamo' },
+  { id: 'PRODUCTO', label: 'Producto' },
+  { id: 'OTRO', label: 'Otro' },
+];
+const TYPE_LABEL = Object.fromEntries(TYPES.map((t) => [t.id, t.label]));
+
+const STATUS_META = {
+  PENDIENTE: { label: 'Pendiente', cls: 'bg-amber-100 text-amber-800' },
+  PAGADO: { label: 'Pagado (efectivo)', cls: 'bg-emerald-100 text-emerald-700' },
+  DESCONTADO: { label: 'Descontado de comisión', cls: 'bg-blue-100 text-blue-700' },
+};
+
+const OWNER_ROLES = ['SUPER_ADMIN', 'ADMIN'];
+
+export default function EmployeeChargesPage() {
+  const { usuario } = useAuth();
+  const isOwner = OWNER_ROLES.includes(usuario?.role);
+
+  const [employees, setEmployees] = useState([]);
+  const [selectedUser, setSelectedUser] = useState('');
+  const [charges, setCharges] = useState([]);
+  const [summary, setSummary] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [alert, setAlert] = useState({});
+
+  const [form, setForm] = useState({
+    type: 'OTRO',
+    concept: '',
+    amount: '',
+    notes: '',
+  });
+
+  // El dueño elige empleado; el empleado solo ve lo suyo.
+  const effectiveUserId = isOwner ? selectedUser : usuario?.id;
+
+  useEffect(() => {
+    if (!isOwner) return;
+    getUsers({ limit: 200 })
+      .then((r) => setEmployees(r?.data || []))
+      .catch(() => setEmployees([]));
+  }, [isOwner]);
+
+  const load = useCallback(async () => {
+    try {
+      const [c, s] = await Promise.all([
+        getEmployeeCharges(effectiveUserId ? { userId: effectiveUserId } : {}),
+        getEmployeeChargesSummary(isOwner ? effectiveUserId : undefined),
+      ]);
+      setCharges(c?.data || []);
+      setSummary(s?.data || null);
+    } catch {
+      setCharges([]);
+      setSummary(null);
+    }
+  }, [effectiveUserId, isOwner]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const add = async () => {
+    if (!selectedUser) {
+      setAlert({ type: 'warning', message: 'Elige el empleado primero.' });
+      return;
+    }
+    if (!form.concept.trim() || !Number(form.amount)) {
+      setAlert({ type: 'warning', message: 'Falta concepto o valor.' });
+      return;
+    }
+    setBusy(true);
+    try {
+      await createEmployeeCharge({
+        userId: Number(selectedUser),
+        type: form.type,
+        concept: form.concept.trim(),
+        amount: Number(form.amount),
+        notes: form.notes.trim() || undefined,
+      });
+      setForm({ type: 'OTRO', concept: '', amount: '', notes: '' });
+      setAlert({ type: 'success', message: 'Cargo registrado.' });
+      load();
+    } catch (e) {
+      setAlert({ type: 'error', message: e.message || 'No se pudo registrar.' });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const settle = async (id, method) => {
+    setBusy(true);
+    try {
+      await settleEmployeeCharge(id, method);
+      load();
+    } catch (e) {
+      setAlert({ type: 'error', message: e.message || 'No se pudo saldar.' });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const reopen = async (id) => {
+    setBusy(true);
+    try {
+      await unsettleEmployeeCharge(id);
+      load();
+    } catch (e) {
+      setAlert({ type: 'error', message: e.message });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const remove = async (id) => {
+    setBusy(true);
+    try {
+      await deleteEmployeeCharge(id);
+      load();
+    } catch (e) {
+      setAlert({ type: 'error', message: e.message });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const inputCls =
+    'w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20';
+
+  const empName = useMemo(() => {
+    const e = employees.find((x) => String(x.id) === String(selectedUser));
+    return e?.name || '';
+  }, [employees, selectedUser]);
+
+  return (
+    <RoleGuard allowedRoles={['SUPER_ADMIN', 'ADMIN', 'BARBERO', 'PROFESIONAL']}>
+      <div className="w-full p-4">
+        <div className="mb-1 flex items-center gap-2">
+          <h1 className="text-2xl font-semibold text-gray-800">
+            Cargos a empleados
+          </h1>
+        </div>
+        <p className="mb-5 text-sm text-gray-500">
+          {isOwner
+            ? 'Valores que el empleado debe responder (error de membresía, préstamo, producto…). Puedes marcarlos pagados en efectivo o descontarlos de sus comisiones.'
+            : 'Estos son los valores que debes responder al negocio.'}
+        </p>
+
+        {/* Selector de empleado (dueño) */}
+        {isOwner && (
+          <div className="mb-4 max-w-sm">
+            <label className="mb-1 block text-xs font-semibold text-gray-600">
+              Empleado
+            </label>
+            <select
+              value={selectedUser}
+              onChange={(e) => setSelectedUser(e.target.value)}
+              className={inputCls}
+            >
+              <option value="">— Todos —</option>
+              {employees.map((e) => (
+                <option key={e.id} value={e.id}>
+                  {e.name} {e.role ? `· ${e.role}` : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* Saldo */}
+        <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+            <p className="text-xs font-semibold uppercase text-amber-700">
+              Saldo pendiente
+            </p>
+            <p className="mt-1 text-2xl font-extrabold text-amber-900">
+              {formatCOP(summary?.pending || 0)}
+            </p>
+          </div>
+          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+            <p className="text-xs font-semibold uppercase text-emerald-700">
+              Pagado en efectivo
+            </p>
+            <p className="mt-1 text-2xl font-extrabold text-emerald-900">
+              {formatCOP(summary?.paid || 0)}
+            </p>
+          </div>
+          <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4">
+            <p className="text-xs font-semibold uppercase text-blue-700">
+              Descontado de comisión
+            </p>
+            <p className="mt-1 text-2xl font-extrabold text-blue-900">
+              {formatCOP(summary?.discounted || 0)}
+            </p>
+          </div>
+        </div>
+
+        {/* Nuevo cargo (dueño) */}
+        {isOwner && (
+          <div className="mb-6 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+            <p className="mb-3 font-semibold text-gray-800">
+              Nuevo cargo {empName ? `para ${empName}` : ''}
+            </p>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-gray-600">
+                  Tipo
+                </label>
+                <select
+                  value={form.type}
+                  onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))}
+                  className={inputCls}
+                >
+                  {TYPES.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="lg:col-span-2">
+                <label className="mb-1 block text-xs font-semibold text-gray-600">
+                  Concepto
+                </label>
+                <input
+                  value={form.concept}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, concept: e.target.value }))
+                  }
+                  placeholder="Ej: Corte membresía mal aplicado"
+                  className={inputCls}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-gray-600">
+                  Valor (COP)
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={form.amount}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, amount: e.target.value }))
+                  }
+                  placeholder="Ej: 27500"
+                  className={inputCls}
+                />
+              </div>
+            </div>
+            <div className="mt-3 flex items-end gap-3">
+              <div className="flex-1">
+                <label className="mb-1 block text-xs font-semibold text-gray-600">
+                  Nota (opcional)
+                </label>
+                <input
+                  value={form.notes}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, notes: e.target.value }))
+                  }
+                  className={inputCls}
+                />
+              </div>
+              <Button
+                variant="add"
+                icon={PlusIcon}
+                onClick={add}
+                loading={busy}
+              >
+                Agregar cargo
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Lista de cargos */}
+        <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+          {charges.length === 0 ? (
+            <p className="py-12 text-center text-sm text-gray-400">
+              Sin cargos registrados.
+            </p>
+          ) : (
+            <table className="w-full min-w-[640px] text-sm">
+              <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+                <tr>
+                  {isOwner && <th className="px-4 py-3 text-left">Empleado</th>}
+                  <th className="px-4 py-3 text-left">Concepto</th>
+                  <th className="px-4 py-3 text-left">Tipo</th>
+                  <th className="px-4 py-3 text-right">Valor</th>
+                  <th className="px-4 py-3 text-center">Estado</th>
+                  {isOwner && <th className="px-4 py-3 text-right">Acciones</th>}
+                </tr>
+              </thead>
+              <tbody>
+                {charges.map((c) => {
+                  const meta = STATUS_META[c.status] || {
+                    label: c.status,
+                    cls: 'bg-gray-100 text-gray-700',
+                  };
+                  return (
+                    <tr key={c.id} className="border-t border-gray-100">
+                      {isOwner && (
+                        <td className="px-4 py-3 font-medium text-gray-700">
+                          {c.userName || `#${c.userId}`}
+                        </td>
+                      )}
+                      <td className="px-4 py-3">
+                        <div className="font-medium text-gray-800">
+                          {c.concept}
+                        </div>
+                        {c.notes && (
+                          <div className="text-xs text-gray-400">{c.notes}</div>
+                        )}
+                        <div className="text-[11px] text-gray-400">
+                          {new Date(c.createdAt).toLocaleDateString('es-CO')}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-gray-600">
+                        {TYPE_LABEL[c.type] || c.type}
+                      </td>
+                      <td className="px-4 py-3 text-right font-bold text-gray-900">
+                        {formatCOP(c.amount)}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <span
+                          className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${meta.cls}`}
+                        >
+                          {meta.label}
+                        </span>
+                      </td>
+                      {isOwner && (
+                        <td className="px-4 py-3">
+                          <div className="flex items-center justify-end gap-1.5">
+                            {c.status === 'PENDIENTE' ? (
+                              <>
+                                <button
+                                  type="button"
+                                  disabled={busy}
+                                  onClick={() => settle(c.id, 'EFECTIVO')}
+                                  title="Pagó en efectivo"
+                                  className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-100 disabled:opacity-50"
+                                >
+                                  <BanknotesIcon className="h-3.5 w-3.5" />
+                                  Efectivo
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={busy}
+                                  onClick={() => settle(c.id, 'COMISION')}
+                                  title="Descontar de su comisión"
+                                  className="inline-flex items-center gap-1 rounded-lg bg-blue-50 px-2 py-1 text-[11px] font-semibold text-blue-700 hover:bg-blue-100 disabled:opacity-50"
+                                >
+                                  <ReceiptPercentIcon className="h-3.5 w-3.5" />
+                                  Comisión
+                                </button>
+                              </>
+                            ) : (
+                              <button
+                                type="button"
+                                disabled={busy}
+                                onClick={() => reopen(c.id)}
+                                title="Reabrir"
+                                className="inline-flex items-center gap-1 rounded-lg bg-gray-50 px-2 py-1 text-[11px] font-semibold text-gray-600 hover:bg-gray-100 disabled:opacity-50"
+                              >
+                                <ArrowUturnLeftIcon className="h-3.5 w-3.5" />
+                                Reabrir
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              disabled={busy}
+                              onClick={() => remove(c.id)}
+                              title="Eliminar"
+                              className="inline-flex items-center rounded-lg border border-gray-200 p-1 text-gray-400 hover:border-red-200 hover:text-red-500 disabled:opacity-50"
+                            >
+                              <TrashIcon className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      )}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
+        </div>
+
+        <AlertModal
+          type={alert.type}
+          message={alert.message}
+          onClose={() => setAlert({})}
+        />
+      </div>
+    </RoleGuard>
+  );
+}
