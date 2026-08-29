@@ -143,7 +143,19 @@ export default function PublicBooking() {
     setStep(5);
   };
 
-  const back = () => setStep((s) => Math.max(local && locals.length === 1 ? 1 : 0, s - 1));
+  const back = () => {
+    const min = locals.length === 1 ? 1 : 0;
+    const target = Math.max(min, step - 1);
+    // Al volver atrás se limpia la selección de ese paso (y las siguientes),
+    // así el chip desaparece y el usuario la elige de nuevo.
+    if (target <= 0 && locals.length > 1) setLocal(null);
+    if (target <= 1) setService(null);
+    if (target <= 2) setBarber(null);
+    if (target <= 3) setDate('');
+    if (target <= 4) setTime('');
+    setSlots([]);
+    setStep(target);
+  };
 
   const reset = () => {
     setLocal(locals.length === 1 ? locals[0] : null);
@@ -168,7 +180,7 @@ export default function PublicBooking() {
   const selectedDay = days.find((d) => d.value === date);
 
   return (
-    <div className="relative flex min-h-screen flex-col bg-black text-white">
+    <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-black text-white">
       {/* Marca de agua */}
       <div className="pointer-events-none fixed inset-0 flex items-center justify-center opacity-[0.03]">
         <img src={LOGO} alt="" className="w-[560px] max-w-[90%]" />
@@ -232,7 +244,7 @@ export default function PublicBooking() {
 
               {/* 1. SEDE */}
               {step === 0 && (
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {locals.length === 0 && <Skeletons n={2} />}
                   {locals.map((l) => (
                     <OptionCard
@@ -260,7 +272,7 @@ export default function PublicBooking() {
 
               {/* 2. SERVICIO */}
               {step === 1 && (
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {services.length === 0 && <Skeletons n={4} />}
                   {services.map((s) => (
                     <OptionCard
@@ -269,8 +281,10 @@ export default function PublicBooking() {
                       onClick={() => pickService(s)}
                     >
                       <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <p className="truncate font-semibold">{s.name}</p>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-semibold leading-tight">
+                            {s.name}
+                          </p>
                           <p className="mt-0.5 text-xs text-gray-400">
                             {s.duration} min
                           </p>
