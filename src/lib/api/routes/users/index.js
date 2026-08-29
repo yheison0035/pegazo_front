@@ -149,3 +149,17 @@ export async function getUsersByRole(params = {}) {
 
   return res.data || res;
 }
+
+// Profesionales para la reserva pública (sin sesión): deriva la empresa del local.
+export async function getPublicProfessionals(params = {}) {
+  const query = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== '' && value !== null && value !== undefined) {
+      query.set(key, String(value));
+    }
+  });
+  const res = await apiFetch(`/public/professionals?${query.toString()}`, {
+    auth: false,
+  });
+  return res?.data ?? res ?? [];
+}
