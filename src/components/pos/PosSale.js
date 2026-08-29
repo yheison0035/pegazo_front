@@ -234,11 +234,13 @@ export default function PosSale({
   }, [custSearch, customer]);
 
   // Tope de cantidad: servicios y elaborados (sin control de stock) son
-  // ilimitados; el resto no puede pasar de las existencias.
+  // ilimitados; el resto no puede pasar de las existencias. Al EDITAR, la
+  // cantidad que ya tenía la venta (originalQuantity) sigue disponible, porque
+  // al guardar se devuelve el stock viejo y se descuenta el nuevo.
   const maxQty = (i) =>
     i.type === 'service' || i.trackStock === false
       ? Infinity
-      : Number(i.stock) || 0;
+      : (Number(i.stock) || 0) + (Number(i.originalQuantity) || 0);
 
   const addToCart = useCallback((r) => {
     const key = keyOf(r);
@@ -767,8 +769,8 @@ export default function PosSale({
           </div>
 
           {/* ================= DERECHA: FACTURA ================= */}
-          <div className="lg:w-[400px] lg:flex-none">
-            <div className="lg:sticky lg:top-4 rounded-2xl border border-gray-100 bg-white shadow-sm flex flex-col max-h-[calc(100vh-2rem)]">
+          <div className="w-full min-w-0 lg:w-[400px] lg:flex-none">
+            <div className="flex flex-col rounded-2xl border border-gray-100 bg-white shadow-sm lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)]">
               {/* Cliente */}
               <div className="p-3 border-b border-gray-100">
                 {customer ? (
@@ -838,8 +840,8 @@ export default function PosSale({
                 )}
               </div>
 
-              {/* Ítems */}
-              <div className="flex-1 overflow-y-auto p-3 space-y-2 min-h-[120px]">
+              {/* Ítems (en móvil crece con la página; en desktop scroll interno) */}
+              <div className="flex-1 space-y-2 p-3 lg:min-h-[120px] lg:overflow-y-auto">
                 {cart.length === 0 ? (
                   <p className="py-10 text-center text-sm text-gray-400">
                     La factura está vacía. Agrega ítems desde la izquierda.
