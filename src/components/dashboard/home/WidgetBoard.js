@@ -127,7 +127,18 @@ export default function WidgetBoard({ data, actions }) {
         (w) => audienceOk(w.id, isBarber) && w.applies(data),
       ).map((w) => w.id),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data?.isServices, data?.isAdmin, data?.showBank, isBarber],
+    [
+      data?.isServices,
+      data?.isAdmin,
+      data?.showBank,
+      isBarber,
+      // Datos que cargan async y de los que depende la visibilidad de algunos
+      // widgets (cargos del empleado/dueño y rendimiento del barbero).
+      data?.ownerCharges?.pending,
+      (data?.myCharges?.list || []).length,
+      data?.myCharges?.pending,
+      data?.myPerf?.ratesConfigured,
+    ],
   );
 
   const [order, setOrder] = useState([]);
