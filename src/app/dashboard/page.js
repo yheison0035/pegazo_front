@@ -14,6 +14,10 @@ import { useAuth } from '@/context/authContext';
 import useTerms from '@/hooks/useTerms';
 import Button from '@/components/ui/Button';
 import { getHomeSummary, getMyPerformance } from '@/lib/api/routes/statistics';
+import {
+  getEmployeeChargesSummary,
+  getEmployeeCharges,
+} from '@/lib/api/routes/employeeCharges';
 import { getLowStock } from '@/lib/api/routes/inventory';
 import { getReceivables } from '@/lib/api/routes/sales';
 import { getAppointmentsAgenda } from '@/lib/api/routes/appointments';
@@ -59,9 +63,23 @@ export default function DashboardHome() {
   const [showWeekly, setShowWeekly] = useState(false);
   const [detailPeriod, setDetailPeriod] = useState(null); // 'today'|'week'|'month'
   const [showTodayAppts, setShowTodayAppts] = useState(false);
+  // Lo que el empleado (cualquier rol no-dueño) debe actualmente al negocio.
+  const [myCharges, setMyCharges] = useState(null);
 
   useEffect(() => {
     if (!usuario) return;
+
+    // Cualquier empleado (no dueño/admin) ve lo que debe al negocio (cargos).
+    if (!isAdmin) {
+      Promise.all([
+        getEmployeeChargesSummary(),
+        getEmployeeCharges({ status: 'PENDIENTE' }),
+      ])
+        .then(([s, l]) =>
+          setMyCharges({ pending: s?.data?.pending || 0, list: l?.data || [] }),
+        )
+        .catch(() => setMyCharges(null));
+    }
 
     // Barbero: SOLO su rendimiento + sus citas de hoy. Nada del negocio.
     if (isBarber) {
@@ -149,6 +167,7 @@ export default function DashboardHome() {
       isAdmin,
       isBarber,
       showBank,
+      myCharges,
       t,
       usuario,
     }),
@@ -164,6 +183,7 @@ export default function DashboardHome() {
       isAdmin,
       isBarber,
       showBank,
+      myCharges,
       t,
       usuario,
     ],

@@ -551,6 +551,18 @@ export const WIDGETS = [
                   <span className="font-semibold text-gray-700">{p.cuts}</span>
                 </li>
               </ul>
+              {p.charges > 0 && (
+                <div className="mt-2 rounded-xl bg-red-50 p-2.5 text-sm">
+                  <div className="flex items-center justify-between text-red-600">
+                    <span>Descuentos (cargos)</span>
+                    <span className="font-semibold">−{formatCOP(p.charges)}</span>
+                  </div>
+                  <div className="mt-1 flex items-center justify-between border-t border-red-100 pt-1 font-bold text-gray-800">
+                    <span>Neto a recibir</span>
+                    <span className="text-orange-700">{formatCOP(p.net)}</span>
+                  </div>
+                </div>
+              )}
               <p className="mt-1.5 text-[11px] text-gray-400">
                 Cierre del {p.range || 'mes'}. Los cortes se pagan por semana;
                 los productos se acumulan y se pagan el{' '}
@@ -608,6 +620,47 @@ export const WIDGETS = [
       );
     },
   },
+  {
+    // Lo que el empleado (cualquier rol no-dueño) debe actualmente al negocio.
+    id: 'lo-que-debo',
+    name: 'Lo que debes',
+    applies: (data) => !data.isAdmin && (data.myCharges?.pending || 0) > 0,
+    Render: ({ data }) => {
+      const mc = data.myCharges || {};
+      const list = mc.list || [];
+      return (
+        <ShortcutCard href="/dashboard/employee-charges" hint="Ver detalle">
+          <Label icon={CreditCardIcon} accent="text-red-500">
+            Lo que debes
+          </Label>
+          <p className="mt-1 text-2xl font-bold tabular-nums text-red-600">
+            {formatCOP(mc.pending || 0)}
+          </p>
+          <ul className="mt-2 space-y-1 border-t border-gray-100 pt-2 text-sm">
+            {list.slice(0, 4).map((c) => (
+              <li
+                key={c.id}
+                className="flex items-center justify-between text-gray-600"
+              >
+                <span className="truncate pr-2">{c.concept}</span>
+                <span className="flex-none font-semibold text-gray-800">
+                  {formatCOP(c.amount)}
+                </span>
+              </li>
+            ))}
+            {list.length > 4 && (
+              <li className="text-[11px] text-gray-400">
+                +{list.length - 4} más
+              </li>
+            )}
+          </ul>
+          <p className="mt-1.5 text-[11px] text-gray-400">
+            Se descuenta de tu pago o lo abonas en efectivo.
+          </p>
+        </ShortcutCard>
+      );
+    },
+  },
 ];
 
 // Audiencia de cada widget: 'owner' (dueño/staff), 'barber' (barbero) o 'all'.
@@ -626,11 +679,14 @@ export const WIDGET_AUDIENCE = {
   'por-cobrar': 'owner',
   cumpleanos: 'all',
   calculadora: 'all',
+  'lo-que-debo': 'all',
 };
 
 // Widgets visibles por defecto (se filtran por audiencia según el rol; el
 // resto se agregan desde el catálogo).
 export const DEFAULT_LAYOUT = [
+  // Empleado: lo que debe (aparece si tiene saldo)
+  'lo-que-debo',
   // Barbero
   'mi-hoy',
   'mis-citas-hoy',
