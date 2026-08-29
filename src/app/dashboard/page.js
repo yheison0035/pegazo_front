@@ -73,14 +73,16 @@ export default function DashboardHome() {
   useEffect(() => {
     if (!usuario) return;
 
-    // Cualquier empleado (no dueño/admin) ve lo que debe al negocio (cargos).
+    // Cualquier empleado (no dueño/admin) ve sus cargos (con estado) y su saldo.
     if (!isAdmin) {
-      Promise.all([
-        getEmployeeChargesSummary(),
-        getEmployeeCharges({ status: 'PENDIENTE' }),
-      ])
+      Promise.all([getEmployeeChargesSummary(), getEmployeeCharges()])
         .then(([s, l]) =>
-          setMyCharges({ pending: s?.data?.pending || 0, list: l?.data || [] }),
+          setMyCharges({
+            pending: s?.data?.pending || 0,
+            paid: s?.data?.paid || 0,
+            discounted: s?.data?.discounted || 0,
+            list: l?.data || [],
+          }),
         )
         .catch(() => setMyCharges(null));
     } else {

@@ -107,6 +107,13 @@ function HintChip({ hint }) {
     </span>
   );
 }
+// Estados de un cargo al empleado (para que sepa si ya está pago o no).
+const CHARGE_STATUS = {
+  PENDIENTE: { label: 'Pendiente', cls: 'bg-amber-100 text-amber-800' },
+  PAGADO: { label: 'Pagado', cls: 'bg-emerald-100 text-emerald-700' },
+  DESCONTADO: { label: 'Descontado', cls: 'bg-blue-100 text-blue-700' },
+};
+
 // Estados de cita para el barbero (informativo, sin poder contactar al cliente).
 const APPT_STATUS = {
   CONFIRMADA: { label: 'Confirmada', cls: 'bg-blue-100 text-blue-700' },
@@ -686,18 +693,6 @@ export const WIDGETS = [
                   <span className="font-semibold text-gray-700">{p.cuts}</span>
                 </li>
               </ul>
-              {p.charges > 0 && (
-                <div className="mt-2 rounded-xl bg-red-50 p-2.5 text-sm">
-                  <div className="flex items-center justify-between text-red-600">
-                    <span>Descuentos (cargos)</span>
-                    <span className="font-semibold">−{formatCOP(p.charges)}</span>
-                  </div>
-                  <div className="mt-1 flex items-center justify-between border-t border-red-100 pt-1 font-bold text-gray-800">
-                    <span>Neto a recibir</span>
-                    <span className="text-orange-700">{formatCOP(p.net)}</span>
-                  </div>
-                </div>
-              )}
               <p className="mt-1.5 text-[11px] text-gray-400">
                 Cierre del {p.range || 'mes'}. Los cortes se pagan por semana;
                 los productos se acumulan y se pagan el{' '}
@@ -721,43 +716,108 @@ export const WIDGETS = [
     Render: ({ data }) => <MisCitasCard agenda={data.myAgenda} />,
   },
   {
-    // Lo que el empleado (cualquier rol no-dueño) debe actualmente al negocio.
+    // Cargos del empleado: lo que debe y si cada uno está pago o pendiente.
     id: 'lo-que-debo',
-    name: 'Lo que debes',
-    applies: (data) => !data.isAdmin && (data.myCharges?.pending || 0) > 0,
+    name: 'Mis cargos',
+    applies: (data) => !data.isAdmin && (data.myCharges?.list || []).length > 0,
     Render: ({ data }) => {
       const mc = data.myCharges || {};
       const list = mc.list || [];
       return (
         <ShortcutCard href="/dashboard/employee-charges" hint="Ver detalle">
           <Label icon={CreditCardIcon} accent="text-red-500">
-            Lo que debes
+            Mis cargos
           </Label>
-          <p className="mt-1 text-2xl font-bold tabular-nums text-red-600">
+          <p className="text-[11px] text-gray-400">Lo que debes al negocio</p>
+          <p className="mt-0.5 text-2xl font-bold tabular-nums text-red-600">
             {formatCOP(mc.pending || 0)}
           </p>
-          <ul className="mt-2 space-y-1 border-t border-gray-100 pt-2 text-sm">
-            {list.slice(0, 4).map((c) => (
-              <li
-                key={c.id}
-                className="flex items-center justify-between text-gray-600"
-              >
-                <span className="truncate pr-2">{c.concept}</span>
-                <span className="flex-none font-semibold text-gray-800">
-                  {formatCOP(c.amount)}
-                </span>
-              </li>
-            ))}
-            {list.length > 4 && (
+          <ul className="mt-2 space-y-1.5 border-t border-gray-100 pt-2 text-sm">
+            {list.slice(0, 5).map((c) => {
+              const st = CHARGE_STATUS[c.status] || {
+                label: c.status,
+                cls: 'bg-gray-100 text-gray-600',
+              };
+              return (
+                <li key={c.id} className="flex items-center gap-2">
+                  <span className="min-w-0 flex-1 truncate text-gray-600">
+                    {c.concept}
+                  </span>
+                  <span
+                    className={`flex-none rounded-full px-2 py-0.5 text-[10px] font-semibold ${st.cls}`}
+                  >
+                    {st.label}
+                  </span>
+                  <span className="flex-none font-semibold text-gray-800">
+                    {formatCOP(c.amount)}
+                  </span>
+                </li>
+              );
+            })}
+            {list.length > 5 && (
               <li className="text-[11px] text-gray-400">
-                +{list.length - 4} más
+                +{list.length - 5} más
               </li>
             )}
           </ul>
           <p className="mt-1.5 text-[11px] text-gray-400">
-            Se descuenta de tu pago o lo abonas en efectivo.
+            Lo pendiente se descuenta de tu pago o lo abonas en efectivo.
           </p>
         </ShortcutCard>
+      );
+    },
+  },
+  {
+    // Total a pagar al barbero esta semana: cortes de la semana − cargos.
+    id: 'total-a-pagar',
+    name: 'Total a pagar',
+    applies: (data) => !data.isAdmin && !!data.myPerf?.ratesConfigured,
+    Render: ({ data }) => {
+      const week = data.myPerf?.week?.earnings?.service || 0;
+      const cargos = data.myCharges?.pending || 0;
+      const total = week - cargos;
+      const range = data.myPerf?.week?.range;
+      return (
+        <Card>
+          <Label icon={BanknotesIcon} accent="text-emerald-600">
+            Total a pagar
+          </Label>
+          {range && (
+            <p className="-mt-1 mb-1.5 text-[11px] font-medium text-gray-400">
+              Semana {range}
+            </p>
+          )}
+          <ul className="space-y-1.5 text-sm">
+            <li className="flex items-center justify-between text-gray-600">
+              <span>Cortes de la semana</span>
+              <span className="font-semibold text-gray-800">
+                {formatCOP(week)}
+              </span>
+            </li>
+            <li className="flex items-center justify-between text-red-600">
+              <span>− Cargos</span>
+              <span className="font-semibold">−{formatCOP(cargos)}</span>
+            </li>
+          </ul>
+          <div className="mt-2 flex items-center justify-between border-t border-gray-100 pt-2">
+            <span className="font-bold text-gray-800">Total a pagar</span>
+            <span
+              className={`text-xl font-extrabold ${
+                total < 0 ? 'text-red-600' : 'text-emerald-600'
+              }`}
+            >
+              {formatCOP(total)}
+            </span>
+          </div>
+          {total < 0 && (
+            <p className="mt-1 text-[11px] text-red-500">
+              Tus cargos superan los cortes de la semana: queda saldo pendiente.
+            </p>
+          )}
+          <p className="mt-1.5 text-[11px] text-gray-400">
+            Los cortes se pagan por semana; los productos, mensual.
+          </p>
+        </Card>
       );
     },
   },
@@ -826,14 +886,16 @@ export const WIDGET_AUDIENCE = {
   cumpleanos: 'all',
   calculadora: 'all',
   'lo-que-debo': 'all',
+  'total-a-pagar': 'barber',
   'cargos-empleados': 'owner',
 };
 
 // Widgets visibles por defecto (se filtran por audiencia según el rol; el
 // resto se agregan desde el catálogo).
 export const DEFAULT_LAYOUT = [
-  // Empleado: lo que debe (aparece si tiene saldo)
+  // Empleado: sus cargos (aparece si tiene) + total a pagar de la semana
   'lo-que-debo',
+  'total-a-pagar',
   // Barbero
   'mi-hoy',
   'mis-citas-hoy',
