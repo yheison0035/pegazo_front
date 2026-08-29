@@ -38,6 +38,11 @@ export default function EditDeliveredSales() {
           color: it.color,
           size: it.size,
           stock: it.stock,
+          // Cantidad que ya tenía la venta: al editar, el stock disponible es
+          // el actual + esta cantidad (porque ya está descontada). Sin esto los
+          // botones +/− topan mal y dañan la cantidad.
+          originalQuantity: it.quantity,
+          trackStock: it.trackStock,
           price: it.price,
           quantity: it.quantity,
           discount: it.discount || 0,
