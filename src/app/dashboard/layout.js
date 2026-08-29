@@ -8,6 +8,7 @@ import PlanUpgradeModal from '@/components/plan/PlanUpgradeModal';
 import AppointmentsHub from '@/components/appointments/AppointmentsHub';
 import BankDepositNotifier from '@/components/bank/BankDepositNotifier';
 import SplashScreen from '@/components/pwa/SplashScreen';
+import PushRegister from '@/components/pwa/PushRegister';
 import { useAuth } from '@/context/authContext';
 import DayBanner from '@/components/pos/DayBanner';
 import RenewalBanner from '@/components/billing/RenewalBanner';
@@ -50,6 +51,7 @@ export default function Layout({ children }) {
         <PlanUpgradeModal />
         <AppointmentsHub />
         <BankDepositNotifier />
+        <PushRegister />
       </div>
     </RoleGuard>
   );
