@@ -58,21 +58,7 @@ export default function Login() {
         router.push('/platform/companies');
         return;
       }
-      // El profesional que presta el servicio (Barbero, Doctor, Estilista…)
-      // entra directo a su agenda de citas.
-      if (role === 'BARBERO' || role === 'PROFESIONAL') {
-        router.push('/dashboard/appointments');
-        return;
-      }
-      // Roles de restaurante: van directo a su módulo de trabajo.
-      if (role === 'MESERO' || role === 'CAJA') {
-        router.push('/dashboard/mesas');
-        return;
-      }
-      if (role === 'COCINERO') {
-        router.push('/dashboard/kitchen');
-        return;
-      }
+      // Cualquier otro rol entra al Inicio (su panel con atajos y su resumen).
       router.push('/dashboard');
     } catch (err) {
       setError(err.message || 'No pudimos iniciar sesión. Revisa tus datos.');
