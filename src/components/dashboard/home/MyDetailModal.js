@@ -139,7 +139,7 @@ export default function MyDetailModal({ period = 'today', onClose }) {
               <BreakdownList
                 title={`Productos (${d.rates.product}%) · ${formatCOP(
                   d.productEarn,
-                )}`}
+                )}${d.productsMonthly ? ' · se paga mensual' : ''}`}
                 icon={ShoppingBagIcon}
                 items={d.products}
                 empty="Sin productos en este periodo."

@@ -150,7 +150,9 @@ function MisCitasCard({ agenda }) {
     if (!el || typeof ResizeObserver === 'undefined') return;
     const measure = () => {
       const h = el.clientHeight;
-      if (h > 0) setFit(Math.max(1, Math.floor(h / APPT_ROW_H)));
+      // Máximo 10 citas visibles (sobre todo en móvil, donde la tarjeta es
+      // alta); el resto queda en "Ver todas".
+      if (h > 0) setFit(Math.min(10, Math.max(1, Math.floor(h / APPT_ROW_H))));
     };
     measure();
     const ro = new ResizeObserver(measure);
@@ -759,6 +761,52 @@ export const WIDGETS = [
       );
     },
   },
+  {
+    // Para el dueño/admin: total de cargos (deudas) de sus empleados.
+    id: 'cargos-empleados',
+    name: 'Cargos a empleados',
+    applies: (data) => data.isAdmin && (data.ownerCharges?.pending || 0) > 0,
+    Render: ({ data }) => {
+      const oc = data.ownerCharges || {};
+      const list = oc.list || [];
+      return (
+        <ShortcutCard href="/dashboard/employee-charges" hint="Ver y cobrar">
+          <Label icon={CreditCardIcon} accent="text-red-500">
+            Cargos a empleados
+          </Label>
+          <p className="mt-1 text-2xl font-bold tabular-nums text-red-600">
+            {formatCOP(oc.pending || 0)}
+          </p>
+          <p className="text-[11px] text-gray-400">
+            Total pendiente por cobrar a empleados
+          </p>
+          <ul className="mt-2 space-y-1 border-t border-gray-100 pt-2 text-sm">
+            {list.slice(0, 4).map((c) => (
+              <li
+                key={c.id}
+                className="flex items-center justify-between text-gray-600"
+              >
+                <span className="truncate pr-2">
+                  <span className="font-medium text-gray-700">
+                    {c.userName || 'Empleado'}
+                  </span>{' '}
+                  · {c.concept}
+                </span>
+                <span className="flex-none font-semibold text-gray-800">
+                  {formatCOP(c.amount)}
+                </span>
+              </li>
+            ))}
+            {list.length > 4 && (
+              <li className="text-[11px] text-gray-400">
+                +{list.length - 4} más
+              </li>
+            )}
+          </ul>
+        </ShortcutCard>
+      );
+    },
+  },
 ];
 
 // Audiencia de cada widget: 'owner' (dueño/staff), 'barber' (barbero) o 'all'.
@@ -778,6 +826,7 @@ export const WIDGET_AUDIENCE = {
   cumpleanos: 'all',
   calculadora: 'all',
   'lo-que-debo': 'all',
+  'cargos-empleados': 'owner',
 };
 
 // Widgets visibles por defecto (se filtran por audiencia según el rol; el
@@ -799,6 +848,7 @@ export const DEFAULT_LAYOUT = [
   'proximas-citas',
   'mes',
   'por-cobrar',
+  'cargos-empleados',
   // Común
   'cumpleanos',
 ];

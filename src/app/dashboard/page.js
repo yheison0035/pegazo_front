@@ -67,6 +67,8 @@ export default function DashboardHome() {
   const [showTodayAppts, setShowTodayAppts] = useState(false);
   // Lo que el empleado (cualquier rol no-dueño) debe actualmente al negocio.
   const [myCharges, setMyCharges] = useState(null);
+  // Para el dueño: total de cargos/deudas de sus empleados.
+  const [ownerCharges, setOwnerCharges] = useState(null);
 
   useEffect(() => {
     if (!usuario) return;
@@ -81,6 +83,19 @@ export default function DashboardHome() {
           setMyCharges({ pending: s?.data?.pending || 0, list: l?.data || [] }),
         )
         .catch(() => setMyCharges(null));
+    } else {
+      // El dueño/admin ve el total de cargos pendientes de sus empleados.
+      Promise.all([
+        getEmployeeChargesSummary(),
+        getEmployeeCharges({ status: 'PENDIENTE' }),
+      ])
+        .then(([s, l]) =>
+          setOwnerCharges({
+            pending: s?.data?.pending || 0,
+            list: l?.data || [],
+          }),
+        )
+        .catch(() => setOwnerCharges(null));
     }
 
     // Barbero: SOLO su rendimiento + sus citas de hoy. Nada del negocio.
@@ -183,6 +198,7 @@ export default function DashboardHome() {
       isBarber,
       showBank,
       myCharges,
+      ownerCharges,
       t,
       usuario,
     }),
@@ -200,6 +216,7 @@ export default function DashboardHome() {
       isBarber,
       showBank,
       myCharges,
+      ownerCharges,
       t,
       usuario,
     ],

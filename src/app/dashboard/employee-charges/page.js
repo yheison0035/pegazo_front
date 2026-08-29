@@ -7,6 +7,7 @@ import {
   ReceiptPercentIcon,
   TrashIcon,
   ArrowUturnLeftIcon,
+  PrinterIcon,
 } from '@heroicons/react/24/outline';
 import RoleGuard from '@/auth/roleGuard';
 import Button from '@/components/ui/Button';
@@ -157,13 +158,70 @@ export default function EmployeeChargesPage() {
     return e?.name || '';
   }, [employees, selectedUser]);
 
+  // Imprime la lista de cargos (deudas) tal como se ve, con el total pendiente.
+  const printCharges = () => {
+    const STATUS_TXT = {
+      PENDIENTE: 'Pendiente',
+      PAGADO: 'Pagado (efectivo)',
+      DESCONTADO: 'Descontado de comisión',
+    };
+    const titulo = empName ? `Cargos de ${empName}` : 'Cargos a empleados';
+    const rows = charges
+      .map(
+        (c) => `<tr>
+          <td>${c.userName || ''}</td>
+          <td>${c.concept || ''}</td>
+          <td>${TYPE_LABEL[c.type] || c.type}</td>
+          <td style="text-align:right">${formatCOP(c.amount)}</td>
+          <td>${STATUS_TXT[c.status] || c.status}</td>
+          <td>${new Date(c.createdAt).toLocaleDateString('es-CO')}</td>
+        </tr>`,
+      )
+      .join('');
+    const pend = charges
+      .filter((c) => c.status === 'PENDIENTE')
+      .reduce((s, c) => s + c.amount, 0);
+    const negocio = usuario?.company?.name || '';
+    const w = window.open('', '_blank', 'width=800,height=600');
+    if (!w) return;
+    w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${titulo}</title>
+      <style>
+        body{font-family:Arial,Helvetica,sans-serif;color:#111827;padding:24px;}
+        h1{font-size:18px;margin:0 0 2px;} .sub{color:#6b7280;font-size:12px;margin:0 0 16px;}
+        table{width:100%;border-collapse:collapse;font-size:12px;}
+        th,td{border:1px solid #e5e7eb;padding:6px 8px;text-align:left;}
+        th{background:#f9fafb;}
+        .tot{margin-top:14px;font-size:14px;font-weight:bold;text-align:right;}
+      </style></head><body>
+      <h1>${titulo}</h1>
+      <p class="sub">${negocio} · ${new Date().toLocaleDateString('es-CO')}</p>
+      <table><thead><tr>
+        <th>Empleado</th><th>Concepto</th><th>Tipo</th><th style="text-align:right">Valor</th><th>Estado</th><th>Fecha</th>
+      </tr></thead><tbody>${rows || '<tr><td colspan="6">Sin cargos</td></tr>'}</tbody></table>
+      <p class="tot">Total pendiente: ${formatCOP(pend)}</p>
+      </body></html>`);
+    w.document.close();
+    w.focus();
+    w.print();
+  };
+
   return (
     <RoleGuard allowedRoles={['SUPER_ADMIN', 'ADMIN', 'BARBERO', 'PROFESIONAL']}>
       <div className="w-full p-4">
-        <div className="mb-1 flex items-center gap-2">
+        <div className="mb-1 flex items-center justify-between gap-2">
           <h1 className="text-2xl font-semibold text-gray-800">
             Cargos a empleados
           </h1>
+          {charges.length > 0 && (
+            <button
+              type="button"
+              onClick={printCharges}
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+            >
+              <PrinterIcon className="h-4 w-4" />
+              Imprimir
+            </button>
+          )}
         </div>
         <p className="mb-5 text-sm text-gray-500">
           {isOwner

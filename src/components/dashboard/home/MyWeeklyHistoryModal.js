@@ -1,7 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { XMarkIcon, CalendarDaysIcon } from '@heroicons/react/24/outline';
+import {
+  XMarkIcon,
+  CalendarDaysIcon,
+  InformationCircleIcon,
+} from '@heroicons/react/24/outline';
 import { getMyHistory } from '@/lib/api/routes/statistics';
 import { formatCOP } from '@/lib/api/utils/utils';
 
@@ -124,10 +128,29 @@ export default function MyWeeklyHistoryModal({ onClose }) {
                                   key={j}
                                   className="flex items-center justify-between gap-2 py-1 text-sm"
                                 >
-                                  <span className="truncate text-gray-600">
+                                  <span className="flex min-w-0 items-center gap-1 truncate text-gray-600">
                                     {s.qty}× {s.name}
+                                    {s.courtesy && (
+                                      <span
+                                        className="group relative inline-flex flex-none cursor-help text-orange-500"
+                                        tabIndex={0}
+                                      >
+                                        <InformationCircleIcon className="h-4 w-4" />
+                                        <span className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-1 hidden w-52 -translate-x-1/2 rounded-lg bg-gray-900 px-2.5 py-1.5 text-[11px] font-normal leading-snug text-white group-hover:block group-focus:block">
+                                          Este corte se hizo pero quedó sin
+                                          comisión (cortesía o mal aplicado): lo
+                                          realizaste, pero no suma a tu pago.
+                                        </span>
+                                      </span>
+                                    )}
                                   </span>
-                                  <span className="flex-none font-semibold text-gray-800">
+                                  <span
+                                    className={`flex-none font-semibold ${
+                                      s.courtesy
+                                        ? 'text-gray-400'
+                                        : 'text-gray-800'
+                                    }`}
+                                  >
                                     {formatCOP(s.earn)}
                                   </span>
                                 </li>
@@ -139,6 +162,11 @@ export default function MyWeeklyHistoryModal({ onClose }) {
                           <div>
                             <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
                               Productos
+                              {w.productsMonthly && (
+                                <span className="ml-1 font-normal normal-case text-gray-400">
+                                  · se paga mensual (no suma aquí)
+                                </span>
+                              )}
                             </p>
                             <ul className="divide-y divide-gray-100">
                               {w.products.map((s, j) => (
