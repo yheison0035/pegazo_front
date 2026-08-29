@@ -3,6 +3,7 @@ export const getEmptyCategory = () => ({
   description: '',
   status: 'ACTIVO',
   localId: '',
+  earnsCommission: false,
 });
 
 export const getFormFieldsCategories = () => [
@@ -35,6 +36,14 @@ export const getFormFieldsCategories = () => [
     required: true,
     source: 'locals',
     disabled: false,
+  },
+  {
+    name: 'earnsCommission',
+    label: 'Los productos de esta categoría dan comisión al empleado',
+    type: 'checkbox',
+    required: false,
+    helperText:
+      'Actívalo solo para insumos. Para cervezas/bebidas déjalo desactivado (no generan comisión).',
   },
 ];
 
