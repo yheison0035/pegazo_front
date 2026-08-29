@@ -12,8 +12,14 @@ import {
 import Button from '@/components/ui/Button';
 import ConfirmClientButton from './ConfirmClientButton';
 import { statusMeta } from '@/lib/appointmentStatus';
+import { useAuth } from '@/context/authContext';
+
+// El barbero/profesional NO puede contactar al cliente: su vista es informativa.
+const NO_CONTACT_ROLES = ['BARBERO', 'PROFESIONAL'];
 
 function AppointmentRow({ appt }) {
+  const { usuario } = useAuth();
+  const canContact = !NO_CONTACT_ROLES.includes(usuario?.role);
   const s = statusMeta(appt.status);
   return (
     <div className="flex flex-col gap-2 rounded-xl border border-gray-100 bg-white p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
@@ -57,7 +63,7 @@ function AppointmentRow({ appt }) {
         </div>
       </div>
 
-      {appt.customer?.phone && (
+      {canContact && appt.customer?.phone && (
         <div className="flex-none">
           <ConfirmClientButton appt={appt} />
         </div>

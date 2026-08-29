@@ -55,6 +55,8 @@ export default function DashboardHome() {
   const [home, setHome] = useState(null);
   const [myPerf, setMyPerf] = useState(null);
   const [todayAppts, setTodayAppts] = useState(null);
+  // Agenda del usuario: hoy / mañana / semana (del día actual en adelante).
+  const [myAgenda, setMyAgenda] = useState(null);
   const [lowStock, setLowStock] = useState([]);
   const [receivable, setReceivable] = useState(0);
   const [bankDeposits, setBankDeposits] = useState([]);
@@ -90,8 +92,14 @@ export default function DashboardHome() {
         .then((r) => setHome(r?.data || null))
         .catch(() => setHome(null));
       getAppointmentsAgenda()
-        .then((r) => setTodayAppts(r?.data?.today || []))
-        .catch(() => setTodayAppts([]));
+        .then((r) => {
+          setTodayAppts(r?.data?.today || []);
+          setMyAgenda(r?.data || { today: [], tomorrow: [], week: [] });
+        })
+        .catch(() => {
+          setTodayAppts([]);
+          setMyAgenda({ today: [], tomorrow: [], week: [] });
+        });
       return;
     }
 
@@ -106,8 +114,14 @@ export default function DashboardHome() {
       .catch(() => setReceivable(0));
     if (isServices) {
       getAppointmentsAgenda()
-        .then((r) => setTodayAppts(r?.data?.today || []))
-        .catch(() => setTodayAppts([]));
+        .then((r) => {
+          setTodayAppts(r?.data?.today || []);
+          setMyAgenda(r?.data || { today: [], tomorrow: [], week: [] });
+        })
+        .catch(() => {
+          setTodayAppts([]);
+          setMyAgenda({ today: [], tomorrow: [], week: [] });
+        });
     }
     if (showBank) {
       const loadBank = () =>
@@ -160,6 +174,7 @@ export default function DashboardHome() {
       myPerf,
       teamBirthdays,
       todayAppts,
+      myAgenda,
       lowStock,
       receivable,
       bankDeposits,
@@ -176,6 +191,7 @@ export default function DashboardHome() {
       myPerf,
       teamBirthdays,
       todayAppts,
+      myAgenda,
       lowStock,
       receivable,
       bankDeposits,

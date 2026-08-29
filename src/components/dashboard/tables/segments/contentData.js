@@ -573,8 +573,11 @@ export default function ContentData({
                   {info.customer?.name || '---'}
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
-                  {info.customer?.document !== '222222222222' &&
-                  info.customer?.phone ? (
+                  {['BARBERO', 'PROFESIONAL'].includes(rol) ? (
+                    // El barbero no contacta al cliente: solo ve el estado.
+                    <StatusBadge status={info.status} />
+                  ) : info.customer?.document !== '222222222222' &&
+                    info.customer?.phone ? (
                     <ConfirmClientButton appt={info} />
                   ) : (
                     '---'
