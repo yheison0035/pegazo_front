@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import {
-  XMarkIcon,
-  CalendarDaysIcon,
-  InformationCircleIcon,
-} from '@heroicons/react/24/outline';
+import { XMarkIcon, CalendarDaysIcon } from '@heroicons/react/24/outline';
 import { getMyHistory } from '@/lib/api/routes/statistics';
 import { formatCOP } from '@/lib/api/utils/utils';
+import CourtesyInfo from './CourtesyInfo';
+
+const COURTESY_TEXT =
+  'Este corte se hizo pero quedó sin comisión (cortesía o mal aplicado): lo realizaste, pero no suma a tu pago.';
 
 // Historial del barbero por SEMANA o por MES, con su ganancia y el desglose de
 // cortes y productos al desplegar.
@@ -131,17 +131,7 @@ export default function MyWeeklyHistoryModal({ onClose }) {
                                   <span className="flex min-w-0 items-center gap-1 truncate text-gray-600">
                                     {s.qty}× {s.name}
                                     {s.courtesy && (
-                                      <span
-                                        className="group relative inline-flex flex-none cursor-help text-orange-500"
-                                        tabIndex={0}
-                                      >
-                                        <InformationCircleIcon className="h-4 w-4" />
-                                        <span className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-1 hidden w-52 -translate-x-1/2 rounded-lg bg-gray-900 px-2.5 py-1.5 text-[11px] font-normal leading-snug text-white group-hover:block group-focus:block">
-                                          Este corte se hizo pero quedó sin
-                                          comisión (cortesía o mal aplicado): lo
-                                          realizaste, pero no suma a tu pago.
-                                        </span>
-                                      </span>
+                                      <CourtesyInfo text={COURTESY_TEXT} />
                                     )}
                                   </span>
                                   <span
