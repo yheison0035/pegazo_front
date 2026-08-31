@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 
@@ -36,9 +36,12 @@ const VARIANTS = {
 const BASE =
   'group/tab relative inline-flex h-9 w-9 items-center justify-center rounded-lg ' +
   'ring-1 ring-inset transition-all duration-150 ease-out ' +
-  'hover:-translate-y-px hover:shadow-sm active:translate-y-0 ' +
+  'hover:-translate-y-px hover:shadow-sm active:translate-y-0 active:scale-95 ' +
   'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 ' +
   'disabled:pointer-events-none disabled:opacity-40 aria-disabled:pointer-events-none aria-disabled:opacity-40';
+
+// Pequeño retardo antes de mostrar el tooltip (evita el parpadeo al pasar rápido).
+const TIP_DELAY = 320;
 
 export default function TableActionButton({
   icon: Icon,
@@ -50,16 +53,25 @@ export default function TableActionButton({
   children,
 }) {
   const ref = useRef(null);
+  const timer = useRef(null);
   const [tip, setTip] = useState(null); // {left, top} o null
 
   const show = useCallback(() => {
-    const el = ref.current;
-    if (!el) return;
-    const r = el.getBoundingClientRect();
-    setTip({ left: r.left + r.width / 2, top: r.top });
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => {
+      const el = ref.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      setTip({ left: r.left + r.width / 2, top: r.top });
+    }, TIP_DELAY);
   }, []);
 
-  const hide = useCallback(() => setTip(null), []);
+  const hide = useCallback(() => {
+    clearTimeout(timer.current);
+    setTip(null);
+  }, []);
+
+  useEffect(() => () => clearTimeout(timer.current), []);
 
   const cls = `${BASE} ${VARIANTS[variant] || VARIANTS.neutral}`;
   const inner = children || (Icon ? <Icon className="h-[18px] w-[18px]" /> : null);
