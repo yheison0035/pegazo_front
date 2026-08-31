@@ -42,6 +42,7 @@ import AnnualStats from '@/components/dashboard/statistics/AnnualStats';
 import ProfitLoss from '@/components/dashboard/statistics/ProfitLoss';
 import CashFlow from '@/components/dashboard/statistics/CashFlow';
 import TaxReport from '@/components/dashboard/statistics/TaxReport';
+import InventoryValuation from '@/components/dashboard/statistics/InventoryValuation';
 import StatDetailModal from '@/components/dashboard/statistics/StatDetailModal';
 import FilterableTable from '@/components/dashboard/statistics/FilterableTable';
 import { exportCSV, csvNum } from '@/components/dashboard/statistics/exportUtils';
@@ -57,6 +58,7 @@ const TABS = [
   { id: 'comparar', label: 'Comparar meses' },
   { id: 'anual', label: 'Anual' },
   { id: 'gastos', label: 'Gastos' },
+  { id: 'inventario', label: 'Inventario' },
   { id: 'impuestos', label: 'Impuestos' },
 ];
 
@@ -330,6 +332,8 @@ export default function Statistics() {
         {tab === 'impuestos' && (
           <TaxReport startDate={startDate} endDate={endDate} />
         )}
+
+        {tab === 'inventario' && <InventoryValuation />}
 
         {/* Filtros (Resumen y Gastos comparten el rango de fechas) */}
         <div
