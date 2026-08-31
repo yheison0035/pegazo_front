@@ -326,6 +326,12 @@ export const NAVIGATION = [
         icon: ReceiptPercentIcon,
         roles: ['SUPER_ADMIN', 'ADMIN'],
       },
+      {
+        name: 'Facturación electrónica',
+        href: '/dashboard/facturacion-electronica',
+        icon: DocumentTextIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN'],
+      },
     ],
   },
 
