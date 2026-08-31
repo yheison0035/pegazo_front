@@ -30,70 +30,70 @@ export const BUSINESS_TYPES = {
   COMERCIO: [
     'locals', 'users', 'categories', 'brands', 'providers', 'inventory',
     'purchases', 'customers', 'cartera', 'impuestos', 'sales', 'delivered_sales',
-    'returns', 'cash', 'expenses', 'statistics',
+    'returns', 'cash', 'expenses', 'payables', 'statistics',
   ],
 
   SUPERMERCADO: [
     'locals', 'users', 'categories', 'brands', 'providers', 'inventory',
     'purchases', 'customers', 'cartera', 'impuestos', 'sales', 'delivered_sales',
-    'returns', 'cash', 'expenses', 'statistics',
+    'returns', 'cash', 'expenses', 'payables', 'statistics',
   ],
 
   DROGUERIA: [
     'locals', 'users', 'categories', 'brands', 'providers', 'inventory',
     'purchases', 'customers', 'cartera', 'impuestos', 'sales', 'delivered_sales',
-    'returns', 'cash', 'expenses', 'statistics',
+    'returns', 'cash', 'expenses', 'payables', 'statistics',
   ],
 
   ROPA: [
     'locals', 'users', 'categories', 'brands', 'providers', 'inventory',
     'purchases', 'customers', 'cartera', 'impuestos', 'sales', 'delivered_sales',
-    'returns', 'cash', 'expenses', 'statistics',
+    'returns', 'cash', 'expenses', 'payables', 'statistics',
   ],
 
   // Perecederos por peso: sin marcas, sin devoluciones (producto perecedero).
   FRUVER: [
     'locals', 'users', 'categories', 'providers', 'inventory', 'purchases',
     'customers', 'cartera', 'impuestos', 'sales', 'delivered_sales', 'cash',
-    'expenses', 'statistics',
+    'expenses', 'payables', 'statistics',
   ],
 
   CARNICERIA: [
     'locals', 'users', 'categories', 'providers', 'inventory', 'purchases',
     'customers', 'cartera', 'impuestos', 'sales', 'delivered_sales', 'cash',
-    'expenses', 'statistics',
+    'expenses', 'payables', 'statistics',
   ],
 
   CAFETERIA: [
     'locals', 'users', 'categories', 'providers', 'inventory', 'purchases',
     'customers', 'cartera', 'impuestos', 'sales', 'delivered_sales', 'cash',
-    'expenses', 'statistics',
+    'expenses', 'payables', 'statistics',
   ],
 
   // Floristería: cotiza arreglos para eventos (domicilios: módulo futuro).
   FLORISTERIA: [
     'locals', 'users', 'categories', 'providers', 'inventory', 'purchases',
     'customers', 'cartera', 'impuestos', 'quotes', 'sales', 'delivered_sales',
-    'cash', 'expenses', 'statistics',
+    'cash', 'expenses', 'payables', 'statistics',
   ],
 
   // Puesto/stand de feria o evento: operación de venta simple.
   FERIA: [
     'locals', 'users', 'categories', 'inventory', 'purchases', 'customers', 'cartera', 'impuestos',
-    'sales', 'delivered_sales', 'returns', 'cash', 'expenses', 'statistics',
+    'sales', 'delivered_sales', 'returns', 'cash', 'expenses', 'payables', 'statistics',
   ],
 
   // ---------- COMIDA (salón + cocina) ----------
   RESTAURANTE: [
     'locals', 'users', 'categories', 'providers', 'inventory', 'supplies', 'purchases',
     'customers', 'cartera', 'impuestos', 'mesas', 'kitchen', 'sales', 'delivered_sales',
-    'cash', 'expenses', 'statistics',
+    'cash', 'expenses', 'payables', 'statistics',
   ],
 
   COMIDA_RAPIDA: [
     'locals', 'users', 'categories', 'providers', 'inventory', 'supplies', 'purchases',
     'customers', 'cartera', 'impuestos', 'mesas', 'kitchen', 'sales', 'delivered_sales',
-    'cash', 'expenses', 'statistics',
+    'cash', 'expenses', 'payables', 'statistics',
   ],
 
   // ---------- SERVICIOS CON AGENDA ----------
@@ -101,14 +101,14 @@ export const BUSINESS_TYPES = {
   SERVICIOS: [
     'locals', 'users', 'categories', 'brands', 'providers', 'inventory',
     'purchases', 'customers', 'cartera', 'impuestos', 'loyalty', 'services', 'appointments',
-    'sales', 'delivered_sales', 'cash', 'expenses', 'employee-charges', 'statistics',
+    'sales', 'delivered_sales', 'cash', 'expenses', 'payables', 'employee-charges', 'statistics',
   ],
 
   // Odontología: presupuestos de tratamiento (quotes) + agenda de pacientes.
   ODONTOLOGIA: [
     'locals', 'users', 'categories', 'providers', 'inventory', 'purchases',
     'customers', 'cartera', 'impuestos', 'loyalty', 'services', 'appointments', 'quotes',
-    'sales', 'delivered_sales', 'cash', 'expenses', 'employee-charges', 'statistics',
+    'sales', 'delivered_sales', 'cash', 'expenses', 'payables', 'employee-charges', 'statistics',
   ],
 
   // ---------- CANALES DE VENTA (remoto / online / mayorista) ----------
@@ -116,21 +116,21 @@ export const BUSINESS_TYPES = {
   TELEVENTAS: [
     'locals', 'users', 'categories', 'brands', 'providers', 'inventory',
     'purchases', 'customers', 'cartera', 'impuestos','quotes', 'sales',
-    'delivered_sales', 'returns', 'expenses', 'statistics',
+    'delivered_sales', 'returns', 'expenses', 'payables', 'statistics',
   ],
 
   // Ecommerce: pedidos web + devoluciones (el estado de envío se gestiona en Pedidos).
   ECOMMERCE: [
     'locals', 'users', 'categories', 'brands', 'providers', 'inventory',
     'purchases', 'customers', 'cartera', 'impuestos','sales', 'delivered_sales',
-    'returns', 'expenses', 'statistics',
+    'returns', 'expenses', 'payables', 'statistics',
   ],
 
   // Distribución / mayorista: pedidos B2B con cotización.
   DISTRIBUCION: [
     'locals', 'users', 'categories', 'brands', 'providers', 'inventory',
     'purchases', 'customers', 'cartera', 'impuestos','quotes', 'sales', 'delivered_sales',
-    'returns', 'expenses', 'statistics',
+    'returns', 'expenses', 'payables', 'statistics',
   ],
 
   // ---------- ESPECIALES ----------
@@ -138,6 +138,6 @@ export const BUSINESS_TYPES = {
   ZORVEX: [
     'locals', 'users', 'categories', 'brands', 'providers', 'inventory',
     'purchases', 'customers', 'cartera', 'impuestos', 'sales', 'delivered_sales', 'returns',
-    'cash', 'expenses', 'statistics',
+    'cash', 'expenses', 'payables', 'statistics',
   ],
 };

@@ -27,6 +27,7 @@ export const TOGGLEABLE_MODULES = [
   { key: 'kitchen', label: 'Cocina (KDS)', group: 'Restaurante' },
 
   { key: 'expenses', label: 'Gastos', group: 'Gestión' },
+  { key: 'payables', label: 'Cuentas por pagar', group: 'Gestión' },
   { key: 'employee-charges', label: 'Cargos a empleados', group: 'Gestión' },
   { key: 'statistics', label: 'Estadísticas y reportes', group: 'Gestión' },
   { key: 'users', label: 'Usuarios y roles', group: 'Gestión' },
