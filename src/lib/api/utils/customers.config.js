@@ -87,6 +87,14 @@ export const getFormFieldsCustomers = () => [
     disabled: false,
   },
   {
+    name: 'segmentId',
+    label: 'Segmento',
+    type: 'select',
+    required: false,
+    source: 'customerSegments',
+    disabled: false,
+  },
+  {
     name: 'notes',
     label: 'Notas del cliente (preferencias, observaciones)',
     type: 'textarea',

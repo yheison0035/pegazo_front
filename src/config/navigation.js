@@ -279,6 +279,12 @@ export const NAVIGATION = [
         ],
       },
       {
+        name: 'Segmentos de cliente',
+        href: '/dashboard/customer-segments',
+        icon: TagIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN'],
+      },
+      {
         name: 'Fidelización',
         href: '/dashboard/loyalty',
         icon: GiftIcon,
