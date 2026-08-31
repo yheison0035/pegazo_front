@@ -11,7 +11,10 @@ import {
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/authContext';
 import { getAppointmentsMonth } from '@/lib/api/routes/appointments';
-import { getRestDays, getMyRestDays } from '@/lib/api/routes/restDays';
+import {
+  getMyRestDays,
+  getRestDaysOverview,
+} from '@/lib/api/routes/restDays';
 
 const MONTHS = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -59,7 +62,8 @@ export default function AppointmentsCalendar() {
   });
   const [appts, setAppts] = useState([]);
   const [barberId, setBarberId] = useState('');
-  const [rest, setRest] = useState(null); // {restWeekdays, timeOff} del barbero elegido
+  // Descansos de todos los profesionales: [{id,name,restWeekdays,timeOff}].
+  const [team, setTeam] = useState([]);
   const [loading, setLoading] = useState(false);
   const [dayOpen, setDayOpen] = useState(null); // dateStr
 
@@ -83,16 +87,49 @@ export default function AppointmentsCalendar() {
     load();
   }, [load]);
 
-  // Descansos del barbero en contexto (barbero: los suyos; admin: el elegido).
+  // Descansos: el barbero ve los suyos; dueño/admin/recepción ven todo el equipo.
   useEffect(() => {
     if (isBarber) {
-      getMyRestDays().then((r) => setRest(r?.data || null)).catch(() => setRest(null));
-    } else if (barberId) {
-      getRestDays(barberId).then((r) => setRest(r?.data || null)).catch(() => setRest(null));
+      getMyRestDays()
+        .then((r) => {
+          const d = r?.data;
+          setTeam(
+            d
+              ? [
+                  {
+                    id: d.userId,
+                    name: d.name || 'Yo',
+                    restWeekdays: d.restWeekdays || [],
+                    timeOff: d.timeOff || [],
+                  },
+                ]
+              : [],
+          );
+        })
+        .catch(() => setTeam([]));
     } else {
-      setRest(null);
+      getRestDaysOverview()
+        .then((r) => setTeam(r?.data || []))
+        .catch(() => setTeam([]));
     }
-  }, [isBarber, barberId]);
+  }, [isBarber]);
+
+  // Profesionales que descansan un día dado (respeta el filtro de barbero).
+  const offBarbersOn = useCallback(
+    (dateStr) => {
+      const weekday = new Date(`${dateStr}T00:00:00Z`).getUTCDay();
+      return team
+        .filter((b) => !barberId || String(b.id) === String(barberId))
+        .filter(
+          (b) =>
+            (b.restWeekdays || []).includes(weekday) ||
+            (b.timeOff || []).some(
+              (t) => String(t.date).slice(0, 10) === dateStr,
+            ),
+        );
+    },
+    [team, barberId],
+  );
 
   // Agrupa citas por día (YYYY-MM-DD).
   const byDay = useMemo(() => {
@@ -104,17 +141,15 @@ export default function AppointmentsCalendar() {
     return map;
   }, [appts]);
 
-  // Opciones de barbero: derivadas de las citas del mes (sin endpoint extra).
+  // Opciones de barbero: todos los profesionales (para poder ver a cualquiera,
+  // aunque no tenga citas ese mes). Si no hay equipo, cae a los de las citas.
   const barberOptions = useMemo(() => {
+    if (team.length) return team.map((b) => ({ id: b.id, name: b.name }));
     const m = new Map();
     for (const a of appts) if (a.barber) m.set(a.barber.id, a.barber.name);
     return [...m.entries()].map(([id, name]) => ({ id, name }));
-  }, [appts]);
+  }, [team, appts]);
 
-  const offSet = new Set(
-    (rest?.timeOff || []).map((t) => String(t.date).slice(0, 10)),
-  );
-  const restWeekdays = rest?.restWeekdays || [];
   const today = todayStr();
 
   const goToday = () => {
@@ -185,8 +220,8 @@ export default function AppointmentsCalendar() {
             if (!c)
               return <div key={`b${i}`} className="min-h-[92px] border-b border-r border-gray-50 bg-gray-50/30" />;
             const list = byDay[c.dateStr] || [];
-            const weekday = new Date(`${c.dateStr}T00:00:00Z`).getUTCDay();
-            const off = offSet.has(c.dateStr) || restWeekdays.includes(weekday);
+            const offBs = offBarbersOn(c.dateStr);
+            const off = offBs.length > 0;
             const isToday = c.dateStr === today;
             return (
               <button
@@ -204,7 +239,19 @@ export default function AppointmentsCalendar() {
                   >
                     {c.d}
                   </span>
-                  {off && <MoonIcon className="h-3.5 w-3.5 text-amber-500" />}
+                  {off && (
+                    <span
+                      className="flex items-center gap-0.5 text-amber-500"
+                      title={`Descanso: ${offBs.map((b) => b.name).join(', ')}`}
+                    >
+                      <MoonIcon className="h-3.5 w-3.5" />
+                      {!barberId && offBs.length > 1 && (
+                        <span className="text-[10px] font-bold">
+                          {offBs.length}
+                        </span>
+                      )}
+                    </span>
+                  )}
                 </div>
                 <div className="space-y-1">
                   {list.slice(0, 3).map((a) => (
@@ -277,12 +324,16 @@ export default function AppointmentsCalendar() {
               </button>
             </div>
             <div className="overflow-y-auto p-4">
-              {(offSet.has(dayOpen) ||
-                restWeekdays.includes(
-                  new Date(`${dayOpen}T00:00:00Z`).getUTCDay(),
-                )) && (
-                <div className="mb-3 flex items-center gap-2 rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-700">
-                  <MoonIcon className="h-4 w-4" /> Día de descanso del profesional.
+              {offBarbersOn(dayOpen).length > 0 && (
+                <div className="mb-3 flex items-start gap-2 rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-700">
+                  <MoonIcon className="mt-0.5 h-4 w-4 flex-none" />
+                  <span>
+                    <b>Descanso:</b>{' '}
+                    {offBarbersOn(dayOpen)
+                      .map((b) => b.name)
+                      .join(', ')}
+                    .
+                  </span>
                 </div>
               )}
               {dayList.length ? (

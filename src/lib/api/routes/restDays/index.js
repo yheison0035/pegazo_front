@@ -13,6 +13,11 @@ export async function getMyRestDays() {
   return apiFetch('/rest-days/mine');
 }
 
+// Resumen de descansos de todos los profesionales (para el calendario).
+export async function getRestDaysOverview() {
+  return apiFetch('/rest-days/overview');
+}
+
 export async function setRestWeekdays(userId, restWeekdays) {
   return apiFetch(`/rest-days/${userId}/weekdays`, {
     method: 'PUT',
