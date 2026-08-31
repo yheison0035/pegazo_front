@@ -14,13 +14,16 @@ import {
 import Button from '@/components/ui/Button';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import { getCompareStats } from '@/lib/api/routes/statistics';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 import {
   ChartCard,
   MoneyTooltip,
   formatMoney,
   formatShort,
+  shortDate,
   COLORS,
 } from './statsUI';
+import { EXPENSE_TYPE_LABELS } from './ExpensesDetail';
 
 // YYYY-MM -> { startDate, endDate } (primer y último día del mes).
 function monthToRange(ym) {
@@ -53,11 +56,17 @@ function pct(a, b) {
 }
 
 const METRICS = [
-  { key: 'totalSales', label: 'Ventas', money: true },
+  { key: 'totalSales', label: 'Ventas', money: true, detail: 'sales' },
   { key: 'salesCount', label: 'Nº de ventas', money: false },
   { key: 'avgTicket', label: 'Ticket promedio', money: true },
   { key: 'itemsSold', label: 'Ítems vendidos', money: false },
-  { key: 'totalExpenses', label: 'Gastos', money: true, invert: true },
+  {
+    key: 'totalExpenses',
+    label: 'Gastos',
+    money: true,
+    invert: true,
+    detail: 'expenses',
+  },
   { key: 'profit', label: 'Utilidad', money: true },
   { key: 'grossMargin', label: 'Margen bruto', money: true },
   { key: 'newCustomers', label: 'Clientes nuevos', money: false },
@@ -68,6 +77,8 @@ export default function CompareStats({ localId }) {
   const [monthB, setMonthB] = useState(currentMonth(-1));
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
+  // Drill-down: { metric, period: 'a'|'b' } o null.
+  const [drill, setDrill] = useState(null);
 
   const fetchCompare = useCallback(async () => {
     setLoading(true);
@@ -177,16 +188,29 @@ export default function CompareStats({ localId }) {
                         ? 'text-red-600'
                         : 'text-gray-400';
                     const fmt = (v) => (m.money ? formatMoney(v) : v);
+                    const Cell = ({ v, period, cls }) =>
+                      m.detail ? (
+                        <button
+                          type="button"
+                          onClick={() => setDrill({ metric: m, period })}
+                          className={`rounded-md px-1.5 py-0.5 font-semibold text-blue-600 underline decoration-dotted underline-offset-2 hover:bg-blue-50 ${cls}`}
+                          title="Ver detalle"
+                        >
+                          {fmt(v)}
+                        </button>
+                      ) : (
+                        <span className={cls}>{fmt(v)}</span>
+                      );
                     return (
                       <tr key={m.key} className="text-gray-700">
                         <td className="py-2.5 pr-4 font-medium text-gray-800">
                           {m.label}
                         </td>
                         <td className="py-2.5 pr-4 text-right font-semibold">
-                          {fmt(va)}
+                          <Cell v={va} period="a" />
                         </td>
                         <td className="py-2.5 pr-4 text-right text-gray-500">
-                          {fmt(vb)}
+                          <Cell v={vb} period="b" cls="text-gray-500" />
                         </td>
                         <td
                           className={`py-2.5 pl-4 text-right font-semibold ${color}`}
@@ -258,6 +282,153 @@ export default function CompareStats({ localId }) {
           </ChartCard>
         </>
       )}
+
+      {drill && (
+        <DrillModal
+          metric={drill.metric}
+          period={data?.[drill.period]}
+          periodLabel={monthLabel(drill.period === 'a' ? monthA : monthB)}
+          onClose={() => setDrill(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+// Modal de detalle al hacer clic en un valor (gastos → listado; ventas → desglose).
+function DrillModal({ metric, period, periodLabel, onClose }) {
+  const isExpenses = metric.detail === 'expenses';
+  const expenses = [...(period?.expensesDetail || [])].sort(
+    (a, b) => new Date(b.date) - new Date(a.date),
+  );
+  const expTotal = expenses.reduce((s, e) => s + e.amount, 0);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+          <div>
+            <h2 className="text-lg font-bold text-gray-800">
+              {metric.label} · {periodLabel}
+            </h2>
+            <p className="text-xs text-gray-500">
+              {isExpenses
+                ? `${expenses.length} movimiento(s)`
+                : 'De dónde vienen las ventas'}
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+          >
+            <XMarkIcon className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="overflow-y-auto p-5">
+          {isExpenses ? (
+            expenses.length ? (
+              <table className="min-w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-100 text-left text-xs uppercase tracking-wide text-gray-500">
+                    <th className="py-2 pr-3">Fecha</th>
+                    <th className="py-2 pr-3">Concepto</th>
+                    <th className="py-2 pr-3">Categoría</th>
+                    <th className="py-2 pr-3">Método</th>
+                    <th className="py-2 pl-3 text-right">Monto</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {expenses.map((e) => (
+                    <tr key={e.id} className="text-gray-700">
+                      <td className="whitespace-nowrap py-2 pr-3 text-gray-400">
+                        {shortDate(String(e.date).slice(0, 10))}
+                      </td>
+                      <td className="py-2 pr-3 font-medium text-gray-800">
+                        {e.concept}
+                      </td>
+                      <td className="py-2 pr-3">
+                        <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
+                          {EXPENSE_TYPE_LABELS[e.type] || e.type}
+                        </span>
+                      </td>
+                      <td className="py-2 pr-3 text-gray-500">
+                        {e.paymentMethod || '—'}
+                      </td>
+                      <td className="py-2 pl-3 text-right font-semibold text-gray-900">
+                        {formatMoney(e.amount)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr className="border-t-2 border-gray-200 font-bold text-gray-900">
+                    <td className="py-3 pr-3" colSpan={4}>
+                      Total
+                    </td>
+                    <td className="py-3 pl-3 text-right">
+                      {formatMoney(expTotal)}
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            ) : (
+              <p className="py-8 text-center text-sm text-gray-400">
+                Sin gastos en este periodo
+              </p>
+            )
+          ) : (
+            <div className="space-y-6">
+              <DrillList
+                title="Top productos"
+                rows={period?.topProducts}
+                nameKey="name"
+              />
+              <DrillList
+                title="Top servicios"
+                rows={period?.topServices}
+                nameKey="name"
+              />
+              <DrillList
+                title="Métodos de pago"
+                rows={period?.paymentMethods}
+                nameKey="method"
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DrillList({ title, rows, nameKey }) {
+  const list = rows || [];
+  if (!list.length) return null;
+  return (
+    <div>
+      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+        {title}
+      </p>
+      <div className="space-y-1">
+        {list.map((r, i) => (
+          <div
+            key={r[nameKey] || i}
+            className="flex items-center justify-between gap-4 border-b border-gray-50 py-1.5 text-sm"
+          >
+            <span className="truncate text-gray-700">{r[nameKey]}</span>
+            <span className="whitespace-nowrap font-semibold text-gray-900">
+              {formatMoney(r.total)}
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

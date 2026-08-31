@@ -121,6 +121,55 @@ export default function Statistics() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Aplica un rango explícito (para los atajos) y recarga.
+  const applyRange = useCallback(
+    async (from, to) => {
+      setStartDate(from);
+      setEndDate(to);
+      setLoading(true);
+      try {
+        const res = await getDashboardStats({
+          startDate: from,
+          endDate: to,
+          ...(localId ? { localId: String(localId) } : {}),
+        });
+        setData(res?.data || null);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [localId],
+  );
+
+  // Atajos de rango (fechas en horario de Colombia).
+  const PRESETS = [
+    {
+      label: 'Este mes',
+      range: () => {
+        const [y, m] = todayCol().split('-');
+        return [`${y}-${m}-01`, todayCol()];
+      },
+    },
+    {
+      label: 'Mes pasado',
+      range: () => {
+        const [y, m] = todayCol().split('-').map(Number);
+        const py = m === 1 ? y - 1 : y;
+        const pm = m === 1 ? 12 : m - 1;
+        const last = new Date(py, pm, 0).getDate();
+        const p = (n) => String(n).padStart(2, '0');
+        return [`${py}-${p(pm)}-01`, `${py}-${p(pm)}-${p(last)}`];
+      },
+    },
+    { label: 'Últimos 30 días', range: () => [daysAgoCol(29), todayCol()] },
+    {
+      label: 'Este año',
+      range: () => [`${todayCol().slice(0, 4)}-01-01`, todayCol()],
+    },
+  ];
+
   const s = data?.summary;
 
   const rangeLabel = data?.range
@@ -284,6 +333,31 @@ export default function Statistics() {
           <Button variant="primary" onClick={fetchStats}>
             Aplicar
           </Button>
+
+          {/* Atajos de rango */}
+          <div className="flex w-full flex-wrap items-center gap-2 pt-1">
+            <span className="text-xs font-semibold uppercase text-gray-400">
+              Atajos:
+            </span>
+            {PRESETS.map((p) => {
+              const [from, to] = p.range();
+              const active = startDate === from && endDate === to;
+              return (
+                <button
+                  key={p.label}
+                  type="button"
+                  onClick={() => applyRange(from, to)}
+                  className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                    active
+                      ? 'border-orange-300 bg-orange-50 text-orange-700'
+                      : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  {p.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* ---- Pestaña Gastos ---- */}
