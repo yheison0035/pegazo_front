@@ -19,23 +19,25 @@ import Link from 'next/link';
  *  - onClick / href / disabled
  */
 
+// Cada acción lleva su color desde el reposo (fondo suave + icono con color)
+// para que se vea activa y clickeable; el hover lo intensifica.
 const VARIANTS = {
-  view: 'hover:bg-orange-50 hover:text-orange-600 hover:ring-orange-100',
-  edit: 'hover:bg-emerald-50 hover:text-emerald-600 hover:ring-emerald-100',
-  delete: 'hover:bg-rose-50 hover:text-rose-600 hover:ring-rose-100',
-  success: 'hover:bg-emerald-50 hover:text-emerald-600 hover:ring-emerald-100',
-  danger: 'hover:bg-rose-50 hover:text-rose-600 hover:ring-rose-100',
-  warning: 'hover:bg-amber-50 hover:text-amber-600 hover:ring-amber-100',
-  info: 'hover:bg-blue-50 hover:text-blue-600 hover:ring-blue-100',
-  whatsapp: 'hover:bg-green-50 hover:text-green-600 hover:ring-green-100',
-  neutral: 'hover:bg-gray-100 hover:text-gray-700 hover:ring-gray-200',
+  view: 'bg-orange-50 text-orange-600 ring-orange-100 hover:bg-orange-100 hover:ring-orange-200',
+  edit: 'bg-emerald-50 text-emerald-600 ring-emerald-100 hover:bg-emerald-100 hover:ring-emerald-200',
+  delete: 'bg-rose-50 text-rose-600 ring-rose-100 hover:bg-rose-100 hover:ring-rose-200',
+  success: 'bg-emerald-50 text-emerald-600 ring-emerald-100 hover:bg-emerald-100 hover:ring-emerald-200',
+  danger: 'bg-rose-50 text-rose-600 ring-rose-100 hover:bg-rose-100 hover:ring-rose-200',
+  warning: 'bg-amber-50 text-amber-600 ring-amber-100 hover:bg-amber-100 hover:ring-amber-200',
+  info: 'bg-blue-50 text-blue-600 ring-blue-100 hover:bg-blue-100 hover:ring-blue-200',
+  whatsapp: 'bg-green-50 text-green-600 ring-green-100 hover:bg-green-100 hover:ring-green-200',
+  neutral: 'bg-gray-100 text-gray-600 ring-gray-200 hover:bg-gray-200 hover:ring-gray-300',
 };
 
 const BASE =
-  'group/tab relative inline-flex h-9 w-9 items-center justify-center rounded-lg text-gray-400 ' +
-  'ring-1 ring-inset ring-transparent transition-all duration-150 ease-out ' +
-  'hover:-translate-y-px hover:shadow-sm ' +
-  'focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 ' +
+  'group/tab relative inline-flex h-9 w-9 items-center justify-center rounded-lg ' +
+  'ring-1 ring-inset transition-all duration-150 ease-out ' +
+  'hover:-translate-y-px hover:shadow-sm active:translate-y-0 ' +
+  'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 ' +
   'disabled:pointer-events-none disabled:opacity-40 aria-disabled:pointer-events-none aria-disabled:opacity-40';
 
 export default function TableActionButton({

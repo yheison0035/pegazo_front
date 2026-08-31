@@ -3,7 +3,7 @@ import usePermissions from '@/hooks/usePermissions';
 import {
   EyeIcon,
   TrashIcon,
-  PencilIcon,
+  PencilSquareIcon,
   Squares2X2Icon,
   PrinterIcon,
   PowerIcon,
@@ -97,7 +97,7 @@ export default function Actions({
 
       {canEdit && (
         <TableActionButton
-          icon={PencilIcon}
+          icon={PencilSquareIcon}
           label="Editar"
           variant="edit"
           disabled={isLocked}
