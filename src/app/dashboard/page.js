@@ -21,6 +21,7 @@ import {
 import { getLowStock } from '@/lib/api/routes/inventory';
 import { getReceivables } from '@/lib/api/routes/sales';
 import { getAppointmentsAgenda } from '@/lib/api/routes/appointments';
+import { getMyRestDays } from '@/lib/api/routes/restDays';
 import { getBankDeposits } from '@/lib/api/routes/bank';
 import { isServicesBusiness } from '@/lib/appointmentsAccess';
 import ReactivateCustomersModal from '@/components/appointments/ReactivateCustomersModal';
@@ -69,6 +70,8 @@ export default function DashboardHome() {
   const [myCharges, setMyCharges] = useState(null);
   // Para el dueño: total de cargos/deudas de sus empleados.
   const [ownerCharges, setOwnerCharges] = useState(null);
+  // Barbero: sus propios descansos programados (para el widget del inicio).
+  const [myRest, setMyRest] = useState(null);
 
   useEffect(() => {
     if (!usuario) return;
@@ -105,6 +108,9 @@ export default function DashboardHome() {
       getMyPerformance()
         .then((r) => setMyPerf(r?.data || null))
         .catch(() => setMyPerf(null));
+      getMyRestDays()
+        .then((r) => setMyRest(r?.data || null))
+        .catch(() => setMyRest(null));
       getHomeSummary()
         .then((r) => setHome(r?.data || null))
         .catch(() => setHome(null));
@@ -201,6 +207,7 @@ export default function DashboardHome() {
       showBank,
       myCharges,
       ownerCharges,
+      myRest,
       t,
       usuario,
     }),
@@ -217,6 +224,7 @@ export default function DashboardHome() {
       isAdmin,
       isBarber,
       showBank,
+      myRest,
       myCharges,
       ownerCharges,
       t,
