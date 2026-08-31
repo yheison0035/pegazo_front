@@ -21,11 +21,11 @@ export const getFormFieldsExpenses = () => [
     disabled: false,
   },
   {
-    name: 'type',
+    name: 'expenseCategoryId',
     label: 'Tipo de Gasto',
     type: 'select',
     required: true,
-    source: 'expenses',
+    source: 'expenseCategories',
     disabled: false,
   },
   {

@@ -303,6 +303,12 @@ export const NAVIGATION = [
         roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA'],
       },
       {
+        name: 'Tipos de gasto',
+        href: '/dashboard/expense-categories',
+        icon: TagIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN'],
+      },
+      {
         name: 'Cuentas por pagar',
         href: '/dashboard/payables',
         icon: BanknotesIcon,
