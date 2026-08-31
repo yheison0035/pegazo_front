@@ -238,6 +238,35 @@ export default function PayablesPage() {
           </Button>
         </div>
 
+        {/* Alerta de vencimientos */}
+        {(summary?.overdueCount > 0 || summary?.dueSoonCount > 0) && (
+          <div
+            className={`mt-4 flex items-start gap-2.5 rounded-2xl border p-3.5 text-sm ${
+              summary?.overdueCount > 0
+                ? 'border-red-200 bg-red-50 text-red-800'
+                : 'border-amber-200 bg-amber-50 text-amber-800'
+            }`}
+          >
+            <ExclamationTriangleIcon className="mt-0.5 h-5 w-5 shrink-0" />
+            <p>
+              {summary?.overdueCount > 0 && (
+                <span className="font-semibold">
+                  {summary.overdueCount} cuenta(s) vencida(s) por{' '}
+                  {formatCOP(summary.overdue)}
+                </span>
+              )}
+              {summary?.overdueCount > 0 && summary?.dueSoonCount > 0 && ' · '}
+              {summary?.dueSoonCount > 0 && (
+                <span>
+                  {summary.dueSoonCount} vence(n) en los próximos 3 días por{' '}
+                  {formatCOP(summary.dueSoon)}
+                </span>
+              )}
+              . Revisa y programa el pago a tiempo.
+            </p>
+          </div>
+        )}
+
         {/* Resumen */}
         <div className="my-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
@@ -259,6 +288,17 @@ export default function PayablesPage() {
               {formatCOP(summary?.overdue || 0)}
             </p>
             <p className="text-xs text-red-700/70">Ya pasó su fecha de pago</p>
+          </div>
+          <div className="rounded-2xl border border-orange-200 bg-orange-50 p-4">
+            <p className="flex items-center gap-1.5 text-xs font-semibold uppercase text-orange-700">
+              <ExclamationTriangleIcon className="h-4 w-4" /> Vence pronto
+            </p>
+            <p className="mt-1 text-2xl font-extrabold text-orange-900">
+              {formatCOP(summary?.dueSoon || 0)}
+            </p>
+            <p className="text-xs text-orange-700/70">
+              {summary?.dueSoonCount || 0} en los próximos 3 días
+            </p>
           </div>
         </div>
 
