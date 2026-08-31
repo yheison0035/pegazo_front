@@ -316,12 +316,15 @@ export default function AppointmentsCalendar() {
                   Sin citas este día.
                 </p>
               )}
-              <Link
-                href={`/dashboard/appointments/new?date=${dayOpen}`}
-                className="mt-4 flex items-center justify-center gap-1.5 rounded-xl bg-orange-500 py-2.5 text-sm font-semibold text-white hover:bg-orange-600"
-              >
-                <PlusIcon className="h-4 w-4" /> Agendar en este día
-              </Link>
+              {/* El barbero solo visualiza: no puede crear citas. */}
+              {!isBarber && (
+                <Link
+                  href={`/dashboard/appointments/new?date=${dayOpen}`}
+                  className="mt-4 flex items-center justify-center gap-1.5 rounded-xl bg-orange-500 py-2.5 text-sm font-semibold text-white hover:bg-orange-600"
+                >
+                  <PlusIcon className="h-4 w-4" /> Agendar en este día
+                </Link>
+              )}
             </div>
           </div>
         </div>
