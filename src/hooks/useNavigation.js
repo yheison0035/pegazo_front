@@ -71,6 +71,7 @@ export default function useNavigation() {
     'expense-categories': 'expenses',
     'charge-categories': 'employee-charges',
     'payment-methods': 'sales',
+    'units-of-measure': 'inventory',
   };
   // Anidado visual (acordeón): bajo qué ítem del menú se agrupa. Puede diferir
   // del gating (ej: métodos de pago se agrupan bajo Caja, pero se muestran
@@ -79,12 +80,14 @@ export default function useNavigation() {
     'expense-categories': 'expenses',
     'charge-categories': 'employee-charges',
     'payment-methods': 'cash',
+    'units-of-measure': 'inventory',
   };
   // Etiqueta del sub-ítem que abre la vista propia del módulo padre.
   const SELF_LABEL = {
     expenses: 'Lista de gastos',
     'employee-charges': 'Lista de cargos',
     cash: 'Ver caja',
+    inventory: 'Ver inventario',
   };
 
   const isAllowedKey = (k) =>

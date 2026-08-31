@@ -209,14 +209,11 @@ export const getFormFieldsInventory = (usuario) => {
       hideWhen: (fd) => fd.trackStock === false,
     },
     {
-      name: 'unit',
-      label: 'Unidad de venta',
+      name: 'unitId',
+      label: 'Unidad de medida',
       type: 'select',
       required: false,
-      options: [
-        { id: 'UNIDAD', name: 'Por unidad' },
-        { id: 'PESO', name: 'Por peso (kg)' },
-      ],
+      source: 'unitsOfMeasure',
       disabled: false,
     },
     {

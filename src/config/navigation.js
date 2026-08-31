@@ -95,6 +95,12 @@ export const NAVIGATION = [
         ],
       },
       {
+        name: 'Unidades de medida',
+        href: '/dashboard/units-of-measure',
+        icon: TagIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN'],
+      },
+      {
         name: 'Insumos',
         href: '/dashboard/supplies',
         icon: BeakerIcon,
