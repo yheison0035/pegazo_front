@@ -8,6 +8,8 @@ import {
   TrashIcon,
   ArrowUturnLeftIcon,
   PrinterIcon,
+  XMarkIcon,
+  CheckCircleIcon,
 } from '@heroicons/react/24/outline';
 import RoleGuard from '@/auth/roleGuard';
 import Button from '@/components/ui/Button';
@@ -51,6 +53,9 @@ export default function EmployeeChargesPage() {
   const [summary, setSummary] = useState(null);
   const [busy, setBusy] = useState(false);
   const [alert, setAlert] = useState({});
+  // Modal para saldar un cargo eligiendo la fecha del pago.
+  const [settleTarget, setSettleTarget] = useState(null); // {charge, method}
+  const [settleDate, setSettleDate] = useState('');
 
   const [form, setForm] = useState({
     type: 'OTRO',
@@ -115,10 +120,24 @@ export default function EmployeeChargesPage() {
     }
   };
 
-  const settle = async (id, method) => {
+  // Abre el modal para saldar eligiendo la FECHA del pago.
+  const openSettle = (charge, method) => {
+    const d = new Date();
+    const off = d.getTimezoneOffset() * 60000;
+    setSettleDate(new Date(d.getTime() - off).toISOString().slice(0, 10));
+    setSettleTarget({ charge, method });
+  };
+
+  const confirmSettle = async () => {
+    if (!settleTarget) return;
     setBusy(true);
     try {
-      await settleEmployeeCharge(id, method);
+      await settleEmployeeCharge(
+        settleTarget.charge.id,
+        settleTarget.method,
+        settleDate ? new Date(settleDate).toISOString() : undefined,
+      );
+      setSettleTarget(null);
       load();
     } catch (e) {
       setAlert({ type: 'error', message: e.message || 'No se pudo saldar.' });
@@ -414,7 +433,7 @@ export default function EmployeeChargesPage() {
                                 <button
                                   type="button"
                                   disabled={busy}
-                                  onClick={() => settle(c.id, 'EFECTIVO')}
+                                  onClick={() => openSettle(c, 'EFECTIVO')}
                                   title="Pagó en efectivo"
                                   className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-100 disabled:opacity-50"
                                 >
@@ -424,7 +443,7 @@ export default function EmployeeChargesPage() {
                                 <button
                                   type="button"
                                   disabled={busy}
-                                  onClick={() => settle(c.id, 'COMISION')}
+                                  onClick={() => openSettle(c, 'COMISION')}
                                   title="Descontar de su comisión"
                                   className="inline-flex items-center gap-1 rounded-lg bg-blue-50 px-2 py-1 text-[11px] font-semibold text-blue-700 hover:bg-blue-100 disabled:opacity-50"
                                 >
@@ -463,6 +482,72 @@ export default function EmployeeChargesPage() {
             </table>
           )}
         </div>
+
+        {/* Modal: saldar cargo eligiendo la fecha del pago */}
+        {settleTarget && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+            onClick={() => setSettleTarget(null)}
+          >
+            <div
+              className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="text-lg font-bold text-gray-800">
+                  {settleTarget.method === 'EFECTIVO'
+                    ? 'Pago en efectivo'
+                    : 'Descontar de comisión'}
+                </h2>
+                <button
+                  onClick={() => setSettleTarget(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <XMarkIcon className="h-5 w-5" />
+                </button>
+              </div>
+              <div className="rounded-xl bg-gray-50 p-3">
+                <p className="font-semibold text-gray-800">
+                  {settleTarget.charge.concept}
+                </p>
+                <p className="text-lg font-bold text-gray-900">
+                  {formatCOP(settleTarget.charge.amount)}
+                </p>
+              </div>
+              <div className="mt-4">
+                <label className="mb-1 block text-xs font-semibold text-gray-600">
+                  Fecha del pago
+                </label>
+                <input
+                  type="date"
+                  value={settleDate}
+                  onChange={(e) => setSettleDate(e.target.value)}
+                  className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                />
+                <p className="mt-1 text-[11px] text-gray-400">
+                  Elige el día en que realmente pagó, para que quede en el
+                  reporte de ese periodo.
+                </p>
+              </div>
+              <div className="mt-5 flex justify-end gap-2">
+                <Button
+                  variant="secondary"
+                  onClick={() => setSettleTarget(null)}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  variant="primary"
+                  icon={CheckCircleIcon}
+                  onClick={confirmSettle}
+                  loading={busy}
+                >
+                  Confirmar
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <AlertModal
           type={alert.type}
