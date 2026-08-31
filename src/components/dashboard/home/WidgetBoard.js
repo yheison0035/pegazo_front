@@ -138,6 +138,7 @@ export default function WidgetBoard({ data, actions }) {
       (data?.myCharges?.list || []).length,
       data?.myCharges?.pending,
       data?.myPerf?.ratesConfigured,
+      !!data?.myRest,
     ],
   );
 

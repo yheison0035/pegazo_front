@@ -8,6 +8,11 @@ export async function getRestDays(userId) {
   return apiFetch(`/rest-days/${userId}`);
 }
 
+// Los descansos del propio usuario (rol barbero/profesional).
+export async function getMyRestDays() {
+  return apiFetch('/rest-days/mine');
+}
+
 export async function setRestWeekdays(userId, restWeekdays) {
   return apiFetch(`/rest-days/${userId}/weekdays`, {
     method: 'PUT',

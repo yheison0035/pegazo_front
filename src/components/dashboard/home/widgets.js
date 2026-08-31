@@ -10,10 +10,12 @@ import {
   CreditCardIcon,
   GiftIcon,
   ChevronRightIcon,
+  MoonIcon,
 } from '@heroicons/react/24/outline';
 import { formatCOP, formatDateTime } from '@/lib/api/utils/utils';
 import SalesTrendChart from './SalesTrendChart';
 import CalculatorWidget from './CalculatorWidget';
+import RestCalendar from '@/components/dashboard/restdays/RestCalendar';
 
 // Medios de pago: etiqueta legible y un color para el punto.
 const PAY_LABEL = {
@@ -696,6 +698,36 @@ export const WIDGETS = [
     Render: ({ data }) => <MisCitasCard agenda={data.myAgenda} />,
   },
   {
+    // Calendario de descansos del propio profesional (rol barbero).
+    id: 'mis-descansos',
+    name: 'Mis descansos',
+    applies: (data) => !!data.myRest,
+    Render: ({ data }) => {
+      const r = data.myRest || {};
+      const count = (r.timeOff || []).length;
+      return (
+        <Card>
+          <Label icon={MoonIcon} accent="text-orange-500">
+            Mis descansos
+          </Label>
+          <p className="mb-2 text-[11px] text-gray-400">
+            Tus días libres programados este mes
+          </p>
+          <RestCalendar
+            restWeekdays={r.restWeekdays || []}
+            timeOff={r.timeOff || []}
+            compact
+          />
+          <p className="mt-2 text-[11px] text-gray-400">
+            {count > 0
+              ? `${count} día(s) libre(s) próximos.`
+              : 'Sin días libres programados. Habla con administración.'}
+          </p>
+        </Card>
+      );
+    },
+  },
+  {
     // Cargos del empleado: lo que debe y si cada uno está pago o pendiente.
     id: 'lo-que-debo',
     name: 'Mis cargos',
@@ -858,6 +890,7 @@ export const WIDGET_AUDIENCE = {
   'mi-semana': 'barber',
   'mi-mes': 'barber',
   'mis-citas-hoy': 'barber',
+  'mis-descansos': 'barber',
   hoy: 'owner',
   grafica: 'owner',
   inventario: 'owner',
@@ -884,6 +917,7 @@ export const DEFAULT_LAYOUT = [
   'mis-citas-hoy',
   'mi-semana',
   'mi-mes',
+  'mis-descansos',
   // Dueño / staff
   'hoy',
   'grafica',
