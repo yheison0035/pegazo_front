@@ -13,6 +13,7 @@ import {
   ChartBarSquareIcon,
   Cog6ToothIcon,
   CalendarDaysIcon,
+  MoonIcon,
   WrenchScrewdriverIcon,
   GlobeAltIcon,
   Squares2X2Icon,
@@ -307,6 +308,12 @@ export const NAVIGATION = [
           'PROFESIONAL',
           'RECEPCIONISTA',
         ],
+      },
+      {
+        name: 'Descansos',
+        href: '/dashboard/rest-days',
+        icon: MoonIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN'],
       },
       {
         name: 'Servicios',

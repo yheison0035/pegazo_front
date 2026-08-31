@@ -71,6 +71,8 @@ export default function PublicBooking() {
   const [barber, setBarber] = useState(null);
   const [date, setDate] = useState('');
   const [slots, setSlots] = useState([]);
+  const [restOff, setRestOff] = useState(false);
+  const [restReason, setRestReason] = useState('');
   const [time, setTime] = useState('');
   const [success, setSuccess] = useState(false);
 
@@ -112,8 +114,14 @@ export default function PublicBooking() {
   useEffect(() => {
     if (!barber || !date) return;
     setSlots([]);
+    setRestOff(false);
+    setRestReason('');
     getAvailability({ barberId: barber.id, date, serviceId: service.id })
-      .then((data) => setSlots(data || []))
+      .then((res) => {
+        setRestOff(!!res?.off);
+        setRestReason(res?.reason || '');
+        setSlots(res?.slots || []);
+      })
       .catch(() => setSlots([]));
   }, [barber, date]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -361,6 +369,26 @@ export default function PublicBooking() {
                   {availabilityLoading ? (
                     <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4">
                       <Skeletons n={8} small />
+                    </div>
+                  ) : restOff ? (
+                    <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-8 text-center">
+                      <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-amber-500/15 text-3xl">
+                        🌙
+                      </div>
+                      <p className="text-base font-semibold text-amber-200">
+                        {(barber?.name || 'El profesional').split(' ')[0]} descansa
+                        este día
+                      </p>
+                      <p className="mt-1 text-sm text-gray-400">
+                        {restReason ? `${restReason}. ` : ''}Elige otra fecha para
+                        agendar tu cita.
+                      </p>
+                      <button
+                        onClick={back}
+                        className="mt-4 rounded-xl border border-amber-500/50 px-4 py-2 text-sm font-semibold text-amber-300 transition hover:bg-amber-500/10"
+                      >
+                        Elegir otra fecha
+                      </button>
                     </div>
                   ) : slots.length === 0 ? (
                     <div className="rounded-2xl border border-gray-800 bg-white/[0.02] p-8 text-center">

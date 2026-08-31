@@ -59,7 +59,7 @@ export default function useAppointments() {
       return await getAvailability(params);
     } catch (err) {
       console.error(err);
-      return [];
+      return { off: false, reason: null, slots: [] };
     } finally {
       setAvailabilityLoading(false);
     }

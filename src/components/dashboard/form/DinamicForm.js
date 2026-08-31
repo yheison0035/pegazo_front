@@ -241,7 +241,18 @@ export default function DinamicForm({
           date: formData.date,
         });
 
-        const data = Array.isArray(res) ? res : res.data || [];
+        // Profesional de descanso ese día: una sola opción informativa (no
+        // seleccionable como hora válida).
+        if (res?.off) {
+          return [
+            {
+              id: '',
+              name: `🌙 De descanso ese día — ${res.reason || 'no atiende'}`,
+            },
+          ];
+        }
+
+        const data = res?.slots || (Array.isArray(res) ? res : res.data || []);
 
         return data.map((time) => ({
           id: time,
