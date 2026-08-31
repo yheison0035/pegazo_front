@@ -47,24 +47,50 @@ function prettyMethod(m) {
     .replace(/^\w/, (c) => c.toUpperCase());
 }
 
+const EMPTY = { concept: '', type: '', paidTo: '', method: '', local: '' };
+
 export default function ExpensesDetail({ data }) {
-  const [typeFilter, setTypeFilter] = useState('');
+  const [filters, setFilters] = useState(EMPTY);
+  const [groupBy, setGroupBy] = useState('type'); // panel "Consumo por"
   const detail = data?.expensesDetail || [];
   const byType = data?.expensesByType || [];
+  const hasLocals = data?.hasMultipleLocals;
+
+  const setF = (k, v) => setFilters((f) => ({ ...f, [k]: v }));
+
+  // Opciones únicas por columna (para los selects de filtro).
+  const options = useMemo(() => {
+    const uniq = (key) =>
+      [...new Set(detail.map((e) => e[key]).filter(Boolean))].sort();
+    return {
+      type: [...new Set(detail.map((e) => e.type))],
+      paidTo: uniq('paidTo'),
+      method: uniq('paymentMethod'),
+      local: uniq('local'),
+    };
+  }, [detail]);
 
   const filtered = useMemo(() => {
-    const list = typeFilter
-      ? detail.filter((e) => e.type === typeFilter)
-      : detail;
-    return [...list].sort((a, b) => new Date(b.date) - new Date(a.date));
-  }, [detail, typeFilter]);
+    const c = filters.concept.trim().toLowerCase();
+    return detail
+      .filter((e) => {
+        if (c && !String(e.concept).toLowerCase().includes(c)) return false;
+        if (filters.type && e.type !== filters.type) return false;
+        if (filters.paidTo && (e.paidTo || '') !== filters.paidTo) return false;
+        if (filters.method && (e.paymentMethod || '') !== filters.method)
+          return false;
+        if (filters.local && (e.local || '') !== filters.local) return false;
+        return true;
+      })
+      .sort((a, b) => new Date(b.date) - new Date(a.date));
+  }, [detail, filters]);
 
   const filteredTotal = useMemo(
     () => filtered.reduce((s, e) => s + e.amount, 0),
     [filtered],
   );
 
-  // Agrupa por día para mostrar subtotales diarios.
+  // Agrupa por día para subtotales.
   const groups = useMemo(() => {
     const map = new Map();
     for (const e of filtered) {
@@ -77,7 +103,35 @@ export default function ExpensesDetail({ data }) {
     return [...map.values()];
   }, [filtered]);
 
+  // "Consumo por": suma del conjunto filtrado agrupado por la columna elegida.
+  const consumption = useMemo(() => {
+    const keyOf = (e) => {
+      if (groupBy === 'type') return EXPENSE_TYPE_LABELS[e.type] || e.type;
+      if (groupBy === 'method') return prettyMethod(e.paymentMethod);
+      if (groupBy === 'paidTo') return e.paidTo || 'Sin especificar';
+      if (groupBy === 'local') return e.local || '—';
+      return 'Otros';
+    };
+    const map = new Map();
+    for (const e of filtered) {
+      const k = keyOf(e);
+      map.set(k, (map.get(k) || 0) + e.amount);
+    }
+    return [...map.entries()]
+      .map(([name, total]) => ({ name, total }))
+      .sort((a, b) => b.total - a.total);
+  }, [filtered, groupBy]);
+
   const totalExpenses = data?.summary?.totalExpenses || 0;
+  const anyFilter = JSON.stringify(filters) !== JSON.stringify(EMPTY);
+  const colCount = hasLocals ? 6 : 5;
+
+  const GROUP_TABS = [
+    { id: 'type', label: 'Categoría' },
+    { id: 'method', label: 'Método' },
+    { id: 'paidTo', label: 'Pagado a' },
+    ...(hasLocals ? [{ id: 'local', label: 'Sede' }] : []),
+  ];
 
   return (
     <div className="space-y-6">
@@ -118,71 +172,81 @@ export default function ExpensesDetail({ data }) {
         </div>
       </div>
 
-      {/* Gastos por tipo */}
-      <ChartCard title="Gastos por categoría" subtitle="Distribución del periodo">
-        {byType.length ? (
-          <ResponsiveContainer width="100%" height={Math.max(200, byType.length * 38)}>
-            <BarChart data={byType} layout="vertical" margin={{ left: 8 }}>
-              <CartesianGrid stroke={COLORS.grid} horizontal={false} />
-              <XAxis
-                type="number"
-                tickFormatter={formatShort}
-                tick={{ fontSize: 11, fill: COLORS.axis }}
-              />
-              <YAxis
-                type="category"
-                dataKey="type"
-                width={150}
-                tickFormatter={(v) => truncate(EXPENSE_TYPE_LABELS[v] || v, 18)}
-                tick={{ fontSize: 11, fill: COLORS.axis }}
-              />
-              <Tooltip
-                content={<MoneyTooltip />}
-                cursor={{ fill: '#f8fafc' }}
-                labelFormatter={(v) => EXPENSE_TYPE_LABELS[v] || v}
-              />
-              <Bar dataKey="total" name="Gastos" radius={[0, 4, 4, 0]}>
-                {byType.map((e, i) => (
-                  <Cell key={e.type} fill={PALETTE[i % PALETTE.length]} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+      {/* Consumo por — cuánto se lleva cada uno */}
+      <ChartCard
+        title="Consumo por"
+        subtitle="Cuánto se lleva cada uno (sobre lo filtrado abajo)"
+      >
+        <div className="mb-3 inline-flex flex-wrap gap-1 rounded-xl border border-gray-200 bg-white p-0.5">
+          {GROUP_TABS.map((g) => (
+            <button
+              key={g.id}
+              onClick={() => setGroupBy(g.id)}
+              className={`rounded-lg px-3 py-1.5 text-sm font-semibold transition ${
+                groupBy === g.id
+                  ? 'bg-orange-500 text-white'
+                  : 'text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              {g.label}
+            </button>
+          ))}
+        </div>
+        {consumption.length ? (
+          <div className="space-y-1.5">
+            {consumption.map((c) => {
+              const pctv = filteredTotal
+                ? Math.round((c.total / filteredTotal) * 100)
+                : 0;
+              return (
+                <div key={c.name} className="flex items-center gap-3">
+                  <span className="w-40 shrink-0 truncate text-sm text-gray-700">
+                    {c.name}
+                  </span>
+                  <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-gray-100">
+                    <div
+                      className="h-full rounded-full bg-orange-400"
+                      style={{ width: `${pctv}%` }}
+                    />
+                  </div>
+                  <span className="w-12 shrink-0 text-right text-xs text-gray-400">
+                    {pctv}%
+                  </span>
+                  <span className="w-28 shrink-0 text-right text-sm font-semibold text-gray-900">
+                    {formatMoney(c.total)}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
         ) : (
-          <p className="py-8 text-center text-sm text-gray-400">
-            No hay gastos en el periodo
-          </p>
+          <p className="py-6 text-center text-sm text-gray-400">Sin datos</p>
         )}
       </ChartCard>
 
-      {/* Detalle con fecha de pago */}
+      {/* Detalle con filtros por columna */}
       <ChartCard
         title="Detalle de gastos"
-        subtitle="Cada movimiento con su fecha de pago"
+        subtitle="Filtra por cada columna para ver el total de ese grupo"
       >
-        {/* Filtro por tipo */}
-        <div className="mb-4 flex flex-wrap items-center gap-3">
-          <select
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-            className="rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
-          >
-            <option value="">Todas las categorías</option>
-            {byType.map((e) => (
-              <option key={e.type} value={e.type}>
-                {EXPENSE_TYPE_LABELS[e.type] || e.type}
-              </option>
-            ))}
-          </select>
+        <div className="mb-3 flex flex-wrap items-center gap-3">
           <span className="text-sm text-gray-500">
-            {filtered.length} movimiento(s) ·{' '}
+            {filtered.length} de {detail.length} movimiento(s) ·{' '}
             <span className="font-semibold text-gray-800">
               {formatMoney(filteredTotal)}
             </span>
           </span>
+          {anyFilter && (
+            <button
+              onClick={() => setFilters(EMPTY)}
+              className="rounded-full border border-gray-200 px-3 py-1 text-xs font-medium text-gray-600 hover:bg-gray-50"
+            >
+              Limpiar filtros
+            </button>
+          )}
         </div>
 
-        {filtered.length ? (
+        {detail.length ? (
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead>
@@ -192,23 +256,79 @@ export default function ExpensesDetail({ data }) {
                   <th className="py-2 pr-4">Categoría</th>
                   <th className="py-2 pr-4">Pagado a</th>
                   <th className="py-2 pr-4">Método</th>
-                  {data?.hasMultipleLocals && <th className="py-2 pr-4">Sede</th>}
+                  {hasLocals && <th className="py-2 pr-4">Sede</th>}
                   <th className="py-2 pl-4 text-right">Monto</th>
+                </tr>
+                {/* Fila de filtros por columna */}
+                <tr className="border-b border-gray-100 align-top">
+                  <th className="py-2 pr-2" />
+                  <th className="py-2 pr-2">
+                    <input
+                      value={filters.concept}
+                      onChange={(e) => setF('concept', e.target.value)}
+                      placeholder="Buscar…"
+                      className="w-full rounded-lg border border-gray-200 px-2 py-1 text-xs font-normal normal-case focus:border-orange-400 focus:outline-none"
+                    />
+                  </th>
+                  <th className="py-2 pr-2">
+                    <ColSelect
+                      value={filters.type}
+                      onChange={(v) => setF('type', v)}
+                      options={options.type.map((t) => ({
+                        value: t,
+                        label: EXPENSE_TYPE_LABELS[t] || t,
+                      }))}
+                    />
+                  </th>
+                  <th className="py-2 pr-2">
+                    <ColSelect
+                      value={filters.paidTo}
+                      onChange={(v) => setF('paidTo', v)}
+                      options={options.paidTo.map((v) => ({ value: v, label: v }))}
+                    />
+                  </th>
+                  <th className="py-2 pr-2">
+                    <ColSelect
+                      value={filters.method}
+                      onChange={(v) => setF('method', v)}
+                      options={options.method.map((v) => ({
+                        value: v,
+                        label: prettyMethod(v),
+                      }))}
+                    />
+                  </th>
+                  {hasLocals && (
+                    <th className="py-2 pr-2">
+                      <ColSelect
+                        value={filters.local}
+                        onChange={(v) => setF('local', v)}
+                        options={options.local.map((v) => ({ value: v, label: v }))}
+                      />
+                    </th>
+                  )}
+                  <th className="py-2 pl-2" />
                 </tr>
               </thead>
               <tbody>
-                {groups.map((g) => (
-                  <FragmentGroup
-                    key={g.day}
-                    g={g}
-                    hasMultipleLocals={data?.hasMultipleLocals}
-                  />
-                ))}
+                {groups.length ? (
+                  groups.map((g) => (
+                    <FragmentGroup key={g.day} g={g} hasLocals={hasLocals} />
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={colCount + 1}
+                      className="py-8 text-center text-sm text-gray-400"
+                    >
+                      No hay gastos que coincidan con los filtros
+                    </td>
+                  </tr>
+                )}
               </tbody>
               <tfoot>
                 <tr className="border-t-2 border-gray-200 font-bold text-gray-900">
-                  <td className="py-3 pr-4" colSpan={data?.hasMultipleLocals ? 6 : 5}>
-                    Total
+                  <td className="py-3 pr-4" colSpan={colCount}>
+                    Total {anyFilter ? 'filtrado' : ''}
                   </td>
                   <td className="py-3 pl-4 text-right">
                     {formatMoney(filteredTotal)}
@@ -219,7 +339,7 @@ export default function ExpensesDetail({ data }) {
           </div>
         ) : (
           <p className="py-8 text-center text-sm text-gray-400">
-            No hay gastos que coincidan con el filtro
+            No hay gastos en el periodo
           </p>
         )}
       </ChartCard>
@@ -227,9 +347,29 @@ export default function ExpensesDetail({ data }) {
   );
 }
 
-// Grupo de un día: fila cabecera con subtotal + movimientos del día.
-function FragmentGroup({ g, hasMultipleLocals }) {
-  const cols = hasMultipleLocals ? 6 : 5;
+// Select compacto de filtro de columna.
+function ColSelect({ value, onChange, options }) {
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className={`w-full rounded-lg border px-2 py-1 text-xs font-normal normal-case focus:border-orange-400 focus:outline-none ${
+        value ? 'border-orange-300 bg-orange-50 text-orange-700' : 'border-gray-200'
+      }`}
+    >
+      <option value="">Todos</option>
+      {options.map((o) => (
+        <option key={o.value} value={o.value}>
+          {o.label}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+// Grupo de un día: cabecera con subtotal + movimientos del día.
+function FragmentGroup({ g, hasLocals }) {
+  const cols = hasLocals ? 6 : 5;
   return (
     <>
       <tr className="bg-gray-50/70 text-xs font-semibold text-gray-600">
@@ -251,9 +391,7 @@ function FragmentGroup({ g, hasMultipleLocals }) {
           </td>
           <td className="py-2 pr-4 text-gray-500">{e.paidTo || '—'}</td>
           <td className="py-2 pr-4 text-gray-500">{prettyMethod(e.paymentMethod)}</td>
-          {hasMultipleLocals && (
-            <td className="py-2 pr-4 text-gray-500">{e.local}</td>
-          )}
+          {hasLocals && <td className="py-2 pr-4 text-gray-500">{e.local}</td>}
           <td className="py-2 pl-4 text-right font-semibold text-gray-900">
             {formatMoney(e.amount)}
           </td>
