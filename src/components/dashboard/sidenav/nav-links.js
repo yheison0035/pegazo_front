@@ -130,58 +130,59 @@ export default function NavLinks({ expanded = true }) {
 
                 // Ítem con sub-ítems (acordeón). Abierto si el usuario lo abrió,
                 // o por defecto cuando la ruta activa es el padre o un hijo.
-                const activeHere =
-                  isRouteActive(link.href) ||
-                  children.some((c) => isRouteActive(c.href));
-                const isOpen = openGroups[link.href] ?? activeHere;
-                const isActive = isRouteActive(link.href);
+                const childActive = children.some((c) =>
+                  isRouteActive(c.href)
+                );
+                const isOpen = openGroups[link.href] ?? childActive;
                 const LinkIcon = link.icon;
+
+                const headerCls = `${rowBase} w-full ${
+                  childActive
+                    ? 'text-white'
+                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                }`;
+                const headerInner = (
+                  <>
+                    <LinkIcon
+                      className={`w-5 h-5 flex-none transition ${
+                        childActive
+                          ? 'text-orange-400'
+                          : 'text-white/50 group-hover/link:text-white'
+                      }`}
+                    />
+                    <span className={`flex-1 text-left ${labelCls(expanded)}`}>
+                      {link.name}
+                    </span>
+                    {expanded && (
+                      <ChevronRightIcon
+                        className={`w-4 h-4 flex-none text-white/40 transition-transform ${
+                          isOpen ? 'rotate-90' : ''
+                        }`}
+                      />
+                    )}
+                  </>
+                );
 
                 return (
                   <div key={link.name}>
-                    <div className={`${rowBase} ${
-                      isActive
-                        ? 'bg-gradient-to-r from-orange-500/25 to-amber-500/10 text-white shadow-inner'
-                        : 'text-white/60 hover:text-white hover:bg-white/5'
-                    } pr-1`}
-                    >
-                      {isActive && (
-                        <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] bg-orange-400 rounded-r-full" />
-                      )}
-                      <Link
-                        href={link.href}
+                    {/* Expandido: el encabezado solo abre/cierra (no navega).
+                        Plegado: navega a su vista propia para no quedar oculto. */}
+                    {expanded ? (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setOpenGroups((g) => ({ ...g, [link.href]: !isOpen }))
+                        }
                         title={link.name}
-                        className="flex flex-1 items-center gap-3 min-w-0"
+                        className={headerCls}
                       >
-                        <LinkIcon
-                          className={`w-5 h-5 flex-none transition ${
-                            isActive
-                              ? 'text-orange-400'
-                              : 'text-white/50 group-hover/link:text-white'
-                          }`}
-                        />
-                        <span className={labelCls(expanded)}>{link.name}</span>
+                        {headerInner}
+                      </button>
+                    ) : (
+                      <Link href={link.href} title={link.name} className={headerCls}>
+                        {headerInner}
                       </Link>
-                      {expanded && (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setOpenGroups((g) => ({
-                              ...g,
-                              [link.href]: !isOpen,
-                            }))
-                          }
-                          aria-label={isOpen ? 'Contraer' : 'Expandir'}
-                          className="flex-none rounded-lg p-1 text-white/40 hover:bg-white/10 hover:text-white"
-                        >
-                          <ChevronRightIcon
-                            className={`w-4 h-4 transition-transform ${
-                              isOpen ? 'rotate-90' : ''
-                            }`}
-                          />
-                        </button>
-                      )}
-                    </div>
+                    )}
                     {expanded && isOpen && (
                       <div className="mt-1 flex flex-col space-y-1">
                         {children.map((child) => renderLeaf(child, true))}
