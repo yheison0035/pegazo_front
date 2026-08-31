@@ -214,6 +214,7 @@ export const getFormFieldsInventory = (usuario) => {
       type: 'select',
       required: false,
       source: 'unitsOfMeasure',
+      defaultOptionName: 'UNIDAD',
       disabled: false,
     },
     {
