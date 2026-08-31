@@ -157,8 +157,17 @@ button:disabled {
    Tema por defecto = naranja (sin override).
    ============================================================ */
 
+/* Fondo de la barra lateral por defecto (tema Naranja): charcoal cálido.
+   Cada tema lo sobrescribe con un tono oscuro coordinado con su acento. */
+[data-crm-theme] {
+  --sidebar-from: #17130d;
+  --sidebar-to: #0a0805;
+}
+
 /* AZUL */
 [data-crm-theme='blue'] {
+  --sidebar-from: #0b1322;
+  --sidebar-to: #060a13;
   --color-orange-50: #eff6ff;
   --color-orange-100: #dbeafe;
   --color-orange-200: #bfdbfe;
@@ -174,6 +183,8 @@ button:disabled {
 
 /* ESMERALDA / VERDE */
 [data-crm-theme='emerald'] {
+  --sidebar-from: #08130f;
+  --sidebar-to: #040805;
   --color-orange-50: #ecfdf5;
   --color-orange-100: #d1fae5;
   --color-orange-200: #a7f3d0;
@@ -188,6 +199,8 @@ button:disabled {
 }
 
 [data-crm-theme='rose'] {
+  --sidebar-from: #1a0a10;
+  --sidebar-to: #0c0507;
   --color-orange-50: #fff1f2;
   --color-orange-100: #ffe4e6;
   --color-orange-200: #fecdd3;
@@ -202,6 +215,8 @@ button:disabled {
 }
 
 [data-crm-theme='violet'] {
+  --sidebar-from: #130b20;
+  --sidebar-to: #08040f;
   --color-orange-50: #f5f3ff;
   --color-orange-100: #ede9fe;
   --color-orange-200: #ddd6fe;
@@ -216,6 +231,8 @@ button:disabled {
 }
 
 [data-crm-theme='cyan'] {
+  --sidebar-from: #07131a;
+  --sidebar-to: #04080c;
   --color-orange-50: #ecfeff;
   --color-orange-100: #cffafe;
   --color-orange-200: #a5f3fc;
@@ -227,6 +244,57 @@ button:disabled {
   --color-amber-300: #7dd3fc;
   --color-amber-400: #38bdf8;
   --color-amber-500: #0ea5e9;
+}
+
+/* GRAFITO — minimalista y elegante (acento pizarra, barra casi negra). */
+[data-crm-theme='graphite'] {
+  --sidebar-from: #0b0e14;
+  --sidebar-to: #05070b;
+  --color-orange-50: #f8fafc;
+  --color-orange-100: #f1f5f9;
+  --color-orange-200: #e2e8f0;
+  --color-orange-300: #cbd5e1;
+  --color-orange-400: #64748b;
+  --color-orange-500: #475569;
+  --color-orange-600: #334155;
+  --color-orange-700: #1e293b;
+  --color-amber-300: #94a3b8;
+  --color-amber-400: #64748b;
+  --color-amber-500: #475569;
+}
+
+/* ÍNDIGO — corporativo y profundo. */
+[data-crm-theme='indigo'] {
+  --sidebar-from: #12123a;
+  --sidebar-to: #08081c;
+  --color-orange-50: #eef2ff;
+  --color-orange-100: #e0e7ff;
+  --color-orange-200: #c7d2fe;
+  --color-orange-300: #a5b4fc;
+  --color-orange-400: #818cf8;
+  --color-orange-500: #6366f1;
+  --color-orange-600: #4f46e5;
+  --color-orange-700: #4338ca;
+  --color-amber-300: #a5b4fc;
+  --color-amber-400: #818cf8;
+  --color-amber-500: #6366f1;
+}
+
+/* VINO — elegante y sofisticado (borgoña + dorado). */
+[data-crm-theme='wine'] {
+  --sidebar-from: #1a0a12;
+  --sidebar-to: #0d0509;
+  --color-orange-50: #fff1f2;
+  --color-orange-100: #ffe4e6;
+  --color-orange-200: #fecdd3;
+  --color-orange-300: #fda4af;
+  --color-orange-400: #e11d48;
+  --color-orange-500: #be123c;
+  --color-orange-600: #9f1239;
+  --color-orange-700: #881337;
+  --color-amber-300: #fcd34d;
+  --color-amber-400: #fbbf24;
+  --color-amber-500: #f59e0b;
 }
 
 /* ===================== MODO OSCURO =====================
