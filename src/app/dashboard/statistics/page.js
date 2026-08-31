@@ -34,8 +34,16 @@ import {
   shortDate,
   truncate,
 } from '@/components/dashboard/statistics/statsUI';
+import CompareStats from '@/components/dashboard/statistics/CompareStats';
+import ExpensesDetail from '@/components/dashboard/statistics/ExpensesDetail';
 import useTerms from '@/hooks/useTerms';
 import { CheckCircleIcon } from '@heroicons/react/24/outline';
+
+const TABS = [
+  { id: 'resumen', label: 'Resumen' },
+  { id: 'comparar', label: 'Comparar meses' },
+  { id: 'gastos', label: 'Gastos' },
+];
 
 const todayCol = () =>
   new Date().toLocaleDateString('en-CA', { timeZone: 'America/Bogota' });
@@ -68,6 +76,7 @@ export default function Statistics() {
 
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [tab, setTab] = useState('resumen');
 
   useEffect(() => {
     getLocals()
@@ -111,15 +120,39 @@ export default function Statistics() {
       <div className="relative w-full p-4">
         <LoadingOverlay show={loading} text="Cargando estadísticas..." />
 
-        <div className="mb-2">
+        <div className="mb-4">
           <h1 className="text-2xl font-semibold text-gray-800">Estadísticas</h1>
           <p className="text-sm text-gray-500">
             Cómo va tu empresa — ventas, rentabilidad, productos y clientes.
           </p>
         </div>
 
-        {/* Filtros */}
-        <div className="mb-6 flex flex-wrap items-end gap-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+        {/* Pestañas */}
+        <div className="mb-5 inline-flex rounded-xl border border-gray-200 bg-white p-0.5 shadow-sm">
+          {TABS.map((tb) => (
+            <button
+              key={tb.id}
+              type="button"
+              onClick={() => setTab(tb.id)}
+              className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
+                tab === tb.id
+                  ? 'bg-orange-500 text-white shadow-sm'
+                  : 'text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              {tb.label}
+            </button>
+          ))}
+        </div>
+
+        {tab === 'comparar' && <CompareStats localId={localId} />}
+
+        {/* Filtros (Resumen y Gastos comparten el rango de fechas) */}
+        <div
+          className={`mb-6 flex-wrap items-end gap-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm ${
+            tab === 'comparar' ? 'hidden' : 'flex'
+          }`}
+        >
           <div className="flex flex-col">
             <label className="mb-1 text-xs font-semibold uppercase text-gray-500">
               Desde
@@ -164,6 +197,19 @@ export default function Statistics() {
           </Button>
         </div>
 
+        {/* ---- Pestaña Gastos ---- */}
+        {tab === 'gastos' &&
+          (data ? (
+            <ExpensesDetail data={data} />
+          ) : (
+            <p className="py-10 text-center text-sm text-gray-400">
+              Sin datos en este periodo.
+            </p>
+          ))}
+
+        {/* ---- Pestaña Resumen ---- */}
+        {tab === 'resumen' && (
+        <>
         {/* KPIs */}
         {s && (
           <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
@@ -571,6 +617,8 @@ export default function Statistics() {
             )}
           </ChartCard>
         </div>
+        </>
+        )}
       </div>
     </RoleGuard>
   );
