@@ -20,6 +20,8 @@ export default function Layout({ children }) {
   // para que el login y las páginas públicas queden siempre en el tema por
   // defecto. Los overrides de color en globals.css usan [data-crm-theme].
   const theme = usuario?.company?.crmTheme || 'orange';
+  // Logo del negocio como marca de agua sutil de fondo en cada módulo.
+  const logo = usuario?.company?.logo;
 
   // Modo oscuro (preferencia personal por dispositivo). Se aplica con
   // data-theme="dark" solo a este contenedor del panel.
@@ -42,10 +44,25 @@ export default function Layout({ children }) {
           <div className="w-full flex-none md:w-20">
             <SideNavigation />
           </div>
-          <div className="grow bg-gray-50 p-6 pt-16 text-gray-800 md:overflow-y-auto md:p-10 md:pt-10">
-            <RenewalBanner />
-            <DayBanner />
-            {children}
+          <div className="relative isolate grow bg-gray-50 p-6 pt-16 text-gray-800 md:overflow-y-auto md:p-10 md:pt-10">
+            {logo && (
+              <div
+                aria-hidden
+                className="pointer-events-none fixed inset-y-0 left-0 right-0 z-0 md:left-20"
+                style={{
+                  backgroundImage: `url(${logo})`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'center',
+                  backgroundSize: 'min(460px, 46%)',
+                  opacity: 0.04,
+                }}
+              />
+            )}
+            <div className="relative z-10">
+              <RenewalBanner />
+              <DayBanner />
+              {children}
+            </div>
           </div>
         </div>
         <PlanUpgradeModal />
