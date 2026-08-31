@@ -184,10 +184,12 @@ export default function ChargeCategoriesPage() {
               <input
                 autoFocus
                 value={editing.name}
-                onChange={(e) => setEditing({ ...editing, name: e.target.value })}
+                onChange={(e) =>
+                  setEditing({ ...editing, name: e.target.value.toUpperCase() })
+                }
                 onKeyDown={(e) => e.key === 'Enter' && save()}
-                placeholder="Ej: Membresía, Préstamo, Uniforme…"
-                className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                placeholder="EJ: MEMBRESÍA, PRÉSTAMO, UNIFORME…"
+                className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm uppercase focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
               />
               <div className="mt-5 flex justify-end gap-2">
                 <Button variant="secondary" onClick={() => setEditing(null)}>
