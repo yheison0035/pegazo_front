@@ -340,3 +340,24 @@ textarea {
     transform: rotate(360deg);
   }
 }
+
+/* Impresión de Estadísticas: aísla el contenido para "Guardar como PDF". */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #stats-print,
+  #stats-print * {
+    visibility: visible;
+  }
+  #stats-print {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 0 12px;
+  }
+  .print\:hidden {
+    display: none !important;
+  }
+}

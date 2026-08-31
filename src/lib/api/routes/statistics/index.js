@@ -39,6 +39,14 @@ export async function getCompareStats(dto = {}) {
   });
 }
 
+// Vista anual (12 meses): { year, localId }
+export async function getAnnualStats(dto = {}) {
+  return apiFetch('/statistics/annual', {
+    method: 'POST',
+    body: JSON.stringify(dto),
+  });
+}
+
 // Reporte de IVA (generado vs descontable) de un periodo.
 export async function getTaxReport(dto = {}) {
   return apiFetch('/statistics/tax-report', {
