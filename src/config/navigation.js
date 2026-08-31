@@ -216,6 +216,12 @@ export const NAVIGATION = [
         ],
       },
       {
+        name: 'Métodos de pago',
+        href: '/dashboard/payment-methods',
+        icon: CreditCardIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN'],
+      },
+      {
         name: 'Consignaciones',
         href: '/dashboard/bank',
         icon: BanknotesIcon,
