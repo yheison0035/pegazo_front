@@ -13,6 +13,7 @@ import {
 } from '@heroicons/react/24/outline';
 import RoleGuard from '@/auth/roleGuard';
 import Button from '@/components/ui/Button';
+import MoneyInput from '@/components/ui/MoneyInput';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import { useAuth } from '@/context/authContext';
 import { formatCOP } from '@/lib/api/utils/utils';
@@ -373,7 +374,7 @@ export default function PayablesPage() {
                                   onClick={() =>
                                     setForm({
                                       ...p,
-                                      amount: String(p.amount),
+                                      amount: p.amount,
                                       dueDate: p.dueDate
                                         ? String(p.dueDate).slice(0, 10)
                                         : '',
@@ -462,15 +463,10 @@ export default function PayablesPage() {
                 </Field>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <Field label="Valor (COP) *">
-                  <input
-                    type="number"
-                    min="1"
+                <Field label="Valor *">
+                  <MoneyInput
                     value={form.amount}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, amount: e.target.value }))
-                    }
-                    placeholder="Ej: 800000"
+                    onChange={(v) => setForm((f) => ({ ...f, amount: v }))}
                     className={inputCls}
                   />
                 </Field>

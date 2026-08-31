@@ -11,6 +11,7 @@ import {
 } from '@heroicons/react/24/outline';
 import RoleGuard from '@/auth/roleGuard';
 import Button from '@/components/ui/Button';
+import MoneyInput from '@/components/ui/MoneyInput';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import { useAuth } from '@/context/authContext';
 import { formatCOP } from '@/lib/api/utils/utils';
@@ -316,16 +317,11 @@ export default function EmployeeChargesPage() {
               </div>
               <div>
                 <label className="mb-1 block text-xs font-semibold text-gray-600">
-                  Valor (COP)
+                  Valor
                 </label>
-                <input
-                  type="number"
-                  min="1"
+                <MoneyInput
                   value={form.amount}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, amount: e.target.value }))
-                  }
-                  placeholder="Ej: 27500"
+                  onChange={(v) => setForm((f) => ({ ...f, amount: v }))}
                   className={inputCls}
                 />
               </div>
