@@ -47,6 +47,14 @@ export async function getAnnualStats(dto = {}) {
   });
 }
 
+// Inventario valorizado: { categoryId? }
+export async function getInventoryValuation(dto = {}) {
+  return apiFetch('/statistics/inventory-valuation', {
+    method: 'POST',
+    body: JSON.stringify(dto),
+  });
+}
+
 // Reporte de IVA (generado vs descontable) de un periodo.
 export async function getTaxReport(dto = {}) {
   return apiFetch('/statistics/tax-report', {
