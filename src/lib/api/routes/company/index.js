@@ -85,3 +85,10 @@ export async function updateCrmTheme(theme) {
     body: JSON.stringify({ theme }),
   });
 }
+
+export async function updateCrmFont(font) {
+  return apiFetch('/company/font', {
+    method: 'PATCH',
+    body: JSON.stringify({ font }),
+  });
+}

@@ -27,12 +27,14 @@ import {
   updateCompanyProfile,
   updateCompanyHours,
   updateCrmTheme,
+  updateCrmFont,
   updateCashPolicy,
   updateFiscal,
   updateTerminology,
   updateCompanyMail,
   testCompanyMail,
 } from '@/lib/api/routes/company';
+import { CRM_FONTS, googleFontHref } from '@/config/crmFonts';
 
 // Editor de vocabulario propio de la empresa (barbería vs estética, etc.).
 // Solo guarda lo que el dueño cambia; lo vacío usa el término del tipo de negocio.
@@ -636,6 +638,113 @@ const THEMES = [
   },
 ];
 
+function FontSettings() {
+  const auth = useAuth();
+  const usuario = auth?.usuario;
+  const setUsuario = auth?.setUsuario;
+  const [current, setCurrent] = useState(usuario?.company?.crmFont || 'system');
+  const [saving, setSaving] = useState(false);
+  const [alert, setAlert] = useState({});
+
+  // Carga todas las fuentes para poder previsualizarlas en las tarjetas.
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    for (const f of CRM_FONTS) {
+      const href = googleFontHref(f.id);
+      if (!href) continue;
+      if (document.querySelector(`link[data-crm-font-preview="${f.id}"]`))
+        continue;
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = href;
+      link.setAttribute('data-crm-font-preview', f.id);
+      document.head.appendChild(link);
+    }
+  }, []);
+
+  const setSessionFont = (fontId) => {
+    if (setUsuario && usuario) {
+      const merged = {
+        ...usuario,
+        company: { ...usuario.company, crmFont: fontId },
+      };
+      setUsuario(merged);
+      localStorage.setItem('usuario', JSON.stringify(merged));
+    }
+  };
+
+  const apply = async (fontId) => {
+    const prev = current;
+    setCurrent(fontId);
+    setSessionFont(fontId); // aplica en vivo
+    setSaving(true);
+    try {
+      await updateCrmFont(fontId);
+      setAlert({ type: 'success', message: 'Fuente actualizada.' });
+    } catch (e) {
+      setCurrent(prev);
+      setSessionFont(prev);
+      setAlert({ type: 'error', message: e.message || 'No se pudo guardar.' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+      <div className="flex items-start gap-3">
+        <div className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-orange-50 text-orange-600 text-lg font-bold">
+          Aa
+        </div>
+        <div>
+          <h2 className="text-base font-bold text-gray-800">Tipografía</h2>
+          <p className="text-sm text-gray-500">
+            Elige la fuente del panel. El cambio se aplica al instante para toda
+            tu empresa.
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        {CRM_FONTS.map((f) => {
+          const active = current === f.id;
+          return (
+            <button
+              key={f.id}
+              onClick={() => apply(f.id)}
+              disabled={saving}
+              style={{ fontFamily: f.stack }}
+              className={`relative rounded-xl border p-3 text-left transition ${
+                active
+                  ? 'border-orange-400 ring-2 ring-orange-500/30'
+                  : 'border-gray-200 hover:border-gray-300'
+              }`}
+            >
+              {active && (
+                <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-orange-500 text-white">
+                  <CheckIcon className="h-3.5 w-3.5" />
+                </span>
+              )}
+              <span className="block text-xl font-semibold text-gray-800">
+                Ag
+              </span>
+              <span className="mt-0.5 block truncate text-sm text-gray-500">
+                {f.name}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      <AlertModal
+        type={alert.type}
+        message={alert.message}
+        onClose={() => setAlert({})}
+      />
+    </div>
+  );
+}
+
 function ThemeSettings() {
   const auth = useAuth();
   const usuario = auth?.usuario;
@@ -1179,6 +1288,9 @@ export default function Settings() {
           <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-2">
             <ThemeSettings />
             <CompanyProfileCard initial={settings} />
+            <div className="lg:col-span-2">
+              <FontSettings />
+            </div>
             {/* La terminología es ancha (muchos campos): ocupa toda la fila. */}
             <div className="lg:col-span-2">
               <TerminologyCard initial={settings} />
