@@ -103,7 +103,23 @@ export default function useNavigation() {
         };
       });
 
-    return { ...section, items };
+    // Anida los catálogos de configuración como sub-ítems de su módulo padre
+    // (acordeón en el sidebar) para no alargar el menú.
+    const byKey = {};
+    for (const it of items) byKey[it.href.split('/').pop()] = it;
+    const nested = [];
+    for (const it of items) {
+      const key = it.href.split('/').pop();
+      const parentKey = CONFIG_PARENT[key];
+      const parent = parentKey ? byKey[parentKey] : null;
+      if (parent) {
+        (parent.children = parent.children || []).push(it);
+      } else {
+        nested.push(it);
+      }
+    }
+
+    return { ...section, items: nested };
   }).filter((section) => section.items.length > 0);
 
   return filteredSections;
