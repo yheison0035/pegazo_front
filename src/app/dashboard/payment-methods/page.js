@@ -199,9 +199,11 @@ export default function PaymentMethodsPage() {
               <input
                 autoFocus
                 value={editing.name}
-                onChange={(e) => setEditing({ ...editing, name: e.target.value })}
-                placeholder="Ej: Nequi, Daviplata, QR…"
-                className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                onChange={(e) =>
+                  setEditing({ ...editing, name: e.target.value.toUpperCase() })
+                }
+                placeholder="EJ: NEQUI, DAVIPLATA, QR…"
+                className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm uppercase focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
               />
               <label className="mb-1 mt-4 block text-xs font-semibold text-gray-600">
                 ¿Cómo se comporta?
