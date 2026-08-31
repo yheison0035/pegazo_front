@@ -107,5 +107,14 @@ export async function getAvailability(params = {}) {
 
   const res = await apiFetch(`/appointments/availability?${query.toString()}`);
 
-  return Array.isArray(res) ? res : res.data || [];
+  // Nuevo formato: { off, reason, slots }. Se mantiene compatibilidad si en algún
+  // punto llega un arreglo plano.
+  if (Array.isArray(res)) {
+    return { off: false, reason: null, slots: res };
+  }
+  return {
+    off: !!res?.off,
+    reason: res?.reason || null,
+    slots: res?.slots || res?.data || [],
+  };
 }
