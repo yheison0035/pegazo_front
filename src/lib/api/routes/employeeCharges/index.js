@@ -19,10 +19,10 @@ export async function createEmployeeCharge(dto) {
   });
 }
 
-export async function settleEmployeeCharge(id, method) {
+export async function settleEmployeeCharge(id, method, settledAt) {
   return apiFetch(`/employee-charges/${id}/settle`, {
     method: 'PATCH',
-    body: JSON.stringify({ method }),
+    body: JSON.stringify({ method, settledAt }),
   });
 }
 
