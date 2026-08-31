@@ -754,8 +754,11 @@ export const WIDGETS = [
     applies: (data) => !data.isAdmin && !!data.myPerf?.ratesConfigured,
     Render: ({ data }) => {
       const week = data.myPerf?.week?.earnings?.service || 0;
-      const cargos = data.myCharges?.pending || 0;
-      const total = week - cargos;
+      // Descuento de la semana = pendientes + los descontados de comisión ESTA
+      // semana (así no desaparece al marcar el cargo como pagado por comisión).
+      const cargos =
+        data.myPerf?.week?.charges ?? (data.myCharges?.pending || 0);
+      const total = data.myPerf?.week?.net ?? week - cargos;
       const range = data.myPerf?.week?.range;
       return (
         <Card>
