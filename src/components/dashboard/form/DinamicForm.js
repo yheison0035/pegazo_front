@@ -296,6 +296,24 @@ export default function DinamicForm({
     }
 
     setDynamicOptions(results);
+
+    // Valor por defecto de ciertos selects AL CREAR (ej: unidad = UNIDAD).
+    if (!formData.id) {
+      const patch = {};
+      for (const field of formFields) {
+        if (field.defaultOptionName && !formData[field.name]) {
+          const opt = (results[field.name] || []).find(
+            (o) =>
+              String(o.name).toUpperCase() ===
+              String(field.defaultOptionName).toUpperCase(),
+          );
+          if (opt) patch[field.name] = opt.id;
+        }
+      }
+      if (Object.keys(patch).length) {
+        setFormData((prev) => ({ ...prev, ...patch }));
+      }
+    }
   }, [
     formFields,
     formData.localId,
