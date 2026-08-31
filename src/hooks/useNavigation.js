@@ -65,27 +65,41 @@ export default function useNavigation() {
 
   // Filtrar por módulos del negocio + rol. El gating por plan NO oculta: marca
   // el módulo como "bloqueado" (candado) para poder ofrecer el plan superior.
+  // Catálogos de configuración: cada uno hereda el gating (tipo de negocio +
+  // plan) de su módulo padre. Así nunca aparecen en una vertical que no usa el
+  // módulo (ej: "Tipos de cargo" solo donde hay employee-charges).
+  const CONFIG_PARENT = {
+    'expense-categories': 'expenses',
+    'charge-categories': 'employee-charges',
+    'payment-methods': 'sales',
+  };
+
+  const isAllowedKey = (k) =>
+    CORE.has(k) ||
+    (useManual ? manual.includes(k) : visibleModules.includes(k));
+
   const filteredSections = NAVIGATION.map((section) => {
     const items = section.items
       .filter((item) => {
         const key = item.href.split('/').pop();
-        // Inicio/Configuración siempre; los demás: si hay control manual, solo
-        // los marcados; si no, los de la vertical.
+        // Inicio/Configuración siempre; los catálogos heredan de su padre; los
+        // demás: si hay control manual, solo los marcados; si no, los de la
+        // vertical.
         const allowedByModule =
-          CORE.has(key) ||
-          (useManual ? manual.includes(key) : visibleModules.includes(key));
+          isAllowedKey(key) ||
+          (CONFIG_PARENT[key] && isAllowedKey(CONFIG_PARENT[key]));
         return allowedByModule && item.roles.includes(role);
       })
       .map((item) => {
         const key = item.href.split('/').pop();
-        // Con control manual no hay candado (el módulo está explícitamente
-        // habilitado); si no, el candado del plan para hacer upsell.
-        const locked = useManual ? false : !planAllowsModule(plan, key);
+        // El candado de plan usa el módulo padre para los catálogos.
+        const planKey = CONFIG_PARENT[key] || key;
+        const locked = useManual ? false : !planAllowsModule(plan, planKey);
         return {
           ...item,
           name: navLabelByModule[key] || item.name,
           locked,
-          requiredPlan: locked ? requiredPlanForModule(key) : null,
+          requiredPlan: locked ? requiredPlanForModule(planKey) : null,
         };
       });
 
