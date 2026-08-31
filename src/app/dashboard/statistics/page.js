@@ -35,13 +35,23 @@ import {
   truncate,
 } from '@/components/dashboard/statistics/statsUI';
 import CompareStats from '@/components/dashboard/statistics/CompareStats';
-import ExpensesDetail from '@/components/dashboard/statistics/ExpensesDetail';
+import ExpensesDetail, {
+  EXPENSE_TYPE_LABELS,
+} from '@/components/dashboard/statistics/ExpensesDetail';
+import AnnualStats from '@/components/dashboard/statistics/AnnualStats';
+import ProfitLoss from '@/components/dashboard/statistics/ProfitLoss';
+import { exportCSV, csvNum } from '@/components/dashboard/statistics/exportUtils';
 import useTerms from '@/hooks/useTerms';
-import { CheckCircleIcon } from '@heroicons/react/24/outline';
+import {
+  CheckCircleIcon,
+  ArrowDownTrayIcon,
+  PrinterIcon,
+} from '@heroicons/react/24/outline';
 
 const TABS = [
   { id: 'resumen', label: 'Resumen' },
   { id: 'comparar', label: 'Comparar meses' },
+  { id: 'anual', label: 'Anual' },
   { id: 'gastos', label: 'Gastos' },
 ];
 
@@ -113,11 +123,68 @@ export default function Statistics() {
 
   const s = data?.summary;
 
+  const rangeLabel = data?.range
+    ? `${data.range.startDate} a ${data.range.endDate}`
+    : '';
+
+  // Exportar el Resumen a Excel (CSV): indicadores + tops + gastos por tipo.
+  const exportResumen = () => {
+    if (!data) return;
+    const rows = [
+      ['Estadísticas Pegazo', rangeLabel],
+      [],
+      ['INDICADOR', 'VALOR'],
+      ['Ventas', csvNum(s.totalSales)],
+      ['Nº de ventas', s.salesCount],
+      ['Ticket promedio', csvNum(s.avgTicket)],
+      ['Costo de ventas', csvNum(s.costOfGoods)],
+      ['Utilidad bruta', csvNum(s.grossMargin)],
+      ['Gastos', csvNum(s.totalExpenses)],
+      ['Utilidad neta', csvNum(s.profit)],
+      ['Clientes nuevos', s.newCustomers],
+      [],
+      ['GASTOS POR CATEGORÍA', 'MONTO'],
+      ...(data.expensesByType || []).map((e) => [
+        EXPENSE_TYPE_LABELS[e.type] || e.type,
+        csvNum(e.total),
+      ]),
+      [],
+      ['TOP CLIENTES', 'COMPRAS', 'Nº'],
+      ...(data.topCustomers || []).map((c) => [c.name, csvNum(c.total), c.count]),
+    ];
+    exportCSV(`Pegazo-resumen`, rows);
+  };
+
+  // Exportar el detalle de gastos (con fecha de pago) a Excel (CSV).
+  const exportGastos = () => {
+    if (!data) return;
+    const rows = [
+      ['Detalle de gastos', rangeLabel],
+      [],
+      ['FECHA', 'CONCEPTO', 'CATEGORÍA', 'PAGADO A', 'MÉTODO', 'SEDE', 'MONTO'],
+      ...(data.expensesDetail || []).map((e) => [
+        String(e.date).slice(0, 10),
+        e.concept,
+        EXPENSE_TYPE_LABELS[e.type] || e.type,
+        e.paidTo || '',
+        e.paymentMethod || '',
+        e.local || '',
+        csvNum(e.amount),
+      ]),
+    ];
+    exportCSV(`Pegazo-gastos`, rows);
+  };
+
+  const handleExport = () => {
+    if (tab === 'gastos') exportGastos();
+    else exportResumen();
+  };
+
   return (
     <RoleGuard
       allowedRoles={[Roles.SUPER_ADMIN, Roles.ADMIN, Roles.COORDINADOR]}
     >
-      <div className="relative w-full p-4">
+      <div id="stats-print" className="relative w-full p-4">
         <LoadingOverlay show={loading} text="Cargando estadísticas..." />
 
         <div className="mb-4">
@@ -127,30 +194,52 @@ export default function Statistics() {
           </p>
         </div>
 
-        {/* Pestañas */}
-        <div className="mb-5 inline-flex rounded-xl border border-gray-200 bg-white p-0.5 shadow-sm">
-          {TABS.map((tb) => (
-            <button
-              key={tb.id}
-              type="button"
-              onClick={() => setTab(tb.id)}
-              className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
-                tab === tb.id
-                  ? 'bg-orange-500 text-white shadow-sm'
-                  : 'text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              {tb.label}
-            </button>
-          ))}
+        {/* Pestañas + exportar */}
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <div className="inline-flex rounded-xl border border-gray-200 bg-white p-0.5 shadow-sm print:hidden">
+            {TABS.map((tb) => (
+              <button
+                key={tb.id}
+                type="button"
+                onClick={() => setTab(tb.id)}
+                className={`rounded-lg px-3.5 py-2 text-sm font-semibold transition sm:px-4 ${
+                  tab === tb.id
+                    ? 'bg-orange-500 text-white shadow-sm'
+                    : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                {tb.label}
+              </button>
+            ))}
+          </div>
+          {(tab === 'resumen' || tab === 'gastos') && (
+            <div className="flex items-center gap-2 print:hidden">
+              <Button
+                variant="secondary"
+                icon={ArrowDownTrayIcon}
+                onClick={handleExport}
+              >
+                Excel
+              </Button>
+              <Button
+                variant="secondary"
+                icon={PrinterIcon}
+                onClick={() => window.print()}
+              >
+                PDF
+              </Button>
+            </div>
+          )}
         </div>
 
         {tab === 'comparar' && <CompareStats localId={localId} />}
 
+        {tab === 'anual' && <AnnualStats localId={localId} />}
+
         {/* Filtros (Resumen y Gastos comparten el rango de fechas) */}
         <div
-          className={`mb-6 flex-wrap items-end gap-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm ${
-            tab === 'comparar' ? 'hidden' : 'flex'
+          className={`mb-6 flex-wrap items-end gap-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm print:hidden ${
+            tab === 'resumen' || tab === 'gastos' ? 'flex' : 'hidden'
           }`}
         >
           <div className="flex flex-col">
@@ -257,6 +346,13 @@ export default function Statistics() {
               delta={s.deltas.newCustomers}
               accent={PALETTE[4]}
             />
+          </div>
+        )}
+
+        {/* Estado de resultados (P&G) */}
+        {s && (
+          <div className="mb-6">
+            <ProfitLoss data={data} />
           </div>
         )}
 
@@ -553,6 +649,50 @@ export default function Statistics() {
               </ResponsiveContainer>
             ) : (
               <EmptyChart height={280} />
+            )}
+          </ChartCard>
+        </div>
+
+        {/* Top clientes */}
+        <div className="mb-6">
+          <ChartCard
+            title="Top clientes"
+            subtitle="Quiénes compran más en el periodo"
+          >
+            {data?.topCustomers?.length ? (
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-100 text-left text-xs uppercase tracking-wide text-gray-500">
+                      <th className="py-2 pr-4">#</th>
+                      <th className="py-2 pr-4">Cliente</th>
+                      <th className="py-2 pr-4 text-right">Nº compras</th>
+                      <th className="py-2 pl-4 text-right">Total comprado</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50">
+                    {data.topCustomers.map((c, i) => (
+                      <tr key={c.name} className="text-gray-700">
+                        <td className="py-2 pr-4 text-gray-400">{i + 1}</td>
+                        <td className="py-2 pr-4 font-medium text-gray-800">
+                          {c.name}
+                        </td>
+                        <td className="py-2 pr-4 text-right text-gray-500">
+                          {c.count}
+                        </td>
+                        <td className="py-2 pl-4 text-right font-semibold">
+                          {formatMoney(c.total)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="py-8 text-center text-sm text-gray-400">
+                Aún no hay clientes identificados con compras (las ventas a
+                Consumidor Final no se cuentan aquí).
+              </div>
             )}
           </ChartCard>
         </div>
