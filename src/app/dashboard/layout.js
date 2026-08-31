@@ -13,6 +13,7 @@ import { useAuth } from '@/context/authContext';
 import DayBanner from '@/components/pos/DayBanner';
 import RenewalBanner from '@/components/billing/RenewalBanner';
 import { isDark, DARK_EVENT } from '@/lib/darkMode';
+import { CRM_FONTS_BY_ID, googleFontHref } from '@/config/crmFonts';
 
 export default function Layout({ children }) {
   const { usuario } = useAuth();
@@ -22,6 +23,21 @@ export default function Layout({ children }) {
   const theme = usuario?.company?.crmTheme || 'orange';
   // Logo del negocio como marca de agua sutil de fondo en cada módulo.
   const logo = usuario?.company?.logo;
+  // Fuente del panel elegida por el negocio.
+  const fontId = usuario?.company?.crmFont || 'system';
+  const fontStack = (CRM_FONTS_BY_ID[fontId] || CRM_FONTS_BY_ID.system).stack;
+
+  // Carga la fuente de Google elegida (una sola vez por fuente).
+  useEffect(() => {
+    const href = googleFontHref(fontId);
+    if (!href || typeof document === 'undefined') return;
+    if (document.querySelector(`link[data-crm-font="${fontId}"]`)) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    link.setAttribute('data-crm-font', fontId);
+    document.head.appendChild(link);
+  }, [fontId]);
 
   // Modo oscuro (preferencia personal por dispositivo). Se aplica con
   // data-theme="dark" solo a este contenedor del panel.
@@ -36,7 +52,11 @@ export default function Layout({ children }) {
   return (
     <RoleGuard allowedRoles={Object.values(Roles)}>
       <SplashScreen />
-      <div data-crm-theme={theme} data-theme={dark ? 'dark' : undefined}>
+      <div
+        data-crm-theme={theme}
+        data-theme={dark ? 'dark' : undefined}
+        style={{ fontFamily: fontStack }}
+      >
         <div className="flex h-screen flex-col bg-gray-50 md:flex-row md:overflow-hidden">
           {/* El sidebar vive fijo y colapsado (solo iconos); aquí reservamos el
               ancho del rail para que el contenido ocupe el resto. Al hacer hover
