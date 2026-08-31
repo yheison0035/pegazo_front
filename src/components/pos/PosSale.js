@@ -15,6 +15,7 @@ import {
   WrenchScrewdriverIcon,
   CalculatorIcon,
   LockClosedIcon,
+  ChevronDownIcon,
 } from '@heroicons/react/24/outline';
 import { getCurrentCash, CASH_CHANGED_EVENT } from '@/lib/api/routes/cash';
 import { dayStateFromRegister } from '@/lib/dayStatus';
@@ -97,6 +98,9 @@ export default function PosSale({
     initial?.paymentMethod || 'EFECTIVO'
   );
   const [notes, setNotes] = useState(initial?.notes || '');
+  // Muestra/oculta los campos secundarios (fecha y observaciones) para dar más
+  // espacio a los ítems de la factura.
+  const [showMore, setShowMore] = useState(false);
   // Vencimiento del fiado (solo cuando el pago es a crédito).
   const [dueDate, setDueDate] = useState(initial?.dueDate || '');
   // Efectivo recibido (para calcular el vuelto). Solo ayuda al cajero.
@@ -770,7 +774,7 @@ export default function PosSale({
 
           {/* ================= DERECHA: FACTURA ================= */}
           <div className="w-full min-w-0 lg:w-[400px] lg:flex-none">
-            <div className="flex flex-col rounded-2xl border border-gray-100 bg-white shadow-sm lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)]">
+            <div className="flex flex-col rounded-2xl border border-gray-100 bg-white shadow-sm lg:sticky lg:top-4">
               {/* Cliente */}
               <div className="p-3 border-b border-gray-100">
                 {customer ? (
@@ -840,8 +844,9 @@ export default function PosSale({
                 )}
               </div>
 
-              {/* Ítems (en móvil crece con la página; en desktop scroll interno) */}
-              <div className="flex-1 space-y-2 p-3 lg:min-h-[120px] lg:overflow-y-auto">
+              {/* Ítems: alto natural (se ven completos, sin scroll diminuto).
+                  La factura crece y la página hace scroll, como en Alegra/Siigo. */}
+              <div className="space-y-2 p-3">
                 {cart.length === 0 ? (
                   <p className="py-10 text-center text-sm text-gray-400">
                     La factura está vacía. Agrega ítems desde la izquierda.
@@ -1061,29 +1066,48 @@ export default function PosSale({
                   </div>
                 )}
 
-                <div>
-                  <label className="text-[11px] font-medium text-gray-500">
-                    Fecha y hora
-                  </label>
-                  <input
-                    type="datetime-local"
-                    value={saleDate}
-                    onChange={(e) => setSaleDate(e.target.value)}
-                    className="mt-0.5 w-full rounded-lg border border-gray-200 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-[11px] font-medium text-gray-500">
-                    Observaciones (salen en la factura)
-                  </label>
-                  <textarea
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    rows={2}
-                    placeholder="Nota para esta factura (opcional)"
-                    className="mt-0.5 w-full resize-y rounded-lg border border-gray-200 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  />
+                {/* Secundarios: fecha y observaciones (colapsados para dar más
+                    espacio a los ítems, como en Alegra/Siigo). */}
+                <div className="rounded-lg border border-gray-100">
+                  <button
+                    type="button"
+                    onClick={() => setShowMore((v) => !v)}
+                    className="flex w-full items-center justify-between px-2.5 py-2 text-[12px] font-medium text-gray-600"
+                  >
+                    <span>Fecha y observaciones</span>
+                    <ChevronDownIcon
+                      className={`h-4 w-4 text-gray-400 transition ${
+                        showMore ? 'rotate-180' : ''
+                      }`}
+                    />
+                  </button>
+                  {showMore && (
+                    <div className="space-y-3 px-2.5 pb-2.5">
+                      <div>
+                        <label className="text-[11px] font-medium text-gray-500">
+                          Fecha y hora
+                        </label>
+                        <input
+                          type="datetime-local"
+                          value={saleDate}
+                          onChange={(e) => setSaleDate(e.target.value)}
+                          className="mt-0.5 w-full rounded-lg border border-gray-200 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-medium text-gray-500">
+                          Observaciones (salen en la factura)
+                        </label>
+                        <textarea
+                          value={notes}
+                          onChange={(e) => setNotes(e.target.value)}
+                          rows={2}
+                          placeholder="Nota para esta factura (opcional)"
+                          className="mt-0.5 w-full resize-y rounded-lg border border-gray-200 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-3 gap-1.5">
