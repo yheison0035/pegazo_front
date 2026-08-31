@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -7,6 +8,7 @@ import {
   LockClosedIcon,
   RocketLaunchIcon,
   ArrowsRightLeftIcon,
+  ChevronRightIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/authContext';
 import useNavigation from '@/hooks/useNavigation';
@@ -33,6 +35,8 @@ export default function NavLinks({ expanded = true }) {
   const showPlanLink = usuario?.role === 'SUPER_ADMIN';
   const canUpgrade = plan !== topPlan;
   const sections = useNavigation();
+  // Grupos (acordeón) abiertos/cerrados manualmente por el usuario.
+  const [openGroups, setOpenGroups] = useState({});
 
   if (loading || !usuario) return null;
 
@@ -40,6 +44,66 @@ export default function NavLinks({ expanded = true }) {
   const rowBase = `group/link relative flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-200 ${
     expanded ? '' : 'md:justify-center'
   }`;
+
+  const isRouteActive = (href) =>
+    href === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(href);
+
+  // Fila individual (ítem o sub-ítem). isChild aplica sangría a la izquierda.
+  const renderLeaf = (link, isChild = false) => {
+    const LinkIcon = link.icon;
+    const isActive = isRouteActive(link.href);
+    const pad = isChild && expanded ? 'pl-11' : '';
+
+    if (link.locked) {
+      return (
+        <button
+          key={link.name}
+          onClick={() =>
+            openPlanUpgrade({
+              requiredPlan: link.requiredPlan,
+              featureName: link.name,
+              reason: 'feature',
+            })
+          }
+          title={link.name}
+          className={`${rowBase} ${pad} text-white/35 hover:text-white/70 hover:bg-white/5`}
+        >
+          <LinkIcon className="w-5 h-5 flex-none text-white/25" />
+          <span className={`flex-1 text-left ${labelCls(expanded)}`}>
+            {link.name}
+          </span>
+          {expanded && (
+            <LockClosedIcon className="w-4 h-4 flex-none text-amber-400/70" />
+          )}
+        </button>
+      );
+    }
+
+    return (
+      <Link
+        key={link.name}
+        href={link.href}
+        title={link.name}
+        className={`${rowBase} ${pad} ${
+          isActive
+            ? 'bg-gradient-to-r from-orange-500/25 to-amber-500/10 text-white shadow-inner'
+            : 'text-white/60 hover:text-white hover:bg-white/5'
+        }`}
+      >
+        {isActive && (
+          <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] bg-orange-400 rounded-r-full" />
+        )}
+        <LinkIcon
+          className={`${isChild ? 'w-4 h-4' : 'w-5 h-5'} flex-none transition ${
+            isActive
+              ? 'text-orange-400'
+              : 'text-white/50 group-hover/link:text-white'
+          }`}
+        />
+        <span className={labelCls(expanded)}>{link.name}</span>
+      </Link>
+    );
+  };
 
   return (
     <div className="flex flex-col w-full h-full">
@@ -60,65 +124,70 @@ export default function NavLinks({ expanded = true }) {
 
             <div className="flex flex-col space-y-1">
               {section.items.map((link) => {
-                const LinkIcon = link.icon;
-                // El Inicio (/dashboard) solo se marca activo en su ruta exacta;
-                // los demás módulos aceptan subrutas (ej. /inventory/new).
-                const isActive =
-                  link.href === '/dashboard'
-                    ? pathname === '/dashboard'
-                    : pathname.startsWith(link.href);
+                const children = link.children || [];
+                // Ítem simple (sin sub-ítems): fila normal.
+                if (!children.length) return renderLeaf(link);
 
-                // Módulo bloqueado por plan: no navega, ofrece mejorar el plan.
-                if (link.locked) {
-                  return (
-                    <button
-                      key={link.name}
-                      onClick={() =>
-                        openPlanUpgrade({
-                          requiredPlan: link.requiredPlan,
-                          featureName: link.name,
-                          reason: 'feature',
-                        })
-                      }
-                      title={link.name}
-                      className={`${rowBase} text-white/35 hover:text-white/70 hover:bg-white/5`}
-                    >
-                      <LinkIcon className="w-5 h-5 flex-none text-white/25" />
-                      <span className={`flex-1 text-left ${labelCls(expanded)}`}>
-                        {link.name}
-                      </span>
-                      {expanded && (
-                        <LockClosedIcon className="w-4 h-4 flex-none text-amber-400/70" />
-                      )}
-                    </button>
-                  );
-                }
+                // Ítem con sub-ítems (acordeón). Abierto si el usuario lo abrió,
+                // o por defecto cuando la ruta activa es el padre o un hijo.
+                const activeHere =
+                  isRouteActive(link.href) ||
+                  children.some((c) => isRouteActive(c.href));
+                const isOpen = openGroups[link.href] ?? activeHere;
+                const isActive = isRouteActive(link.href);
+                const LinkIcon = link.icon;
 
                 return (
-                  <Link
-                    key={link.name}
-                    href={link.href}
-                    title={link.name}
-                    className={`${rowBase} ${
+                  <div key={link.name}>
+                    <div className={`${rowBase} ${
                       isActive
                         ? 'bg-gradient-to-r from-orange-500/25 to-amber-500/10 text-white shadow-inner'
                         : 'text-white/60 hover:text-white hover:bg-white/5'
-                    }`}
-                  >
-                    {isActive && (
-                      <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] bg-orange-400 rounded-r-full" />
+                    } pr-1`}
+                    >
+                      {isActive && (
+                        <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] bg-orange-400 rounded-r-full" />
+                      )}
+                      <Link
+                        href={link.href}
+                        title={link.name}
+                        className="flex flex-1 items-center gap-3 min-w-0"
+                      >
+                        <LinkIcon
+                          className={`w-5 h-5 flex-none transition ${
+                            isActive
+                              ? 'text-orange-400'
+                              : 'text-white/50 group-hover/link:text-white'
+                          }`}
+                        />
+                        <span className={labelCls(expanded)}>{link.name}</span>
+                      </Link>
+                      {expanded && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setOpenGroups((g) => ({
+                              ...g,
+                              [link.href]: !isOpen,
+                            }))
+                          }
+                          aria-label={isOpen ? 'Contraer' : 'Expandir'}
+                          className="flex-none rounded-lg p-1 text-white/40 hover:bg-white/10 hover:text-white"
+                        >
+                          <ChevronRightIcon
+                            className={`w-4 h-4 transition-transform ${
+                              isOpen ? 'rotate-90' : ''
+                            }`}
+                          />
+                        </button>
+                      )}
+                    </div>
+                    {expanded && isOpen && (
+                      <div className="mt-1 flex flex-col space-y-1">
+                        {children.map((child) => renderLeaf(child, true))}
+                      </div>
                     )}
-
-                    <LinkIcon
-                      className={`w-5 h-5 flex-none transition ${
-                        isActive
-                          ? 'text-orange-400'
-                          : 'text-white/50 group-hover/link:text-white'
-                      }`}
-                    />
-
-                    <span className={labelCls(expanded)}>{link.name}</span>
-                  </Link>
+                  </div>
                 );
               })}
             </div>
