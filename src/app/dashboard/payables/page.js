@@ -14,6 +14,7 @@ import {
 import RoleGuard from '@/auth/roleGuard';
 import Button from '@/components/ui/Button';
 import MoneyInput from '@/components/ui/MoneyInput';
+import TableActionButton from '@/components/ui/TableActionButton';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import { useAuth } from '@/context/authContext';
 import { formatCOP } from '@/lib/api/utils/utils';
@@ -408,8 +409,10 @@ export default function PayablesPage() {
                                   <CheckCircleIcon className="h-3.5 w-3.5" />
                                   Pagar
                                 </button>
-                                <button
-                                  type="button"
+                                <TableActionButton
+                                  icon={PencilSquareIcon}
+                                  label="Editar"
+                                  variant="edit"
                                   disabled={busy}
                                   onClick={() =>
                                     setForm({
@@ -423,10 +426,7 @@ export default function PayablesPage() {
                                       notes: p.notes || '',
                                     })
                                   }
-                                  className="inline-flex items-center rounded-lg border border-gray-200 p-1.5 text-gray-500 hover:bg-gray-50"
-                                >
-                                  <PencilSquareIcon className="h-3.5 w-3.5" />
-                                </button>
+                                />
                               </>
                             ) : (
                               <button
@@ -440,14 +440,13 @@ export default function PayablesPage() {
                                 Reabrir
                               </button>
                             )}
-                            <button
-                              type="button"
+                            <TableActionButton
+                              icon={TrashIcon}
+                              label="Eliminar"
+                              variant="delete"
                               disabled={busy}
                               onClick={() => doDelete(p)}
-                              className="inline-flex items-center rounded-lg border border-gray-200 p-1.5 text-gray-400 hover:border-red-200 hover:text-red-500"
-                            >
-                              <TrashIcon className="h-3.5 w-3.5" />
-                            </button>
+                            />
                           </div>
                         </td>
                       </tr>

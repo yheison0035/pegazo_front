@@ -14,6 +14,7 @@ import {
 import RoleGuard from '@/auth/roleGuard';
 import Button from '@/components/ui/Button';
 import MoneyInput from '@/components/ui/MoneyInput';
+import TableActionButton from '@/components/ui/TableActionButton';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import { useAuth } from '@/context/authContext';
 import { formatCOP } from '@/lib/api/utils/utils';
@@ -463,15 +464,13 @@ export default function EmployeeChargesPage() {
                                 Reabrir
                               </button>
                             )}
-                            <button
-                              type="button"
+                            <TableActionButton
+                              icon={TrashIcon}
+                              label="Eliminar"
+                              variant="delete"
                               disabled={busy}
                               onClick={() => remove(c.id)}
-                              title="Eliminar"
-                              className="inline-flex items-center rounded-lg border border-gray-200 p-1 text-gray-400 hover:border-red-200 hover:text-red-500 disabled:opacity-50"
-                            >
-                              <TrashIcon className="h-3.5 w-3.5" />
-                            </button>
+                            />
                           </div>
                         </td>
                       )}
