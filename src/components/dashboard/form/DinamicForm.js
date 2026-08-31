@@ -19,6 +19,7 @@ import { getBrands } from '@/lib/api/routes/brands';
 import { getCustomers } from '@/lib/api/routes/customers';
 import { getExpenseCategories } from '@/lib/api/routes/expenseCategories';
 import { getUnitsOfMeasure } from '@/lib/api/routes/unitsOfMeasure';
+import { getCustomerSegments } from '@/lib/api/routes/customerSegments';
 import ImageUploader from '../inventory/imageUploader';
 import LogoUploader from '@/components/ui/LogoUploader';
 import { colorOptions } from '@/lib/api/utils/getColors';
@@ -203,6 +204,7 @@ export default function DinamicForm({
       expenses: getTypeExpenses,
       expenseCategories: getExpenseCategories,
       unitsOfMeasure: getUnitsOfMeasure,
+      customerSegments: getCustomerSegments,
       typeCompanies: getTypeCompanies,
       services: getServices,
       getUsersByRole: async () => {
