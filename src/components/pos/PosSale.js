@@ -27,6 +27,7 @@ import useSales from '@/lib/api/hooks/useSales';
 import useUsers from '@/lib/api/hooks/useUsers';
 import useLocals from '@/lib/api/hooks/useLocals';
 import { getCustomers, getCustomerSummary } from '@/lib/api/routes/customers';
+import { getPaymentMethodCatalog } from '@/lib/api/routes/paymentMethods';
 import { getFiscalConfig } from '@/lib/api/routes/company';
 import { getProductFields } from '@/config/verticalProfiles';
 import { formatCOP } from '@/lib/api/utils/utils';
@@ -97,6 +98,32 @@ export default function PosSale({
   const [paymentMethod, setPaymentMethod] = useState(
     initial?.paymentMethod || 'EFECTIVO'
   );
+  // Métodos de pago del catálogo administrable de la empresa. Cada uno tiene un
+  // `code` (comportamiento base) que alimenta a `paymentMethod`.
+  const [methods, setMethods] = useState([]);
+  const [paymentMethodCatalogId, setPaymentMethodCatalogId] = useState(
+    initial?.paymentMethodCatalogId || null
+  );
+  useEffect(() => {
+    getPaymentMethodCatalog()
+      .then((r) => {
+        const list = r?.data || [];
+        setMethods(list);
+        // Selección inicial: el ya elegido, o el que coincida con el code
+        // inicial, o Efectivo, o el primero.
+        setPaymentMethodCatalogId((prev) => {
+          if (prev) return prev;
+          const pick =
+            list.find((m) => m.code === (initial?.paymentMethod || 'EFECTIVO')) ||
+            list.find((m) => m.code === 'EFECTIVO') ||
+            list[0];
+          if (pick) setPaymentMethod(pick.code);
+          return pick ? pick.id : null;
+        });
+      })
+      .catch(() => setMethods([]));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [notes, setNotes] = useState(initial?.notes || '');
   // Muestra/oculta los campos secundarios (fecha y observaciones) para dar más
   // espacio a los ítems de la factura.
@@ -424,7 +451,13 @@ export default function PosSale({
     setCart([]);
     setCustomer(null);
     setNotes('');
-    setPaymentMethod('EFECTIVO');
+    {
+      // Reinicia al método por defecto (Efectivo del catálogo si existe).
+      const def =
+        methods.find((m) => m.code === 'EFECTIVO') || methods[0] || null;
+      setPaymentMethod(def ? def.code : 'EFECTIVO');
+      setPaymentMethodCatalogId(def ? def.id : null);
+    }
     setSaleDate(nowLocalDatetime());
     setDueDate('');
     setCashReceived('');
@@ -452,6 +485,7 @@ export default function PosSale({
     try {
       await onSubmit({
         paymentMethod,
+        paymentMethodCatalogId: paymentMethodCatalogId || undefined,
         paymentStatus: paymentMethod === 'CREDITO' ? 'FIADO' : 'PAGADA',
         dueDate: paymentMethod === 'CREDITO' && dueDate ? dueDate : null,
         localId: Number(localId),
@@ -1111,19 +1145,34 @@ export default function PosSale({
                 </div>
 
                 <div className="grid grid-cols-3 gap-1.5">
-                  {PAYMENT_METHODS.map((pm) => (
-                    <button
-                      key={pm.id}
-                      onClick={() => setPaymentMethod(pm.id)}
-                      className={`rounded-lg px-2 py-1.5 text-xs font-medium border transition ${
-                        paymentMethod === pm.id
-                          ? 'border-orange-400 bg-orange-50 text-orange-700'
-                          : 'border-gray-200 text-gray-500 hover:bg-gray-50'
-                      }`}
-                    >
-                      {pm.name}
-                    </button>
-                  ))}
+                  {(methods.length ? methods : PAYMENT_METHODS).map((pm) => {
+                    // Con catálogo: id = id del método, code = comportamiento.
+                    // Fallback (sin catálogo): id === code (enum).
+                    const isCatalog = methods.length > 0;
+                    const selected = isCatalog
+                      ? paymentMethodCatalogId === pm.id
+                      : paymentMethod === pm.id;
+                    return (
+                      <button
+                        key={pm.id}
+                        onClick={() => {
+                          if (isCatalog) {
+                            setPaymentMethodCatalogId(pm.id);
+                            setPaymentMethod(pm.code);
+                          } else {
+                            setPaymentMethod(pm.id);
+                          }
+                        }}
+                        className={`rounded-lg px-2 py-1.5 text-xs font-medium border transition ${
+                          selected
+                            ? 'border-orange-400 bg-orange-50 text-orange-700'
+                            : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                        }`}
+                      >
+                        {pm.name}
+                      </button>
+                    );
+                  })}
                 </div>
 
                 {paymentMethod === 'EFECTIVO' && total > 0 && (
