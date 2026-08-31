@@ -326,12 +326,8 @@ export const NAVIGATION = [
         icon: ReceiptPercentIcon,
         roles: ['SUPER_ADMIN', 'ADMIN'],
       },
-      {
-        name: 'Facturación electrónica',
-        href: '/dashboard/facturacion-electronica',
-        icon: DocumentTextIcon,
-        roles: ['SUPER_ADMIN', 'ADMIN'],
-      },
+      // Facturación electrónica (Factus): oculta del menú hasta probarla 100%.
+      // La página existe en /dashboard/facturacion-electronica para pruebas.
     ],
   },
 
