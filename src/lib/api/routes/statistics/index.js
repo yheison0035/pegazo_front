@@ -31,6 +31,14 @@ export async function getDashboardStats(dto = {}) {
   });
 }
 
+// Comparación entre dos periodos: { periodA:{startDate,endDate}, periodB:{...}, localId }
+export async function getCompareStats(dto = {}) {
+  return apiFetch('/statistics/compare', {
+    method: 'POST',
+    body: JSON.stringify(dto),
+  });
+}
+
 // Reporte de IVA (generado vs descontable) de un periodo.
 export async function getTaxReport(dto = {}) {
   return apiFetch('/statistics/tax-report', {
