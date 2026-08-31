@@ -321,6 +321,12 @@ export const NAVIGATION = [
         roles: ['SUPER_ADMIN', 'ADMIN', 'BARBERO', 'PROFESIONAL'],
       },
       {
+        name: 'Tipos de cargo',
+        href: '/dashboard/charge-categories',
+        icon: TagIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN'],
+      },
+      {
         name: 'Estadísticas',
         href: '/dashboard/statistics',
         icon: ChartBarSquareIcon,

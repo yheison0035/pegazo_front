@@ -19,6 +19,7 @@ import AlertModal from '@/components/dashboard/modals/alertModal';
 import { useAuth } from '@/context/authContext';
 import { formatCOP } from '@/lib/api/utils/utils';
 import { getUsers } from '@/lib/api/routes/users';
+import { getChargeCategories } from '@/lib/api/routes/chargeCategories';
 import {
   getEmployeeCharges,
   getEmployeeChargesSummary,
@@ -58,8 +59,9 @@ export default function EmployeeChargesPage() {
   const [settleTarget, setSettleTarget] = useState(null); // {charge, method}
   const [settleDate, setSettleDate] = useState('');
 
+  const [categories, setCategories] = useState([]);
   const [form, setForm] = useState({
-    type: 'OTRO',
+    chargeCategoryId: '',
     concept: '',
     amount: '',
     notes: '',
@@ -73,6 +75,15 @@ export default function EmployeeChargesPage() {
     getUsers({ limit: 200 })
       .then((r) => setEmployees(r?.data || []))
       .catch(() => setEmployees([]));
+    getChargeCategories()
+      .then((r) => {
+        const cats = r?.data || [];
+        setCategories(cats);
+        // Preselecciona "Otro" si existe.
+        const otro = cats.find((c) => c.code === 'OTRO') || cats[0];
+        if (otro) setForm((f) => ({ ...f, chargeCategoryId: String(otro.id) }));
+      })
+      .catch(() => setCategories([]));
   }, [isOwner]);
 
   const load = useCallback(async () => {
@@ -106,12 +117,14 @@ export default function EmployeeChargesPage() {
     try {
       await createEmployeeCharge({
         userId: Number(selectedUser),
-        type: form.type,
+        chargeCategoryId: form.chargeCategoryId
+          ? Number(form.chargeCategoryId)
+          : undefined,
         concept: form.concept.trim(),
         amount: Number(form.amount),
         notes: form.notes.trim() || undefined,
       });
-      setForm({ type: 'OTRO', concept: '', amount: '', notes: '' });
+      setForm((f) => ({ ...f, concept: '', amount: '', notes: '' }));
       setAlert({ type: 'success', message: 'Cargo registrado.' });
       load();
     } catch (e) {
@@ -192,7 +205,7 @@ export default function EmployeeChargesPage() {
         (c) => `<tr>
           <td>${c.userName || ''}</td>
           <td>${c.concept || ''}</td>
-          <td>${TYPE_LABEL[c.type] || c.type}</td>
+          <td>${c.categoryName || TYPE_LABEL[c.type] || c.type}</td>
           <td style="text-align:right">${formatCOP(c.amount)}</td>
           <td>${STATUS_TXT[c.status] || c.status}</td>
           <td>${new Date(c.createdAt).toLocaleDateString('es-CO')}</td>
@@ -311,13 +324,15 @@ export default function EmployeeChargesPage() {
                   Tipo
                 </label>
                 <select
-                  value={form.type}
-                  onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))}
+                  value={form.chargeCategoryId}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, chargeCategoryId: e.target.value }))
+                  }
                   className={inputCls}
                 >
-                  {TYPES.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.label}
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
                     </option>
                   ))}
                 </select>
@@ -414,7 +429,7 @@ export default function EmployeeChargesPage() {
                         </div>
                       </td>
                       <td className="px-4 py-3 text-gray-600">
-                        {TYPE_LABEL[c.type] || c.type}
+                        {c.categoryName || TYPE_LABEL[c.type] || c.type}
                       </td>
                       <td className="px-4 py-3 text-right font-bold text-gray-900">
                         {formatCOP(c.amount)}
