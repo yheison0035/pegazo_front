@@ -40,6 +40,9 @@ import ExpensesDetail, {
 } from '@/components/dashboard/statistics/ExpensesDetail';
 import AnnualStats from '@/components/dashboard/statistics/AnnualStats';
 import ProfitLoss from '@/components/dashboard/statistics/ProfitLoss';
+import CashFlow from '@/components/dashboard/statistics/CashFlow';
+import TaxReport from '@/components/dashboard/statistics/TaxReport';
+import StatDetailModal from '@/components/dashboard/statistics/StatDetailModal';
 import { exportCSV, csvNum } from '@/components/dashboard/statistics/exportUtils';
 import useTerms from '@/hooks/useTerms';
 import {
@@ -53,7 +56,26 @@ const TABS = [
   { id: 'comparar', label: 'Comparar meses' },
   { id: 'anual', label: 'Anual' },
   { id: 'gastos', label: 'Gastos' },
+  { id: 'impuestos', label: 'Impuestos' },
 ];
+
+// Cartera por edades: agrupa las cuentas por cobrar según días de vencimiento.
+function agingBuckets(items = []) {
+  const now = Date.now();
+  const buckets = [
+    { label: 'Corriente (0-30)', min: 0, max: 30, total: 0, count: 0 },
+    { label: '31-60 días', min: 31, max: 60, total: 0, count: 0 },
+    { label: '61-90 días', min: 61, max: 90, total: 0, count: 0 },
+    { label: 'Más de 90', min: 91, max: Infinity, total: 0, count: 0 },
+  ];
+  for (const it of items) {
+    const days = Math.floor((now - new Date(it.date).getTime()) / 86400000);
+    const b = buckets.find((x) => days >= x.min && days <= x.max) || buckets[0];
+    b.total += it.amount;
+    b.count += 1;
+  }
+  return buckets;
+}
 
 const todayCol = () =>
   new Date().toLocaleDateString('en-CA', { timeZone: 'America/Bogota' });
@@ -87,6 +109,8 @@ export default function Statistics() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [tab, setTab] = useState('resumen');
+  // Modal de detalle al hacer clic en una tarjeta del Resumen ('sales'|'expenses').
+  const [resumenDrill, setResumenDrill] = useState(null);
 
   useEffect(() => {
     getLocals()
@@ -283,12 +307,26 @@ export default function Statistics() {
 
         {tab === 'comparar' && <CompareStats localId={localId} />}
 
-        {tab === 'anual' && <AnnualStats localId={localId} />}
+        {tab === 'anual' && (
+          <AnnualStats
+            localId={localId}
+            onSelectMonth={(from, to) => {
+              setTab('resumen');
+              applyRange(from, to);
+            }}
+          />
+        )}
+
+        {tab === 'impuestos' && (
+          <TaxReport startDate={startDate} endDate={endDate} />
+        )}
 
         {/* Filtros (Resumen y Gastos comparten el rango de fechas) */}
         <div
           className={`mb-6 flex-wrap items-end gap-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm print:hidden ${
-            tab === 'resumen' || tab === 'gastos' ? 'flex' : 'hidden'
+            tab === 'resumen' || tab === 'gastos' || tab === 'impuestos'
+              ? 'flex'
+              : 'hidden'
           }`}
         >
           <div className="flex flex-col">
@@ -381,6 +419,7 @@ export default function Statistics() {
               value={formatMoney(s.totalSales)}
               delta={s.deltas.totalSales}
               accent={COLORS.income}
+              onClick={() => setResumenDrill('sales')}
             />
             <KpiCard
               label="Nº de ventas"
@@ -400,6 +439,7 @@ export default function Statistics() {
               delta={s.deltas.totalExpenses}
               invert
               accent={COLORS.expense}
+              onClick={() => setResumenDrill('expenses')}
             />
             <KpiCard
               label="Utilidad"
@@ -423,10 +463,11 @@ export default function Statistics() {
           </div>
         )}
 
-        {/* Estado de resultados (P&G) */}
+        {/* Estado de resultados (P&G) + Flujo de caja */}
         {s && (
-          <div className="mb-6">
+          <div className="mb-6 grid gap-6 lg:grid-cols-2">
             <ProfitLoss data={data} />
+            <CashFlow data={data} />
           </div>
         )}
 
@@ -792,6 +833,32 @@ export default function Statistics() {
                   </span>
                 </div>
 
+                {/* Cartera por edades */}
+                <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {agingBuckets(data.receivables.items).map((b, i) => (
+                    <div
+                      key={b.label}
+                      className={`rounded-xl border p-3 ${
+                        i === 0
+                          ? 'border-emerald-100 bg-emerald-50'
+                          : i === 3
+                            ? 'border-red-100 bg-red-50'
+                            : 'border-amber-100 bg-amber-50'
+                      }`}
+                    >
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                        {b.label}
+                      </p>
+                      <p className="mt-0.5 text-sm font-bold text-gray-900">
+                        {formatMoney(b.total)}
+                      </p>
+                      <p className="text-[11px] text-gray-400">
+                        {b.count} venta(s)
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
                 <div className="overflow-x-auto">
                   <table className="min-w-full text-sm">
                     <thead>
@@ -832,6 +899,17 @@ export default function Statistics() {
           </ChartCard>
         </div>
         </>
+        )}
+
+        {/* Modal de detalle del Resumen (clic en tarjeta Ventas/Gastos) */}
+        {resumenDrill && data && (
+          <StatDetailModal
+            title={resumenDrill === 'expenses' ? 'Detalle de gastos' : 'Detalle de ventas'}
+            subtitle={rangeLabel}
+            kind={resumenDrill}
+            data={data}
+            onClose={() => setResumenDrill(null)}
+          />
         )}
       </div>
     </RoleGuard>

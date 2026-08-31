@@ -30,7 +30,7 @@ const MONTHS = [
   'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
 ];
 
-export default function AnnualStats({ localId }) {
+export default function AnnualStats({ localId, onSelectMonth }) {
   const thisYear = new Date().getFullYear();
   const [year, setYear] = useState(thisYear);
   const [data, setData] = useState(null);
@@ -75,6 +75,13 @@ export default function AnnualStats({ localId }) {
   const changeYear = (y) => {
     setYear(y);
     fetchAnnual(y);
+  };
+
+  // Rango de fechas de un mes del año seleccionado.
+  const monthRange = (m) => {
+    const p = (n) => String(n).padStart(2, '0');
+    const last = new Date(year, m, 0).getDate();
+    return [`${year}-${p(m)}-01`, `${year}-${p(m)}-${p(last)}`];
   };
 
   const handleExport = () => {
@@ -179,8 +186,28 @@ export default function AnnualStats({ localId }) {
             </thead>
             <tbody className="divide-y divide-gray-50">
               {(data?.months || []).map((m) => (
-                <tr key={m.month} className="text-gray-700">
-                  <td className="py-2 pr-4 font-medium text-gray-800">{MONTHS[m.month - 1]}</td>
+                <tr
+                  key={m.month}
+                  onClick={
+                    onSelectMonth
+                      ? () => onSelectMonth(...monthRange(m.month))
+                      : undefined
+                  }
+                  className={`text-gray-700 ${
+                    onSelectMonth
+                      ? 'cursor-pointer hover:bg-orange-50/60'
+                      : ''
+                  }`}
+                  title={onSelectMonth ? 'Ver este mes en detalle' : undefined}
+                >
+                  <td className="py-2 pr-4 font-medium text-gray-800">
+                    {MONTHS[m.month - 1]}
+                    {onSelectMonth && (
+                      <span className="ml-1 text-[10px] font-semibold text-orange-500">
+                        ›
+                      </span>
+                    )}
+                  </td>
                   <td className="py-2 pr-4 text-right">{formatMoney(m.ventas)}</td>
                   <td className="py-2 pr-4 text-right text-gray-400">{formatMoney(m.costoVentas)}</td>
                   <td className="py-2 pr-4 text-right">{formatMoney(m.utilidadBruta)}</td>

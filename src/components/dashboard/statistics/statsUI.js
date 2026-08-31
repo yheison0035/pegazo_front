@@ -50,7 +50,7 @@ export function shortDate(iso) {
 }
 
 // -------- KPI Card --------
-export function KpiCard({ label, value, delta, invert = false, accent }) {
+export function KpiCard({ label, value, delta, invert = false, accent, onClick }) {
   const hasDelta = delta !== null && delta !== undefined;
   const up = hasDelta && delta > 0;
   const down = hasDelta && delta < 0;
@@ -65,8 +65,24 @@ export function KpiCard({ label, value, delta, invert = false, accent }) {
       : 'text-gray-400';
   const arrow = up ? '▲' : down ? '▼' : '•';
 
+  const clickable = typeof onClick === 'function';
+  const Tag = clickable ? 'button' : 'div';
+
   return (
-    <div className="min-w-0 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+    <Tag
+      {...(clickable
+        ? {
+            type: 'button',
+            onClick,
+            title: 'Ver detalle',
+          }
+        : {})}
+      className={`min-w-0 rounded-2xl border border-gray-200 bg-white p-4 text-left shadow-sm transition ${
+        clickable
+          ? 'cursor-pointer hover:-translate-y-0.5 hover:border-orange-200 hover:shadow-md'
+          : ''
+      }`}
+    >
       <div className="flex items-center gap-2">
         {accent && (
           <span
@@ -77,6 +93,11 @@ export function KpiCard({ label, value, delta, invert = false, accent }) {
         <p className="truncate text-xs font-semibold uppercase tracking-wide text-gray-500">
           {label}
         </p>
+        {clickable && (
+          <span className="ml-auto text-[10px] font-semibold text-orange-500">
+            ver ›
+          </span>
+        )}
       </div>
       <p className="mt-2 break-words text-lg font-bold leading-tight text-gray-900 sm:text-xl xl:text-2xl">
         {value}
@@ -87,7 +108,7 @@ export function KpiCard({ label, value, delta, invert = false, accent }) {
           <span className="text-gray-400">vs anterior</span>
         </p>
       )}
-    </div>
+    </Tag>
   );
 }
 
