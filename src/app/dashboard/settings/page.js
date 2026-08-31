@@ -616,6 +616,24 @@ const THEMES = [
     desc: 'Vivo y tecnológico.',
     colors: ['#0891b2', '#22d3ee', '#0ea5e9'],
   },
+  {
+    id: 'graphite',
+    name: 'Grafito',
+    desc: 'Minimalista y elegante.',
+    colors: ['#334155', '#475569', '#64748b'],
+  },
+  {
+    id: 'indigo',
+    name: 'Índigo',
+    desc: 'Corporativo y profundo.',
+    colors: ['#4f46e5', '#6366f1', '#818cf8'],
+  },
+  {
+    id: 'wine',
+    name: 'Vino',
+    desc: 'Elegante y sofisticado.',
+    colors: ['#9f1239', '#be123c', '#f59e0b'],
+  },
 ];
 
 function ThemeSettings() {
