@@ -12,7 +12,7 @@ export default function Layout({ children }) {
         <div className="w-full flex-none md:w-20">
           <SideNavigation />
         </div>
-        <div className="grow p-6 pt-16 md:overflow-y-auto md:p-10 md:pt-10">
+        <div className="grow bg-gray-50 p-6 pt-16 text-gray-800 md:overflow-y-auto md:p-10 md:pt-10">
           {children}
         </div>
       </div>

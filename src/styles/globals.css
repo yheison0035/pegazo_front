@@ -157,8 +157,14 @@ button:disabled {
    Tema por defecto = naranja (sin override).
    ============================================================ */
 
-/* Fondo de la barra lateral por defecto (tema Naranja): charcoal cálido.
-   Cada tema lo sobrescribe con un tono oscuro coordinado con su acento. */
+/* Fondo de la barra lateral: valor por defecto GLOBAL (para /platform, login y
+   cualquier contexto sin tema). En el dashboard, [data-crm-theme] lo coordina
+   con el acento del tema elegido. */
+:root {
+  --sidebar-from: #0b0f19;
+  --sidebar-to: #05070d;
+}
+
 [data-crm-theme] {
   --sidebar-from: #17130d;
   --sidebar-to: #0a0805;
