@@ -65,13 +65,26 @@ export default function useNavigation() {
 
   // Filtrar por módulos del negocio + rol. El gating por plan NO oculta: marca
   // el módulo como "bloqueado" (candado) para poder ofrecer el plan superior.
-  // Catálogos de configuración: cada uno hereda el gating (tipo de negocio +
-  // plan) de su módulo padre. Así nunca aparecen en una vertical que no usa el
-  // módulo (ej: "Tipos de cargo" solo donde hay employee-charges).
-  const CONFIG_PARENT = {
+  // Gating: cada catálogo hereda la visibilidad (vertical + plan) de su módulo
+  // padre. Así nunca aparece en una vertical que no usa el módulo.
+  const GATING_PARENT = {
     'expense-categories': 'expenses',
     'charge-categories': 'employee-charges',
     'payment-methods': 'sales',
+  };
+  // Anidado visual (acordeón): bajo qué ítem del menú se agrupa. Puede diferir
+  // del gating (ej: métodos de pago se agrupan bajo Caja, pero se muestran
+  // siempre que haya ventas; si no hay Caja en la vertical, quedan sueltos).
+  const NEST_PARENT = {
+    'expense-categories': 'expenses',
+    'charge-categories': 'employee-charges',
+    'payment-methods': 'cash',
+  };
+  // Etiqueta del sub-ítem que abre la vista propia del módulo padre.
+  const SELF_LABEL = {
+    expenses: 'Lista de gastos',
+    'employee-charges': 'Lista de cargos',
+    cash: 'Ver caja',
   };
 
   const isAllowedKey = (k) =>
@@ -87,13 +100,13 @@ export default function useNavigation() {
         // vertical.
         const allowedByModule =
           isAllowedKey(key) ||
-          (CONFIG_PARENT[key] && isAllowedKey(CONFIG_PARENT[key]));
+          (GATING_PARENT[key] && isAllowedKey(GATING_PARENT[key]));
         return allowedByModule && item.roles.includes(role);
       })
       .map((item) => {
         const key = item.href.split('/').pop();
         // El candado de plan usa el módulo padre para los catálogos.
-        const planKey = CONFIG_PARENT[key] || key;
+        const planKey = GATING_PARENT[key] || key;
         const locked = useManual ? false : !planAllowsModule(plan, planKey);
         return {
           ...item,
@@ -103,17 +116,31 @@ export default function useNavigation() {
         };
       });
 
-    // Anida los catálogos de configuración como sub-ítems de su módulo padre
-    // (acordeón en el sidebar) para no alargar el menú.
+    // Anida los catálogos como sub-ítems de su módulo padre (acordeón). El padre
+    // pasa a ser un grupo que NO navega: su vista propia entra como primer
+    // sub-ítem ("Lista de gastos", etc.).
     const byKey = {};
     for (const it of items) byKey[it.href.split('/').pop()] = it;
     const nested = [];
     for (const it of items) {
       const key = it.href.split('/').pop();
-      const parentKey = CONFIG_PARENT[key];
+      const parentKey = NEST_PARENT[key];
       const parent = parentKey ? byKey[parentKey] : null;
       if (parent) {
-        (parent.children = parent.children || []).push(it);
+        if (!parent.children) {
+          parent.isGroup = true;
+          parent.children = [
+            {
+              name: SELF_LABEL[parentKey] || parent.name,
+              href: parent.href,
+              icon: parent.icon,
+              roles: parent.roles,
+              locked: parent.locked,
+              requiredPlan: parent.requiredPlan,
+            },
+          ];
+        }
+        parent.children.push(it);
       } else {
         nested.push(it);
       }
