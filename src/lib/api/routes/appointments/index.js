@@ -96,6 +96,14 @@ export async function deleteAppointment(id) {
   return res;
 }
 
+// Citas de un mes para la vista de calendario: { year, month(0-11), barberId? }
+export async function getAppointmentsMonth(params = {}) {
+  const q = new URLSearchParams(
+    Object.entries(params).filter(([, v]) => v !== '' && v != null),
+  ).toString();
+  return apiFetch(`/appointments/month?${q}`);
+}
+
 export async function getAvailability(params = {}) {
   const query = new URLSearchParams();
 
