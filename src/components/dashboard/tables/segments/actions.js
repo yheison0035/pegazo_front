@@ -4,7 +4,7 @@ import {
   EyeIcon,
   TrashIcon,
   PencilSquareIcon,
-  Squares2X2Icon,
+  RectangleGroupIcon,
   PrinterIcon,
   PowerIcon,
 } from '@heroicons/react/24/outline';
@@ -56,7 +56,7 @@ export default function Actions({
 
       {(view === 'inventory' || view === 'services') && canView && (
         <TableActionButton
-          icon={Squares2X2Icon}
+          icon={RectangleGroupIcon}
           label="Variantes"
           variant="view"
           disabled={isLocked}
