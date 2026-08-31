@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import DinamicForm from '@/components/dashboard/form/DinamicForm';
 import Button from '@/components/ui/Button';
+import MoneyInput from '@/components/ui/MoneyInput';
 import { useAuth } from '@/context/authContext';
 import useCompanies from '@/lib/api/hooks/useCompanies';
 import { getFormFieldsCompanies } from '@/lib/api/utils/companies.config';
@@ -92,31 +93,21 @@ function ModulesPricePanel({ company, updateCompany, onSaved }) {
       <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div>
           <label className="mb-1 block text-xs font-semibold text-gray-600">
-            Precio mensual (COP)
+            Precio mensual
           </label>
-          <input
-            type="number"
-            min="0"
+          <MoneyInput
             value={price.monthlyPrice}
-            onChange={(e) =>
-              setPrice((p) => ({ ...p, monthlyPrice: e.target.value }))
-            }
-            placeholder="Ej: 80000"
+            onChange={(v) => setPrice((p) => ({ ...p, monthlyPrice: v }))}
             className={num}
           />
         </div>
         <div>
           <label className="mb-1 block text-xs font-semibold text-gray-600">
-            Precio con descuento (COP)
+            Precio con descuento
           </label>
-          <input
-            type="number"
-            min="0"
+          <MoneyInput
             value={price.discountedPrice}
-            onChange={(e) =>
-              setPrice((p) => ({ ...p, discountedPrice: e.target.value }))
-            }
-            placeholder="Ej: 40000"
+            onChange={(v) => setPrice((p) => ({ ...p, discountedPrice: v }))}
             className={num}
           />
         </div>
