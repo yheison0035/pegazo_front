@@ -6,6 +6,8 @@ import {
   TrashIcon,
   MoonIcon,
   CalendarDaysIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
 } from '@heroicons/react/24/outline';
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
@@ -47,6 +49,29 @@ function todayInput() {
   return new Date(d.getTime() - off).toISOString().slice(0, 10);
 }
 
+const MONTH_NAMES = [
+  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+];
+
+// Celdas del mes (lunes primero). null = relleno antes del día 1.
+function monthGrid(y, m) {
+  const startDow = (new Date(Date.UTC(y, m, 1)).getUTCDay() + 6) % 7; // 0=Lun
+  const days = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+  const cells = [];
+  for (let i = 0; i < startDow; i++) cells.push(null);
+  for (let d = 1; d <= days; d++) {
+    const dateStr = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    cells.push({ d, dateStr });
+  }
+  return cells;
+}
+
+// Día de la semana (0=Dom..6=Sáb) de una fecha YYYY-MM-DD.
+function weekdayOf(dateStr) {
+  return new Date(`${dateStr}T00:00:00Z`).getUTCDay();
+}
+
 export default function RestDaysPage() {
   const [pros, setPros] = useState([]);
   const [selected, setSelected] = useState(null);
@@ -56,6 +81,29 @@ export default function RestDaysPage() {
   const [alert, setAlert] = useState({});
   const [newDate, setNewDate] = useState(todayInput());
   const [newReason, setNewReason] = useState('');
+  const [cal, setCal] = useState(() => {
+    const d = new Date();
+    return { y: d.getFullYear(), m: d.getMonth() };
+  });
+  const [dayBusy, setDayBusy] = useState(null);
+
+  // Programa o quita un descanso puntual desde el calendario.
+  const toggleDay = async (dateStr) => {
+    if (!config || dateStr < todayInput()) return;
+    setDayBusy(dateStr);
+    try {
+      const existing = (config.timeOff || []).find(
+        (t) => String(t.date).slice(0, 10) === dateStr,
+      );
+      if (existing) await removeTimeOff(existing.id);
+      else await addTimeOff(selected, { date: dateStr, reason: 'Programado' });
+      await loadConfig(selected);
+    } catch (e) {
+      setAlert({ type: 'error', message: e.message || 'No se pudo guardar.' });
+    } finally {
+      setDayBusy(null);
+    }
+  };
 
   useEffect(() => {
     getRestDaysProfessionals()
@@ -209,8 +257,99 @@ export default function RestDaysPage() {
                     Días libres puntuales
                   </p>
                   <p className="mb-4 text-xs text-gray-500">
-                    Vacaciones, citas médicas, permisos… (fechas específicas).
+                    Programa cada descanso en el calendario (toca el día).
+                    Vacaciones, permisos, el domingo del mes…
                   </p>
+
+                  {/* Calendario mensual */}
+                  <div className="mb-4 rounded-2xl border border-gray-100 bg-gray-50/60 p-3">
+                    <div className="mb-2 flex items-center justify-between">
+                      <button
+                        onClick={() =>
+                          setCal((c) =>
+                            c.m === 0
+                              ? { y: c.y - 1, m: 11 }
+                              : { y: c.y, m: c.m - 1 },
+                          )
+                        }
+                        className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100"
+                      >
+                        <ChevronLeftIcon className="h-4 w-4" />
+                      </button>
+                      <span className="text-sm font-semibold text-gray-800">
+                        {MONTH_NAMES[cal.m]} {cal.y}
+                      </span>
+                      <button
+                        onClick={() =>
+                          setCal((c) =>
+                            c.m === 11
+                              ? { y: c.y + 1, m: 0 }
+                              : { y: c.y, m: c.m + 1 },
+                          )
+                        }
+                        className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100"
+                      >
+                        <ChevronRightIcon className="h-4 w-4" />
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+                      {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map(
+                        (d) => (
+                          <div key={d}>{d}</div>
+                        ),
+                      )}
+                    </div>
+                    <div className="mt-1 grid grid-cols-7 gap-1">
+                      {monthGrid(cal.y, cal.m).map((cell, i) => {
+                        if (!cell) return <div key={`b${i}`} />;
+                        const off = (config.timeOff || []).some(
+                          (t) => String(t.date).slice(0, 10) === cell.dateStr,
+                        );
+                        const weekly = (config.restWeekdays || []).includes(
+                          weekdayOf(cell.dateStr),
+                        );
+                        const past = cell.dateStr < todayInput();
+                        const isToday = cell.dateStr === todayInput();
+                        let cls =
+                          'text-gray-700 hover:bg-orange-100 hover:text-orange-700';
+                        if (weekly)
+                          cls = 'bg-amber-100 text-amber-700 cursor-default';
+                        else if (off)
+                          cls = 'bg-orange-500 text-white shadow-sm';
+                        else if (past)
+                          cls = 'text-gray-300 cursor-not-allowed';
+                        return (
+                          <button
+                            key={cell.dateStr}
+                            disabled={past || weekly || !!dayBusy}
+                            onClick={() => toggleDay(cell.dateStr)}
+                            title={
+                              weekly
+                                ? 'Descanso semanal'
+                                : off
+                                  ? 'Quitar descanso'
+                                  : 'Programar descanso'
+                            }
+                            className={`relative h-9 rounded-lg text-sm font-medium transition disabled:opacity-100 ${cls} ${
+                              isToday ? 'ring-1 ring-orange-300' : ''
+                            }`}
+                          >
+                            {cell.d}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <div className="mt-2 flex flex-wrap gap-4 text-[11px] text-gray-500">
+                      <span className="flex items-center gap-1.5">
+                        <span className="inline-block h-2.5 w-2.5 rounded bg-orange-500" />
+                        Programado
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <span className="inline-block h-2.5 w-2.5 rounded bg-amber-200" />
+                        Descanso semanal
+                      </span>
+                    </div>
+                  </div>
 
                   <div className="mb-4 flex flex-wrap items-end gap-2">
                     <div className="flex flex-col">
