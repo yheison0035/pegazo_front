@@ -43,6 +43,7 @@ import ProfitLoss from '@/components/dashboard/statistics/ProfitLoss';
 import CashFlow from '@/components/dashboard/statistics/CashFlow';
 import TaxReport from '@/components/dashboard/statistics/TaxReport';
 import StatDetailModal from '@/components/dashboard/statistics/StatDetailModal';
+import FilterableTable from '@/components/dashboard/statistics/FilterableTable';
 import { exportCSV, csvNum } from '@/components/dashboard/statistics/exportUtils';
 import useTerms from '@/hooks/useTerms';
 import {
@@ -224,6 +225,15 @@ export default function Statistics() {
       [],
       ['TOP CLIENTES', 'COMPRAS', 'Nº'],
       ...(data.topCustomers || []).map((c) => [c.name, csvNum(c.total), c.count]),
+      [],
+      ['RENTABILIDAD POR PRODUCTO', 'VENDIDO', 'COSTO', 'UTILIDAD', 'MARGEN %'],
+      ...(data.productProfit || []).map((p) => [
+        p.name,
+        csvNum(p.revenue),
+        csvNum(p.cost),
+        csvNum(p.profit),
+        p.margin,
+      ]),
     ];
     exportCSV(`Pegazo-resumen`, rows);
   };
@@ -775,34 +785,32 @@ export default function Statistics() {
             subtitle="Quiénes compran más en el periodo"
           >
             {data?.topCustomers?.length ? (
-              <div className="overflow-x-auto">
-                <table className="min-w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-gray-100 text-left text-xs uppercase tracking-wide text-gray-500">
-                      <th className="py-2 pr-4">#</th>
-                      <th className="py-2 pr-4">Cliente</th>
-                      <th className="py-2 pr-4 text-right">Nº compras</th>
-                      <th className="py-2 pl-4 text-right">Total comprado</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-50">
-                    {data.topCustomers.map((c, i) => (
-                      <tr key={c.name} className="text-gray-700">
-                        <td className="py-2 pr-4 text-gray-400">{i + 1}</td>
-                        <td className="py-2 pr-4 font-medium text-gray-800">
-                          {c.name}
-                        </td>
-                        <td className="py-2 pr-4 text-right text-gray-500">
-                          {c.count}
-                        </td>
-                        <td className="py-2 pl-4 text-right font-semibold">
-                          {formatMoney(c.total)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <FilterableTable
+                rows={data.topCustomers}
+                initialSort={{ key: 'total', dir: 'desc' }}
+                columns={[
+                  {
+                    key: 'name',
+                    label: 'Cliente',
+                    filter: 'text',
+                    value: (r) => r.name,
+                  },
+                  {
+                    key: 'count',
+                    label: 'Nº compras',
+                    align: 'right',
+                    value: (r) => r.count,
+                  },
+                  {
+                    key: 'total',
+                    label: 'Total comprado',
+                    align: 'right',
+                    isMoney: true,
+                    total: true,
+                    value: (r) => r.total,
+                  },
+                ]}
+              />
             ) : (
               <div className="py-8 text-center text-sm text-gray-400">
                 Aún no hay clientes identificados con compras (las ventas a
@@ -811,6 +819,74 @@ export default function Statistics() {
             )}
           </ChartCard>
         </div>
+
+        {/* Rentabilidad por producto */}
+        {data?.productProfit?.length > 0 && (
+          <div className="mb-6">
+            <ChartCard
+              title="Rentabilidad por producto"
+              subtitle="Vendido menos costo = utilidad real por artículo"
+            >
+              <FilterableTable
+                rows={data.productProfit}
+                initialSort={{ key: 'profit', dir: 'desc' }}
+                columns={[
+                  {
+                    key: 'name',
+                    label: 'Producto',
+                    filter: 'text',
+                    value: (r) => r.name,
+                  },
+                  {
+                    key: 'quantity',
+                    label: 'Uds.',
+                    align: 'right',
+                    value: (r) => r.quantity,
+                  },
+                  {
+                    key: 'revenue',
+                    label: 'Vendido',
+                    align: 'right',
+                    isMoney: true,
+                    total: true,
+                    value: (r) => r.revenue,
+                  },
+                  {
+                    key: 'cost',
+                    label: 'Costo',
+                    align: 'right',
+                    isMoney: true,
+                    total: true,
+                    value: (r) => r.cost,
+                  },
+                  {
+                    key: 'profit',
+                    label: 'Utilidad',
+                    align: 'right',
+                    isMoney: true,
+                    total: true,
+                    value: (r) => r.profit,
+                  },
+                  {
+                    key: 'margin',
+                    label: 'Margen',
+                    align: 'right',
+                    value: (r) => r.margin,
+                    render: (r) => (
+                      <span
+                        className={
+                          r.margin >= 0 ? 'text-emerald-600' : 'text-red-600'
+                        }
+                      >
+                        {r.margin}%
+                      </span>
+                    ),
+                  },
+                ]}
+              />
+            </ChartCard>
+          </div>
+        )}
 
         {/* Por cobrar (Fiado) */}
         <div className="mb-6">
@@ -859,36 +935,43 @@ export default function Statistics() {
                   ))}
                 </div>
 
-                <div className="overflow-x-auto">
-                  <table className="min-w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-gray-100 text-left text-xs uppercase tracking-wide text-gray-500">
-                        <th className="py-2 pr-4">Cliente</th>
-                        <th className="py-2 pr-4 text-right">Monto</th>
-                        <th className="py-2 pr-4">Fecha</th>
-                        {data?.hasMultipleLocals && (
-                          <th className="py-2 pr-4">Sede</th>
-                        )}
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-50">
-                      {data.receivables.items.map((r) => (
-                        <tr key={r.id} className="text-gray-700">
-                          <td className="py-2 pr-4">{r.customer}</td>
-                          <td className="py-2 pr-4 text-right font-semibold">
-                            {formatMoney(r.amount)}
-                          </td>
-                          <td className="whitespace-nowrap py-2 pr-4">
-                            {shortDate(r.date)}
-                          </td>
-                          {data?.hasMultipleLocals && (
-                            <td className="py-2 pr-4">{r.local}</td>
-                          )}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                <FilterableTable
+                  rows={data.receivables.items}
+                  initialSort={{ key: 'amount', dir: 'desc' }}
+                  columns={[
+                    {
+                      key: 'customer',
+                      label: 'Cliente',
+                      filter: 'text',
+                      value: (r) => r.customer,
+                    },
+                    {
+                      key: 'amount',
+                      label: 'Monto',
+                      align: 'right',
+                      isMoney: true,
+                      total: true,
+                      value: (r) => r.amount,
+                    },
+                    {
+                      key: 'date',
+                      label: 'Fecha',
+                      value: (r) => r.date,
+                      sortValue: (r) => new Date(r.date).getTime(),
+                      render: (r) => shortDate(String(r.date).slice(0, 10)),
+                    },
+                    ...(data?.hasMultipleLocals
+                      ? [
+                          {
+                            key: 'local',
+                            label: 'Sede',
+                            filter: 'select',
+                            value: (r) => r.local,
+                          },
+                        ]
+                      : []),
+                  ]}
+                />
               </div>
             ) : (
               <div className="flex flex-col items-center gap-1 py-8 text-center text-sm text-gray-400">
