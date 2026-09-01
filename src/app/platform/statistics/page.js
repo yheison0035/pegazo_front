@@ -9,40 +9,88 @@ import {
   ExclamationTriangleIcon,
   UsersIcon,
   BuildingStorefrontIcon,
+  BanknotesIcon,
+  ArrowTrendingUpIcon,
+  ShieldExclamationIcon,
+  EyeIcon,
 } from '@heroicons/react/24/outline';
 
 import RoleGuard from '@/auth/roleGuard';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
-import { getPlatformOverview } from '@/lib/api/routes/companies';
+import { getPlatformOverview, getPlatformAudit } from '@/lib/api/routes/companies';
 import { formatDateOnly } from '@/lib/api/utils/utils';
 
-function Card({ icon: Icon, label, value, accent }) {
+const cop = (n) =>
+  new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    maximumFractionDigits: 0,
+  }).format(Number(n) || 0);
+
+function Card({ icon: Icon, label, value, accent, sub }) {
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
       <div className="flex items-center gap-3">
         <span className={`rounded-xl p-2 ${accent}`}>
           <Icon className="h-6 w-6" />
         </span>
-        <div>
+        <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
             {label}
           </p>
-          <p className="text-2xl font-bold text-gray-900">{value}</p>
+          <p className="truncate text-2xl font-bold text-gray-900">{value}</p>
+          {sub && <p className="text-xs text-gray-400">{sub}</p>}
         </div>
       </div>
     </div>
   );
 }
 
+// Barras horizontales para desgloses (un solo tono; el valor va como etiqueta).
+function BreakdownBars({ title, rows, labelKey, max }) {
+  const top = max || Math.max(1, ...rows.map((r) => r.count));
+  return (
+    <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+      <h2 className="mb-4 text-sm font-semibold text-gray-800">{title}</h2>
+      {rows.length === 0 ? (
+        <p className="py-4 text-center text-sm text-gray-400">Sin datos.</p>
+      ) : (
+        <div className="flex flex-col gap-2.5">
+          {rows.map((r) => (
+            <div key={r[labelKey]} className="flex items-center gap-3">
+              <span className="w-28 shrink-0 truncate text-xs font-medium text-gray-600">
+                {r[labelKey]}
+              </span>
+              <div className="h-5 flex-1 overflow-hidden rounded-md bg-gray-100">
+                <div
+                  className="flex h-full items-center justify-end rounded-md bg-orange-400 px-2 text-[11px] font-semibold text-white"
+                  style={{ width: `${Math.max(8, (r.count / top) * 100)}%` }}
+                >
+                  {r.count}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function PlatformStatistics() {
   const [data, setData] = useState(null);
+  const [audit, setAudit] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await getPlatformOverview();
-      setData(res?.data || null);
+      const [ov, au] = await Promise.all([
+        getPlatformOverview(),
+        getPlatformAudit(30).catch(() => ({ data: [] })),
+      ]);
+      setData(ov?.data || null);
+      setAudit(au?.data || []);
     } finally {
       setLoading(false);
     }
@@ -53,6 +101,8 @@ export default function PlatformStatistics() {
   }, [fetchData]);
 
   const t = data?.totals;
+  const growth = data?.growth || [];
+  const maxGrowth = Math.max(1, ...growth.map((g) => g.count));
 
   return (
     <RoleGuard allowedRoles={['SUPER_PLATFORM_ADMIN']}>
@@ -64,7 +114,39 @@ export default function PlatformStatistics() {
           Visión general de toda la plataforma.
         </p>
 
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
+        {/* Ingresos */}
+        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+          Ingresos
+        </h2>
+        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <Card
+            icon={BanknotesIcon}
+            label="MRR (mes)"
+            value={cop(t?.mrr)}
+            accent="bg-emerald-50 text-emerald-600"
+            sub="Ingreso recurrente de empresas activas"
+          />
+          <Card
+            icon={ArrowTrendingUpIcon}
+            label="ARR (año)"
+            value={cop(t?.arr)}
+            accent="bg-emerald-50 text-emerald-600"
+            sub="Proyección anual (MRR × 12)"
+          />
+          <Card
+            icon={ShieldExclamationIcon}
+            label="Ingreso en riesgo"
+            value={cop(t?.revenueAtRisk)}
+            accent="bg-red-50 text-red-600"
+            sub="De empresas vencidas por pagar"
+          />
+        </div>
+
+        {/* Portafolio */}
+        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+          Portafolio
+        </h2>
+        <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
           <Card
             icon={BuildingOffice2Icon}
             label="Empresas"
@@ -103,8 +185,56 @@ export default function PlatformStatistics() {
           />
         </div>
 
+        {/* Crecimiento */}
+        <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+          <h2 className="mb-4 text-sm font-semibold text-gray-800">
+            Nuevas empresas (últimos 6 meses)
+          </h2>
+          <div className="flex items-end gap-3" style={{ height: 160 }}>
+            {growth.map((g, i) => {
+              const last = i === growth.length - 1;
+              return (
+                <div key={g.key} className="flex flex-1 flex-col items-center gap-2">
+                  <span className="text-xs font-semibold text-gray-500">
+                    {g.count}
+                  </span>
+                  <div
+                    className={`w-full rounded-t-md ${
+                      last ? 'bg-orange-500' : 'bg-orange-200'
+                    }`}
+                    style={{
+                      height: `${Math.max(4, (g.count / maxGrowth) * 120)}px`,
+                    }}
+                    title={`${g.count} altas`}
+                  />
+                  <span className="text-[11px] text-gray-400">{g.label}</span>
+                </div>
+              );
+            })}
+            {growth.length === 0 && (
+              <p className="w-full py-4 text-center text-sm text-gray-400">
+                Sin datos de crecimiento.
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Desgloses */}
+        <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <BreakdownBars
+            title="Empresas por tipo de negocio"
+            rows={data?.byType || []}
+            labelKey="type"
+          />
+          <BreakdownBars
+            title="Empresas por plan"
+            rows={data?.byPlan || []}
+            labelKey="plan"
+          />
+        </div>
+
         {/* Próximas a vencer */}
-        <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+        <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
           <h2 className="mb-4 text-sm font-semibold text-gray-800">
             Próximas a vencer (7 días)
           </h2>
@@ -141,6 +271,48 @@ export default function PlatformStatistics() {
           ) : (
             <p className="py-4 text-center text-sm text-gray-400">
               Ninguna empresa vence en los próximos 7 días.
+            </p>
+          )}
+        </div>
+
+        {/* Auditoría de accesos de soporte */}
+        <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+          <h2 className="mb-1 flex items-center gap-2 text-sm font-semibold text-gray-800">
+            <EyeIcon className="h-4 w-4 text-gray-400" />
+            Accesos de soporte recientes
+          </h2>
+          <p className="mb-4 text-xs text-gray-400">
+            Cada vez que la plataforma entra como una empresa queda registrado
+            aquí.
+          </p>
+          {audit.length ? (
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm">
+                <thead className="text-left text-xs uppercase tracking-wide text-gray-500">
+                  <tr className="border-b border-gray-100">
+                    <th className="py-2 pr-4">Fecha</th>
+                    <th className="py-2 pr-4">Empresa</th>
+                    <th className="py-2 pr-4">Operador</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {audit.map((a) => (
+                    <tr key={a.id} className="text-gray-700">
+                      <td className="py-2 pr-4 whitespace-nowrap text-gray-500">
+                        {new Date(a.createdAt).toLocaleString('es-CO')}
+                      </td>
+                      <td className="py-2 pr-4 font-medium">{a.companyName}</td>
+                      <td className="py-2 pr-4 text-gray-500">
+                        {a.actorEmail || `#${a.actorId}`}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="py-4 text-center text-sm text-gray-400">
+              Aún no hay accesos de soporte registrados.
             </p>
           )}
         </div>

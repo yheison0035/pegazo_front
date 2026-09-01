@@ -103,6 +103,11 @@ export async function getPlatformOverview() {
   return apiFetch('/companies/platform/overview');
 }
 
+// Auditoría de accesos de soporte (impersonaciones).
+export async function getPlatformAudit(limit = 50) {
+  return apiFetch(`/companies/platform/audit?limit=${limit}`);
+}
+
 // Activar / desactivar empresa (suspensión por impago)
 export async function setCompanyStatus(id, status) {
   return apiFetch(`/companies/${id}/status`, {
