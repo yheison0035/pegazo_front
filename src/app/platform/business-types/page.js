@@ -100,6 +100,8 @@ function Editor({ item, onClose, onSaved }) {
         : assignableRolesForType(item.type || ''),
     ),
   );
+  const [defs, setDefs] = useState(item.defaults || {});
+  const setDef = (k, v) => setDefs((prev) => ({ ...prev, [k]: v }));
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState('');
 
@@ -134,10 +136,17 @@ function Editor({ item, onClose, onSaved }) {
       ...PF_DEFAULTS,
       ...pf,
     };
+    // Defaults: solo las claves con valor definido.
+    const defaults = Object.fromEntries(
+      Object.entries(defs).filter(
+        ([, v]) => v !== '' && v !== undefined && v !== null,
+      ),
+    );
     const payloadExtra = {
       terminology: Object.keys(terminology).length ? terminology : null,
       productFields,
       roles: [...roles],
+      defaults: Object.keys(defaults).length ? defaults : null,
     };
     try {
       if (isNew) {
@@ -326,6 +335,73 @@ function Editor({ item, onClose, onSaved }) {
               <span className="text-gray-700">{r}</span>
             </label>
           ))}
+        </div>
+
+        {/* Valores por defecto */}
+        <p className="mt-6 mb-1 text-sm font-semibold text-gray-800">
+          Valores por defecto
+        </p>
+        <p className="mb-3 text-xs text-gray-400">
+          Se aplican al crear una empresa de este tipo. El dueño los puede
+          cambiar luego en su configuración.
+        </p>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-100 px-3 py-2 text-sm hover:bg-gray-50">
+            <input
+              type="checkbox"
+              checked={!!defs.requireCashOpen}
+              onChange={(e) => setDef('requireCashOpen', e.target.checked)}
+              className="h-4 w-4 cursor-pointer accent-orange-500"
+            />
+            <span className="text-gray-700">Exigir abrir caja para vender</span>
+          </label>
+          <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-100 px-3 py-2 text-sm hover:bg-gray-50">
+            <input
+              type="checkbox"
+              checked={!!defs.loyaltyEnabled}
+              onChange={(e) => setDef('loyaltyEnabled', e.target.checked)}
+              className="h-4 w-4 cursor-pointer accent-orange-500"
+            />
+            <span className="text-gray-700">Fidelización activada</span>
+          </label>
+          <div>
+            <label className="mb-1 block text-xs font-medium text-gray-500">
+              Hora de apertura (0–23)
+            </label>
+            <input
+              type="number"
+              min="0"
+              max="23"
+              className={inputCls}
+              value={defs.openHour ?? ''}
+              onChange={(e) =>
+                setDef(
+                  'openHour',
+                  e.target.value === '' ? '' : Number(e.target.value),
+                )
+              }
+              placeholder="9"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium text-gray-500">
+              Hora de cierre (0–23)
+            </label>
+            <input
+              type="number"
+              min="0"
+              max="23"
+              className={inputCls}
+              value={defs.closeHour ?? ''}
+              onChange={(e) =>
+                setDef(
+                  'closeHour',
+                  e.target.value === '' ? '' : Number(e.target.value),
+                )
+              }
+              placeholder="20"
+            />
+          </div>
         </div>
 
         {err && <p className="mt-3 text-sm text-red-600">{err}</p>}
