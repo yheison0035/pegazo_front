@@ -27,6 +27,7 @@ const ICONS = {
   Servicios: ScissorsIcon,
   Clientes: UsersIcon,
   Pacientes: UsersIcon,
+  Historia: ClipboardDocumentListIcon,
   Caja: BanknotesIcon,
   Gastos: BanknotesIcon,
   Fidelización: GiftIcon,
@@ -76,6 +77,14 @@ const VERTICALS = [
     catalog: 'Servicios',
     items: [['Consulta general', '$45.000'], ['Vacuna múltiple', '$55.000'], ['Baño y peluquería', '$35.000']],
     kpis: [['Ventas de hoy', '$620.000', 'bg-emerald-400'], ['Citas hoy', '9', 'bg-orange-400']],
+  },
+  {
+    id: 'odontologia', emoji: '🦷', name: 'Odontología', biz: 'Clínica Sonríe',
+    accent: 'Historia clínica por paciente, odontograma y consentimientos firmados.',
+    menu: ['Inicio', 'Citas', 'Servicios', 'Pacientes', 'Historia', 'Caja', 'Estadísticas'],
+    catalog: 'Tratamientos',
+    items: [['Consulta + diagnóstico', '$60.000'], ['Limpieza dental', '$90.000'], ['Resina (por diente)', '$130.000']],
+    kpis: [['Ventas de hoy', '$1.180.000', 'bg-emerald-400'], ['Citas hoy', '11', 'bg-orange-400']],
   },
   {
     id: 'ropa', emoji: '👗', name: 'Tienda de ropa', biz: 'Moda Urbana',
