@@ -4,6 +4,7 @@ import {
   ChartBarIcon,
   Cog6ToothIcon,
   TicketIcon,
+  MegaphoneIcon,
 } from '@heroicons/react/24/outline';
 
 export const PLATFORM_NAVIGATION = [
@@ -24,6 +25,11 @@ export const PLATFORM_NAVIGATION = [
         name: 'Cupones',
         href: '/platform/coupons',
         icon: TicketIcon,
+      },
+      {
+        name: 'Comunicados',
+        href: '/platform/announcements',
+        icon: MegaphoneIcon,
       },
       {
         name: 'Estadísticas Globales',
