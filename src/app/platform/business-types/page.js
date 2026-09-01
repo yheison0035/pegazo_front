@@ -66,6 +66,18 @@ const VARIANT_OPTIONS = [
   { id: 'weight', name: 'Peso (kg)' },
 ];
 
+const FULFILLMENT_OPTIONS = [
+  { id: 'shipping', label: 'Envío nacional (transportadora)' },
+  { id: 'local_delivery', label: 'Domicilio local' },
+  { id: 'pickup', label: 'Recoger en tienda' },
+  { id: 'dine_in', label: 'Consumo en mesa' },
+];
+const LAYOUT_OPTIONS = [
+  { id: '', name: 'Por defecto' },
+  { id: 'grid', name: 'Cuadrícula (retail)' },
+  { id: 'menu', name: 'Menú (comida)' },
+];
+
 const TYPE_ROLES = [
   'ADMIN',
   'COORDINADOR',
@@ -102,6 +114,14 @@ function Editor({ item, onClose, onSaved }) {
   );
   const [defs, setDefs] = useState(item.defaults || {});
   const setDef = (k, v) => setDefs((prev) => ({ ...prev, [k]: v }));
+  const [ful, setFul] = useState(new Set(item.storefront?.fulfillment || []));
+  const [sfLayout, setSfLayout] = useState(item.storefront?.layout || '');
+  const toggleFul = (key) =>
+    setFul((prev) => {
+      const next = new Set(prev);
+      next.has(key) ? next.delete(key) : next.add(key);
+      return next;
+    });
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState('');
 
@@ -142,11 +162,16 @@ function Editor({ item, onClose, onSaved }) {
         ([, v]) => v !== '' && v !== undefined && v !== null,
       ),
     );
+    // Tienda online: modos de entrega + layout.
+    const storefront = {};
+    if (ful.size) storefront.fulfillment = [...ful];
+    if (sfLayout) storefront.layout = sfLayout;
     const payloadExtra = {
       terminology: Object.keys(terminology).length ? terminology : null,
       productFields,
       roles: [...roles],
       defaults: Object.keys(defaults).length ? defaults : null,
+      storefront: Object.keys(storefront).length ? storefront : null,
     };
     try {
       if (isNew) {
@@ -402,6 +427,48 @@ function Editor({ item, onClose, onSaved }) {
               placeholder="20"
             />
           </div>
+        </div>
+
+        {/* Tienda online */}
+        <p className="mt-6 mb-1 text-sm font-semibold text-gray-800">
+          Tienda online
+        </p>
+        <p className="mb-3 text-xs text-gray-400">
+          Cómo entrega y se ve el catálogo de la tienda para este tipo de
+          negocio. Vacío = usa el comportamiento por defecto.
+        </p>
+        <p className="mb-2 text-xs font-medium text-gray-500">Modos de entrega</p>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {FULFILLMENT_OPTIONS.map((f) => (
+            <label
+              key={f.id}
+              className="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-100 px-3 py-2 text-sm hover:bg-gray-50"
+            >
+              <input
+                type="checkbox"
+                checked={ful.has(f.id)}
+                onChange={() => toggleFul(f.id)}
+                className="h-4 w-4 cursor-pointer accent-orange-500"
+              />
+              <span className="text-gray-700">{f.label}</span>
+            </label>
+          ))}
+        </div>
+        <div className="mt-3 max-w-xs">
+          <label className="mb-1 block text-xs font-medium text-gray-500">
+            Diseño del catálogo
+          </label>
+          <select
+            className={inputCls}
+            value={sfLayout}
+            onChange={(e) => setSfLayout(e.target.value)}
+          >
+            {LAYOUT_OPTIONS.map((l) => (
+              <option key={l.id} value={l.id}>
+                {l.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         {err && <p className="mt-3 text-sm text-red-600">{err}</p>}
