@@ -23,6 +23,17 @@ export async function deleteClinicalEntry(id) {
   return apiFetch(`/clinical/entry/${id}`, { method: 'DELETE' });
 }
 
+export async function addClinicalConsent(customerId, dto) {
+  return apiFetch(`/clinical/${customerId}/consent`, {
+    method: 'POST',
+    body: JSON.stringify(dto),
+  });
+}
+
+export async function deleteClinicalConsent(id) {
+  return apiFetch(`/clinical/consent/${id}`, { method: 'DELETE' });
+}
+
 // Sube una imagen (foto/radiografía) y devuelve { data: { url } }.
 export async function uploadClinicalImage(file) {
   const formData = new FormData();
