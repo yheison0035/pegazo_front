@@ -74,6 +74,22 @@ export async function getGlobalUsers(params = {}) {
   return apiFetch(`/users/platform/all?${query.toString()}`);
 }
 
+// Soporte de plataforma: activar/desactivar cualquier usuario.
+export async function platformSetUserStatus(id, status) {
+  return apiFetch(`/users/platform/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  });
+}
+
+// Soporte de plataforma: resetear la contraseña de cualquier usuario.
+export async function platformResetUserPassword(id, password) {
+  return apiFetch(`/users/platform/${id}/reset-password`, {
+    method: 'PATCH',
+    body: JSON.stringify({ password }),
+  });
+}
+
 export async function createUser(dto) {
   const body = {
     ...dto,
