@@ -31,7 +31,12 @@ import {
   MapPinIcon,
   DocumentChartBarIcon,
   ClockIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
+import { PLANS } from '@/lib/plans';
+
+// Registro / prueba gratis (auto-registro del negocio).
+const REGISTER = '/register';
 
 // Cotización directa por WhatsApp (venta punto a punto; los precios se acuerdan
 // con cada cliente). Los planes y sus límites siguen aplicados en el CRM.
@@ -627,19 +632,24 @@ export default function Landing() {
             </p>
 
             <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row lg:justify-start">
+              <Link
+                href={REGISTER}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 px-7 py-3 font-semibold text-white shadow-lg hover:opacity-90 sm:w-auto"
+              >
+                <RocketLaunchIcon className="h-5 w-5" /> Empieza gratis
+              </Link>
               <a
                 href={WHATSAPP}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 px-7 py-3 font-semibold text-white shadow-lg hover:opacity-90 sm:w-auto"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/20 px-7 py-3 text-center font-semibold text-white hover:bg-white/5 sm:w-auto"
               >
-                <ChatBubbleLeftRightIcon className="h-5 w-5" /> Cotizar por
-                WhatsApp
+                <ChatBubbleLeftRightIcon className="h-5 w-5" /> Cotizar por WhatsApp
               </a>
-              <Link
-                href="/login"
-                className="w-full rounded-xl border border-white/20 px-7 py-3 text-center font-semibold text-white hover:bg-white/5 sm:w-auto"
-              >
+            </div>
+            <div className="mt-3 text-center text-sm text-neutral-400 lg:text-left">
+              ¿Ya tienes cuenta?{' '}
+              <Link href="/login" className="font-semibold text-white hover:underline">
                 Iniciar sesión
               </Link>
             </div>
@@ -942,66 +952,166 @@ export default function Landing() {
       </section>
 
       {/* PLAN A TU MEDIDA (cotización por WhatsApp) */}
-      <section id="planes" className="mx-auto max-w-6xl px-5 py-20">
+      {/* COMPARATIVA */}
+      <section className="mx-auto max-w-5xl px-5 py-20">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold text-neutral-900">
-            Un plan a la medida de tu negocio
+            ¿Por qué Pegazo y no otro?
           </h2>
           <p className="mt-3 text-neutral-500">
-            Nosotros te asesoramos y armamos el plan según lo que necesitas. Sin
-            permanencia. Escríbenos y te cotizamos al instante.
+            Otros llevan la contabilidad. Pegazo hace vender: se adapta a tu
+            negocio y trae tu tienda online conectada al inventario.
           </p>
         </div>
 
-        <div className="mx-auto mt-12 max-w-4xl overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-sm">
-          <div className="grid md:grid-cols-2">
-            {/* Lado marca / CTA */}
-            <div className="relative flex flex-col justify-center overflow-hidden bg-gradient-to-br from-neutral-900 via-neutral-950 to-black p-8 text-white sm:p-10">
-              <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-orange-500 opacity-20 blur-3xl" />
-              <p className="text-sm font-semibold uppercase tracking-wider text-orange-400">
-                Plan a tu medida
-              </p>
-              <h3 className="mt-2 text-2xl font-bold">
-                Todo Pegazo, ajustado a tu negocio
-              </h3>
-              <p className="mt-3 text-neutral-300">
-                Pagas por lo que tu negocio necesita. Te asesoramos según tu
-                tipo de negocio, tus sedes y tu equipo.
-              </p>
-              <a
-                href={WHATSAPP}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 px-6 py-3.5 font-semibold text-white shadow-lg transition hover:opacity-90"
-              >
-                <ChatBubbleLeftRightIcon className="h-5 w-5" />
-                Cotizar por WhatsApp
-              </a>
-              <p className="mt-3 text-xs text-neutral-400">
-                Respuesta rápida · Sin compromiso
-              </p>
-            </div>
+        <div className="mt-10 overflow-x-auto">
+          <table className="w-full min-w-[640px] border-collapse text-sm">
+            <thead>
+              <tr>
+                <th className="p-3 text-left font-medium text-neutral-500"></th>
+                <th className="rounded-t-xl bg-gradient-to-br from-orange-600 to-amber-500 p-3 text-center font-bold text-white">
+                  Pegazo
+                </th>
+                <th className="p-3 text-center font-semibold text-neutral-500">
+                  Alegra
+                </th>
+                <th className="p-3 text-center font-semibold text-neutral-500">
+                  Siigo
+                </th>
+                <th className="p-3 text-center font-semibold text-neutral-500">
+                  Treinta
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                ['Se adapta a tu tipo de negocio', ['Sí, configurable', 'Genérico', 'Genérico', 'Básico']],
+                ['Tienda online conectada al inventario', ['Incluida', false, false, false]],
+                ['Citas / agenda + fidelización', ['Sí', false, false, false]],
+                ['Restaurante: mesas + cocina (KDS)', ['Sí', false, false, false]],
+                ['Multi-sede con inventario por local', ['Sí', 'Sí', 'Sí', 'Limitado']],
+                ['Pagos en línea a tu propio banco', ['Sí', false, false, false]],
+                ['App en el celular (PWA)', ['Sí', 'Sí', 'Sí', 'Sí']],
+                ['Facturación electrónica DIAN', ['En camino', 'Sí', 'Sí', false]],
+                ['Empieza gratis', ['Sí', false, false, 'Sí']],
+              ].map(([label, cells], i) => (
+                <tr key={label} className={i % 2 ? 'bg-neutral-50' : ''}>
+                  <td className="p-3 text-left font-medium text-neutral-700">
+                    {label}
+                  </td>
+                  {cells.map((c, j) => (
+                    <td
+                      key={j}
+                      className={`p-3 text-center ${
+                        j === 0 ? 'bg-orange-50/60 font-semibold text-orange-700' : 'text-neutral-500'
+                      }`}
+                    >
+                      {c === false ? (
+                        <XMarkIcon className="mx-auto h-4 w-4 text-neutral-300" />
+                      ) : c === true || c === 'Sí' || c === 'Incluida' ? (
+                        <span className="inline-flex items-center gap-1">
+                          <CheckCircleIcon
+                            className={`h-4 w-4 ${j === 0 ? 'text-orange-600' : 'text-emerald-500'}`}
+                          />
+                          {c !== 'Sí' ? c : ''}
+                        </span>
+                      ) : (
+                        c
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="mt-4 text-center text-xs text-neutral-400">
+          La facturación electrónica DIAN está en camino en Pegazo. Todo lo demás,
+          ya disponible hoy.
+        </p>
+      </section>
 
-            {/* Lado incluido */}
-            <div className="p-8 sm:p-10">
-              <p className="mb-4 font-semibold text-neutral-900">
-                Incluye todo lo que ofrece Pegazo:
-              </p>
-              <ul className="grid gap-x-4 gap-y-2 sm:grid-cols-2">
-                {INCLUDED.map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-sm">
-                    <CheckCircleIcon className="mt-0.5 h-4 w-4 flex-none text-orange-500" />
-                    <span className="text-neutral-600">{f}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
+      <section id="planes" className="mx-auto max-w-6xl px-5 py-20">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-3xl font-bold text-neutral-900">
+            Planes claros, sin letra chica
+          </h2>
+          <p className="mt-3 text-neutral-500">
+            Empieza gratis y sube de plan cuando crezcas. Precios en pesos, sin
+            permanencia. Cancela cuando quieras.
+          </p>
         </div>
 
-        <p className="mt-8 text-center text-sm text-neutral-400">
-          Datos en la nube y respaldados. Te ayudamos a montar tu negocio en el
-          sistema.
+        <div className="mx-auto mt-12 grid max-w-6xl gap-5 md:grid-cols-2 lg:grid-cols-4">
+          {PLANS.map((plan) => {
+            const free = (plan.priceMonthly || 0) <= 0;
+            return (
+              <div
+                key={plan.id}
+                className={`relative flex flex-col rounded-3xl border bg-white p-6 shadow-sm ${
+                  plan.highlight
+                    ? 'border-orange-400 ring-2 ring-orange-400'
+                    : 'border-neutral-200'
+                }`}
+              >
+                {plan.highlight && (
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-orange-600 to-amber-500 px-3 py-1 text-xs font-semibold text-white">
+                    Más popular
+                  </span>
+                )}
+                <div className="text-2xl">{plan.emoji}</div>
+                <h3 className="mt-1 text-lg font-bold text-neutral-900">
+                  {plan.name}
+                </h3>
+                <p className="text-xs text-neutral-500">{plan.tagline}</p>
+                <div className="mt-4">
+                  <span className="text-3xl font-extrabold text-neutral-900">
+                    {plan.priceLabel}
+                  </span>
+                  {plan.priceSuffix && (
+                    <span className="text-sm text-neutral-400">
+                      {' '}
+                      {plan.priceSuffix}
+                    </span>
+                  )}
+                </div>
+                <Link
+                  href={REGISTER}
+                  className={`mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
+                    plan.highlight
+                      ? 'bg-gradient-to-r from-orange-600 to-amber-500 text-white shadow hover:opacity-90'
+                      : 'border border-neutral-300 text-neutral-800 hover:bg-neutral-50'
+                  }`}
+                >
+                  {free ? 'Empezar gratis' : 'Probar gratis'}
+                </Link>
+                <ul className="mt-5 space-y-2 border-t border-neutral-100 pt-4">
+                  {plan.features.map((f) => (
+                    <li
+                      key={f}
+                      className="flex items-start gap-2 text-sm text-neutral-600"
+                    >
+                      <CheckCircleIcon className="mt-0.5 h-4 w-4 flex-none text-orange-500" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
+        </div>
+
+        <p className="mt-8 text-center text-sm text-neutral-500">
+          ¿No sabes cuál elegir?{' '}
+          <a
+            href={WHATSAPP}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-orange-600 hover:underline"
+          >
+            Te asesoramos por WhatsApp
+          </a>{' '}
+          · Datos en la nube y respaldados · Te ayudamos a montar tu negocio.
         </p>
       </section>
 
@@ -1041,25 +1151,24 @@ export default function Landing() {
             Haz despegar tu negocio con Pegazo
           </h2>
           <p className="mt-4 text-white/90">
-            Todo tu negocio, en un solo lugar. Escríbenos y te armamos el plan a
-            tu medida.
+            Todo tu negocio, en un solo lugar. Crea tu cuenta gratis y empieza a
+            vender hoy mismo.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Link
+              href={REGISTER}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-neutral-950 px-8 py-3.5 font-semibold text-white shadow-lg hover:bg-neutral-800 sm:w-auto"
+            >
+              <RocketLaunchIcon className="h-5 w-5" /> Empieza gratis
+            </Link>
             <a
               href={WHATSAPP}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-neutral-950 px-8 py-3.5 font-semibold text-white shadow-lg hover:bg-neutral-800 sm:w-auto"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/40 px-8 py-3.5 text-center font-semibold text-white hover:bg-white/10 sm:w-auto"
             >
-              <ChatBubbleLeftRightIcon className="h-5 w-5" /> Cotizar por
-              WhatsApp
+              <ChatBubbleLeftRightIcon className="h-5 w-5" /> Cotizar por WhatsApp
             </a>
-            <Link
-              href="/login"
-              className="w-full rounded-xl border border-white/40 px-8 py-3.5 text-center font-semibold text-white hover:bg-white/10 sm:w-auto"
-            >
-              Iniciar sesión
-            </Link>
           </div>
         </div>
       </section>
