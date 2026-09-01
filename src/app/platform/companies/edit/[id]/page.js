@@ -12,6 +12,38 @@ import { getFormFieldsCompanies } from '@/lib/api/utils/companies.config';
 import { MODULE_GROUPS, MODULE_KEYS } from '@/config/modules';
 
 // Panel de la plataforma: control MANUAL de módulos + precio por empresa.
+function FeatureToggle({ title, desc, on, onToggle }) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className={`flex items-start justify-between gap-3 rounded-xl border p-3 text-left transition ${
+        on
+          ? 'border-orange-300 bg-orange-50'
+          : 'border-gray-200 hover:bg-gray-50'
+      }`}
+    >
+      <span className="min-w-0">
+        <span className="block text-sm font-semibold text-gray-800">
+          {title}
+        </span>
+        <span className="mt-0.5 block text-xs text-gray-500">{desc}</span>
+      </span>
+      <span
+        className={`mt-0.5 flex h-5 w-9 flex-none items-center rounded-full p-0.5 transition ${
+          on ? 'bg-orange-500' : 'bg-gray-300'
+        }`}
+      >
+        <span
+          className={`h-4 w-4 rounded-full bg-white shadow transition ${
+            on ? 'translate-x-4' : ''
+          }`}
+        />
+      </span>
+    </button>
+  );
+}
+
 function ModulesPricePanel({ company, updateCompany, onSaved }) {
   const [enabled, setEnabled] = useState([]);
   const [manual, setManual] = useState(false);
@@ -22,6 +54,8 @@ function ModulesPricePanel({ company, updateCompany, onSaved }) {
   });
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState({});
+  // Funciones que activa la plataforma por empresa.
+  const [feats, setFeats] = useState({ bank: false, einvoice: false });
 
   useEffect(() => {
     if (!company) return;
@@ -30,6 +64,10 @@ function ModulesPricePanel({ company, updateCompany, onSaved }) {
       : [];
     setEnabled(em);
     setManual(em.length > 0);
+    setFeats({
+      bank: !!company.bankNotifyEnabled,
+      einvoice: !!company.electronicInvoicingEnabled,
+    });
     setPrice({
       monthlyPrice: company.monthlyPrice ?? '',
       discountedPrice: company.discountedPrice ?? '',
@@ -59,6 +97,8 @@ function ModulesPricePanel({ company, updateCompany, onSaved }) {
     try {
       await updateCompany(company.id, {
         enabledModules: manual ? enabled : [],
+        bankNotifyEnabled: feats.bank,
+        electronicInvoicingEnabled: feats.einvoice,
         monthlyPrice:
           price.monthlyPrice === '' ? null : Number(price.monthlyPrice),
         discountedPrice:
@@ -67,7 +107,7 @@ function ModulesPricePanel({ company, updateCompany, onSaved }) {
           ? new Date(price.discountUntil).toISOString()
           : null,
       });
-      setMsg({ type: 'success', text: 'Módulos y precio guardados.' });
+      setMsg({ type: 'success', text: 'Módulos, funciones y precio guardados.' });
       onSaved?.();
     } catch (e) {
       setMsg({ type: 'error', text: e.message || 'No se pudo guardar.' });
@@ -129,6 +169,29 @@ function ModulesPricePanel({ company, updateCompany, onSaved }) {
         El descuento es informativo: al vencer, cobras el precio mensual. (El
         cobro es manual por ahora.)
       </p>
+
+      {/* Funciones del negocio (activadas por la plataforma) */}
+      <div className="mt-6 border-t border-gray-100 pt-5">
+        <p className="font-semibold text-gray-800">Funciones del negocio</p>
+        <p className="mb-3 text-xs text-gray-500">
+          Enciende estas funciones para esta empresa (sirve para cualquier tipo
+          de negocio).
+        </p>
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+          <FeatureToggle
+            title="Consignaciones (banco)"
+            desc="Aviso por voz + notificación de transferencias recibidas."
+            on={feats.bank}
+            onToggle={() => setFeats((f) => ({ ...f, bank: !f.bank }))}
+          />
+          <FeatureToggle
+            title="Facturación electrónica DIAN"
+            desc="Muestra el módulo de factura electrónica (vía Factus)."
+            on={feats.einvoice}
+            onToggle={() => setFeats((f) => ({ ...f, einvoice: !f.einvoice }))}
+          />
+        </div>
+      </div>
 
       {/* Control de módulos */}
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 pt-5">
