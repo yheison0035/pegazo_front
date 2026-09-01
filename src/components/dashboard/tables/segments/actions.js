@@ -11,6 +11,7 @@ import {
 } from '@heroicons/react/24/outline';
 import TableActionButton from '@/components/ui/TableActionButton';
 import { sendInvoiceWhatsapp } from '@/utils/invoiceWhatsapp';
+import { effectiveModules } from '@/lib/appointmentsAccess';
 import { enterAsCompany } from '@/lib/impersonation';
 
 export default function Actions({
@@ -26,7 +27,7 @@ export default function Actions({
   const { can } = usePermissions();
   const auth = useAuth();
   const companyName = auth?.usuario?.company?.name;
-  const businessType = auth?.usuario?.company?.type;
+  const companyModules = effectiveModules(auth?.usuario);
 
   const canView = can(view, 'view');
   const canEdit = can(view, 'edit');
@@ -111,7 +112,7 @@ export default function Actions({
             label="Enviar factura por WhatsApp"
             variant="whatsapp"
             disabled={isLocked}
-            onClick={() => sendInvoiceWhatsapp(info, companyName, businessType)}
+            onClick={() => sendInvoiceWhatsapp(info, companyName, companyModules)}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

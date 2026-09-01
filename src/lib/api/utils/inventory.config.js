@@ -1,4 +1,5 @@
 import { canSeeOldPrice } from '@/hooks/inventory.permissions';
+import { isFoodBusiness } from '@/lib/appointmentsAccess';
 import {
   getProductFields,
   WEIGHT_UNIT_OPTIONS,
@@ -73,8 +74,7 @@ export const getFormFieldsInventory = (usuario) => {
   // Solo en comida tiene sentido elegir si el producto lleva existencias
   // (plato elaborado = sin stock vs. bebida = con stock). En el resto de
   // verticales todo lleva inventario, así que el interruptor se oculta.
-  const type = usuario?.company?.type;
-  const isFood = ['RESTAURANTE', 'COMIDA_RAPIDA', 'CAFETERIA'].includes(type);
+  const isFood = isFoodBusiness(usuario);
 
   // Qué campos ocultar según la vertical (no todos manejan marca, etc.).
   const hidden = new Set();

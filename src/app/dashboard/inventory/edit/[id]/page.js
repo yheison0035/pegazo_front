@@ -17,6 +17,7 @@ import InventorySpecsModal from '@/components/dashboard/inventory/inventorySpecs
 import RecipeModal from '@/components/dashboard/inventory/recipeModal';
 import { PencilIcon, BeakerIcon } from '@heroicons/react/24/outline';
 import { canSeeOldPrice } from '@/hooks/inventory.permissions';
+import { isFoodBusiness } from '@/lib/appointmentsAccess';
 
 export default function EditProduct() {
   const [formData, setFormData] = useState({});
@@ -30,9 +31,7 @@ export default function EditProduct() {
   const usuario = auth?.usuario;
   const showOldPrice = canSeeOldPrice(usuario);
   // La receta solo aplica a platos elaborados (sin stock) en verticales de comida.
-  const isFood = ['RESTAURANTE', 'COMIDA_RAPIDA', 'CAFETERIA'].includes(
-    usuario?.company?.type
-  );
+  const isFood = isFoodBusiness(usuario);
   const showRecipe = isFood && formData?.trackStock === false;
 
   const { getProductById, updateProduct, uploadProductImages, loading } =

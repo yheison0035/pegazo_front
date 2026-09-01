@@ -30,6 +30,7 @@ import { getCustomers, getCustomerSummary } from '@/lib/api/routes/customers';
 import { getPaymentMethodCatalog } from '@/lib/api/routes/paymentMethods';
 import { getFiscalConfig } from '@/lib/api/routes/company';
 import { getProductFields } from '@/config/verticalProfiles';
+import { isServicesBusiness } from '@/lib/appointmentsAccess';
 import { formatCOP } from '@/lib/api/utils/utils';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import NewCustomerModal from '@/components/dashboard/modals/newCustomerModal';
@@ -145,9 +146,7 @@ export default function PosSale({
   // "atendido por": quien PRESTA el servicio (barbero/profesional) y el resto
   // (recepción/caja/admin). Se elige SOLO uno. Por defecto se exige elegir al
   // barbero para que la recepcionista no se auto-asigne el corte por error.
-  const isServiceVertical = ['SERVICIOS', 'ODONTOLOGIA'].includes(
-    usuario?.company?.type
-  );
+  const isServiceVertical = isServicesBusiness(usuario);
   const [sellerGroup, setSellerGroup] = useState('attendant'); // 'attendant' | 'other'
   const [sellerId, setSellerId] = useState(
     initial?.sellerId ?? (isServiceVertical ? '' : usuario?.id) ?? ''
