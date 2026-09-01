@@ -38,7 +38,7 @@ export default function Appointments() {
 
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
-  const [view, setView] = useState('list'); // 'list' | 'calendar'
+  const [view, setView] = useState('calendar'); // 'calendar' | 'list'
 
   const [selectedAppointments, setSelectedAppointments] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -97,18 +97,8 @@ export default function Appointments() {
           </h1>
 
           <div className="flex items-center gap-3">
-            {/* Switch Lista / Calendario */}
+            {/* Switch Calendario / Lista */}
             <div className="inline-flex rounded-xl border border-gray-200 bg-white p-0.5">
-              <button
-                onClick={() => setView('list')}
-                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition ${
-                  view === 'list'
-                    ? 'bg-orange-500 text-white'
-                    : 'text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                <ListBulletIcon className="h-4 w-4" /> Lista
-              </button>
               <button
                 onClick={() => setView('calendar')}
                 className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition ${
@@ -118,6 +108,16 @@ export default function Appointments() {
                 }`}
               >
                 <CalendarDaysIcon className="h-4 w-4" /> Calendario
+              </button>
+              <button
+                onClick={() => setView('list')}
+                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition ${
+                  view === 'list'
+                    ? 'bg-orange-500 text-white'
+                    : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                <ListBulletIcon className="h-4 w-4" /> Lista
               </button>
             </div>
 
