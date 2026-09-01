@@ -90,6 +90,22 @@ export async function platformResetUserPassword(id, password) {
   });
 }
 
+// Plataforma: crear un usuario en una empresa.
+export async function platformCreateUser(companyId, dto) {
+  return apiFetch(`/users/platform/company/${companyId}`, {
+    method: 'POST',
+    body: JSON.stringify(dto),
+  });
+}
+
+// Plataforma: editar rol/estado/sede/empresa de un usuario.
+export async function platformUpdateUser(id, dto) {
+  return apiFetch(`/users/platform/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(dto),
+  });
+}
+
 export async function createUser(dto) {
   const body = {
     ...dto,
