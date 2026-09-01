@@ -22,3 +22,10 @@ export async function addClinicalEntry(customerId, dto) {
 export async function deleteClinicalEntry(id) {
   return apiFetch(`/clinical/entry/${id}`, { method: 'DELETE' });
 }
+
+// Sube una imagen (foto/radiografía) y devuelve { data: { url } }.
+export async function uploadClinicalImage(file) {
+  const formData = new FormData();
+  formData.append('file', file);
+  return apiFetch('/clinical/upload', { method: 'POST', body: formData });
+}
