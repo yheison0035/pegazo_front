@@ -9,6 +9,8 @@ import {
   ClipboardDocumentListIcon,
   PhotoIcon,
   PrinterIcon,
+  DocumentCheckIcon,
+  CalendarDaysIcon,
 } from '@heroicons/react/24/outline';
 import Button from '@/components/ui/Button';
 import {
@@ -17,6 +19,8 @@ import {
   addClinicalEntry,
   deleteClinicalEntry,
   uploadClinicalImage,
+  addClinicalConsent,
+  deleteClinicalConsent,
 } from '@/lib/api/routes/clinical';
 
 const inputCls =
@@ -57,11 +61,14 @@ function fmtDate(d) {
 export default function ClinicalHistory({ customerId, patientName = '', dental = false }) {
   const [record, setRecord] = useState(null);
   const [entries, setEntries] = useState([]);
+  const [consents, setConsents] = useState([]);
+  const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editRec, setEditRec] = useState(false);
   const [recForm, setRecForm] = useState({});
   const [savingRec, setSavingRec] = useState(false);
   const [showEntry, setShowEntry] = useState(false);
+  const [showConsent, setShowConsent] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -69,12 +76,20 @@ export default function ClinicalHistory({ customerId, patientName = '', dental =
       const res = await getClinical(customerId);
       setRecord(res?.data?.record || null);
       setEntries(res?.data?.entries || []);
+      setConsents(res?.data?.consents || []);
+      setAppointments(res?.data?.appointments || []);
     } catch {
       /* noop */
     } finally {
       setLoading(false);
     }
   }, [customerId]);
+
+  const apptLabel = (id) => {
+    const a = appointments.find((x) => x.id === id);
+    if (!a) return null;
+    return `${fmtDate(a.date)}${a.startTime ? ' · ' + a.startTime : ''}${a.service?.name ? ' · ' + a.service.name : ''}`;
+  };
 
   useEffect(() => {
     fetchData();
@@ -111,6 +126,12 @@ export default function ClinicalHistory({ customerId, patientName = '', dental =
     if (!confirm('¿Eliminar esta evolución?')) return;
     await deleteClinicalEntry(id);
     setEntries((l) => l.filter((e) => e.id !== id));
+  };
+
+  const removeConsent = async (id) => {
+    if (!confirm('¿Eliminar este consentimiento?')) return;
+    await deleteClinicalConsent(id);
+    setConsents((l) => l.filter((c) => c.id !== id));
   };
 
   const printHistory = () => printClinical(patientName, record, entries);
@@ -215,6 +236,62 @@ export default function ClinicalHistory({ customerId, patientName = '', dental =
             />
           )}
 
+          {/* Consentimientos */}
+          <div className="mt-5 flex items-center justify-between">
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+              Consentimientos ({consents.length})
+            </p>
+            <button
+              onClick={() => setShowConsent(true)}
+              className="inline-flex items-center gap-1 text-xs font-medium text-orange-600 hover:underline"
+            >
+              <DocumentCheckIcon className="h-3.5 w-3.5" /> Nuevo consentimiento
+            </button>
+          </div>
+          {consents.length === 0 ? (
+            <p className="mt-1 text-sm text-gray-400">
+              Sin consentimientos firmados.
+            </p>
+          ) : (
+            <ul className="mt-2 space-y-2">
+              {consents.map((c) => (
+                <li
+                  key={c.id}
+                  className="flex items-center justify-between gap-3 rounded-xl border border-gray-100 bg-white p-3 shadow-sm"
+                >
+                  <div className="flex min-w-0 items-center gap-3">
+                    {c.signatureUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={c.signatureUrl}
+                        alt="Firma"
+                        className="h-10 w-20 flex-none rounded border border-gray-200 bg-white object-contain"
+                      />
+                    ) : (
+                      <DocumentCheckIcon className="h-8 w-8 flex-none text-emerald-500" />
+                    )}
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-gray-800">
+                        {c.title}
+                      </p>
+                      <p className="text-[11px] text-gray-400">
+                        Firmado {fmtDate(c.signedAt)}
+                        {c.userName ? ` · ${c.userName}` : ''}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => removeConsent(c.id)}
+                    className="rounded-lg p-1 text-gray-300 hover:bg-rose-50 hover:text-rose-500"
+                    aria-label="Eliminar"
+                  >
+                    <TrashIcon className="h-3.5 w-3.5" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+
           {/* Evoluciones */}
           <p className="mt-5 mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
             Evoluciones ({entries.length})
@@ -244,6 +321,11 @@ export default function ClinicalHistory({ customerId, patientName = '', dental =
                         </button>
                       </div>
                     </div>
+                    {e.appointmentId && apptLabel(e.appointmentId) && (
+                      <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-orange-50 px-2 py-0.5 text-[10px] font-medium text-orange-600">
+                        <CalendarDaysIcon className="h-3 w-3" /> {apptLabel(e.appointmentId)}
+                      </span>
+                    )}
                     <div className="mt-2 grid grid-cols-1 gap-1.5 text-sm">
                       {e.reason && (
                         <p><span className="font-medium text-gray-500">Motivo: </span><span className="text-gray-700">{e.reason}</span></p>
@@ -281,10 +363,22 @@ export default function ClinicalHistory({ customerId, patientName = '', dental =
       {showEntry && (
         <EntryModal
           customerId={customerId}
+          appointments={appointments}
           onClose={() => setShowEntry(false)}
           onSaved={(entry) => {
             setEntries((l) => [entry, ...l]);
             setShowEntry(false);
+          }}
+        />
+      )}
+
+      {showConsent && (
+        <ConsentModal
+          customerId={customerId}
+          onClose={() => setShowConsent(false)}
+          onSaved={(consent) => {
+            setConsents((l) => [consent, ...l]);
+            setShowConsent(false);
           }}
         />
       )}
@@ -373,9 +467,9 @@ function Odontogram({ value, onSave }) {
 }
 
 /* ---------- Modal de evolución (con adjuntos) ---------- */
-function EntryModal({ customerId, onClose, onSaved }) {
+function EntryModal({ customerId, appointments = [], onClose, onSaved }) {
   const today = new Date().toISOString().slice(0, 10);
-  const [f, setF] = useState({ date: today, reason: '', diagnosis: '', treatment: '', notes: '' });
+  const [f, setF] = useState({ date: today, reason: '', diagnosis: '', treatment: '', notes: '', appointmentId: '' });
   const [attachments, setAttachments] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -415,6 +509,7 @@ function EntryModal({ customerId, onClose, onSaved }) {
         diagnosis: f.diagnosis,
         treatment: f.treatment,
         notes: f.notes,
+        appointmentId: f.appointmentId ? Number(f.appointmentId) : undefined,
         attachments,
       });
       onSaved(res?.data);
@@ -436,6 +531,27 @@ function EntryModal({ customerId, onClose, onSaved }) {
             <label className="mb-1 block text-xs font-medium text-gray-500">Fecha</label>
             <input type="date" className={inputCls} value={f.date} onChange={(e) => set('date', e.target.value)} />
           </div>
+          {appointments.length > 0 && (
+            <div>
+              <label className="mb-1 block text-xs font-medium text-gray-500">
+                Cita relacionada (opcional)
+              </label>
+              <select
+                className={inputCls}
+                value={f.appointmentId}
+                onChange={(e) => set('appointmentId', e.target.value)}
+              >
+                <option value="">Sin cita</option>
+                {appointments.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {fmtDate(a.date)}
+                    {a.startTime ? ` · ${a.startTime}` : ''}
+                    {a.service?.name ? ` · ${a.service.name}` : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <div>
             <label className="mb-1 block text-xs font-medium text-gray-500">Motivo de consulta</label>
             <input className={inputCls} value={f.reason} onChange={(e) => set('reason', e.target.value)} />
@@ -497,6 +613,164 @@ function EntryModal({ customerId, onClose, onSaved }) {
           <Button variant="secondary" size="sm" onClick={onClose}>Cancelar</Button>
           <Button variant="primary" size="sm" loading={saving} disabled={uploading} onClick={save}>
             Guardar evolución
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Consentimiento con firma ---------- */
+function SignaturePad({ canvasRef, onDraw }) {
+  const drawing = useRef(false);
+  const last = useRef(null);
+
+  const pos = (e) => {
+    const c = canvasRef.current;
+    const r = c.getBoundingClientRect();
+    const x = (e.clientX - r.left) * (c.width / r.width);
+    const y = (e.clientY - r.top) * (c.height / r.height);
+    return { x, y };
+  };
+  const start = (e) => {
+    drawing.current = true;
+    last.current = pos(e);
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+  };
+  const move = (e) => {
+    if (!drawing.current) return;
+    e.preventDefault();
+    const ctx = canvasRef.current.getContext('2d');
+    const p = pos(e);
+    ctx.strokeStyle = '#111827';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(last.current.x, last.current.y);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+    last.current = p;
+    onDraw?.();
+  };
+  const end = () => {
+    drawing.current = false;
+  };
+
+  return (
+    <canvas
+      ref={canvasRef}
+      width={480}
+      height={150}
+      onPointerDown={start}
+      onPointerMove={move}
+      onPointerUp={end}
+      onPointerLeave={end}
+      className="w-full touch-none rounded-lg border border-gray-300 bg-white"
+      style={{ cursor: 'crosshair' }}
+    />
+  );
+}
+
+function ConsentModal({ customerId, onClose, onSaved }) {
+  const [title, setTitle] = useState('');
+  const [notes, setNotes] = useState('');
+  const [hasSig, setHasSig] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState('');
+  const canvasRef = useRef(null);
+
+  const clearSig = () => {
+    const c = canvasRef.current;
+    if (c) c.getContext('2d').clearRect(0, 0, c.width, c.height);
+    setHasSig(false);
+  };
+
+  const save = async () => {
+    if (!title.trim()) {
+      setErr('Escribe un título para el consentimiento.');
+      return;
+    }
+    setSaving(true);
+    setErr('');
+    try {
+      let signatureUrl;
+      if (hasSig && canvasRef.current) {
+        const dataUrl = canvasRef.current.toDataURL('image/png');
+        const blob = await (await fetch(dataUrl)).blob();
+        const file = new File([blob], 'firma.png', { type: 'image/png' });
+        const up = await uploadClinicalImage(file);
+        signatureUrl = up?.data?.url;
+      }
+      const res = await addClinicalConsent(customerId, {
+        title: title.trim(),
+        notes: notes.trim() || undefined,
+        signatureUrl,
+      });
+      onSaved(res?.data);
+    } catch (e) {
+      setErr(e?.message || 'No se pudo guardar.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[70] flex items-start justify-center overflow-y-auto bg-black/40 p-4">
+      <div className="my-8 w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
+        <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-800">
+          <DocumentCheckIcon className="h-5 w-5 text-emerald-600" /> Nuevo
+          consentimiento
+        </h2>
+        <div className="mt-4 grid grid-cols-1 gap-3">
+          <div>
+            <label className="mb-1 block text-xs font-medium text-gray-500">
+              Título
+            </label>
+            <input
+              className={inputCls}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Ej: Consentimiento de tratamiento de ortodoncia"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium text-gray-500">
+              Texto / observaciones (opcional)
+            </label>
+            <textarea
+              rows={3}
+              className={inputCls}
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Detalle del consentimiento…"
+            />
+          </div>
+          <div>
+            <div className="mb-1 flex items-center justify-between">
+              <label className="block text-xs font-medium text-gray-500">
+                Firma del paciente
+              </label>
+              <button
+                type="button"
+                onClick={clearSig}
+                className="text-[11px] font-medium text-gray-400 hover:text-gray-600"
+              >
+                Limpiar
+              </button>
+            </div>
+            <SignaturePad canvasRef={canvasRef} onDraw={() => setHasSig(true)} />
+            <p className="mt-1 text-[11px] text-gray-400">
+              El paciente firma con el mouse o el dedo (en tablet/celular).
+            </p>
+          </div>
+        </div>
+        {err && <p className="mt-3 text-sm text-red-600">{err}</p>}
+        <div className="mt-6 flex justify-end gap-2">
+          <Button variant="secondary" size="sm" onClick={onClose}>
+            Cancelar
+          </Button>
+          <Button variant="primary" size="sm" loading={saving} onClick={save}>
+            Guardar consentimiento
           </Button>
         </div>
       </div>
