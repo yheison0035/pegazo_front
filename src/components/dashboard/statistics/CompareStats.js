@@ -22,13 +22,14 @@ import {
   COLORS,
 } from './statsUI';
 import StatDetailModal from './StatDetailModal';
+import { useAuth } from '@/context/authContext';
+import { cycleMonthRange } from '@/lib/cycle';
 
-// YYYY-MM -> { startDate, endDate } (primer y último día del mes).
-function monthToRange(ym) {
-  const [y, m] = ym.split('-').map(Number);
-  const last = new Date(y, m, 0).getDate();
-  const p = (n) => String(n).padStart(2, '0');
-  return { startDate: `${ym}-01`, endDate: `${y}-${p(m)}-${p(last)}` };
+// YYYY-MM -> { startDate, endDate } según el ciclo de cierre de la empresa
+// (cycleDay=1 = mes calendario; ej. RAGNOR 3 = del 3 al 2 del siguiente).
+function monthToRange(ym, cycleDay = 1) {
+  const [s, e] = cycleMonthRange(cycleDay, `${ym}-28`, 0);
+  return { startDate: s, endDate: e };
 }
 
 function currentMonth(offset = 0) {
@@ -71,6 +72,8 @@ const METRICS = [
 ];
 
 export default function CompareStats({ localId }) {
+  const { usuario } = useAuth();
+  const cycleDay = usuario?.company?.cycleStartDay || 1;
   const [monthA, setMonthA] = useState(currentMonth(0));
   const [monthB, setMonthB] = useState(currentMonth(-1));
   const [data, setData] = useState(null);
@@ -82,8 +85,8 @@ export default function CompareStats({ localId }) {
     setLoading(true);
     try {
       const res = await getCompareStats({
-        periodA: monthToRange(monthA),
-        periodB: monthToRange(monthB),
+        periodA: monthToRange(monthA, cycleDay),
+        periodB: monthToRange(monthB, cycleDay),
         localId: localId || undefined,
       });
       if (res?.success) setData(res.data);
@@ -92,7 +95,7 @@ export default function CompareStats({ localId }) {
     } finally {
       setLoading(false);
     }
-  }, [monthA, monthB, localId]);
+  }, [monthA, monthB, localId, cycleDay]);
 
   useEffect(() => {
     fetchCompare();
