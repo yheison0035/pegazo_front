@@ -715,21 +715,23 @@ export default function Landing() {
       </section>
 
       {/* DEMO INTERACTIVA: elige tu negocio y míralo adaptarse */}
-      <section className="mx-auto max-w-6xl px-5 py-20">
-        <div className="mx-auto max-w-2xl text-center">
-          <span className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-600">
-            <SparklesIcon className="h-3.5 w-3.5" /> Demo en vivo
-          </span>
-          <h2 className="text-3xl font-bold text-neutral-900">
-            Elige tu negocio y míralo adaptarse
-          </h2>
-          <p className="mt-3 text-neutral-500">
-            El mismo Pegazo, con el menú, el vocabulario y el catálogo de TU
-            negocio. Toca un tipo y compruébalo.
-          </p>
-        </div>
-        <div className="mt-10">
-          <VerticalShowcase />
+      <section className="bg-gradient-to-b from-neutral-50 to-white py-20">
+        <div className="mx-auto max-w-6xl px-5">
+          <div className="mx-auto max-w-2xl text-center">
+            <span className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-600">
+              <SparklesIcon className="h-3.5 w-3.5" /> Demo en vivo
+            </span>
+            <h2 className="text-3xl font-bold text-neutral-900">
+              Elige tu negocio y míralo adaptarse
+            </h2>
+            <p className="mt-3 text-neutral-500">
+              El mismo Pegazo, con el menú, el vocabulario y el catálogo de TU
+              negocio. Toca un tipo y compruébalo.
+            </p>
+          </div>
+          <div className="mt-10">
+            <VerticalShowcase />
+          </div>
         </div>
       </section>
 
