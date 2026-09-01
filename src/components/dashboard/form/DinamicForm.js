@@ -80,6 +80,7 @@ export default function DinamicForm({
 
     if (
       name === 'purchasePrice' ||
+      name === 'purchaseTotal' ||
       name === 'salePrice' ||
       name === 'oldPrice' ||
       name === 'totalAmount'
@@ -103,11 +104,36 @@ export default function DinamicForm({
       formattedValue = toggleCase(value, 'uppercase');
     }
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: formattedValue,
-      ...(name === 'department' ? { city: '' } : {}),
-    }));
+    setFormData((prev) => {
+      const next = {
+        ...prev,
+        [name]: formattedValue,
+        ...(name === 'department' ? { city: '' } : {}),
+      };
+      // Costo de compra: total ⇄ unitario según la cantidad. El campo que se
+      // guarda para estadísticas/contabilidad es el UNITARIO (purchasePrice).
+      if (
+        name === 'purchaseTotal' ||
+        name === 'purchasePrice' ||
+        name === 'stock'
+      ) {
+        const num = (s) => Number(String(s ?? '').replace(/[^\d]/g, '')) || 0;
+        const vSum = Array.isArray(next.variants)
+          ? next.variants.reduce((a, v) => a + (Number(v.stock) || 0), 0)
+          : 0;
+        const qty = vSum > 0 ? vSum : Number(next.stock) || 0;
+        if (name === 'purchaseTotal') {
+          const unit = qty > 0 ? Math.round(num(formattedValue) / qty) : num(formattedValue);
+          next.purchasePrice = formatPrice(String(unit));
+        } else if (name === 'purchasePrice') {
+          next.purchaseTotal = formatPrice(String(Math.round(num(formattedValue) * qty)));
+        } else if (name === 'stock') {
+          const unit = num(next.purchasePrice);
+          if (unit) next.purchaseTotal = formatPrice(String(Math.round(unit * qty)));
+        }
+      }
+      return next;
+    });
 
     // Validación en tiempo real: valida el campo con su nuevo valor y muestra
     // (o limpia) el mensaje debajo al instante.
@@ -749,6 +775,11 @@ export default function DinamicForm({
                       : 'focus:ring-2 focus:ring-orange-500 focus:border-orange-500'
                   }`}
                 />
+                {field.helperText && !errors[name] && (
+                  <p className="mt-1 text-xs text-gray-500">
+                    {field.helperText}
+                  </p>
+                )}
                 {errors[name] && (
                   <p className="mt-1 text-sm font-medium text-red-600">
                     {errors[name]}

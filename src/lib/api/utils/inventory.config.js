@@ -48,6 +48,7 @@ export const getEmptyInventory = () => ({
   stock: 0,
   localId: '',
   providerId: '',
+  purchaseTotal: '',
   purchasePrice: '',
   oldPrice: '',
   salePrice: '',
@@ -158,11 +159,22 @@ export const getFormFieldsInventory = (usuario) => {
       hideWhen: (fd) => fd.trackStock === false,
     },
     {
+      name: 'purchaseTotal',
+      label: 'Precio de compra total',
+      type: 'text',
+      required: false,
+      disabled: false,
+      helperText: 'Lo que pagaste por toda la cantidad; calcula el unitario solo.',
+      // Un plato elaborado no tiene "precio de compra".
+      hideWhen: (fd) => fd.trackStock === false,
+    },
+    {
       name: 'purchasePrice',
-      label: 'Precio de Compra',
+      label: 'Precio de compra unitario',
       type: 'text',
       required: true,
       disabled: false,
+      helperText: 'Costo de cada unidad. Se usa para costos y estadísticas.',
       // Un plato elaborado no tiene "precio de compra".
       hideWhen: (fd) => fd.trackStock === false,
     },
