@@ -17,7 +17,11 @@ import {
 
 import RoleGuard from '@/auth/roleGuard';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
-import { getPlatformOverview, getPlatformAudit } from '@/lib/api/routes/companies';
+import {
+  getPlatformOverview,
+  getPlatformAudit,
+  getPlatformActivity,
+} from '@/lib/api/routes/companies';
 import { formatDateOnly } from '@/lib/api/utils/utils';
 
 const cop = (n) =>
@@ -80,17 +84,20 @@ function BreakdownBars({ title, rows, labelKey, max }) {
 export default function PlatformStatistics() {
   const [data, setData] = useState(null);
   const [audit, setAudit] = useState([]);
+  const [activity, setActivity] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [ov, au] = await Promise.all([
+      const [ov, au, act] = await Promise.all([
         getPlatformOverview(),
         getPlatformAudit(30).catch(() => ({ data: [] })),
+        getPlatformActivity(40).catch(() => ({ data: [] })),
       ]);
       setData(ov?.data || null);
       setAudit(au?.data || []);
+      setActivity(act?.data || []);
     } finally {
       setLoading(false);
     }
@@ -316,7 +323,71 @@ export default function PlatformStatistics() {
             </p>
           )}
         </div>
+
+        {/* Actividad reciente de todas las empresas */}
+        <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+          <h2 className="mb-1 text-sm font-semibold text-gray-800">
+            Actividad reciente
+          </h2>
+          <p className="mb-4 text-xs text-gray-400">
+            Últimos movimientos (creado / editado / eliminado) en todas las
+            empresas.
+          </p>
+          {activity.length ? (
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm">
+                <thead className="text-left text-xs uppercase tracking-wide text-gray-500">
+                  <tr className="border-b border-gray-100">
+                    <th className="py-2 pr-4">Fecha</th>
+                    <th className="py-2 pr-4">Empresa</th>
+                    <th className="py-2 pr-4">Acción</th>
+                    <th className="py-2 pr-4">Qué</th>
+                    <th className="py-2 pr-4">Usuario</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {activity.map((a) => (
+                    <tr key={a.id} className="text-gray-700">
+                      <td className="py-2 pr-4 whitespace-nowrap text-gray-500">
+                        {new Date(a.createdAt).toLocaleString('es-CO')}
+                      </td>
+                      <td className="py-2 pr-4 font-medium">{a.companyName}</td>
+                      <td className="py-2 pr-4">
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                            ACTION_STYLE[a.action] || 'bg-gray-100 text-gray-600'
+                          }`}
+                        >
+                          {ACTION_LABEL[a.action] || a.action}
+                        </span>
+                      </td>
+                      <td className="py-2 pr-4 text-gray-500">
+                        {a.entity} #{a.entityId}
+                      </td>
+                      <td className="py-2 pr-4 text-gray-500">{a.userName}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="py-4 text-center text-sm text-gray-400">
+              Sin actividad registrada todavía.
+            </p>
+          )}
+        </div>
       </div>
     </RoleGuard>
   );
 }
+
+const ACTION_LABEL = {
+  CREATE: 'Creó',
+  UPDATE: 'Editó',
+  DELETE: 'Eliminó',
+};
+const ACTION_STYLE = {
+  CREATE: 'bg-emerald-50 text-emerald-600',
+  UPDATE: 'bg-blue-50 text-blue-600',
+  DELETE: 'bg-red-50 text-red-600',
+};
