@@ -11,7 +11,7 @@ import {
 //   color NO aplica; solo importa que la cantidad sea válida (0 o más).
 // Devuelve { ok, message }.
 export function validateProductVariants(variants, usuario) {
-  const fields = getProductFields(usuario?.company?.type);
+  const fields = getProductFields(usuario?.company?.type, usuario?.company?.typeProductFields);
   const vt = fields.variantType; // 'color' | 'weight' | 'simple'
   const list = Array.isArray(variants) ? variants : [];
 
@@ -65,7 +65,7 @@ export const getEmptyInventory = () => ({
 
 export const getFormFieldsInventory = (usuario) => {
   const canOldPrice = canSeeOldPrice(usuario);
-  const fields = getProductFields(usuario?.company?.type);
+  const fields = getProductFields(usuario?.company?.type, usuario?.company?.typeProductFields);
   const showOldPrice = canOldPrice && fields.oldPrice;
 
   const vt = fields.variantType; // 'color' | 'weight' | 'simple'
@@ -274,7 +274,7 @@ export const getFormFieldsInventory = (usuario) => {
 
 export const getHeaderTableInventory = (usuario) => {
   const canOldPrice = canSeeOldPrice(usuario);
-  const fields = getProductFields(usuario?.company?.type);
+  const fields = getProductFields(usuario?.company?.type, usuario?.company?.typeProductFields);
   const showOldPrice = canOldPrice && fields.oldPrice;
 
   return [

@@ -31,7 +31,7 @@ export default function PurchasesPage() {
   const { usuario } = useAuth();
   // Solo los negocios con variantes de color muestran el color del producto.
   const showColor =
-    getProductFields(usuario?.company?.type).variantType === 'color';
+    getProductFields(usuario?.company?.type, usuario?.company?.typeProductFields).variantType === 'color';
   const colorLabel = (c) =>
     showColor && c && c !== 'ÚNICO' ? ` · ${c}` : '';
   const {

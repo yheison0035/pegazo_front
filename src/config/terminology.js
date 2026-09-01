@@ -119,9 +119,15 @@ const TERMS_BY_TYPE = {
 // Devuelve los términos para una empresa: DEFAULT + por tipo + overrides propios.
 export function getTerms(company) {
   const type = company?.type;
+  // Vocabulario del tipo: primero el configurado en BD por la plataforma
+  // (company.typeTerminology), y si no hay, el mapa por defecto del código.
+  const typeTerms =
+    company?.typeTerminology && Object.keys(company.typeTerminology).length
+      ? company.typeTerminology
+      : TERMS_BY_TYPE[type] || {};
   return {
     ...DEFAULT,
-    ...(TERMS_BY_TYPE[type] || {}),
+    ...typeTerms,
     ...(company?.terminology || {}),
   };
 }

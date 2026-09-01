@@ -64,8 +64,14 @@ const PRODUCT_FIELDS_BY_TYPE = {
   COMIDA_RAPIDA: { brand: false, provider: false, barcode: false, oldPrice: false },
 };
 
-export function getProductFields(type) {
-  return { ...DEFAULT_PRODUCT_FIELDS, ...(PRODUCT_FIELDS_BY_TYPE[type] || {}) };
+// `override` opcional: los campos configurados en BD para el tipo
+// (company.typeProductFields). Si no viene, usa el mapa por defecto del código.
+export function getProductFields(type, override) {
+  const byType =
+    override && Object.keys(override).length
+      ? override
+      : PRODUCT_FIELDS_BY_TYPE[type] || {};
+  return { ...DEFAULT_PRODUCT_FIELDS, ...byType };
 }
 
 // Opciones de unidad de venta según el tipo de variante.

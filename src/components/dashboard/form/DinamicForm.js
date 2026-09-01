@@ -190,7 +190,10 @@ export default function DinamicForm({
       roles: async () => {
         const res = await getRoles();
         const data = Array.isArray(res) ? res : res?.data || [];
-        const allowed = assignableRolesForType(company?.type);
+        const allowed = assignableRolesForType(
+          company?.type,
+          company?.typeRoles,
+        );
         // Se ofrecen los roles de la vertical. El rol que ya trae el usuario
         // (al editar) se conserva aunque sea heredado, para no vaciar el select.
         const current = formData?.role;

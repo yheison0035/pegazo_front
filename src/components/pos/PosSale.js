@@ -72,11 +72,11 @@ export default function PosSale({
   const { usuario } = useAuth();
   const t = useTerms();
   const showColor =
-    getProductFields(usuario?.company?.type).variantType === 'color';
+    getProductFields(usuario?.company?.type, usuario?.company?.typeProductFields).variantType === 'color';
   // Verticales que venden por peso (fruver, carnicería, supermercado): el POS
   // debe aceptar cantidades decimales (1,5 kg) en vez de solo enteros.
   const isWeightVertical =
-    getProductFields(usuario?.company?.type).variantType === 'weight';
+    getProductFields(usuario?.company?.type, usuario?.company?.typeProductFields).variantType === 'weight';
   // Un ítem se cobra por peso si su producto es de unidad PESO; si el producto
   // no trae `unit`, se usa el default del vertical.
   const isByWeight = (i) => (i.unit ? i.unit === 'PESO' : isWeightVertical);

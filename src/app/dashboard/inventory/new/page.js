@@ -51,7 +51,10 @@ export default function NewProduct() {
   // (los platos se elaboran al momento); el dueño lo activa para las bebidas.
   useEffect(() => {
     const type = usuario?.company?.type;
-    if (getProductFields(type).variantType === 'weight') {
+    if (
+      getProductFields(type, usuario?.company?.typeProductFields).variantType ===
+      'weight'
+    ) {
       setFormData((prev) =>
         prev.unit === 'UNIDAD' ? { ...prev, unit: 'KG' } : prev
       );
@@ -75,7 +78,7 @@ export default function NewProduct() {
         getBrands({ all: true }),
         getProviders({ all: true }),
       ]);
-      const pf = getProductFields(usuario?.company?.type);
+      const pf = getProductFields(usuario?.company?.type, usuario?.company?.typeProductFields);
       const missing = [];
       if (!locs?.data?.length)
         missing.push({ label: 'Sedes / locales', href: '/dashboard/locals/new' });
