@@ -36,7 +36,17 @@ export default function Actions({
 
   return (
     <div className="flex items-center justify-center gap-1 opacity-80 transition group-hover:opacity-100">
-      {canView && (
+      {canView && view === 'companies' && (
+        <TableActionButton
+          icon={EyeIcon}
+          label="Ver panel de la empresa"
+          variant="view"
+          disabled={isLocked}
+          href={isLocked ? undefined : `/platform/companies/${info.id}`}
+        />
+      )}
+
+      {canView && view !== 'companies' && (
         <TableActionButton
           icon={EyeIcon}
           label="Ver detalle"

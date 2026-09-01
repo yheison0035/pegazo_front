@@ -108,6 +108,19 @@ export async function getPlatformAudit(limit = 50) {
   return apiFetch(`/companies/platform/audit?limit=${limit}`);
 }
 
+// Vista 360° de una empresa.
+export async function getCompanyDetail(id) {
+  return apiFetch(`/companies/platform/${id}/detail`);
+}
+
+// Renovar/marcar pagado (+N días, default 30).
+export async function renewCompany(id, days = 30) {
+  return apiFetch(`/companies/platform/${id}/renew`, {
+    method: 'PATCH',
+    body: JSON.stringify({ days }),
+  });
+}
+
 // Activar / desactivar empresa (suspensión por impago)
 export async function setCompanyStatus(id, status) {
   return apiFetch(`/companies/${id}/status`, {
