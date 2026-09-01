@@ -41,7 +41,16 @@ export default function EditProduct() {
     if (!id) return;
     try {
       const { data } = await getProductById(Number(id));
-      setFormData(data);
+      // Precarga el "precio de compra total" = unitario × cantidad, para que el
+      // dueño lo vea (el auto-cálculo lo mantiene sincronizado al editar).
+      const qty = Array.isArray(data?.variants)
+        ? data.variants.reduce((a, v) => a + (Number(v.stock) || 0), 0)
+        : 0;
+      const unit = Number(data?.purchasePrice) || 0;
+      setFormData({
+        ...data,
+        purchaseTotal: qty > 0 && unit ? Math.round(unit * qty) : '',
+      });
       setImages(data.images || []);
     } catch (err) {
       setAlert({
