@@ -5,6 +5,7 @@ import {
   Cog6ToothIcon,
   TicketIcon,
   MegaphoneIcon,
+  Squares2X2Icon,
 } from '@heroicons/react/24/outline';
 
 export const PLATFORM_NAVIGATION = [
@@ -30,6 +31,11 @@ export const PLATFORM_NAVIGATION = [
         name: 'Comunicados',
         href: '/platform/announcements',
         icon: MegaphoneIcon,
+      },
+      {
+        name: 'Tipos de negocio',
+        href: '/platform/business-types',
+        icon: Squares2X2Icon,
       },
       {
         name: 'Estadísticas Globales',

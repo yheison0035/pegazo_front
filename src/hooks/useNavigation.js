@@ -42,10 +42,16 @@ export default function useNavigation() {
       (t.productPlural !== 'Productos' ? t.productPlural : null),
   };
 
-  // Módulos del tipo de negocio (lista curada y explícita por vertical).
-  // 'settings' (Configuración) siempre está disponible para el dueño.
+  // Módulos del tipo de negocio. La plataforma los configura en BD
+  // (company.typeModules, vía BusinessTypeConfig); si no hay configuración se
+  // cae al mapa por defecto del código. 'settings' siempre disponible.
+  const typeModules = usuario.company?.typeModules;
+  const baseModules =
+    Array.isArray(typeModules) && typeModules.length > 0
+      ? typeModules
+      : BUSINESS_TYPES[businessType] || BUSINESS_TYPES.COMERCIO;
   const modules = [
-    ...(BUSINESS_TYPES[businessType] || BUSINESS_TYPES.COMERCIO),
+    ...baseModules,
     'settings',
     // Aviso de consignaciones al banco: disponible para cualquier negocio.
     'bank',
