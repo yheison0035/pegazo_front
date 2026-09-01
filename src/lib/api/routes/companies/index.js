@@ -110,3 +110,8 @@ export async function setCompanyStatus(id, status) {
     body: JSON.stringify({ status }),
   });
 }
+
+// Impersonación de soporte: la plataforma entra como el dueño de la empresa.
+export async function impersonateCompany(companyId) {
+  return apiFetch(`/auth/impersonate/${companyId}`, { method: 'POST' });
+}

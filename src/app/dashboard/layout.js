@@ -14,6 +14,8 @@ import DayBanner from '@/components/pos/DayBanner';
 import RenewalBanner from '@/components/billing/RenewalBanner';
 import { isDark, DARK_EVENT } from '@/lib/darkMode';
 import { CRM_FONTS_BY_ID, googleFontHref } from '@/config/crmFonts';
+import ImpersonationBanner from '@/components/platform/ImpersonationBanner';
+import { isImpersonating } from '@/lib/impersonation';
 
 export default function Layout({ children }) {
   const { usuario } = useAuth();
@@ -23,6 +25,8 @@ export default function Layout({ children }) {
   const theme = usuario?.company?.crmTheme || 'orange';
   // Logo del negocio como marca de agua sutil de fondo en cada módulo.
   const logo = usuario?.company?.logo;
+  const [imp, setImp] = useState(false);
+  useEffect(() => setImp(isImpersonating()), []);
   // Fuente del panel elegida por el negocio.
   const fontId = usuario?.company?.crmFont || 'system';
   const fontStack = (CRM_FONTS_BY_ID[fontId] || CRM_FONTS_BY_ID.system).stack;
@@ -52,12 +56,17 @@ export default function Layout({ children }) {
   return (
     <RoleGuard allowedRoles={Object.values(Roles)}>
       <SplashScreen />
+      <ImpersonationBanner />
       <div
         data-crm-theme={theme}
         data-theme={dark ? 'dark' : undefined}
         style={{ fontFamily: fontStack }}
       >
-        <div className="flex h-screen flex-col bg-gray-50 md:flex-row md:overflow-hidden">
+        <div
+          className={`flex flex-col bg-gray-50 md:flex-row md:overflow-hidden ${
+            imp ? 'mt-9 h-[calc(100vh-2.25rem)]' : 'h-screen'
+          }`}
+        >
           {/* El sidebar vive fijo y colapsado (solo iconos); aquí reservamos el
               ancho del rail para que el contenido ocupe el resto. Al hacer hover
               el menú se expande por encima sin mover el contenido. */}

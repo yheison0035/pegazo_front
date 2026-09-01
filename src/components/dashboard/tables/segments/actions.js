@@ -7,9 +7,11 @@ import {
   RectangleGroupIcon,
   PrinterIcon,
   PowerIcon,
+  ArrowRightEndOnRectangleIcon,
 } from '@heroicons/react/24/outline';
 import TableActionButton from '@/components/ui/TableActionButton';
 import { sendInvoiceWhatsapp } from '@/utils/invoiceWhatsapp';
+import { enterAsCompany } from '@/lib/impersonation';
 
 export default function Actions({
   isLocked,
@@ -51,6 +53,23 @@ export default function Actions({
           variant={isActive ? 'danger' : 'success'}
           disabled={isLocked}
           onClick={handleToggle}
+        />
+      )}
+
+      {view === 'companies' && isActive && (
+        <TableActionButton
+          icon={ArrowRightEndOnRectangleIcon}
+          label="Entrar como esta empresa"
+          variant="info"
+          disabled={isLocked}
+          onClick={async () => {
+            try {
+              await enterAsCompany(info.id);
+              window.location.href = '/dashboard';
+            } catch (e) {
+              alert(e?.message || 'No se pudo entrar como la empresa.');
+            }
+          }}
         />
       )}
 
