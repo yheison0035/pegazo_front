@@ -19,6 +19,8 @@ import {
 
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
+import { useAuth } from '@/context/authContext';
+import { cycleMonthRange, cycleStartOf } from '@/lib/cycle';
 import useLocals from '@/lib/api/hooks/useLocals';
 import { getDashboardStats } from '@/lib/api/routes/statistics';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
@@ -101,6 +103,9 @@ function EmptyChart({ height = 260 }) {
 export default function Statistics() {
   const t = useTerms();
   const { getLocals } = useLocals();
+  const { usuario } = useAuth();
+  // Día de inicio del ciclo de cierre de la empresa (default 1 = mes calendario).
+  const cycleDay = usuario?.company?.cycleStartDay || 1;
 
   const [locals, setLocals] = useState([]);
   const [localId, setLocalId] = useState('');
@@ -174,21 +179,13 @@ export default function Statistics() {
   const PRESETS = [
     {
       label: 'Este mes',
-      range: () => {
-        const [y, m] = todayCol().split('-');
-        return [`${y}-${m}-01`, todayCol()];
-      },
+      // Respeta el ciclo de cierre: inicio del ciclo actual → hoy.
+      range: () => [cycleStartOf(cycleDay, todayCol()), todayCol()],
     },
     {
       label: 'Mes pasado',
-      range: () => {
-        const [y, m] = todayCol().split('-').map(Number);
-        const py = m === 1 ? y - 1 : y;
-        const pm = m === 1 ? 12 : m - 1;
-        const last = new Date(py, pm, 0).getDate();
-        const p = (n) => String(n).padStart(2, '0');
-        return [`${py}-${p(pm)}-01`, `${py}-${p(pm)}-${p(last)}`];
-      },
+      // Ciclo anterior completo (según el día de inicio de la empresa).
+      range: () => cycleMonthRange(cycleDay, todayCol(), -1),
     },
     { label: 'Últimos 30 días', range: () => [daysAgoCol(29), todayCol()] },
     {
