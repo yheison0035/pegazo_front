@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import {
   Squares2X2Icon,
   PencilSquareIcon,
+  PlusIcon,
 } from '@heroicons/react/24/outline';
 
 import RoleGuard from '@/auth/roleGuard';
@@ -14,14 +15,17 @@ import { MODULE_GROUPS } from '@/config/modules';
 import {
   getBusinessTypes,
   updateBusinessType,
+  createBusinessType,
 } from '@/lib/api/routes/businessTypes';
 
 const inputCls =
   'w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20';
 
 function Editor({ item, onClose, onSaved }) {
-  const [label, setLabel] = useState(item.label);
-  const [active, setActive] = useState(item.active);
+  const isNew = !!item.__new;
+  const [label, setLabel] = useState(item.label || '');
+  const [typeKey, setTypeKey] = useState(item.type || '');
+  const [active, setActive] = useState(item.active ?? true);
   const [mods, setMods] = useState(new Set(item.modules || []));
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState('');
@@ -34,14 +38,26 @@ function Editor({ item, onClose, onSaved }) {
     });
 
   const save = async () => {
+    if (!label.trim()) {
+      setErr('El nombre es obligatorio.');
+      return;
+    }
     setSaving(true);
     setErr('');
     try {
-      await updateBusinessType(item.type, {
-        label: label.trim() || item.type,
-        modules: [...mods],
-        active,
-      });
+      if (isNew) {
+        await createBusinessType({
+          label: label.trim(),
+          type: typeKey.trim() || undefined,
+          modules: [...mods],
+        });
+      } else {
+        await updateBusinessType(item.type, {
+          label: label.trim() || item.type,
+          modules: [...mods],
+          active,
+        });
+      }
       onSaved();
     } catch (e) {
       setErr(e?.message || 'No se pudo guardar.');
@@ -54,11 +70,12 @@ function Editor({ item, onClose, onSaved }) {
     <div className="fixed inset-0 z-[70] flex items-start justify-center overflow-y-auto bg-black/40 p-4">
       <div className="my-8 w-full max-w-2xl rounded-2xl bg-white p-6 shadow-xl">
         <h2 className="text-lg font-semibold text-gray-800">
-          Tipo de negocio: {item.type}
+          {isNew ? 'Nuevo tipo de negocio' : `Tipo de negocio: ${item.type}`}
         </h2>
         <p className="mt-1 text-sm text-gray-500">
-          Ajusta el nombre visible y qué módulos ve por defecto este tipo de
-          negocio. (El override por empresa sigue mandando sobre esto.)
+          {isNew
+            ? 'Crea un tipo de negocio nuevo y marca los módulos que traerá por defecto.'
+            : 'Ajusta el nombre visible y qué módulos ve por defecto este tipo de negocio. (El override por empresa sigue mandando sobre esto.)'}
         </p>
 
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -70,17 +87,32 @@ function Editor({ item, onClose, onSaved }) {
               className={inputCls}
               value={label}
               onChange={(e) => setLabel(e.target.value)}
+              placeholder="Ej: Ferretería"
             />
           </div>
-          <label className="flex items-center gap-2 self-end pb-2 text-sm text-gray-700">
-            <input
-              type="checkbox"
-              checked={active}
-              onChange={(e) => setActive(e.target.checked)}
-              className="h-4 w-4 cursor-pointer accent-orange-500"
-            />
-            Activo (usa esta configuración)
-          </label>
+          {isNew ? (
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-gray-600">
+                Clave (opcional)
+              </label>
+              <input
+                className={inputCls}
+                value={typeKey}
+                onChange={(e) => setTypeKey(e.target.value)}
+                placeholder="Se genera del nombre (FERRETERIA)"
+              />
+            </div>
+          ) : (
+            <label className="flex items-center gap-2 self-end pb-2 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                checked={active}
+                onChange={(e) => setActive(e.target.checked)}
+                className="h-4 w-4 cursor-pointer accent-orange-500"
+              />
+              Activo (usa esta configuración)
+            </label>
+          )}
         </div>
 
         <div className="mt-5 space-y-4">
@@ -148,15 +180,22 @@ export default function PlatformBusinessTypes() {
       <div className="relative w-full p-4">
         <LoadingOverlay show={loading} text="Cargando tipos de negocio..." />
 
-        <h1 className="mb-1 flex items-center gap-2 text-2xl font-semibold">
-          <Squares2X2Icon className="h-6 w-6 text-orange-500" />
-          Tipos de negocio
-        </h1>
-        <p className="mb-6 text-sm text-gray-500">
-          Configura el nombre y los módulos que trae cada tipo de negocio. Los
-          cambios aplican a todos los negocios de ese tipo (salvo que tengan
-          módulos manuales por empresa).
-        </p>
+        <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h1 className="mb-1 flex items-center gap-2 text-2xl font-semibold">
+              <Squares2X2Icon className="h-6 w-6 text-orange-500" />
+              Tipos de negocio
+            </h1>
+            <p className="text-sm text-gray-500">
+              Configura el nombre y los módulos que trae cada tipo de negocio, o
+              crea uno nuevo. Los cambios aplican a todos los negocios de ese tipo
+              (salvo que tengan módulos manuales por empresa).
+            </p>
+          </div>
+          <Button variant="primary" onClick={() => setEditing({ __new: true })}>
+            <PlusIcon className="mr-1 h-4 w-4" /> Nuevo tipo
+          </Button>
+        </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {items.map((it) => (
