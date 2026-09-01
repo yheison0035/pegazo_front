@@ -1,12 +1,14 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   HeartIcon,
   PlusIcon,
   PencilSquareIcon,
   TrashIcon,
   ClipboardDocumentListIcon,
+  PhotoIcon,
+  PrinterIcon,
 } from '@heroicons/react/24/outline';
 import Button from '@/components/ui/Button';
 import {
@@ -14,6 +16,7 @@ import {
   saveClinicalRecord,
   addClinicalEntry,
   deleteClinicalEntry,
+  uploadClinicalImage,
 } from '@/lib/api/routes/clinical';
 
 const inputCls =
@@ -27,6 +30,20 @@ const REC_FIELDS = [
   { key: 'notes', label: 'Observaciones generales', ph: 'Notas relevantes del paciente…' },
 ];
 
+// Estados del odontograma (dental) y su color.
+const TOOTH_STATES = [
+  { id: '', label: 'Sano', cls: 'bg-white text-gray-700 border-gray-200' },
+  { id: 'caries', label: 'Caries', cls: 'bg-red-100 text-red-700 border-red-300' },
+  { id: 'obturado', label: 'Obturado', cls: 'bg-blue-100 text-blue-700 border-blue-300' },
+  { id: 'corona', label: 'Corona', cls: 'bg-amber-100 text-amber-700 border-amber-300' },
+  { id: 'ausente', label: 'Ausente', cls: 'bg-gray-200 text-gray-400 border-gray-300 line-through' },
+];
+const toothCls = (st) =>
+  (TOOTH_STATES.find((s) => s.id === (st || '')) || TOOTH_STATES[0]).cls;
+// Dentición FDI (adulto): superior 18→11, 21→28 · inferior 48→41, 31→38.
+const UPPER = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28];
+const LOWER = [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38];
+
 function fmtDate(d) {
   try {
     return new Date(d).toLocaleDateString('es-CO', {
@@ -37,7 +54,7 @@ function fmtDate(d) {
   }
 }
 
-export default function ClinicalHistory({ customerId }) {
+export default function ClinicalHistory({ customerId, patientName = '', dental = false }) {
   const [record, setRecord] = useState(null);
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -85,11 +102,18 @@ export default function ClinicalHistory({ customerId }) {
     }
   };
 
+  const saveOdontogram = async (odontogram) => {
+    const res = await saveClinicalRecord(customerId, { odontogram });
+    setRecord(res?.data || null);
+  };
+
   const removeEntry = async (id) => {
     if (!confirm('¿Eliminar esta evolución?')) return;
     await deleteClinicalEntry(id);
     setEntries((l) => l.filter((e) => e.id !== id));
   };
+
+  const printHistory = () => printClinical(patientName, record, entries);
 
   const hasRecord =
     record &&
@@ -97,13 +121,18 @@ export default function ClinicalHistory({ customerId }) {
 
   return (
     <div className="mt-5 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="flex items-center gap-2 text-sm font-bold text-gray-700">
           <HeartIcon className="h-5 w-5 text-rose-500" /> Historia clínica
         </h2>
-        <Button variant="secondary" size="sm" onClick={() => setShowEntry(true)}>
-          <PlusIcon className="mr-1 h-4 w-4" /> Nueva evolución
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="secondary" size="sm" onClick={printHistory}>
+            <PrinterIcon className="mr-1 h-4 w-4" /> Imprimir
+          </Button>
+          <Button variant="primary" size="sm" onClick={() => setShowEntry(true)}>
+            <PlusIcon className="mr-1 h-4 w-4" /> Nueva evolución
+          </Button>
+        </div>
       </div>
 
       {loading ? (
@@ -139,18 +168,14 @@ export default function ClinicalHistory({ customerId }) {
                         className={inputCls}
                         value={recForm[f.key] || ''}
                         placeholder={f.ph}
-                        onChange={(e) =>
-                          setRecForm((p) => ({ ...p, [f.key]: e.target.value }))
-                        }
+                        onChange={(e) => setRecForm((p) => ({ ...p, [f.key]: e.target.value }))}
                       />
                     ) : (
                       <input
                         className={inputCls}
                         value={recForm[f.key] || ''}
                         placeholder={f.ph}
-                        onChange={(e) =>
-                          setRecForm((p) => ({ ...p, [f.key]: e.target.value }))
-                        }
+                        onChange={(e) => setRecForm((p) => ({ ...p, [f.key]: e.target.value }))}
                       />
                     )}
                   </div>
@@ -182,6 +207,14 @@ export default function ClinicalHistory({ customerId }) {
             )}
           </div>
 
+          {/* Odontograma (solo dental) */}
+          {dental && (
+            <Odontogram
+              value={record?.odontogram || {}}
+              onSave={saveOdontogram}
+            />
+          )}
+
           {/* Evoluciones */}
           <p className="mt-5 mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
             Evoluciones ({entries.length})
@@ -197,14 +230,10 @@ export default function ClinicalHistory({ customerId }) {
                   <span className="absolute -left-[21px] top-1.5 h-2.5 w-2.5 rounded-full bg-orange-400 ring-2 ring-white" />
                   <div className="rounded-xl border border-gray-100 bg-white p-3 shadow-sm">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs font-semibold text-gray-800">
-                        {fmtDate(e.date)}
-                      </span>
+                      <span className="text-xs font-semibold text-gray-800">{fmtDate(e.date)}</span>
                       <div className="flex items-center gap-2">
                         {e.userName && (
-                          <span className="text-[11px] text-gray-400">
-                            {e.userName}
-                          </span>
+                          <span className="text-[11px] text-gray-400">{e.userName}</span>
                         )}
                         <button
                           onClick={() => removeEntry(e.id)}
@@ -217,27 +246,30 @@ export default function ClinicalHistory({ customerId }) {
                     </div>
                     <div className="mt-2 grid grid-cols-1 gap-1.5 text-sm">
                       {e.reason && (
-                        <p>
-                          <span className="font-medium text-gray-500">Motivo: </span>
-                          <span className="text-gray-700">{e.reason}</span>
-                        </p>
+                        <p><span className="font-medium text-gray-500">Motivo: </span><span className="text-gray-700">{e.reason}</span></p>
                       )}
                       {e.diagnosis && (
-                        <p>
-                          <span className="font-medium text-gray-500">Diagnóstico: </span>
-                          <span className="text-gray-700">{e.diagnosis}</span>
-                        </p>
+                        <p><span className="font-medium text-gray-500">Diagnóstico: </span><span className="text-gray-700">{e.diagnosis}</span></p>
                       )}
                       {e.treatment && (
-                        <p>
-                          <span className="font-medium text-gray-500">Tratamiento: </span>
-                          <span className="text-gray-700">{e.treatment}</span>
-                        </p>
+                        <p><span className="font-medium text-gray-500">Tratamiento: </span><span className="text-gray-700">{e.treatment}</span></p>
                       )}
-                      {e.notes && (
-                        <p className="whitespace-pre-line text-gray-600">{e.notes}</p>
-                      )}
+                      {e.notes && <p className="whitespace-pre-line text-gray-600">{e.notes}</p>}
                     </div>
+                    {Array.isArray(e.attachments) && e.attachments.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {e.attachments.map((url) => (
+                          <a key={url} href={url} target="_blank" rel="noopener noreferrer">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={url}
+                              alt="Adjunto clínico"
+                              className="h-16 w-16 rounded-lg border border-gray-200 object-cover"
+                            />
+                          </a>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </li>
               ))}
@@ -260,16 +292,118 @@ export default function ClinicalHistory({ customerId }) {
   );
 }
 
+/* ---------- Odontograma ---------- */
+function Odontogram({ value, onSave }) {
+  const [map, setMap] = useState(value || {});
+  const [dirty, setDirty] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setMap(value || {});
+    setDirty(false);
+  }, [value]);
+
+  const cycle = (n) => {
+    const cur = map[n] || '';
+    const idx = TOOTH_STATES.findIndex((s) => s.id === cur);
+    const next = TOOTH_STATES[(idx + 1) % TOOTH_STATES.length].id;
+    const nm = { ...map };
+    if (next) nm[n] = next;
+    else delete nm[n];
+    setMap(nm);
+    setDirty(true);
+  };
+
+  const save = async () => {
+    setSaving(true);
+    try {
+      await onSave(map);
+      setDirty(false);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const Row = ({ teeth }) => (
+    <div className="flex justify-center gap-1">
+      {teeth.map((n) => (
+        <button
+          key={n}
+          type="button"
+          onClick={() => cycle(n)}
+          title={`Diente ${n}`}
+          className={`flex h-9 w-8 flex-col items-center justify-center rounded-md border text-[10px] font-semibold transition ${toothCls(map[n])}`}
+        >
+          {n}
+        </button>
+      ))}
+    </div>
+  );
+
+  return (
+    <div className="mt-4 rounded-xl border border-gray-100 bg-white p-4">
+      <div className="mb-3 flex items-center justify-between">
+        <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+          Odontograma
+        </p>
+        {dirty && (
+          <Button variant="primary" size="sm" loading={saving} onClick={save}>
+            Guardar odontograma
+          </Button>
+        )}
+      </div>
+      <div className="space-y-1 overflow-x-auto">
+        <Row teeth={UPPER} />
+        <div className="my-1 border-t border-dashed border-gray-200" />
+        <Row teeth={LOWER} />
+      </div>
+      <div className="mt-3 flex flex-wrap gap-3">
+        {TOOTH_STATES.map((s) => (
+          <span key={s.id} className="flex items-center gap-1.5 text-[11px] text-gray-500">
+            <span className={`inline-block h-3 w-3 rounded border ${s.cls}`} />
+            {s.label}
+          </span>
+        ))}
+      </div>
+      <p className="mt-2 text-[11px] text-gray-400">
+        Toca un diente para cambiar su estado.
+      </p>
+    </div>
+  );
+}
+
+/* ---------- Modal de evolución (con adjuntos) ---------- */
 function EntryModal({ customerId, onClose, onSaved }) {
   const today = new Date().toISOString().slice(0, 10);
   const [f, setF] = useState({ date: today, reason: '', diagnosis: '', treatment: '', notes: '' });
+  const [attachments, setAttachments] = useState([]);
+  const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState('');
+  const fileRef = useRef(null);
   const set = (k, v) => setF((p) => ({ ...p, [k]: v }));
 
+  const onFiles = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    setUploading(true);
+    setErr('');
+    try {
+      for (const file of files) {
+        const res = await uploadClinicalImage(file);
+        if (res?.data?.url) setAttachments((a) => [...a, res.data.url]);
+      }
+    } catch (e2) {
+      setErr(e2?.message || 'No se pudo subir la imagen.');
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  };
+
   const save = async () => {
-    if (!f.reason.trim() && !f.notes.trim() && !f.diagnosis.trim()) {
-      setErr('Escribe al menos el motivo, diagnóstico o una nota.');
+    if (!f.reason.trim() && !f.notes.trim() && !f.diagnosis.trim() && attachments.length === 0) {
+      setErr('Escribe al menos el motivo, diagnóstico, una nota o adjunta una imagen.');
       return;
     }
     setSaving(true);
@@ -281,6 +415,7 @@ function EntryModal({ customerId, onClose, onSaved }) {
         diagnosis: f.diagnosis,
         treatment: f.treatment,
         notes: f.notes,
+        attachments,
       });
       onSaved(res?.data);
     } catch (e) {
@@ -294,23 +429,15 @@ function EntryModal({ customerId, onClose, onSaved }) {
     <div className="fixed inset-0 z-[70] flex items-start justify-center overflow-y-auto bg-black/40 p-4">
       <div className="my-8 w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
         <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-800">
-          <ClipboardDocumentListIcon className="h-5 w-5 text-orange-500" />
-          Nueva evolución
+          <ClipboardDocumentListIcon className="h-5 w-5 text-orange-500" /> Nueva evolución
         </h2>
         <div className="mt-4 grid grid-cols-1 gap-3">
           <div>
             <label className="mb-1 block text-xs font-medium text-gray-500">Fecha</label>
-            <input
-              type="date"
-              className={inputCls}
-              value={f.date}
-              onChange={(e) => set('date', e.target.value)}
-            />
+            <input type="date" className={inputCls} value={f.date} onChange={(e) => set('date', e.target.value)} />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-gray-500">
-              Motivo de consulta
-            </label>
+            <label className="mb-1 block text-xs font-medium text-gray-500">Motivo de consulta</label>
             <input className={inputCls} value={f.reason} onChange={(e) => set('reason', e.target.value)} />
           </div>
           <div>
@@ -318,26 +445,109 @@ function EntryModal({ customerId, onClose, onSaved }) {
             <input className={inputCls} value={f.diagnosis} onChange={(e) => set('diagnosis', e.target.value)} />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-gray-500">
-              Procedimiento / tratamiento
-            </label>
+            <label className="mb-1 block text-xs font-medium text-gray-500">Procedimiento / tratamiento</label>
             <input className={inputCls} value={f.treatment} onChange={(e) => set('treatment', e.target.value)} />
           </div>
           <div>
             <label className="mb-1 block text-xs font-medium text-gray-500">Evolución / notas</label>
             <textarea rows={3} className={inputCls} value={f.notes} onChange={(e) => set('notes', e.target.value)} />
           </div>
+
+          {/* Adjuntos */}
+          <div>
+            <label className="mb-1 block text-xs font-medium text-gray-500">
+              Fotos / radiografías
+            </label>
+            <div className="flex flex-wrap items-center gap-2">
+              {attachments.map((url) => (
+                <div key={url} className="relative">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={url} alt="Adjunto" className="h-16 w-16 rounded-lg border border-gray-200 object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => setAttachments((a) => a.filter((x) => x !== url))}
+                    className="absolute -right-1.5 -top-1.5 grid h-5 w-5 place-items-center rounded-full bg-rose-500 text-xs text-white shadow"
+                    aria-label="Quitar"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                className="flex h-16 w-16 flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-gray-300 text-[10px] text-gray-400 hover:border-orange-300 hover:text-orange-500"
+              >
+                <PhotoIcon className="h-5 w-5" />
+                {uploading ? '…' : 'Subir'}
+              </button>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={onFiles}
+              />
+            </div>
+          </div>
         </div>
         {err && <p className="mt-3 text-sm text-red-600">{err}</p>}
         <div className="mt-6 flex justify-end gap-2">
-          <Button variant="secondary" size="sm" onClick={onClose}>
-            Cancelar
-          </Button>
-          <Button variant="primary" size="sm" loading={saving} onClick={save}>
+          <Button variant="secondary" size="sm" onClick={onClose}>Cancelar</Button>
+          <Button variant="primary" size="sm" loading={saving} disabled={uploading} onClick={save}>
             Guardar evolución
           </Button>
         </div>
       </div>
     </div>
   );
+}
+
+/* ---------- Impresión ---------- */
+function printClinical(patientName, record, entries) {
+  const esc = (s) => String(s || '').replace(/[<>&]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]));
+  const rec = record || {};
+  const ant = [
+    ['Alergias', rec.allergies],
+    ['Medicamentos', rec.medications],
+    ['Antecedentes', rec.conditions],
+    ['Tipo de sangre', rec.bloodType],
+    ['Observaciones', rec.notes],
+  ].filter(([, v]) => v);
+  const antHtml = ant.length
+    ? ant.map(([k, v]) => `<p><b>${k}:</b> ${esc(v)}</p>`).join('')
+    : '<p style="color:#888">Sin antecedentes.</p>';
+  const evHtml = (entries || []).length
+    ? entries
+        .map((e) => {
+          const d = new Date(e.date).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' });
+          const rows = [
+            e.reason && `<b>Motivo:</b> ${esc(e.reason)}`,
+            e.diagnosis && `<b>Diagnóstico:</b> ${esc(e.diagnosis)}`,
+            e.treatment && `<b>Tratamiento:</b> ${esc(e.treatment)}`,
+            e.notes && esc(e.notes),
+          ].filter(Boolean).map((r) => `<p style="margin:2px 0">${r}</p>`).join('');
+          return `<div style="border:1px solid #eee;border-radius:8px;padding:10px;margin:8px 0">
+            <div style="display:flex;justify-content:space-between"><b>${d}</b><span style="color:#888">${esc(e.userName || '')}</span></div>
+            ${rows}
+          </div>`;
+        })
+        .join('')
+    : '<p style="color:#888">Sin evoluciones.</p>';
+  const html = `<!doctype html><html><head><meta charset="utf-8"><title>Historia clínica${patientName ? ' · ' + esc(patientName) : ''}</title>
+    <style>body{font-family:system-ui,Arial,sans-serif;color:#222;max-width:720px;margin:24px auto;padding:0 20px;line-height:1.5}
+    h1{font-size:20px;margin:0} h2{font-size:14px;text-transform:uppercase;letter-spacing:.05em;color:#e8581f;margin:22px 0 8px;border-bottom:1px solid #eee;padding-bottom:4px}
+    p{margin:3px 0;font-size:13px}</style></head><body>
+    <h1>Historia clínica${patientName ? ' — ' + esc(patientName) : ''}</h1>
+    <p style="color:#888;font-size:12px">Generado el ${new Date().toLocaleDateString('es-CO')}</p>
+    <h2>Antecedentes</h2>${antHtml}
+    <h2>Evoluciones</h2>${evHtml}
+    </body></html>`;
+  const w = window.open('', '_blank');
+  if (!w) return;
+  w.document.write(html);
+  w.document.close();
+  w.focus();
+  setTimeout(() => w.print(), 300);
 }

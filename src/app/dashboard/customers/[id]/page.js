@@ -43,6 +43,8 @@ export default function CustomerProfile() {
   const { usuario } = useAuth();
   // La historia clínica solo aparece en verticales de salud (módulo 'clinical').
   const showClinical = effectiveModules(usuario).includes('clinical');
+  // El odontograma solo aplica a odontología.
+  const isDental = usuario?.company?.type === 'ODONTOLOGIA';
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -373,7 +375,13 @@ export default function CustomerProfile() {
         )}
       </div>
 
-      {showClinical && <ClinicalHistory customerId={id} />}
+      {showClinical && (
+        <ClinicalHistory
+          customerId={id}
+          patientName={data?.name || ''}
+          dental={isDental}
+        />
+      )}
     </div>
   );
 }
