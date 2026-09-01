@@ -60,6 +60,12 @@ export default function useNavigation() {
     if (!modules.includes('orders')) modules.push('orders');
   }
 
+  // Facturación electrónica DIAN: solo si la plataforma la habilitó para esta
+  // empresa (independiente de la vertical).
+  if (usuario.company?.electronicInvoicingEnabled) {
+    modules.push('facturacion-electronica');
+  }
+
   // Oculta los módulos que aún no están 100% terminados/comprobados.
   const visibleModules = modules.filter((m) => !HIDDEN_MODULES.has(m));
 
