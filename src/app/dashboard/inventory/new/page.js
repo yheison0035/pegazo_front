@@ -27,6 +27,7 @@ import { getProviders } from '@/lib/api/routes/providers';
 import { getLocals } from '@/lib/api/routes/locals';
 import { getProductFields } from '@/config/verticalProfiles';
 import { getTerms } from '@/config/terminology';
+import { isFoodBusiness } from '@/lib/appointmentsAccess';
 
 export default function NewProduct() {
   const [formData, setFormData] = useState(getEmptyInventory());
@@ -59,7 +60,7 @@ export default function NewProduct() {
         prev.unit === 'UNIDAD' ? { ...prev, unit: 'KG' } : prev
       );
     }
-    if (['RESTAURANTE', 'COMIDA_RAPIDA', 'CAFETERIA'].includes(type)) {
+    if (isFoodBusiness(usuario)) {
       setFormData((prev) => ({ ...prev, trackStock: false }));
     }
   }, [usuario]);

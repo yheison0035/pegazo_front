@@ -36,6 +36,16 @@ export function isServicesBusiness(usuario) {
   return effectiveModules(usuario).includes('appointments');
 }
 
+// ¿La empresa es de comida (restaurante/bar/pizzería…)? Se detecta por el
+// módulo de cocina (KDS), que solo tienen los negocios de comida. Así aplica a
+// cualquier vertical de comida, incluidas las creadas desde la plataforma.
+export function isFoodBusiness(usuario) {
+  if (!usuario) return false;
+  if (usuario.role === 'SUPER_PLATFORM_ADMIN') return false;
+  const m = effectiveModules(usuario);
+  return m.includes('kitchen') || m.includes('mesas');
+}
+
 // Fecha de "hoy" en calendario Colombia (UTC-5) en formato YYYY-MM-DD. Se usa
 // como clave para mostrar el modal / recordatorios una sola vez por día.
 export function colombiaToday() {

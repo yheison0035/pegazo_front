@@ -1,17 +1,17 @@
-// Frase de agradecimiento según el tipo de negocio.
-function thanksPhrase(businessType) {
-  const services = ['SERVICIOS', 'ODONTOLOGIA'];
-  const food = ['RESTAURANTE', 'COMIDA_RAPIDA'];
-  if (services.includes(businessType)) {
+// Frase de agradecimiento según lo que realmente maneja el negocio (módulos),
+// no un tipo fijo: así aplica a cualquier vertical, incluidas las nuevas.
+function thanksPhrase(modules) {
+  const m = Array.isArray(modules) ? modules : [];
+  if (m.includes('appointments'))
     return 'Gracias por confiar en nuestros servicios';
-  }
-  if (food.includes(businessType)) return 'Gracias por tu pedido';
+  if (m.includes('kitchen') || m.includes('mesas'))
+    return 'Gracias por tu pedido';
   return 'Gracias por tu compra';
 }
 
 // Abre WhatsApp con un mensaje que incluye la factura y su enlace de
 // verificación, para enviársela al cliente. El saludo se adapta a la vertical.
-export function sendInvoiceWhatsapp(sale, companyName, businessType) {
+export function sendInvoiceWhatsapp(sale, companyName, modules) {
   const raw = String(sale?.customer?.phone || '').replace(/\D/g, '');
   if (!raw) return { ok: false, reason: 'sin-telefono' };
   const phone = raw.length === 10 && raw.startsWith('3') ? `57${raw}` : raw;
@@ -31,7 +31,7 @@ export function sendInvoiceWhatsapp(sale, companyName, businessType) {
     : '';
 
   const msg = [
-    `¡Hola${nombre}! ${thanksPhrase(businessType)} en ${
+    `¡Hola${nombre}! ${thanksPhrase(modules)} en ${
       companyName || 'nuestro negocio'
     }.`,
     `Factura N° ${sale.code}`,
