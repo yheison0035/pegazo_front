@@ -129,6 +129,8 @@ export default function WidgetBoard({ data, actions }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       data?.isServices,
+      data?.hasInventory,
+      data?.hasCartera,
       data?.isAdmin,
       data?.showBank,
       isBarber,

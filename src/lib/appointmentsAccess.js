@@ -1,19 +1,31 @@
 import { BUSINESS_TYPES } from '@/config/businessTypes';
 import { planAllowsModule } from '@/lib/plans';
 
+// Módulos EFECTIVOS de la empresa (misma prioridad que el menú): override manual
+// por empresa → configuración del tipo en BD (typeModules) → mapa por defecto.
+// Así el Inicio se adapta a las verticales nuevas creadas desde la plataforma.
+export function effectiveModules(usuario) {
+  const company = usuario?.company;
+  const manual = company?.enabledModules;
+  if (Array.isArray(manual) && manual.length) return manual;
+  const typeMods = company?.typeModules;
+  if (Array.isArray(typeMods) && typeMods.length) return typeMods;
+  return BUSINESS_TYPES[company?.type] || BUSINESS_TYPES.COMERCIO;
+}
+
 // La agenda de inicio y los recordatorios de citas solo aplican a empresas que
-// realmente manejan citas: su tipo de negocio incluye el módulo `appointments`
-// (hoy, SERVICIOS) y su plan lo tiene habilitado (IMPULSO+).
+// realmente manejan citas: sus módulos incluyen `appointments` y su plan lo
+// tiene habilitado (IMPULSO+).
 export function usesAppointments(usuario) {
   if (!usuario) return false;
   // El creador de la plataforma no opera una empresa de citas.
   if (usuario.role === 'SUPER_PLATFORM_ADMIN') return false;
 
-  const type = usuario.company?.type || 'COMERCIO';
   const plan = usuario.company?.plan;
-  const modules = BUSINESS_TYPES[type] || BUSINESS_TYPES.COMERCIO;
-
-  return modules.includes('appointments') && planAllowsModule(plan, 'appointments');
+  return (
+    effectiveModules(usuario).includes('appointments') &&
+    planAllowsModule(plan, 'appointments')
+  );
 }
 
 // ¿La empresa es de servicios/citas? (independiente del plan). Usado para
@@ -21,9 +33,7 @@ export function usesAppointments(usuario) {
 export function isServicesBusiness(usuario) {
   if (!usuario) return false;
   if (usuario.role === 'SUPER_PLATFORM_ADMIN') return false;
-  const type = usuario.company?.type || 'COMERCIO';
-  const modules = BUSINESS_TYPES[type] || BUSINESS_TYPES.COMERCIO;
-  return modules.includes('appointments');
+  return effectiveModules(usuario).includes('appointments');
 }
 
 // Fecha de "hoy" en calendario Colombia (UTC-5) en formato YYYY-MM-DD. Se usa

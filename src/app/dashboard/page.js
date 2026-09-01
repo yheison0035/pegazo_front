@@ -23,7 +23,7 @@ import { getReceivables } from '@/lib/api/routes/sales';
 import { getAppointmentsAgenda } from '@/lib/api/routes/appointments';
 import { getMyRestDays } from '@/lib/api/routes/restDays';
 import { getBankDeposits } from '@/lib/api/routes/bank';
-import { isServicesBusiness } from '@/lib/appointmentsAccess';
+import { isServicesBusiness, effectiveModules } from '@/lib/appointmentsAccess';
 import ReactivateCustomersModal from '@/components/appointments/ReactivateCustomersModal';
 import LowStockModal from '@/components/dashboard/inventory/LowStockModal';
 import MyWeeklyHistoryModal from '@/components/dashboard/home/MyWeeklyHistoryModal';
@@ -45,6 +45,11 @@ export default function DashboardHome() {
   const usuario = auth?.usuario;
   const t = useTerms();
   const isServices = isServicesBusiness(usuario);
+  // Módulos efectivos del negocio: el Inicio muestra solo los widgets que
+  // correspondan a lo que el negocio realmente maneja.
+  const modules = useMemo(() => effectiveModules(usuario), [usuario]);
+  const hasInventory = modules.includes('inventory');
+  const hasCartera = modules.includes('cartera');
   // Datos financieros (utilidad, IVA) solo para dueño/administrador.
   const isAdmin = ['SUPER_ADMIN', 'ADMIN'].includes(usuario?.role);
   // El barbero/profesional solo ve SU información (nada del negocio).
@@ -129,12 +134,16 @@ export default function DashboardHome() {
     getHomeSummary()
       .then((r) => setHome(r?.data || null))
       .catch(() => setHome(null));
-    getLowStock()
-      .then((r) => setLowStock(r?.data || []))
-      .catch(() => setLowStock([]));
-    getReceivables()
-      .then((r) => setReceivable(r?.data?.totalSaldo || 0))
-      .catch(() => setReceivable(0));
+    if (hasInventory) {
+      getLowStock()
+        .then((r) => setLowStock(r?.data || []))
+        .catch(() => setLowStock([]));
+    }
+    if (hasCartera) {
+      getReceivables()
+        .then((r) => setReceivable(r?.data?.totalSaldo || 0))
+        .catch(() => setReceivable(0));
+    }
     if (isServices) {
       getAppointmentsAgenda()
         .then((r) => {
@@ -155,7 +164,7 @@ export default function DashboardHome() {
       const bt = setInterval(loadBank, 10000);
       return () => clearInterval(bt);
     }
-  }, [usuario, isServices, showBank, isBarber]);
+  }, [usuario, isServices, showBank, isBarber, hasInventory, hasCartera]);
 
   // ---- Checklist de primeros pasos ----
   const setup = home?.setup;
@@ -202,6 +211,9 @@ export default function DashboardHome() {
       receivable,
       bankDeposits,
       isServices,
+      modules,
+      hasInventory,
+      hasCartera,
       isAdmin,
       isBarber,
       showBank,
@@ -221,6 +233,9 @@ export default function DashboardHome() {
       receivable,
       bankDeposits,
       isServices,
+      modules,
+      hasInventory,
+      hasCartera,
       isAdmin,
       isBarber,
       showBank,

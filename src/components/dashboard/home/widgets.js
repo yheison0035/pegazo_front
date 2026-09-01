@@ -326,7 +326,7 @@ export const WIDGETS = [
   {
     id: 'inventario',
     name: 'Inventario por agotarse',
-    applies: () => true,
+    applies: (data) => data.hasInventory,
     Render: ({ data, actions }) => {
       const items = data.lowStock || [];
       const agotados = items.filter((i) => (i.stock || 0) <= 0).length;
@@ -411,7 +411,7 @@ export const WIDGETS = [
   {
     id: 'por-reactivar',
     name: 'Clientes por reactivar',
-    applies: () => true,
+    applies: (data) => data.isServices,
     Render: ({ data, actions }) => {
       const count = data.home?.winbackCount || 0;
       const inner = (
@@ -507,7 +507,7 @@ export const WIDGETS = [
   {
     id: 'por-cobrar',
     name: 'Por cobrar (fiado)',
-    applies: () => true,
+    applies: (data) => data.hasCartera,
     Render: ({ data }) => (
       <ShortcutCard href="/dashboard/cartera" hint="Ver cartera">
         <Label icon={CreditCardIcon} accent="text-orange-600">
