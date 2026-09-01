@@ -1,9 +1,16 @@
 'use client';
 
+import { Suspense, useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/authContext';
 import { PLANS, PLAN_ORDER } from '@/lib/plans';
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
+import { CreditCardIcon } from '@heroicons/react/24/outline';
 import RoleGuard from '@/auth/roleGuard';
+import {
+  startPlanCheckout,
+  getPlanPaymentStatus,
+} from '@/lib/api/routes/subscription';
 
 // WhatsApp de Pegazo para cotizar/cambiar de plan (mismo del sitio público).
 const WHATSAPP = '573186356609';
@@ -21,12 +28,81 @@ function WhatsAppIcon({ className = 'h-4 w-4' }) {
   );
 }
 
+// Banner que aparece al volver de Wompi (?ref=...).
+function ReturnBanner({ payment }) {
+  if (!payment) return null;
+  const map = {
+    APPROVED: {
+      cls: 'border-emerald-200 bg-emerald-50 text-emerald-800',
+      text: `¡Pago aprobado! Tu plan ${payment.plan} ya está activo.`,
+    },
+    PENDING: {
+      cls: 'border-amber-200 bg-amber-50 text-amber-800',
+      text: 'Estamos confirmando tu pago. En cuanto Wompi lo apruebe, tu plan se activa automáticamente.',
+    },
+    DECLINED: {
+      cls: 'border-red-200 bg-red-50 text-red-800',
+      text: 'El pago fue rechazado. Puedes intentarlo de nuevo o escribirnos por WhatsApp.',
+    },
+  };
+  const s = map[payment.status] || map.PENDING;
+  return (
+    <div className={`mb-6 rounded-xl border px-4 py-3 text-sm font-medium ${s.cls}`}>
+      {s.text}
+    </div>
+  );
+}
+
 export default function UpgradePage() {
+  return (
+    <Suspense fallback={null}>
+      <UpgradeInner />
+    </Suspense>
+  );
+}
+
+function UpgradeInner() {
   const { usuario } = useAuth();
   const company = usuario?.company;
   const currentPlan = company?.plan || null;
   const currentRank = currentPlan ? PLAN_ORDER.indexOf(currentPlan) : -1;
   const nombre = company?.name || 'mi negocio';
+
+  const params = useSearchParams();
+  const [payment, setPayment] = useState(null); // { plan, status }
+  const [payingId, setPayingId] = useState(null);
+  const [error, setError] = useState('');
+
+  // Al volver de Wompi, consulta el estado del pago (el webhook lo confirma).
+  useEffect(() => {
+    const ref = params.get('ref');
+    if (!ref) return;
+    getPlanPaymentStatus(ref)
+      .then((res) => setPayment(res?.data || null))
+      .catch(() => {});
+  }, [params]);
+
+  const pay = async (planId) => {
+    setPayingId(planId);
+    setError('');
+    try {
+      const res = await startPlanCheckout(planId);
+      const url = res?.data?.checkoutUrl;
+      if (url) {
+        window.location.href = url;
+        return;
+      }
+      setError('No se pudo iniciar el pago. Intenta de nuevo.');
+    } catch (e) {
+      // 503 cuando la pasarela aún no está configurada: mensaje claro + WhatsApp.
+      setError(
+        e?.message ||
+          'Los pagos en línea aún no están activos. Escríbenos por WhatsApp para activar tu plan.',
+      );
+    } finally {
+      setPayingId(null);
+    }
+  };
 
   const cotizarGeneral = waUrl(
     `Hola, soy de "${nombre}"${
@@ -37,6 +113,8 @@ export default function UpgradePage() {
   return (
     <RoleGuard allowedRoles={['SUPER_ADMIN']}>
       <div className="w-full">
+        <ReturnBanner payment={payment} />
+
         {/* Encabezado + plan actual */}
         <div className="mb-6 rounded-2xl border border-orange-200 bg-gradient-to-br from-orange-50 to-white p-6 shadow-sm">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -49,11 +127,11 @@ export default function UpgradePage() {
                     <span className="font-semibold text-orange-600">
                       {currentPlan}
                     </span>
-                    . ¿Necesitas más funciones o ampliar tu operación?
-                    Cotízalo directamente con nosotros.
+                    . Mejóralo cuando quieras: el pago es en línea y seguro con
+                    Wompi.
                   </>
                 ) : (
-                  <>Cotiza el plan a la medida de tu negocio, sin costos ocultos.</>
+                  <>Elige el plan a la medida de tu negocio y págalo en línea.</>
                 )}
               </p>
             </div>
@@ -64,17 +142,23 @@ export default function UpgradePage() {
               className="inline-flex flex-none cursor-pointer items-center justify-center gap-2 rounded-xl bg-green-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-green-700"
             >
               <WhatsAppIcon />
-              Cotizar por WhatsApp
+              ¿Dudas? WhatsApp
             </a>
           </div>
         </div>
 
+        {error && (
+          <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            {error}
+          </div>
+        )}
+
         <h2 className="mb-3 text-lg font-semibold text-gray-800">
-          Lo que puede crecer contigo
+          Planes de Pegazo
         </h2>
         <p className="mb-5 text-sm text-gray-500">
-          Pegazo se arma a tu medida: activamos lo que tu negocio necesita. Estos
-          son los paquetes de referencia; el precio lo acordamos contigo.
+          Paga en línea con Wompi (tarjeta, PSE, Nequi…) y tu plan se activa al
+          instante. También puedes escribirnos por WhatsApp.
         </p>
 
         <div className="grid items-start gap-5 lg:grid-cols-4">
@@ -82,11 +166,12 @@ export default function UpgradePage() {
             const rank = PLAN_ORDER.indexOf(plan.id);
             const isCurrent = currentPlan === plan.id;
             const isUpgrade = currentRank >= 0 && rank > currentRank;
+            const isFree = (plan.priceMonthly || 0) <= 0;
 
             const cotizarPlan = waUrl(
               `Hola, soy de "${nombre}"${
                 currentPlan ? ` (plan actual: ${currentPlan})` : ''
-              } y quiero cotizar el plan ${plan.name} de Pegazo.`,
+              } y quiero el plan ${plan.name} de Pegazo.`,
             );
 
             return (
@@ -112,6 +197,17 @@ export default function UpgradePage() {
                 </h3>
                 <p className="text-xs text-gray-500">{plan.tagline}</p>
 
+                <div className="mt-3">
+                  <span className="text-2xl font-bold text-gray-900">
+                    {plan.priceLabel}
+                  </span>
+                  {plan.priceSuffix && (
+                    <span className="text-sm text-gray-400">
+                      {plan.priceSuffix}
+                    </span>
+                  )}
+                </div>
+
                 <div className="mt-4">
                   {isCurrent ? (
                     <button
@@ -121,16 +217,41 @@ export default function UpgradePage() {
                     >
                       Plan actual
                     </button>
-                  ) : (
+                  ) : isFree ? (
                     <a
                       href={cotizarPlan}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700"
+                      className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-600 transition hover:bg-gray-50"
                     >
                       <WhatsAppIcon />
-                      {isUpgrade ? `Cotizar ${plan.name}` : 'Cotizar'}
+                      Consultar
                     </a>
+                  ) : (
+                    <div className="flex flex-col gap-2">
+                      <button
+                        type="button"
+                        onClick={() => pay(plan.id)}
+                        disabled={payingId === plan.id}
+                        className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-700 disabled:opacity-60"
+                      >
+                        <CreditCardIcon className="h-4 w-4" />
+                        {payingId === plan.id
+                          ? 'Redirigiendo…'
+                          : isUpgrade
+                            ? `Mejorar a ${plan.name}`
+                            : `Pagar ${plan.priceLabel}`}
+                      </button>
+                      <a
+                        href={cotizarPlan}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex w-full cursor-pointer items-center justify-center gap-1.5 text-xs font-medium text-green-700 hover:underline"
+                      >
+                        <WhatsAppIcon className="h-3.5 w-3.5" />
+                        o cotizar por WhatsApp
+                      </a>
+                    </div>
                   )}
                 </div>
 
@@ -151,8 +272,8 @@ export default function UpgradePage() {
         </div>
 
         <p className="mt-6 text-center text-xs text-gray-400">
-          El plan y las funciones activas las coordinamos contigo. Escríbenos por
-          WhatsApp y te armamos la cotización a la medida de tu negocio.
+          Pagos procesados de forma segura por Wompi. Al aprobarse, tu plan se
+          activa automáticamente por 30 días.
         </p>
       </div>
     </RoleGuard>
