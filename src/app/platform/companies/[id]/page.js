@@ -13,11 +13,13 @@ import {
   BanknotesIcon,
   MapPinIcon,
   ArrowLeftIcon,
+  PlusIcon,
 } from '@heroicons/react/24/outline';
 
 import RoleGuard from '@/auth/roleGuard';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import Button from '@/components/ui/Button';
+import TableActionButton from '@/components/ui/TableActionButton';
 import { formatDateOnly } from '@/lib/api/utils/utils';
 import { enterAsCompany } from '@/lib/impersonation';
 import {
@@ -25,6 +27,27 @@ import {
   renewCompany,
   setCompanyStatus,
 } from '@/lib/api/routes/companies';
+import {
+  platformCreateUser,
+  platformUpdateUser,
+  platformResetUserPassword,
+} from '@/lib/api/routes/users';
+
+const ASSIGNABLE_ROLES = [
+  'SUPER_ADMIN',
+  'ADMIN',
+  'COORDINADOR',
+  'ASESOR',
+  'AUXILIAR',
+  'BODEGUERO',
+  'VENTAS',
+  'CAJA',
+  'RECEPCIONISTA',
+  'BARBERO',
+  'PROFESIONAL',
+  'MESERO',
+  'COCINERO',
+];
 
 const cop = (n) =>
   new Intl.NumberFormat('es-CO', {
@@ -77,6 +100,8 @@ export default function CompanyDetail() {
     setMsg({ type, text });
     setTimeout(() => setMsg(null), 3500);
   };
+
+  const [userModal, setUserModal] = useState(null); // null | {} (nuevo) | user
 
   const c = data?.company;
   const b = data?.billing;
@@ -294,9 +319,18 @@ export default function CompanyDetail() {
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
               {/* Usuarios */}
               <div className="lg:col-span-2 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-                <h2 className="mb-4 text-sm font-semibold text-gray-800">
-                  Usuarios ({data.users.length})
-                </h2>
+                <div className="mb-4 flex items-center justify-between">
+                  <h2 className="text-sm font-semibold text-gray-800">
+                    Usuarios ({data.users.length})
+                  </h2>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setUserModal({})}
+                  >
+                    <PlusIcon className="mr-1 h-4 w-4" /> Agregar usuario
+                  </Button>
+                </div>
                 <div className="overflow-x-auto">
                   <table className="min-w-full text-sm">
                     <thead className="text-left text-xs uppercase tracking-wide text-gray-500">
@@ -305,6 +339,7 @@ export default function CompanyDetail() {
                         <th className="py-2 pr-4">Correo</th>
                         <th className="py-2 pr-4">Rol</th>
                         <th className="py-2 pr-4">Estado</th>
+                        <th className="py-2 pr-4 text-center">Acciones</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-50">
@@ -327,6 +362,16 @@ export default function CompanyDetail() {
                             >
                               {u.status}
                             </span>
+                          </td>
+                          <td className="py-2 pr-4">
+                            <div className="flex justify-center">
+                              <TableActionButton
+                                icon={PencilSquareIcon}
+                                label="Editar usuario"
+                                variant="edit"
+                                onClick={() => setUserModal(u)}
+                              />
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -374,8 +419,195 @@ export default function CompanyDetail() {
             </div>
           </>
         )}
+
+        {userModal && c && (
+          <UserEditor
+            initial={userModal.id ? userModal : null}
+            companyId={Number(id)}
+            locals={data.locals || []}
+            onClose={() => setUserModal(null)}
+            onSaved={() => {
+              setUserModal(null);
+              fetchData();
+            }}
+          />
+        )}
       </div>
     </RoleGuard>
+  );
+}
+
+const editorInput =
+  'w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20';
+
+function UserEditor({ initial, companyId, locals, onClose, onSaved }) {
+  const isEdit = !!initial;
+  const [f, setF] = useState({
+    name: initial?.name || '',
+    email: initial?.email || '',
+    password: '',
+    role: initial?.role || 'ASESOR',
+    status: initial?.status || 'ACTIVO',
+    localId: initial?.localId ? String(initial.localId) : '',
+  });
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState('');
+  const set = (k, v) => setF((p) => ({ ...p, [k]: v }));
+
+  const save = async () => {
+    setErr('');
+    if (!isEdit) {
+      if (!f.name.trim() || !f.email.trim() || f.password.length < 6) {
+        setErr('Nombre, correo y contraseña (mínimo 6) son obligatorios.');
+        return;
+      }
+    }
+    setSaving(true);
+    try {
+      const localId = f.localId ? Number(f.localId) : null;
+      if (isEdit) {
+        await platformUpdateUser(initial.id, {
+          name: f.name.trim(),
+          role: f.role,
+          status: f.status,
+          localId,
+        });
+        if (f.password.trim()) {
+          await platformResetUserPassword(initial.id, f.password.trim());
+        }
+      } else {
+        await platformCreateUser(companyId, {
+          name: f.name.trim(),
+          email: f.email.trim(),
+          password: f.password,
+          role: f.role,
+          localId,
+        });
+      }
+      onSaved();
+    } catch (e) {
+      setErr(e?.message || 'No se pudo guardar.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[70] flex items-start justify-center overflow-y-auto bg-black/40 p-4">
+      <div className="my-8 w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
+        <h2 className="text-lg font-semibold text-gray-800">
+          {isEdit ? `Editar usuario` : 'Nuevo usuario'}
+        </h2>
+
+        <div className="mt-4 grid grid-cols-1 gap-4">
+          <div>
+            <label className="mb-1 block text-xs font-semibold text-gray-600">
+              Nombre
+            </label>
+            <input
+              className={editorInput}
+              value={f.name}
+              onChange={(e) => set('name', e.target.value)}
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-xs font-semibold text-gray-600">
+              Correo
+            </label>
+            <input
+              className={editorInput}
+              value={f.email}
+              onChange={(e) => set('email', e.target.value)}
+              disabled={isEdit}
+              placeholder="correo@negocio.com"
+            />
+            {isEdit && (
+              <p className="mt-1 text-xs text-gray-400">
+                El correo no se cambia.
+              </p>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-gray-600">
+                Rol
+              </label>
+              <select
+                className={editorInput}
+                value={f.role}
+                onChange={(e) => set('role', e.target.value)}
+              >
+                {ASSIGNABLE_ROLES.map((r) => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-gray-600">
+                Sede
+              </label>
+              <select
+                className={editorInput}
+                value={f.localId}
+                onChange={(e) => set('localId', e.target.value)}
+              >
+                <option value="">Sin sede</option>
+                {locals.map((l) => (
+                  <option key={l.id} value={l.id}>
+                    {l.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {isEdit && (
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-gray-600">
+                Estado
+              </label>
+              <select
+                className={editorInput}
+                value={f.status}
+                onChange={(e) => set('status', e.target.value)}
+              >
+                <option value="ACTIVO">Activo</option>
+                <option value="INACTIVO">Inactivo</option>
+              </select>
+            </div>
+          )}
+
+          <div>
+            <label className="mb-1 block text-xs font-semibold text-gray-600">
+              {isEdit ? 'Nueva contraseña (opcional)' : 'Contraseña'}
+            </label>
+            <input
+              type="text"
+              className={editorInput}
+              value={f.password}
+              onChange={(e) => set('password', e.target.value)}
+              placeholder={isEdit ? 'Déjalo vacío para no cambiarla' : 'Mínimo 6 caracteres'}
+              autoComplete="off"
+            />
+          </div>
+        </div>
+
+        {err && <p className="mt-3 text-sm text-red-600">{err}</p>}
+
+        <div className="mt-6 flex justify-end gap-2">
+          <Button variant="secondary" size="sm" onClick={onClose}>
+            Cancelar
+          </Button>
+          <Button variant="primary" size="sm" loading={saving} onClick={save}>
+            {isEdit ? 'Guardar' : 'Crear usuario'}
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }
 
