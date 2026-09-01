@@ -22,6 +22,7 @@ export const TOGGLEABLE_MODULES = [
   { key: 'loyalty', label: 'Fidelización', group: 'Clientes' },
   { key: 'appointments', label: 'Citas', group: 'Clientes' },
   { key: 'services', label: 'Servicios', group: 'Clientes' },
+  { key: 'clinical', label: 'Historia clínica (salud)', group: 'Clientes' },
 
   { key: 'mesas', label: 'Mesas (restaurante)', group: 'Restaurante' },
   { key: 'kitchen', label: 'Cocina (KDS)', group: 'Restaurante' },

@@ -21,6 +21,9 @@ import { getCustomerSummary } from '@/lib/api/routes/customers';
 import { SALES_CHANGED_EVENT } from '@/lib/api/routes/sales';
 import { formatCOP, formatDateOnly } from '@/lib/api/utils/utils';
 import { segmentMeta } from '@/lib/customerSegment';
+import { useAuth } from '@/context/authContext';
+import { effectiveModules } from '@/lib/appointmentsAccess';
+import ClinicalHistory from '@/components/dashboard/clinical/ClinicalHistory';
 import { statusMeta } from '@/lib/appointmentStatus';
 
 function Kpi({ icon: Icon, label, value, accent = 'text-gray-900' }) {
@@ -37,6 +40,9 @@ function Kpi({ icon: Icon, label, value, accent = 'text-gray-900' }) {
 
 export default function CustomerProfile() {
   const { id } = useParams();
+  const { usuario } = useAuth();
+  // La historia clínica solo aparece en verticales de salud (módulo 'clinical').
+  const showClinical = effectiveModules(usuario).includes('clinical');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -366,6 +372,8 @@ export default function CustomerProfile() {
           </div>
         )}
       </div>
+
+      {showClinical && <ClinicalHistory customerId={id} />}
     </div>
   );
 }
