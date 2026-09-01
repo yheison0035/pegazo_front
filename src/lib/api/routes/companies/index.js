@@ -108,6 +108,11 @@ export async function getPlatformAudit(limit = 50) {
   return apiFetch(`/companies/platform/audit?limit=${limit}`);
 }
 
+// Actividad reciente de todas las empresas.
+export async function getPlatformActivity(limit = 60) {
+  return apiFetch(`/companies/platform/activity?limit=${limit}`);
+}
+
 // Vista 360° de una empresa.
 export async function getCompanyDetail(id) {
   return apiFetch(`/companies/platform/${id}/detail`);
