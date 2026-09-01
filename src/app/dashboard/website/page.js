@@ -11,6 +11,7 @@ import RoleGuard from '@/auth/roleGuard';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import Button from '@/components/ui/Button';
+import WompiPaymentSettings from '@/components/dashboard/website/WompiPaymentSettings';
 import {
   getWebsiteConfig,
   updateWebsiteConfig,
@@ -673,6 +674,9 @@ export default function WebsitePage() {
             </div>
           </form>
         )}
+
+        {/* ---------- PAGOS EN LÍNEA (Wompi por empresa) ---------- */}
+        {!loading && <WompiPaymentSettings />}
 
         {/* ---------- BANNERS (fuera del form para no anidar formularios) ---------- */}
         {!loading && config?.websiteEnabled && (

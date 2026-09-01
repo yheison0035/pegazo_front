@@ -92,3 +92,15 @@ export async function updateCrmFont(font) {
     body: JSON.stringify({ font }),
   });
 }
+
+// Pasarela de pagos propia de la tienda (Wompi por empresa).
+export async function getWompiConfig() {
+  return apiFetch('/company/wompi');
+}
+
+export async function updateWompiConfig(dto) {
+  return apiFetch('/company/wompi', {
+    method: 'PATCH',
+    body: JSON.stringify(dto),
+  });
+}
