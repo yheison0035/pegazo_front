@@ -35,6 +35,18 @@ import NewCustomerModal from '@/components/dashboard/modals/newCustomerModal';
 import { useAuth } from '@/context/authContext';
 import { roleLabel, assignableRolesForType } from '@/config/roleLabels';
 
+// Todos los inputs de PRECIO usan el mismo formato (COP) tanto al escribir como
+// al mostrarse. Cualquier campo de dinero nuevo debe agregarse aquí.
+const PRICE_FIELDS = new Set([
+  'purchasePrice',
+  'purchaseTotal',
+  'salePrice',
+  'oldPrice',
+  'amount',
+  'price',
+  'totalAmount',
+]);
+
 export default function DinamicForm({
   formData,
   formFields,
@@ -78,13 +90,7 @@ export default function DinamicForm({
     const { name, value } = e.target;
     let formattedValue = value;
 
-    if (
-      name === 'purchasePrice' ||
-      name === 'purchaseTotal' ||
-      name === 'salePrice' ||
-      name === 'oldPrice' ||
-      name === 'totalAmount'
-    ) {
+    if (PRICE_FIELDS.has(name)) {
       formattedValue = formatPrice(value);
     }
 
@@ -430,11 +436,7 @@ export default function DinamicForm({
                 ? normalizeDateTimeForInput(formData[name])
                 : type === 'date'
                   ? normalizeDateForInput(formData[name])
-                  : name === 'purchasePrice' ||
-                    name === 'salePrice' ||
-                    name === 'oldPrice' ||
-                    name === 'amount' ||
-                    name === 'price'
+                  : PRICE_FIELDS.has(name)
                   ? formatCOP(formData[name] || '')
                   : name === 'stock'
                     ? (formData[name] ?? 0)
