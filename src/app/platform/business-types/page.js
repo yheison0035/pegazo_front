@@ -77,6 +77,20 @@ const LAYOUT_OPTIONS = [
   { id: 'grid', name: 'Cuadrícula (retail)' },
   { id: 'menu', name: 'Menú (comida)' },
 ];
+const SF_VARIANT_OPTIONS = [
+  { id: '', name: 'Por defecto' },
+  { id: 'color', name: 'Color' },
+  { id: 'size', name: 'Talla' },
+  { id: 'weight', name: 'Peso' },
+  { id: 'modifiers', name: 'Modificadores (comida)' },
+  { id: 'none', name: 'Sin variantes' },
+];
+const TRISTATE = [
+  { id: '', name: 'Por defecto' },
+  { id: 'true', name: 'Sí' },
+  { id: 'false', name: 'No' },
+];
+const tri = (v) => (v === true ? 'true' : v === false ? 'false' : '');
 
 const TYPE_ROLES = [
   'ADMIN',
@@ -116,6 +130,11 @@ function Editor({ item, onClose, onSaved }) {
   const setDef = (k, v) => setDefs((prev) => ({ ...prev, [k]: v }));
   const [ful, setFul] = useState(new Set(item.storefront?.fulfillment || []));
   const [sfLayout, setSfLayout] = useState(item.storefront?.layout || '');
+  const [sfVariant, setSfVariant] = useState(item.storefront?.variant || '');
+  const [sfSpecs, setSfSpecs] = useState(tri(item.storefront?.showSpecs));
+  const [sfWarranty, setSfWarranty] = useState(
+    tri(item.storefront?.warrantyBadge),
+  );
   const toggleFul = (key) =>
     setFul((prev) => {
       const next = new Set(prev);
@@ -166,6 +185,9 @@ function Editor({ item, onClose, onSaved }) {
     const storefront = {};
     if (ful.size) storefront.fulfillment = [...ful];
     if (sfLayout) storefront.layout = sfLayout;
+    if (sfVariant) storefront.variant = sfVariant;
+    if (sfSpecs !== '') storefront.showSpecs = sfSpecs === 'true';
+    if (sfWarranty !== '') storefront.warrantyBadge = sfWarranty === 'true';
     const payloadExtra = {
       terminology: Object.keys(terminology).length ? terminology : null,
       productFields,
@@ -454,21 +476,71 @@ function Editor({ item, onClose, onSaved }) {
             </label>
           ))}
         </div>
-        <div className="mt-3 max-w-xs">
-          <label className="mb-1 block text-xs font-medium text-gray-500">
-            Diseño del catálogo
-          </label>
-          <select
-            className={inputCls}
-            value={sfLayout}
-            onChange={(e) => setSfLayout(e.target.value)}
-          >
-            {LAYOUT_OPTIONS.map((l) => (
-              <option key={l.id} value={l.id}>
-                {l.name}
-              </option>
-            ))}
-          </select>
+        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div>
+            <label className="mb-1 block text-xs font-medium text-gray-500">
+              Diseño del catálogo
+            </label>
+            <select
+              className={inputCls}
+              value={sfLayout}
+              onChange={(e) => setSfLayout(e.target.value)}
+            >
+              {LAYOUT_OPTIONS.map((l) => (
+                <option key={l.id} value={l.id}>
+                  {l.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium text-gray-500">
+              Variantes del producto
+            </label>
+            <select
+              className={inputCls}
+              value={sfVariant}
+              onChange={(e) => setSfVariant(e.target.value)}
+            >
+              {SF_VARIANT_OPTIONS.map((v) => (
+                <option key={v.id} value={v.id}>
+                  {v.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium text-gray-500">
+              Ficha técnica
+            </label>
+            <select
+              className={inputCls}
+              value={sfSpecs}
+              onChange={(e) => setSfSpecs(e.target.value)}
+            >
+              {TRISTATE.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium text-gray-500">
+              Insignia de garantía
+            </label>
+            <select
+              className={inputCls}
+              value={sfWarranty}
+              onChange={(e) => setSfWarranty(e.target.value)}
+            >
+              {TRISTATE.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {err && <p className="mt-3 text-sm text-red-600">{err}</p>}
