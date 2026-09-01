@@ -133,11 +133,4 @@ export const BUSINESS_TYPES = {
     'returns', 'expenses', 'payables', 'statistics',
   ],
 
-  // ---------- ESPECIALES ----------
-  // Interno de la empresa: set completo de comercio.
-  ZORVEX: [
-    'locals', 'users', 'categories', 'brands', 'providers', 'inventory',
-    'purchases', 'customers', 'cartera', 'impuestos', 'sales', 'delivered_sales', 'returns',
-    'cash', 'expenses', 'payables', 'statistics',
-  ],
 };
