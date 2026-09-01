@@ -67,7 +67,10 @@ const DEFAULT_ROLES = ['ADMIN', 'ASESOR', 'CAJA', 'BODEGUERO', 'RECEPCIONISTA'];
  * IDs de rol que se pueden asignar en un tipo de negocio (para el dropdown).
  * @param {string} type tipo de empresa (company.type)
  */
-export function assignableRolesForType(type) {
+// `override` opcional: roles configurados en BD para el tipo
+// (company.typeRoles). Si no viene, usa el mapa por defecto del código.
+export function assignableRolesForType(type, override) {
+  if (Array.isArray(override) && override.length) return override;
   return ROLES_BY_TYPE[type] || DEFAULT_ROLES;
 }
 

@@ -53,7 +53,7 @@ export default function ContentData({
 }) {
   const auth = useAuth();
   const usuario = auth?.usuario;
-  const pf = getProductFields(usuario?.company?.type);
+  const pf = getProductFields(usuario?.company?.type, usuario?.company?.typeProductFields);
   const showOldPrice = canSeeOldPrice(usuario) && pf.oldPrice;
 
   return (
