@@ -16,6 +16,7 @@ import { isDark, DARK_EVENT } from '@/lib/darkMode';
 import { CRM_FONTS_BY_ID, googleFontHref } from '@/config/crmFonts';
 import ImpersonationBanner from '@/components/platform/ImpersonationBanner';
 import { isImpersonating } from '@/lib/impersonation';
+import AnnouncementsFeed from '@/components/dashboard/AnnouncementsFeed';
 
 export default function Layout({ children }) {
   const { usuario } = useAuth();
@@ -90,6 +91,7 @@ export default function Layout({ children }) {
             <div className="relative z-10">
               <RenewalBanner />
               <DayBanner />
+              <AnnouncementsFeed />
               {children}
             </div>
           </div>
