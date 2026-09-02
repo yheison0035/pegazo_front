@@ -11,6 +11,10 @@ export const getEmptyCustomer = () => ({
   notes: '',
   status: '',
   localId: '',
+  requiresEInvoice: false,
+  personType: '',
+  taxResponsibility: '',
+  municipalityCode: '',
 });
 
 export const getFormFieldsCustomers = () => [
@@ -92,6 +96,49 @@ export const getFormFieldsCustomers = () => [
     type: 'select',
     required: false,
     source: 'customerSegments',
+    disabled: false,
+  },
+  {
+    name: 'requiresEInvoice',
+    label: 'Recibe factura electrónica (DIAN)',
+    type: 'checkbox',
+    required: false,
+    helperText:
+      'Al activarlo, los datos que exige la DIAN (documento, nombre, tipo de persona, régimen, dirección, correo y teléfono) quedan obligatorios.',
+    disabled: false,
+  },
+  {
+    name: 'personType',
+    label: 'Tipo de persona',
+    type: 'select',
+    required: false,
+    options: [
+      { id: 'NATURAL', name: 'Persona natural' },
+      { id: 'JURIDICA', name: 'Persona jurídica' },
+    ],
+    hideWhen: (fd) => !fd.requiresEInvoice,
+    disabled: false,
+  },
+  {
+    name: 'taxResponsibility',
+    label: 'Responsabilidad de IVA (régimen)',
+    type: 'select',
+    required: false,
+    options: [
+      { id: 'RESPONSABLE_IVA', name: 'Responsable de IVA' },
+      { id: 'NO_RESPONSABLE', name: 'No responsable de IVA' },
+    ],
+    hideWhen: (fd) => !fd.requiresEInvoice,
+    disabled: false,
+  },
+  {
+    name: 'municipalityCode',
+    label: 'Código DANE del municipio (opcional)',
+    type: 'text',
+    required: false,
+    helperText:
+      'Necesario para transmitir a la DIAN. Si no lo tienes a la mano, se puede completar luego.',
+    hideWhen: (fd) => !fd.requiresEInvoice,
     disabled: false,
   },
   {
