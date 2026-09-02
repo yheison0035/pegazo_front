@@ -184,8 +184,13 @@ export default function PosSale({
   }, []);
 
   // ¿La empresa ya tiene facturación electrónica DIAN activa? Solo entonces se
-  // ofrece el selector "Tiquete POS / Factura electrónica" al vender.
+  // ofrece el selector "Tiquete POS / Factura electrónica" al vender. No se
+  // consulta siquiera si la empresa no la tiene habilitada (negocios reales).
+  const fiscalEnabled =
+    !!usuario?.company?.electronicInvoicingEnabled ||
+    !!usuario?.company?.fiscalCompanyId;
   useEffect(() => {
+    if (!fiscalEnabled) return;
     (async () => {
       try {
         const res = await getFiscalStatus();
@@ -194,7 +199,7 @@ export default function PosSale({
         setFiscalReady(false);
       }
     })();
-  }, []);
+  }, [fiscalEnabled]);
 
   // Política "abrir el día": si la empresa lo exige, se bloquea el POS hasta
   // que haya una caja abierta de hoy en la sede.

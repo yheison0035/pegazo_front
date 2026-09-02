@@ -33,6 +33,7 @@ import {
   getFiscalWhatsapp,
   deleteFiscalDocument,
   annulFiscalDocument,
+  createFiscalCreditNote,
 } from '@/lib/api/routes/fiscal';
 
 const TYPE_LABELS = {
@@ -77,6 +78,7 @@ function FacturacionElectronica() {
   const [repLoading, setRepLoading] = useState(false);
   const [repDocId, setRepDocId] = useState(null);
   const [showResModal, setShowResModal] = useState(false);
+  const [creditDoc, setCreditDoc] = useState(null);
 
   const linked = status?.linked;
 
@@ -492,13 +494,22 @@ function FacturacionElectronica() {
                           </button>
                           {d.type === 'FACTURA_VENTA' &&
                             d.status === 'ACEPTADO' && (
-                              <button
-                                onClick={() => handleAnnul(d)}
-                                className="rounded-lg px-2 py-1 text-xs font-medium text-red-600 transition hover:bg-red-50"
-                                title="Anular con nota crédito"
-                              >
-                                Anular
-                              </button>
+                              <>
+                                <button
+                                  onClick={() => setCreditDoc(d)}
+                                  className="rounded-lg px-2 py-1 text-xs font-medium text-amber-600 transition hover:bg-amber-50"
+                                  title="Nota crédito parcial (devolución/ajuste)"
+                                >
+                                  N. crédito
+                                </button>
+                                <button
+                                  onClick={() => handleAnnul(d)}
+                                  className="rounded-lg px-2 py-1 text-xs font-medium text-red-600 transition hover:bg-red-50"
+                                  title="Anular con nota crédito total"
+                                >
+                                  Anular
+                                </button>
+                              </>
                             )}
                           {(d.status === 'BORRADOR' ||
                             d.status === 'FIRMADO' ||
@@ -562,6 +573,23 @@ function FacturacionElectronica() {
             setRepLoading(false);
             setRepDocId(null);
           }}
+        />
+      )}
+
+      {/* MODAL nota crédito parcial */}
+      {creditDoc && (
+        <CreditNoteModal
+          doc={creditDoc}
+          onClose={() => setCreditDoc(null)}
+          onSaved={async (nc) => {
+            setCreditDoc(null);
+            setAlert({
+              type: 'success',
+              message: `Nota crédito ${nc?.number || ''} emitida.`,
+            });
+            await loadData();
+          }}
+          onError={(m) => setAlert({ type: 'error', message: m })}
         />
       )}
 
@@ -828,6 +856,166 @@ function RepresentationModal({
               className="h-full w-full border-0 bg-white"
             />
           )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Modal de nota crédito PARCIAL: devolución/ajuste sobre una factura aceptada.
+function CreditNoteModal({ doc, onClose, onSaved, onError }) {
+  const [reason, setReason] = useState('');
+  const [lines, setLines] = useState([
+    { description: '', quantity: 1, unitPrice: '', vatRate: 0 },
+  ]);
+  const [saving, setSaving] = useState(false);
+
+  const setLine = (i, k, v) =>
+    setLines((ls) => ls.map((l, idx) => (idx === i ? { ...l, [k]: v } : l)));
+  const addLine = () =>
+    setLines((ls) => [
+      ...ls,
+      { description: '', quantity: 1, unitPrice: '', vatRate: 0 },
+    ]);
+  const removeLine = (i) => setLines((ls) => ls.filter((_, idx) => idx !== i));
+
+  const total = lines.reduce(
+    (s, l) => s + (Number(l.quantity) || 0) * (Number(l.unitPrice) || 0),
+    0,
+  );
+
+  const submit = async () => {
+    const clean = lines
+      .filter((l) => l.description.trim() && Number(l.unitPrice) > 0)
+      .map((l) => ({
+        description: l.description.trim(),
+        quantity: Number(l.quantity) || 1,
+        unitPrice: Number(l.unitPrice),
+        vatRate: Number(l.vatRate) || 0,
+      }));
+    if (!clean.length) {
+      onError('Agrega al menos una línea con descripción y valor.');
+      return;
+    }
+    setSaving(true);
+    try {
+      const nc = await createFiscalCreditNote({
+        originalInvoiceId: doc.id,
+        reason: reason || 'Devolución / ajuste parcial',
+        lines: clean,
+      });
+      onSaved(nc);
+    } catch (e) {
+      onError(e.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="w-full max-w-xl overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+          <div>
+            <h3 className="text-sm font-semibold text-gray-800">
+              Nota crédito parcial
+            </h3>
+            <p className="text-xs text-gray-500">
+              Sobre la factura {doc.number} · para devoluciones o ajustes de valor.
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="grid h-8 w-8 place-items-center rounded-lg text-gray-400 hover:bg-gray-100"
+          >
+            <XMarkIcon className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="space-y-3 p-5">
+          <label className="flex flex-col text-sm">
+            <span className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
+              Motivo
+            </span>
+            <input
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder="Devolución de un producto, descuento, corrección…"
+              className="rounded-lg border border-gray-200 px-3 py-2 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+            />
+          </label>
+
+          <div className="space-y-2">
+            {lines.map((l, i) => (
+              <div key={i} className="flex items-end gap-2">
+                <label className="flex-1">
+                  <span className="text-[10px] uppercase text-gray-400">
+                    Concepto
+                  </span>
+                  <input
+                    value={l.description}
+                    onChange={(e) => setLine(i, 'description', e.target.value)}
+                    className="w-full rounded-lg border border-gray-200 px-2 py-1.5 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                  />
+                </label>
+                <label className="w-14">
+                  <span className="text-[10px] uppercase text-gray-400">Cant</span>
+                  <input
+                    type="number"
+                    value={l.quantity}
+                    onChange={(e) => setLine(i, 'quantity', e.target.value)}
+                    className="w-full rounded-lg border border-gray-200 px-2 py-1.5 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                  />
+                </label>
+                <label className="w-24">
+                  <span className="text-[10px] uppercase text-gray-400">
+                    V. unit.
+                  </span>
+                  <input
+                    type="number"
+                    value={l.unitPrice}
+                    onChange={(e) => setLine(i, 'unitPrice', e.target.value)}
+                    className="w-full rounded-lg border border-gray-200 px-2 py-1.5 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                  />
+                </label>
+                <label className="w-16">
+                  <span className="text-[10px] uppercase text-gray-400">IVA%</span>
+                  <input
+                    type="number"
+                    value={l.vatRate}
+                    onChange={(e) => setLine(i, 'vatRate', e.target.value)}
+                    className="w-full rounded-lg border border-gray-200 px-2 py-1.5 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                  />
+                </label>
+                {lines.length > 1 && (
+                  <button
+                    onClick={() => removeLine(i)}
+                    className="mb-1 grid h-8 w-8 place-items-center rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-500"
+                  >
+                    <XMarkIcon className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+            ))}
+            <button
+              onClick={addLine}
+              className="text-xs font-medium text-orange-600 hover:underline"
+            >
+              + Agregar línea
+            </button>
+          </div>
+
+          <div className="text-right text-sm font-semibold text-gray-800">
+            Total a acreditar:{' '}
+            {'$' + total.toLocaleString('es-CO', { maximumFractionDigits: 0 })}
+          </div>
+        </div>
+        <div className="flex justify-end gap-2 border-t border-gray-100 px-5 py-4">
+          <Button variant="clear" onClick={onClose}>
+            Cancelar
+          </Button>
+          <Button variant="primary" icon={PlusIcon} loading={saving} onClick={submit}>
+            Emitir nota crédito
+          </Button>
         </div>
       </div>
     </div>

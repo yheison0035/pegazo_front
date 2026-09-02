@@ -34,6 +34,11 @@ export default function Actions({
   const toast = useToast();
   const companyName = auth?.usuario?.company?.name;
   const companyModules = effectiveModules(auth?.usuario);
+  // La factura electrónica solo se ofrece si la empresa la tiene habilitada o ya
+  // está vinculada al servicio fiscal (no aparece en negocios que no la usan).
+  const fiscalEnabled =
+    !!auth?.usuario?.company?.electronicInvoicingEnabled ||
+    !!auth?.usuario?.company?.fiscalCompanyId;
   const [emitting, setEmitting] = useState(false);
 
   // Emite (o reutiliza, es idempotente por venta) la factura electrónica DIAN
@@ -130,7 +135,7 @@ export default function Actions({
         />
       )}
 
-      {view === 'delivered_sales' && canView && (
+      {view === 'delivered_sales' && canView && fiscalEnabled && (
         <TableActionButton
           icon={DocumentTextIcon}
           label="Factura electrónica DIAN"

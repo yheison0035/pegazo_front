@@ -66,12 +66,16 @@ export default function useNavigation() {
     if (!modules.includes('orders')) modules.push('orders');
   }
 
-  // Facturación electrónica DIAN: disponible para dueños/administradores en
-  // cualquier vertical. El módulo tiene su propio flujo de activación adentro
-  // (vincular empresa, cargar certificado, resoluciones), así que ya no depende
-  // de un flag previo de la plataforma. El acceso queda limitado por rol
-  // (SUPER_ADMIN/ADMIN) en la definición del menú.
-  modules.push('facturacion-electronica');
+  // Facturación electrónica DIAN: SOLO para empresas donde la plataforma la
+  // habilitó (electronicInvoicingEnabled) o que ya están vinculadas al servicio
+  // fiscal (fiscalCompanyId). Así NO aparece en los negocios reales que aún no
+  // la usan. El acceso además está limitado por rol (SUPER_ADMIN/ADMIN).
+  if (
+    usuario.company?.electronicInvoicingEnabled ||
+    usuario.company?.fiscalCompanyId
+  ) {
+    modules.push('facturacion-electronica');
+  }
 
   // Oculta los módulos que aún no están 100% terminados/comprobados.
   const visibleModules = modules.filter((m) => !HIDDEN_MODULES.has(m));
