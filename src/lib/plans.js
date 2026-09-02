@@ -112,7 +112,7 @@ export const MODULE_MIN_PLAN = {
   bank: 'ALTURA', // avisos de consignación (banco)
   clinical: 'ALTURA', // historia clínica (salud)
   // Órbita: cadena / empresa
-  payroll: 'ORBITA', // nómina electrónica (cuando se implemente)
+  'nomina-electronica': 'ORBITA', // nómina electrónica
 };
 
 export const PLAN_ORDER = ['DESPEGUE', 'IMPULSO', 'ALTURA', 'ORBITA'];

@@ -41,6 +41,14 @@ export async function emitFiscalTestInvoice() {
   return apiFetch('/fiscal/test-invoice', { method: 'POST' });
 }
 
+// Emite un Documento Soporte de Pago de Nómina Electrónica (DSPNE).
+export async function emitFiscalPayroll(dto) {
+  return apiFetch('/fiscal/payroll', {
+    method: 'POST',
+    body: JSON.stringify(dto),
+  });
+}
+
 // Devuelve el HTML de la representación gráfica (para mostrar en un iframe).
 // apiFetch devuelve el texto crudo cuando la respuesta no es JSON.
 export async function getFiscalRepresentation(id) {

@@ -34,6 +34,7 @@ export const TOGGLEABLE_MODULES = [
   { key: 'users', label: 'Usuarios y roles', group: 'Gestión' },
   { key: 'locals', label: 'Locales / sedes', group: 'Gestión' },
   { key: 'bank', label: 'Consignaciones (banco)', group: 'Gestión' },
+  { key: 'nomina-electronica', label: 'Nómina electrónica', group: 'Gestión' },
 
   { key: 'website', label: 'Tienda online', group: 'Tienda online' },
   { key: 'orders', label: 'Pedidos de la tienda', group: 'Tienda online' },
