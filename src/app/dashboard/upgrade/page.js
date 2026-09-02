@@ -4,6 +4,10 @@ import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/authContext';
 import { PLANS, PLAN_ORDER } from '@/lib/plans';
+import {
+  planFeaturesForType,
+  taglineForType,
+} from '@/config/planFeaturesByType';
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
 import { CreditCardIcon } from '@heroicons/react/24/outline';
 import RoleGuard from '@/auth/roleGuard';
@@ -161,12 +165,26 @@ function UpgradeInner() {
           instante. También puedes escribirnos por WhatsApp.
         </p>
 
+        {company?.type && (
+          <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-orange-50 px-3 py-1.5 text-xs font-semibold text-orange-700 ring-1 ring-orange-100">
+            ✨ {taglineForType(company.type)}
+          </p>
+        )}
+
         <div className="grid items-start gap-5 lg:grid-cols-4">
           {PLANS.map((plan) => {
             const rank = PLAN_ORDER.indexOf(plan.id);
             const isCurrent = currentPlan === plan.id;
             const isUpgrade = currentRank >= 0 && rank > currentRank;
             const isFree = (plan.priceMonthly || 0) <= 0;
+            // Features adaptadas al tipo de negocio de la empresa.
+            const prevPlanName =
+              rank > 0 ? PLANS.find((p) => p.id === PLAN_ORDER[rank - 1])?.name : null;
+            const features = planFeaturesForType(
+              plan.id,
+              company?.type,
+              prevPlanName,
+            );
 
             const cotizarPlan = waUrl(
               `Hola, soy de "${nombre}"${
@@ -256,7 +274,7 @@ function UpgradeInner() {
                 </div>
 
                 <ul className="mt-5 space-y-2 border-t border-gray-100 pt-4">
-                  {plan.features.map((f) => (
+                  {features.map((f) => (
                     <li
                       key={f}
                       className="flex items-start gap-2 text-sm text-gray-600"
