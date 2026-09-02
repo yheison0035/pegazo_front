@@ -39,6 +39,19 @@ const MAP = {
   RECHAZADA: { cls: 'bg-red-50 text-red-700 ring-red-600/20', dot: 'bg-red-500' },
   CONVERTIDA: { cls: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20', dot: 'bg-emerald-500' },
   VENCIDA: { cls: 'bg-gray-100 text-gray-600 ring-gray-500/20', dot: 'bg-gray-400' },
+
+  // Estado de documentos electrónicos DIAN (facturación electrónica)
+  BORRADOR: { cls: 'bg-gray-100 text-gray-600 ring-gray-500/20', dot: 'bg-gray-400' },
+  FIRMADO: { cls: 'bg-indigo-50 text-indigo-700 ring-indigo-600/20', dot: 'bg-indigo-500' },
+  ENVIADO: { cls: 'bg-amber-50 text-amber-700 ring-amber-600/20', dot: 'bg-amber-500 animate-pulse' },
+  ACEPTADO: { cls: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20', dot: 'bg-emerald-500' },
+  RECHAZADO: { cls: 'bg-red-50 text-red-700 ring-red-600/20', dot: 'bg-red-500' },
+  CONTINGENCIA: { cls: 'bg-orange-50 text-orange-700 ring-orange-600/20', dot: 'bg-orange-500' },
+  ERROR: { cls: 'bg-red-50 text-red-700 ring-red-600/20', dot: 'bg-red-500' },
+  // Estado de habilitación de la empresa ante la DIAN
+  HABILITADO: { cls: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20', dot: 'bg-emerald-500' },
+  REGISTRADO: { cls: 'bg-amber-50 text-amber-700 ring-amber-600/20', dot: 'bg-amber-500' },
+  EN_PRUEBAS: { cls: 'bg-blue-50 text-blue-700 ring-blue-600/20', dot: 'bg-blue-500' },
 };
 
 const DEFAULT = { cls: 'bg-slate-100 text-slate-700 ring-slate-500/20', dot: 'bg-slate-400' };
@@ -47,6 +60,8 @@ const DEFAULT = { cls: 'bg-slate-100 text-slate-700 ring-slate-500/20', dot: 'bg
 const LABELS = {
   EN_PROCESO: 'En proceso',
   NO_ASISTIO: 'No asistió',
+  EN_PRUEBAS: 'En pruebas',
+  CONTINGENCIA: 'Contingencia',
 };
 
 function prettyLabel(status) {
