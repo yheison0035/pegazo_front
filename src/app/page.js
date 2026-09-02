@@ -44,6 +44,8 @@ const WHATSAPP =
 // Todo lo que incluye la plataforma (para el plan a la medida).
 const INCLUDED = [
   'Punto de venta y facturación',
+  'Facturación electrónica DIAN ilimitada',
+  'Certificado y firma digital incluidos',
   'Control de inventario en tiempo real',
   'Variantes (color, talla) y código de barras',
   'Productos por agotarse y agotados',
@@ -69,6 +71,11 @@ const INCLUDED = [
 
 // ── Lo que nos diferencia de la competencia (Siigo, Treinta, Alegra…) ──
 const DIFFERENTIATORS = [
+  {
+    icon: ReceiptPercentIcon,
+    title: 'Facturación electrónica DIAN, ilimitada e incluida',
+    desc: 'Emite factura electrónica directo ante la DIAN —sin costo por documento y con el certificado incluido—. Lo que en otros es una suscripción aparte, en Pegazo va dentro de tu plan: notas crédito, envío por correo y WhatsApp, y tiquete con QR.',
+  },
   {
     icon: SparklesIcon,
     title: 'Se adapta a CUALQUIER negocio',
@@ -102,6 +109,17 @@ const FEATURE_GROUPS = [
       'Apertura y cierre de caja con arqueo por día',
       'IVA y precios configurados para Colombia',
       'Cotizaciones para tus clientes',
+    ],
+  },
+  {
+    icon: ShieldCheckIcon,
+    title: 'Facturación electrónica DIAN',
+    items: [
+      'Emisión directa ante la DIAN, ilimitada y sin costo por documento',
+      'Certificado y firma digital incluidos',
+      'Elige al vender: tiquete POS o factura electrónica',
+      'Notas crédito (totales y parciales) y anulación',
+      'Envío al cliente por correo y WhatsApp, con QR',
     ],
   },
   {
@@ -301,11 +319,6 @@ const HOW_STEPS = [
 // ── Roadmap ──
 const ROADMAP = [
   {
-    icon: ReceiptPercentIcon,
-    title: 'Facturación electrónica DIAN',
-    desc: 'Emite facturas electrónicas válidas ante la DIAN, desde el mismo sistema.',
-  },
-  {
     icon: BoltIcon,
     title: 'Pantalla de cocina (KDS)',
     desc: 'Los pedidos llegan directo a la cocina en tiempo real.',
@@ -363,7 +376,7 @@ const FAQ = [
   },
   {
     q: '¿Pegazo factura electrónicamente ante la DIAN?',
-    a: 'La facturación electrónica DIAN está en camino. Hoy imprimes tu factura y controlas tus ventas e IVA; muy pronto podrás emitir facturas electrónicas válidas desde el mismo sistema.',
+    a: 'Sí. Emites factura electrónica directo ante la DIAN desde el mismo sistema, de forma ilimitada y sin costo por documento, con el certificado y la firma digital incluidos. Al vender eliges tiquete POS o factura electrónica, generas notas crédito y se la envías a tu cliente por correo o WhatsApp con su código QR.',
   },
 ];
 
@@ -623,9 +636,10 @@ export default function Landing() {
               </span>
             </h1>
             <p className="mx-auto mt-5 max-w-xl text-lg text-neutral-300 lg:mx-0">
-              Ventas, inventario, clientes, citas, cartera, reportes y tu propia
-              tienda online. Pegazo se adapta a lo que vendes y hace despegar tu
-              negocio, todo desde la nube.
+              Ventas, inventario, clientes, citas, cartera, reportes, tu propia
+              tienda online y <span className="font-semibold text-white">facturación
+              electrónica DIAN ilimitada</span>. Pegazo se adapta a lo que vendes y
+              hace despegar tu negocio, todo desde la nube.
             </p>
 
             <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row lg:justify-start">
@@ -1004,7 +1018,9 @@ export default function Landing() {
                 ['Multi-sede con inventario por local', ['Sí', 'Sí', 'Sí', 'Limitado']],
                 ['Pagos en línea a tu propio banco', ['Sí', false, false, false]],
                 ['App en el celular (PWA)', ['Sí', 'Sí', 'Sí', 'Sí']],
-                ['Facturación electrónica DIAN', ['En camino', 'Sí', 'Sí', false]],
+                ['Facturación electrónica DIAN', ['Ilimitada', 'Sí', 'Sí', false]],
+                ['Certificado digital incluido', ['Sí', 'Sí', false, false]],
+                ['Todo en un solo plan (sin módulos aparte)', ['Sí', false, false, 'Básico']],
               ].map(([label, cells], i) => (
                 <tr key={label} className={i % 2 ? 'bg-neutral-50' : ''}>
                   <td className="p-3 text-left font-medium text-neutral-700">
