@@ -36,6 +36,11 @@ export async function emitFiscalInvoice(saleId) {
   return apiFetch(`/fiscal/emit/${saleId}`, { method: 'POST' });
 }
 
+// Emite una factura de prueba (datos de ejemplo) para validar el flujo.
+export async function emitFiscalTestInvoice() {
+  return apiFetch('/fiscal/test-invoice', { method: 'POST' });
+}
+
 // Devuelve el HTML de la representación gráfica (para mostrar en un iframe).
 // apiFetch devuelve el texto crudo cuando la respuesta no es JSON.
 export async function getFiscalRepresentation(id) {

@@ -28,6 +28,7 @@ import {
   getFiscalStats,
   getFiscalRepresentation,
   addFiscalResolution,
+  emitFiscalTestInvoice,
 } from '@/lib/api/routes/fiscal';
 
 const TYPE_LABELS = {
@@ -129,6 +130,24 @@ function FacturacionElectronica() {
     return () => clearInterval(pollRef.current);
   }, [linked, loadData]);
 
+  const hasResolution = (status?.resolutions?.length || 0) > 0;
+
+  const handleEmitTest = async () => {
+    setWorking(true);
+    try {
+      const r = await emitFiscalTestInvoice();
+      setAlert({
+        type: 'success',
+        message: `Factura de prueba emitida: ${r?.number || ''} (${r?.status || ''}).`,
+      });
+      await loadData();
+    } catch (e) {
+      setAlert({ type: 'error', message: e.message });
+    } finally {
+      setWorking(false);
+    }
+  };
+
   const handleSetup = async () => {
     setWorking(true);
     try {
@@ -194,6 +213,17 @@ function FacturacionElectronica() {
             >
               Actualizar
             </Button>
+            {hasResolution && (
+              <Button
+                variant="primary"
+                size="sm"
+                icon={PlusIcon}
+                loading={working}
+                onClick={handleEmitTest}
+              >
+                Emitir factura de prueba
+              </Button>
+            )}
           </div>
         )}
       </div>
