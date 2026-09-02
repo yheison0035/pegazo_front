@@ -132,6 +132,27 @@ export function requiredPlanForModule(moduleKey) {
   return MODULE_MIN_PLAN[moduleKey] || null;
 }
 
+// Versión DINÁMICA: usa la config de planes que viene en /auth/me
+// (usuario.planConfig = { gates, plans }). Si no hay config, cae al estático.
+export function planAllowsModuleDynamic(plan, moduleKey, planConfig) {
+  if (!planConfig?.gates) return planAllowsModule(plan, moduleKey);
+  const g = planConfig.gates[moduleKey];
+  const min = !g || g === 'BASE' ? null : g;
+  if (!min) return true;
+  if (!plan) return true;
+  const rankOf = (id) =>
+    planConfig.plans?.find((p) => p.id === id)?.order || 0;
+  const r = rankOf(plan);
+  if (!r) return true;
+  return r >= rankOf(min);
+}
+
+export function requiredPlanForModuleDynamic(moduleKey, planConfig) {
+  if (!planConfig?.gates) return requiredPlanForModule(moduleKey);
+  const g = planConfig.gates[moduleKey];
+  return !g || g === 'BASE' ? null : g;
+}
+
 export function getPlan(planId) {
   return PLANS.find((p) => p.id === planId) || null;
 }
