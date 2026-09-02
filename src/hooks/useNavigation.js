@@ -78,6 +78,8 @@ export default function useNavigation() {
     usuario.company?.fiscalCompanyId
   ) {
     modules.push('facturacion-electronica');
+    // Nómina electrónica: mismo enlace DIAN; el candado de plan (Órbita) decide.
+    modules.push('nomina-electronica');
   }
 
   // Oculta los módulos que aún no están 100% terminados/comprobados.

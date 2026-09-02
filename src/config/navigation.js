@@ -371,6 +371,14 @@ export const NAVIGATION = [
         icon: DocumentTextIcon,
         roles: ['SUPER_ADMIN', 'ADMIN'],
       },
+      {
+        // Igual que facturación: aparece según el flag/vinculación; el candado
+        // de plan (Órbita) lo maneja el gating por 'nomina-electronica'.
+        name: 'Nómina electrónica',
+        href: '/dashboard/nomina-electronica',
+        icon: DocumentTextIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN'],
+      },
     ],
   },
 
