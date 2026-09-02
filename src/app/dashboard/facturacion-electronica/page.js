@@ -31,6 +31,8 @@ import {
   emitFiscalTestInvoice,
   sendFiscalEmail,
   getFiscalWhatsapp,
+  deleteFiscalDocument,
+  annulFiscalDocument,
 } from '@/lib/api/routes/fiscal';
 
 const TYPE_LABELS = {
@@ -207,6 +209,41 @@ function FacturacionElectronica() {
     try {
       const r = await getFiscalWhatsapp(repDocId);
       if (r?.url) window.open(r.url, '_blank');
+    } catch (e) {
+      setAlert({ type: 'error', message: e.message });
+    }
+  };
+
+  const handleDelete = async (doc) => {
+    if (
+      !window.confirm(
+        `¿Eliminar el documento ${doc.number || ''}? Solo se puede porque aún no fue transmitido a la DIAN.`,
+      )
+    )
+      return;
+    try {
+      await deleteFiscalDocument(doc.id);
+      setAlert({ type: 'success', message: 'Documento eliminado.' });
+      await loadData();
+    } catch (e) {
+      setAlert({ type: 'error', message: e.message });
+    }
+  };
+
+  const handleAnnul = async (doc) => {
+    if (
+      !window.confirm(
+        `¿Anular la factura ${doc.number || ''}? Se generará una nota crédito total que la deja sin efecto.`,
+      )
+    )
+      return;
+    try {
+      const nc = await annulFiscalDocument(doc.id);
+      setAlert({
+        type: 'success',
+        message: `Factura anulada con la nota crédito ${nc?.number || ''}.`,
+      });
+      await loadData();
     } catch (e) {
       setAlert({ type: 'error', message: e.message });
     }
@@ -445,13 +482,36 @@ function FacturacionElectronica() {
                       <td className="px-4 py-3 text-xs text-gray-500">
                         {formatDateTime(d.createdAt)}
                       </td>
-                      <td className="px-4 py-3 text-right">
-                        <button
-                          onClick={() => openRepresentation(d.id)}
-                          className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-orange-600 transition hover:bg-orange-50"
-                        >
-                          <EyeIcon className="h-4 w-4" /> Ver
-                        </button>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            onClick={() => openRepresentation(d.id)}
+                            className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-orange-600 transition hover:bg-orange-50"
+                          >
+                            <EyeIcon className="h-4 w-4" /> Ver
+                          </button>
+                          {d.type === 'FACTURA_VENTA' &&
+                            d.status === 'ACEPTADO' && (
+                              <button
+                                onClick={() => handleAnnul(d)}
+                                className="rounded-lg px-2 py-1 text-xs font-medium text-red-600 transition hover:bg-red-50"
+                                title="Anular con nota crédito"
+                              >
+                                Anular
+                              </button>
+                            )}
+                          {(d.status === 'BORRADOR' ||
+                            d.status === 'FIRMADO' ||
+                            d.status === 'ERROR') && (
+                            <button
+                              onClick={() => handleDelete(d)}
+                              className="rounded-lg px-2 py-1 text-xs font-medium text-red-600 transition hover:bg-red-50"
+                              title="Eliminar (aún no transmitida)"
+                            >
+                              Eliminar
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}

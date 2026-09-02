@@ -56,3 +56,16 @@ export async function sendFiscalEmail(id) {
 export async function getFiscalWhatsapp(id) {
   return apiFetch(`/fiscal/documents/${id}/whatsapp`);
 }
+
+// Elimina un documento (solo si aún no fue transmitido a la DIAN).
+export async function deleteFiscalDocument(id) {
+  return apiFetch(`/fiscal/documents/${id}`, { method: 'DELETE' });
+}
+
+// Anula una factura generando su nota crédito total.
+export async function annulFiscalDocument(id, reason) {
+  return apiFetch(`/fiscal/documents/${id}/annul`, {
+    method: 'POST',
+    body: JSON.stringify({ reason }),
+  });
+}
