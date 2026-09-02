@@ -64,6 +64,8 @@ function FacturacionElectronica() {
   const [search, setSearch] = useState('');
   const [type, setType] = useState('');
   const [docStatus, setDocStatus] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const [page, setPage] = useState(1);
 
   // modales
@@ -88,7 +90,15 @@ function FacturacionElectronica() {
       try {
         const [s, d] = await Promise.all([
           getFiscalStats().catch(() => null),
-          getFiscalDocuments({ page, limit: 15, search, type, status: docStatus }),
+          getFiscalDocuments({
+            page,
+            limit: 15,
+            search,
+            type,
+            status: docStatus,
+            dateFrom,
+            dateTo,
+          }),
         ]);
         setStats(s);
         setDocs(d?.data || []);
@@ -100,7 +110,7 @@ function FacturacionElectronica() {
         if (!silent) setRefreshing(false);
       }
     },
-    [page, search, type, docStatus],
+    [page, search, type, docStatus, dateFrom, dateTo],
   );
 
   // carga inicial
@@ -283,7 +293,41 @@ function FacturacionElectronica() {
                   className="w-full rounded-lg border border-gray-200 py-2 pl-9 pr-3 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
                 />
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                  <span>Desde</span>
+                  <input
+                    type="date"
+                    value={dateFrom}
+                    onChange={(e) => {
+                      setPage(1);
+                      setDateFrom(e.target.value);
+                    }}
+                    className="rounded-lg border border-gray-200 bg-white px-2 py-2 text-sm text-gray-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                  />
+                  <span>Hasta</span>
+                  <input
+                    type="date"
+                    value={dateTo}
+                    onChange={(e) => {
+                      setPage(1);
+                      setDateTo(e.target.value);
+                    }}
+                    className="rounded-lg border border-gray-200 bg-white px-2 py-2 text-sm text-gray-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                  />
+                  {(dateFrom || dateTo) && (
+                    <button
+                      onClick={() => {
+                        setPage(1);
+                        setDateFrom('');
+                        setDateTo('');
+                      }}
+                      className="rounded-lg px-2 py-1 text-xs font-medium text-orange-600 hover:bg-orange-50"
+                    >
+                      Limpiar
+                    </button>
+                  )}
+                </div>
                 <Select
                   value={type}
                   onChange={(v) => {
