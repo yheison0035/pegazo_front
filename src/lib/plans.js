@@ -39,7 +39,9 @@ export const PLANS = [
       'Fiado / crédito',
       'Citas y servicios',
       'Roles y permisos',
+      'Fidelización',
       'Estadísticas completas',
+      '🧾 Facturación electrónica DIAN ilimitada',
       'Soporte prioritario por WhatsApp',
     ],
     cta: 'Probar 14 días gratis',
@@ -58,8 +60,10 @@ export const PLANS = [
     features: [
       'Todo lo de Impulso',
       'Multi-sede (hasta 3 sedes)',
-      'Reportes por sede',
+      'Reportes por sede · estadísticas a profundidad',
       '🛒 Tienda online conectada a tu inventario',
+      '🏦 Avisos de consignación al banco',
+      '🩺 Historia clínica (salud)',
     ],
     cta: 'Probar 14 días gratis',
   },
@@ -77,8 +81,8 @@ export const PLANS = [
     features: [
       'Todo lo de Altura',
       'Usuarios y sedes ilimitados',
-      'Factura electrónica DIAN (próximamente)',
-      'Integraciones y API (próximamente)',
+      '💼 Nómina electrónica',
+      'Integraciones y API',
       'Gerente de cuenta dedicado y capacitación',
     ],
     cta: 'Hablar con ventas',
@@ -93,13 +97,22 @@ export const PLAN_OPTIONS = PLANS.map((p) => ({ id: p.id, name: p.name }));
 // con el backend (src/common/plan-limits.service.ts). Empresas sin plan o con
 // plan desconocido = sin restricción (no se les cambia lo que ya usan).
 export const MODULE_MIN_PLAN = {
+  // Impulso: negocio en marcha
   expenses: 'IMPULSO',
   appointments: 'IMPULSO',
   services: 'IMPULSO',
   users: 'IMPULSO',
   statistics: 'IMPULSO',
+  fiado: 'IMPULSO',
+  loyalty: 'IMPULSO', // fidelización
+  'facturacion-electronica': 'IMPULSO', // factura electrónica DIAN ilimitada
+  // Altura: crece con varias sedes
   website: 'ALTURA',
   shipping: 'ALTURA',
+  bank: 'ALTURA', // avisos de consignación (banco)
+  clinical: 'ALTURA', // historia clínica (salud)
+  // Órbita: cadena / empresa
+  payroll: 'ORBITA', // nómina electrónica (cuando se implemente)
 };
 
 export const PLAN_ORDER = ['DESPEGUE', 'IMPULSO', 'ALTURA', 'ORBITA'];
