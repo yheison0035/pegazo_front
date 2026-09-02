@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { useAuth } from '@/context/authContext';
+import { useToast } from '@/context/toastContext';
 import usePermissions from '@/hooks/usePermissions';
 import {
   EyeIcon,
@@ -8,9 +10,12 @@ import {
   PrinterIcon,
   PowerIcon,
   ArrowRightEndOnRectangleIcon,
+  DocumentTextIcon,
 } from '@heroicons/react/24/outline';
 import TableActionButton from '@/components/ui/TableActionButton';
 import { sendInvoiceWhatsapp } from '@/utils/invoiceWhatsapp';
+import { emitFiscalInvoice } from '@/lib/api/routes/fiscal';
+import { printFiscalInvoice } from '@/utils/printFiscalInvoice';
 import { effectiveModules } from '@/lib/appointmentsAccess';
 import { enterAsCompany } from '@/lib/impersonation';
 
@@ -26,8 +31,29 @@ export default function Actions({
 }) {
   const { can } = usePermissions();
   const auth = useAuth();
+  const toast = useToast();
   const companyName = auth?.usuario?.company?.name;
   const companyModules = effectiveModules(auth?.usuario);
+  const [emitting, setEmitting] = useState(false);
+
+  // Emite (o reutiliza, es idempotente por venta) la factura electrónica DIAN
+  // y la imprime en formato térmico con su CUFE + QR de la DIAN.
+  const emitAndPrintFiscal = async () => {
+    if (emitting) return;
+    setEmitting(true);
+    try {
+      const doc = await emitFiscalInvoice(info.id);
+      toast.show({
+        type: 'success',
+        message: `Factura electrónica ${doc?.number || ''} lista (${doc?.status || ''}).`,
+      });
+      printFiscalInvoice(info, doc, auth?.usuario);
+    } catch (e) {
+      toast.show({ type: 'error', message: e.message });
+    } finally {
+      setEmitting(false);
+    }
+  };
 
   const canView = can(view, 'view');
   const canEdit = can(view, 'edit');
@@ -97,10 +123,20 @@ export default function Actions({
       {view === 'delivered_sales' && canView && (
         <TableActionButton
           icon={PrinterIcon}
-          label="Imprimir"
+          label="Imprimir tiquete"
           variant="info"
           disabled={isLocked}
           onClick={() => setPrinterInvoice(info)}
+        />
+      )}
+
+      {view === 'delivered_sales' && canView && (
+        <TableActionButton
+          icon={DocumentTextIcon}
+          label="Factura electrónica DIAN"
+          variant="success"
+          disabled={isLocked || emitting}
+          onClick={emitAndPrintFiscal}
         />
       )}
 
