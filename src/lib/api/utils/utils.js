@@ -30,20 +30,34 @@ export function parseDate(value) {
   return isNaN(date.getTime()) ? null : date;
 }
 
-// Devuelve YYYY-MM-DD desde cualquier fecha
+// Devuelve YYYY-MM-DD desde cualquier fecha.
+// Se arma manualmente con relleno de ceros (padStart) porque
+// toLocaleDateString('en-CA') NO rellena el año a 4 dígitos: para años
+// pequeños (los que produce un <input type="date"> mientras se teclea el año,
+// p.ej. "0002-09-15") devolvía "2-09-15", un valor inválido que reseteaba el
+// input en cada tecla.
 export function toISODate(value) {
   const date = parseDate(value);
   if (!date) return null;
 
   // Las fechas "solo día" se guardan a medianoche UTC; se leen en UTC para
   // no correr el día por la conversión de zona horaria.
-  return date.toLocaleDateString('en-CA', {
-    timeZone: 'UTC',
-  });
+  const y = String(date.getUTCFullYear()).padStart(4, '0');
+  const m = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const d = String(date.getUTCDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
 }
 
-// Normaliza fecha para inputs tipo <input type="date" />
+// Normaliza fecha para inputs tipo <input type="date" />.
+// Si el valor ya viene como YYYY-MM-DD (lo que produce el propio input), se
+// devuelve TAL CUAL, sin reconvertir por Date. Reconvertir en cada tecla
+// corrompía lo que el usuario estaba escribiendo (años parciales) y reseteaba
+// el campo. Solo se convierte cuando el valor llega como ISO/fecha del servidor.
 export function normalizeDateForInput(value) {
+  if (!value) return '';
+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return value;
+  }
   const iso = toISODate(value);
   return iso || '';
 }
@@ -51,6 +65,13 @@ export function normalizeDateForInput(value) {
 // Normaliza fecha + hora para inputs tipo <input type="datetime-local" />
 // Devuelve "YYYY-MM-DDTHH:mm" en la zona horaria de Colombia.
 export function normalizeDateTimeForInput(value) {
+  if (!value) return '';
+  // Igual que en las fechas: si ya viene como YYYY-MM-DDTHH:mm (lo que teclea
+  // el usuario), se respeta tal cual. Reconvertir a zona Colombia en cada tecla
+  // desplazaba la hora y hacía "saltar" el campo mientras se editaba.
+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)) {
+    return value;
+  }
   const date = parseDate(value);
   if (!date) return '';
 
