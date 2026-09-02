@@ -8,6 +8,7 @@ import {
   TicketIcon,
   MegaphoneIcon,
   CheckCircleIcon,
+  Square3Stack3DIcon,
 } from '@heroicons/react/24/outline';
 
 import RoleGuard from '@/auth/roleGuard';
@@ -26,6 +27,13 @@ const CARDS = [
     title: 'Usuarios Globales',
     desc: 'Ver todos los usuarios, resetear contraseñas y activar/desactivar.',
     accent: 'text-orange-600',
+  },
+  {
+    href: '/platform/plans',
+    icon: Square3Stack3DIcon,
+    title: 'Planes y funciones',
+    desc: 'Precios, límites y qué módulo desbloquea cada plan. Configurable.',
+    accent: 'text-indigo-600',
   },
   {
     href: '/platform/coupons',

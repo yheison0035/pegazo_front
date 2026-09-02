@@ -3,7 +3,10 @@
 import { BUSINESS_TYPES, HIDDEN_MODULES } from '@/config/businessTypes';
 import { NAVIGATION } from '@/config/navigation';
 import { PLATFORM_NAVIGATION } from '@/config/platformNavigation';
-import { planAllowsModule, requiredPlanForModule } from '@/lib/plans';
+import {
+  planAllowsModuleDynamic,
+  requiredPlanForModuleDynamic,
+} from '@/lib/plans';
 import { getTerms } from '@/config/terminology';
 import { useAuth } from '@/context/authContext';
 
@@ -133,12 +136,16 @@ export default function useNavigation() {
         const key = item.href.split('/').pop();
         // El candado de plan usa el módulo padre para los catálogos.
         const planKey = GATING_PARENT[key] || key;
-        const locked = useManual ? false : !planAllowsModule(plan, planKey);
+        const locked = useManual
+          ? false
+          : !planAllowsModuleDynamic(plan, planKey, usuario.planConfig);
         return {
           ...item,
           name: navLabelByModule[key] || item.name,
           locked,
-          requiredPlan: locked ? requiredPlanForModule(planKey) : null,
+          requiredPlan: locked
+            ? requiredPlanForModuleDynamic(planKey, usuario.planConfig)
+            : null,
         };
       });
 
