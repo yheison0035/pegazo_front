@@ -29,6 +29,8 @@ import {
   getFiscalRepresentation,
   addFiscalResolution,
   emitFiscalTestInvoice,
+  sendFiscalEmail,
+  getFiscalWhatsapp,
 } from '@/lib/api/routes/fiscal';
 
 const TYPE_LABELS = {
@@ -71,6 +73,7 @@ function FacturacionElectronica() {
   // modales
   const [repHtml, setRepHtml] = useState(null);
   const [repLoading, setRepLoading] = useState(false);
+  const [repDocId, setRepDocId] = useState(null);
   const [showResModal, setShowResModal] = useState(false);
 
   const linked = status?.linked;
@@ -174,6 +177,7 @@ function FacturacionElectronica() {
   const openRepresentation = async (id) => {
     setRepLoading(true);
     setRepHtml('');
+    setRepDocId(id);
     try {
       const html = await getFiscalRepresentation(id);
       setRepHtml(typeof html === 'string' ? html : html?.data || '');
@@ -182,6 +186,29 @@ function FacturacionElectronica() {
       setRepHtml(null);
     } finally {
       setRepLoading(false);
+    }
+  };
+
+  const [sending, setSending] = useState(false);
+  const handleSendEmail = async () => {
+    if (!repDocId) return;
+    setSending(true);
+    try {
+      const r = await sendFiscalEmail(repDocId);
+      setAlert({ type: 'success', message: `Factura enviada a ${r?.to || 'el cliente'}.` });
+    } catch (e) {
+      setAlert({ type: 'error', message: e.message });
+    } finally {
+      setSending(false);
+    }
+  };
+  const handleSendWhatsapp = async () => {
+    if (!repDocId) return;
+    try {
+      const r = await getFiscalWhatsapp(repDocId);
+      if (r?.url) window.open(r.url, '_blank');
+    } catch (e) {
+      setAlert({ type: 'error', message: e.message });
     }
   };
 
@@ -467,9 +494,13 @@ function FacturacionElectronica() {
         <RepresentationModal
           html={repHtml}
           loading={repLoading}
+          sending={sending}
+          onEmail={handleSendEmail}
+          onWhatsapp={handleSendWhatsapp}
           onClose={() => {
             setRepHtml(null);
             setRepLoading(false);
+            setRepDocId(null);
           }}
         />
       )}
@@ -671,15 +702,37 @@ function Select({ value, onChange, options }) {
   );
 }
 
-function RepresentationModal({ html, loading, onClose }) {
+function RepresentationModal({
+  html,
+  loading,
+  sending,
+  onEmail,
+  onWhatsapp,
+  onClose,
+}) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="flex h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 px-4 py-3">
           <h3 className="text-sm font-semibold text-gray-800">
             Representación gráfica
           </h3>
           <div className="flex items-center gap-2">
+            {html && onEmail && (
+              <Button
+                variant="outline"
+                size="sm"
+                loading={sending}
+                onClick={onEmail}
+              >
+                Enviar por correo
+              </Button>
+            )}
+            {html && onWhatsapp && (
+              <Button variant="outline" size="sm" onClick={onWhatsapp}>
+                WhatsApp
+              </Button>
+            )}
             {html && (
               <Button
                 variant="outline"
