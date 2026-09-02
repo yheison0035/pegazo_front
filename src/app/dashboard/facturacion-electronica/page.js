@@ -762,7 +762,9 @@ function ResolutionModal({ onClose, onSaved, onError }) {
           </label>
           <ResField form={form} set={set} k="prefix" label="Prefijo" placeholder="SETP" />
           <ResField form={form} set={set} k="resolution" label="N° Resolución" placeholder="18760000001" />
-          <Input
+          <ResField
+            form={form}
+            set={set}
             k="technicalKey"
             label="Clave técnica"
             placeholder="(solo factura)"
