@@ -677,6 +677,25 @@ function RepresentationModal({ html, loading, onClose }) {
   );
 }
 
+// Campo del modal de resolución. Definido a NIVEL DE MÓDULO (no dentro del
+// componente padre) para que React no lo remonte en cada tecla — si se define
+// dentro del render, el input pierde el foco y se resetea al escribir.
+function ResField({ form, set, k, label, ...rest }) {
+  return (
+    <label className="flex flex-col text-sm">
+      <span className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
+        {label}
+      </span>
+      <input
+        value={form[k]}
+        onChange={(e) => set(k, e.target.value)}
+        className="rounded-lg border border-gray-200 px-3 py-2 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+        {...rest}
+      />
+    </label>
+  );
+}
+
 function ResolutionModal({ onClose, onSaved, onError }) {
   const [form, setForm] = useState({
     documentType: 'FACTURA_VENTA',
@@ -706,20 +725,6 @@ function ResolutionModal({ onClose, onSaved, onError }) {
       setSaving(false);
     }
   };
-
-  const Input = ({ k, label, ...rest }) => (
-    <label className="flex flex-col text-sm">
-      <span className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
-        {label}
-      </span>
-      <input
-        value={form[k]}
-        onChange={(e) => set(k, e.target.value)}
-        className="rounded-lg border border-gray-200 px-3 py-2 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
-        {...rest}
-      />
-    </label>
-  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -755,17 +760,17 @@ function ResolutionModal({ onClose, onSaved, onError }) {
               <option value="NOTA_DEBITO">Nota débito</option>
             </select>
           </label>
-          <Input k="prefix" label="Prefijo" placeholder="SETP" />
-          <Input k="resolution" label="N° Resolución" placeholder="18760000001" />
+          <ResField form={form} set={set} k="prefix" label="Prefijo" placeholder="SETP" />
+          <ResField form={form} set={set} k="resolution" label="N° Resolución" placeholder="18760000001" />
           <Input
             k="technicalKey"
             label="Clave técnica"
             placeholder="(solo factura)"
           />
-          <Input k="rangeFrom" label="Desde" type="number" placeholder="990000000" />
-          <Input k="rangeTo" label="Hasta" type="number" placeholder="995000000" />
-          <Input k="validFrom" label="Válida desde" type="date" />
-          <Input k="validTo" label="Válida hasta" type="date" />
+          <ResField form={form} set={set} k="rangeFrom" label="Desde" type="number" placeholder="990000000" />
+          <ResField form={form} set={set} k="rangeTo" label="Hasta" type="number" placeholder="995000000" />
+          <ResField form={form} set={set} k="validFrom" label="Válida desde" type="date" />
+          <ResField form={form} set={set} k="validTo" label="Válida hasta" type="date" />
         </div>
         <div className="flex justify-end gap-2 border-t border-gray-100 px-5 py-4">
           <Button variant="clear" onClick={onClose}>
