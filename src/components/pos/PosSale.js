@@ -29,6 +29,8 @@ import useLocals from '@/lib/api/hooks/useLocals';
 import { getCustomers, getCustomerSummary } from '@/lib/api/routes/customers';
 import { getPaymentMethodCatalog } from '@/lib/api/routes/paymentMethods';
 import { getFiscalConfig } from '@/lib/api/routes/company';
+import { getFiscalStatus, emitFiscalInvoice } from '@/lib/api/routes/fiscal';
+import { printFiscalInvoice } from '@/utils/printFiscalInvoice';
 import { getProductFields } from '@/config/verticalProfiles';
 import { isServicesBusiness } from '@/lib/appointmentsAccess';
 import { formatCOP } from '@/lib/api/utils/utils';
@@ -126,6 +128,9 @@ export default function PosSale({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const [notes, setNotes] = useState(initial?.notes || '');
+  // Tipo de comprobante: tiquete POS (normal) o factura electrónica DIAN.
+  const [docType, setDocType] = useState('POS');
+  const [fiscalReady, setFiscalReady] = useState(false);
   // Muestra/oculta los campos secundarios (fecha y observaciones) para dar más
   // espacio a los ítems de la factura.
   const [showMore, setShowMore] = useState(false);
@@ -174,6 +179,19 @@ export default function PosSale({
         setFiscal(res?.data || res || null);
       } catch (_) {
         setFiscal(null);
+      }
+    })();
+  }, []);
+
+  // ¿La empresa ya tiene facturación electrónica DIAN activa? Solo entonces se
+  // ofrece el selector "Tiquete POS / Factura electrónica" al vender.
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await getFiscalStatus();
+        setFiscalReady(!!res?.data?.linked);
+      } catch (_) {
+        setFiscalReady(false);
       }
     })();
   }, []);
@@ -480,9 +498,18 @@ export default function PosSale({
       });
       return;
     }
+    // La factura electrónica necesita un cliente con datos (no Consumidor Final).
+    if (docType === 'ELECTRONIC' && fiscalReady && !customer?.id) {
+      setAlert({
+        type: 'warning',
+        message:
+          'La factura electrónica requiere seleccionar un cliente con sus datos DIAN.',
+      });
+      return;
+    }
     setSubmitting(true);
     try {
-      await onSubmit({
+      const created = await onSubmit({
         paymentMethod,
         paymentMethodCatalogId: paymentMethodCatalogId || undefined,
         paymentStatus: paymentMethod === 'CREDITO' ? 'FIADO' : 'PAGADA',
@@ -511,7 +538,29 @@ export default function PosSale({
               }
         ),
       });
-      setAlert({ type: 'success', message: successMessage, url: successUrl });
+
+      // Si se eligió factura electrónica, se emite contra la DIAN y se imprime
+      // el térmico con CUFE + QR. Si falla, la venta YA quedó guardada: se avisa
+      // y se puede reintentar desde "Ventas realizadas".
+      const saleId = created?.data?.id;
+      if (docType === 'ELECTRONIC' && fiscalReady && saleId) {
+        try {
+          const doc = await emitFiscalInvoice(saleId);
+          setAlert({
+            type: 'success',
+            message: `Factura electrónica ${doc?.number || ''} emitida.`,
+          });
+          printFiscalInvoice(created.data, doc, usuario);
+        } catch (e) {
+          setAlert({
+            type: 'warning',
+            message: `La venta se guardó, pero la factura electrónica no se emitió: ${e.message}. Puedes emitirla desde Ventas realizadas.`,
+          });
+        }
+      } else {
+        setAlert({ type: 'success', message: successMessage, url: successUrl });
+      }
+
       if (mode === 'new') clearAll();
     } catch (err) {
       setAlert({ type: 'error', message: err.message || 'Error al guardar' });
@@ -1234,6 +1283,45 @@ export default function PosSale({
                   </div>
                 )}
 
+                {/* Tipo de comprobante: solo si la empresa tiene facturación
+                    electrónica DIAN activa. */}
+                {fiscalReady && mode === 'new' && (
+                  <div className="mb-2">
+                    <p className="mb-1 text-xs font-medium text-gray-500">
+                      Tipo de comprobante
+                    </p>
+                    <div className="inline-flex w-full rounded-xl border border-gray-200 bg-gray-50 p-0.5">
+                      <button
+                        type="button"
+                        onClick={() => setDocType('POS')}
+                        className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                          docType === 'POS'
+                            ? 'bg-white text-gray-800 shadow-sm'
+                            : 'text-gray-500'
+                        }`}
+                      >
+                        Tiquete POS
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDocType('ELECTRONIC')}
+                        className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                          docType === 'ELECTRONIC'
+                            ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow'
+                            : 'text-gray-500'
+                        }`}
+                      >
+                        Factura electrónica
+                      </button>
+                    </div>
+                    {docType === 'ELECTRONIC' && (
+                      <p className="mt-1 text-[11px] text-orange-600">
+                        Se emitirá ante la DIAN y se imprimirá con CUFE + QR.
+                      </p>
+                    )}
+                  </div>
+                )}
+
                 <div className="flex gap-2">
                   {mode === 'new' && cart.length > 0 && (
                     <button
@@ -1248,7 +1336,9 @@ export default function PosSale({
                     disabled={submitting || cart.length === 0}
                     className="flex-1 rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-orange-600 disabled:opacity-50"
                   >
-                    {submitText}
+                    {docType === 'ELECTRONIC' && fiscalReady
+                      ? 'Facturar electrónicamente'
+                      : submitText}
                   </button>
                 </div>
               </div>
