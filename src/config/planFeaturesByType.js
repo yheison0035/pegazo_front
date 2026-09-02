@@ -6,31 +6,29 @@
 // junto con effectiveModules(vertical). Esto es solo la CAPA DE PRESENTACIÓN:
 // qué destacar en cada plan según el negocio.
 
-// Agrupamos los ~15 tipos de negocio en 4 familias para no repetir copy.
+// Agrupamos los tipos de negocio reales (businessTypes.js) en 4 familias para
+// no repetir copy. Las claves deben coincidir con los tipos que existen.
 const GROUP_BY_TYPE = {
-  // Servicios con agenda
-  BARBERIA: 'servicios',
-  PELUQUERIA: 'servicios',
-  SPA: 'servicios',
-  ESTETICA: 'servicios',
-  SALON_BELLEZA: 'servicios',
+  // Servicios con agenda (barberías, spa, estética… usan el tipo SERVICIOS)
+  SERVICIOS: 'servicios',
   // Comida
   RESTAURANTE: 'comida',
   COMIDA_RAPIDA: 'comida',
   CAFETERIA: 'comida',
   // Salud (agenda + historia clínica)
   ODONTOLOGIA: 'salud',
-  VETERINARIA: 'salud',
-  CONSULTORIO: 'salud',
-  MEDICINA: 'salud',
   // Retail / mostrador con productos
   COMERCIO: 'retail',
-  FERRETERIA: 'retail',
-  ROPA: 'retail',
   SUPERMERCADO: 'retail',
-  MINIMERCADO: 'retail',
-  TIENDA: 'retail',
-  REPUESTOS: 'retail',
+  DROGUERIA: 'retail',
+  ROPA: 'retail',
+  FRUVER: 'retail',
+  CARNICERIA: 'retail',
+  FLORISTERIA: 'retail',
+  FERIA: 'retail',
+  TELEVENTAS: 'retail',
+  DISTRIBUCION: 'retail',
+  ECOMMERCE: 'retail',
 };
 
 const DEFAULT_GROUP = 'retail';

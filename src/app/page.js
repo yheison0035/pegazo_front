@@ -221,7 +221,7 @@ const VERTICALS = [
     perks: [
       'Menú por categorías',
       'Mesas con estados y cobro',
-      'Insumos (y recetas, muy pronto)',
+      'Insumos y recetas',
       'Domicilio, recoger o consumo en el lugar',
       'Ventas rápidas en hora pico',
     ],
@@ -319,29 +319,19 @@ const HOW_STEPS = [
 // ── Roadmap ──
 const ROADMAP = [
   {
-    icon: BoltIcon,
-    title: 'Pantalla de cocina (KDS)',
-    desc: 'Los pedidos llegan directo a la cocina en tiempo real.',
-  },
-  {
-    icon: Squares2X2Icon,
-    title: 'Recetas e insumos',
-    desc: 'Descuenta ingredientes automáticamente con cada plato vendido.',
-  },
-  {
     icon: SparklesIcon,
     title: 'Editor de tu tienda in-situ',
     desc: 'Personaliza tu tienda online desde el propio sitio, sin saber de tecnología.',
   },
   {
-    icon: BellAlertIcon,
-    title: 'Notificaciones push',
-    desc: 'Avisos al instante en tu celular de ventas, citas y consignaciones.',
+    icon: BoltIcon,
+    title: 'Turnos y reservas online',
+    desc: 'Tus clientes reservan su cita o mesa desde tu propio enlace.',
   },
   {
     icon: RocketLaunchIcon,
-    title: 'Más verticales',
-    desc: 'Nuevos tipos de negocio y módulos, según lo que necesites.',
+    title: 'Más verticales y módulos',
+    desc: 'Nuevos tipos de negocio y funciones, según lo que necesites.',
   },
 ];
 
@@ -1053,8 +1043,8 @@ export default function Landing() {
           </table>
         </div>
         <p className="mt-4 text-center text-xs text-neutral-400">
-          La facturación electrónica DIAN está en camino en Pegazo. Todo lo demás,
-          ya disponible hoy.
+          Facturación y nómina electrónica DIAN, POS por vertical, tienda online y
+          más — todo incluido y disponible hoy.
         </p>
       </section>
 
