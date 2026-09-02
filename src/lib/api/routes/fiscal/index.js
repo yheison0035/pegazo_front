@@ -46,3 +46,13 @@ export async function emitFiscalTestInvoice() {
 export async function getFiscalRepresentation(id) {
   return apiFetch(`/fiscal/documents/${id}/representation`);
 }
+
+// Envía la factura al correo del cliente.
+export async function sendFiscalEmail(id) {
+  return apiFetch(`/fiscal/documents/${id}/send-email`, { method: 'POST' });
+}
+
+// Devuelve el enlace de WhatsApp para compartir la factura con el cliente.
+export async function getFiscalWhatsapp(id) {
+  return apiFetch(`/fiscal/documents/${id}/whatsapp`);
+}
