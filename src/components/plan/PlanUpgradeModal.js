@@ -9,11 +9,14 @@ import {
 import Button from '@/components/ui/Button';
 import { PLAN_UPGRADE_EVENT } from '@/lib/planUpgrade';
 import { getPlan } from '@/lib/plans';
+import { useAuth } from '@/context/authContext';
+import { planFeaturesForType } from '@/config/planFeaturesByType';
 
 // Modal global "Mejora tu plan". Se monta una vez (en el layout del dashboard) y
 // se abre al recibir el evento pegazo:plan-upgrade (menú bloqueado o 403 de plan).
 export default function PlanUpgradeModal() {
   const [detail, setDetail] = useState(null);
+  const { usuario } = useAuth();
 
   useEffect(() => {
     const handler = (e) => setDetail(e.detail || {});
@@ -62,7 +65,10 @@ export default function PlanUpgradeModal() {
                 <p className="text-sm text-neutral-500">{plan.tagline}</p>
               </div>
               <ul className="mt-4 space-y-2">
-                {plan.features.slice(0, 5).map((f) => (
+                {planFeaturesForType(plan.id, usuario?.company?.type)
+                  .filter((f) => !f.startsWith('Todo lo de'))
+                  .slice(0, 5)
+                  .map((f) => (
                   <li
                     key={f}
                     className="flex items-start gap-2 text-sm text-neutral-600"
