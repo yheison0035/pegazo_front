@@ -78,9 +78,17 @@ export async function annulFiscalDocument(id, reason) {
   });
 }
 
-// Crea una nota crédito (parcial) sobre una factura.
+// Crea una nota crédito (parcial) sobre una factura. dto.reasonCode = 1..5
 export async function createFiscalCreditNote(dto) {
   return apiFetch('/fiscal/credit-notes', {
+    method: 'POST',
+    body: JSON.stringify(dto),
+  });
+}
+
+// Crea una nota débito (subir valor) sobre una factura. dto.reasonCode = 1..4
+export async function createFiscalDebitNote(dto) {
+  return apiFetch('/fiscal/debit-notes', {
     method: 'POST',
     body: JSON.stringify(dto),
   });
