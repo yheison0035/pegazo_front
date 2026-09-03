@@ -18,6 +18,8 @@ import {
   getFiscalStatus,
   getFiscalDocuments,
   emitFiscalPayroll,
+  replaceFiscalPayroll,
+  eliminateFiscalPayroll,
 } from '@/lib/api/routes/fiscal';
 
 export default function NominaElectronicaPage() {
@@ -34,6 +36,22 @@ function NominaElectronica() {
   const [docs, setDocs] = useState([]);
   const [alert, setAlert] = useState({});
   const [showModal, setShowModal] = useState(false);
+  const [replaceId, setReplaceId] = useState(null);
+
+  const handleEliminate = async (d) => {
+    const reason = window.prompt(
+      `Eliminar (nota de ajuste) la nómina ${d.number || ''}. Escribe el motivo:`,
+      'Nómina enviada por error',
+    );
+    if (reason === null) return;
+    try {
+      const r = await eliminateFiscalPayroll(d.id, reason || 'Eliminación');
+      setAlert({ type: 'success', message: `Nota de ajuste ${r?.number || ''} (eliminación) emitida.` });
+      await load();
+    } catch (e) {
+      setAlert({ type: 'error', message: e.message });
+    }
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -88,7 +106,10 @@ function NominaElectronica() {
               variant="primary"
               size="sm"
               icon={PlusIcon}
-              onClick={() => setShowModal(true)}
+              onClick={() => {
+                setReplaceId(null);
+                setShowModal(true);
+              }}
             >
               Emitir nómina
             </Button>
@@ -117,12 +138,13 @@ function NominaElectronica() {
                   <th className="px-4 py-3 text-right font-semibold">Total</th>
                   <th className="px-4 py-3 font-semibold">Estado</th>
                   <th className="px-4 py-3 font-semibold">Fecha</th>
+                  <th className="px-4 py-3 text-right font-semibold">Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {docs.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="px-4 py-14 text-center">
+                    <td colSpan={6} className="px-4 py-14 text-center">
                       <BriefcaseIcon className="mx-auto mb-2 h-8 w-8 text-gray-300" />
                       <p className="text-sm text-gray-500">
                         Aún no has emitido nómina electrónica.
@@ -147,6 +169,27 @@ function NominaElectronica() {
                     <td className="px-4 py-3 text-xs text-gray-500">
                       {formatDateTime(d.createdAt)}
                     </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          onClick={() => {
+                            setReplaceId(d.id);
+                            setShowModal(true);
+                          }}
+                          className="rounded-lg px-2 py-1 text-xs font-medium text-amber-600 transition hover:bg-amber-50"
+                          title="Corregir con nota de ajuste (reemplazo)"
+                        >
+                          Corregir
+                        </button>
+                        <button
+                          onClick={() => handleEliminate(d)}
+                          className="rounded-lg px-2 py-1 text-xs font-medium text-red-600 transition hover:bg-red-50"
+                          title="Eliminar con nota de ajuste"
+                        >
+                          Eliminar
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -157,12 +200,19 @@ function NominaElectronica() {
 
       {showModal && (
         <PayrollModal
-          onClose={() => setShowModal(false)}
+          replaceId={replaceId}
+          onClose={() => {
+            setShowModal(false);
+            setReplaceId(null);
+          }}
           onSaved={async (r) => {
             setShowModal(false);
+            setReplaceId(null);
             setAlert({
               type: 'success',
-              message: `Nómina ${r?.number || ''} emitida para ${r?.employee || ''}.`,
+              message: replaceId
+                ? `Nota de ajuste ${r?.number || ''} (reemplazo) emitida.`
+                : `Nómina ${r?.number || ''} emitida para ${r?.employee || ''}.`,
             });
             await load();
           }}
@@ -179,7 +229,7 @@ function NominaElectronica() {
   );
 }
 
-function PayrollModal({ onClose, onSaved, onError }) {
+function PayrollModal({ onClose, onSaved, onError, replaceId }) {
   const today = new Date().toISOString().slice(0, 10);
   const [emp, setEmp] = useState({
     name: '',
@@ -210,7 +260,7 @@ function PayrollModal({ onClose, onSaved, onError }) {
         arr
           .filter((l) => l.concept.trim() && Number(l.amount) > 0)
           .map((l) => ({ concept: l.concept.trim(), amount: Number(l.amount) }));
-      const r = await emitFiscalPayroll({
+      const payload = {
         employee: {
           name: emp.name.trim(),
           identification: emp.identification.trim(),
@@ -220,7 +270,10 @@ function PayrollModal({ onClose, onSaved, onError }) {
         period,
         earnings: clean(earnings),
         deductions: clean(deductions),
-      });
+      };
+      const r = replaceId
+        ? await replaceFiscalPayroll(replaceId, payload)
+        : await emitFiscalPayroll(payload);
       onSaved(r);
     } catch (e) {
       onError(e.message);
@@ -234,7 +287,7 @@ function PayrollModal({ onClose, onSaved, onError }) {
       <div className="flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
         <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
           <h3 className="text-sm font-semibold text-gray-800">
-            Emitir nómina electrónica
+            {replaceId ? 'Corregir nómina (nota de ajuste)' : 'Emitir nómina electrónica'}
           </h3>
           <button
             onClick={onClose}

@@ -42,6 +42,22 @@ export async function emitFiscalTestInvoice() {
 }
 
 // Emite un Documento Soporte de Pago de Nómina Electrónica (DSPNE).
+// Nota de ajuste de nómina de REEMPLAZO (corrige con datos nuevos).
+export async function replaceFiscalPayroll(id, dto) {
+  return apiFetch(`/fiscal/payroll/${id}/replace`, {
+    method: 'POST',
+    body: JSON.stringify(dto),
+  });
+}
+
+// Nota de ajuste de nómina de ELIMINACIÓN (borra una mal enviada).
+export async function eliminateFiscalPayroll(id, reason) {
+  return apiFetch(`/fiscal/payroll/${id}/eliminate`, {
+    method: 'POST',
+    body: JSON.stringify({ reason }),
+  });
+}
+
 export async function emitFiscalPayroll(dto) {
   return apiFetch('/fiscal/payroll', {
     method: 'POST',
