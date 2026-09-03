@@ -11,10 +11,11 @@ import {
   PowerIcon,
   ArrowRightEndOnRectangleIcon,
   DocumentTextIcon,
+  ArrowPathRoundedSquareIcon,
 } from '@heroicons/react/24/outline';
 import TableActionButton from '@/components/ui/TableActionButton';
 import { sendInvoiceWhatsapp } from '@/utils/invoiceWhatsapp';
-import { emitFiscalInvoice } from '@/lib/api/routes/fiscal';
+import { emitFiscalInvoice, reissueFiscalInvoice } from '@/lib/api/routes/fiscal';
 import { printFiscalInvoice } from '@/utils/printFiscalInvoice';
 import { effectiveModules } from '@/lib/appointmentsAccess';
 import { enterAsCompany } from '@/lib/impersonation';
@@ -51,6 +52,31 @@ export default function Actions({
       toast.show({
         type: 'success',
         message: `Factura electrónica ${doc?.number || ''} lista (${doc?.status || ''}).`,
+      });
+      printFiscalInvoice(info, doc, auth?.usuario);
+    } catch (e) {
+      toast.show({ type: 'error', message: e.message });
+    } finally {
+      setEmitting(false);
+    }
+  };
+
+  // Corrige la factura de la venta: anula la anterior y reemite una corregida
+  // (con los datos actuales del cliente/venta), y la imprime.
+  const correctAndPrintFiscal = async () => {
+    if (emitting) return;
+    if (
+      !window.confirm(
+        'Se anulará la factura actual de esta venta y se reemitirá corregida con los datos actuales del cliente. ¿Continuar?',
+      )
+    )
+      return;
+    setEmitting(true);
+    try {
+      const doc = await reissueFiscalInvoice(info.id);
+      toast.show({
+        type: 'success',
+        message: `Factura corregida ${doc?.number || ''} emitida.`,
       });
       printFiscalInvoice(info, doc, auth?.usuario);
     } catch (e) {
@@ -138,12 +164,30 @@ export default function Actions({
       {view === 'delivered_sales' && canView && fiscalEnabled && (
         <TableActionButton
           icon={DocumentTextIcon}
-          label="Factura electrónica DIAN"
+          label={
+            info?.eInvoiceStatus
+              ? `Factura electrónica: ${info.eInvoiceStatus}`
+              : 'Factura electrónica DIAN'
+          }
           variant="success"
           disabled={isLocked || emitting}
           onClick={emitAndPrintFiscal}
         />
       )}
+
+      {view === 'delivered_sales' &&
+        canView &&
+        fiscalEnabled &&
+        info?.eInvoiceStatus &&
+        info?.eInvoiceStatus !== 'ANULADA' && (
+          <TableActionButton
+            icon={ArrowPathRoundedSquareIcon}
+            label="Corregir factura (anular + reemitir)"
+            variant="edit"
+            disabled={isLocked || emitting}
+            onClick={correctAndPrintFiscal}
+          />
+        )}
 
       {view === 'delivered_sales' &&
         canView &&

@@ -36,6 +36,11 @@ export async function emitFiscalInvoice(saleId) {
   return apiFetch(`/fiscal/emit/${saleId}`, { method: 'POST' });
 }
 
+// Corrige la factura de una venta: anula la actual y reemite una corregida.
+export async function reissueFiscalInvoice(saleId) {
+  return apiFetch(`/fiscal/reissue/${saleId}`, { method: 'POST' });
+}
+
 // Emite una factura de prueba (datos de ejemplo) para validar el flujo.
 export async function emitFiscalTestInvoice() {
   return apiFetch('/fiscal/test-invoice', { method: 'POST' });
