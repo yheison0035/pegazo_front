@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import {
   ArrowLeftIcon,
   BanknotesIcon,
@@ -40,6 +40,13 @@ function Kpi({ icon: Icon, label, value, accent = 'text-gray-900' }) {
 
 export default function CustomerProfile() {
   const { id } = useParams();
+  const router = useRouter();
+  // Volver a la vista ANTERIOR (ventas realizadas, citas, etc.), no siempre a
+  // clientes. Si no hay historial (entró por link directo), cae a clientes.
+  const goBack = () => {
+    if (typeof window !== 'undefined' && window.history.length > 1) router.back();
+    else router.push('/dashboard/customers');
+  };
   const { usuario } = useAuth();
   // La historia clínica solo aparece en verticales de salud (módulo 'clinical').
   const showClinical = effectiveModules(usuario).includes('clinical');
@@ -85,10 +92,10 @@ export default function CustomerProfile() {
         <Button
           variant="secondary"
           icon={ArrowLeftIcon}
-          href="/dashboard/customers"
+          onClick={goBack}
           className="mt-3"
         >
-          Volver a clientes
+          Volver
         </Button>
       </div>
     );
@@ -101,7 +108,7 @@ export default function CustomerProfile() {
   return (
     <div className="mx-auto w-full max-w-5xl p-4">
       <div className="mb-4 flex items-center justify-between gap-3">
-        <Button variant="secondary" icon={ArrowLeftIcon} href="/dashboard/customers">
+        <Button variant="secondary" icon={ArrowLeftIcon} onClick={goBack}>
           Volver
         </Button>
         <Button
