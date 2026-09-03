@@ -34,7 +34,23 @@ import {
   deleteFiscalDocument,
   annulFiscalDocument,
   createFiscalCreditNote,
+  createFiscalDebitNote,
 } from '@/lib/api/routes/fiscal';
+
+// Conceptos DIAN por tipo de nota.
+const CREDIT_CONCEPTS = [
+  ['1', 'Devolución parcial de bienes / servicio'],
+  ['2', 'Anulación de la factura'],
+  ['3', 'Rebaja o descuento'],
+  ['4', 'Ajuste de precio'],
+  ['5', 'Otros'],
+];
+const DEBIT_CONCEPTS = [
+  ['1', 'Intereses'],
+  ['2', 'Gastos por cobrar'],
+  ['3', 'Cambio del valor (mayor)'],
+  ['4', 'Otros'],
+];
 
 const TYPE_LABELS = {
   FACTURA_VENTA: 'Factura',
@@ -78,7 +94,7 @@ function FacturacionElectronica() {
   const [repLoading, setRepLoading] = useState(false);
   const [repDocId, setRepDocId] = useState(null);
   const [showResModal, setShowResModal] = useState(false);
-  const [creditDoc, setCreditDoc] = useState(null);
+  const [noteModal, setNoteModal] = useState(null); // { doc, kind: 'CREDIT'|'DEBIT' }
 
   const linked = status?.linked;
 
@@ -493,14 +509,21 @@ function FacturacionElectronica() {
                             <EyeIcon className="h-4 w-4" /> Ver
                           </button>
                           {d.type === 'FACTURA_VENTA' &&
-                            d.status === 'ACEPTADO' && (
+                            d.status !== 'RECHAZADO' && (
                               <>
                                 <button
-                                  onClick={() => setCreditDoc(d)}
+                                  onClick={() => setNoteModal({ doc: d, kind: 'CREDIT' })}
                                   className="rounded-lg px-2 py-1 text-xs font-medium text-amber-600 transition hover:bg-amber-50"
-                                  title="Nota crédito parcial (devolución/ajuste)"
+                                  title="Nota crédito (devolución, descuento, ajuste)"
                                 >
                                   N. crédito
+                                </button>
+                                <button
+                                  onClick={() => setNoteModal({ doc: d, kind: 'DEBIT' })}
+                                  className="rounded-lg px-2 py-1 text-xs font-medium text-indigo-600 transition hover:bg-indigo-50"
+                                  title="Nota débito (subir el valor)"
+                                >
+                                  N. débito
                                 </button>
                                 <button
                                   onClick={() => handleAnnul(d)}
@@ -576,16 +599,17 @@ function FacturacionElectronica() {
         />
       )}
 
-      {/* MODAL nota crédito parcial */}
-      {creditDoc && (
-        <CreditNoteModal
-          doc={creditDoc}
-          onClose={() => setCreditDoc(null)}
-          onSaved={async (nc) => {
-            setCreditDoc(null);
+      {/* MODAL nota crédito / débito */}
+      {noteModal && (
+        <NoteModal
+          doc={noteModal.doc}
+          kind={noteModal.kind}
+          onClose={() => setNoteModal(null)}
+          onSaved={async (nota) => {
+            setNoteModal(null);
             setAlert({
               type: 'success',
-              message: `Nota crédito ${nc?.number || ''} emitida.`,
+              message: `${noteModal.kind === 'DEBIT' ? 'Nota débito' : 'Nota crédito'} ${nota?.number || ''} emitida.`,
             });
             await loadData();
           }}
@@ -863,7 +887,10 @@ function RepresentationModal({
 }
 
 // Modal de nota crédito PARCIAL: devolución/ajuste sobre una factura aceptada.
-function CreditNoteModal({ doc, onClose, onSaved, onError }) {
+function NoteModal({ doc, kind, onClose, onSaved, onError }) {
+  const isDebit = kind === 'DEBIT';
+  const concepts = isDebit ? DEBIT_CONCEPTS : CREDIT_CONCEPTS;
+  const [concept, setConcept] = useState(isDebit ? '3' : '1');
   const [reason, setReason] = useState('');
   const [lines, setLines] = useState([
     { description: '', quantity: 1, unitPrice: '', vatRate: 0 },
@@ -899,12 +926,19 @@ function CreditNoteModal({ doc, onClose, onSaved, onError }) {
     }
     setSaving(true);
     try {
-      const nc = await createFiscalCreditNote({
+      const payload = {
         originalInvoiceId: doc.id,
-        reason: reason || 'Devolución / ajuste parcial',
+        reason:
+          reason ||
+          concepts.find(([c]) => c === concept)?.[1] ||
+          (isDebit ? 'Ajuste' : 'Devolución / ajuste'),
+        reasonCode: concept,
         lines: clean,
-      });
-      onSaved(nc);
+      };
+      const nota = isDebit
+        ? await createFiscalDebitNote(payload)
+        : await createFiscalCreditNote(payload);
+      onSaved(nota);
     } catch (e) {
       onError(e.message);
     } finally {
@@ -918,10 +952,11 @@ function CreditNoteModal({ doc, onClose, onSaved, onError }) {
         <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
           <div>
             <h3 className="text-sm font-semibold text-gray-800">
-              Nota crédito parcial
+              {isDebit ? 'Nota débito' : 'Nota crédito'}
             </h3>
             <p className="text-xs text-gray-500">
-              Sobre la factura {doc.number} · para devoluciones o ajustes de valor.
+              Sobre la factura {doc.number} ·{' '}
+              {isDebit ? 'sube el valor cobrado' : 'devoluciones, descuentos o ajustes'}.
             </p>
           </div>
           <button
@@ -934,12 +969,28 @@ function CreditNoteModal({ doc, onClose, onSaved, onError }) {
         <div className="space-y-3 p-5">
           <label className="flex flex-col text-sm">
             <span className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
-              Motivo
+              Concepto (DIAN)
+            </span>
+            <select
+              value={concept}
+              onChange={(e) => setConcept(e.target.value)}
+              className="rounded-lg border border-gray-200 px-3 py-2 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+            >
+              {concepts.map(([c, label]) => (
+                <option key={c} value={c}>
+                  {c} · {label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="flex flex-col text-sm">
+            <span className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
+              Motivo (detalle)
             </span>
             <input
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="Devolución de un producto, descuento, corrección…"
+              placeholder="Descripción del motivo…"
               className="rounded-lg border border-gray-200 px-3 py-2 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
             />
           </label>
@@ -1005,7 +1056,7 @@ function CreditNoteModal({ doc, onClose, onSaved, onError }) {
           </div>
 
           <div className="text-right text-sm font-semibold text-gray-800">
-            Total a acreditar:{' '}
+            {isDebit ? 'Total a cobrar (adicional):' : 'Total a acreditar:'}{' '}
             {'$' + total.toLocaleString('es-CO', { maximumFractionDigits: 0 })}
           </div>
         </div>
@@ -1014,7 +1065,7 @@ function CreditNoteModal({ doc, onClose, onSaved, onError }) {
             Cancelar
           </Button>
           <Button variant="primary" icon={PlusIcon} loading={saving} onClick={submit}>
-            Emitir nota crédito
+            {isDebit ? 'Emitir nota débito' : 'Emitir nota crédito'}
           </Button>
         </div>
       </div>
