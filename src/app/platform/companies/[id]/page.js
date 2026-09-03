@@ -393,6 +393,7 @@ export default function CompanyDetail() {
                   />
                   <FeatureRow label="Pagos en línea (Wompi)" on={c.wompiEnabled} />
                   <FeatureRow label="Tienda online" on={c.websiteEnabled} />
+                  <FeatureRow label="Empresa de pruebas (sandbox)" on={c.isTestCompany} />
                 </ul>
                 <div className="mt-4 border-t border-gray-100 pt-3">
                   <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">

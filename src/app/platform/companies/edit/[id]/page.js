@@ -55,7 +55,11 @@ function ModulesPricePanel({ company, updateCompany, onSaved }) {
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState({});
   // Funciones que activa la plataforma por empresa.
-  const [feats, setFeats] = useState({ bank: false, einvoice: false });
+  const [feats, setFeats] = useState({
+    bank: false,
+    einvoice: false,
+    test: false,
+  });
 
   useEffect(() => {
     if (!company) return;
@@ -67,6 +71,7 @@ function ModulesPricePanel({ company, updateCompany, onSaved }) {
     setFeats({
       bank: !!company.bankNotifyEnabled,
       einvoice: !!company.electronicInvoicingEnabled,
+      test: !!company.isTestCompany,
     });
     setPrice({
       monthlyPrice: company.monthlyPrice ?? '',
@@ -99,6 +104,7 @@ function ModulesPricePanel({ company, updateCompany, onSaved }) {
         enabledModules: manual ? enabled : [],
         bankNotifyEnabled: feats.bank,
         electronicInvoicingEnabled: feats.einvoice,
+        isTestCompany: feats.test,
         monthlyPrice:
           price.monthlyPrice === '' ? null : Number(price.monthlyPrice),
         discountedPrice:
@@ -186,9 +192,15 @@ function ModulesPricePanel({ company, updateCompany, onSaved }) {
           />
           <FeatureToggle
             title="Facturación electrónica DIAN"
-            desc="Muestra el módulo de factura electrónica (vía Factus)."
+            desc="Muestra el módulo de factura electrónica (integración propia)."
             on={feats.einvoice}
             onToggle={() => setFeats((f) => ({ ...f, einvoice: !f.einvoice }))}
+          />
+          <FeatureToggle
+            title="Empresa de pruebas (sandbox)"
+            desc="Solo estas empresas ven funciones aún no liberadas (DIAN: factura y nómina electrónica). Los negocios reales no la ven hasta el release."
+            on={feats.test}
+            onToggle={() => setFeats((f) => ({ ...f, test: !f.test }))}
           />
         </div>
       </div>

@@ -69,13 +69,15 @@ export default function useNavigation() {
     if (!modules.includes('orders')) modules.push('orders');
   }
 
-  // Facturación electrónica DIAN: SOLO para empresas donde la plataforma la
-  // habilitó (electronicInvoicingEnabled) o que ya están vinculadas al servicio
-  // fiscal (fiscalCompanyId). Así NO aparece en los negocios reales que aún no
-  // la usan. El acceso además está limitado por rol (SUPER_ADMIN/ADMIN).
+  // Facturación electrónica DIAN: aún NO está liberada al 100%, así que SOLO se
+  // muestra en empresas de PRUEBA (isTestCompany) que además la tengan habilitada
+  // (electronicInvoicingEnabled) o ya vinculada al servicio fiscal (fiscalCompanyId).
+  // Los negocios reales en producción NO la ven hasta el release oficial.
+  // El acceso además está limitado por rol (SUPER_ADMIN/ADMIN).
   if (
-    usuario.company?.electronicInvoicingEnabled ||
-    usuario.company?.fiscalCompanyId
+    usuario.company?.isTestCompany &&
+    (usuario.company?.electronicInvoicingEnabled ||
+      usuario.company?.fiscalCompanyId)
   ) {
     modules.push('facturacion-electronica');
     // Nómina electrónica: mismo enlace DIAN; el candado de plan (Órbita) decide.
