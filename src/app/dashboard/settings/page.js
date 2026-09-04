@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import RoleGuard from '@/auth/roleGuard';
-import { Roles } from '@/config/roles';
+import { Roles, ALL_EXCEPT_BARBER } from '@/config/roles';
 import {
   GiftIcon,
   BuildingStorefrontIcon,
@@ -1262,7 +1262,7 @@ export default function Settings() {
   }, [canConfig]);
 
   return (
-    <RoleGuard allowedRoles={Object.values(Roles)}>
+    <RoleGuard allowedRoles={ALL_EXCEPT_BARBER}>
       <div className="w-full p-4">
         <div className="mb-4 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
           <h1 className="text-xl font-semibold text-gray-800 md:text-2xl">

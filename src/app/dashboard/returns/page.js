@@ -8,7 +8,7 @@ import {
   ArrowUturnLeftIcon,
 } from '@heroicons/react/24/outline';
 import RoleGuard from '@/auth/roleGuard';
-import { Roles } from '@/config/roles';
+import { Roles, ALL_EXCEPT_BARBER } from '@/config/roles';
 import useReturns from '@/lib/api/hooks/useReturns';
 import { getSales } from '@/lib/api/routes/sales';
 import { formatCOP, formatDateTime } from '@/lib/api/utils/utils';
@@ -136,7 +136,7 @@ export default function ReturnsPage() {
   };
 
   return (
-    <RoleGuard allowedRoles={Object.values(Roles)}>
+    <RoleGuard allowedRoles={ALL_EXCEPT_BARBER}>
       <div className="w-full p-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
           <div>

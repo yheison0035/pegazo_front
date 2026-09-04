@@ -899,7 +899,8 @@ export const WIDGET_AUDIENCE = {
   'proximas-citas': 'owner',
   mes: 'owner',
   'por-cobrar': 'owner',
-  cumpleanos: 'all',
+  // Cumpleaños del equipo: es info de compañeros → NO para el barbero.
+  cumpleanos: 'owner',
   calculadora: 'all',
   'lo-que-debo': 'all',
   'total-a-pagar': 'barber',

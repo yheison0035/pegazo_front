@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { EyeIcon, TruckIcon } from '@heroicons/react/24/outline';
 import RoleGuard from '@/auth/roleGuard';
-import { Roles } from '@/config/roles';
+import { Roles, ALL_EXCEPT_BARBER } from '@/config/roles';
 import Pagination from '@/components/dashboard/tables/segments/pagination';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import AlertModal from '@/components/dashboard/modals/alertModal';
@@ -54,7 +54,7 @@ export default function Orders() {
   };
 
   return (
-    <RoleGuard allowedRoles={Object.values(Roles)}>
+    <RoleGuard allowedRoles={ALL_EXCEPT_BARBER}>
       <div className="w-full p-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-5">
           <div>

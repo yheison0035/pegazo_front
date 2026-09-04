@@ -5,7 +5,7 @@ import { PlusIcon } from '@heroicons/react/24/outline';
 import Button from '@/components/ui/Button';
 
 import RoleGuard from '@/auth/roleGuard';
-import { Roles } from '@/config/roles';
+import { Roles, ALL_EXCEPT_BARBER } from '@/config/roles';
 import { useAuth } from '@/context/authContext';
 
 import useLocals from '@/lib/api/hooks/useLocals';
@@ -80,7 +80,7 @@ export default function Locals() {
   };
 
   return (
-    <RoleGuard allowedRoles={Object.values(Roles)}>
+    <RoleGuard allowedRoles={ALL_EXCEPT_BARBER}>
       <div className="w-full p-4">
         <div className="flex flex-col md:flex-row justify-between mb-4 gap-4">
           <h1 className="text-2xl font-semibold">Listado de Locales</h1>
