@@ -232,21 +232,10 @@ export const NAVIGATION = [
         name: 'Consignaciones',
         href: '/dashboard/bank',
         icon: BanknotesIcon,
-        // Roles del negocio que ven dinero. El BARBERO NO (información financiera).
-        roles: [
-          'SUPER_ADMIN',
-          'COORDINADOR',
-          'ADMIN',
-          'ASESOR',
-          'AUXILIAR',
-          'BODEGUERO',
-          'VENTAS',
-          'CAJA',
-          'RECEPCIONISTA',
-          'MESERO',
-          'COCINERO',
-          'PROFESIONAL',
-        ],
+        // Información financiera sensible: SOLO el dueño (SUPER_ADMIN), el
+        // administrador (ADMIN) y la recepcionista. El barbero/profesional y demás
+        // roles operativos NO lo ven.
+        roles: ['SUPER_ADMIN', 'ADMIN', 'RECEPCIONISTA'],
       },
       {
         name: 'Cotizaciones',
