@@ -28,8 +28,15 @@ export async function createExpenses(dto) {
     amount: parseCOPToNumber(dto.amount) || 0,
     localId: Number(dto.localId) || null,
     providerId: Number(dto.providerId) || null,
+    // La categoría (tipo de gasto) debe ir como entero, no como texto.
+    expenseCategoryId: dto.expenseCategoryId
+      ? Number(dto.expenseCategoryId)
+      : undefined,
     expenseDate: new Date(dto.expenseDate) || '',
   };
+  // El enum `type` lo deriva el backend desde la categoría; no enviarlo vacío
+  // (un '' rompe la validación @IsEnum).
+  if (!body.type) delete body.type;
 
   return apiFetch('/expenses', {
     method: 'POST',
@@ -38,15 +45,27 @@ export async function createExpenses(dto) {
 }
 
 export async function updateExpenses(id, dto) {
-  const { id: _id, createdAt, updatedAt, local, provider, ...cleanDto } = dto;
+  const {
+    id: _id,
+    createdAt,
+    updatedAt,
+    local,
+    provider,
+    expenseCategory,
+    ...cleanDto
+  } = dto;
 
   const body = {
     ...cleanDto,
     amount: parseCOPToNumber(dto.amount) || 0,
     localId: Number(dto.localId) || null,
     providerId: Number(dto.providerId) || null,
+    expenseCategoryId: dto.expenseCategoryId
+      ? Number(dto.expenseCategoryId)
+      : undefined,
     expenseDate: new Date(dto.expenseDate) || '',
   };
+  if (!body.type) delete body.type;
 
   return apiFetch(`/expenses/${id}`, {
     method: 'PUT',
