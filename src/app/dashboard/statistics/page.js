@@ -453,7 +453,7 @@ export default function Statistics() {
               onClick={() => setResumenDrill('expenses')}
             />
             <KpiCard
-              label="Utilidad"
+              label="Utilidad/Ganancia"
               value={formatMoney(s.profit)}
               delta={s.deltas.profit}
               accent={PALETTE[5]}
