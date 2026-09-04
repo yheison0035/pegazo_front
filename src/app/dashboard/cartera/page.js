@@ -7,7 +7,7 @@ import {
   BanknotesIcon,
 } from '@heroicons/react/24/outline';
 import RoleGuard from '@/auth/roleGuard';
-import { Roles } from '@/config/roles';
+import { Roles, ALL_EXCEPT_BARBER } from '@/config/roles';
 import {
   getReceivables,
   getPaymentsHistory,
@@ -108,7 +108,7 @@ export default function CarteraPage() {
     .reduce((a, r) => a + r.saldo, 0);
 
   return (
-    <RoleGuard allowedRoles={Object.values(Roles)}>
+    <RoleGuard allowedRoles={ALL_EXCEPT_BARBER}>
       <div className="w-full p-4">
         {loading && <LoadingOverlay />}
 

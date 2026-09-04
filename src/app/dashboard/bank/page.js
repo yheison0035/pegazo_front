@@ -11,7 +11,7 @@ import {
   BookOpenIcon,
 } from '@heroicons/react/24/outline';
 import RoleGuard from '@/auth/roleGuard';
-import { Roles } from '@/config/roles';
+import { Roles, ALL_EXCEPT_BARBER } from '@/config/roles';
 import Button from '@/components/ui/Button';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import ConfirmModal from '@/components/ui/ConfirmModal';
@@ -200,7 +200,7 @@ export default function BankPage() {
   };
 
   return (
-    <RoleGuard allowedRoles={Object.values(Roles)}>
+    <RoleGuard allowedRoles={ALL_EXCEPT_BARBER}>
       <div className="w-full p-4 max-w-4xl mx-auto">
         <div className="mb-1 flex items-center gap-2">
           <BanknotesIcon className="h-7 w-7 text-orange-500" />

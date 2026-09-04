@@ -8,7 +8,7 @@ import Pagination from '@/components/dashboard/tables/segments/pagination';
 import Button from '@/components/ui/Button';
 import RoleGuard from '@/auth/roleGuard';
 import { useAuth } from '@/context/authContext';
-import { Roles } from '@/config/roles';
+import { Roles, ALL_EXCEPT_BARBER } from '@/config/roles';
 import useCustomers from '@/lib/api/hooks/useCustomers';
 import useTerms from '@/hooks/useTerms';
 import {
@@ -79,7 +79,7 @@ export default function Customers() {
   };
 
   return (
-    <RoleGuard allowedRoles={Object.values(Roles)}>
+    <RoleGuard allowedRoles={ALL_EXCEPT_BARBER}>
       <div className="w-full p-4">
         <div className="flex justify-between mb-4">
           <h1 className="text-2xl font-semibold">

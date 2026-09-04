@@ -8,7 +8,7 @@ import Pagination from '@/components/dashboard/tables/segments/pagination';
 import Link from 'next/link';
 import RoleGuard from '@/auth/roleGuard';
 import { useAuth } from '@/context/authContext';
-import { Roles } from '@/config/roles';
+import { Roles, ALL_EXCEPT_BARBER } from '@/config/roles';
 import useCategories from '@/lib/api/hooks/useCategories';
 import {
   getHeaderTableCategories,
@@ -76,7 +76,7 @@ export default function Categories() {
   const { can } = usePermissions();
 
   return (
-    <RoleGuard allowedRoles={Object.values(Roles)}>
+    <RoleGuard allowedRoles={ALL_EXCEPT_BARBER}>
       <div className="w-full p-4">
         <div className="flex flex-col md:flex-row justify-between mb-4 gap-4">
           <h1 className="text-2xl font-semibold">Listado de Categorías</h1>

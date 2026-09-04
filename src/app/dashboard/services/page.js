@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import RoleGuard from '@/auth/roleGuard';
-import { Roles } from '@/config/roles';
+import { Roles, ALL_EXCEPT_BARBER } from '@/config/roles';
 import { useAuth } from '@/context/authContext';
 import useTerms from '@/hooks/useTerms';
 
@@ -82,7 +82,7 @@ export default function Services() {
   const { can } = usePermissions();
 
   return (
-    <RoleGuard allowedRoles={Object.values(Roles)}>
+    <RoleGuard allowedRoles={ALL_EXCEPT_BARBER}>
       <div className="w-full p-4">
         <div className="flex flex-col md:flex-row justify-between mb-4 gap-4">
           <h1 className="text-2xl font-semibold">Listado de {t.servicePlural}</h1>

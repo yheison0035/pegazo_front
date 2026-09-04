@@ -11,7 +11,7 @@ import {
 import RoleGuard from '@/auth/roleGuard';
 import StatusBadge from '@/components/ui/StatusBadge';
 import EmptyState from '@/components/ui/EmptyState';
-import { Roles } from '@/config/roles';
+import { Roles, ALL_EXCEPT_BARBER } from '@/config/roles';
 import { useAuth } from '@/context/authContext';
 import useQuotes from '@/lib/api/hooks/useQuotes';
 import useSales from '@/lib/api/hooks/useSales';
@@ -229,7 +229,7 @@ export default function QuotesPage() {
   };
 
   return (
-    <RoleGuard allowedRoles={Object.values(Roles)}>
+    <RoleGuard allowedRoles={ALL_EXCEPT_BARBER}>
       <div className="w-full p-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
           <div>
