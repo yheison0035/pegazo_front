@@ -180,18 +180,63 @@ export default function SalesRangeReModal({ onClose }) {
               <h3 className="text-lg font-semibold text-gray-800 mb-4">
                 Resumen General
               </h3>
-              <span className="text-sm text-gray-600">
-                {Object.entries(result.total.users).map(([user]) => (
-                  <div
-                    key={user}
-                    className="flex justify-between text-sm text-gray-700"
-                  >
-                    <span className="font-bold">
-                      {toggleCase(user, 'uppercase')}
-                    </span>
+
+              {/* Desglose por barbero/asesor: lo vendido, su % y lo que gana */}
+              {Array.isArray(result.total.users) &&
+                result.total.users.length > 0 && (
+                  <div className="mb-6 overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="text-left text-xs uppercase text-gray-500 border-b border-gray-200">
+                          <th className="py-2 pr-3">Barbero / Asesor</th>
+                          <th className="py-2 px-3 text-right">Vendido</th>
+                          <th className="py-2 px-3 text-right">Servicios</th>
+                          <th className="py-2 px-3 text-right">Productos</th>
+                          <th className="py-2 px-3 text-center">% Serv.</th>
+                          <th className="py-2 px-3 text-center">% Prod.</th>
+                          <th className="py-2 pl-3 text-right">Gana (comisión)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {result.total.users.map((u) => (
+                          <tr
+                            key={u.userId}
+                            className="border-b border-gray-100 last:border-0"
+                          >
+                            <td className="py-2 pr-3 font-semibold text-gray-800">
+                              {toggleCase(u.name, 'uppercase')}
+                            </td>
+                            <td className="py-2 px-3 text-right text-gray-700">
+                              {formatCOP(u.total)}
+                            </td>
+                            <td className="py-2 px-3 text-right text-gray-500">
+                              {formatCOP(u.services)}
+                            </td>
+                            <td className="py-2 px-3 text-right text-gray-500">
+                              {formatCOP(u.products)}
+                            </td>
+                            <td className="py-2 px-3 text-center text-gray-600">
+                              {u.serviceRate != null ? `${u.serviceRate}%` : '—'}
+                            </td>
+                            <td className="py-2 px-3 text-center text-gray-600">
+                              {u.productRate != null ? `${u.productRate}%` : '—'}
+                            </td>
+                            <td className="py-2 pl-3 text-right font-bold text-green-600">
+                              {u.ratesConfigured ? (
+                                formatCOP(u.commission)
+                              ) : (
+                                <span className="text-xs font-medium text-amber-600">
+                                  sin % configurado
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
-                ))}
-              </span>
+                )}
+
               <div className="flex justify-between items-center mb-4">
                 <span className="text-sm text-gray-600">
                   Total de ventas en el rango de{' '}
