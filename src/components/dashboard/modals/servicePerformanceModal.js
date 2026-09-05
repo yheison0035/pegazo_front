@@ -228,109 +228,121 @@ export default function ServicePerformanceModal({ onClose }) {
                           Cantidad
                         </th>
                         <th className="text-right px-4 py-3 border-b">Total</th>
-                        <th className="text-right px-4 py-3 border-b">
-                          Comisión
+                        <th className="text-right px-4 py-3 border-b text-green-700">
+                          Cortes
+                          <span className="block text-[10px] font-normal normal-case text-gray-400">
+                            se paga el sábado
+                          </span>
                         </th>
-                        <th className="text-right px-4 py-3 border-b"></th>
+                        <th className="text-right px-4 py-3 border-b text-blue-700">
+                          Productos
+                          <span className="block text-[10px] font-normal normal-case text-gray-400">
+                            se paga del 3 al 2
+                          </span>
+                        </th>
                       </tr>
                     </thead>
 
                     <tbody>
-                      {Object.entries(result).map(([user, data]) => (
-                        <React.Fragment key={user}>
-                          <tr className="bg-gray-50 border-t">
-                            <td
-                              colSpan="5"
-                              className="px-4 py-3 font-bold text-gray-800"
-                            >
-                              {user}
-                              {data.ratesConfigured ? (
-                                <span className="ml-2 text-xs font-medium text-gray-500">
-                                  (Servicios {data.serviceRate ?? 0}% · Productos{' '}
-                                  {data.productRate ?? 0}%)
-                                </span>
-                              ) : (
-                                <span className="ml-2 text-xs font-medium text-amber-600">
-                                  sin % configurado
-                                </span>
-                              )}
-                            </td>
-                            <td></td>
-                          </tr>
-
-                          {Object.entries(data.services).map(([name, s]) => (
-                            <tr key={name} className="border-b border-gray-200">
-                              <td></td>
-
-                              <td className="px-4 py-2">
-                                {name} · {formatCOP(s.price)}
-                              </td>
-
-                              <td className="text-center">{s.count}</td>
-
-                              <td className="text-right font-semibold">
-                                {formatCOP(s.total)}
-                              </td>
-
-                              <td className="text-right text-green-600 font-semibold">
-                                {formatCOP(s.commission)}
-                              </td>
-                              <td></td>
-                            </tr>
-                          ))}
-
-                          {Object.entries(data.products).map(([name, p]) => (
-                            <tr key={name} className="border-b border-gray-200">
-                              <td></td>
-
-                              <td className="px-4 py-2 text-gray-600">
-                                <span className="inline-flex items-center gap-1.5">
-                                  <CubeIcon className="h-4 w-4 flex-none text-gray-400" />
-                                  {name}
-                                </span>
-                              </td>
-
-                              <td className="text-center">{p.count}</td>
-
-                              <td className="text-right font-semibold">
-                                {formatCOP(p.total)}
-                              </td>
-
-                              <td className="text-right font-semibold text-green-600">
-                                {p.commission > 0 ? (
-                                  formatCOP(p.commission)
+                      {Object.entries(result).map(([user, data]) => {
+                        const weeklyNet =
+                          data.totals.netCommission ??
+                          data.totals.servicesCommission ??
+                          0;
+                        return (
+                          <React.Fragment key={user}>
+                            <tr className="bg-gray-50 border-t">
+                              <td
+                                colSpan="6"
+                                className="px-4 py-3 font-bold text-gray-800"
+                              >
+                                {user}
+                                {data.ratesConfigured ? (
+                                  <span className="ml-2 text-xs font-medium text-gray-500">
+                                    (Cortes {data.serviceRate ?? 0}% · Productos{' '}
+                                    {data.productRate ?? 0}%)
+                                  </span>
                                 ) : (
-                                  <span className="text-gray-300">—</span>
+                                  <span className="ml-2 text-xs font-medium text-amber-600">
+                                    sin % configurado
+                                  </span>
                                 )}
                               </td>
-                              <td></td>
                             </tr>
-                          ))}
 
-                          <tr className="bg-gray-100 font-semibold">
-                            <td></td>
+                            {Object.entries(data.services).map(([name, s]) => (
+                              <tr
+                                key={name}
+                                className="border-b border-gray-200"
+                              >
+                                <td></td>
+                                <td className="px-4 py-2">
+                                  {name} · {formatCOP(s.price)}
+                                </td>
+                                <td className="text-center">{s.count}</td>
+                                <td className="text-right font-semibold">
+                                  {formatCOP(s.total)}
+                                </td>
+                                <td className="text-right text-green-600 font-semibold">
+                                  {formatCOP(s.commission)}
+                                </td>
+                                <td className="text-right text-gray-300">—</td>
+                              </tr>
+                            ))}
 
-                            <td className="px-4 py-3">Totales</td>
+                            {Object.entries(data.products).map(([name, p]) => (
+                              <tr
+                                key={name}
+                                className="border-b border-gray-200"
+                              >
+                                <td></td>
+                                <td className="px-4 py-2 text-gray-600">
+                                  <span className="inline-flex items-center gap-1.5">
+                                    <CubeIcon className="h-4 w-4 flex-none text-gray-400" />
+                                    {name}
+                                  </span>
+                                </td>
+                                <td className="text-center">{p.count}</td>
+                                <td className="text-right font-semibold">
+                                  {formatCOP(p.total)}
+                                </td>
+                                <td className="text-right text-gray-300">—</td>
+                                <td className="text-right font-semibold text-blue-600">
+                                  {p.commission > 0 ? (
+                                    formatCOP(p.commission)
+                                  ) : (
+                                    <span className="text-gray-300">—</span>
+                                  )}
+                                </td>
+                              </tr>
+                            ))}
 
-                            <td></td>
+                            <tr className="bg-gray-100 font-semibold">
+                              <td></td>
+                              <td className="px-4 py-3">Totales comisión</td>
+                              <td></td>
+                              <td className="text-right text-purple-700">
+                                {formatCOP(data.totals.total)}
+                              </td>
+                              <td className="text-right text-green-600">
+                                {data.totals.servicesCommission > 0
+                                  ? formatCOP(data.totals.servicesCommission)
+                                  : '—'}
+                              </td>
+                              <td className="text-right text-blue-600">
+                                {data.totals.productsCommission > 0
+                                  ? formatCOP(data.totals.productsCommission)
+                                  : '—'}
+                              </td>
+                            </tr>
 
-                            <td className="text-right text-purple-700">
-                              {formatCOP(data.totals.total)}
-                            </td>
-
-                            <td className="text-right text-green-600">
-                              {data.totals.commission > 0
-                                ? formatCOP(data.totals.commission)
-                                : '—'}
-                            </td>
-                            <td></td>
-                          </tr>
-
-                          {/* Cargos/descuentos del barbero + neto a pagar */}
-                          {data.totals.charges > 0 && (
-                            <>
-                              {(data.chargesList || []).map((c) => (
-                                <tr key={`ch-${c.id}`} className="border-b border-red-100 bg-red-50/40">
+                            {/* Cargos/descuentos: se restan del pago semanal (cortes) */}
+                            {data.totals.charges > 0 &&
+                              (data.chargesList || []).map((c) => (
+                                <tr
+                                  key={`ch-${c.id}`}
+                                  className="border-b border-red-100 bg-red-50/40"
+                                >
                                   <td></td>
                                   <td className="px-4 py-2 text-red-600">
                                     − {c.concept}
@@ -340,28 +352,43 @@ export default function ServicePerformanceModal({ onClose }) {
                                   <td className="text-right font-semibold text-red-600">
                                     −{formatCOP(c.amount)}
                                   </td>
-                                  <td></td>
+                                  <td className="text-right text-gray-300">—</td>
                                 </tr>
                               ))}
-                              <tr className="bg-orange-50 font-bold">
-                                <td></td>
-                                <td className="px-4 py-3 text-gray-800">
-                                  Neto a pagar
-                                  <span className="ml-1 text-xs font-normal text-gray-500">
-                                    (comisión − cargos)
-                                  </span>
-                                </td>
-                                <td></td>
-                                <td></td>
-                                <td className="text-right text-orange-700">
-                                  {formatCOP(data.totals.netCommission)}
-                                </td>
-                                <td></td>
-                              </tr>
-                            </>
-                          )}
-                        </React.Fragment>
-                      ))}
+
+                            {/* A pagar el sábado: cortes − cargos */}
+                            <tr className="bg-orange-50 font-bold">
+                              <td></td>
+                              <td colSpan="3" className="px-4 py-3 text-gray-800">
+                                A pagar el sábado
+                                <span className="ml-1 text-xs font-normal text-gray-500">
+                                  (cortes − cargos)
+                                </span>
+                              </td>
+                              <td className="text-right text-orange-700">
+                                {formatCOP(weeklyNet)}
+                              </td>
+                              <td className="text-right text-gray-300">—</td>
+                            </tr>
+
+                            {/* A pagar mensual: productos (del 3 al 2) */}
+                            <tr className="bg-blue-50 font-bold">
+                              <td></td>
+                              <td colSpan="4" className="px-4 py-3 text-gray-800">
+                                A pagar mensual — productos
+                                <span className="ml-1 text-xs font-normal text-gray-500">
+                                  (del 3 al 2)
+                                </span>
+                              </td>
+                              <td className="text-right text-blue-700">
+                                {data.totals.productsCommission > 0
+                                  ? formatCOP(data.totals.productsCommission)
+                                  : '—'}
+                              </td>
+                            </tr>
+                          </React.Fragment>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
