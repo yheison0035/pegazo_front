@@ -244,6 +244,16 @@ export default function ServicePerformanceModal({ onClose }) {
                               className="px-4 py-3 font-bold text-gray-800"
                             >
                               {user}
+                              {data.ratesConfigured ? (
+                                <span className="ml-2 text-xs font-medium text-gray-500">
+                                  (Servicios {data.serviceRate ?? 0}% · Productos{' '}
+                                  {data.productRate ?? 0}%)
+                                </span>
+                              ) : (
+                                <span className="ml-2 text-xs font-medium text-amber-600">
+                                  sin % configurado
+                                </span>
+                              )}
                             </td>
                             <td></td>
                           </tr>
@@ -286,7 +296,13 @@ export default function ServicePerformanceModal({ onClose }) {
                                 {formatCOP(p.total)}
                               </td>
 
-                              <td className="text-right text-gray-300">—</td>
+                              <td className="text-right font-semibold text-green-600">
+                                {p.commission > 0 ? (
+                                  formatCOP(p.commission)
+                                ) : (
+                                  <span className="text-gray-300">—</span>
+                                )}
+                              </td>
                               <td></td>
                             </tr>
                           ))}
