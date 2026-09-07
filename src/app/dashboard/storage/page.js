@@ -503,11 +503,11 @@ export default function StoragePage() {
           <button
             type="button"
             onClick={() => { setTab('activos'); setWashOnly(false); setQ(''); }}
-            className={`rounded-2xl border p-4 text-left transition hover:shadow-md ${tab === 'activos' && !washOnly ? 'border-blue-400 bg-blue-50 ring-2 ring-blue-500/20' : 'border-blue-200 bg-blue-50'}`}
+            className={`rounded-2xl border p-4 text-left transition hover:shadow-md ${tab === 'activos' && !washOnly ? 'border-orange-400 bg-orange-50 ring-2 ring-orange-500/20' : 'border-orange-200 bg-orange-50'}`}
           >
-            <p className="text-xs font-semibold uppercase text-blue-700">En custodia</p>
-            <p className="mt-1 text-2xl font-extrabold text-blue-900">{summary?.active || 0}</p>
-            <p className="text-[10px] text-blue-700/60">Ver lista</p>
+            <p className="text-xs font-semibold uppercase text-orange-700">En custodia</p>
+            <p className="mt-1 text-2xl font-extrabold text-orange-700">{summary?.active || 0}</p>
+            <p className="text-[10px] text-orange-700/60">Ver lista</p>
           </button>
           <button
             type="button"
@@ -683,7 +683,7 @@ export default function StoragePage() {
                           <ClockIcon className="h-3.5 w-3.5" />
                           {charge.elapsedLabel}
                         </span>
-                        <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-semibold text-blue-700">
+                        <span className="rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-semibold text-gray-600">
                           {t.billingMode === 'DIA' ? 'Por día' : t.billingMode === 'MENSUALIDAD' ? 'Mensualidad' : 'Por hora'}
                         </span>
                         {t.washRequested && (
@@ -887,7 +887,7 @@ export default function StoragePage() {
                 <div className="space-y-2">
                   {/* Guardado */}
                   <div className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-gray-50/60 px-3.5 py-3">
-                    <span className="grid h-9 w-9 flex-none place-items-center rounded-xl bg-blue-100 text-blue-600">
+                    <span className="grid h-9 w-9 flex-none place-items-center rounded-xl bg-orange-100 text-orange-600">
                       <ClockIcon className="h-5 w-5" />
                     </span>
                     <div className="min-w-0 flex-1">
@@ -924,7 +924,7 @@ export default function StoragePage() {
                   {/* Productos */}
                   {co.products.map((p) => (
                     <div key={p.variantId} className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-white px-3.5 py-2.5">
-                      <span className="grid h-9 w-9 flex-none place-items-center rounded-xl bg-violet-100 text-violet-600">
+                      <span className="grid h-9 w-9 flex-none place-items-center rounded-xl bg-orange-100 text-orange-600">
                         <ArchiveBoxIcon className="h-5 w-5" />
                       </span>
                       <div className="min-w-0 flex-1">
@@ -1044,7 +1044,7 @@ export default function StoragePage() {
         {receipt && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setReceipt(null)}>
             <div className="w-full max-w-sm rounded-2xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
-              <div className={`flex items-center gap-2 rounded-t-2xl px-5 py-4 text-white ${receipt.kind === 'ingreso' ? 'bg-blue-600' : 'bg-emerald-600'}`}>
+              <div className={`flex items-center gap-2 rounded-t-2xl px-5 py-4 text-white ${receipt.kind === 'ingreso' ? 'bg-gradient-to-r from-orange-500 to-amber-500' : 'bg-emerald-600'}`}>
                 {receipt.kind === 'ingreso' ? <CheckCircleIcon className="h-6 w-6" /> : <BanknotesIcon className="h-6 w-6" />}
                 <div>
                   <p className="text-sm font-bold">
