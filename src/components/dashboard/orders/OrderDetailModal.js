@@ -133,7 +133,7 @@ export default function OrderDetailModal({ orderId, onClose, onUpdated }) {
               {/* Ítems */}
               <div>
                 <p className="text-xs uppercase text-gray-400 mb-2">Productos</p>
-                <div className="rounded-xl border border-gray-100 overflow-hidden">
+                <div className="rounded-xl border border-gray-100 overflow-x-auto">
                   <table className="w-full text-sm">
                     <tbody>
                       {order.items?.map((it) => (
