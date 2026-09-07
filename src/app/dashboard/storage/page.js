@@ -23,6 +23,7 @@ import { formatCOP } from '@/lib/api/utils/utils';
 import { getProducts } from '@/lib/api/routes/inventory';
 import {
   getStorage,
+  getStorageHistory,
   checkInStorage,
   toggleStorageWash,
   checkoutStorage,
@@ -111,6 +112,26 @@ export default function StoragePage() {
   const [products, setProducts] = useState([]);
   const [checkoutTarget, setCheckoutTarget] = useState(null);
   const [co, setCo] = useState({ includeWash: false, products: [], paymentMethod: 'EFECTIVO' });
+
+  const [tab, setTab] = useState('activos'); // activos | historial
+  const [history, setHistory] = useState([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+
+  const loadHistory = useCallback(async () => {
+    setLoadingHistory(true);
+    try {
+      const res = await getStorageHistory(50);
+      setHistory(res?.data || []);
+    } catch {
+      setHistory([]);
+    } finally {
+      setLoadingHistory(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (tab === 'historial') loadHistory();
+  }, [tab, loadHistory]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -344,8 +365,76 @@ export default function StoragePage() {
           </div>
         </div>
 
+        {/* Pestañas: en custodia / historial */}
+        <div className="mb-4 inline-flex rounded-xl border border-gray-200 bg-gray-50 p-1">
+          <button
+            type="button"
+            onClick={() => setTab('activos')}
+            className={`inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold transition ${tab === 'activos' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            <ArchiveBoxIcon className="h-4 w-4" />
+            En custodia {summary?.active ? `(${summary.active})` : ''}
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab('historial')}
+            className={`inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold transition ${tab === 'historial' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            <ClockIcon className="h-4 w-4" />
+            Historial
+          </button>
+        </div>
+
+        {/* Historial de entregados */}
+        {tab === 'historial' && (
+          loadingHistory ? (
+            <p className="py-12 text-center text-sm text-gray-400">Cargando…</p>
+          ) : history.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-gray-200 bg-white py-14 text-center">
+              <p className="text-sm text-gray-500">Aún no hay entregas registradas.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto rounded-2xl border border-gray-100 bg-white shadow-sm">
+              <table className="w-full min-w-[560px] text-sm">
+                <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+                  <tr>
+                    <th className="px-4 py-3 text-left">Cliente</th>
+                    <th className="px-4 py-3 text-center">Cascos</th>
+                    <th className="px-4 py-3 text-left">Entregado</th>
+                    <th className="px-4 py-3 text-center">Lavado</th>
+                    <th className="px-4 py-3 text-right">Cobrado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {history.map((h) => (
+                    <tr key={h.id} className="border-t border-gray-100">
+                      <td className="px-4 py-3 font-medium text-gray-800">
+                        {h.customerName}
+                        <div className="text-[11px] text-gray-400">{h.customerPhone || h.customerEmail || ''}</div>
+                      </td>
+                      <td className="px-4 py-3 text-center text-gray-600">{h.helmetCount}</td>
+                      <td className="px-4 py-3 text-gray-600">
+                        {h.checkOutAt ? new Date(h.checkOutAt).toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' }) : '—'}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        {h.washRequested ? (
+                          <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">{h.washCount || h.helmetCount}</span>
+                        ) : (
+                          <span className="text-gray-300">—</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-right font-bold text-gray-900">{formatCOP(h.amount || 0)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
+        )}
+
         {/* Lista de cascos en custodia */}
-        {loading ? (
+        {tab === 'activos' && (
+        loading ? (
           <p className="py-12 text-center text-sm text-gray-400">Cargando…</p>
         ) : active.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-gray-200 bg-white py-14 text-center">
@@ -437,6 +526,7 @@ export default function StoragePage() {
               );
             })}
           </div>
+        )
         )}
 
         {/* Modal: recibir casco (check-in) */}
