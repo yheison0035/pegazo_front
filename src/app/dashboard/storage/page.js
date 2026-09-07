@@ -21,7 +21,9 @@ import Button from '@/components/ui/Button';
 import MoneyInput from '@/components/ui/MoneyInput';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import { formatCOP } from '@/lib/api/utils/utils';
+import { printSaleInvoice } from '@/utils/printInvoice';
 import { getProducts } from '@/lib/api/routes/inventory';
+import { getUsers } from '@/lib/api/routes/users';
 import {
   getStorage,
   getStorageHistory,
@@ -185,6 +187,7 @@ const EMPTY_CHECKIN = {
   washRequested: false,
   washCount: 1,
   helmetCount: 1,
+  receivedById: '',
   notes: '',
 };
 
@@ -209,6 +212,7 @@ export default function StoragePage() {
   const [sForm, setSForm] = useState(null);
 
   const [products, setProducts] = useState([]);
+  const [users, setUsers] = useState([]);
   const [checkoutTarget, setCheckoutTarget] = useState(null);
   const [co, setCo] = useState({ includeWash: false, products: [], paymentMethod: 'EFECTIVO' });
 
@@ -266,7 +270,20 @@ export default function StoragePage() {
         setProducts(list);
       })
       .catch(() => setProducts([]));
-  }, [load]);
+    // Usuarios registrados (para elegir quién recibe el casco). Se garantiza que
+    // el usuario actual siempre esté disponible aunque no pueda listar usuarios.
+    const meOption = usuario?.id ? [{ id: usuario.id, name: usuario.name || 'Yo' }] : [];
+    getUsers({ limit: 200 })
+      .then((r) => {
+        const list = r?.data || [];
+        const withMe =
+          usuario?.id && !list.some((u) => u.id === usuario.id)
+            ? [...meOption, ...list]
+            : list;
+        setUsers(withMe);
+      })
+      .catch(() => setUsers(meOption));
+  }, [load, usuario?.id, usuario?.name]);
 
   // Reloj en vivo (cada 30s) para el cobro que corre con el tiempo.
   useEffect(() => {
@@ -312,6 +329,7 @@ export default function StoragePage() {
           ? Math.min(Math.max(1, Number(ci.washCount) || helmets), helmets)
           : 0,
         helmetCount: helmets,
+        receivedById: ci.receivedById ? Number(ci.receivedById) : undefined,
         notes: ci.notes.trim() || undefined,
       });
       setCi({ ...EMPTY_CHECKIN });
@@ -387,7 +405,7 @@ export default function StoragePage() {
     if (!checkoutTarget) return;
     setBusy(true);
     try {
-      await checkoutStorage(checkoutTarget.id, {
+      const res = await checkoutStorage(checkoutTarget.id, {
         paymentMethod: co.paymentMethod,
         includeWash: co.includeWash,
         products: co.products.map((p) => ({ inventoryVariantId: p.variantId, quantity: p.quantity })),
@@ -397,8 +415,9 @@ export default function StoragePage() {
         (PAY_METHODS.find((m) => m.id === co.paymentMethod) || {}).label || co.paymentMethod;
       const tot = { ...checkoutTotals, products: co.products };
       const ticket = checkoutTarget;
+      const sale = res?.data?.sale || null; // venta real (para impreso de Ventas realizadas)
       setCheckoutTarget(null);
-      setReceipt({ kind: 'factura', ticket, tot, methodLabel });
+      setReceipt({ kind: 'factura', ticket, tot, methodLabel, sale });
       load();
     } catch (e) {
       setAlert({ type: 'error', message: e.message || 'No se pudo cobrar.' });
@@ -482,7 +501,14 @@ export default function StoragePage() {
                 Tarifas
               </button>
             )}
-            <Button variant="add" icon={PlusIcon} onClick={() => setShowCheckIn(true)}>
+            <Button
+              variant="add"
+              icon={PlusIcon}
+              onClick={() => {
+                setCi({ ...EMPTY_CHECKIN, receivedById: usuario?.id ? String(usuario.id) : '' });
+                setShowCheckIn(true);
+              }}
+            >
               Recibir casco
             </Button>
           </div>
@@ -587,6 +613,9 @@ export default function StoragePage() {
                         <p className="text-[11px] text-gray-400">
                           #{h.id} · {h.customerPhone || h.customerEmail || ''}
                         </p>
+                        {h.receivedByName && (
+                          <p className="text-[10px] text-gray-400">Recibió: {h.receivedByName}</p>
+                        )}
                       </div>
                       <span className="whitespace-nowrap rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold text-gray-500">
                         {h.helmetCount} casco{h.helmetCount > 1 ? 's' : ''}
@@ -604,21 +633,23 @@ export default function StoragePage() {
                     <button
                       type="button"
                       onClick={() =>
-                        printReceipt(
-                          'Factura',
-                          company,
-                          facturaBody(
-                            h,
-                            {
-                              charge: { storageCharge: h.amount || 0, units: 0, unit: '', helmets: h.helmetCount },
-                              wash: 0,
-                              washUnits: 0,
-                              products: [],
-                              total: h.amount || 0,
-                            },
-                            'Pagado',
-                          ),
-                        )
+                        h.sale
+                          ? printSaleInvoice(h.sale, usuario)
+                          : printReceipt(
+                              'Factura',
+                              company,
+                              facturaBody(
+                                h,
+                                {
+                                  charge: { storageCharge: h.amount || 0, helmets: h.helmetCount },
+                                  wash: 0,
+                                  washUnits: 0,
+                                  products: [],
+                                  total: h.amount || 0,
+                                },
+                                'Pagado',
+                              ),
+                            )
                       }
                       className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-2.5 py-1.5 text-[11px] font-semibold text-gray-600 hover:bg-gray-50"
                     >
@@ -678,6 +709,9 @@ export default function StoragePage() {
                         {t.customerPhone || t.customerEmail || ''}
                         {t.helmetCount > 1 ? ` · ${t.helmetCount} cascos` : ''}
                       </p>
+                      {t.receivedByName && (
+                        <p className="text-[10px] text-gray-400">Recibió: {t.receivedByName}</p>
+                      )}
                       <div className="mt-2 flex flex-wrap items-center gap-2">
                         <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-semibold text-gray-600">
                           <ClockIcon className="h-3.5 w-3.5" />
@@ -758,17 +792,20 @@ export default function StoragePage() {
         </>
         )}
 
-        {/* Modal: recibir casco (check-in) */}
+        {/* Modal: recibir casco (check-in) — diseño pro */}
         {showCheckIn && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setShowCheckIn(false)}>
-            <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-              <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-lg font-bold text-gray-800">Recibir casco</h2>
-                <button onClick={() => setShowCheckIn(false)} className="text-gray-400 hover:text-gray-600">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" onClick={() => setShowCheckIn(false)}>
+            <div className="flex max-h-[94vh] w-full max-w-md flex-col overflow-hidden rounded-3xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
+              <div className="relative bg-gradient-to-br from-orange-500 to-amber-500 px-6 py-5 text-white">
+                <button onClick={() => setShowCheckIn(false)} className="absolute right-4 top-4 text-white/80 hover:text-white">
                   <XMarkIcon className="h-5 w-5" />
                 </button>
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/80">Guarda cascos</p>
+                <h2 className="mt-1 flex items-center gap-2 text-xl font-bold">
+                  <ArchiveBoxIcon className="h-6 w-6" /> Recibir casco
+                </h2>
               </div>
-              <div className="space-y-3">
+              <div className="flex-1 space-y-3 overflow-y-auto px-6 py-5">
                 <div>
                   <label className="mb-1 block text-xs font-semibold text-gray-600">Nombre completo del cliente</label>
                   <input
@@ -777,6 +814,22 @@ export default function StoragePage() {
                     placeholder="EJ: JUAN PÉREZ"
                     className={`${inputCls} uppercase placeholder:normal-case`}
                   />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-gray-600">Quién recibe (asesor a cargo)</label>
+                  <select
+                    value={ci.receivedById}
+                    onChange={(e) => setCi((c) => ({ ...c, receivedById: e.target.value }))}
+                    className={inputCls}
+                  >
+                    <option value="">— Selecciona —</option>
+                    {users.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.name}
+                        {u.id === usuario?.id ? ' (yo)' : ''}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
@@ -849,7 +902,7 @@ export default function StoragePage() {
                 </div>
                 <p className="text-[11px] text-gray-400">La hora de ingreso se registra automáticamente ahora.</p>
               </div>
-              <div className="mt-5 flex justify-end gap-2">
+              <div className="flex justify-end gap-2 border-t border-gray-100 px-6 py-4">
                 <Button variant="secondary" onClick={() => setShowCheckIn(false)}>Cancelar</Button>
                 <Button variant="primary" icon={CheckCircleIcon} onClick={doCheckIn} loading={busy}>Recibir</Button>
               </div>
@@ -1107,15 +1160,15 @@ export default function StoragePage() {
                   <Button
                     variant="primary"
                     icon={PrinterIcon}
-                    onClick={() =>
-                      printReceipt(
-                        receipt.kind === 'ingreso' ? 'Comprobante' : 'Factura',
-                        company,
-                        receipt.kind === 'ingreso'
-                          ? ingresoBody(receipt.ticket, settings)
-                          : facturaBody(receipt.ticket, receipt.tot, receipt.methodLabel),
-                      )
-                    }
+                    onClick={() => {
+                      if (receipt.kind === 'factura' && receipt.sale) {
+                        printSaleInvoice(receipt.sale, usuario);
+                      } else if (receipt.kind === 'ingreso') {
+                        printReceipt('Comprobante', company, ingresoBody(receipt.ticket, settings));
+                      } else {
+                        printReceipt('Factura', company, facturaBody(receipt.ticket, receipt.tot, receipt.methodLabel));
+                      }
+                    }}
                   >
                     Imprimir
                   </Button>
