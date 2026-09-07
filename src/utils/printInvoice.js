@@ -1,5 +1,139 @@
 import { formatCOP, formatDateTime } from '@/lib/api/utils/utils';
 
+// Comprobante de custodia (guarda cascos) — MISMO diseño que la factura de venta
+// (logo, encabezado de empresa, régimen, QR y pie), pero con la información del
+// ingreso: cliente, quién recibe, cascos, lavado, tarifas y observación.
+export function printCustodyTicket(ticket, usuario, settings) {
+  if (!ticket) return;
+
+  const modeLabel =
+    ticket.billingMode === 'DIA'
+      ? 'Por día'
+      : ticket.billingMode === 'MENSUALIDAD'
+        ? 'Mensualidad'
+        : 'Por hora';
+
+  const verifyUrl = `https://pegazo.co/verifyCodeSale?code=CUSTODIA-${ticket.id}`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
+    verifyUrl
+  )}`;
+
+  const responsableIVA = usuario?.company?.responsableIVA ?? false;
+  const regimenText = responsableIVA
+    ? 'Responsable de IVA'
+    : 'No responsable de IVA';
+
+  const tarifasHTML = `
+    ${settings?.hourRate ? `<div class="right">Tarifa por hora: ${formatCOP(settings.hourRate)}</div>` : ''}
+    ${settings?.dayRate ? `<div class="right">Tarifa por día: ${formatCOP(settings.dayRate)}</div>` : ''}
+    ${settings?.washPrice ? `<div class="right">Lavado (c/u): ${formatCOP(settings.washPrice)}</div>` : ''}
+  `;
+
+  const html = `
+  <html>
+    <head>
+      <title>Comprobante ${ticket.id}</title>
+      <style>
+        * { font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; font-size: 11.5px; line-height: 1.4; }
+        body { margin: 0; padding: 10px; width: 80mm; color: #000; }
+        .center { text-align: center; }
+        .right { text-align: right; }
+        .bold { font-weight: 700; }
+        .logo { display: flex; justify-content: center; margin-bottom: 6px; }
+        .logo img { max-width: 120px; height: auto; }
+        .qr { display: flex; justify-content: center; margin-top: 6px; }
+        .qr img { width: 100px; height: 100px; }
+        hr { border: none; border-top: 1px solid #000; margin: 6px 0; }
+        .section-title { text-align: center; font-weight: 700; margin: 4px 0; }
+        .big { text-align: center; font-weight: 700; font-size: 15px; margin: 4px 0; }
+        .footer { font-size: 10px; text-align: center; margin-top: 8px; color: #333; }
+        @media print { body { width: 80mm; } }
+      </style>
+    </head>
+    <body>
+      <div class="logo">
+        <img src=${usuario?.company?.logo || '/images/no-image.png'} alt=${usuario?.company?.name || 'sin nombre'} referrerpolicy="no-referrer" />
+      </div>
+
+      <div class="center bold">${usuario?.company?.name || ''}</div>
+      ${usuario?.company?.nit ? `<div class="center">NIT ${usuario.company.nit}</div>` : ''}
+      ${usuario?.company?.phone ? `<div class="center">+57 ${usuario.company.phone}</div>` : ''}
+      <div class="center">${usuario?.company?.email || ''}</div>
+      <div class="center">Régimen: ${regimenText}</div>
+
+      <hr />
+
+      <div class="section-title">Comprobante de custodia</div>
+      <div class="big">N° ${ticket.id}</div>
+      <div class="center">Guarde este comprobante para reclamar su(s) casco(s)</div>
+
+      <hr />
+
+      <div class="bold">Cliente: ${ticket.customerName || '-------'}</div>
+      ${ticket.customerPhone ? `<div><span class="bold">Celular:</span> ${ticket.customerPhone}</div>` : ''}
+      ${ticket.customerEmail ? `<div><span class="bold">Correo:</span> ${ticket.customerEmail}</div>` : ''}
+      ${ticket.receivedByName ? `<div><span class="bold">Recibió:</span> ${ticket.receivedByName}</div>` : ''}
+
+      <hr />
+
+      <div><span class="bold">Fecha de ingreso:</span> ${formatDateTime(ticket.checkInAt)}</div>
+      <div><span class="bold">N° de cascos:</span> ${ticket.helmetCount || 1}</div>
+      ${ticket.washRequested ? `<div><span class="bold">Lavado:</span> ${ticket.washCount || ticket.helmetCount} casco(s)</div>` : ''}
+      <div><span class="bold">Forma de cobro:</span> ${modeLabel}</div>
+
+      <hr />
+
+      ${tarifasHTML}
+
+      ${
+        ticket.notes
+          ? `<hr /><div style="border:1px solid #f2f4f8; padding:6px; font-size:11px; text-align:left;">
+        <div style="font-weight:700; margin-bottom:4px;">Observaciones:</div>
+        <div>${ticket.notes}</div>
+      </div>`
+          : ''
+      }
+
+      <hr />
+
+      <div class="center bold">Comprobante de custodia</div>
+      <div class="qr">
+        <img src="${qrUrl}" alt="QR" referrerpolicy="no-referrer" />
+      </div>
+
+      <hr />
+      <div class="footer">Presente este comprobante para reclamar su(s) casco(s). El cobro se realiza al momento de la entrega.</div>
+
+      <script>
+        const images = document.images;
+        let loaded = 0;
+        function doPrint(){ window.print(); setTimeout(() => window.close(), 500); }
+        if (images.length === 0) { doPrint(); }
+        else {
+          for (let img of images) {
+            if (img.complete) { loaded++; }
+            else { img.onload = img.onerror = () => { loaded++; if (loaded === images.length) doPrint(); }; }
+          }
+          if (loaded === images.length) doPrint();
+        }
+      </script>
+    </body>
+  </html>`;
+
+  const iframe = document.createElement('iframe');
+  iframe.style.position = 'fixed';
+  iframe.style.right = '0';
+  iframe.style.bottom = '0';
+  iframe.style.width = '0';
+  iframe.style.height = '0';
+  iframe.style.border = '0';
+  document.body.appendChild(iframe);
+  const doc = iframe.contentWindow.document;
+  doc.open();
+  doc.write(html);
+  doc.close();
+}
+
 export function printSaleInvoice(sale, usuario) {
   if (!sale) return;
 
