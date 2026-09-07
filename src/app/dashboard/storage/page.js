@@ -796,6 +796,11 @@ export default function StoragePage() {
                   <span className="rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-semibold backdrop-blur">
                     Ticket #{checkoutTarget.id}
                   </span>
+                  {checkoutTarget.receivedByName && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-semibold backdrop-blur">
+                      <UserIcon className="h-3.5 w-3.5" /> Recibió: {checkoutTarget.receivedByName}
+                    </span>
+                  )}
                 </div>
               </div>
 
