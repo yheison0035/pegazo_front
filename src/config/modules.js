@@ -20,6 +20,7 @@ export const TOGGLEABLE_MODULES = [
 
   { key: 'customers', label: 'Clientes', group: 'Clientes' },
   { key: 'loyalty', label: 'Fidelización', group: 'Clientes' },
+  { key: 'memberships', label: 'Membresías', group: 'Clientes' },
   { key: 'appointments', label: 'Citas', group: 'Clientes' },
   { key: 'services', label: 'Servicios', group: 'Clientes' },
   { key: 'clinical', label: 'Historia clínica (salud)', group: 'Clientes' },
