@@ -387,7 +387,7 @@ export default function EmployeeChargesPage() {
         )}
 
         {/* Lista de cargos */}
-        <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+        <div className="overflow-x-auto rounded-2xl border border-gray-100 bg-white shadow-sm">
           {charges.length === 0 ? (
             <p className="py-12 text-center text-sm text-gray-400">
               Sin cargos registrados.

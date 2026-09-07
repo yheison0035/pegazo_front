@@ -325,7 +325,7 @@ export default function PurchasesPage() {
 
             {/* Líneas de la compra */}
             {items.length > 0 && (
-              <div className="rounded-xl border border-gray-100 overflow-hidden mb-4">
+              <div className="rounded-xl border border-gray-100 overflow-x-auto mb-4">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="text-left text-gray-500 bg-gray-50">
@@ -497,7 +497,7 @@ export default function PurchasesPage() {
                   <XMarkIcon className="w-6 h-6" />
                 </button>
               </div>
-              <div className="flex-1 overflow-y-auto p-5">
+              <div className="flex-1 overflow-auto p-5">
                 <table className="w-full text-sm mb-4">
                   <thead>
                     <tr className="text-left text-gray-500 border-b">

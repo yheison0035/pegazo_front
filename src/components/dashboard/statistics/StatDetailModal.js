@@ -34,7 +34,7 @@ export default function StatDetailModal({ title, subtitle, kind, data, onClose }
           </button>
         </div>
 
-        <div className="overflow-y-auto p-5">
+        <div className="overflow-auto p-5">
           {kind === 'expenses' ? (
             expenses.length ? (
               <table className="min-w-full text-sm">

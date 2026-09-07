@@ -322,7 +322,7 @@ export default function PayablesPage() {
         </div>
 
         {/* Lista */}
-        <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+        <div className="overflow-x-auto rounded-2xl border border-gray-100 bg-white shadow-sm">
           {items.length === 0 ? (
             <p className="py-14 text-center text-sm text-gray-400">
               No hay cuentas {tab === 'PENDIENTE' ? 'por pagar' : ''} aquí.
