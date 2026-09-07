@@ -17,7 +17,8 @@ export const getEmptyUser = () => {
   };
 };
 
-export const getFormFieldsUsers = () => [
+export const getFormFieldsUsers = (type) => {
+  const fields = [
   {
     name: 'role',
     label: 'Rol',
@@ -123,7 +124,13 @@ export const getFormFieldsUsers = () => [
     source: null,
     required: true,
   },
-];
+  ];
+  // Guarda cascos no vende servicios/cortes: se oculta esa comisión (la de
+  // productos sí aplica). El resto de negocios ve ambas.
+  if (type === 'GUARDA_CASCOS')
+    return fields.filter((f) => f.name !== 'commissionServiceRate');
+  return fields;
+};
 
 export const getHeaderTableUsers = () => {
   return [

@@ -55,7 +55,7 @@ export default function NewUser() {
 
       <DinamicForm
         formData={formData}
-        formFields={getFormFieldsUsers()}
+        formFields={getFormFieldsUsers(usuario?.company?.type)}
         setFormData={setFormData}
         handleSubmit={handleSubmit}
         handleReset={handleReset}

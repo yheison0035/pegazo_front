@@ -36,7 +36,7 @@ export default function EditUser() {
   // personales y no puede cambiar por sí mismo. La comisión es solo-lectura
   // salvo para dueño/administrador.
   const formFields = useMemo(() => {
-    const withCommission = getFormFieldsUsers().map((f) =>
+    const withCommission = getFormFieldsUsers(usuario?.company?.type).map((f) =>
       !canEditCommission &&
       (f.name === 'commissionServiceRate' || f.name === 'commissionProductRate')
         ? { ...f, disabled: true }
@@ -48,7 +48,7 @@ export default function EditUser() {
       .map((f) =>
         f.name === 'role' || f.name === 'email' ? { ...f, disabled: true } : f,
       );
-  }, [isSelf, canEditCommission]);
+  }, [isSelf, canEditCommission, usuario?.company?.type]);
 
   const fetchUser = useCallback(async () => {
     if (!id) return;
