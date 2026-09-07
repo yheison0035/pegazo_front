@@ -66,14 +66,18 @@ function computeCharge(settings, ticket, nowMs) {
     return { mode, storageCharge: 0, perHelmet: 0, helmets, rate: 0, unitMin: 0, elapsedLabel: label };
   }
   const rawMin = Math.max(0, Math.floor(ms / 60000));
-  const billable = Math.max(0, rawMin - (settings?.graceMinutes || 0));
+  const grace = settings?.graceMinutes || 0;
   const rate = mode === 'DIA' ? settings?.dayRate || 0 : settings?.hourRate || 0;
   const unitMin = mode === 'DIA' ? 1440 : 60;
   let perHelmet = 0;
-  if (billable > 0) {
+  // Dentro del periodo de gracia que configure el dueño no se cobra. Superado
+  // ese punto, desde el minuto 1 se cobra la primera unidad completa (primera
+  // hora / primer día); al pasar la unidad, el cobro es proporcional.
+  if (rawMin >= grace) {
+    const billable = Math.max(1, rawMin - grace);
     perHelmet =
       billable <= unitMin
-        ? Math.round(rate) // 1 unidad completa (mínimo)
+        ? Math.round(rate) // 1 unidad completa (mínimo, desde el minuto 1)
         : Math.round((rate * billable) / unitMin); // proporcional (fracción)
   }
   return { mode, perHelmet, helmets, storageCharge: perHelmet * helmets, rate, unitMin, elapsedLabel: label };
