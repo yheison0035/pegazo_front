@@ -21,7 +21,7 @@ import Button from '@/components/ui/Button';
 import MoneyInput from '@/components/ui/MoneyInput';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import { formatCOP } from '@/lib/api/utils/utils';
-import { printSaleInvoice } from '@/utils/printInvoice';
+import { printSaleInvoice, printCustodyTicket } from '@/utils/printInvoice';
 import { getProducts } from '@/lib/api/routes/inventory';
 import { getUsers } from '@/lib/api/routes/users';
 import {
@@ -611,7 +611,7 @@ export default function StoragePage() {
                       <button
                         type="button"
                         title="Reimprimir comprobante"
-                        onClick={() => printReceipt('Comprobante', company, ingresoBody(t, settings))}
+                        onClick={() => printCustodyTicket(t, usuario, settings)}
                         className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold text-gray-500 hover:bg-gray-100"
                       >
                         <PrinterIcon className="h-3.5 w-3.5" />
@@ -1039,7 +1039,7 @@ export default function StoragePage() {
                       if (receipt.kind === 'factura' && receipt.sale) {
                         printSaleInvoice(receipt.sale, usuario);
                       } else if (receipt.kind === 'ingreso') {
-                        printReceipt('Comprobante', company, ingresoBody(receipt.ticket, settings));
+                        printCustodyTicket(receipt.ticket, usuario, settings);
                       } else {
                         printReceipt('Factura', company, facturaBody(receipt.ticket, receipt.tot, receipt.methodLabel));
                       }
