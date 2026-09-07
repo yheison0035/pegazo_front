@@ -50,6 +50,7 @@ const MODULE_META = {
   customers: ['Clientes', UsersIcon],
   loyalty: ['Fidelización', GiftIcon],
   memberships: ['Membresías', IdentificationIcon],
+  storage: ['Guarda cascos', ArchiveBoxIcon],
   appointments: ['Citas / Reservas', CalendarDaysIcon],
   services: ['Servicios', ScissorsIcon],
   clinical: ['Historia clínica', ClipboardDocumentListIcon],

@@ -51,8 +51,8 @@ const ROLES_BY_TYPE = {
   // Canchas: cada cancha se crea como "recurso" (rol Profesional → "Cancha")
   // para que aparezca como columna en la agenda de reservas.
   CANCHAS_SINTETICAS: ['ADMIN', 'RECEPCIONISTA', 'PROFESIONAL', 'CAJA'],
-  // Guarda cascos: atención de mostrador.
-  GUARDA_CASCOS: ['ADMIN', 'RECEPCIONISTA', 'CAJA', 'AUXILIAR'],
+  // Guarda cascos: el ASESOR recibe/entrega cascos y cobra; recepción y caja.
+  GUARDA_CASCOS: ['ADMIN', 'RECEPCIONISTA', 'ASESOR', 'CAJA', 'AUXILIAR'],
 };
 
 // Retail de mostrador: comparten el mismo set.
