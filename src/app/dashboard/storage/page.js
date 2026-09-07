@@ -273,8 +273,21 @@ export default function StoragePage() {
       setAlert({ type: 'warning', message: 'Falta el nombre del cliente.' });
       return;
     }
-    if (!ci.customerPhone.trim() && !ci.customerEmail.trim()) {
+    const phone = ci.customerPhone.trim();
+    const email = ci.customerEmail.trim();
+    if (!phone && !email) {
       setAlert({ type: 'warning', message: 'Indica celular o correo del cliente.' });
+      return;
+    }
+    if (phone && !/^3\d{9}$/.test(phone)) {
+      setAlert({
+        type: 'warning',
+        message: 'El celular debe tener 10 dígitos y empezar por 3 (ej: 3001234567).',
+      });
+      return;
+    }
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setAlert({ type: 'warning', message: 'El correo no es válido.' });
       return;
     }
     setBusy(true);
@@ -749,12 +762,39 @@ export default function StoragePage() {
               <div className="space-y-3">
                 <div>
                   <label className="mb-1 block text-xs font-semibold text-gray-600">Nombre completo del cliente</label>
-                  <input value={ci.customerName} onChange={(e) => setCi((c) => ({ ...c, customerName: e.target.value }))} placeholder="Ej: Juan Pérez" className={inputCls} />
+                  <input
+                    value={ci.customerName}
+                    onChange={(e) => setCi((c) => ({ ...c, customerName: e.target.value.toUpperCase() }))}
+                    placeholder="EJ: JUAN PÉREZ"
+                    className={`${inputCls} uppercase placeholder:normal-case`}
+                  />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="mb-1 block text-xs font-semibold text-gray-600">Celular</label>
-                    <input value={ci.customerPhone} onChange={(e) => setCi((c) => ({ ...c, customerPhone: e.target.value }))} placeholder="300…" className={inputCls} />
+                    <input
+                      type="tel"
+                      inputMode="numeric"
+                      maxLength={10}
+                      value={ci.customerPhone}
+                      onChange={(e) =>
+                        setCi((c) => ({
+                          ...c,
+                          customerPhone: e.target.value.replace(/\D/g, '').slice(0, 10),
+                        }))
+                      }
+                      placeholder="3001234567"
+                      className={`${inputCls} ${
+                        ci.customerPhone && !/^3\d{9}$/.test(ci.customerPhone)
+                          ? 'border-red-400 focus:border-red-500 focus:ring-red-500/20'
+                          : ''
+                      }`}
+                    />
+                    {ci.customerPhone && !/^3\d{9}$/.test(ci.customerPhone) && (
+                      <p className="mt-1 text-[11px] text-red-500">
+                        10 dígitos, empieza por 3.
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label className="mb-1 block text-xs font-semibold text-gray-600">Correo (opcional)</label>
