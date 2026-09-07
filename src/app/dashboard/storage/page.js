@@ -965,12 +965,17 @@ export default function StoragePage() {
 
         {/* Comprobante / factura en pantalla (con impresión) */}
         {receipt && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setReceipt(null)}>
-            <div className="w-full max-w-sm rounded-2xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
-              <div className={`flex items-center gap-2 rounded-t-2xl px-5 py-4 text-white ${receipt.kind === 'ingreso' ? 'bg-gradient-to-r from-orange-500 to-amber-500' : 'bg-emerald-600'}`}>
-                {receipt.kind === 'ingreso' ? <CheckCircleIcon className="h-6 w-6" /> : <BanknotesIcon className="h-6 w-6" />}
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" onClick={() => setReceipt(null)}>
+            <div className="w-full max-w-sm overflow-hidden rounded-3xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
+              <div className="relative flex items-center gap-3 bg-gradient-to-br from-orange-500 to-amber-500 px-6 py-5 text-white">
+                <button onClick={() => setReceipt(null)} className="absolute right-4 top-4 text-white/80 hover:text-white">
+                  <XMarkIcon className="h-5 w-5" />
+                </button>
+                <span className="grid h-10 w-10 flex-none place-items-center rounded-2xl bg-white/20">
+                  {receipt.kind === 'ingreso' ? <CheckCircleIcon className="h-6 w-6" /> : <BanknotesIcon className="h-6 w-6" />}
+                </span>
                 <div>
-                  <p className="text-sm font-bold">
+                  <p className="text-base font-bold">
                     {receipt.kind === 'ingreso' ? 'Casco recibido' : 'Cobrado y entregado'}
                   </p>
                   <p className="text-xs text-white/80">Ticket #{receipt.ticket.id}</p>
