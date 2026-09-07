@@ -26,7 +26,6 @@ import { getProducts } from '@/lib/api/routes/inventory';
 import { getUsers } from '@/lib/api/routes/users';
 import {
   getStorage,
-  getStorageHistory,
   checkInStorage,
   toggleStorageWash,
   checkoutStorage,
@@ -216,32 +215,11 @@ export default function StoragePage() {
   const [checkoutTarget, setCheckoutTarget] = useState(null);
   const [co, setCo] = useState({ includeWash: false, products: [], paymentMethod: 'EFECTIVO' });
 
-  const [tab, setTab] = useState('activos'); // activos | historial
-  const [history, setHistory] = useState([]);
-  const [loadingHistory, setLoadingHistory] = useState(false);
-
-  // Buscadores y filtros
+  // Buscadores y filtros (los entregados viven en Ventas realizadas).
   const [q, setQ] = useState(''); // buscador en custodia
   const [washOnly, setWashOnly] = useState(false);
-  const [histQ, setHistQ] = useState(''); // buscador en historial
   // Recibo/factura en pantalla (con impresión)
   const [receipt, setReceipt] = useState(null); // {kind:'ingreso'|'factura', ...}
-
-  const loadHistory = useCallback(async () => {
-    setLoadingHistory(true);
-    try {
-      const res = await getStorageHistory(50);
-      setHistory(res?.data || []);
-    } catch {
-      setHistory([]);
-    } finally {
-      setLoadingHistory(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (tab === 'historial') loadHistory();
-  }, [tab, loadHistory]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -473,18 +451,6 @@ export default function StoragePage() {
     return list;
   }, [active, washOnly, q]);
 
-  // Filtro del historial (buscador por # o nombre).
-  const filteredHistory = useMemo(() => {
-    const s = histQ.trim().toLowerCase();
-    if (!s) return history;
-    return history.filter(
-      (h) =>
-        String(h.id).includes(s) ||
-        (h.customerName || '').toLowerCase().includes(s) ||
-        (h.customerPhone || '').includes(s),
-    );
-  }, [history, histQ]);
-
   return (
     <RoleGuard allowedRoles={[Roles.SUPER_ADMIN, Roles.ADMIN, Roles.RECEPCIONISTA, Roles.ASESOR, Roles.CAJA]}>
       <div className="w-full p-4">
@@ -528,8 +494,8 @@ export default function StoragePage() {
         <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
           <button
             type="button"
-            onClick={() => { setTab('activos'); setWashOnly(false); setQ(''); }}
-            className={`rounded-2xl border p-4 text-left transition hover:shadow-md ${tab === 'activos' && !washOnly ? 'border-orange-400 bg-orange-50 ring-2 ring-orange-500/20' : 'border-orange-200 bg-orange-50'}`}
+            onClick={() => { setWashOnly(false); setQ(''); }}
+            className={`rounded-2xl border p-4 text-left transition hover:shadow-md ${!washOnly ? 'border-orange-400 bg-orange-50 ring-2 ring-orange-500/20' : 'border-orange-200 bg-orange-50'}`}
           >
             <p className="text-xs font-semibold uppercase text-orange-700">En custodia</p>
             <p className="mt-1 text-2xl font-extrabold text-orange-700">{summary?.active || 0}</p>
@@ -537,7 +503,7 @@ export default function StoragePage() {
           </button>
           <button
             type="button"
-            onClick={() => { setTab('activos'); setWashOnly(true); }}
+            onClick={() => setWashOnly(true)}
             className={`rounded-2xl border p-4 text-left transition hover:shadow-md ${washOnly ? 'border-amber-400 bg-amber-50 ring-2 ring-amber-500/20' : 'border-amber-200 bg-amber-50'}`}
           >
             <p className="text-xs font-semibold uppercase text-amber-700">Lavados pendientes</p>
@@ -564,107 +530,7 @@ export default function StoragePage() {
           </button>
         </div>
 
-        {/* Pestañas: en custodia / historial */}
-        <div className="mb-4 inline-flex rounded-xl border border-gray-200 bg-gray-50 p-1">
-          <button
-            type="button"
-            onClick={() => setTab('activos')}
-            className={`inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold transition ${tab === 'activos' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-          >
-            <ArchiveBoxIcon className="h-4 w-4" />
-            En custodia {summary?.active ? `(${summary.active})` : ''}
-          </button>
-          <button
-            type="button"
-            onClick={() => setTab('historial')}
-            className={`inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold transition ${tab === 'historial' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-          >
-            <ClockIcon className="h-4 w-4" />
-            Historial
-          </button>
-        </div>
-
-        {/* Historial de entregados (3 columnas + buscador) */}
-        {tab === 'historial' && (
-          <>
-            <div className="mb-3">
-              <input
-                value={histQ}
-                onChange={(e) => setHistQ(e.target.value)}
-                placeholder="Buscar por # de ticket o nombre…"
-                className="w-full max-w-xs rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
-              />
-            </div>
-            {loadingHistory ? (
-              <p className="py-12 text-center text-sm text-gray-400">Cargando…</p>
-            ) : filteredHistory.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-gray-200 bg-white py-14 text-center">
-                <p className="text-sm text-gray-500">
-                  {history.length === 0 ? 'Aún no hay entregas registradas.' : 'Sin resultados para tu búsqueda.'}
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {filteredHistory.map((h) => (
-                  <div key={h.id} className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className="truncate font-semibold text-gray-800">{h.customerName}</p>
-                        <p className="text-[11px] text-gray-400">
-                          #{h.id} · {h.customerPhone || h.customerEmail || ''}
-                        </p>
-                        {h.receivedByName && (
-                          <p className="text-[10px] text-gray-400">Recibió: {h.receivedByName}</p>
-                        )}
-                      </div>
-                      <span className="whitespace-nowrap rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold text-gray-500">
-                        {h.helmetCount} casco{h.helmetCount > 1 ? 's' : ''}
-                      </span>
-                    </div>
-                    <p className="mt-2 text-xl font-extrabold text-gray-900">{formatCOP(h.amount || 0)}</p>
-                    <div className="mt-1 flex flex-wrap items-center gap-x-2 text-[11px] text-gray-400">
-                      <span>{h.checkOutAt ? new Date(h.checkOutAt).toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' }) : '—'}</span>
-                      {h.washRequested && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 font-semibold text-emerald-700">
-                          <SparklesIcon className="h-3 w-3" /> {h.washCount || h.helmetCount} lavado(s)
-                        </span>
-                      )}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        h.sale
-                          ? printSaleInvoice(h.sale, usuario)
-                          : printReceipt(
-                              'Factura',
-                              company,
-                              facturaBody(
-                                h,
-                                {
-                                  charge: { storageCharge: h.amount || 0, helmets: h.helmetCount },
-                                  wash: 0,
-                                  washUnits: 0,
-                                  products: [],
-                                  total: h.amount || 0,
-                                },
-                                'Pagado',
-                              ),
-                            )
-                      }
-                      className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-2.5 py-1.5 text-[11px] font-semibold text-gray-600 hover:bg-gray-50"
-                    >
-                      <PrinterIcon className="h-3.5 w-3.5" />
-                      Reimprimir factura
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Lista de cascos en custodia */}
-        {tab === 'activos' && (
+        {/* Lista de cascos en custodia (los entregados están en Ventas realizadas) */}
         <>
           <div className="mb-3 flex flex-wrap items-center gap-2">
             <input
@@ -790,7 +656,6 @@ export default function StoragePage() {
           </div>
         )}
         </>
-        )}
 
         {/* Modal: recibir casco (check-in) — diseño pro */}
         {showCheckIn && (

@@ -138,8 +138,8 @@ const TERMS_BY_TYPE = {
     attendantPlural: 'Encargados',
     service: 'Guardado',
     servicePlural: 'Guardados',
-    customer: 'Usuario',
-    customerPlural: 'Usuarios',
+    // Clientes queda como "Clientes" (NO "Usuarios", para no confundir con
+    // Usuarios/Roles del negocio).
   },
 };
 
