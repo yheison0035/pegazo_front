@@ -93,15 +93,26 @@ function Row({ l, r }) {
 const money = (n) =>
   '$' + Math.round(n || 0).toLocaleString('es-CO');
 
-// Documento térmico (80mm) imprimible.
-function printReceipt(title, business, bodyHTML) {
+// Documento térmico (80mm) imprimible, con encabezado de la empresa
+// (logo + nombre + NIT + teléfono) igual para comprobante y factura.
+function printReceipt(title, company, bodyHTML) {
   const w = window.open('', '_blank', 'width=340,height=620');
   if (!w) return;
-  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${title}</title>
+  const c = company || {};
+  const esc = (s) => String(s || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const header = `
+    ${c.logo ? `<img class="logo" src="${esc(c.logo)}" alt=""/>` : ''}
+    <h1>${esc(c.name || 'Guarda cascos')}</h1>
+    ${c.nit ? `<p class="muted center">NIT ${esc(c.nit)}</p>` : ''}
+    ${c.phone ? `<p class="muted center">Tel. ${esc(c.phone)}</p>` : ''}
+    ${c.email ? `<p class="muted center">${esc(c.email)}</p>` : ''}
+    <hr/>`;
+  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(title)}</title>
     <style>
       *{font-family:'Courier New',monospace;box-sizing:border-box}
       body{width:280px;margin:0 auto;padding:10px;color:#000;font-size:12px;line-height:1.4}
       h1{font-size:15px;text-align:center;margin:0}
+      .logo{display:block;margin:0 auto 6px;max-height:70px;max-width:200px;object-fit:contain}
       .sub{text-align:center;font-size:11px;margin:2px 0 8px}
       .big{font-size:22px;font-weight:bold;text-align:center;margin:6px 0}
       .row{display:flex;justify-content:space-between;gap:8px;margin:2px 0}
@@ -110,8 +121,8 @@ function printReceipt(title, business, bodyHTML) {
       .center{text-align:center}
       .muted{color:#444;font-size:10px}
       .tot{font-size:16px;font-weight:bold}
-    </style></head><body onload="setTimeout(function(){window.print()},150)">
-    <h1>${business}</h1>
+    </style></head><body onload="setTimeout(function(){window.print()},250)">
+    ${header}
     ${bodyHTML}
     </body></html>`);
   w.document.close();
@@ -183,7 +194,8 @@ const EMPTY_CHECKIN = {
 export default function StoragePage() {
   const { usuario } = useAuth();
   const isOwner = ['SUPER_ADMIN', 'ADMIN'].includes(usuario?.role);
-  const businessName = usuario?.company?.name || 'Guarda cascos';
+  const company = usuario?.company || {};
+  const businessName = company.name || 'Guarda cascos';
 
   const [settings, setSettings] = useState(null);
   const [active, setActive] = useState([]);
@@ -596,8 +608,8 @@ export default function StoragePage() {
                       type="button"
                       onClick={() =>
                         printReceipt(
-                          businessName,
-                          businessName,
+                          'Factura',
+                          company,
                           facturaBody(
                             h,
                             {
@@ -702,7 +714,7 @@ export default function StoragePage() {
                       <button
                         type="button"
                         title="Reimprimir comprobante"
-                        onClick={() => printReceipt('Comprobante', businessName, ingresoBody(t, settings))}
+                        onClick={() => printReceipt('Comprobante', company, ingresoBody(t, settings))}
                         className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold text-gray-500 hover:bg-gray-100"
                       >
                         <PrinterIcon className="h-3.5 w-3.5" />
@@ -988,8 +1000,14 @@ export default function StoragePage() {
 
               <div className="p-5">
                 <div className="rounded-xl border border-dashed border-gray-300 p-4 text-sm">
+                  {company.logo && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={company.logo} alt="" className="mx-auto mb-2 max-h-14 object-contain" />
+                  )}
                   <p className="text-center font-bold text-gray-800">{businessName}</p>
-                  <p className="mb-2 text-center text-[11px] text-gray-400">
+                  {company.nit && <p className="text-center text-[11px] text-gray-400">NIT {company.nit}</p>}
+                  {company.phone && <p className="text-center text-[11px] text-gray-400">Tel. {company.phone}</p>}
+                  <p className="mb-2 mt-1 text-center text-[11px] font-semibold text-gray-500">
                     {receipt.kind === 'ingreso' ? 'Comprobante de ingreso' : 'Factura de venta'}
                   </p>
                   <div className="space-y-1 border-t border-gray-100 pt-2">
@@ -1036,7 +1054,7 @@ export default function StoragePage() {
                     onClick={() =>
                       printReceipt(
                         receipt.kind === 'ingreso' ? 'Comprobante' : 'Factura',
-                        businessName,
+                        company,
                         receipt.kind === 'ingreso'
                           ? ingresoBody(receipt.ticket, settings)
                           : facturaBody(receipt.ticket, receipt.tot, receipt.methodLabel),
