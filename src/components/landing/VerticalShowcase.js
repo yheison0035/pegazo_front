@@ -18,7 +18,62 @@ import {
   CreditCardIcon,
   TruckIcon,
   BeakerIcon,
+  TagIcon,
+  Squares2X2Icon,
+  GlobeAltIcon,
+  BuildingStorefrontIcon,
+  ReceiptPercentIcon,
+  ArrowUturnLeftIcon,
+  WrenchScrewdriverIcon,
+  IdentificationIcon,
+  BuildingOffice2Icon,
 } from '@heroicons/react/24/outline';
+import { BUSINESS_TYPES } from '@/config/businessTypes';
+
+// Etiqueta + ícono REAL de cada módulo del CRM (para mostrar el menú tal cual
+// lo verá el dueño). La clave es la del módulo (último segmento de la ruta).
+const MODULE_META = {
+  dashboard: ['Inicio', HomeIcon],
+  sales: ['Facturar (POS)', ShoppingBagIcon],
+  delivered_sales: ['Ventas realizadas', ShoppingBagIcon],
+  cash: ['Caja', BanknotesIcon],
+  cartera: ['Cartera y fiado', CreditCardIcon],
+  returns: ['Devoluciones', ArrowUturnLeftIcon],
+  quotes: ['Cotizaciones', ClipboardDocumentListIcon],
+  impuestos: ['Impuestos (IVA)', ReceiptPercentIcon],
+  inventory: ['Inventario', ArchiveBoxIcon],
+  categories: ['Categorías', Squares2X2Icon],
+  brands: ['Marcas', TagIcon],
+  providers: ['Proveedores', TruckIcon],
+  purchases: ['Compras', ShoppingCartIcon],
+  supplies: ['Insumos', BeakerIcon],
+  customers: ['Clientes', UsersIcon],
+  loyalty: ['Fidelización', GiftIcon],
+  memberships: ['Membresías', IdentificationIcon],
+  appointments: ['Citas / Reservas', CalendarDaysIcon],
+  services: ['Servicios', ScissorsIcon],
+  clinical: ['Historia clínica', ClipboardDocumentListIcon],
+  mesas: ['Mesas', TableCellsIcon],
+  kitchen: ['Cocina (KDS)', FireIcon],
+  expenses: ['Gastos', BanknotesIcon],
+  payables: ['Cuentas por pagar', CreditCardIcon],
+  'employee-charges': ['Cargos a empleados', CreditCardIcon],
+  statistics: ['Estadísticas', ChartBarIcon],
+  users: ['Usuarios y roles', UsersIcon],
+  locals: ['Locales / sedes', BuildingOffice2Icon],
+  bank: ['Consignaciones', BanknotesIcon],
+  'nomina-electronica': ['Nómina electrónica', IdentificationIcon],
+  website: ['Tienda online', GlobeAltIcon],
+  orders: ['Pedidos', ShoppingBagIcon],
+  settings: ['Configuración', WrenchScrewdriverIcon],
+};
+
+// Módulos reales que verá el dueño de cada tipo (Inicio primero, Configuración
+// al final). Toma la lista curada por vertical del CRM (businessTypes.js).
+function realModules(type) {
+  const base = BUSINESS_TYPES[type] || [];
+  return ['dashboard', ...base, 'settings'];
+}
 
 // Íconos por nombre de módulo (mismos que el menú real del CRM).
 const ICONS = {
@@ -51,7 +106,7 @@ const ICONS = {
 // (menú, vocabulario y catálogo). Datos ilustrativos.
 const VERTICALS = [
   {
-    id: 'barberia', emoji: '💈', name: 'Barbería', biz: 'RAGNOR Barber',
+    id: 'barberia', type: 'SERVICIOS', emoji: '💈', name: 'Barbería', biz: 'RAGNOR Barber',
     accent: 'Se agenda por barbero, con comisiones y fidelización.',
     menu: ['Inicio', 'Citas', 'Servicios', 'Clientes', 'Caja', 'Fidelización', 'Estadísticas'],
     catalog: 'Servicios',
@@ -59,7 +114,7 @@ const VERTICALS = [
     kpis: [['Ventas de hoy', '$486.000', 'bg-emerald-400'], ['Citas hoy', '14', 'bg-orange-400']],
   },
   {
-    id: 'restaurante', emoji: '🍽️', name: 'Restaurante', biz: 'La Parrilla',
+    id: 'restaurante', type: 'RESTAURANTE', emoji: '🍽️', name: 'Restaurante', biz: 'La Parrilla',
     accent: 'Mesas, comandas y pantalla de cocina (KDS).',
     menu: ['Inicio', 'Mesas', 'Cocina', 'Menú', 'Ventas', 'Caja', 'Insumos'],
     catalog: 'Menú',
@@ -67,7 +122,7 @@ const VERTICALS = [
     kpis: [['Ventas de hoy', '$1.240.000', 'bg-emerald-400'], ['Mesas activas', '6', 'bg-orange-400']],
   },
   {
-    id: 'ferreteria', emoji: '🔧', name: 'Ferretería', biz: 'El Tornillo',
+    id: 'ferreteria', type: 'COMERCIO', emoji: '🔧', name: 'Ferretería', biz: 'El Tornillo',
     accent: 'Inventario, compras, cartera y fiado a la mano.',
     menu: ['Inicio', 'Inventario', 'Compras', 'Ventas', 'Clientes', 'Cartera', 'Caja'],
     catalog: 'Inventario',
@@ -75,7 +130,7 @@ const VERTICALS = [
     kpis: [['Ventas de hoy', '$2.150.000', 'bg-emerald-400'], ['Por cobrar', '$1.8M', 'bg-orange-400']],
   },
   {
-    id: 'veterinaria', emoji: '🐾', name: 'Veterinaria', biz: 'Huellitas',
+    id: 'veterinaria', type: 'SERVICIOS', emoji: '🐾', name: 'Veterinaria', biz: 'Huellitas',
     accent: 'Citas por especialista y ficha de cada mascota.',
     menu: ['Inicio', 'Citas', 'Servicios', 'Pacientes', 'Inventario', 'Caja'],
     catalog: 'Servicios',
@@ -83,7 +138,7 @@ const VERTICALS = [
     kpis: [['Ventas de hoy', '$620.000', 'bg-emerald-400'], ['Citas hoy', '9', 'bg-orange-400']],
   },
   {
-    id: 'odontologia', emoji: '🦷', name: 'Odontología', biz: 'Clínica Sonríe',
+    id: 'odontologia', type: 'ODONTOLOGIA', emoji: '🦷', name: 'Odontología', biz: 'Clínica Sonríe',
     accent: 'Historia clínica por paciente, odontograma y consentimientos firmados.',
     menu: ['Inicio', 'Citas', 'Servicios', 'Pacientes', 'Historia', 'Caja', 'Estadísticas'],
     catalog: 'Tratamientos',
@@ -91,7 +146,7 @@ const VERTICALS = [
     kpis: [['Ventas de hoy', '$1.180.000', 'bg-emerald-400'], ['Citas hoy', '11', 'bg-orange-400']],
   },
   {
-    id: 'ropa', emoji: '👗', name: 'Tienda de ropa', biz: 'Moda Urbana',
+    id: 'ropa', type: 'ROPA', emoji: '👗', name: 'Tienda de ropa', biz: 'Moda Urbana',
     accent: 'Variantes por talla y color, con multi-sede.',
     menu: ['Inicio', 'Inventario', 'Ventas', 'Clientes', 'Compras', 'Caja', 'Estadísticas'],
     catalog: 'Inventario',
@@ -99,7 +154,7 @@ const VERTICALS = [
     kpis: [['Ventas de hoy', '$980.000', 'bg-emerald-400'], ['Referencias', '860', 'bg-orange-400']],
   },
   {
-    id: 'supermercado', emoji: '🛒', name: 'Minimercado', biz: 'La Esquina',
+    id: 'supermercado', type: 'SUPERMERCADO', emoji: '🛒', name: 'Minimercado', biz: 'La Esquina',
     accent: 'Venta rápida, proveedores y control de stock.',
     menu: ['Inicio', 'Inventario', 'Compras', 'Ventas', 'Proveedores', 'Caja', 'Gastos'],
     catalog: 'Inventario',
@@ -107,7 +162,7 @@ const VERTICALS = [
     kpis: [['Ventas de hoy', '$3.420.000', 'bg-emerald-400'], ['Productos', '2.100', 'bg-orange-400']],
   },
   {
-    id: 'lavado', emoji: '🚗', name: 'Lavado de vehículos', biz: 'Aqua Wash',
+    id: 'lavado', type: 'LAVADO_VEHICULOS', emoji: '🚗', name: 'Lavado de vehículos', biz: 'Aqua Wash',
     accent: 'Turnos por lavador, comisiones y fidelización (el lavado #10 gratis).',
     menu: ['Inicio', 'Turnos', 'Lavados', 'Clientes', 'Caja', 'Fidelización', 'Estadísticas'],
     catalog: 'Lavados',
@@ -115,7 +170,7 @@ const VERTICALS = [
     kpis: [['Ventas de hoy', '$540.000', 'bg-emerald-400'], ['Turnos hoy', '18', 'bg-orange-400']],
   },
   {
-    id: 'canchas', emoji: '⚽', name: 'Canchas sintéticas', biz: 'Gol Center',
+    id: 'canchas', type: 'CANCHAS_SINTETICAS', emoji: '⚽', name: 'Canchas sintéticas', biz: 'Gol Center',
     accent: 'Cada cancha se reserva por hora, con venta de bebidas e implementos.',
     menu: ['Inicio', 'Reservas', 'Clientes', 'Inventario', 'Ventas', 'Caja', 'Estadísticas'],
     catalog: 'Alquiler de cancha',
@@ -123,7 +178,7 @@ const VERTICALS = [
     kpis: [['Ventas de hoy', '$1.080.000', 'bg-emerald-400'], ['Reservas hoy', '12', 'bg-orange-400']],
   },
   {
-    id: 'guardacascos', emoji: '🪖', name: 'Guarda cascos', biz: 'Casco Seguro',
+    id: 'guardacascos', type: 'GUARDA_CASCOS', emoji: '🪖', name: 'Guarda cascos', biz: 'Casco Seguro',
     accent: 'Guardado por uso o mensualidad, con venta de candados y forros.',
     menu: ['Inicio', 'Guardados', 'Clientes', 'Inventario', 'Ventas', 'Caja', 'Fidelización'],
     catalog: 'Guardados',
@@ -181,32 +236,47 @@ export default function VerticalShowcase() {
                 Pegazo
               </span>
             </div>
-            <ul className="space-y-1">
-              {v.menu.map((m, i) => {
-                const Icon = ICONS[m] || HomeIcon;
-                const activeItem = i === 0;
-                return (
-                  <li
-                    key={m}
-                    className={`relative flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium transition ${
-                      activeItem
-                        ? 'bg-gradient-to-r from-orange-500/25 to-amber-500/10 text-white shadow-inner'
-                        : 'text-white/55'
-                    }`}
-                  >
-                    {activeItem && (
-                      <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-orange-400" />
-                    )}
-                    <Icon
-                      className={`h-4 w-4 flex-none ${
-                        activeItem ? 'text-orange-400' : 'text-white/45'
-                      }`}
-                    />
-                    <span className="truncate">{m}</span>
-                  </li>
-                );
-              })}
-            </ul>
+            {(() => {
+              const mods = realModules(v.type);
+              return (
+                <>
+                  <p className="mb-1.5 px-1 text-[10px] font-semibold uppercase tracking-wide text-white/35">
+                    Tu menú · {mods.length} módulos
+                  </p>
+                  <ul className="max-h-[264px] space-y-1 overflow-y-auto pr-1 [scrollbar-width:thin] [scrollbar-color:rgba(249,115,22,.5)_transparent]">
+                    {mods.map((key, i) => {
+                      const meta = MODULE_META[key] || [key, HomeIcon];
+                      const label = meta[0];
+                      const Icon = meta[1];
+                      const activeItem = i === 0;
+                      return (
+                        <li
+                          key={key}
+                          className={`relative flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium transition ${
+                            activeItem
+                              ? 'bg-gradient-to-r from-orange-500/25 to-amber-500/10 text-white shadow-inner'
+                              : 'text-white/55'
+                          }`}
+                        >
+                          {activeItem && (
+                            <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-orange-400" />
+                          )}
+                          <Icon
+                            className={`h-4 w-4 flex-none ${
+                              activeItem ? 'text-orange-400' : 'text-white/45'
+                            }`}
+                          />
+                          <span className="truncate">{label}</span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                  <p className="mt-2 px-1 text-[9.5px] text-white/25">
+                    Desliza para ver todo tu CRM ↓
+                  </p>
+                </>
+              );
+            })()}
           </aside>
 
           {/* CONTENIDO (bg-gray-50 como el panel real) */}

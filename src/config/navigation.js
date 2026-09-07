@@ -280,6 +280,12 @@ export const NAVIGATION = [
         icon: GiftIcon,
         roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA'],
       },
+      {
+        name: 'Membresías',
+        href: '/dashboard/memberships',
+        icon: CreditCardIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN', 'RECEPCIONISTA'],
+      },
     ],
   },
 

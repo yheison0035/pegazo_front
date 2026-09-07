@@ -144,14 +144,14 @@ export const BUSINESS_TYPES = {
   // Canchas sintéticas: cada cancha es un recurso con agenda; reserva por hora.
   CANCHAS_SINTETICAS: [
     'locals', 'users', 'categories', 'providers', 'inventory', 'purchases',
-    'customers', 'cartera', 'impuestos', 'loyalty', 'services', 'appointments',
+    'customers', 'cartera', 'impuestos', 'loyalty', 'memberships', 'services', 'appointments',
     'sales', 'delivered_sales', 'cash', 'expenses', 'payables', 'statistics',
   ],
 
   // Guarda cascos: guardado por uso o mensualidad + venta de productos.
   GUARDA_CASCOS: [
     'locals', 'users', 'categories', 'providers', 'inventory', 'purchases',
-    'customers', 'cartera', 'impuestos', 'loyalty', 'services',
+    'customers', 'cartera', 'impuestos', 'loyalty', 'memberships', 'services',
     'sales', 'delivered_sales', 'cash', 'expenses', 'payables', 'statistics',
   ],
 
