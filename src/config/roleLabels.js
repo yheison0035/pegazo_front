@@ -44,6 +44,15 @@ const ROLES_BY_TYPE = {
   TELEVENTAS: ['ADMIN', 'ASESOR', 'BODEGUERO', 'CAJA'],
   ECOMMERCE: ['ADMIN', 'ASESOR', 'BODEGUERO', 'CAJA'],
   DISTRIBUCION: ['ADMIN', 'ASESOR', 'BODEGUERO', 'CAJA'],
+
+  // Servicios con agenda/recurso
+  // Lavado: el "Profesional" es el Lavador (recibe comisión).
+  LAVADO_VEHICULOS: ['ADMIN', 'RECEPCIONISTA', 'PROFESIONAL', 'CAJA', 'AUXILIAR'],
+  // Canchas: cada cancha se crea como "recurso" (rol Profesional → "Cancha")
+  // para que aparezca como columna en la agenda de reservas.
+  CANCHAS_SINTETICAS: ['ADMIN', 'RECEPCIONISTA', 'PROFESIONAL', 'CAJA'],
+  // Guarda cascos: atención de mostrador.
+  GUARDA_CASCOS: ['ADMIN', 'RECEPCIONISTA', 'CAJA', 'AUXILIAR'],
 };
 
 // Retail de mostrador: comparten el mismo set.

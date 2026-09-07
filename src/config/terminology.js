@@ -114,6 +114,33 @@ const TERMS_BY_TYPE = {
     product: 'Corte',
     productPlural: 'Cortes',
   },
+
+  // ---- Servicios con agenda / recurso ----
+  LAVADO_VEHICULOS: {
+    attendant: 'Lavador',
+    attendantPlural: 'Lavadores',
+    service: 'Lavado',
+    servicePlural: 'Lavados',
+    appointment: 'Turno',
+    appointmentPlural: 'Turnos',
+  },
+  CANCHAS_SINTETICAS: {
+    // El "recurso" que se reserva es la cancha (ocupa la columna de agenda).
+    attendant: 'Cancha',
+    attendantPlural: 'Canchas',
+    service: 'Alquiler de cancha',
+    servicePlural: 'Alquileres de cancha',
+    appointment: 'Reserva',
+    appointmentPlural: 'Reservas',
+  },
+  GUARDA_CASCOS: {
+    attendant: 'Encargado',
+    attendantPlural: 'Encargados',
+    service: 'Guardado',
+    servicePlural: 'Guardados',
+    customer: 'Usuario',
+    customerPlural: 'Usuarios',
+  },
 };
 
 // Devuelve los términos para una empresa: DEFAULT + por tipo + overrides propios.

@@ -133,4 +133,26 @@ export const BUSINESS_TYPES = {
     'returns', 'expenses', 'payables', 'statistics',
   ],
 
+  // ---------- SERVICIOS CON AGENDA / RECURSO ----------
+  // Lavado de vehículos: turnos, comisión al lavador, fidelización y productos.
+  LAVADO_VEHICULOS: [
+    'locals', 'users', 'categories', 'providers', 'inventory', 'purchases',
+    'customers', 'cartera', 'impuestos', 'loyalty', 'services', 'appointments',
+    'sales', 'delivered_sales', 'cash', 'expenses', 'payables', 'employee-charges', 'statistics',
+  ],
+
+  // Canchas sintéticas: cada cancha es un recurso con agenda; reserva por hora.
+  CANCHAS_SINTETICAS: [
+    'locals', 'users', 'categories', 'providers', 'inventory', 'purchases',
+    'customers', 'cartera', 'impuestos', 'loyalty', 'services', 'appointments',
+    'sales', 'delivered_sales', 'cash', 'expenses', 'payables', 'statistics',
+  ],
+
+  // Guarda cascos: guardado por uso o mensualidad + venta de productos.
+  GUARDA_CASCOS: [
+    'locals', 'users', 'categories', 'providers', 'inventory', 'purchases',
+    'customers', 'cartera', 'impuestos', 'loyalty', 'services',
+    'sales', 'delivered_sales', 'cash', 'expenses', 'payables', 'statistics',
+  ],
+
 };

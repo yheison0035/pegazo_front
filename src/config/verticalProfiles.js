@@ -62,6 +62,11 @@ const PRODUCT_FIELDS_BY_TYPE = {
   // Comida: cantidad simple, sin marca/código
   RESTAURANTE: { brand: false, barcode: false, oldPrice: false },
   COMIDA_RAPIDA: { brand: false, provider: false, barcode: false, oldPrice: false },
+
+  // Servicios con agenda/recurso: productos simples (ceras, bebidas, candados)
+  LAVADO_VEHICULOS: { brand: false, barcode: false, oldPrice: false },
+  CANCHAS_SINTETICAS: { brand: false, barcode: false, oldPrice: false },
+  GUARDA_CASCOS: { brand: false, barcode: false, oldPrice: false },
 };
 
 // `override` opcional: los campos configurados en BD para el tipo

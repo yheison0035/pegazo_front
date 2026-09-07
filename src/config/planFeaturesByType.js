@@ -11,6 +11,10 @@
 const GROUP_BY_TYPE = {
   // Servicios con agenda (barberías, spa, estética… usan el tipo SERVICIOS)
   SERVICIOS: 'servicios',
+  // Servicios con agenda/recurso (lavado, canchas, guarda cascos)
+  LAVADO_VEHICULOS: 'servicios',
+  CANCHAS_SINTETICAS: 'servicios',
+  GUARDA_CASCOS: 'servicios',
   // Comida
   RESTAURANTE: 'comida',
   COMIDA_RAPIDA: 'comida',
@@ -47,7 +51,7 @@ const HIGHLIGHTS = {
   servicios: {
     DESPEGUE: ['Agenda de citas básica', 'Servicios y clientes', 'Ventas (POS)'],
     IMPULSO: [
-      'Citas por profesional (barbero/estilista)',
+      'Citas/turnos por profesional o recurso',
       'Comisiones por empleado',
       'Fidelización de clientes',
       'Gastos y caja',

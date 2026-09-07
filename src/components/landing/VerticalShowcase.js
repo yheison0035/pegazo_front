@@ -41,6 +41,10 @@ const ICONS = {
   Ventas: ShoppingBagIcon,
   Cartera: CreditCardIcon,
   Proveedores: TruckIcon,
+  Turnos: CalendarDaysIcon,
+  Reservas: CalendarDaysIcon,
+  Lavados: ScissorsIcon,
+  Guardados: ArchiveBoxIcon,
 };
 
 // El visitante elige un tipo de negocio y ve el panel de Pegazo adaptado
@@ -101,6 +105,30 @@ const VERTICALS = [
     catalog: 'Inventario',
     items: [['Arroz 500g', '$2.400'], ['Leche entera 1L', '$4.300'], ['Huevos x30', '$16.500']],
     kpis: [['Ventas de hoy', '$3.420.000', 'bg-emerald-400'], ['Productos', '2.100', 'bg-orange-400']],
+  },
+  {
+    id: 'lavado', emoji: '🚗', name: 'Lavado de vehículos', biz: 'Aqua Wash',
+    accent: 'Turnos por lavador, comisiones y fidelización (el lavado #10 gratis).',
+    menu: ['Inicio', 'Turnos', 'Lavados', 'Clientes', 'Caja', 'Fidelización', 'Estadísticas'],
+    catalog: 'Lavados',
+    items: [['Lavado básico', '$15.000'], ['Lavado + encerado', '$28.000'], ['Polichado completo', '$120.000']],
+    kpis: [['Ventas de hoy', '$540.000', 'bg-emerald-400'], ['Turnos hoy', '18', 'bg-orange-400']],
+  },
+  {
+    id: 'canchas', emoji: '⚽', name: 'Canchas sintéticas', biz: 'Gol Center',
+    accent: 'Cada cancha se reserva por hora, con venta de bebidas e implementos.',
+    menu: ['Inicio', 'Reservas', 'Clientes', 'Inventario', 'Ventas', 'Caja', 'Estadísticas'],
+    catalog: 'Alquiler de cancha',
+    items: [['Cancha 1 · hora', '$90.000'], ['Cancha 2 · hora', '$90.000'], ['Alquiler de peto', '$3.000']],
+    kpis: [['Ventas de hoy', '$1.080.000', 'bg-emerald-400'], ['Reservas hoy', '12', 'bg-orange-400']],
+  },
+  {
+    id: 'guardacascos', emoji: '🪖', name: 'Guarda cascos', biz: 'Casco Seguro',
+    accent: 'Guardado por uso o mensualidad, con venta de candados y forros.',
+    menu: ['Inicio', 'Guardados', 'Clientes', 'Inventario', 'Ventas', 'Caja', 'Fidelización'],
+    catalog: 'Guardados',
+    items: [['Guardado por día', '$2.000'], ['Mensualidad', '$25.000'], ['Candado', '$18.000']],
+    kpis: [['Ventas de hoy', '$180.000', 'bg-emerald-400'], ['Usuarios activos', '64', 'bg-orange-400']],
   },
 ];
 
