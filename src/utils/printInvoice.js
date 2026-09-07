@@ -13,11 +13,6 @@ export function printCustodyTicket(ticket, usuario, settings) {
         ? 'Mensualidad'
         : 'Por hora';
 
-  const verifyUrl = `https://pegazo.co/verifyCodeSale?code=CUSTODIA-${ticket.id}`;
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
-    verifyUrl
-  )}`;
-
   const responsableIVA = usuario?.company?.responsableIVA ?? false;
   const regimenText = responsableIVA
     ? 'Responsable de IVA'
@@ -41,8 +36,6 @@ export function printCustodyTicket(ticket, usuario, settings) {
         .bold { font-weight: 700; }
         .logo { display: flex; justify-content: center; margin-bottom: 6px; }
         .logo img { max-width: 120px; height: auto; }
-        .qr { display: flex; justify-content: center; margin-top: 6px; }
-        .qr img { width: 100px; height: 100px; }
         hr { border: none; border-top: 1px solid #000; margin: 6px 0; }
         .section-title { text-align: center; font-weight: 700; margin: 4px 0; }
         .big { text-align: center; font-weight: 700; font-size: 15px; margin: 4px 0; }
@@ -97,9 +90,6 @@ export function printCustodyTicket(ticket, usuario, settings) {
       <hr />
 
       <div class="center bold">Comprobante de custodia</div>
-      <div class="qr">
-        <img src="${qrUrl}" alt="QR" referrerpolicy="no-referrer" />
-      </div>
 
       <hr />
       <div class="footer">Presente este comprobante para reclamar su(s) casco(s). El cobro se realiza al momento de la entrega.</div>
