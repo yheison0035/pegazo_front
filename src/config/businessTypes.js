@@ -148,10 +148,11 @@ export const BUSINESS_TYPES = {
     'sales', 'delivered_sales', 'cash', 'expenses', 'payables', 'statistics',
   ],
 
-  // Guarda cascos: guardado por uso o mensualidad + venta de productos.
+  // Guarda cascos: custodia de cascos (storage) + mensualidad + venta de
+  // productos. El módulo 'storage' es EXCLUSIVO de este tipo de negocio.
   GUARDA_CASCOS: [
     'locals', 'users', 'categories', 'providers', 'inventory', 'purchases',
-    'customers', 'cartera', 'impuestos', 'loyalty', 'memberships', 'services',
+    'customers', 'cartera', 'impuestos', 'loyalty', 'memberships', 'storage', 'services',
     'sales', 'delivered_sales', 'cash', 'expenses', 'payables', 'statistics',
   ],
 
