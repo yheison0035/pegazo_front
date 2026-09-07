@@ -17,6 +17,8 @@ import {
   viewModalConfig,
 } from '@/lib/api/utils/expenses.config';
 import usePermissions from '@/hooks/usePermissions';
+import FixedExpensesPanel from '@/components/dashboard/expenses/FixedExpensesPanel';
+import { ArrowsRightLeftIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 
 export default function Expenses() {
   const auth = useAuth();
@@ -76,16 +78,54 @@ export default function Expenses() {
 
   const { can } = usePermissions();
 
+  // Pestañas: movimientos (lista de gastos) y gastos fijos (recurrentes).
+  const [tab, setTab] = useState('movimientos');
+
   return (
     <div className="w-full p-4">
-      <div className="flex justify-between mb-4">
-        <h1 className="text-2xl font-semibold">Listado de Gastos</h1>
-        {can('expenses', 'create') && (
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-semibold">
+          {tab === 'fijos' ? 'Gastos fijos' : 'Listado de Gastos'}
+        </h1>
+        {tab === 'movimientos' && can('expenses', 'create') && (
           <Header type="Gastos" typeUrl="expenses" />
         )}
       </div>
 
-      <div className="bg-white rounded-lg shadow relative">
+      {/* Pestañas */}
+      <div className="mb-5 inline-flex rounded-xl border border-gray-200 bg-gray-50 p-1">
+        <button
+          type="button"
+          onClick={() => setTab('movimientos')}
+          className={`inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold transition ${
+            tab === 'movimientos'
+              ? 'bg-white text-gray-800 shadow-sm'
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          <ArrowsRightLeftIcon className="h-4 w-4" />
+          Movimientos
+        </button>
+        <button
+          type="button"
+          onClick={() => setTab('fijos')}
+          className={`inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold transition ${
+            tab === 'fijos'
+              ? 'bg-white text-gray-800 shadow-sm'
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          <ArrowPathIcon className="h-4 w-4" />
+          Gastos fijos
+        </button>
+      </div>
+
+      {tab === 'fijos' && <FixedExpensesPanel />}
+
+      <div
+        className="bg-white rounded-lg shadow relative"
+        hidden={tab !== 'movimientos'}
+      >
         <LoadingOverlay show={loading} text="Cargando gastos..." />
 
         <Table
