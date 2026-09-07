@@ -12,6 +12,7 @@ import {
   UserIcon,
   ArchiveBoxIcon,
   TrashIcon,
+  PrinterIcon,
 } from '@heroicons/react/24/outline';
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
@@ -80,6 +81,94 @@ function computeCharge(settings, ticket, nowMs) {
   return { mode, perHelmet, helmets, storageCharge: perHelmet * helmets, units, unit, rate, elapsedLabel: elapsedLabel(ms) };
 }
 
+function Row({ l, r }) {
+  return (
+    <div className="flex justify-between gap-3">
+      <span className="text-gray-500">{l}</span>
+      <span className="text-right font-semibold text-gray-800">{r}</span>
+    </div>
+  );
+}
+
+const money = (n) =>
+  '$' + Math.round(n || 0).toLocaleString('es-CO');
+
+// Documento térmico (80mm) imprimible.
+function printReceipt(title, business, bodyHTML) {
+  const w = window.open('', '_blank', 'width=340,height=620');
+  if (!w) return;
+  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${title}</title>
+    <style>
+      *{font-family:'Courier New',monospace;box-sizing:border-box}
+      body{width:280px;margin:0 auto;padding:10px;color:#000;font-size:12px;line-height:1.4}
+      h1{font-size:15px;text-align:center;margin:0}
+      .sub{text-align:center;font-size:11px;margin:2px 0 8px}
+      .big{font-size:22px;font-weight:bold;text-align:center;margin:6px 0}
+      .row{display:flex;justify-content:space-between;gap:8px;margin:2px 0}
+      .row .r{font-weight:bold;text-align:right}
+      hr{border:none;border-top:1px dashed #000;margin:7px 0}
+      .center{text-align:center}
+      .muted{color:#444;font-size:10px}
+      .tot{font-size:16px;font-weight:bold}
+    </style></head><body onload="setTimeout(function(){window.print()},150)">
+    <h1>${business}</h1>
+    ${bodyHTML}
+    </body></html>`);
+  w.document.close();
+  w.focus();
+}
+
+function ingresoBody(t, settings) {
+  const modeLabel =
+    t.billingMode === 'DIA' ? 'Por día' : t.billingMode === 'MENSUALIDAD' ? 'Mensualidad' : 'Por hora';
+  return `
+    <p class="sub">Comprobante de ingreso</p>
+    <div class="big">TICKET #${t.id}</div>
+    <p class="center muted">Guarde este comprobante para reclamar su(s) casco(s)</p>
+    <hr/>
+    <div class="row"><span>Cliente</span><span class="r">${t.customerName}</span></div>
+    ${t.customerPhone ? `<div class="row"><span>Celular</span><span class="r">${t.customerPhone}</span></div>` : ''}
+    ${t.customerEmail ? `<div class="row"><span>Correo</span><span class="r">${t.customerEmail}</span></div>` : ''}
+    <div class="row"><span>Ingreso</span><span class="r">${new Date(t.checkInAt).toLocaleString('es-CO')}</span></div>
+    <div class="row"><span>Cascos</span><span class="r">${t.helmetCount}</span></div>
+    ${t.washRequested ? `<div class="row"><span>Lavado</span><span class="r">${t.washCount || t.helmetCount} casco(s)</span></div>` : ''}
+    <div class="row"><span>Cobro</span><span class="r">${modeLabel}</span></div>
+    ${t.notes ? `<div class="row"><span>Nota</span><span class="r">${t.notes}</span></div>` : ''}
+    <hr/>
+    <p class="center muted">Tarifa ${settings?.hourRate ? money(settings.hourRate) + '/hora' : ''}${settings?.washPrice ? ' · lavado ' + money(settings.washPrice) : ''}</p>`;
+}
+
+function facturaBody(t, tot, methodLabel) {
+  const rows = [];
+  if (tot.charge.storageCharge > 0)
+    rows.push(
+      `<div class="row"><span>Guardado ${tot.charge.units} ${tot.charge.unit}${tot.charge.units > 1 ? 's' : ''}${tot.charge.helmets > 1 ? ' x' + tot.charge.helmets : ''}</span><span class="r">${money(tot.charge.storageCharge)}</span></div>`,
+    );
+  if (tot.wash > 0)
+    rows.push(
+      `<div class="row"><span>Lavado${tot.washUnits > 1 ? ' x' + tot.washUnits : ''}</span><span class="r">${money(tot.wash)}</span></div>`,
+    );
+  (tot.products || []).forEach((p) =>
+    rows.push(
+      `<div class="row"><span>${p.name} x${p.quantity}</span><span class="r">${money((p.price || 0) * p.quantity)}</span></div>`,
+    ),
+  );
+  return `
+    <p class="sub">Factura de venta</p>
+    <p class="center muted">${new Date().toLocaleString('es-CO')} · Ticket #${t.id}</p>
+    <hr/>
+    <div class="row"><span>Cliente</span><span class="r">${t.customerName}</span></div>
+    ${t.customerPhone ? `<div class="row"><span>Celular</span><span class="r">${t.customerPhone}</span></div>` : ''}
+    <div class="row"><span>Cascos</span><span class="r">${t.helmetCount}</span></div>
+    <hr/>
+    ${rows.join('')}
+    <hr/>
+    <div class="row tot"><span>TOTAL</span><span class="r">${money(tot.total)}</span></div>
+    <div class="row"><span>Pago</span><span class="r">${methodLabel}</span></div>
+    <hr/>
+    <p class="center muted">¡Gracias por su visita!</p>`;
+}
+
 const EMPTY_CHECKIN = {
   customerName: '',
   customerPhone: '',
@@ -94,6 +183,7 @@ const EMPTY_CHECKIN = {
 export default function StoragePage() {
   const { usuario } = useAuth();
   const isOwner = ['SUPER_ADMIN', 'ADMIN'].includes(usuario?.role);
+  const businessName = usuario?.company?.name || 'Guarda cascos';
 
   const [settings, setSettings] = useState(null);
   const [active, setActive] = useState([]);
@@ -116,6 +206,13 @@ export default function StoragePage() {
   const [tab, setTab] = useState('activos'); // activos | historial
   const [history, setHistory] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
+
+  // Buscadores y filtros
+  const [q, setQ] = useState(''); // buscador en custodia
+  const [washOnly, setWashOnly] = useState(false);
+  const [histQ, setHistQ] = useState(''); // buscador en historial
+  // Recibo/factura en pantalla (con impresión)
+  const [receipt, setReceipt] = useState(null); // {kind:'ingreso'|'factura', ...}
 
   const loadHistory = useCallback(async () => {
     setLoadingHistory(true);
@@ -183,7 +280,7 @@ export default function StoragePage() {
     setBusy(true);
     try {
       const helmets = Math.max(1, Number(ci.helmetCount) || 1);
-      await checkInStorage({
+      const res = await checkInStorage({
         customerName: ci.customerName.trim(),
         customerPhone: ci.customerPhone.trim() || undefined,
         customerEmail: ci.customerEmail.trim() || undefined,
@@ -197,8 +294,11 @@ export default function StoragePage() {
       });
       setCi({ ...EMPTY_CHECKIN });
       setShowCheckIn(false);
-      setAlert({ type: 'success', message: 'Casco recibido en custodia.' });
       load();
+      // Muestra el comprobante de ingreso (con opción de imprimir).
+      const ticket = res?.data;
+      if (ticket) setReceipt({ kind: 'ingreso', ticket });
+      else setAlert({ type: 'success', message: 'Casco recibido en custodia.' });
     } catch (e) {
       setAlert({ type: 'error', message: e.message || 'No se pudo registrar.' });
     } finally {
@@ -265,14 +365,18 @@ export default function StoragePage() {
     if (!checkoutTarget) return;
     setBusy(true);
     try {
-      const res = await checkoutStorage(checkoutTarget.id, {
+      await checkoutStorage(checkoutTarget.id, {
         paymentMethod: co.paymentMethod,
         includeWash: co.includeWash,
         products: co.products.map((p) => ({ inventoryVariantId: p.variantId, quantity: p.quantity })),
       });
-      const total = res?.data?.ticket?.amount ?? 0;
+      // Arma la factura para mostrarla/imprimirla con todos los datos.
+      const methodLabel =
+        (PAY_METHODS.find((m) => m.id === co.paymentMethod) || {}).label || co.paymentMethod;
+      const tot = { ...checkoutTotals, products: co.products };
+      const ticket = checkoutTarget;
       setCheckoutTarget(null);
-      setAlert({ type: 'success', message: `Cobrado y entregado · ${formatCOP(total)}` });
+      setReceipt({ kind: 'factura', ticket, tot, methodLabel });
       load();
     } catch (e) {
       setAlert({ type: 'error', message: e.message || 'No se pudo cobrar.' });
@@ -313,6 +417,33 @@ export default function StoragePage() {
 
   const ratesConfigured = (settings?.hourRate || 0) > 0 || (settings?.dayRate || 0) > 0;
 
+  // Filtro de la lista en custodia (buscador por # o nombre + solo lavados).
+  const filteredActive = useMemo(() => {
+    let list = active;
+    if (washOnly) list = list.filter((t) => t.washRequested && !t.washDone);
+    const s = q.trim().toLowerCase();
+    if (s)
+      list = list.filter(
+        (t) =>
+          String(t.id).includes(s) ||
+          (t.customerName || '').toLowerCase().includes(s) ||
+          (t.customerPhone || '').includes(s),
+      );
+    return list;
+  }, [active, washOnly, q]);
+
+  // Filtro del historial (buscador por # o nombre).
+  const filteredHistory = useMemo(() => {
+    const s = histQ.trim().toLowerCase();
+    if (!s) return history;
+    return history.filter(
+      (h) =>
+        String(h.id).includes(s) ||
+        (h.customerName || '').toLowerCase().includes(s) ||
+        (h.customerPhone || '').includes(s),
+    );
+  }, [history, histQ]);
+
   return (
     <RoleGuard allowedRoles={[Roles.SUPER_ADMIN, Roles.ADMIN, Roles.RECEPCIONISTA, Roles.ASESOR, Roles.CAJA]}>
       <div className="w-full p-4">
@@ -345,24 +476,44 @@ export default function StoragePage() {
           </div>
         )}
 
-        {/* Resumen */}
+        {/* Resumen (clicable: filtra la lista) */}
         <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4">
+          <button
+            type="button"
+            onClick={() => { setTab('activos'); setWashOnly(false); setQ(''); }}
+            className={`rounded-2xl border p-4 text-left transition hover:shadow-md ${tab === 'activos' && !washOnly ? 'border-blue-400 bg-blue-50 ring-2 ring-blue-500/20' : 'border-blue-200 bg-blue-50'}`}
+          >
             <p className="text-xs font-semibold uppercase text-blue-700">En custodia</p>
             <p className="mt-1 text-2xl font-extrabold text-blue-900">{summary?.active || 0}</p>
-          </div>
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+            <p className="text-[10px] text-blue-700/60">Ver lista</p>
+          </button>
+          <button
+            type="button"
+            onClick={() => { setTab('activos'); setWashOnly(true); }}
+            className={`rounded-2xl border p-4 text-left transition hover:shadow-md ${washOnly ? 'border-amber-400 bg-amber-50 ring-2 ring-amber-500/20' : 'border-amber-200 bg-amber-50'}`}
+          >
             <p className="text-xs font-semibold uppercase text-amber-700">Lavados pendientes</p>
             <p className="mt-1 text-2xl font-extrabold text-amber-900">{summary?.washPending || 0}</p>
-          </div>
-          <div className="rounded-2xl border border-gray-200 bg-white p-4">
+            <p className="text-[10px] text-amber-700/60">Ver solo estos</p>
+          </button>
+          <button
+            type="button"
+            onClick={() => isOwner && openSettings()}
+            className="rounded-2xl border border-gray-200 bg-white p-4 text-left transition hover:shadow-md"
+          >
             <p className="text-xs font-semibold uppercase text-gray-500">Tarifa hora</p>
             <p className="mt-1 text-xl font-extrabold text-gray-900">{formatCOP(settings?.hourRate || 0)}</p>
-          </div>
-          <div className="rounded-2xl border border-gray-200 bg-white p-4">
+            {isOwner && <p className="text-[10px] text-gray-400">Editar tarifas</p>}
+          </button>
+          <button
+            type="button"
+            onClick={() => isOwner && openSettings()}
+            className="rounded-2xl border border-gray-200 bg-white p-4 text-left transition hover:shadow-md"
+          >
             <p className="text-xs font-semibold uppercase text-gray-500">Lavado</p>
             <p className="mt-1 text-xl font-extrabold text-gray-900">{formatCOP(settings?.washPrice || 0)}</p>
-          </div>
+            {isOwner && <p className="text-[10px] text-gray-400">Editar tarifas</p>}
+          </button>
         </div>
 
         {/* Pestañas: en custodia / historial */}
@@ -385,66 +536,112 @@ export default function StoragePage() {
           </button>
         </div>
 
-        {/* Historial de entregados */}
+        {/* Historial de entregados (3 columnas + buscador) */}
         {tab === 'historial' && (
-          loadingHistory ? (
-            <p className="py-12 text-center text-sm text-gray-400">Cargando…</p>
-          ) : history.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-gray-200 bg-white py-14 text-center">
-              <p className="text-sm text-gray-500">Aún no hay entregas registradas.</p>
+          <>
+            <div className="mb-3">
+              <input
+                value={histQ}
+                onChange={(e) => setHistQ(e.target.value)}
+                placeholder="Buscar por # de ticket o nombre…"
+                className="w-full max-w-xs rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+              />
             </div>
-          ) : (
-            <div className="overflow-x-auto rounded-2xl border border-gray-100 bg-white shadow-sm">
-              <table className="w-full min-w-[560px] text-sm">
-                <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
-                  <tr>
-                    <th className="px-4 py-3 text-left">Cliente</th>
-                    <th className="px-4 py-3 text-center">Cascos</th>
-                    <th className="px-4 py-3 text-left">Entregado</th>
-                    <th className="px-4 py-3 text-center">Lavado</th>
-                    <th className="px-4 py-3 text-right">Cobrado</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {history.map((h) => (
-                    <tr key={h.id} className="border-t border-gray-100">
-                      <td className="px-4 py-3 font-medium text-gray-800">
-                        {h.customerName}
-                        <div className="text-[11px] text-gray-400">{h.customerPhone || h.customerEmail || ''}</div>
-                      </td>
-                      <td className="px-4 py-3 text-center text-gray-600">{h.helmetCount}</td>
-                      <td className="px-4 py-3 text-gray-600">
-                        {h.checkOutAt ? new Date(h.checkOutAt).toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' }) : '—'}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        {h.washRequested ? (
-                          <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">{h.washCount || h.helmetCount}</span>
-                        ) : (
-                          <span className="text-gray-300">—</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-right font-bold text-gray-900">{formatCOP(h.amount || 0)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )
+            {loadingHistory ? (
+              <p className="py-12 text-center text-sm text-gray-400">Cargando…</p>
+            ) : filteredHistory.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-gray-200 bg-white py-14 text-center">
+                <p className="text-sm text-gray-500">
+                  {history.length === 0 ? 'Aún no hay entregas registradas.' : 'Sin resultados para tu búsqueda.'}
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {filteredHistory.map((h) => (
+                  <div key={h.id} className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold text-gray-800">{h.customerName}</p>
+                        <p className="text-[11px] text-gray-400">
+                          #{h.id} · {h.customerPhone || h.customerEmail || ''}
+                        </p>
+                      </div>
+                      <span className="whitespace-nowrap rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold text-gray-500">
+                        {h.helmetCount} casco{h.helmetCount > 1 ? 's' : ''}
+                      </span>
+                    </div>
+                    <p className="mt-2 text-xl font-extrabold text-gray-900">{formatCOP(h.amount || 0)}</p>
+                    <div className="mt-1 flex flex-wrap items-center gap-x-2 text-[11px] text-gray-400">
+                      <span>{h.checkOutAt ? new Date(h.checkOutAt).toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' }) : '—'}</span>
+                      {h.washRequested && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 font-semibold text-emerald-700">
+                          <SparklesIcon className="h-3 w-3" /> {h.washCount || h.helmetCount} lavado(s)
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        printReceipt(
+                          businessName,
+                          businessName,
+                          facturaBody(
+                            h,
+                            {
+                              charge: { storageCharge: h.amount || 0, units: 0, unit: '', helmets: h.helmetCount },
+                              wash: 0,
+                              washUnits: 0,
+                              products: [],
+                              total: h.amount || 0,
+                            },
+                            'Pagado',
+                          ),
+                        )
+                      }
+                      className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-2.5 py-1.5 text-[11px] font-semibold text-gray-600 hover:bg-gray-50"
+                    >
+                      <PrinterIcon className="h-3.5 w-3.5" />
+                      Reimprimir factura
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
         )}
 
         {/* Lista de cascos en custodia */}
         {tab === 'activos' && (
-        loading ? (
+        <>
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Buscar por # de ticket o nombre…"
+              className="w-full max-w-xs rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+            />
+            {washOnly && (
+              <button
+                type="button"
+                onClick={() => setWashOnly(false)}
+                className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1.5 text-xs font-semibold text-amber-800"
+              >
+                Solo lavados pendientes
+                <XMarkIcon className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+          {loading ? (
           <p className="py-12 text-center text-sm text-gray-400">Cargando…</p>
-        ) : active.length === 0 ? (
+        ) : filteredActive.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-gray-200 bg-white py-14 text-center">
             <ArchiveBoxIcon className="mx-auto h-8 w-8 text-gray-300" />
-            <p className="mt-2 text-sm text-gray-500">No hay cascos en custodia.</p>
-            <p className="mt-1 text-xs text-gray-400">Toca “Recibir casco” cuando llegue un cliente.</p>
+            <p className="mt-2 text-sm text-gray-500">{active.length === 0 ? 'No hay cascos en custodia.' : 'Sin resultados para tu búsqueda.'}</p>
+            {active.length === 0 && <p className="mt-1 text-xs text-gray-400">Toca “Recibir casco” cuando llegue un cliente.</p>}
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-            {active.map((t) => {
+            {filteredActive.map((t) => {
               const charge = computeCharge(settings, t, now);
               const washPending = t.washRequested && !t.washDone;
               return (
@@ -489,6 +686,15 @@ export default function StoragePage() {
 
                   <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-gray-100 pt-3">
                     <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        title="Reimprimir comprobante"
+                        onClick={() => printReceipt('Comprobante', businessName, ingresoBody(t, settings))}
+                        className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold text-gray-500 hover:bg-gray-100"
+                      >
+                        <PrinterIcon className="h-3.5 w-3.5" />
+                        Comprobante
+                      </button>
                       {washPending && (
                         <button
                           type="button"
@@ -526,7 +732,8 @@ export default function StoragePage() {
               );
             })}
           </div>
-        )
+        )}
+        </>
         )}
 
         {/* Modal: recibir casco (check-in) */}
@@ -720,6 +927,85 @@ export default function StoragePage() {
               <div className="mt-5 flex justify-end gap-2">
                 <Button variant="secondary" onClick={() => setShowSettings(false)}>Cancelar</Button>
                 <Button variant="primary" icon={CheckCircleIcon} onClick={saveSettings} loading={busy}>Guardar tarifas</Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Comprobante / factura en pantalla (con impresión) */}
+        {receipt && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setReceipt(null)}>
+            <div className="w-full max-w-sm rounded-2xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
+              <div className={`flex items-center gap-2 rounded-t-2xl px-5 py-4 text-white ${receipt.kind === 'ingreso' ? 'bg-blue-600' : 'bg-emerald-600'}`}>
+                {receipt.kind === 'ingreso' ? <CheckCircleIcon className="h-6 w-6" /> : <BanknotesIcon className="h-6 w-6" />}
+                <div>
+                  <p className="text-sm font-bold">
+                    {receipt.kind === 'ingreso' ? 'Casco recibido' : 'Cobrado y entregado'}
+                  </p>
+                  <p className="text-xs text-white/80">Ticket #{receipt.ticket.id}</p>
+                </div>
+              </div>
+
+              <div className="p-5">
+                <div className="rounded-xl border border-dashed border-gray-300 p-4 text-sm">
+                  <p className="text-center font-bold text-gray-800">{businessName}</p>
+                  <p className="mb-2 text-center text-[11px] text-gray-400">
+                    {receipt.kind === 'ingreso' ? 'Comprobante de ingreso' : 'Factura de venta'}
+                  </p>
+                  <div className="space-y-1 border-t border-gray-100 pt-2">
+                    <Row l="Cliente" r={receipt.ticket.customerName} />
+                    {receipt.ticket.customerPhone && <Row l="Celular" r={receipt.ticket.customerPhone} />}
+                    {receipt.kind === 'ingreso' ? (
+                      <>
+                        <Row l="Ingreso" r={new Date(receipt.ticket.checkInAt).toLocaleString('es-CO')} />
+                        <Row l="Cascos" r={receipt.ticket.helmetCount} />
+                        {receipt.ticket.washRequested && (
+                          <Row l="Lavado" r={`${receipt.ticket.washCount || receipt.ticket.helmetCount} casco(s)`} />
+                        )}
+                        <Row l="Cobro" r={receipt.ticket.billingMode === 'DIA' ? 'Por día' : receipt.ticket.billingMode === 'MENSUALIDAD' ? 'Mensualidad' : 'Por hora'} />
+                      </>
+                    ) : (
+                      <>
+                        {receipt.tot.charge.storageCharge > 0 && (
+                          <Row l={`Guardado${receipt.tot.charge.helmets > 1 ? ' ×' + receipt.tot.charge.helmets : ''}`} r={formatCOP(receipt.tot.charge.storageCharge)} />
+                        )}
+                        {receipt.tot.wash > 0 && <Row l={`Lavado${receipt.tot.washUnits > 1 ? ' ×' + receipt.tot.washUnits : ''}`} r={formatCOP(receipt.tot.wash)} />}
+                        {(receipt.tot.products || []).map((p) => (
+                          <Row key={p.variantId} l={`${p.name} ×${p.quantity}`} r={formatCOP((p.price || 0) * p.quantity)} />
+                        ))}
+                        <div className="mt-1 flex justify-between border-t border-gray-200 pt-2 text-base font-extrabold text-gray-900">
+                          <span>TOTAL</span>
+                          <span>{formatCOP(receipt.tot.total)}</span>
+                        </div>
+                        <Row l="Pago" r={receipt.methodLabel} />
+                      </>
+                    )}
+                  </div>
+                  {receipt.kind === 'ingreso' && (
+                    <p className="mt-3 text-center text-[10px] text-gray-400">
+                      Guarde este comprobante para reclamar su(s) casco(s).
+                    </p>
+                  )}
+                </div>
+
+                <div className="mt-4 flex justify-end gap-2">
+                  <Button variant="secondary" onClick={() => setReceipt(null)}>Cerrar</Button>
+                  <Button
+                    variant="primary"
+                    icon={PrinterIcon}
+                    onClick={() =>
+                      printReceipt(
+                        receipt.kind === 'ingreso' ? 'Comprobante' : 'Factura',
+                        businessName,
+                        receipt.kind === 'ingreso'
+                          ? ingresoBody(receipt.ticket, settings)
+                          : facturaBody(receipt.ticket, receipt.tot, receipt.methodLabel),
+                      )
+                    }
+                  >
+                    Imprimir
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
