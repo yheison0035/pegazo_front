@@ -28,9 +28,17 @@ import {
   BeakerIcon,
 } from '@heroicons/react/24/outline';
 
+// El menú sigue un PASO A PASO de arriba hacia abajo, pensado para que cualquier
+// persona lo use sin confundirse:
+//   1. Inicio  2. Atención (lo que haces cuando llega el cliente)
+//   3. Ventas (facturar/cobrar)  4. Clientes  5. Catálogo (lo que vendes)
+//   6. Finanzas (dinero/reportes)  7. Administración.
+// Cada sección solo aparece si la vertical usa alguno de sus módulos.
+// IMPORTANTE: un catálogo que se anida (payment-methods, units-of-measure, etc.)
+// debe ir en la MISMA sección que su padre (ver NEST_PARENT en useNavigation).
 export const NAVIGATION = [
   {
-    section: 'General',
+    section: 'Inicio',
     items: [
       {
         name: 'Inicio',
@@ -52,97 +60,30 @@ export const NAVIGATION = [
           'BARBERO',
         ],
       },
-      {
-        name: 'Locales',
-        href: '/dashboard/locals',
-        icon: BuildingOffice2Icon,
-        roles: ['SUPER_ADMIN'],
-      },
     ],
   },
 
+  // 2. ATENCIÓN — lo primero que haces cuando llega un cliente.
   {
-    section: 'Inventario',
+    section: 'Atención',
     items: [
       {
-        name: 'Categorías',
-        href: '/dashboard/categories',
-        icon: TagIcon,
-        roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA', 'BODEGUERO'],
-      },
-      {
-        name: 'Marcas',
-        href: '/dashboard/brands',
-        icon: SparklesIcon,
-        roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA', 'BODEGUERO'],
-      },
-      {
-        name: 'Proveedores',
-        href: '/dashboard/providers',
-        icon: TruckIcon,
-        roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA', 'BODEGUERO'],
-      },
-      {
-        name: 'Inventario',
-        href: '/dashboard/inventory',
-        icon: ArchiveBoxIcon,
+        name: 'Citas',
+        href: '/dashboard/appointments',
+        icon: CalendarDaysIcon,
         roles: [
           'SUPER_ADMIN',
           'ADMIN',
-          'ASESOR',
+          'BARBERO',
+          'PROFESIONAL',
           'RECEPCIONISTA',
-          'BODEGUERO',
-          'VENTAS',
         ],
       },
       {
-        name: 'Unidades de medida',
-        href: '/dashboard/units-of-measure',
-        icon: TagIcon,
+        name: 'Descansos',
+        href: '/dashboard/rest-days',
+        icon: MoonIcon,
         roles: ['SUPER_ADMIN', 'ADMIN'],
-      },
-      {
-        name: 'Insumos',
-        href: '/dashboard/supplies',
-        icon: BeakerIcon,
-        roles: [
-          'SUPER_ADMIN',
-          'ADMIN',
-          'RECEPCIONISTA',
-          'CAJA',
-          'COCINERO',
-        ],
-      },
-      {
-        name: 'Compras',
-        href: '/dashboard/purchases',
-        icon: InboxArrowDownIcon,
-        roles: [
-          'SUPER_ADMIN',
-          'ADMIN',
-          'ASESOR',
-          'RECEPCIONISTA',
-          'BODEGUERO',
-        ],
-      },
-    ],
-  },
-
-  {
-    section: 'Ventas',
-    items: [
-      {
-        name: 'Realizar Factura',
-        href: '/dashboard/sales',
-        icon: BanknotesIcon,
-        roles: [
-          'SUPER_ADMIN',
-          'ADMIN',
-          'ASESOR',
-          'RECEPCIONISTA',
-          'VENTAS',
-          'CAJA',
-        ],
       },
       {
         name: 'Mesas',
@@ -172,6 +113,32 @@ export const NAVIGATION = [
         ],
       },
       {
+        name: 'Guarda cascos',
+        href: '/dashboard/storage',
+        icon: ArchiveBoxIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN', 'RECEPCIONISTA', 'ASESOR', 'CAJA'],
+      },
+    ],
+  },
+
+  // 3. VENTAS — facturar y cobrar.
+  {
+    section: 'Ventas',
+    items: [
+      {
+        name: 'Realizar Factura',
+        href: '/dashboard/sales',
+        icon: BanknotesIcon,
+        roles: [
+          'SUPER_ADMIN',
+          'ADMIN',
+          'ASESOR',
+          'RECEPCIONISTA',
+          'VENTAS',
+          'CAJA',
+        ],
+      },
+      {
         name: 'Pedidos',
         href: '/dashboard/orders',
         icon: ShoppingCartIcon,
@@ -183,6 +150,12 @@ export const NAVIGATION = [
           'VENTAS',
           'CAJA',
         ],
+      },
+      {
+        name: 'Cotizaciones',
+        href: '/dashboard/quotes',
+        icon: DocumentTextIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA', 'VENTAS'],
       },
       {
         name: 'Ventas Realizadas',
@@ -204,12 +177,6 @@ export const NAVIGATION = [
         roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA'],
       },
       {
-        name: 'Cartera',
-        href: '/dashboard/cartera',
-        icon: CreditCardIcon,
-        roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA', 'CAJA'],
-      },
-      {
         name: 'Caja',
         href: '/dashboard/cash',
         icon: CalculatorIcon,
@@ -229,29 +196,15 @@ export const NAVIGATION = [
         roles: ['SUPER_ADMIN', 'ADMIN'],
       },
       {
-        name: 'Consignaciones',
-        href: '/dashboard/bank',
-        icon: BanknotesIcon,
-        // Información financiera sensible: SOLO el dueño (SUPER_ADMIN), el
-        // administrador (ADMIN) y la recepcionista. El barbero/profesional y demás
-        // roles operativos NO lo ven.
-        roles: ['SUPER_ADMIN', 'ADMIN', 'RECEPCIONISTA'],
-      },
-      {
-        name: 'Cotizaciones',
-        href: '/dashboard/quotes',
-        icon: DocumentTextIcon,
-        roles: [
-          'SUPER_ADMIN',
-          'ADMIN',
-          'ASESOR',
-          'RECEPCIONISTA',
-          'VENTAS',
-        ],
+        name: 'Cartera',
+        href: '/dashboard/cartera',
+        icon: CreditCardIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA', 'CAJA'],
       },
     ],
   },
 
+  // 4. CLIENTES.
   {
     section: 'Clientes',
     items: [
@@ -286,42 +239,75 @@ export const NAVIGATION = [
         icon: CreditCardIcon,
         roles: ['SUPER_ADMIN', 'ADMIN', 'RECEPCIONISTA'],
       },
-      {
-        name: 'Guarda cascos',
-        href: '/dashboard/storage',
-        icon: ArchiveBoxIcon,
-        roles: ['SUPER_ADMIN', 'ADMIN', 'RECEPCIONISTA', 'ASESOR', 'CAJA'],
-      },
     ],
   },
 
+  // 5. CATÁLOGO — lo que vendes (productos y servicios) y su abastecimiento.
   {
-    section: 'Operación',
+    section: 'Catálogo',
     items: [
-      {
-        name: 'Citas',
-        href: '/dashboard/appointments',
-        icon: CalendarDaysIcon,
-        roles: [
-          'SUPER_ADMIN',
-          'ADMIN',
-          'BARBERO',
-          'PROFESIONAL',
-          'RECEPCIONISTA',
-        ],
-      },
-      {
-        name: 'Descansos',
-        href: '/dashboard/rest-days',
-        icon: MoonIcon,
-        roles: ['SUPER_ADMIN', 'ADMIN'],
-      },
       {
         name: 'Servicios',
         href: '/dashboard/services',
         icon: WrenchScrewdriverIcon,
         roles: ['SUPER_ADMIN', 'ADMIN', 'RECEPCIONISTA'],
       },
+      {
+        name: 'Inventario',
+        href: '/dashboard/inventory',
+        icon: ArchiveBoxIcon,
+        roles: [
+          'SUPER_ADMIN',
+          'ADMIN',
+          'ASESOR',
+          'RECEPCIONISTA',
+          'BODEGUERO',
+          'VENTAS',
+        ],
+      },
+      {
+        name: 'Unidades de medida',
+        href: '/dashboard/units-of-measure',
+        icon: TagIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN'],
+      },
+      {
+        name: 'Categorías',
+        href: '/dashboard/categories',
+        icon: TagIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA', 'BODEGUERO'],
+      },
+      {
+        name: 'Marcas',
+        href: '/dashboard/brands',
+        icon: SparklesIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA', 'BODEGUERO'],
+      },
+      {
+        name: 'Insumos',
+        href: '/dashboard/supplies',
+        icon: BeakerIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN', 'RECEPCIONISTA', 'CAJA', 'COCINERO'],
+      },
+      {
+        name: 'Proveedores',
+        href: '/dashboard/providers',
+        icon: TruckIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA', 'BODEGUERO'],
+      },
+      {
+        name: 'Compras',
+        href: '/dashboard/purchases',
+        icon: InboxArrowDownIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA', 'BODEGUERO'],
+      },
+    ],
+  },
+
+  // 6. FINANZAS — dinero y reportes.
+  {
+    section: 'Finanzas',
+    items: [
       {
         name: 'Gastos',
         href: '/dashboard/expenses',
@@ -353,10 +339,12 @@ export const NAVIGATION = [
         roles: ['SUPER_ADMIN', 'ADMIN'],
       },
       {
-        name: 'Estadísticas',
-        href: '/dashboard/statistics',
-        icon: ChartBarSquareIcon,
-        roles: ['SUPER_ADMIN'],
+        name: 'Consignaciones',
+        href: '/dashboard/bank',
+        icon: BanknotesIcon,
+        // Información financiera sensible: SOLO el dueño (SUPER_ADMIN), el
+        // administrador (ADMIN) y la recepcionista.
+        roles: ['SUPER_ADMIN', 'ADMIN', 'RECEPCIONISTA'],
       },
       {
         name: 'Impuestos (IVA)',
@@ -365,16 +353,19 @@ export const NAVIGATION = [
         roles: ['SUPER_ADMIN', 'ADMIN'],
       },
       {
-        // Solo aparece si la plataforma la habilitó para la empresa
-        // (useNavigation empuja 'facturacion-electronica' según el flag).
+        name: 'Estadísticas',
+        href: '/dashboard/statistics',
+        icon: ChartBarSquareIcon,
+        roles: ['SUPER_ADMIN'],
+      },
+      {
+        // Solo aparece si la plataforma la habilitó para la empresa.
         name: 'Facturación electrónica',
         href: '/dashboard/facturacion-electronica',
         icon: DocumentTextIcon,
         roles: ['SUPER_ADMIN', 'ADMIN'],
       },
       {
-        // Igual que facturación: aparece según el flag/vinculación; el candado
-        // de plan (Órbita) lo maneja el gating por 'nomina-electronica'.
         name: 'Nómina electrónica',
         href: '/dashboard/nomina-electronica',
         icon: DocumentTextIcon,
@@ -383,6 +374,7 @@ export const NAVIGATION = [
     ],
   },
 
+  // 7. ADMINISTRACIÓN — configuración del negocio.
   {
     section: 'Administración',
     items: [
@@ -390,6 +382,12 @@ export const NAVIGATION = [
         name: 'Usuarios / Roles',
         href: '/dashboard/users',
         icon: UserGroupIcon,
+        roles: ['SUPER_ADMIN'],
+      },
+      {
+        name: 'Locales',
+        href: '/dashboard/locals',
+        icon: BuildingOffice2Icon,
         roles: ['SUPER_ADMIN'],
       },
       {
