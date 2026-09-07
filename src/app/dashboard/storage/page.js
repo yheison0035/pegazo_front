@@ -55,10 +55,11 @@ function elapsedLabel(ms) {
   return parts.join(' ');
 }
 function computeCharge(settings, ticket, nowMs) {
+  const helmets = Math.max(1, ticket.helmetCount || 1);
   const mode = ticket.billingMode || settings?.defaultMode || 'HORA';
   const ms = nowMs - new Date(ticket.checkInAt).getTime();
   if (mode === 'MENSUALIDAD') {
-    return { mode, storageCharge: 0, units: 0, unit: 'mes', rate: 0, elapsedLabel: elapsedLabel(ms) };
+    return { mode, storageCharge: 0, perHelmet: 0, helmets, units: 0, unit: 'mes', rate: 0, elapsedLabel: elapsedLabel(ms) };
   }
   const rawMin = Math.max(0, Math.floor(ms / 60000));
   const billable = Math.max(0, rawMin - (settings?.graceMinutes || 0));
@@ -74,7 +75,8 @@ function computeCharge(settings, ticket, nowMs) {
     unit = 'hora';
     units = billable <= 0 ? 0 : Math.max(1, Math.ceil(billable / 60));
   }
-  return { mode, storageCharge: Math.round(units * rate), units, unit, rate, elapsedLabel: elapsedLabel(ms) };
+  const perHelmet = Math.round(units * rate);
+  return { mode, perHelmet, helmets, storageCharge: perHelmet * helmets, units, unit, rate, elapsedLabel: elapsedLabel(ms) };
 }
 
 const EMPTY_CHECKIN = {
@@ -83,6 +85,7 @@ const EMPTY_CHECKIN = {
   customerEmail: '',
   billingMode: 'HORA',
   washRequested: false,
+  washCount: 1,
   helmetCount: 1,
   notes: '',
 };
@@ -158,13 +161,17 @@ export default function StoragePage() {
     }
     setBusy(true);
     try {
+      const helmets = Math.max(1, Number(ci.helmetCount) || 1);
       await checkInStorage({
         customerName: ci.customerName.trim(),
         customerPhone: ci.customerPhone.trim() || undefined,
         customerEmail: ci.customerEmail.trim() || undefined,
         billingMode: ci.billingMode,
         washRequested: ci.washRequested,
-        helmetCount: Number(ci.helmetCount) || 1,
+        washCount: ci.washRequested
+          ? Math.min(Math.max(1, Number(ci.washCount) || helmets), helmets)
+          : 0,
+        helmetCount: helmets,
         notes: ci.notes.trim() || undefined,
       });
       setCi({ ...EMPTY_CHECKIN });
@@ -225,9 +232,12 @@ export default function StoragePage() {
   const checkoutTotals = useMemo(() => {
     if (!checkoutTarget) return null;
     const charge = computeCharge(settings, checkoutTarget, now);
-    const wash = co.includeWash ? settings?.washPrice || 0 : 0;
+    const washUnits = co.includeWash
+      ? Math.max(1, checkoutTarget.washCount || checkoutTarget.helmetCount || 1)
+      : 0;
+    const wash = washUnits * (settings?.washPrice || 0);
     const prods = co.products.reduce((s, p) => s + (p.price || 0) * p.quantity, 0);
-    return { charge, wash, prods, total: charge.storageCharge + wash + prods };
+    return { charge, wash, washUnits, prods, total: charge.storageCharge + wash + prods };
   }, [checkoutTarget, settings, now, co]);
 
   const confirmCheckout = async () => {
@@ -380,7 +390,10 @@ export default function StoragePage() {
                       <p className="text-[10px] uppercase tracking-wide text-gray-400">A cobrar (guardado)</p>
                       <p className="text-xl font-extrabold text-gray-900">{formatCOP(charge.storageCharge)}</p>
                       {charge.mode !== 'MENSUALIDAD' && charge.units > 0 && (
-                        <p className="text-[10px] text-gray-400">{charge.units} {charge.unit}{charge.units > 1 ? 's' : ''} × {formatCOP(charge.rate)}</p>
+                        <p className="text-[10px] text-gray-400">
+                          {charge.units} {charge.unit}{charge.units > 1 ? 's' : ''} × {formatCOP(charge.rate)}
+                          {charge.helmets > 1 ? ` × ${charge.helmets} cascos` : ''}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -463,11 +476,27 @@ export default function StoragePage() {
                     <input type="number" min="1" value={ci.helmetCount} onChange={(e) => setCi((c) => ({ ...c, helmetCount: e.target.value }))} className={inputCls} />
                   </div>
                 </div>
-                <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-gray-200 px-3 py-2.5 text-sm">
-                  <input type="checkbox" checked={ci.washRequested} onChange={(e) => setCi((c) => ({ ...c, washRequested: e.target.checked }))} className="h-4 w-4 accent-orange-500" />
-                  <SparklesIcon className="h-4 w-4 text-orange-500" />
-                  El cliente quiere <b>lavado del casco</b> {settings?.washPrice ? `(${formatCOP(settings.washPrice)})` : ''}
-                </label>
+                <div className="rounded-xl border border-gray-200 px-3 py-2.5">
+                  <label className="flex cursor-pointer items-center gap-2 text-sm">
+                    <input type="checkbox" checked={ci.washRequested} onChange={(e) => setCi((c) => ({ ...c, washRequested: e.target.checked, washCount: c.washCount || Number(c.helmetCount) || 1 }))} className="h-4 w-4 accent-orange-500" />
+                    <SparklesIcon className="h-4 w-4 text-orange-500" />
+                    El cliente quiere <b>lavado</b> {settings?.washPrice ? `(${formatCOP(settings.washPrice)} c/u)` : ''}
+                  </label>
+                  {ci.washRequested && Number(ci.helmetCount) > 1 && (
+                    <div className="mt-2 flex items-center gap-2 pl-6 text-sm text-gray-600">
+                      ¿Cuántos lavar?
+                      <input
+                        type="number"
+                        min="1"
+                        max={Number(ci.helmetCount) || 1}
+                        value={ci.washCount}
+                        onChange={(e) => setCi((c) => ({ ...c, washCount: e.target.value }))}
+                        className="w-16 rounded-lg border border-gray-200 px-2 py-1 text-sm"
+                      />
+                      <span className="text-xs text-gray-400">de {ci.helmetCount}</span>
+                    </div>
+                  )}
+                </div>
                 <div>
                   <label className="mb-1 block text-xs font-semibold text-gray-600">Nota (opcional)</label>
                   <input value={ci.notes} onChange={(e) => setCi((c) => ({ ...c, notes: e.target.value }))} placeholder="Ej: casco negro con visor" className={inputCls} />
@@ -501,16 +530,19 @@ export default function StoragePage() {
               <div className="mt-3 space-y-1.5 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600">
-                    Guardado {checkoutTotals.charge.mode === 'MENSUALIDAD' ? '(mensualidad)' : `(${checkoutTotals.charge.units} ${checkoutTotals.charge.unit}${checkoutTotals.charge.units > 1 ? 's' : ''})`}
+                    Guardado{' '}
+                    {checkoutTotals.charge.mode === 'MENSUALIDAD'
+                      ? '(mensualidad)'
+                      : `(${checkoutTotals.charge.units} ${checkoutTotals.charge.unit}${checkoutTotals.charge.units > 1 ? 's' : ''}${checkoutTotals.charge.helmets > 1 ? ` × ${checkoutTotals.charge.helmets} cascos` : ''})`}
                   </span>
                   <span className="font-semibold text-gray-900">{formatCOP(checkoutTotals.charge.storageCharge)}</span>
                 </div>
                 <label className="flex items-center justify-between">
                   <span className="flex items-center gap-2 text-gray-600">
                     <input type="checkbox" checked={co.includeWash} onChange={(e) => setCo((c) => ({ ...c, includeWash: e.target.checked }))} className="h-4 w-4 accent-orange-500" />
-                    Lavado de casco
+                    Lavado{checkoutTotals.washUnits > 1 ? ` (${checkoutTotals.washUnits} cascos)` : ''}
                   </span>
-                  <span className="font-semibold text-gray-900">{formatCOP(co.includeWash ? settings?.washPrice || 0 : 0)}</span>
+                  <span className="font-semibold text-gray-900">{formatCOP(checkoutTotals.wash)}</span>
                 </label>
                 {co.products.map((p) => (
                   <div key={p.variantId} className="flex items-center justify-between gap-2">
