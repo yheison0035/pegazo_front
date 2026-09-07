@@ -60,25 +60,22 @@ function computeCharge(settings, ticket, nowMs) {
   const helmets = Math.max(1, ticket.helmetCount || 1);
   const mode = ticket.billingMode || settings?.defaultMode || 'HORA';
   const ms = nowMs - new Date(ticket.checkInAt).getTime();
+  const label = elapsedLabel(ms);
   if (mode === 'MENSUALIDAD') {
-    return { mode, storageCharge: 0, perHelmet: 0, helmets, units: 0, unit: 'mes', rate: 0, elapsedLabel: elapsedLabel(ms) };
+    return { mode, storageCharge: 0, perHelmet: 0, helmets, rate: 0, unitMin: 0, elapsedLabel: label };
   }
   const rawMin = Math.max(0, Math.floor(ms / 60000));
   const billable = Math.max(0, rawMin - (settings?.graceMinutes || 0));
-  let units = 0;
-  let rate = 0;
-  let unit = 'hora';
-  if (mode === 'DIA') {
-    rate = settings?.dayRate || 0;
-    unit = 'día';
-    units = billable <= 0 ? 0 : Math.max(1, Math.ceil(billable / 1440));
-  } else {
-    rate = settings?.hourRate || 0;
-    unit = 'hora';
-    units = billable <= 0 ? 0 : Math.max(1, Math.ceil(billable / 60));
+  const rate = mode === 'DIA' ? settings?.dayRate || 0 : settings?.hourRate || 0;
+  const unitMin = mode === 'DIA' ? 1440 : 60;
+  let perHelmet = 0;
+  if (billable > 0) {
+    perHelmet =
+      billable <= unitMin
+        ? Math.round(rate) // 1 unidad completa (mínimo)
+        : Math.round((rate * billable) / unitMin); // proporcional (fracción)
   }
-  const perHelmet = Math.round(units * rate);
-  return { mode, perHelmet, helmets, storageCharge: perHelmet * helmets, units, unit, rate, elapsedLabel: elapsedLabel(ms) };
+  return { mode, perHelmet, helmets, storageCharge: perHelmet * helmets, rate, unitMin, elapsedLabel: label };
 }
 
 function Row({ l, r }) {
@@ -153,7 +150,7 @@ function facturaBody(t, tot, methodLabel) {
   const rows = [];
   if (tot.charge.storageCharge > 0)
     rows.push(
-      `<div class="row"><span>Guardado ${tot.charge.units} ${tot.charge.unit}${tot.charge.units > 1 ? 's' : ''}${tot.charge.helmets > 1 ? ' x' + tot.charge.helmets : ''}</span><span class="r">${money(tot.charge.storageCharge)}</span></div>`,
+      `<div class="row"><span>Guardado${tot.charge.elapsedLabel ? ' ' + tot.charge.elapsedLabel : ''}${tot.charge.helmets > 1 ? ' x' + tot.charge.helmets : ''}</span><span class="r">${money(tot.charge.storageCharge)}</span></div>`,
     );
   if (tot.wash > 0)
     rows.push(
@@ -700,10 +697,10 @@ export default function StoragePage() {
                     <div className="text-right">
                       <p className="text-[10px] uppercase tracking-wide text-gray-400">A cobrar (guardado)</p>
                       <p className="text-xl font-extrabold text-gray-900">{formatCOP(charge.storageCharge)}</p>
-                      {charge.mode !== 'MENSUALIDAD' && charge.units > 0 && (
+                      {charge.mode !== 'MENSUALIDAD' && charge.perHelmet > 0 && (
                         <p className="text-[10px] text-gray-400">
-                          {charge.units} {charge.unit}{charge.units > 1 ? 's' : ''} × {formatCOP(charge.rate)}
-                          {charge.helmets > 1 ? ` × ${charge.helmets} cascos` : ''}
+                          {charge.elapsedLabel}
+                          {charge.helmets > 1 ? ` · ${formatCOP(charge.perHelmet)}/casco` : ''}
                         </p>
                       )}
                     </div>
@@ -860,78 +857,137 @@ export default function StoragePage() {
           </div>
         )}
 
-        {/* Modal: cobrar y entregar */}
+        {/* Modal: cobrar y entregar (diseño pro) */}
         {checkoutTarget && checkoutTotals && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setCheckoutTarget(null)}>
-            <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl max-h-[92vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-              <div className="mb-3 flex items-center justify-between">
-                <h2 className="text-lg font-bold text-gray-800">Cobrar y entregar</h2>
-                <button onClick={() => setCheckoutTarget(null)} className="text-gray-400 hover:text-gray-600">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" onClick={() => setCheckoutTarget(null)}>
+            <div className="flex max-h-[94vh] w-full max-w-md flex-col overflow-hidden rounded-3xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
+              {/* Encabezado con degradado */}
+              <div className="relative bg-gradient-to-br from-orange-500 via-orange-500 to-amber-500 px-6 py-5 text-white">
+                <button onClick={() => setCheckoutTarget(null)} className="absolute right-4 top-4 text-white/80 hover:text-white">
                   <XMarkIcon className="h-5 w-5" />
                 </button>
-              </div>
-              <div className="rounded-xl bg-gray-50 p-3">
-                <p className="font-semibold text-gray-800">{checkoutTarget.customerName}</p>
-                <p className="text-xs text-gray-500">Tiempo en custodia: {checkoutTotals.charge.elapsedLabel}</p>
-              </div>
-
-              {/* Desglose */}
-              <div className="mt-3 space-y-1.5 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">
-                    Guardado{' '}
-                    {checkoutTotals.charge.mode === 'MENSUALIDAD'
-                      ? '(mensualidad)'
-                      : `(${checkoutTotals.charge.units} ${checkoutTotals.charge.unit}${checkoutTotals.charge.units > 1 ? 's' : ''}${checkoutTotals.charge.helmets > 1 ? ` × ${checkoutTotals.charge.helmets} cascos` : ''})`}
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/80">Cobrar y entregar</p>
+                <h2 className="mt-1 text-xl font-bold leading-tight">{checkoutTarget.customerName}</h2>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-semibold backdrop-blur">
+                    <ClockIcon className="h-3.5 w-3.5" /> {checkoutTotals.charge.elapsedLabel}
                   </span>
-                  <span className="font-semibold text-gray-900">{formatCOP(checkoutTotals.charge.storageCharge)}</span>
+                  <span className="rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-semibold backdrop-blur">
+                    {checkoutTarget.helmetCount} casco{checkoutTarget.helmetCount > 1 ? 's' : ''}
+                  </span>
+                  <span className="rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-semibold backdrop-blur">
+                    Ticket #{checkoutTarget.id}
+                  </span>
                 </div>
-                <label className="flex items-center justify-between">
-                  <span className="flex items-center gap-2 text-gray-600">
-                    <input type="checkbox" checked={co.includeWash} onChange={(e) => setCo((c) => ({ ...c, includeWash: e.target.checked }))} className="h-4 w-4 accent-orange-500" />
-                    Lavado{checkoutTotals.washUnits > 1 ? ` (${checkoutTotals.washUnits} cascos)` : ''}
-                  </span>
-                  <span className="font-semibold text-gray-900">{formatCOP(checkoutTotals.wash)}</span>
-                </label>
-                {co.products.map((p) => (
-                  <div key={p.variantId} className="flex items-center justify-between gap-2">
-                    <span className="flex items-center gap-1.5 text-gray-600">
-                      <button onClick={() => removeProduct(p.variantId)} className="text-gray-300 hover:text-red-500"><XMarkIcon className="h-4 w-4" /></button>
-                      {p.name}
-                      <input type="number" min="1" value={p.quantity} onChange={(e) => setProdQty(p.variantId, Number(e.target.value))} className="w-12 rounded border border-gray-200 px-1 py-0.5 text-xs" />
-                    </span>
-                    <span className="font-semibold text-gray-900">{formatCOP((p.price || 0) * p.quantity)}</span>
-                  </div>
-                ))}
               </div>
 
-              {/* Agregar producto */}
-              {products.length > 0 && (
-                <div className="mt-3">
-                  <select onChange={(e) => { addProduct(e.target.value); e.target.value = ''; }} className={inputCls} defaultValue="">
+              {/* Cuerpo (desglose) */}
+              <div className="flex-1 overflow-y-auto px-6 py-5">
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-gray-400">Detalle del cobro</p>
+                <div className="space-y-2">
+                  {/* Guardado */}
+                  <div className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-gray-50/60 px-3.5 py-3">
+                    <span className="grid h-9 w-9 flex-none place-items-center rounded-xl bg-blue-100 text-blue-600">
+                      <ClockIcon className="h-5 w-5" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-gray-800">Guardado</p>
+                      <p className="text-[11px] text-gray-400">
+                        {checkoutTotals.charge.mode === 'MENSUALIDAD'
+                          ? 'Cubierto por mensualidad'
+                          : `${checkoutTotals.charge.elapsedLabel}${checkoutTotals.charge.helmets > 1 ? ` · ${formatCOP(checkoutTotals.charge.perHelmet)} × ${checkoutTotals.charge.helmets} cascos` : ''}`}
+                      </p>
+                    </div>
+                    <span className="font-bold tabular-nums text-gray-900">{formatCOP(checkoutTotals.charge.storageCharge)}</span>
+                  </div>
+
+                  {/* Lavado (toggle) */}
+                  <button
+                    type="button"
+                    onClick={() => setCo((c) => ({ ...c, includeWash: !c.includeWash }))}
+                    className={`flex w-full items-center gap-3 rounded-2xl border px-3.5 py-3 text-left transition ${co.includeWash ? 'border-emerald-200 bg-emerald-50/60' : 'border-gray-100 bg-white'}`}
+                  >
+                    <span className={`grid h-9 w-9 flex-none place-items-center rounded-xl ${co.includeWash ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-400'}`}>
+                      <SparklesIcon className="h-5 w-5" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-gray-800">
+                        Lavado {co.includeWash ? '· incluido' : ''}
+                      </p>
+                      <p className="text-[11px] text-gray-400">
+                        {checkoutTotals.washUnits > 1 ? `${checkoutTotals.washUnits} cascos` : 'Toca para incluir / quitar'}
+                      </p>
+                    </div>
+                    <span className={`font-bold tabular-nums ${co.includeWash ? 'text-gray-900' : 'text-gray-300'}`}>{formatCOP(checkoutTotals.wash)}</span>
+                  </button>
+
+                  {/* Productos */}
+                  {co.products.map((p) => (
+                    <div key={p.variantId} className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-white px-3.5 py-2.5">
+                      <span className="grid h-9 w-9 flex-none place-items-center rounded-xl bg-violet-100 text-violet-600">
+                        <ArchiveBoxIcon className="h-5 w-5" />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold text-gray-800">{p.name}</p>
+                        <div className="mt-0.5 flex items-center gap-1.5">
+                          <button onClick={() => setProdQty(p.variantId, p.quantity - 1)} className="grid h-5 w-5 place-items-center rounded bg-gray-100 text-gray-600 hover:bg-gray-200">−</button>
+                          <span className="w-6 text-center text-xs font-semibold">{p.quantity}</span>
+                          <button onClick={() => setProdQty(p.variantId, p.quantity + 1)} className="grid h-5 w-5 place-items-center rounded bg-gray-100 text-gray-600 hover:bg-gray-200">+</button>
+                          <button onClick={() => removeProduct(p.variantId)} className="ml-1 text-gray-300 hover:text-red-500"><XMarkIcon className="h-3.5 w-3.5" /></button>
+                        </div>
+                      </div>
+                      <span className="font-bold tabular-nums text-gray-900">{formatCOP((p.price || 0) * p.quantity)}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Agregar producto */}
+                {products.length > 0 && (
+                  <select
+                    onChange={(e) => { addProduct(e.target.value); e.target.value = ''; }}
+                    className={`mt-2.5 ${inputCls}`}
+                    defaultValue=""
+                  >
                     <option value="">+ Agregar producto…</option>
                     {products.map((p) => <option key={p.variantId} value={p.variantId}>{p.name} · {formatCOP(p.price)}</option>)}
                   </select>
+                )}
+              </div>
+
+              {/* Pie: total + método + cobrar */}
+              <div className="border-t border-gray-100 bg-white px-6 py-4">
+                <div className="flex items-end justify-between">
+                  <span className="text-sm font-semibold text-gray-500">Total a cobrar</span>
+                  <span className="text-3xl font-black tabular-nums text-gray-900">{formatCOP(checkoutTotals.total)}</span>
                 </div>
-              )}
 
-              <div className="mt-4 flex items-center justify-between border-t border-gray-200 pt-3">
-                <span className="text-sm font-semibold text-gray-700">Total a cobrar</span>
-                <span className="text-2xl font-extrabold text-orange-600">{formatCOP(checkoutTotals.total)}</span>
-              </div>
+                <p className="mb-1.5 mt-3 text-[11px] font-semibold uppercase tracking-wide text-gray-400">Método de pago</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {PAY_METHODS.map((pm) => (
+                    <button
+                      key={pm.id}
+                      type="button"
+                      onClick={() => setCo((c) => ({ ...c, paymentMethod: pm.id }))}
+                      className={`rounded-xl border px-3 py-2 text-sm font-semibold transition ${co.paymentMethod === pm.id ? 'border-orange-500 bg-orange-50 text-orange-700 ring-2 ring-orange-500/20' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+                    >
+                      {pm.label}
+                    </button>
+                  ))}
+                </div>
 
-              <div className="mt-3">
-                <label className="mb-1 block text-xs font-semibold text-gray-600">Método de pago</label>
-                <select value={co.paymentMethod} onChange={(e) => setCo((c) => ({ ...c, paymentMethod: e.target.value }))} className={inputCls}>
-                  {PAY_METHODS.map((pm) => <option key={pm.id} value={pm.id}>{pm.label}</option>)}
-                </select>
-              </div>
-
-              <div className="mt-5 flex justify-end gap-2">
-                <Button variant="secondary" onClick={() => setCheckoutTarget(null)}>Cancelar</Button>
-                <Button variant="primary" icon={BanknotesIcon} onClick={confirmCheckout} loading={busy}>
-                  Cobrar {formatCOP(checkoutTotals.total)}
-                </Button>
+                <button
+                  type="button"
+                  onClick={confirmCheckout}
+                  disabled={busy}
+                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 px-4 py-3.5 text-base font-bold text-white shadow-lg shadow-orange-500/25 transition hover:from-orange-400 hover:to-amber-400 disabled:opacity-60"
+                >
+                  {busy ? (
+                    <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                  ) : (
+                    <BanknotesIcon className="h-5 w-5" />
+                  )}
+                  Cobrar y entregar · {formatCOP(checkoutTotals.total)}
+                </button>
               </div>
             </div>
           </div>
