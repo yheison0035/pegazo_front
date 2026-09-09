@@ -12,6 +12,7 @@ import PushRegister from '@/components/pwa/PushRegister';
 import { useAuth } from '@/context/authContext';
 import DayBanner from '@/components/pos/DayBanner';
 import RenewalBanner from '@/components/billing/RenewalBanner';
+import SubscriptionDueModal from '@/components/billing/SubscriptionDueModal';
 import { isDark, DARK_EVENT } from '@/lib/darkMode';
 import { CRM_FONTS_BY_ID, googleFontHref } from '@/config/crmFonts';
 import ImpersonationBanner from '@/components/platform/ImpersonationBanner';
@@ -97,6 +98,7 @@ export default function Layout({ children }) {
           </div>
         </div>
         <PlanUpgradeModal />
+        <SubscriptionDueModal />
         <AppointmentsHub />
         <BankDepositNotifier />
         <PushRegister />
