@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { BellIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/authContext';
 import { useToast } from '@/context/toastContext';
@@ -19,6 +19,8 @@ export default function NotificationBell({ expanded }) {
   const { usuario } = useAuth();
   const toast = useToast();
   const router = useRouter();
+  const pathname = usePathname();
+  const active = pathname === '/dashboard/notifications';
   const [unread, setUnread] = useState(0);
   const known = useRef(new Set());
   const initialized = useRef(false);
@@ -70,8 +72,15 @@ export default function NotificationBell({ expanded }) {
         type="button"
         onClick={() => router.push('/dashboard/notifications')}
         title="Notificaciones"
-        className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-gray-300 transition hover:bg-white/10"
+        className={`relative flex w-full items-center gap-3 rounded-xl px-3 py-2 transition ${
+          active
+            ? 'bg-gradient-to-r from-orange-500/25 to-amber-500/10 text-white shadow-inner'
+            : 'text-gray-300 hover:bg-white/10 hover:text-white'
+        }`}
       >
+        {active && (
+          <span className="absolute left-0 top-1/2 h-6 w-[3px] -translate-y-1/2 rounded-r-full bg-orange-400" />
+        )}
         <span className="relative flex-none">
           <BellIcon
             className={`h-6 w-6 ${unread > 0 ? 'text-orange-300' : 'text-gray-300'}`}
