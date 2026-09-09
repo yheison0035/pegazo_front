@@ -210,6 +210,17 @@ export default function ContentData({
                 <td className="px-5 py-4 whitespace-nowrap">
                   <StatusBadge status={info.status} />
                 </td>
+                <td className="px-5 py-4 whitespace-nowrap">
+                  {info.stockRequestPending ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-700">
+                      Pendiente disminución
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-500">
+                      Sin novedad
+                    </span>
+                  )}
+                </td>
                 <td className="px-5 py-4">
                   <LastAudit
                     audit={info.lastAudit}
