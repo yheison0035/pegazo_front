@@ -64,6 +64,24 @@ export default function Inventory() {
     fetchProducts();
   }, [fetchProducts]);
 
+  // Refresco en tiempo real: cuando se aprueba/rechaza una solicitud de stock
+  // (mismo o cambio de vista) y al volver el foco a la pestaña, se recarga la
+  // lista para reflejar el stock y el estado sin tener que recargar la página.
+  useEffect(() => {
+    const onChange = () => fetchProducts();
+    const onFocus = () => {
+      if (document.visibilityState === 'visible') fetchProducts();
+    };
+    window.addEventListener('stock-requests-changed', onChange);
+    document.addEventListener('visibilitychange', onFocus);
+    window.addEventListener('focus', onChange);
+    return () => {
+      window.removeEventListener('stock-requests-changed', onChange);
+      document.removeEventListener('visibilitychange', onFocus);
+      window.removeEventListener('focus', onChange);
+    };
+  }, [fetchProducts]);
+
   const handleDeleteClick = (id, name) => {
     setDeleteTarget({ id, name });
     setShowDeleteModal(true);
