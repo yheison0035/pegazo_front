@@ -7,8 +7,10 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 // Editor de variantes: color + talla (opcional) + stock. Cada combinación de
 // color y talla es una variante distinta. Sin talla se comporta como antes.
 const ColorSelect = memo(function ColorSelect({ value, onChange, disabled }) {
+  // Se conservan las variantes en 0 (producto agotado). Solo se descartan las
+  // que no tienen color o traen un stock inválido (negativo/NaN).
   const safeValue = Array.isArray(value)
-    ? value.filter((v) => v && v.color && v.stock > 0)
+    ? value.filter((v) => v && v.color && Number(v.stock) >= 0)
     : [];
 
   const [open, setOpen] = useState(false);
@@ -74,20 +76,16 @@ const ColorSelect = memo(function ColorSelect({ value, onChange, disabled }) {
 
   const decrease = (color) => {
     const existing = getVariant(color);
-    if (!existing) return;
-    if (existing.stock === 1) {
-      onChange(
-        variants.filter((v) => key(v.color, v.size) !== key(color, size))
-      );
-    } else {
-      onChange(
-        variants.map((v) =>
-          key(v.color, v.size) === key(color, size)
-            ? { ...v, stock: v.stock - 1 }
-            : v
-        )
-      );
-    }
+    if (!existing || existing.stock <= 0) return;
+    // El "−" baja hasta 0 y la variante se queda en 0 (agotado). Para quitarla
+    // por completo se usa la "X" del chip (removeVariant).
+    onChange(
+      variants.map((v) =>
+        key(v.color, v.size) === key(color, size)
+          ? { ...v, stock: v.stock - 1 }
+          : v
+      )
+    );
   };
 
   const removeVariant = (v) =>
