@@ -11,7 +11,7 @@ import {
 import NavLinks from './nav-links';
 import { useAuth } from '@/context/authContext';
 import Avatar from '../profile/avatar';
-import StockRequestsBell from './StockRequestsBell';
+import NotificationBell from './NotificationBell';
 import { isDark, toggleDark, DARK_EVENT } from '@/lib/darkMode';
 
 export default function SideNavigation() {
@@ -133,8 +133,8 @@ export default function SideNavigation() {
           <NavLinks expanded={expanded} />
         </div>
 
-        {/* Solicitudes de disminución de stock (solo dueño/admin) */}
-        <StockRequestsBell expanded={expanded} />
+        {/* Notificaciones in-app (todos los usuarios) */}
+        <NotificationBell expanded={expanded} />
 
         {/* Modo oscuro (preferencia personal) */}
         <div className="border-t border-white/10 px-2 py-3">
