@@ -6,6 +6,7 @@ import {
   TicketIcon,
   MegaphoneIcon,
   Squares2X2Icon,
+  BanknotesIcon,
 } from '@heroicons/react/24/outline';
 
 export const PLATFORM_NAVIGATION = [
@@ -36,6 +37,11 @@ export const PLATFORM_NAVIGATION = [
         name: 'Tipos de negocio',
         href: '/platform/business-types',
         icon: Squares2X2Icon,
+      },
+      {
+        name: 'Cuentas de pago',
+        href: '/platform/payment-accounts',
+        icon: BanknotesIcon,
       },
       {
         name: 'Estadísticas Globales',

@@ -23,3 +23,8 @@ export async function notifyAppointmentReminder(appointmentId) {
     body: JSON.stringify({ appointmentId }),
   });
 }
+
+// Crea (idempotente) el aviso de vencimiento del plan si faltan ≤ 3 días.
+export async function notifySubscriptionDue() {
+  return apiFetch('/notifications/subscription-due', { method: 'POST' });
+}

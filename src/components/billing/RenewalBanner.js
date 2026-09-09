@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/authContext';
+import PayModal from './PayModal';
 
 // Número de WhatsApp de Pegazo para renovar/cotizar (mismo del sitio público).
 const WHATSAPP = '573186356609';
@@ -56,6 +57,7 @@ function formatCOP(value) {
 export default function RenewalBanner() {
   const { usuario } = useAuth();
   const [dismissed, setDismissed] = useState(false);
+  const [showPay, setShowPay] = useState(false);
 
   const company = usuario?.company;
   const paidUntil = company?.paidUntil;
@@ -130,6 +132,7 @@ export default function RenewalBanner() {
     : `Vence el ${formatDate(paidUntil)}. Renueva a tiempo para no interrumpir tu operación${price ? ` (${price}/mes)` : ''}.`;
 
   return (
+    <>
     <div
       className={`mb-5 flex flex-col gap-3 rounded-2xl border px-4 py-3 shadow-sm sm:flex-row sm:items-center sm:justify-between ${styles.wrap}`}
       role="alert"
@@ -156,11 +159,31 @@ export default function RenewalBanner() {
       </div>
 
       <div className="flex flex-none items-center gap-2 self-end sm:self-auto">
+        <button
+          type="button"
+          onClick={() => setShowPay(true)}
+          className={`inline-flex cursor-pointer items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-sm transition ${styles.btn}`}
+        >
+          <svg
+            className="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth="2"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3M3.75 3h16.5a1.5 1.5 0 011.5 1.5v15a1.5 1.5 0 01-1.5 1.5H3.75a1.5 1.5 0 01-1.5-1.5v-15A1.5 1.5 0 013.75 3z"
+            />
+          </svg>
+          Pagar
+        </button>
         <a
           href={waUrl}
           target="_blank"
           rel="noreferrer"
-          className={`inline-flex cursor-pointer items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-sm transition ${styles.btn}`}
+          className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-current/20 px-4 py-2 text-sm font-semibold shadow-sm transition hover:bg-black/5"
         >
           <svg
             className="h-4 w-4"
@@ -196,5 +219,7 @@ export default function RenewalBanner() {
         )}
       </div>
     </div>
+    <PayModal open={showPay} onClose={() => setShowPay(false)} company={company} />
+    </>
   );
 }
