@@ -118,15 +118,16 @@ export default function FixedExpensesPanel() {
   };
 
   const saveForm = async () => {
-    if (!form.name.trim() || !Number(form.amount)) {
-      setAlert({ type: 'warning', message: 'Falta el nombre o el monto.' });
+    if (!form.name.trim()) {
+      setAlert({ type: 'warning', message: 'Falta el nombre.' });
       return;
     }
     setBusy(true);
     try {
       const dto = {
+        // Monto opcional: si varía cada mes se deja vacío (0) y se define al pagar.
         name: form.name.trim(),
-        amount: Number(form.amount),
+        amount: form.amount ? Number(form.amount) : 0,
         dueDay: form.dueDay ? Number(form.dueDay) : undefined,
         expenseCategoryId: form.expenseCategoryId
           ? Number(form.expenseCategoryId)
@@ -167,7 +168,8 @@ export default function FixedExpensesPanel() {
   const openPay = (fx) => {
     setPayTarget(fx);
     setPayForm({
-      amount: fx.amount ?? '',
+      // Prefill con el monto habitual si lo tiene; si no, vacío para escribirlo.
+      amount: fx.amount > 0 ? fx.amount : '',
       paymentDate: todayISO(),
       paymentMethod: '',
       notes: '',
@@ -180,11 +182,15 @@ export default function FixedExpensesPanel() {
       setAlert({ type: 'warning', message: 'Elige la fecha del pago.' });
       return;
     }
+    if (!(Number(payForm.amount) > 0)) {
+      setAlert({ type: 'warning', message: 'Ingresa el monto del pago.' });
+      return;
+    }
     setBusy(true);
     try {
       await payFixedExpense(payTarget.id, {
         paymentDate: new Date(payForm.paymentDate).toISOString(),
-        amount: payForm.amount ? Number(payForm.amount) : undefined,
+        amount: Number(payForm.amount),
         paymentMethod: payForm.paymentMethod || undefined,
         notes: payForm.notes.trim() || undefined,
       });
@@ -308,7 +314,13 @@ export default function FixedExpensesPanel() {
                       )}
                     </div>
                     <p className="mt-0.5 text-lg font-extrabold text-gray-900">
-                      {formatCOP(fx.amount)}
+                      {fx.amount > 0 ? (
+                        formatCOP(fx.amount)
+                      ) : (
+                        <span className="text-sm font-semibold text-gray-400">
+                          Monto variable · se define al pagar
+                        </span>
+                      )}
                     </p>
                     <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-gray-400">
                       {fx.dueDay ? (
@@ -437,13 +449,16 @@ export default function FixedExpensesPanel() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1 block text-xs font-semibold text-gray-600">
-                    Monto
+                    Monto habitual (opcional)
                   </label>
                   <MoneyInput
                     value={form.amount}
                     onChange={(v) => setForm((f) => ({ ...f, amount: v }))}
                     className={inputCls}
                   />
+                  <p className="mt-1 text-[10px] text-gray-400">
+                    Si el valor cambia cada mes, déjalo vacío: se pedirá al pagar.
+                  </p>
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-semibold text-gray-600">
@@ -558,7 +573,7 @@ export default function FixedExpensesPanel() {
             <div className="mt-4 space-y-3">
               <div>
                 <label className="mb-1 block text-xs font-semibold text-gray-600">
-                  Monto pagado
+                  Monto pagado <span className="text-red-500">*</span>
                 </label>
                 <MoneyInput
                   value={payForm.amount}
