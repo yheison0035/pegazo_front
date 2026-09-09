@@ -15,3 +15,11 @@ export async function markNotificationRead(id) {
 export async function markAllNotificationsRead() {
   return apiFetch('/notifications/read-all', { method: 'PATCH' });
 }
+
+// Persiste en la campana el recordatorio de una cita próxima (idempotente).
+export async function notifyAppointmentReminder(appointmentId) {
+  return apiFetch('/notifications/appointment-reminder', {
+    method: 'POST',
+    body: JSON.stringify({ appointmentId }),
+  });
+}

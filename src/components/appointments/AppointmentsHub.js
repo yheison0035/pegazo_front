@@ -11,6 +11,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/authContext';
 import { getAppointmentsAgenda } from '@/lib/api/routes/appointments';
+import { notifyAppointmentReminder } from '@/lib/api/routes/notifications';
 import {
   usesAppointments,
   colombiaToday,
@@ -175,6 +176,13 @@ export default function AppointmentsHub() {
       ...fresh.map((r) => r.id),
     ];
     lsSet(`pegazo:rem-toasted:${companyId}:${day}`, toastedRef.current);
+
+    // Persistir cada recordatorio en la campana de notificaciones (una sola vez
+    // por cita/usuario; el backend es idempotente). No bloquea la UI.
+    fresh.forEach((r) => {
+      notifyAppointmentReminder(r.id).catch(() => null);
+    });
+    window.dispatchEvent(new Event('notifications-changed'));
   }, [reminders, enabled, companyId, day]);
 
   const dismissToast = (id) =>
