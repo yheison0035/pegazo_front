@@ -14,7 +14,9 @@ export async function getProducts(params = {}) {
     }
   });
 
-  return apiFetch(`/inventory?${query.toString()}`);
+  // Sin caché: el stock debe verse siempre fresco (ej. tras aprobar una
+  // solicitud de disminución) sin recargar la página.
+  return apiFetch(`/inventory?${query.toString()}`, { cache: 'no-store' });
 }
 
 export async function getProductById(id) {
