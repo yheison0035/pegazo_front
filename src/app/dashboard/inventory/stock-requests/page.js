@@ -35,6 +35,13 @@ function StockRequestsInner() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState(null);
+  // Modal de rechazo (reemplaza el prompt nativo). Motivo opcional.
+  const [rejectModal, setRejectModal] = useState({
+    open: false,
+    item: null,
+    note: '',
+    submitting: false,
+  });
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -52,26 +59,33 @@ function StockRequestsInner() {
     load();
   }, [load]);
 
-  const decide = async (item, action) => {
-    let note;
-    if (action === 'reject') {
-      note = window.prompt('Motivo del rechazo (opcional):') || undefined;
-    }
+  const approve = async (item) => {
     setBusyId(item.id);
     try {
-      if (action === 'approve') {
-        await approveStockRequest(item.id, note);
-        toast.show({ type: 'success', message: 'Disminución aprobada.' });
-      } else {
-        await rejectStockRequest(item.id, note);
-        toast.show({ type: 'success', message: 'Solicitud rechazada.' });
-      }
+      await approveStockRequest(item.id);
+      toast.show({ type: 'success', message: 'Disminución aprobada.' });
       await load();
       window.dispatchEvent(new Event('stock-requests-changed'));
     } catch (err) {
       toast.show({ type: 'error', message: err.message || 'No se pudo procesar' });
     } finally {
       setBusyId(null);
+    }
+  };
+
+  const confirmReject = async () => {
+    const item = rejectModal.item;
+    if (!item) return;
+    setRejectModal((s) => ({ ...s, submitting: true }));
+    try {
+      await rejectStockRequest(item.id, rejectModal.note.trim() || undefined);
+      toast.show({ type: 'success', message: 'Solicitud rechazada.' });
+      setRejectModal({ open: false, item: null, note: '', submitting: false });
+      await load();
+      window.dispatchEvent(new Event('stock-requests-changed'));
+    } catch (err) {
+      setRejectModal((s) => ({ ...s, submitting: false }));
+      toast.show({ type: 'error', message: err.message || 'No se pudo procesar' });
     }
   };
 
@@ -150,14 +164,21 @@ function StockRequestsInner() {
                     <div className="flex gap-2">
                       <button
                         disabled={busyId === item.id}
-                        onClick={() => decide(item, 'approve')}
+                        onClick={() => approve(item)}
                         className="inline-flex items-center gap-1 rounded-lg bg-emerald-500 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:opacity-50"
                       >
                         <CheckCircleIcon className="h-4 w-4" /> Aprobar
                       </button>
                       <button
                         disabled={busyId === item.id}
-                        onClick={() => decide(item, 'reject')}
+                        onClick={() =>
+                          setRejectModal({
+                            open: true,
+                            item,
+                            note: '',
+                            submitting: false,
+                          })
+                        }
                         className="inline-flex items-center gap-1 rounded-lg bg-red-500 px-3 py-2 text-sm font-semibold text-white hover:bg-red-600 disabled:opacity-50"
                       >
                         <XCircleIcon className="h-4 w-4" /> Rechazar
@@ -201,6 +222,68 @@ function StockRequestsInner() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {rejectModal.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-white shadow-xl">
+            <div className="rounded-t-2xl bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-4">
+              <h3 className="text-lg font-bold text-white">
+                Rechazar solicitud
+              </h3>
+              <p className="text-sm text-white/90">
+                {rejectModal.item?.inventory?.name || 'Producto'} · solicitado
+                por {rejectModal.item?.requestedBy?.name || '—'}
+              </p>
+            </div>
+            <div className="space-y-3 px-6 py-5">
+              <p className="text-sm text-gray-600">
+                El stock no se modificará. Si quieres, deja una nota para que el
+                solicitante sepa por qué.
+              </p>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700">
+                  Motivo del rechazo{' '}
+                  <span className="text-gray-400">(opcional)</span>
+                </label>
+                <textarea
+                  rows={3}
+                  value={rejectModal.note}
+                  onChange={(e) =>
+                    setRejectModal((s) => ({ ...s, note: e.target.value }))
+                  }
+                  placeholder="Ej: la cantidad no coincide con el conteo físico…"
+                  className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-1 focus:ring-orange-400"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 rounded-b-2xl border-t border-gray-100 px-6 py-4">
+              <button
+                type="button"
+                onClick={() =>
+                  setRejectModal({
+                    open: false,
+                    item: null,
+                    note: '',
+                    submitting: false,
+                  })
+                }
+                className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={rejectModal.submitting}
+                onClick={confirmReject}
+                className="inline-flex items-center gap-1 rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <XCircleIcon className="h-4 w-4" />
+                {rejectModal.submitting ? 'Rechazando…' : 'Rechazar'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
