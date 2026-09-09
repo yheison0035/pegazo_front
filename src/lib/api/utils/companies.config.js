@@ -75,6 +75,18 @@ export const getFormFieldsCompanies = (includeAdmin = false) => [
     type: 'date',
     required: false,
   },
+  {
+    name: 'monthlyPrice',
+    label: 'Valor a pagar / precio mensual (COP)',
+    type: 'number',
+    required: false,
+  },
+  {
+    name: 'paymentDay',
+    label: 'Día de pago del mes (1-31, ej: paga cada 22)',
+    type: 'number',
+    required: false,
+  },
 
   // Solo al crear: credenciales del administrador inicial de la empresa, para
   // que pueda iniciar sesión y de ahí en adelante gestione todo por su cuenta.

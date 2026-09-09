@@ -529,11 +529,29 @@ export default function ContentData({
                           <span className="text-xs text-gray-500">
                             {formatDateOnly(info.paidUntil)}
                           </span>
+                          {info.monthlyPrice != null && (
+                            <span className="text-xs font-semibold text-gray-700">
+                              {formatCOP(info.monthlyPrice)}/mes
+                              {info.paymentDay
+                                ? ` · paga el ${info.paymentDay}`
+                                : ''}
+                            </span>
+                          )}
                         </div>
                       );
                     })()
                   ) : (
-                    <span className="text-gray-400">—</span>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-gray-400">—</span>
+                      {info.monthlyPrice != null && (
+                        <span className="text-xs font-semibold text-gray-700">
+                          {formatCOP(info.monthlyPrice)}/mes
+                          {info.paymentDay
+                            ? ` · paga el ${info.paymentDay}`
+                            : ''}
+                        </span>
+                      )}
+                    </div>
                   )}
                 </td>
               </>
