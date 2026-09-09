@@ -48,7 +48,6 @@ function ModulesPricePanel({ company, updateCompany, onSaved }) {
   const [enabled, setEnabled] = useState([]);
   const [manual, setManual] = useState(false);
   const [price, setPrice] = useState({
-    monthlyPrice: '',
     discountedPrice: '',
     discountUntil: '',
   });
@@ -74,7 +73,6 @@ function ModulesPricePanel({ company, updateCompany, onSaved }) {
       test: !!company.isTestCompany,
     });
     setPrice({
-      monthlyPrice: company.monthlyPrice ?? '',
       discountedPrice: company.discountedPrice ?? '',
       discountUntil: company.discountUntil
         ? String(company.discountUntil).slice(0, 10)
@@ -105,8 +103,6 @@ function ModulesPricePanel({ company, updateCompany, onSaved }) {
         bankNotifyEnabled: feats.bank,
         electronicInvoicingEnabled: feats.einvoice,
         isTestCompany: feats.test,
-        monthlyPrice:
-          price.monthlyPrice === '' ? null : Number(price.monthlyPrice),
         discountedPrice:
           price.discountedPrice === '' ? null : Number(price.discountedPrice),
         discountUntil: price.discountUntil
@@ -128,25 +124,15 @@ function ModulesPricePanel({ company, updateCompany, onSaved }) {
   return (
     <div className="mt-8 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
       <h3 className="text-lg font-bold text-gray-800">
-        Módulos y precio (plataforma)
+        Módulos, funciones y descuento (plataforma)
       </h3>
       <p className="mt-1 text-sm text-gray-500">
-        Controla qué módulos ve el cliente en su CRM y el precio acordado. Lo que
-        no habilites, no le aparece.
+        Controla qué módulos ve el cliente en su CRM. El precio mensual y el día
+        de pago se editan arriba, en el formulario de la empresa.
       </p>
 
-      {/* Precio */}
-      <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <div>
-          <label className="mb-1 block text-xs font-semibold text-gray-600">
-            Precio mensual
-          </label>
-          <MoneyInput
-            value={price.monthlyPrice}
-            onChange={(v) => setPrice((p) => ({ ...p, monthlyPrice: v }))}
-            className={num}
-          />
-        </div>
+      {/* Descuento (el precio mensual se edita arriba, en el formulario). */}
+      <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
           <label className="mb-1 block text-xs font-semibold text-gray-600">
             Precio con descuento
@@ -303,8 +289,19 @@ export default function EditCompany() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Coerción numérica: el valor a pagar y el día de pago deben ir como número.
+    const toIntOrNull = (v) => {
+      if (v === '' || v === null || v === undefined) return null;
+      const n = Number(String(v).replace(/[^\d]/g, ''));
+      return Number.isFinite(n) ? n : null;
+    };
+    const payload = {
+      ...formData,
+      monthlyPrice: toIntOrNull(formData.monthlyPrice),
+      paymentDay: toIntOrNull(formData.paymentDay),
+    };
     try {
-      await updateCompany(id, formData);
+      await updateCompany(id, payload);
       setAlert({
         type: 'success',
         message: 'Empresa actualizada correctamente.',

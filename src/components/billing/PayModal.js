@@ -138,6 +138,11 @@ export default function PayModal({ open, onClose, company }) {
                 <Field label="Fecha de pago (vence)">
                   {fmtDate(company?.paidUntil)}
                 </Field>
+                {company?.paymentDay ? (
+                  <Field label="Día de pago">
+                    Cada {company.paymentDay} de cada mes
+                  </Field>
+                ) : null}
               </div>
             )}
           </div>
