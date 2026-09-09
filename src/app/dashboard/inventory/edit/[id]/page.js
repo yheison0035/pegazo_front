@@ -18,6 +18,12 @@ import RecipeModal from '@/components/dashboard/inventory/recipeModal';
 import { PencilIcon, BeakerIcon } from '@heroicons/react/24/outline';
 import { canSeeOldPrice } from '@/hooks/inventory.permissions';
 import { isFoodBusiness } from '@/lib/appointmentsAccess';
+import { createStockRequest } from '@/lib/api/routes/stock-requests';
+
+// Solo el dueño y el administrador pueden BAJAR stock directamente. Los demás
+// roles solo pueden subir; para disminuir deben solicitarlo (con motivo) y el
+// dueño/admin aprueba o rechaza. Aplica a todos los tipos de negocio.
+const CAN_DECREASE_ROLES = ['SUPER_ADMIN', 'ADMIN'];
 
 export default function EditProduct() {
   const [formData, setFormData] = useState({});
@@ -26,9 +32,20 @@ export default function EditProduct() {
   const [showImages, setShowImages] = useState(false);
   const [showSpecsModal, setShowSpecsModal] = useState(false);
   const [showRecipeModal, setShowRecipeModal] = useState(false);
+  // Stock original por variante (para detectar disminuciones al guardar).
+  const [originalStock, setOriginalStock] = useState({});
+  // Modal de solicitud de disminución: guarda el payload y las líneas a pedir.
+  const [decreaseReq, setDecreaseReq] = useState({
+    open: false,
+    reason: '',
+    payload: null,
+    lines: [],
+    submitting: false,
+  });
   const { id } = useParams();
   const auth = useAuth();
   const usuario = auth?.usuario;
+  const canDecrease = CAN_DECREASE_ROLES.includes(usuario?.role);
   const showOldPrice = canSeeOldPrice(usuario);
   // La receta solo aplica a platos elaborados (sin stock) en verticales de comida.
   const isFood = isFoodBusiness(usuario);
@@ -51,6 +68,12 @@ export default function EditProduct() {
         ...data,
         purchaseTotal: qty > 0 && unit ? Math.round(unit * qty) : '',
       });
+      // Guardamos el stock original de cada variante para comparar al guardar.
+      const map = {};
+      (data?.variants || []).forEach((v) => {
+        if (v.id != null) map[v.id] = Number(v.stock) || 0;
+      });
+      setOriginalStock(map);
       setImages(data.images || []);
     } catch (err) {
       setAlert({
@@ -117,25 +140,90 @@ export default function EditProduct() {
       })),
     };
 
-    try {
-      const response = await updateProduct(id, payload);
-      const productId = response?.data?.id;
+    // Detecta variantes cuyo stock DISMINUYE respecto al original.
+    const decreaseLines = (payload.variants || [])
+      .filter((v) => v.id != null && originalStock[v.id] != null)
+      .filter((v) => Number(v.stock) < Number(originalStock[v.id]))
+      .map((v) => ({ variantId: v.id, requestedStock: Number(v.stock) }));
 
-      if (!productId) {
-        throw new Error('No se pudo obtener el ID del producto');
-      }
+    // Si quien edita NO puede bajar stock y está intentando disminuir, no se
+    // guarda la baja: se abre el modal para pedir el motivo y crear la solicitud.
+    if (!canDecrease && decreaseLines.length > 0) {
+      setDecreaseReq({
+        open: true,
+        reason: '',
+        payload,
+        lines: decreaseLines,
+        submitting: false,
+      });
+      return;
+    }
 
-      await uploadProductImages(productId, images);
+    await handleSubmitSafe(payload);
+  };
 
+  // Guarda el producto (y sube imágenes). Reutilizable desde el flujo normal y
+  // desde el modal de solicitud de disminución.
+  const doSave = async (payload, { silent = false } = {}) => {
+    const response = await updateProduct(id, payload);
+    const productId = response?.data?.id;
+    if (!productId) throw new Error('No se pudo obtener el ID del producto');
+    await uploadProductImages(productId, images);
+    if (!silent) {
       setAlert({
         type: 'success',
         message: 'Producto actualizado correctamente.',
         url: '/dashboard/inventory',
       });
+    }
+    return productId;
+  };
+
+  const handleSubmitSafe = async (payload) => {
+    try {
+      await doSave(payload);
     } catch (err) {
       setAlert({
         type: 'error',
         message: err.message || 'Error al actualizar producto',
+      });
+    }
+  };
+
+  // Confirma la solicitud de disminución: guarda los cambios permitidos
+  // (aumentos y otros campos; el backend NO baja el stock) y crea la solicitud
+  // con el motivo para que el dueño/admin la apruebe o rechace.
+  const submitDecreaseRequest = async () => {
+    const reason = decreaseReq.reason.trim();
+    if (reason.length < 3) return;
+    setDecreaseReq((s) => ({ ...s, submitting: true }));
+    try {
+      // 1) Guarda el resto de cambios (el backend conserva el stock actual).
+      await doSave(decreaseReq.payload, { silent: true });
+      // 2) Crea la solicitud de disminución.
+      await createStockRequest({
+        inventoryId: Number(id),
+        reason,
+        lines: decreaseReq.lines,
+      });
+      setDecreaseReq({
+        open: false,
+        reason: '',
+        payload: null,
+        lines: [],
+        submitting: false,
+      });
+      setAlert({
+        type: 'success',
+        message:
+          'Solicitud de disminución enviada. El dueño o administrador debe aprobarla.',
+        url: '/dashboard/inventory',
+      });
+    } catch (err) {
+      setDecreaseReq((s) => ({ ...s, submitting: false }));
+      setAlert({
+        type: 'error',
+        message: err.message || 'No se pudo enviar la solicitud',
       });
     }
   };
@@ -219,6 +307,96 @@ export default function EditProduct() {
           inventoryId={id}
           dishName={formData?.name}
         />
+
+        {decreaseReq.open && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="w-full max-w-lg rounded-2xl bg-white shadow-xl">
+              <div className="rounded-t-2xl bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-4">
+                <h3 className="text-lg font-bold text-white">
+                  Solicitar disminución de stock
+                </h3>
+                <p className="text-sm text-white/90">
+                  No tienes permiso para bajar stock. Explica el motivo y el
+                  dueño o administrador lo aprobará o rechazará.
+                </p>
+              </div>
+              <div className="space-y-4 px-6 py-5">
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm">
+                  <p className="mb-2 font-semibold text-gray-700">
+                    Cambios solicitados
+                  </p>
+                  <ul className="space-y-1">
+                    {decreaseReq.lines.map((l) => {
+                      const orig = Number(originalStock[l.variantId]) || 0;
+                      const vv = (formData.variants || []).find(
+                        (x) => x.id === l.variantId,
+                      );
+                      const label =
+                        [vv?.color, vv?.size].filter(Boolean).join(' / ') ||
+                        `Variante #${l.variantId}`;
+                      return (
+                        <li
+                          key={l.variantId}
+                          className="flex items-center justify-between text-gray-600"
+                        >
+                          <span>{label}</span>
+                          <span className="font-medium">
+                            {orig} → {l.requestedStock}{' '}
+                            <span className="text-red-500">
+                              ({l.requestedStock - orig})
+                            </span>
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">
+                    Motivo de la disminución{' '}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={decreaseReq.reason}
+                    onChange={(e) =>
+                      setDecreaseReq((s) => ({ ...s, reason: e.target.value }))
+                    }
+                    placeholder="Ej: producto vencido, avería, ajuste por conteo físico…"
+                    className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-1 focus:ring-orange-400"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 rounded-b-2xl border-t border-gray-100 px-6 py-4">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setDecreaseReq({
+                      open: false,
+                      reason: '',
+                      payload: null,
+                      lines: [],
+                      submitting: false,
+                    })
+                  }
+                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  disabled={
+                    decreaseReq.reason.trim().length < 3 || decreaseReq.submitting
+                  }
+                  onClick={submitDecreaseRequest}
+                  className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {decreaseReq.submitting ? 'Enviando…' : 'Enviar solicitud'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

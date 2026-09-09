@@ -11,6 +11,7 @@ import {
 import NavLinks from './nav-links';
 import { useAuth } from '@/context/authContext';
 import Avatar from '../profile/avatar';
+import StockRequestsBell from './StockRequestsBell';
 import { isDark, toggleDark, DARK_EVENT } from '@/lib/darkMode';
 
 export default function SideNavigation() {
@@ -131,6 +132,9 @@ export default function SideNavigation() {
         <div className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-4 custom-scroll">
           <NavLinks expanded={expanded} />
         </div>
+
+        {/* Solicitudes de disminución de stock (solo dueño/admin) */}
+        <StockRequestsBell expanded={expanded} />
 
         {/* Modo oscuro (preferencia personal) */}
         <div className="border-t border-white/10 px-2 py-3">
