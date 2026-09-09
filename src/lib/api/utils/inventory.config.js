@@ -333,6 +333,12 @@ export const getHeaderTableInventory = (usuario) => {
     { name: 'brandId', title: 'Marca', show: false, showInput: false },
     { name: 'status', title: 'Estado', show: true, showInput: true },
     {
+      name: 'stockRequestPending',
+      title: 'Estado de stock',
+      show: true,
+      showInput: false,
+    },
+    {
       name: 'updatedAt',
       title: 'Última Actualización',
       show: false,
