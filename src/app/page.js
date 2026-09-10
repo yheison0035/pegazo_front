@@ -35,6 +35,7 @@ import {
   Bars3Icon,
 } from '@heroicons/react/24/outline';
 import VerticalShowcase from '@/components/landing/VerticalShowcase';
+import ScrollReveal from '@/components/landing/ScrollReveal';
 
 // Cotización directa por WhatsApp (venta punto a punto; los precios se acuerdan
 // con cada cliente). Los planes y sus límites siguen aplicados en el CRM.
@@ -563,6 +564,7 @@ function PhoneStoreMockup() {
 export default function Landing() {
   return (
     <div className="min-h-screen bg-white text-neutral-800">
+      <ScrollReveal />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
@@ -653,32 +655,32 @@ export default function Landing() {
 
       {/* HERO */}
       <section className="relative overflow-hidden bg-gradient-to-br from-neutral-900 via-neutral-950 to-black text-white">
-        <div className="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-orange-500 opacity-20 blur-3xl" />
-        <div className="absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-amber-400 opacity-20 blur-3xl" />
+        <div className="pz-float absolute -top-24 -left-24 h-96 w-96 rounded-full bg-orange-500 opacity-20 blur-3xl" />
+        <div className="pz-float-slow absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-amber-400 opacity-20 blur-3xl" />
 
         <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-5 py-16 sm:py-20 lg:grid-cols-2">
           <div className="text-center lg:text-left">
-            <span className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-neutral-300">
+            <span className="pz-hero-in mb-5 inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-neutral-300">
               <BoltIcon className="h-3.5 w-3.5 text-orange-400" /> Un solo
               sistema para cualquier negocio
             </span>
-            <h1 className="text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl">
+            <h1 className="pz-hero-in pz-hero-in-2 text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl">
               Todo tu negocio,{' '}
-              <span className="bg-gradient-to-r from-orange-500 to-amber-400 bg-clip-text text-transparent">
+              <span className="pz-shimmer bg-gradient-to-r from-orange-500 via-amber-300 to-orange-500 bg-clip-text text-transparent">
                 en un solo lugar
               </span>
             </h1>
-            <p className="mx-auto mt-5 max-w-xl text-lg text-neutral-300 lg:mx-0">
+            <p className="pz-hero-in pz-hero-in-2 mx-auto mt-5 max-w-xl text-lg text-neutral-300 lg:mx-0">
               Ventas, inventario, clientes, citas, cartera, reportes, tu propia
               tienda online y <span className="font-semibold text-white">facturación
               electrónica DIAN ilimitada</span>. Pegazo se adapta a lo que vendes y
               hace despegar tu negocio, todo desde la nube.
             </p>
 
-            <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row lg:justify-start">
+            <div className="pz-hero-in pz-hero-in-3 mt-8 flex flex-col items-center gap-3 sm:flex-row lg:justify-start">
               <Link
                 href="/register"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 px-7 py-3 font-semibold text-white shadow-lg hover:opacity-90 sm:w-auto"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 px-7 py-3 font-semibold text-white shadow-lg transition-transform hover:-translate-y-0.5 hover:opacity-95 sm:w-auto"
               >
                 <RocketLaunchIcon className="h-5 w-5" /> Crear cuenta gratis
               </Link>
@@ -704,14 +706,14 @@ export default function Landing() {
           </div>
 
           {/* Mockup del panel */}
-          <div className="mx-auto w-full max-w-md">
+          <div className="pz-hero-in pz-hero-in-3 pz-float-slow mx-auto w-full max-w-md">
             <DashboardMockup />
           </div>
         </div>
       </section>
 
       {/* ¿QUÉ ES PEGAZO? (contenido para SEO) */}
-      <section className="mx-auto max-w-4xl px-5 pt-16 text-center">
+      <section data-reveal className="mx-auto max-w-4xl px-5 pt-16 text-center">
         <h2 className="text-2xl font-bold text-neutral-900 sm:text-3xl">
           ¿Qué es Pegazo?
         </h2>
@@ -730,7 +732,11 @@ export default function Landing() {
       </section>
 
       {/* DIFERENCIADORES */}
-      <section id="diferencia" className="mx-auto max-w-6xl px-5 py-20">
+      <section
+        id="diferencia"
+        data-reveal
+        className="mx-auto max-w-6xl px-5 py-20"
+      >
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-sm font-semibold uppercase tracking-wider text-orange-600">
             Por qué Pegazo y no otro
@@ -762,7 +768,10 @@ export default function Landing() {
       </section>
 
       {/* DEMO INTERACTIVA: elige tu negocio y míralo adaptarse */}
-      <section className="bg-gradient-to-b from-neutral-50 to-white py-20">
+      <section
+        data-reveal
+        className="bg-gradient-to-b from-neutral-50 to-white py-20"
+      >
         <div className="mx-auto max-w-6xl px-5">
           <div className="mx-auto max-w-2xl text-center">
             <span className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-600">
@@ -839,7 +848,11 @@ export default function Landing() {
       </section>
 
       {/* FUNCIONES por área */}
-      <section id="funciones" className="mx-auto max-w-6xl px-5 py-20">
+      <section
+        id="funciones"
+        data-reveal
+        className="mx-auto max-w-6xl px-5 py-20"
+      >
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold text-neutral-900">
             Todo lo que tu negocio necesita
@@ -873,7 +886,7 @@ export default function Landing() {
       </section>
 
       {/* POR VERTICAL (individual) */}
-      <section id="negocios" className="bg-neutral-50 py-20">
+      <section id="negocios" data-reveal className="bg-neutral-50 py-20">
         <div className="mx-auto max-w-6xl px-5">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold text-neutral-900">
@@ -916,7 +929,7 @@ export default function Landing() {
       </section>
 
       {/* BENEFICIOS */}
-      <section className="mx-auto max-w-6xl px-5 py-20">
+      <section data-reveal className="mx-auto max-w-6xl px-5 py-20">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold text-neutral-900">
             Por qué te conviene
@@ -936,7 +949,7 @@ export default function Landing() {
       </section>
 
       {/* CÓMO FUNCIONA */}
-      <section className="bg-neutral-50 py-20">
+      <section data-reveal className="bg-neutral-50 py-20">
         <div className="mx-auto max-w-5xl px-5">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold text-neutral-900">
