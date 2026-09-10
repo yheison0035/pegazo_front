@@ -1,6 +1,10 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import {
+  beginBackgroundRefresh,
+  endBackgroundRefresh,
+} from '@/lib/liveRefresh';
 
 // Mantiene los datos "en vivo" sin recargar la página: vuelve a ejecutar `cb`
 //  - al volver el foco a la ventana,
@@ -13,9 +17,19 @@ export default function useLiveRefresh(cb, { interval = 20000 } = {}) {
   ref.current = cb;
 
   useEffect(() => {
-    const run = () => {
+    const run = async () => {
       if (typeof document !== 'undefined' && document.hidden) return;
-      ref.current?.();
+      const cb = ref.current;
+      if (!cb) return;
+      // Marca "refresco en segundo plano" mientras dura el fetch para que los
+      // loaders no parpadeen (solo se ven en la carga inicial). Se mantiene un
+      // pequeño margen tras terminar por si hay un setState de cola.
+      beginBackgroundRefresh();
+      try {
+        await cb();
+      } finally {
+        setTimeout(endBackgroundRefresh, 300);
+      }
     };
     const onVisible = () => {
       if (document.visibilityState === 'visible') run();

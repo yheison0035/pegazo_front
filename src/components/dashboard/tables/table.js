@@ -174,7 +174,7 @@ const Table = ({
                 handleFilterChange={handleFilterChange}
               />
 
-              {loading ? (
+              {loading && info.length === 0 ? (
                 <TableSkeleton rows={8} cols={header.length + 1} />
               ) : info.length === 0 ? (
                 <tr>
