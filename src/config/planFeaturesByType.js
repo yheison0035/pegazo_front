@@ -26,6 +26,7 @@ const GROUP_BY_TYPE = {
   SUPERMERCADO: 'retail',
   DROGUERIA: 'retail',
   ROPA: 'retail',
+  CALZADO: 'retail',
   FRUVER: 'retail',
   CARNICERIA: 'retail',
   FLORISTERIA: 'retail',

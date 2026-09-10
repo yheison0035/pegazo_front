@@ -85,6 +85,12 @@ const TERMS_BY_TYPE = {
     product: 'Prenda',
     productPlural: 'Prendas',
   },
+  CALZADO: {
+    attendant: 'Vendedor',
+    attendantPlural: 'Vendedores',
+    product: 'Par',
+    productPlural: 'Pares',
+  },
   FRUVER: {
     attendant: 'Cajero',
     attendantPlural: 'Cajeros',
