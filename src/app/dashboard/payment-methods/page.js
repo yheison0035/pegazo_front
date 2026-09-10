@@ -165,7 +165,20 @@ export default function PaymentMethodsPage() {
               {!rows.length && !loading && (
                 <tr>
                   <td colSpan={4} className="px-4 py-8 text-center text-gray-400">
-                    Aún no hay métodos de pago.
+                    <div className="flex flex-col items-center gap-3">
+                      <span className="text-gray-400">
+                        Aún no hay métodos de pago.
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setEditing({ name: '', code: 'TRANSFERENCIA' })
+                        }
+                        className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600"
+                      >
+                        Crear el primero
+                      </button>
+                    </div>
                   </td>
                 </tr>
               )}
