@@ -64,6 +64,22 @@ export async function updateCashPolicy(requireCashOpen) {
   });
 }
 
+// Base contable de los reportes: 'CASH' (caja) o 'ACCRUAL' (causación).
+export async function updateAccountingBasis(basis) {
+  return apiFetch('/company/accounting-basis', {
+    method: 'PATCH',
+    body: JSON.stringify({ basis }),
+  });
+}
+
+// Cierre de periodo: fecha 'YYYY-MM-DD' (o null para reabrir todo).
+export async function updateBooksClose(date) {
+  return apiFetch('/company/books-close', {
+    method: 'PATCH',
+    body: JSON.stringify({ date: date || null }),
+  });
+}
+
 // Tema de diseño del panel/CRM (orange | blue | emerald).
 export async function updateCompanyMail(dto) {
   return apiFetch('/company/mail', {
