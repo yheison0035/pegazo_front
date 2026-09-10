@@ -18,6 +18,7 @@ import {
   GlobeAltIcon,
   Squares2X2Icon,
   FireIcon,
+  BuildingLibraryIcon,
   CalculatorIcon,
   InboxArrowDownIcon,
   GiftIcon,
@@ -374,7 +375,22 @@ export const NAVIGATION = [
     ],
   },
 
-  // 7. ADMINISTRACIÓN — configuración del negocio.
+  // 7. CONTABILIDAD — capa contable (se muestra si el dueño la activa + plan).
+  //    Info financiera sensible: solo dueño (SUPER_ADMIN) y administrador.
+  //    A futuro se suma el rol CONTADOR y más módulos (plan de cuentas, estados).
+  {
+    section: 'Contabilidad',
+    items: [
+      {
+        name: 'Activos',
+        href: '/dashboard/assets',
+        icon: BuildingLibraryIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN'],
+      },
+    ],
+  },
+
+  // 8. ADMINISTRACIÓN — configuración del negocio.
   {
     section: 'Administración',
     items: [

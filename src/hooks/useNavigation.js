@@ -69,6 +69,13 @@ export default function useNavigation() {
     if (!modules.includes('orders')) modules.push('orders');
   }
 
+  // Sección Contabilidad (activos y, a futuro, plan de cuentas / estados). Se
+  // muestra cuando el dueño la activa (accountingEnabled); el plan (Altura+)
+  // decide si queda desbloqueada o con candado. Disponible en cualquier tipo.
+  if (usuario.company?.accountingEnabled) {
+    modules.push('assets');
+  }
+
   // Facturación electrónica DIAN: aún NO está liberada al 100%, así que SOLO se
   // muestra en empresas de PRUEBA (isTestCompany) que además la tengan habilitada
   // (electronicInvoicingEnabled) o ya vinculada al servicio fiscal (fiscalCompanyId).
