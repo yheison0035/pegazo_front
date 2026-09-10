@@ -9,12 +9,14 @@ export default function ProfitLoss({ data }) {
   if (!s) return null;
 
   const ventas = s.totalSales || 0;
+  const membresias = s.membershipIncome || 0;
+  const ingresos = s.totalIncome ?? ventas + membresias;
   const costo = s.costOfGoods || 0;
   const utilidadBruta = s.grossMargin ?? ventas - costo;
   const margenBruto = ventas ? Math.round((utilidadBruta / ventas) * 100) : 0;
   const gastos = s.totalExpenses || 0;
-  const utilidadNeta = s.profit ?? ventas - gastos;
-  const margenNeto = ventas ? Math.round((utilidadNeta / ventas) * 100) : 0;
+  const utilidadNeta = s.profit ?? ingresos - gastos;
+  const margenNeto = ingresos ? Math.round((utilidadNeta / ingresos) * 100) : 0;
   const byType = data?.expensesByType || [];
 
   return (
@@ -24,6 +26,9 @@ export default function ProfitLoss({ data }) {
     >
       <div className="text-sm">
         <Row label="Ingresos operacionales (ventas cobradas)" value={ventas} strong />
+        {membresias > 0 && (
+          <Row label="(+) Ingresos por membresías" value={membresias} />
+        )}
         <Row label="(−) Costo de mercancía vendida" value={-costo} muted />
         <Row
           label={`= Utilidad bruta (margen ${margenBruto}%)`}
