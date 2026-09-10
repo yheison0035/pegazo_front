@@ -8,6 +8,7 @@ import {
   PhotoIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
+import ImageLightbox from '@/components/ui/ImageLightbox';
 import {
   getSupportThreads,
   getPlatformSupportThread,
@@ -45,6 +46,7 @@ function SupportInbox() {
   const [sending, setSending] = useState(false);
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
+  const [zoomSrc, setZoomSrc] = useState(null);
   const endRef = useRef(null);
   const fileRef = useRef(null);
 
@@ -224,18 +226,17 @@ function SupportInbox() {
                       }`}
                     >
                       {m.imageUrl && (
-                        <a
-                          href={m.imageUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="mb-1 block"
+                        <button
+                          type="button"
+                          onClick={() => setZoomSrc(m.imageUrl)}
+                          className="mb-1 block w-full"
                         >
                           <img
                             src={m.imageUrl}
                             alt="adjunto"
-                            className="max-h-56 w-full rounded-lg object-cover"
+                            className="max-h-56 w-full cursor-zoom-in rounded-lg object-cover"
                           />
-                        </a>
+                        </button>
                       )}
                       {m.body && (
                         <p className="whitespace-pre-wrap break-words">
@@ -312,6 +313,10 @@ function SupportInbox() {
           )}
         </div>
       </div>
+
+      {zoomSrc && (
+        <ImageLightbox src={zoomSrc} onClose={() => setZoomSrc(null)} />
+      )}
     </div>
   );
 }
