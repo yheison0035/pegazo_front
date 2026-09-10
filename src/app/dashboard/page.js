@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import useLiveRefresh from '@/hooks/useLiveRefresh';
 import Link from 'next/link';
 import {
   CheckCircleIcon,
@@ -80,7 +81,7 @@ export default function DashboardHome() {
   // Barbero: sus propios descansos programados (para el widget del inicio).
   const [myRest, setMyRest] = useState(null);
 
-  useEffect(() => {
+  const refreshHome = useCallback(() => {
     if (!usuario) return;
 
     // Cualquier empleado (no dueño/admin) ve sus cargos (con estado) y su saldo.
@@ -158,15 +159,37 @@ export default function DashboardHome() {
         });
     }
     if (showBank) {
-      const loadBank = () =>
-        getBankDeposits({ limit: 6 })
-          .then((r) => setBankDeposits(r?.data || []))
-          .catch(() => {});
-      loadBank();
-      const bt = setInterval(loadBank, 10000);
-      return () => clearInterval(bt);
+      getBankDeposits({ limit: 6 })
+        .then((r) => setBankDeposits(r?.data || []))
+        .catch(() => {});
     }
-  }, [usuario, isServices, showBank, isBarber, hasInventory, hasCartera]);
+  }, [
+    usuario,
+    isAdmin,
+    isServices,
+    showBank,
+    isBarber,
+    hasInventory,
+    hasCartera,
+  ]);
+
+  useEffect(() => {
+    refreshHome();
+  }, [refreshHome]);
+
+  // Datos del Inicio en vivo: al volver a la pestaña/foco y cada 20s.
+  useLiveRefresh(refreshHome);
+
+  // Consignaciones: sondeo más frecuente (10s) para el aviso de plata que entra.
+  useEffect(() => {
+    if (!showBank) return;
+    const bt = setInterval(() => {
+      getBankDeposits({ limit: 6 })
+        .then((r) => setBankDeposits(r?.data || []))
+        .catch(() => {});
+    }, 10000);
+    return () => clearInterval(bt);
+  }, [showBank]);
 
   // ---- Checklist de primeros pasos ----
   const setup = home?.setup;

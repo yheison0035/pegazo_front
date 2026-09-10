@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import useLiveRefresh from "@/hooks/useLiveRefresh";
 import { PlusIcon } from '@heroicons/react/24/outline';
 import Button from '@/components/ui/Button';
 
@@ -66,6 +67,9 @@ export default function Locals() {
   useEffect(() => {
     fetchLocals();
   }, [fetchLocals]);
+
+  // Datos en vivo: refresca al volver a la pestana/foco y cada 20s.
+  useLiveRefresh(fetchLocals);
 
   const handleDeleteClick = (id, name) => {
     setDeleteTarget({ id, name, type: 'este local' });

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import useLiveRefresh from '@/hooks/useLiveRefresh';
 import {
   PlusIcon,
   PencilSquareIcon,
@@ -44,6 +45,8 @@ export default function ChargeCategoriesPage() {
   useEffect(() => {
     load();
   }, [load]);
+
+  useLiveRefresh(load);
 
   const save = async () => {
     const name = (editing?.name || '').trim();

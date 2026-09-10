@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import useLiveRefresh from "@/hooks/useLiveRefresh";
 import {
   PlusIcon,
   XMarkIcon,
@@ -55,6 +56,9 @@ export default function ReturnsPage() {
   useEffect(() => {
     fetchReturns();
   }, [fetchReturns]);
+
+  // Datos en vivo: refresca al volver a la pestana/foco y cada 20s.
+  useLiveRefresh(fetchReturns);
 
   // Buscar venta por código
   useEffect(() => {

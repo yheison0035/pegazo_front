@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import useLiveRefresh from '@/hooks/useLiveRefresh';
 import {
   AreaChart,
   Area,
@@ -157,6 +158,9 @@ export default function Statistics() {
     fetchStats();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Estadísticas en vivo: al volver a la pestaña/foco y cada 20s.
+  useLiveRefresh(fetchStats);
 
   // Aplica un rango explícito (para los atajos) y recarga.
   const applyRange = useCallback(

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import useLiveRefresh from "@/hooks/useLiveRefresh";
 import {
   PlusIcon,
   PencilSquareIcon,
@@ -44,6 +45,9 @@ export default function CustomerSegmentsPage() {
   useEffect(() => {
     load();
   }, [load]);
+
+  // Datos en vivo: refresca al volver a la pestana/foco y cada 20s.
+  useLiveRefresh(load);
 
   const save = async () => {
     const name = (editing?.name || '').trim();

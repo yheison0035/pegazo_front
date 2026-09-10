@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import useLiveRefresh from "@/hooks/useLiveRefresh";
 import {
   PlusIcon,
   TrashIcon,
@@ -79,6 +80,9 @@ export default function PurchasesPage() {
   useEffect(() => {
     fetchPurchases();
   }, [fetchPurchases]);
+
+  // Datos en vivo: refresca al volver a la pestana/foco y cada 20s.
+  useLiveRefresh(fetchPurchases);
 
   useEffect(() => {
     (async () => {

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import useLiveRefresh from "@/hooks/useLiveRefresh";
 import {
   CreditCardIcon,
   MagnifyingGlassIcon,
@@ -92,6 +93,9 @@ export default function CarteraPage() {
       window.removeEventListener('focus', onChange);
     };
   }, [load]);
+
+  // Datos en vivo: refresca al volver a la pestana/foco y cada 20s.
+  useLiveRefresh(load);
 
   const rows = data.rows.filter((r) => {
     const t = search.trim().toLowerCase();
