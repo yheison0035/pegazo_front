@@ -22,7 +22,7 @@ import { Roles } from '@/config/roles';
 import { useAuth } from '@/context/authContext';
 import { cycleMonthRange, cycleStartOf } from '@/lib/cycle';
 import useLocals from '@/lib/api/hooks/useLocals';
-import { getDashboardStats } from '@/lib/api/routes/statistics';
+import { getDashboardStats, getMovements } from '@/lib/api/routes/statistics';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import Button from '@/components/ui/Button';
 import {
@@ -262,6 +262,41 @@ export default function Statistics() {
     else exportResumen();
   };
 
+  // Libro de movimientos: todos los ingresos (ventas + membresías) y egresos
+  // del periodo, en un archivo para el contador.
+  const exportMovimientos = async () => {
+    try {
+      const { data } = await getMovements({ startDate, endDate, localId });
+      const rows = [
+        ['Libro de movimientos Pegazo', rangeLabel],
+        [
+          'Ingresos',
+          csvNum(data?.totals?.income),
+          'Egresos',
+          csvNum(data?.totals?.expense),
+          'Neto',
+          csvNum(data?.totals?.net),
+        ],
+        [],
+        ['FECHA', 'TIPO', 'CATEGORÍA', 'CONCEPTO', 'TERCERO', 'MÉTODO', 'SEDE', 'INGRESO', 'EGRESO'],
+        ...(data?.rows || []).map((r) => [
+          r.date,
+          r.kind === 'INGRESO' ? 'Ingreso' : 'Egreso',
+          r.category || '',
+          r.concept || '',
+          r.thirdParty || '',
+          r.method || '',
+          r.local || '',
+          r.kind === 'INGRESO' ? csvNum(r.amount) : '',
+          r.kind === 'EGRESO' ? csvNum(r.amount) : '',
+        ]),
+      ];
+      exportCSV('Pegazo-libro-movimientos', rows);
+    } catch (e) {
+      /* noop: el botón no debe romper la pantalla */
+    }
+  };
+
   return (
     <RoleGuard
       allowedRoles={[Roles.SUPER_ADMIN, Roles.ADMIN, Roles.COORDINADOR]}
@@ -302,6 +337,13 @@ export default function Statistics() {
                 onClick={handleExport}
               >
                 Excel
+              </Button>
+              <Button
+                variant="secondary"
+                icon={ArrowDownTrayIcon}
+                onClick={exportMovimientos}
+              >
+                Libro contable
               </Button>
               <Button
                 variant="secondary"
