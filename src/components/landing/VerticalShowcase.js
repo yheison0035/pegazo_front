@@ -109,7 +109,6 @@ const VERTICALS = [
   {
     id: 'barberia', type: 'SERVICIOS', emoji: '💈', name: 'Barbería', biz: 'RAGNOR Barber',
     accent: 'Se agenda por barbero, con comisiones y fidelización.',
-    menu: ['Inicio', 'Citas', 'Servicios', 'Clientes', 'Caja', 'Fidelización', 'Estadísticas'],
     catalog: 'Servicios',
     items: [['Corte clásico', '$18.000'], ['Corte + barba', '$28.000'], ['Perfilado de cejas', '$8.000']],
     kpis: [['Ventas de hoy', '$486.000', 'bg-emerald-400'], ['Citas hoy', '14', 'bg-orange-400']],
@@ -117,7 +116,6 @@ const VERTICALS = [
   {
     id: 'restaurante', type: 'RESTAURANTE', emoji: '🍽️', name: 'Restaurante', biz: 'La Parrilla',
     accent: 'Mesas, comandas y pantalla de cocina (KDS).',
-    menu: ['Inicio', 'Mesas', 'Cocina', 'Menú', 'Ventas', 'Caja', 'Insumos'],
     catalog: 'Menú',
     items: [['Bandeja paisa', '$26.000'], ['Limonada de coco', '$9.000'], ['Postre del día', '$7.000']],
     kpis: [['Ventas de hoy', '$1.240.000', 'bg-emerald-400'], ['Mesas activas', '6', 'bg-orange-400']],
@@ -125,7 +123,6 @@ const VERTICALS = [
   {
     id: 'ferreteria', type: 'COMERCIO', emoji: '🔧', name: 'Ferretería', biz: 'El Tornillo',
     accent: 'Inventario, compras, cartera y fiado a la mano.',
-    menu: ['Inicio', 'Inventario', 'Compras', 'Ventas', 'Clientes', 'Cartera', 'Caja'],
     catalog: 'Inventario',
     items: [['Tornillo 1/4" (100u)', '$12.000'], ['Pintura vinilo 1gl', '$62.000'], ['Cinta aislante', '$4.500']],
     kpis: [['Ventas de hoy', '$2.150.000', 'bg-emerald-400'], ['Por cobrar', '$1.8M', 'bg-orange-400']],
@@ -133,7 +130,6 @@ const VERTICALS = [
   {
     id: 'veterinaria', type: 'SERVICIOS', emoji: '🐾', name: 'Veterinaria', biz: 'Huellitas',
     accent: 'Citas por especialista y ficha de cada mascota.',
-    menu: ['Inicio', 'Citas', 'Servicios', 'Pacientes', 'Inventario', 'Caja'],
     catalog: 'Servicios',
     items: [['Consulta general', '$45.000'], ['Vacuna múltiple', '$55.000'], ['Baño y peluquería', '$35.000']],
     kpis: [['Ventas de hoy', '$620.000', 'bg-emerald-400'], ['Citas hoy', '9', 'bg-orange-400']],
@@ -141,7 +137,6 @@ const VERTICALS = [
   {
     id: 'odontologia', type: 'ODONTOLOGIA', emoji: '🦷', name: 'Odontología', biz: 'Clínica Sonríe',
     accent: 'Historia clínica por paciente, odontograma y consentimientos firmados.',
-    menu: ['Inicio', 'Citas', 'Servicios', 'Pacientes', 'Historia', 'Caja', 'Estadísticas'],
     catalog: 'Tratamientos',
     items: [['Consulta + diagnóstico', '$60.000'], ['Limpieza dental', '$90.000'], ['Resina (por diente)', '$130.000']],
     kpis: [['Ventas de hoy', '$1.180.000', 'bg-emerald-400'], ['Citas hoy', '11', 'bg-orange-400']],
@@ -149,7 +144,6 @@ const VERTICALS = [
   {
     id: 'ropa', type: 'ROPA', emoji: '👗', name: 'Tienda de ropa', biz: 'Moda Urbana',
     accent: 'Variantes por talla y color, con multi-sede.',
-    menu: ['Inicio', 'Inventario', 'Ventas', 'Clientes', 'Compras', 'Caja', 'Estadísticas'],
     catalog: 'Inventario',
     items: [['Camiseta oversize · M', '$49.900'], ['Jean slim · 32', '$89.900'], ['Chaqueta · L', '$139.900']],
     kpis: [['Ventas de hoy', '$980.000', 'bg-emerald-400'], ['Referencias', '860', 'bg-orange-400']],
@@ -157,7 +151,6 @@ const VERTICALS = [
   {
     id: 'supermercado', type: 'SUPERMERCADO', emoji: '🛒', name: 'Minimercado', biz: 'La Esquina',
     accent: 'Venta rápida, proveedores y control de stock.',
-    menu: ['Inicio', 'Inventario', 'Compras', 'Ventas', 'Proveedores', 'Caja', 'Gastos'],
     catalog: 'Inventario',
     items: [['Arroz 500g', '$2.400'], ['Leche entera 1L', '$4.300'], ['Huevos x30', '$16.500']],
     kpis: [['Ventas de hoy', '$3.420.000', 'bg-emerald-400'], ['Productos', '2.100', 'bg-orange-400']],
@@ -165,7 +158,6 @@ const VERTICALS = [
   {
     id: 'lavado', type: 'LAVADO_VEHICULOS', emoji: '🚗', name: 'Lavado de vehículos', biz: 'Aqua Wash',
     accent: 'Turnos por lavador, comisiones y fidelización (el lavado #10 gratis).',
-    menu: ['Inicio', 'Turnos', 'Lavados', 'Clientes', 'Caja', 'Fidelización', 'Estadísticas'],
     catalog: 'Lavados',
     items: [['Lavado básico', '$15.000'], ['Lavado + encerado', '$28.000'], ['Polichado completo', '$120.000']],
     kpis: [['Ventas de hoy', '$540.000', 'bg-emerald-400'], ['Turnos hoy', '18', 'bg-orange-400']],
@@ -173,7 +165,6 @@ const VERTICALS = [
   {
     id: 'canchas', type: 'CANCHAS_SINTETICAS', emoji: '⚽', name: 'Canchas sintéticas', biz: 'Gol Center',
     accent: 'Cada cancha se reserva por hora, con venta de bebidas e implementos.',
-    menu: ['Inicio', 'Reservas', 'Clientes', 'Inventario', 'Ventas', 'Caja', 'Estadísticas'],
     catalog: 'Alquiler de cancha',
     items: [['Cancha 1 · hora', '$90.000'], ['Cancha 2 · hora', '$90.000'], ['Alquiler de peto', '$3.000']],
     kpis: [['Ventas de hoy', '$1.080.000', 'bg-emerald-400'], ['Reservas hoy', '12', 'bg-orange-400']],
@@ -181,7 +172,6 @@ const VERTICALS = [
   {
     id: 'guardacascos', type: 'GUARDA_CASCOS', emoji: '🪖', name: 'Guarda cascos', biz: 'Casco Seguro',
     accent: 'Guardado por uso o mensualidad, con venta de candados y forros.',
-    menu: ['Inicio', 'Guardados', 'Clientes', 'Inventario', 'Ventas', 'Caja', 'Fidelización'],
     catalog: 'Guardados',
     items: [['Guardado por día', '$2.000'], ['Mensualidad', '$25.000'], ['Candado', '$18.000']],
     kpis: [['Ventas de hoy', '$180.000', 'bg-emerald-400'], ['Usuarios activos', '64', 'bg-orange-400']],

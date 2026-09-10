@@ -32,6 +32,7 @@ import {
   DocumentChartBarIcon,
   ClockIcon,
   XMarkIcon,
+  Bars3Icon,
 } from '@heroicons/react/24/outline';
 import VerticalShowcase from '@/components/landing/VerticalShowcase';
 
@@ -589,22 +590,64 @@ export default function Landing() {
               Planes
             </a>
           </nav>
-          <div className="flex items-center gap-2">
+          <div className="hidden items-center gap-2 md:flex">
             <Link
               href="/login"
               className="rounded-lg px-3 py-2 text-sm font-semibold text-neutral-200 hover:text-white"
             >
               Iniciar sesión
             </Link>
-            <a
-              href={WHATSAPP}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/register"
               className="rounded-lg bg-gradient-to-r from-orange-600 to-amber-500 px-4 py-2 text-sm font-semibold text-white shadow hover:opacity-90"
             >
-              Cotizar
-            </a>
+              Crear cuenta
+            </Link>
           </div>
+
+          {/* Menú móvil (nativo, sin JS) */}
+          <details className="relative md:hidden">
+            <summary className="flex cursor-pointer list-none items-center rounded-lg border border-white/15 p-2 text-neutral-200 [&::-webkit-details-marker]:hidden">
+              <Bars3Icon className="h-6 w-6" />
+            </summary>
+            <div className="absolute right-0 z-50 mt-2 w-60 rounded-xl border border-white/10 bg-neutral-900 p-2 shadow-2xl">
+              {[
+                ['#diferencia', 'Por qué Pegazo'],
+                ['#funciones', 'Funciones'],
+                ['#negocios', 'Para tu negocio'],
+                ['#planes', 'Planes'],
+              ].map(([href, label]) => (
+                <a
+                  key={href}
+                  href={href}
+                  className="block rounded-lg px-3 py-2 text-sm text-neutral-200 hover:bg-white/5"
+                >
+                  {label}
+                </a>
+              ))}
+              <div className="my-2 h-px bg-white/10" />
+              <Link
+                href="/login"
+                className="block rounded-lg px-3 py-2 text-sm text-neutral-200 hover:bg-white/5"
+              >
+                Iniciar sesión
+              </Link>
+              <Link
+                href="/register"
+                className="mt-1 block rounded-lg bg-gradient-to-r from-orange-600 to-amber-500 px-3 py-2 text-center text-sm font-semibold text-white"
+              >
+                Crear cuenta
+              </Link>
+              <a
+                href={WHATSAPP}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-1 block rounded-lg border border-white/15 px-3 py-2 text-center text-sm text-neutral-200"
+              >
+                Cotizar por WhatsApp
+              </a>
+            </div>
+          </details>
         </div>
       </header>
 
@@ -633,20 +676,20 @@ export default function Landing() {
             </p>
 
             <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row lg:justify-start">
+              <Link
+                href="/register"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 px-7 py-3 font-semibold text-white shadow-lg hover:opacity-90 sm:w-auto"
+              >
+                <RocketLaunchIcon className="h-5 w-5" /> Crear cuenta gratis
+              </Link>
               <a
                 href={WHATSAPP}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 px-7 py-3 font-semibold text-white shadow-lg hover:opacity-90 sm:w-auto"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/20 px-7 py-3 text-center font-semibold text-white hover:bg-white/5 sm:w-auto"
               >
                 <ChatBubbleLeftRightIcon className="h-5 w-5" /> Cotizar por WhatsApp
               </a>
-              <Link
-                href="/login"
-                className="w-full rounded-xl border border-white/20 px-7 py-3 text-center font-semibold text-white hover:bg-white/5 sm:w-auto"
-              >
-                Iniciar sesión
-              </Link>
             </div>
 
             <div className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-neutral-400 lg:justify-start">
@@ -1151,11 +1194,17 @@ export default function Landing() {
             tu medida.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Link
+              href="/register"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-neutral-950 px-8 py-3.5 font-semibold text-white shadow-lg hover:bg-neutral-800 sm:w-auto"
+            >
+              <RocketLaunchIcon className="h-5 w-5" /> Crear cuenta gratis
+            </Link>
             <a
               href={WHATSAPP}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-neutral-950 px-8 py-3.5 font-semibold text-white shadow-lg hover:bg-neutral-800 sm:w-auto"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/40 px-8 py-3.5 text-center font-semibold text-white hover:bg-white/10 sm:w-auto"
             >
               <ChatBubbleLeftRightIcon className="h-5 w-5" /> Cotizar por WhatsApp
             </a>
