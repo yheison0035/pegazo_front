@@ -5,11 +5,14 @@ import RoleGuard from '@/auth/roleGuard';
 import {
   ChatBubbleLeftRightIcon,
   PaperAirplaneIcon,
+  PhotoIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import {
   getSupportThreads,
   getPlatformSupportThread,
   sendPlatformSupport,
+  uploadSupportImage,
 } from '@/lib/api/routes/support';
 
 function hhmm(d) {
@@ -40,7 +43,21 @@ function SupportInbox() {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
+  const [file, setFile] = useState(null);
+  const [preview, setPreview] = useState(null);
   const endRef = useRef(null);
+  const fileRef = useRef(null);
+
+  const pickFile = (f) => {
+    if (!f || !f.type?.startsWith('image/')) return;
+    setFile(f);
+    setPreview(URL.createObjectURL(f));
+  };
+  const clearFile = () => {
+    setFile(null);
+    setPreview(null);
+    if (fileRef.current) fileRef.current.value = '';
+  };
 
   const loadThreads = useCallback(async () => {
     try {
@@ -89,20 +106,28 @@ function SupportInbox() {
 
   const send = async () => {
     const body = text.trim();
-    if (!body || !active || sending) return;
+    if ((!body && !file) || !active || sending) return;
     setSending(true);
+    const localPreview = preview;
     setMessages((prev) => [
       ...prev,
       {
         id: `tmp-${Date.now()}`,
         fromPlatform: true,
         body,
+        imageUrl: localPreview,
         createdAt: new Date().toISOString(),
       },
     ]);
     setText('');
+    clearFile();
     try {
-      await sendPlatformSupport(active, body);
+      let imageUrl;
+      if (file) {
+        const { data } = await uploadSupportImage(file);
+        imageUrl = data?.url;
+      }
+      await sendPlatformSupport(active, body, imageUrl);
       await loadThread(active);
       loadThreads();
     } catch {
@@ -198,7 +223,25 @@ function SupportInbox() {
                           : 'rounded-bl-sm bg-white text-gray-800 shadow-sm'
                       }`}
                     >
-                      <p className="whitespace-pre-wrap break-words">{m.body}</p>
+                      {m.imageUrl && (
+                        <a
+                          href={m.imageUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mb-1 block"
+                        >
+                          <img
+                            src={m.imageUrl}
+                            alt="adjunto"
+                            className="max-h-56 w-full rounded-lg object-cover"
+                          />
+                        </a>
+                      )}
+                      {m.body && (
+                        <p className="whitespace-pre-wrap break-words">
+                          {m.body}
+                        </p>
+                      )}
                       <p
                         className={`mt-1 text-[10px] ${
                           m.fromPlatform ? 'text-white/70' : 'text-gray-400'
@@ -212,27 +255,58 @@ function SupportInbox() {
                 ))}
                 <div ref={endRef} />
               </div>
-              <div className="flex items-end gap-2 border-t border-gray-100 p-2">
-                <textarea
-                  rows={1}
-                  value={text}
-                  onChange={(e) => setText(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      send();
-                    }
-                  }}
-                  placeholder="Responder…"
-                  className="max-h-28 flex-1 resize-none rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-1 focus:ring-orange-400"
-                />
-                <button
-                  onClick={send}
-                  disabled={sending || !text.trim()}
-                  className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-orange-500 text-white hover:bg-orange-600 disabled:opacity-50"
-                >
-                  <PaperAirplaneIcon className="h-5 w-5" />
-                </button>
+              <div className="border-t border-gray-100 p-2">
+                {preview && (
+                  <div className="relative mb-2 inline-block">
+                    <img
+                      src={preview}
+                      alt="adjunto"
+                      className="h-16 w-16 rounded-lg border border-gray-200 object-cover"
+                    />
+                    <button
+                      onClick={clearFile}
+                      className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-gray-800 text-white"
+                    >
+                      <XMarkIcon className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                )}
+                <div className="flex items-end gap-2">
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => pickFile(e.target.files?.[0])}
+                  />
+                  <button
+                    onClick={() => fileRef.current?.click()}
+                    title="Adjuntar imagen"
+                    className="flex h-10 w-10 flex-none items-center justify-center rounded-xl border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-orange-500"
+                  >
+                    <PhotoIcon className="h-5 w-5" />
+                  </button>
+                  <textarea
+                    rows={1}
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        send();
+                      }
+                    }}
+                    placeholder="Responder…"
+                    className="max-h-28 flex-1 resize-none rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-1 focus:ring-orange-400"
+                  />
+                  <button
+                    onClick={send}
+                    disabled={sending || (!text.trim() && !file)}
+                    className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-orange-500 text-white hover:bg-orange-600 disabled:opacity-50"
+                  >
+                    <PaperAirplaneIcon className="h-5 w-5" />
+                  </button>
+                </div>
               </div>
             </>
           )}
