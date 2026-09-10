@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import useLiveRefresh from "@/hooks/useLiveRefresh";
 import Table from '@/components/dashboard/tables/table';
 import Pagination from '@/components/dashboard/tables/segments/pagination';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
@@ -95,6 +96,9 @@ export default function Delivered_Sales() {
   useEffect(() => {
     fetchSales();
   }, [fetchSales]);
+
+  // Datos en vivo: refresca al volver a la pestana/foco y cada 20s.
+  useLiveRefresh(fetchSales);
 
   const handleDeleteClick = (id, name) => {
     setDeleteTarget({ id, name, type: 'esta venta' });

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import useLiveRefresh from "@/hooks/useLiveRefresh";
 import {
   BanknotesIcon,
   ArrowDownCircleIcon,
@@ -96,6 +97,9 @@ export default function CashPage() {
   useEffect(() => {
     refresh();
   }, [refresh]);
+
+  // Datos en vivo: refresca al volver a la pestana/foco y cada 20s.
+  useLiveRefresh(refresh);
 
   // Corrige la base inicial de la caja abierta (dueño/admin).
   const handleUpdateOpening = async () => {

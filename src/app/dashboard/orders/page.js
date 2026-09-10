@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import useLiveRefresh from '@/hooks/useLiveRefresh';
 import { EyeIcon, TruckIcon } from '@heroicons/react/24/outline';
 import RoleGuard from '@/auth/roleGuard';
 import { Roles, ALL_EXCEPT_BARBER } from '@/config/roles';
@@ -47,6 +48,8 @@ export default function Orders() {
     const t = setTimeout(fetchOrders, 300);
     return () => clearTimeout(t);
   }, [fetchOrders]);
+
+  useLiveRefresh(fetchOrders);
 
   const handleFilter = (key, value) => {
     setPage(1);

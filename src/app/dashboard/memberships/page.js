@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import useLiveRefresh from "@/hooks/useLiveRefresh";
 import {
   PlusIcon,
   BanknotesIcon,
@@ -100,6 +101,9 @@ export default function MembershipsPage() {
       .then((r) => setCustomers(r?.data || []))
       .catch(() => setCustomers([]));
   }, [load]);
+
+  // Datos en vivo: refresca al volver a la pestana/foco y cada 20s.
+  useLiveRefresh(load);
 
   const inputCls =
     'w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20';

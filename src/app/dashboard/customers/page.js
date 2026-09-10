@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import useLiveRefresh from "@/hooks/useLiveRefresh";
 import { PlusIcon } from '@heroicons/react/24/outline';
 import ViewModal from '../../viewModal';
 import Table from '@/components/dashboard/tables/table';
@@ -65,6 +66,9 @@ export default function Customers() {
   useEffect(() => {
     fetchCustomers();
   }, [fetchCustomers]);
+
+  // Datos en vivo: refresca al volver a la pestana/foco y cada 20s.
+  useLiveRefresh(fetchCustomers);
 
   const handleDeleteClick = (id, name) => {
     setDeleteTarget({ id, name, type: 'este cliente' });

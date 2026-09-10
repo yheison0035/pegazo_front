@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import useLiveRefresh from '@/hooks/useLiveRefresh';
 import { useAuth } from '@/context/authContext';
 import useProducts from '@/lib/api/hooks/useProducts';
 import Table from '@/components/dashboard/tables/table';
@@ -63,6 +64,9 @@ export default function Inventory() {
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
+
+  // Sondeo periódico (además del refresco por foco/evento de abajo).
+  useLiveRefresh(fetchProducts);
 
   // Refresco en tiempo real: cuando se aprueba/rechaza una solicitud de stock
   // (mismo o cambio de vista) y al volver el foco a la pestaña, se recarga la

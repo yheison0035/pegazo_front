@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import useLiveRefresh from "@/hooks/useLiveRefresh";
 import { useAuth } from '@/context/authContext';
 import useExpenses from '@/lib/api/hooks/useExpenses';
 import Table from '@/components/dashboard/tables/table';
@@ -63,6 +64,9 @@ export default function Expenses() {
   useEffect(() => {
     fetchExpenses();
   }, [fetchExpenses]);
+
+  // Datos en vivo: refresca al volver a la pestana/foco y cada 20s.
+  useLiveRefresh(fetchExpenses);
 
   const handleDeleteClick = (id, name) => {
     setDeleteTarget({ id, name, type: 'este gasto' });

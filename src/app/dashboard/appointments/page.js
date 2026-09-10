@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import useLiveRefresh from '@/hooks/useLiveRefresh';
 import {
   PlusIcon,
   CalendarDaysIcon,
@@ -73,6 +74,8 @@ export default function Appointments() {
   useEffect(() => {
     fetchAppointments();
   }, [fetchAppointments]);
+
+  useLiveRefresh(fetchAppointments);
 
   const handleDeleteClick = (id, name) => {
     setDeleteTarget({ id, name, type: 'esta cita' });
