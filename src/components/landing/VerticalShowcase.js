@@ -27,6 +27,8 @@ import {
   WrenchScrewdriverIcon,
   IdentificationIcon,
   BuildingOffice2Icon,
+  Bars3Icon,
+  EllipsisHorizontalIcon,
 } from '@heroicons/react/24/outline';
 import { BUSINESS_TYPES } from '@/config/businessTypes';
 
@@ -181,6 +183,53 @@ const VERTICALS = [
 export default function VerticalShowcase() {
   const [active, setActive] = useState(VERTICALS[0].id);
   const v = VERTICALS.find((x) => x.id === active) || VERTICALS[0];
+  const mods = realModules(v.type);
+
+  // Cuerpo del panel (KPIs + catálogo + nota), reutilizado en escritorio y móvil.
+  const panelBody = (
+    <>
+      {/* KPIs (tarjetas reales) */}
+      <div className="grid grid-cols-2 gap-3">
+        {v.kpis.map(([label, val, dot]) => (
+          <div
+            key={label}
+            className="rounded-2xl border border-gray-200 bg-white p-3.5 shadow-sm"
+          >
+            <div className="flex items-center gap-1.5">
+              <span className={`inline-block h-2.5 w-2.5 rounded-full ${dot}`} />
+              <p className="text-[10px] font-medium uppercase tracking-wide text-gray-500">
+                {label}
+              </p>
+            </div>
+            <p className="mt-1.5 text-lg font-bold text-gray-900">{val}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Catálogo adaptado (tarjeta real) */}
+      <div className="mt-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+        <div className="mb-2 flex items-center justify-between">
+          <p className="text-xs font-semibold text-gray-800">{v.catalog}</p>
+          <span className="text-[10px] font-medium text-orange-600">
+            Ver todo
+          </span>
+        </div>
+        <ul className="divide-y divide-gray-100">
+          {v.items.map(([name, price]) => (
+            <li
+              key={name}
+              className="flex items-center justify-between py-2 text-sm"
+            >
+              <span className="truncate text-gray-700">{name}</span>
+              <span className="font-semibold text-gray-900">{price}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <p className="mt-3 text-[11px] text-gray-400">{v.accent}</p>
+    </>
+  );
 
   return (
     <div>
@@ -203,8 +252,8 @@ export default function VerticalShowcase() {
         ))}
       </div>
 
-      {/* Ventana de la app (marco) */}
-      <div className="mx-auto mt-8 max-w-4xl overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-2xl">
+      {/* ESCRITORIO: ventana de navegador con sidebar (como el CRM en PC) */}
+      <div className="mx-auto mt-8 hidden max-w-4xl overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-2xl sm:block">
         {/* barra superior del navegador */}
         <div className="flex items-center gap-2 border-b border-neutral-200 bg-neutral-100 px-4 py-2.5">
           <span className="h-3 w-3 rounded-full bg-red-400" />
@@ -216,9 +265,9 @@ export default function VerticalShowcase() {
         </div>
 
         {/* cuerpo: sidebar oscuro + contenido claro (como el CRM real) */}
-        <div className="grid grid-cols-[132px_1fr] sm:grid-cols-[188px_1fr]">
+        <div className="grid grid-cols-[188px_1fr]">
           {/* SIDEBAR */}
-          <aside className="bg-gradient-to-b from-[#0b0f19] to-[#05070d] p-3 border-r border-orange-500/10">
+          <aside className="border-r border-orange-500/10 bg-gradient-to-b from-[#0b0f19] to-[#05070d] p-3">
             <div className="mb-4 flex items-center gap-2 px-1">
               <span className="grid h-8 w-8 flex-none place-items-center rounded-lg bg-gradient-to-br from-orange-500 to-amber-400 text-sm font-black text-white shadow">
                 P
@@ -227,51 +276,44 @@ export default function VerticalShowcase() {
                 Pegazo
               </span>
             </div>
-            {(() => {
-              const mods = realModules(v.type);
-              return (
-                <>
-                  <p className="mb-1.5 px-1 text-[10px] font-semibold uppercase tracking-wide text-white/35">
-                    Tu menú · {mods.length} módulos
-                  </p>
-                  <ul className="max-h-[264px] space-y-1 overflow-y-auto pr-1 [scrollbar-width:thin] [scrollbar-color:rgba(249,115,22,.5)_transparent]">
-                    {mods.map((key, i) => {
-                      const meta = MODULE_META[key] || [key, HomeIcon];
-                      const label = meta[0];
-                      const Icon = meta[1];
-                      const activeItem = i === 0;
-                      return (
-                        <li
-                          key={key}
-                          className={`relative flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium transition ${
-                            activeItem
-                              ? 'bg-gradient-to-r from-orange-500/25 to-amber-500/10 text-white shadow-inner'
-                              : 'text-white/55'
-                          }`}
-                        >
-                          {activeItem && (
-                            <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-orange-400" />
-                          )}
-                          <Icon
-                            className={`h-4 w-4 flex-none ${
-                              activeItem ? 'text-orange-400' : 'text-white/45'
-                            }`}
-                          />
-                          <span className="truncate">{label}</span>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                  <p className="mt-2 px-1 text-[9.5px] text-white/25">
-                    Desliza para ver todo tu CRM ↓
-                  </p>
-                </>
-              );
-            })()}
+            <p className="mb-1.5 px-1 text-[10px] font-semibold uppercase tracking-wide text-white/35">
+              Tu menú · {mods.length} módulos
+            </p>
+            <ul className="max-h-[264px] space-y-1 overflow-y-auto pr-1 [scrollbar-color:rgba(249,115,22,.5)_transparent] [scrollbar-width:thin]">
+              {mods.map((key, i) => {
+                const meta = MODULE_META[key] || [key, HomeIcon];
+                const label = meta[0];
+                const Icon = meta[1];
+                const activeItem = i === 0;
+                return (
+                  <li
+                    key={key}
+                    className={`relative flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium transition ${
+                      activeItem
+                        ? 'bg-gradient-to-r from-orange-500/25 to-amber-500/10 text-white shadow-inner'
+                        : 'text-white/55'
+                    }`}
+                  >
+                    {activeItem && (
+                      <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-orange-400" />
+                    )}
+                    <Icon
+                      className={`h-4 w-4 flex-none ${
+                        activeItem ? 'text-orange-400' : 'text-white/45'
+                      }`}
+                    />
+                    <span className="truncate">{label}</span>
+                  </li>
+                );
+              })}
+            </ul>
+            <p className="mt-2 px-1 text-[9.5px] text-white/25">
+              Desliza para ver todo tu CRM ↓
+            </p>
           </aside>
 
           {/* CONTENIDO (bg-gray-50 como el panel real) */}
-          <div className="bg-gray-50 p-4 sm:p-6">
+          <div className="bg-gray-50 p-6">
             <div className="flex items-center justify-between gap-2">
               <div className="min-w-0">
                 <p className="truncate text-sm font-bold text-gray-900">
@@ -285,51 +327,71 @@ export default function VerticalShowcase() {
                 {v.name}
               </span>
             </div>
-
-            {/* KPIs (tarjetas reales) */}
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              {v.kpis.map(([label, val, dot]) => (
-                <div
-                  key={label}
-                  className="rounded-2xl border border-gray-200 bg-white p-3.5 shadow-sm"
-                >
-                  <div className="flex items-center gap-1.5">
-                    <span className={`inline-block h-2.5 w-2.5 rounded-full ${dot}`} />
-                    <p className="text-[10px] font-medium uppercase tracking-wide text-gray-500">
-                      {label}
-                    </p>
-                  </div>
-                  <p className="mt-1.5 text-lg font-bold text-gray-900">{val}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Catálogo adaptado (tarjeta real) */}
-            <div className="mt-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-              <div className="mb-2 flex items-center justify-between">
-                <p className="text-xs font-semibold text-gray-800">{v.catalog}</p>
-                <span className="text-[10px] font-medium text-orange-600">
-                  Ver todo
-                </span>
-              </div>
-              <ul className="divide-y divide-gray-100">
-                {v.items.map(([name, price]) => (
-                  <li
-                    key={name}
-                    className="flex items-center justify-between py-2 text-sm"
-                  >
-                    <span className="truncate text-gray-700">{name}</span>
-                    <span className="font-semibold text-gray-900">{price}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <p className="mt-3 text-[11px] text-gray-400">
-              {v.accent}
-            </p>
+            <div className="mt-4">{panelBody}</div>
           </div>
         </div>
+      </div>
+
+      {/* MÓVIL: marco de celular con barra superior + navegación inferior
+          (así se ve Pegazo en el teléfono: menú en ☰ y pestañas abajo) */}
+      <div className="mx-auto mt-8 w-full max-w-[340px] sm:hidden">
+        <div className="overflow-hidden rounded-[2.2rem] border-4 border-neutral-800 bg-neutral-950 p-1.5 shadow-2xl">
+          <div className="overflow-hidden rounded-[1.8rem] bg-gray-50">
+            {/* barra superior de la app */}
+            <div className="flex items-center justify-between gap-2 bg-gradient-to-b from-[#0b0f19] to-[#05070d] px-3 py-3 text-white">
+              <div className="flex min-w-0 items-center gap-2">
+                <Bars3Icon className="h-5 w-5 flex-none text-white/80" />
+                <span className="grid h-7 w-7 flex-none place-items-center rounded-lg bg-gradient-to-br from-orange-500 to-amber-400 text-xs font-black text-white shadow">
+                  P
+                </span>
+                <span className="min-w-0">
+                  <span className="block truncate text-[13px] font-bold leading-tight">
+                    {v.biz}
+                  </span>
+                  <span className="block truncate text-[10px] text-white/50">
+                    Tu panel · {v.name}
+                  </span>
+                </span>
+              </div>
+              <span className="flex-none rounded-full bg-orange-500/20 px-2 py-0.5 text-[9px] font-semibold text-orange-300">
+                {mods.length} módulos
+              </span>
+            </div>
+
+            {/* contenido a ancho completo */}
+            <div className="p-3">{panelBody}</div>
+
+            {/* barra de navegación inferior (como una app móvil) */}
+            <div className="flex items-stretch justify-around border-t border-gray-200 bg-white px-1 pb-1.5 pt-2">
+              {mods.slice(0, 4).map((key, i) => {
+                const meta = MODULE_META[key] || [key, HomeIcon];
+                const label = meta[0];
+                const Icon = meta[1];
+                const activeItem = i === 0;
+                return (
+                  <div
+                    key={key}
+                    className={`flex flex-1 flex-col items-center gap-0.5 ${
+                      activeItem ? 'text-orange-500' : 'text-gray-400'
+                    }`}
+                  >
+                    <Icon className="h-5 w-5" />
+                    <span className="max-w-full truncate text-[8.5px] font-medium">
+                      {label.split(' ')[0]}
+                    </span>
+                  </div>
+                );
+              })}
+              <div className="flex flex-1 flex-col items-center gap-0.5 text-gray-400">
+                <EllipsisHorizontalIcon className="h-5 w-5" />
+                <span className="text-[8.5px] font-medium">Más</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p className="mt-3 text-center text-[11px] text-neutral-400">
+          Así se ve Pegazo en tu celular · toca ☰ para todo tu menú
+        </p>
       </div>
     </div>
   );
