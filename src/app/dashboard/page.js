@@ -30,6 +30,7 @@ import MyWeeklyHistoryModal from '@/components/dashboard/home/MyWeeklyHistoryMod
 import MyDetailModal from '@/components/dashboard/home/MyDetailModal';
 import TodayAppointmentsModal from '@/components/dashboard/home/TodayAppointmentsModal';
 import WidgetBoard from '@/components/dashboard/home/WidgetBoard';
+import WelcomeWizard from '@/components/dashboard/home/WelcomeWizard';
 
 // Roles que solo ven SU información (empleado de servicio, no dueño/caja).
 const SELF_ONLY_ROLES = ['BARBERO', 'PROFESIONAL'];
@@ -71,6 +72,7 @@ export default function DashboardHome() {
   const [showWeekly, setShowWeekly] = useState(false);
   const [detailPeriod, setDetailPeriod] = useState(null); // 'today'|'week'|'month'
   const [showTodayAppts, setShowTodayAppts] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
   // Lo que el empleado (cualquier rol no-dueño) debe actualmente al negocio.
   const [myCharges, setMyCharges] = useState(null);
   // Para el dueño: total de cargos/deudas de sus empleados.
@@ -196,6 +198,30 @@ export default function DashboardHome() {
     : [];
   const setupIncomplete = steps.some((s) => !s.done);
 
+  // Asistente de bienvenida: se muestra una sola vez por empresa, al primer
+  // ingreso de un negocio nuevo (dueño/admin con la configuración incompleta).
+  const companyId = usuario?.company?.id;
+  useEffect(() => {
+    if (isBarber || !setup || !companyId || !setupIncomplete) return;
+    let done = false;
+    try {
+      done = localStorage.getItem(`pegazo:welcome-done:${companyId}`) === '1';
+    } catch {
+      /* ignora */
+    }
+    if (!done) setShowWelcome(true);
+  }, [isBarber, setup, companyId, setupIncomplete]);
+
+  const closeWelcome = () => {
+    try {
+      if (companyId)
+        localStorage.setItem(`pegazo:welcome-done:${companyId}`, '1');
+    } catch {
+      /* ignora */
+    }
+    setShowWelcome(false);
+  };
+
   // Datos y acciones que consumen los widgets.
   const teamBirthdays = isBarber
     ? myPerf?.teamBirthdays
@@ -259,6 +285,13 @@ export default function DashboardHome() {
 
   return (
     <div className="mx-auto w-full max-w-5xl p-4">
+      <WelcomeWizard
+        open={showWelcome}
+        steps={steps}
+        companyName={usuario?.company?.name}
+        onClose={closeWelcome}
+      />
+
       {/* Saludo */}
       <div className="mb-5">
         <h1 className="text-2xl font-bold text-gray-800">
