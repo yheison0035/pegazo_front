@@ -202,7 +202,7 @@ export default function AppointmentsHub() {
   return (
     <>
       {/* Campana flotante */}
-      <div className="fixed right-3 top-3 z-40 md:right-6 md:top-4">
+      <div className="fixed bottom-24 right-4 z-40 md:right-6">
         <button
           onClick={() => setBellOpen((v) => !v)}
           className={`relative flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white shadow-sm transition hover:bg-gray-50 ${
@@ -228,7 +228,7 @@ export default function AppointmentsHub() {
               className="fixed inset-0 z-[-1]"
               onClick={() => setBellOpen(false)}
             />
-            <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl">
+            <div className="absolute bottom-full right-0 mb-2 w-80 max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl">
               <div className="border-b border-gray-100 bg-gray-50 px-4 py-3">
                 <p className="text-sm font-bold text-gray-800">
                   Recordatorios
@@ -259,7 +259,7 @@ export default function AppointmentsHub() {
       </div>
 
       {/* Toasts de recordatorio */}
-      <div className="fixed bottom-4 right-4 z-[90] flex w-80 max-w-[calc(100vw-2rem)] flex-col gap-2">
+      <div className="fixed top-4 right-4 z-[90] flex w-80 max-w-[calc(100vw-2rem)] flex-col gap-2">
         {toasts.map((t) => (
           <ReminderToast
             key={t.id}
