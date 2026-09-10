@@ -277,7 +277,9 @@ export const WIDGETS = [
           <Label>Hoy</Label>
           <div className="grid grid-cols-2 gap-2">
             <Stat
-              label={`${data.t.salePlural}`}
+              // El monto del día es dinero VENDIDO (ventas), aunque el negocio
+              // llame "pedidos" a sus operaciones (ej. televentas/restaurante).
+              label="Ventas"
               value={home ? formatCOP(home.today.total) : '—'}
               accent="text-emerald-600"
             />
