@@ -6,6 +6,8 @@ import {
   BellIcon,
   CheckIcon,
   ArrowPathIcon,
+  XMarkIcon,
+  ArrowTopRightOnSquareIcon,
 } from '@heroicons/react/24/outline';
 import {
   getNotifications,
@@ -42,6 +44,7 @@ export default function NotificationsPage() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('all'); // all | unread
+  const [detail, setDetail] = useState(null); // notificación abierta en modal
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -63,6 +66,8 @@ export default function NotificationsPage() {
   const visible = tab === 'unread' ? items.filter((n) => !n.read) : items;
 
   const openNotification = async (n) => {
+    // Abre el detalle en un modal (ya no redirige automáticamente).
+    setDetail(n);
     if (!n.read) {
       setItems((prev) =>
         prev.map((x) => (x.id === n.id ? { ...x, read: true } : x)),
@@ -74,7 +79,12 @@ export default function NotificationsPage() {
         /* noop */
       }
     }
-    if (n.url) router.push(n.url);
+  };
+
+  const goToDetail = () => {
+    const url = detail?.url;
+    setDetail(null);
+    if (url) router.push(url);
   };
 
   const markAll = async () => {
@@ -184,6 +194,57 @@ export default function NotificationsPage() {
             </li>
           ))}
         </ul>
+      )}
+
+      {detail && (
+        <div
+          className="fixed inset-0 z-[90] flex items-center justify-center bg-black/50 p-4 backdrop-blur-[1px]"
+          onClick={() => setDetail(null)}
+        >
+          <div
+            className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3 bg-gradient-to-r from-amber-500 to-orange-500 px-5 py-4">
+              <div className="flex items-center gap-2 text-white">
+                <BellIcon className="h-6 w-6 flex-none" />
+                <h2 className="text-base font-bold leading-tight">
+                  {detail.title}
+                </h2>
+              </div>
+              <button
+                onClick={() => setDetail(null)}
+                className="rounded-lg p-1 text-white/80 hover:bg-white/10 hover:text-white"
+              >
+                <XMarkIcon className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="px-5 py-4">
+              <p className="mb-2 text-[11px] uppercase tracking-wide text-gray-400">
+                {fmtFull(detail.createdAt)}
+              </p>
+              <p className="whitespace-pre-wrap break-words text-sm text-gray-700">
+                {detail.body}
+              </p>
+            </div>
+            <div className="flex justify-end gap-2 border-t border-gray-100 px-5 py-3">
+              <button
+                onClick={() => setDetail(null)}
+                className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
+              >
+                Cerrar
+              </button>
+              {detail.url && (
+                <button
+                  onClick={goToDetail}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600"
+                >
+                  <ArrowTopRightOnSquareIcon className="h-4 w-4" /> Ir al detalle
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
