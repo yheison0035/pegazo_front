@@ -17,6 +17,7 @@ import {
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
 import Button from '@/components/ui/Button';
+import MoneyInput from '@/components/ui/MoneyInput';
 import StatusBadge from '@/components/ui/StatusBadge';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import AlertModal from '@/components/dashboard/modals/alertModal';
@@ -1021,10 +1022,9 @@ function NoteModal({ doc, kind, onClose, onSaved, onError }) {
                   <span className="text-[10px] uppercase text-gray-400">
                     V. unit.
                   </span>
-                  <input
-                    type="number"
+                  <MoneyInput
                     value={l.unitPrice}
-                    onChange={(e) => setLine(i, 'unitPrice', e.target.value)}
+                    onChange={(v) => setLine(i, 'unitPrice', v)}
                     className="w-full rounded-lg border border-gray-200 px-2 py-1.5 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
                   />
                 </label>

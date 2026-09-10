@@ -10,6 +10,7 @@ import {
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
 import Button from '@/components/ui/Button';
+import MoneyInput from '@/components/ui/MoneyInput';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import { useAuth } from '@/context/authContext';
@@ -307,9 +308,11 @@ export default function Supplies() {
                 </label>
                 <input
                   value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, name: e.target.value.toUpperCase() })
+                  }
                   placeholder="Ej: Carne molida"
-                  className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none"
+                  className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-sm uppercase focus:border-orange-400 focus:outline-none"
                 />
               </div>
 
@@ -367,11 +370,10 @@ export default function Supplies() {
                   <label className="text-xs font-semibold text-gray-500">
                     Costo por unidad (opcional)
                   </label>
-                  <input
-                    type="number"
+                  <MoneyInput
                     value={form.cost}
-                    onChange={(e) => setForm({ ...form, cost: e.target.value })}
-                    placeholder="—"
+                    onChange={(v) => setForm({ ...form, cost: v })}
+                    placeholder="$ —"
                     className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-sm"
                   />
                 </div>
