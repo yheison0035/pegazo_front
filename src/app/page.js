@@ -1144,6 +1144,11 @@ export default function Landing() {
                   </li>
                 ))}
               </ul>
+              <p className="mt-4 text-xs text-neutral-400">
+                Algunas funciones avanzadas (tienda online, avisos de banco,
+                historia clínica, nómina electrónica) se activan según el plan.
+                Te asesoramos cuál te conviene.
+              </p>
             </div>
           </div>
         </div>
