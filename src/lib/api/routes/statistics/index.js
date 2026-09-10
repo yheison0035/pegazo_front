@@ -62,3 +62,13 @@ export async function getTaxReport(dto = {}) {
     body: JSON.stringify(dto),
   });
 }
+
+// Libro de movimientos (ingresos + egresos) para el contador.
+export async function getMovements({ startDate, endDate, localId } = {}) {
+  const q = new URLSearchParams();
+  if (startDate) q.set('startDate', startDate);
+  if (endDate) q.set('endDate', endDate);
+  if (localId) q.set('localId', localId);
+  const qs = q.toString();
+  return apiFetch(`/statistics/movements${qs ? `?${qs}` : ''}`);
+}
