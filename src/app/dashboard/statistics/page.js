@@ -109,6 +109,10 @@ export default function Statistics() {
 
   const [locals, setLocals] = useState([]);
   const [localId, setLocalId] = useState('');
+  // Base contable del reporte (por defecto la que el dueño eligió en Config).
+  const [basis, setBasis] = useState(
+    usuario?.company?.accountingBasis || 'CASH',
+  );
   // "Desde" arranca vacío: el backend lo resuelve a la primera venta registrada
   // y lo poblamos con el rango que devuelve.
   const [startDate, setStartDate] = useState('');
@@ -132,6 +136,7 @@ export default function Statistics() {
       const res = await getDashboardStats({
         startDate,
         endDate,
+        basis,
         ...(localId ? { localId: String(localId) } : {}),
       });
       setData(res?.data || null);
@@ -146,7 +151,7 @@ export default function Statistics() {
     } finally {
       setLoading(false);
     }
-  }, [startDate, endDate, localId]);
+  }, [startDate, endDate, localId, basis]);
 
   useEffect(() => {
     fetchStats();
@@ -163,6 +168,7 @@ export default function Statistics() {
         const res = await getDashboardStats({
           startDate: from,
           endDate: to,
+          basis,
           ...(localId ? { localId: String(localId) } : {}),
         });
         setData(res?.data || null);
@@ -172,8 +178,27 @@ export default function Statistics() {
         setLoading(false);
       }
     },
-    [localId],
+    [localId, basis],
   );
+
+  // Cambia la base contable y recarga con ese valor explícito.
+  const changeBasis = async (v) => {
+    setBasis(v);
+    setLoading(true);
+    try {
+      const res = await getDashboardStats({
+        startDate,
+        endDate,
+        basis: v,
+        ...(localId ? { localId: String(localId) } : {}),
+      });
+      setData(res?.data || null);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Atajos de rango (fechas en horario de Colombia).
   const PRESETS = [
@@ -420,6 +445,35 @@ export default function Statistics() {
                 </option>
               ))}
             </select>
+          </div>
+          <div className="flex flex-col">
+            <label className="mb-1 text-xs font-semibold uppercase text-gray-500">
+              Base
+            </label>
+            <div className="inline-flex rounded-xl border border-gray-200 bg-white p-0.5">
+              {[
+                ['CASH', 'Caja'],
+                ['ACCRUAL', 'Causación'],
+              ].map(([val, label]) => (
+                <button
+                  key={val}
+                  type="button"
+                  onClick={() => changeBasis(val)}
+                  title={
+                    val === 'CASH'
+                      ? 'Solo lo cobrado y pagado'
+                      : 'Incluye ventas a crédito (fiado) al emitirse'
+                  }
+                  className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
+                    basis === val
+                      ? 'bg-orange-500 text-white'
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
           <Button variant="primary" onClick={fetchStats}>
             Aplicar

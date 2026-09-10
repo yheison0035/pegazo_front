@@ -29,6 +29,8 @@ import {
   updateCrmTheme,
   updateCrmFont,
   updateCashPolicy,
+  updateAccountingBasis,
+  updateBooksClose,
   updateFiscal,
   updateTerminology,
   updateCompanyMail,
@@ -1070,6 +1072,199 @@ function CashPolicyCard({ initial }) {
   );
 }
 
+// Base contable de los reportes: caja (solo cobrado/pagado) o causación
+// (la venta cuenta al emitirse, incluye fiado). Lo elige el dueño.
+function AccountingBasisCard({ initial }) {
+  const auth = useAuth();
+  const usuario = auth?.usuario;
+  const setUsuario = auth?.setUsuario;
+  const [basis, setBasis] = useState('CASH');
+  const [saving, setSaving] = useState(false);
+  const [alert, setAlert] = useState({});
+
+  useEffect(() => {
+    if (initial?.accountingBasis) setBasis(initial.accountingBasis);
+  }, [initial]);
+
+  const change = async (val) => {
+    const prev = basis;
+    setBasis(val);
+    setSaving(true);
+    try {
+      await updateAccountingBasis(val);
+      if (setUsuario && usuario) {
+        const merged = {
+          ...usuario,
+          company: { ...usuario.company, accountingBasis: val },
+        };
+        setUsuario(merged);
+        localStorage.setItem('usuario', JSON.stringify(merged));
+      }
+      setAlert({ type: 'success', message: 'Base contable guardada.' });
+    } catch (e) {
+      setBasis(prev);
+      setAlert({ type: 'error', message: e.message || 'No se pudo guardar.' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+      <div className="flex items-start gap-3">
+        <div className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-orange-50 text-orange-600">
+          <CalculatorIcon className="h-5 w-5" />
+        </div>
+        <div>
+          <h2 className="text-base font-bold text-gray-800">Base contable</h2>
+          <p className="text-sm text-gray-500">
+            Define cómo se cuenta la plata en tus reportes y utilidad.
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-4 grid gap-2 sm:grid-cols-2">
+        {[
+          ['CASH', 'Base caja', 'Cuenta solo lo cobrado y lo pagado. El fiado entra cuando lo cobras.'],
+          ['ACCRUAL', 'Base causación', 'La venta cuenta al emitirse (incluye fiado). Los ingresos se reconocen aunque no se hayan cobrado.'],
+        ].map(([val, title, desc]) => (
+          <button
+            key={val}
+            type="button"
+            disabled={saving}
+            onClick={() => change(val)}
+            className={`rounded-xl border p-3 text-left transition ${
+              basis === val
+                ? 'border-orange-300 bg-orange-50 ring-1 ring-orange-300'
+                : 'border-gray-200 hover:bg-gray-50'
+            }`}
+          >
+            <p className="text-sm font-semibold text-gray-800">{title}</p>
+            <p className="mt-0.5 text-xs text-gray-500">{desc}</p>
+          </button>
+        ))}
+      </div>
+
+      <AlertModal
+        type={alert.type}
+        message={alert.message}
+        onClose={() => setAlert({})}
+      />
+    </div>
+  );
+}
+
+// Cierre de periodo: fija la fecha hasta la que los libros quedan congelados
+// (no se puede crear/editar ventas ni gastos anteriores). Reabrible por el dueño.
+function BooksCloseCard({ initial }) {
+  const auth = useAuth();
+  const usuario = auth?.usuario;
+  const setUsuario = auth?.setUsuario;
+  const [date, setDate] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [alert, setAlert] = useState({});
+
+  const closedUntil = usuario?.company?.booksClosedUntil;
+
+  useEffect(() => {
+    if (initial?.booksClosedUntil) {
+      setDate(String(initial.booksClosedUntil).slice(0, 10));
+    }
+  }, [initial]);
+
+  const save = async (value) => {
+    setSaving(true);
+    try {
+      await updateBooksClose(value);
+      if (setUsuario && usuario) {
+        const merged = {
+          ...usuario,
+          company: {
+            ...usuario.company,
+            booksClosedUntil: value ? new Date(value).toISOString() : null,
+          },
+        };
+        setUsuario(merged);
+        localStorage.setItem('usuario', JSON.stringify(merged));
+      }
+      setAlert({
+        type: 'success',
+        message: value ? 'Periodo cerrado.' : 'Periodo reabierto.',
+      });
+      if (!value) setDate('');
+    } catch (e) {
+      setAlert({ type: 'error', message: e.message || 'No se pudo guardar.' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+      <div className="flex items-start gap-3">
+        <div className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-orange-50 text-orange-600">
+          <CalculatorIcon className="h-5 w-5" />
+        </div>
+        <div>
+          <h2 className="text-base font-bold text-gray-800">
+            Cierre de periodo
+          </h2>
+          <p className="text-sm text-gray-500">
+            Congela tus libros hasta una fecha: no se podrán crear ni editar
+            ventas ni gastos anteriores o iguales a ese día. Tú lo puedes
+            reabrir cuando quieras.
+          </p>
+        </div>
+      </div>
+
+      {closedUntil && (
+        <div className="mt-3 rounded-xl border border-amber-100 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+          Libros cerrados hasta el{' '}
+          <b>{new Date(closedUntil).toLocaleDateString('es-CO')}</b>.
+        </div>
+      )}
+
+      <div className="mt-4 flex flex-wrap items-end gap-2">
+        <div className="flex flex-col">
+          <label className="mb-1 text-xs font-semibold uppercase text-gray-500">
+            Cerrar hasta
+          </label>
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="rounded-xl border border-gray-200 px-3 py-2 text-sm"
+          />
+        </div>
+        <button
+          type="button"
+          disabled={saving || !date}
+          onClick={() => save(date)}
+          className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600 disabled:opacity-50"
+        >
+          Cerrar periodo
+        </button>
+        {closedUntil && (
+          <button
+            type="button"
+            disabled={saving}
+            onClick={() => save(null)}
+            className="rounded-xl border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            Reabrir
+          </button>
+        )}
+      </div>
+
+      <AlertModal
+        type={alert.type}
+        message={alert.message}
+        onClose={() => setAlert({})}
+      />
+    </div>
+  );
+}
+
 function LoyaltySettings() {
   const [form, setForm] = useState({
     loyaltyEnabled: false,
@@ -1297,6 +1492,8 @@ export default function Settings() {
             </div>
             <FiscalCard initial={settings} />
             <CashPolicyCard initial={settings} />
+            <AccountingBasisCard initial={settings} />
+            <BooksCloseCard initial={settings} />
             {isServices && <HoursCard initial={settings} />}
             {isServices && <LoyaltySettings />}
           </div>
