@@ -149,8 +149,17 @@ export default function ExpenseCategoriesPage() {
               ))}
               {!rows.length && !loading && (
                 <tr>
-                  <td colSpan={4} className="px-4 py-8 text-center text-gray-400">
-                    Aún no hay tipos de gasto.
+                  <td colSpan={4} className="px-4 py-10 text-center">
+                    <div className="flex flex-col items-center gap-3">
+                      <p className="text-gray-400">Aún no hay tipos de gasto.</p>
+                      <button
+                        type="button"
+                        onClick={() => setEditing({ name: '' })}
+                        className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600"
+                      >
+                        Crear el primero
+                      </button>
+                    </div>
                   </td>
                 </tr>
               )}
