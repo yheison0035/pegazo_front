@@ -31,6 +31,7 @@ import {
   updateCashPolicy,
   updateAccountingBasis,
   updateBooksClose,
+  updateAccountingEnabled,
   updateFiscal,
   updateTerminology,
   updateCompanyMail,
@@ -1074,6 +1075,91 @@ function CashPolicyCard({ initial }) {
 
 // Base contable de los reportes: caja (solo cobrado/pagado) o causación
 // (la venta cuenta al emitirse, incluye fiado). Lo elige el dueño.
+// Interruptor para activar la sección "Contabilidad" (activos y, a futuro, plan
+// de cuentas / estados financieros). El plan (Altura+) decide si queda
+// desbloqueada; aquí el dueño simplemente la enciende o apaga.
+function AccountingSectionCard({ initial }) {
+  const auth = useAuth();
+  const usuario = auth?.usuario;
+  const setUsuario = auth?.setUsuario;
+  const [enabled, setEnabled] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [alert, setAlert] = useState({});
+
+  useEffect(() => {
+    setEnabled(!!initial?.accountingEnabled);
+  }, [initial]);
+
+  const toggle = async () => {
+    const next = !enabled;
+    setEnabled(next);
+    setSaving(true);
+    try {
+      await updateAccountingEnabled(next);
+      if (setUsuario && usuario) {
+        const merged = {
+          ...usuario,
+          company: { ...usuario.company, accountingEnabled: next },
+        };
+        setUsuario(merged);
+        localStorage.setItem('usuario', JSON.stringify(merged));
+      }
+      setAlert({
+        type: 'success',
+        message: next
+          ? 'Contabilidad activada. Ya ves la sección en el menú.'
+          : 'Contabilidad desactivada.',
+      });
+    } catch (e) {
+      setEnabled(!next);
+      setAlert({ type: 'error', message: e.message || 'No se pudo guardar.' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start gap-3">
+          <div className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-orange-50 text-orange-600">
+            <CalculatorIcon className="h-5 w-5" />
+          </div>
+          <div>
+            <h2 className="text-base font-bold text-gray-800">Contabilidad</h2>
+            <p className="text-sm text-gray-500">
+              Activa la sección de Contabilidad en tu menú para llevar tus
+              activos y su depreciación. Pronto: estados financieros e impuestos.
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={enabled}
+          disabled={saving}
+          onClick={toggle}
+          className={`relative mt-1 inline-flex h-6 w-11 flex-none items-center rounded-full transition ${
+            enabled ? 'bg-orange-500' : 'bg-gray-300'
+          } disabled:opacity-50`}
+        >
+          <span
+            className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${
+              enabled ? 'translate-x-5' : 'translate-x-0.5'
+            }`}
+          />
+        </button>
+      </div>
+
+      <AlertModal
+        type={alert.type}
+        message={alert.message}
+        onClose={() => setAlert({})}
+      />
+    </div>
+  );
+}
+
 function AccountingBasisCard({ initial }) {
   const auth = useAuth();
   const usuario = auth?.usuario;
@@ -1492,6 +1578,7 @@ export default function Settings() {
             </div>
             <FiscalCard initial={settings} />
             <CashPolicyCard initial={settings} />
+            <AccountingSectionCard initial={settings} />
             <AccountingBasisCard initial={settings} />
             <BooksCloseCard initial={settings} />
             {isServices && <HoursCard initial={settings} />}

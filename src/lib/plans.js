@@ -111,6 +111,7 @@ export const MODULE_MIN_PLAN = {
   shipping: 'ALTURA',
   bank: 'ALTURA', // avisos de consignación (banco)
   clinical: 'ALTURA', // historia clínica (salud)
+  assets: 'ALTURA', // Contabilidad · activos fijos
   // Órbita: cadena / empresa
   'nomina-electronica': 'ORBITA', // nómina electrónica
 };

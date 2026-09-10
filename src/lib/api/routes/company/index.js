@@ -80,6 +80,14 @@ export async function updateBooksClose(date) {
   });
 }
 
+// Interruptor de la sección Contabilidad (activos, etc.).
+export async function updateAccountingEnabled(enabled) {
+  return apiFetch('/company/accounting-enabled', {
+    method: 'PATCH',
+    body: JSON.stringify({ enabled }),
+  });
+}
+
 // Tema de diseño del panel/CRM (orange | blue | emerald).
 export async function updateCompanyMail(dto) {
   return apiFetch('/company/mail', {
