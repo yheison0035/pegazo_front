@@ -303,6 +303,64 @@ export default function PayablesPage() {
           </div>
         </div>
 
+        {/* Antigüedad de saldos + estado de cuenta por proveedor */}
+        {summary?.pending > 0 && (
+          <div className="mb-4 grid gap-3 lg:grid-cols-2">
+            <div className="rounded-2xl border border-gray-100 bg-white p-4">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                Antigüedad de saldos
+              </p>
+              <div className="grid grid-cols-5 gap-2 text-center">
+                {[
+                  ['Por vencer', summary.aging?.corriente, 'text-emerald-600'],
+                  ['1–30 d', summary.aging?.d1_30, 'text-amber-600'],
+                  ['31–60 d', summary.aging?.d31_60, 'text-orange-600'],
+                  ['61–90 d', summary.aging?.d61_90, 'text-red-500'],
+                  ['+90 d', summary.aging?.d90, 'text-red-700'],
+                ].map(([label, val, cls]) => (
+                  <div key={label} className="rounded-xl bg-gray-50 p-2">
+                    <p className={`text-sm font-bold tabular-nums ${cls}`}>
+                      {formatCOP(val || 0)}
+                    </p>
+                    <p className="mt-0.5 text-[10px] text-gray-500">{label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="rounded-2xl border border-gray-100 bg-white p-4">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                Estado de cuenta por proveedor
+              </p>
+              {!summary.byProvider || summary.byProvider.length === 0 ? (
+                <p className="text-sm text-gray-400">Sin cuentas pendientes.</p>
+              ) : (
+                <ul className="max-h-44 divide-y divide-gray-100 overflow-y-auto">
+                  {summary.byProvider.map((pv) => (
+                    <li
+                      key={pv.provider}
+                      className="flex items-center justify-between gap-3 py-1.5 text-sm"
+                    >
+                      <span className="truncate text-gray-700">
+                        {pv.provider}
+                      </span>
+                      <span className="flex-none whitespace-nowrap text-right">
+                        <span className="font-semibold tabular-nums text-gray-900">
+                          {formatCOP(pv.total)}
+                        </span>
+                        {pv.overdue > 0 && (
+                          <span className="ml-2 text-xs font-semibold text-red-600">
+                            {formatCOP(pv.overdue)} venc.
+                          </span>
+                        )}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Pestañas */}
         <div className="mb-3 inline-flex rounded-xl border border-gray-200 bg-white p-0.5">
           {TABS.map((tb) => (
