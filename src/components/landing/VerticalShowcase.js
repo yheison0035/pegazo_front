@@ -28,7 +28,8 @@ import {
   IdentificationIcon,
   BuildingOffice2Icon,
   Bars3Icon,
-  EllipsisHorizontalIcon,
+  XMarkIcon,
+  MoonIcon,
 } from '@heroicons/react/24/outline';
 import { BUSINESS_TYPES } from '@/config/businessTypes';
 
@@ -151,6 +152,13 @@ const VERTICALS = [
     kpis: [['Ventas de hoy', '$980.000', 'bg-emerald-400'], ['Referencias', '860', 'bg-orange-400']],
   },
   {
+    id: 'calzado', type: 'CALZADO', emoji: '👟', name: 'Tienda de calzado', biz: 'Pasos',
+    accent: 'Inventario por talla y color, con cambios y devoluciones.',
+    catalog: 'Inventario',
+    items: [['Tenis running · 40', '$189.900'], ['Botín cuero · 38', '$249.900'], ['Sandalia dama · 37', '$79.900']],
+    kpis: [['Ventas de hoy', '$1.120.000', 'bg-emerald-400'], ['Pares en stock', '540', 'bg-orange-400']],
+  },
+  {
     id: 'supermercado', type: 'SUPERMERCADO', emoji: '🛒', name: 'Minimercado', biz: 'La Esquina',
     accent: 'Venta rápida, proveedores y control de stock.',
     catalog: 'Inventario',
@@ -182,6 +190,7 @@ const VERTICALS = [
 
 export default function VerticalShowcase() {
   const [active, setActive] = useState(VERTICALS[0].id);
+  const [menuOpen, setMenuOpen] = useState(false); // drawer del demo móvil
   const v = VERTICALS.find((x) => x.id === active) || VERTICALS[0];
   const mods = realModules(v.type);
 
@@ -332,65 +341,116 @@ export default function VerticalShowcase() {
         </div>
       </div>
 
-      {/* MÓVIL: marco de celular con barra superior + navegación inferior
-          (así se ve Pegazo en el teléfono: menú en ☰ y pestañas abajo) */}
-      <div className="mx-auto mt-8 w-full max-w-[340px] sm:hidden">
-        <div className="overflow-hidden rounded-[2.2rem] border-4 border-neutral-800 bg-neutral-950 p-1.5 shadow-2xl">
-          <div className="overflow-hidden rounded-[1.8rem] bg-gray-50">
-            {/* barra superior de la app */}
-            <div className="flex items-center justify-between gap-2 bg-gradient-to-b from-[#0b0f19] to-[#05070d] px-3 py-3 text-white">
-              <div className="flex min-w-0 items-center gap-2">
-                <Bars3Icon className="h-5 w-5 flex-none text-white/80" />
-                <span className="grid h-7 w-7 flex-none place-items-center rounded-lg bg-gradient-to-br from-orange-500 to-amber-400 text-xs font-black text-white shadow">
+      {/* MÓVIL: réplica del diseño real del CRM en el teléfono → hamburguesa
+          flotante que abre el menú lateral (drawer) sobre el Inicio. */}
+      <div className="mx-auto mt-8 w-full max-w-[330px] sm:hidden">
+        <div className="rounded-[2.2rem] border-4 border-neutral-800 bg-neutral-950 p-1.5 shadow-2xl">
+          <div className="relative h-[560px] overflow-hidden rounded-[1.8rem] bg-gray-50">
+            {/* Botón hamburguesa flotante (idéntico al real) */}
+            <button
+              type="button"
+              onClick={() => setMenuOpen(true)}
+              className="absolute left-3 top-3 z-20 rounded-xl border border-orange-500/20 bg-[#0B0F19]/90 p-2 shadow-lg backdrop-blur"
+            >
+              <Bars3Icon className="h-5 w-5 text-orange-400" />
+            </button>
+
+            {/* Inicio (contenido del panel), con espacio arriba para la hamburguesa */}
+            <div className="h-full overflow-y-auto px-3 pb-5 pt-14">
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-bold text-gray-900">
+                    Hola 👋 · {v.biz}
+                  </p>
+                  <p className="text-[11px] text-gray-500">
+                    Este es tu Inicio · {v.name}
+                  </p>
+                </div>
+                <span className="flex-none rounded-full bg-orange-50 px-2.5 py-1 text-[10px] font-semibold text-orange-600">
+                  {v.name}
+                </span>
+              </div>
+              {panelBody}
+            </div>
+
+            {/* Fondo oscuro del drawer (dentro del teléfono) */}
+            {menuOpen && (
+              <div
+                onClick={() => setMenuOpen(false)}
+                className="absolute inset-0 z-30 bg-black/60 backdrop-blur-sm"
+              />
+            )}
+
+            {/* Drawer: menú lateral oscuro (igual al del CRM) */}
+            <aside
+              className={`absolute inset-y-0 left-0 z-40 flex w-[82%] max-w-[268px] flex-col border-r border-orange-500/10 bg-gradient-to-b from-[#0b0f19] to-[#05070d] text-white shadow-2xl transition-transform duration-300 ${
+                menuOpen ? 'translate-x-0' : '-translate-x-full'
+              }`}
+            >
+              {/* Cabecera: logo + nombre de la empresa + cerrar */}
+              <div className="flex min-h-[60px] items-center gap-3 border-b border-orange-500/10 px-3 py-3">
+                <span className="grid h-10 w-10 flex-none place-items-center rounded-xl bg-gradient-to-br from-orange-500 to-amber-400 text-sm font-black text-white shadow">
                   P
                 </span>
-                <span className="min-w-0">
-                  <span className="block truncate text-[13px] font-bold leading-tight">
+                <div className="min-w-0 flex-1 leading-tight">
+                  <span className="block truncate text-[13px] font-semibold">
                     {v.biz}
                   </span>
-                  <span className="block truncate text-[10px] text-white/50">
-                    Tu panel · {v.name}
-                  </span>
-                </span>
+                  <span className="text-[10px] text-orange-400/60">Workspace</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setMenuOpen(false)}
+                  className="text-white/60 hover:text-white"
+                >
+                  <XMarkIcon className="h-5 w-5" />
+                </button>
               </div>
-              <span className="flex-none rounded-full bg-orange-500/20 px-2 py-0.5 text-[9px] font-semibold text-orange-300">
-                {mods.length} módulos
-              </span>
-            </div>
 
-            {/* contenido a ancho completo */}
-            <div className="p-3">{panelBody}</div>
-
-            {/* barra de navegación inferior (como una app móvil) */}
-            <div className="flex items-stretch justify-around border-t border-gray-200 bg-white px-1 pb-1.5 pt-2">
-              {mods.slice(0, 4).map((key, i) => {
-                const meta = MODULE_META[key] || [key, HomeIcon];
-                const label = meta[0];
-                const Icon = meta[1];
-                const activeItem = i === 0;
-                return (
-                  <div
-                    key={key}
-                    className={`flex flex-1 flex-col items-center gap-0.5 ${
-                      activeItem ? 'text-orange-500' : 'text-gray-400'
-                    }`}
-                  >
-                    <Icon className="h-5 w-5" />
-                    <span className="max-w-full truncate text-[8.5px] font-medium">
-                      {label.split(' ')[0]}
-                    </span>
-                  </div>
-                );
-              })}
-              <div className="flex flex-1 flex-col items-center gap-0.5 text-gray-400">
-                <EllipsisHorizontalIcon className="h-5 w-5" />
-                <span className="text-[8.5px] font-medium">Más</span>
+              {/* Navegación (módulos reales de la vertical) */}
+              <div className="flex-1 overflow-y-auto px-2 py-3 [scrollbar-color:rgba(249,115,22,.5)_transparent] [scrollbar-width:thin]">
+                <ul className="space-y-1">
+                  {mods.map((key, i) => {
+                    const meta = MODULE_META[key] || [key, HomeIcon];
+                    const label = meta[0];
+                    const Icon = meta[1];
+                    const activeItem = i === 0;
+                    return (
+                      <li
+                        key={key}
+                        className={`relative flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-[13px] font-medium transition ${
+                          activeItem
+                            ? 'bg-gradient-to-r from-orange-500/25 to-amber-500/10 text-white shadow-inner'
+                            : 'text-white/60'
+                        }`}
+                      >
+                        {activeItem && (
+                          <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-orange-400" />
+                        )}
+                        <Icon
+                          className={`h-5 w-5 flex-none ${
+                            activeItem ? 'text-orange-400' : 'text-white/45'
+                          }`}
+                        />
+                        <span className="truncate">{label}</span>
+                      </li>
+                    );
+                  })}
+                </ul>
               </div>
-            </div>
+
+              {/* Pie: modo oscuro (como el real) */}
+              <div className="border-t border-white/10 px-2 py-3">
+                <div className="flex items-center gap-3 rounded-xl px-3 py-2 text-gray-300">
+                  <MoonIcon className="h-5 w-5 flex-none text-orange-300" />
+                  <span className="text-[13px] font-medium">Modo oscuro</span>
+                </div>
+              </div>
+            </aside>
           </div>
         </div>
         <p className="mt-3 text-center text-[11px] text-neutral-400">
-          Así se ve Pegazo en tu celular · toca ☰ para todo tu menú
+          Así se ve en tu celular · toca ☰ para abrir tu menú
         </p>
       </div>
     </div>

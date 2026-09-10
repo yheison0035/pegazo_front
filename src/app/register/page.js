@@ -18,6 +18,7 @@ const TYPE_LABELS = {
   SUPERMERCADO: 'Supermercado / Minimercado',
   DROGUERIA: 'Droguería / Farmacia',
   ROPA: 'Tienda de ropa',
+  CALZADO: 'Tienda de calzado / Zapatería',
   FRUVER: 'Fruver (frutas y verduras)',
   CARNICERIA: 'Carnicería',
   FLORISTERIA: 'Floristería',

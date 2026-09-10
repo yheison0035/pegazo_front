@@ -51,6 +51,14 @@ export const BUSINESS_TYPES = {
     'returns', 'cash', 'expenses', 'payables', 'statistics',
   ],
 
+  // Tienda de calzado / zapatería: retail con variantes por talla + color y
+  // devoluciones (cambios de talla). Mismo set que ROPA.
+  CALZADO: [
+    'locals', 'users', 'categories', 'brands', 'providers', 'inventory',
+    'purchases', 'customers', 'cartera', 'impuestos', 'sales', 'delivered_sales',
+    'returns', 'cash', 'expenses', 'payables', 'statistics',
+  ],
+
   // Perecederos por peso: sin marcas, sin devoluciones (producto perecedero).
   FRUVER: [
     'locals', 'users', 'categories', 'providers', 'inventory', 'purchases',

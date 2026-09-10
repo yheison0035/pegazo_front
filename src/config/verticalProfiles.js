@@ -42,6 +42,9 @@ const PRODUCT_FIELDS_BY_TYPE = {
   // Ropa: color + talla
   ROPA: { variantType: 'color', size: true },
 
+  // Calzado: color + talla (numérica). Como ropa.
+  CALZADO: { variantType: 'color', size: true },
+
   // Peso (kg / libra / arroba), sin marca ni código
   FRUVER: { brand: false, barcode: false, variantType: 'weight' },
   CARNICERIA: {
