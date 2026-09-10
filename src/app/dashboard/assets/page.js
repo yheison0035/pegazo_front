@@ -51,7 +51,8 @@ const emptyForm = {
   category: '',
   reference: '',
   acquisitionDate: '',
-  cost: '',
+  quantity: '1',
+  unitCost: '',
   salvageValue: '',
   usefulLifeMonths: '',
   notes: '',
@@ -76,13 +77,20 @@ export default function AssetsPage() {
   const [editing, setEditing] = useState(null); // {id?, ...form}
   const [disposing, setDisposing] = useState(null); // asset a dar de baja
   const [confirmDel, setConfirmDel] = useState(null);
+  const [catOptions, setCatOptions] = useState(CATEGORY_SUGGESTIONS);
+  const [addingCat, setAddingCat] = useState(false);
+  const [newCat, setNewCat] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
       const res = await getAssets();
-      setRows(res?.data || []);
+      const data = res?.data || [];
+      setRows(data);
       setSummary(res?.summary || null);
+      // Mezcla las categorías ya usadas con las sugeridas (sin duplicar).
+      const used = data.map((a) => a.category).filter(Boolean);
+      setCatOptions((prev) => [...new Set([...CATEGORY_SUGGESTIONS, ...prev, ...used])]);
     } catch (e) {
       setAlert({ type: 'error', message: e.message || 'No se pudo cargar.' });
     } finally {
@@ -96,8 +104,16 @@ export default function AssetsPage() {
 
   useLiveRefresh(load);
 
-  const openNew = () => setEditing({ ...emptyForm });
-  const openEdit = (a) =>
+  const resetCatAdder = () => {
+    setAddingCat(false);
+    setNewCat('');
+  };
+  const openNew = () => {
+    resetCatAdder();
+    setEditing({ ...emptyForm });
+  };
+  const openEdit = (a) => {
+    resetCatAdder();
     setEditing({
       id: a.id,
       name: a.name || '',
@@ -106,18 +122,29 @@ export default function AssetsPage() {
       acquisitionDate: a.acquisitionDate
         ? new Date(a.acquisitionDate).toISOString().slice(0, 10)
         : '',
-      cost: a.cost ?? '',
+      quantity: String(a.quantity ?? 1),
+      unitCost: a.unitCost ?? (a.quantity ? Math.round((a.cost || 0) / a.quantity) : a.cost) ?? '',
       salvageValue: a.salvageValue ?? '',
       usefulLifeMonths: a.usefulLifeMonths ?? '',
       notes: a.notes || '',
     });
+  };
+
+  // Agregar una categoría nueva a la lista y dejarla seleccionada.
+  const addCategory = () => {
+    const c = newCat.trim();
+    if (!c) return;
+    setCatOptions((prev) => [...new Set([...prev, c])]);
+    setEditing((f) => ({ ...f, category: c }));
+    resetCatAdder();
+  };
 
   const save = async () => {
     const f = editing;
-    if (!f.name.trim() || !f.acquisitionDate || !f.cost || !f.usefulLifeMonths) {
+    if (!f.name.trim() || !f.acquisitionDate || !f.unitCost || Number(f.unitCost) <= 0) {
       setAlert({
         type: 'error',
-        message: 'Completa nombre, fecha de compra, costo y vida útil.',
+        message: 'Completa nombre, fecha de compra y valor unitario.',
       });
       return;
     }
@@ -128,9 +155,10 @@ export default function AssetsPage() {
         category: f.category.trim() || null,
         reference: f.reference.trim() || null,
         acquisitionDate: f.acquisitionDate,
-        cost: Number(f.cost),
+        quantity: Number(f.quantity) || 1,
+        unitCost: Number(f.unitCost),
         salvageValue: Number(f.salvageValue) || 0,
-        usefulLifeMonths: Number(f.usefulLifeMonths),
+        usefulLifeMonths: f.usefulLifeMonths ? Number(f.usefulLifeMonths) : null,
         notes: f.notes.trim() || null,
       };
       if (f.id) await updateAsset(f.id, payload);
@@ -248,10 +276,19 @@ export default function AssetsPage() {
                     <td className="px-4 py-3 text-gray-500">
                       {fmtDate(a.acquisitionDate)}
                       <span className="block text-[11px] text-gray-400">
-                        {a.usefulLifeMonths} meses vida útil
+                        {a.usefulLifeMonths
+                          ? `${a.usefulLifeMonths} meses vida útil`
+                          : 'No se deprecia'}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right tabular-nums">{cop(a.cost)}</td>
+                    <td className="px-4 py-3 text-right tabular-nums">
+                      {cop(a.cost)}
+                      {a.quantity > 1 && (
+                        <span className="block text-[11px] text-gray-400">
+                          {a.quantity} × {cop(a.unitCost)}
+                        </span>
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-right tabular-nums text-gray-500">
                       {cop(a.accumulatedDepreciation)}
                     </td>
@@ -356,20 +393,58 @@ export default function AssetsPage() {
                   <label className="mb-1 block text-xs font-semibold text-gray-600">
                     Categoría
                   </label>
-                  <input
-                    list="asset-cats"
-                    value={editing.category}
-                    onChange={(e) =>
-                      setEditing({ ...editing, category: e.target.value })
-                    }
-                    placeholder="Equipo, Muebles, Vehículo…"
-                    className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
-                  />
-                  <datalist id="asset-cats">
-                    {CATEGORY_SUGGESTIONS.map((c) => (
-                      <option key={c} value={c} />
-                    ))}
-                  </datalist>
+                  {addingCat ? (
+                    <div className="flex gap-2">
+                      <input
+                        autoFocus
+                        value={newCat}
+                        onChange={(e) => setNewCat(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            addCategory();
+                          }
+                        }}
+                        placeholder="Nueva categoría"
+                        className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                      />
+                      <button
+                        type="button"
+                        onClick={addCategory}
+                        className="flex-none rounded-xl bg-orange-500 px-3 text-sm font-semibold text-white hover:bg-orange-600"
+                      >
+                        Agregar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={resetCatAdder}
+                        className="flex-none rounded-xl border border-gray-200 px-2 text-gray-500 hover:bg-gray-50"
+                      >
+                        <XMarkIcon className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <select
+                      value={editing.category}
+                      onChange={(e) => {
+                        if (e.target.value === '__new__') {
+                          setNewCat('');
+                          setAddingCat(true);
+                        } else {
+                          setEditing({ ...editing, category: e.target.value });
+                        }
+                      }}
+                      className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                    >
+                      <option value="">Sin categoría</option>
+                      {catOptions.map((c) => (
+                        <option key={c} value={c}>
+                          {c}
+                        </option>
+                      ))}
+                      <option value="__new__">+ Agregar categoría…</option>
+                    </select>
+                  )}
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-semibold text-gray-600">
@@ -399,7 +474,49 @@ export default function AssetsPage() {
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-semibold text-gray-600">
-                    Vida útil (meses) *
+                    Cantidad *
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={editing.quantity}
+                    onChange={(e) =>
+                      setEditing({ ...editing, quantity: e.target.value })
+                    }
+                    placeholder="1"
+                    className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-gray-600">
+                    Valor unitario *
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={editing.unitCost}
+                    onChange={(e) =>
+                      setEditing({ ...editing, unitCost: e.target.value })
+                    }
+                    placeholder="COP por unidad"
+                    className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-gray-600">
+                    Valor total
+                  </label>
+                  <div className="flex h-[38px] items-center rounded-xl border border-gray-100 bg-gray-50 px-3 text-sm font-semibold tabular-nums text-gray-800">
+                    {cop(
+                      (Number(editing.quantity) || 0) *
+                        (Number(editing.unitCost) || 0),
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-gray-600">
+                    Vida útil (meses){' '}
+                    <span className="font-normal text-gray-400">— opcional</span>
                   </label>
                   <input
                     type="number"
@@ -408,20 +525,7 @@ export default function AssetsPage() {
                     onChange={(e) =>
                       setEditing({ ...editing, usefulLifeMonths: e.target.value })
                     }
-                    placeholder="Ej: 60"
-                    className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-semibold text-gray-600">
-                    Costo de compra *
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={editing.cost}
-                    onChange={(e) => setEditing({ ...editing, cost: e.target.value })}
-                    placeholder="COP"
+                    placeholder="Ej: 60 (vacío = no se deprecia)"
                     className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
                   />
                 </div>
@@ -454,8 +558,9 @@ export default function AssetsPage() {
               </div>
 
               <p className="mt-3 rounded-lg bg-orange-50/60 px-3 py-2 text-[11px] text-orange-700">
-                Depreciación por línea recta: (costo − salvamento) ÷ vida útil.
-                Pegazo la calcula sola cada mes.
+                Si defines vida útil, Pegazo deprecia por línea recta cada mes:
+                (valor total − salvamento) ÷ meses. Sin vida útil, el activo no se
+                deprecia (su valor en libros se mantiene).
               </p>
 
               <div className="mt-5 flex justify-end gap-2">
