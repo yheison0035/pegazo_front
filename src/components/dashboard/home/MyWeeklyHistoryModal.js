@@ -4,14 +4,16 @@ import { useEffect, useState } from 'react';
 import { XMarkIcon, CalendarDaysIcon } from '@heroicons/react/24/outline';
 import { getMyHistory } from '@/lib/api/routes/statistics';
 import { formatCOP } from '@/lib/api/utils/utils';
+import useTerms from '@/hooks/useTerms';
 import CourtesyInfo from './CourtesyInfo';
 
-const COURTESY_TEXT =
-  'Este corte se hizo pero quedó sin comisión (cortesía o mal aplicado): lo realizaste, pero no suma a tu pago.';
-
-// Historial del barbero por SEMANA o por MES, con su ganancia y el desglose de
-// cortes y productos al desplegar.
+// Historial del profesional por SEMANA o por MES, con su ganancia y el desglose
+// de servicios y productos al desplegar. Los textos usan la terminología del
+// tipo de negocio (corte / lavado / servicio…).
 export default function MyWeeklyHistoryModal({ onClose }) {
+  const t = useTerms();
+  const servicePlural = (t.servicePlural || 'Servicios');
+  const courtesyText = `Este ${(t.service || 'servicio').toLowerCase()} se hizo pero quedó sin comisión (cortesía o mal aplicado): lo realizaste, pero no suma a tu pago.`;
   const [group, setGroup] = useState('week'); // 'day' | 'week' | 'month'
   const [rows, setRows] = useState([]);
   const [conf, setConf] = useState(true);
@@ -108,7 +110,8 @@ export default function MyWeeklyHistoryModal({ onClose }) {
                           {w.label}
                         </p>
                         <p className="text-[11px] text-gray-400">
-                          {w.cuts} cortes · {w.productUnits || 0} productos
+                          {w.cuts} {servicePlural.toLowerCase()} ·{' '}
+                          {w.productUnits || 0} productos
                         </p>
                       </div>
                       <span className="flex-none text-sm font-bold text-emerald-600">
@@ -120,7 +123,7 @@ export default function MyWeeklyHistoryModal({ onClose }) {
                         {w.services?.length > 0 && (
                           <div>
                             <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
-                              Cortes
+                              {servicePlural}
                             </p>
                             <ul className="divide-y divide-gray-100">
                               {w.services.map((s, j) => (
@@ -131,7 +134,7 @@ export default function MyWeeklyHistoryModal({ onClose }) {
                                   <span className="flex min-w-0 items-center gap-1 truncate text-gray-600">
                                     {s.qty}× {s.name}
                                     {s.courtesy && (
-                                      <CourtesyInfo text={COURTESY_TEXT} />
+                                      <CourtesyInfo text={courtesyText} />
                                     )}
                                   </span>
                                   <span

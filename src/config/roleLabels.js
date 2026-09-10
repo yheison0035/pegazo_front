@@ -66,6 +66,7 @@ const RETAIL_ROLES = ['ADMIN', 'CAJA', 'ASESOR', 'BODEGUERO', 'RECEPCIONISTA'];
   'CAFETERIA',
   'CARNICERIA',
   'ROPA',
+  'FERIA',
 ].forEach((t) => {
   ROLES_BY_TYPE[t] = RETAIL_ROLES;
 });

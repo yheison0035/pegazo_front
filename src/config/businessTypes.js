@@ -79,7 +79,7 @@ export const BUSINESS_TYPES = {
 
   // Puesto/stand de feria o evento: operación de venta simple.
   FERIA: [
-    'locals', 'users', 'categories', 'inventory', 'purchases', 'customers', 'cartera', 'impuestos',
+    'locals', 'users', 'categories', 'providers', 'inventory', 'purchases', 'customers', 'cartera', 'impuestos',
     'sales', 'delivered_sales', 'returns', 'cash', 'expenses', 'payables', 'statistics',
   ],
 

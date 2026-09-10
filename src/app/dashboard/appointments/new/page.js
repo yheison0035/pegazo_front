@@ -53,7 +53,8 @@ export default function NewAppointment() {
         <span className="font-semibold">en orden, uno por uno</span>. Cada campo
         habilita las opciones del siguiente — por ejemplo, al elegir el{' '}
         <span className="font-semibold">Local</span> se cargan los servicios,
-        barberos y horarios disponibles.
+        {(t.attendantPlural || 'profesionales').toLowerCase()} y horarios
+        disponibles.
       </div>
 
       <DinamicForm

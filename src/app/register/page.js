@@ -9,24 +9,37 @@ import { validateCoupon } from '@/lib/api/auth/auth';
 import { PLANS } from '@/lib/plans';
 import LogoUploader from '@/components/ui/LogoUploader';
 import Button from '@/components/ui/Button';
+import { BUSINESS_TYPES as BT } from '@/config/businessTypes';
 
-const BUSINESS_TYPES = [
-  { id: 'COMERCIO', name: 'Tienda / Comercio' },
-  { id: 'SUPERMERCADO', name: 'Supermercado / Minimercado' },
-  { id: 'DROGUERIA', name: 'Droguería / Farmacia' },
-  { id: 'ROPA', name: 'Tienda de ropa' },
-  { id: 'FRUVER', name: 'Fruver (frutas y verduras)' },
-  { id: 'CARNICERIA', name: 'Carnicería' },
-  { id: 'FLORISTERIA', name: 'Floristería' },
-  { id: 'CAFETERIA', name: 'Cafetería / Panadería' },
-  { id: 'FERIA', name: 'Feria / Puesto' },
-  { id: 'RESTAURANTE', name: 'Restaurante / Bar' },
-  { id: 'COMIDA_RAPIDA', name: 'Comidas rápidas' },
-  { id: 'SERVICIOS', name: 'Servicios (barbería, spa, salón)' },
-  { id: 'ODONTOLOGIA', name: 'Consultorio odontológico / Salud' },
-  { id: 'ECOMMERCE', name: 'Tienda online' },
-  { id: 'DISTRIBUCION', name: 'Distribución / Mayorista' },
-];
+// Etiquetas amables por tipo. La LISTA de opciones se deriva de la config (BT),
+// así cualquier vertical nuevo aparece aquí automáticamente, sin editar esto.
+const TYPE_LABELS = {
+  COMERCIO: 'Tienda / Comercio',
+  SUPERMERCADO: 'Supermercado / Minimercado',
+  DROGUERIA: 'Droguería / Farmacia',
+  ROPA: 'Tienda de ropa',
+  FRUVER: 'Fruver (frutas y verduras)',
+  CARNICERIA: 'Carnicería',
+  FLORISTERIA: 'Floristería',
+  CAFETERIA: 'Cafetería / Panadería',
+  FERIA: 'Feria / Puesto',
+  RESTAURANTE: 'Restaurante / Bar',
+  COMIDA_RAPIDA: 'Comidas rápidas',
+  SERVICIOS: 'Servicios (barbería, spa, salón)',
+  ODONTOLOGIA: 'Consultorio odontológico / Salud',
+  TELEVENTAS: 'Televentas / Call center',
+  ECOMMERCE: 'Tienda online',
+  DISTRIBUCION: 'Distribución / Mayorista',
+  LAVADO_VEHICULOS: 'Lavado de vehículos',
+  CANCHAS_SINTETICAS: 'Canchas sintéticas',
+  GUARDA_CASCOS: 'Guarda cascos',
+};
+const prettifyType = (k) =>
+  k.charAt(0) + k.slice(1).toLowerCase().replace(/_/g, ' ');
+const BUSINESS_TYPES = Object.keys(BT).map((id) => ({
+  id,
+  name: TYPE_LABELS[id] || prettifyType(id),
+}));
 
 const PLAN_IDS = PLANS.map((p) => p.id);
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
