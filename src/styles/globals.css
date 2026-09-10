@@ -435,3 +435,52 @@ textarea {
     display: none !important;
   }
 }
+
+/* ===== Animaciones de la landing ===== */
+/* Solo se activan si el usuario no pidió reducir movimiento, y solo cuando el
+   JS marcó .reveal-ready en <html> (si no hay JS, todo se ve normal). */
+@media (prefers-reduced-motion: no-preference) {
+  html.reveal-ready [data-reveal] {
+    opacity: 0;
+    transform: translateY(26px);
+    transition:
+      opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+  }
+  html.reveal-ready [data-reveal].is-visible {
+    opacity: 1;
+    transform: none;
+  }
+  [data-reveal-delay='1'] { transition-delay: 0.08s; }
+  [data-reveal-delay='2'] { transition-delay: 0.16s; }
+  [data-reveal-delay='3'] { transition-delay: 0.24s; }
+
+  /* Entrada del hero al cargar. */
+  .pz-hero-in {
+    animation: pzHeroIn 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .pz-hero-in-2 { animation-delay: 0.12s; }
+  .pz-hero-in-3 { animation-delay: 0.24s; }
+  @keyframes pzHeroIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  /* Flotación suave (blobs / mockups). */
+  .pz-float { animation: pzFloat 7s ease-in-out infinite; }
+  .pz-float-slow { animation: pzFloat 11s ease-in-out infinite; }
+  @keyframes pzFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+
+  /* Brillo del degradado en el título/acentos. */
+  .pz-shimmer {
+    background-size: 200% auto;
+    animation: pzShimmer 6s linear infinite;
+  }
+  @keyframes pzShimmer {
+    to { background-position: 200% center; }
+  }
+}
