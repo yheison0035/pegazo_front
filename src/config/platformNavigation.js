@@ -7,6 +7,7 @@ import {
   MegaphoneIcon,
   Squares2X2Icon,
   BanknotesIcon,
+  ChatBubbleLeftRightIcon,
 } from '@heroicons/react/24/outline';
 
 export const PLATFORM_NAVIGATION = [
@@ -42,6 +43,11 @@ export const PLATFORM_NAVIGATION = [
         name: 'Cuentas de pago',
         href: '/platform/payment-accounts',
         icon: BanknotesIcon,
+      },
+      {
+        name: 'Soporte',
+        href: '/platform/support',
+        icon: ChatBubbleLeftRightIcon,
       },
       {
         name: 'Estadísticas Globales',
