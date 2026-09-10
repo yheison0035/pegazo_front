@@ -113,7 +113,7 @@ export default function SupportWidget() {
     <>
       {/* Panel */}
       {open && (
-        <div className="fixed bottom-24 left-4 z-[80] flex h-[70vh] max-h-[560px] w-[92vw] max-w-sm flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl">
+        <div className="fixed bottom-24 right-4 z-[80] flex h-[70vh] max-h-[560px] w-[92vw] max-w-sm flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl">
           <div className="flex items-center justify-between bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-3">
             <div className="flex items-center gap-2 text-white">
               <ChatBubbleLeftRightIcon className="h-5 w-5" />
@@ -194,7 +194,7 @@ export default function SupportWidget() {
       <button
         onClick={() => setOpen((v) => !v)}
         title="Soporte"
-        className="fixed bottom-5 left-4 z-[80] flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-orange-600 to-amber-500 text-white shadow-xl transition hover:scale-105"
+        className="fixed bottom-5 right-4 z-[80] flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-orange-600 to-amber-500 text-white shadow-xl transition hover:scale-105"
       >
         {open ? (
           <XMarkIcon className="h-6 w-6" />
