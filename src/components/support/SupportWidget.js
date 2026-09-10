@@ -5,12 +5,14 @@ import {
   ChatBubbleLeftRightIcon,
   XMarkIcon,
   PaperAirplaneIcon,
+  PhotoIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/authContext';
 import {
   getSupportThread,
   sendSupportMessage,
   getSupportUnread,
+  uploadSupportImage,
 } from '@/lib/api/routes/support';
 
 function hhmm(d) {
@@ -33,7 +35,22 @@ export default function SupportWidget() {
   const [unread, setUnread] = useState(0);
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
+  const [file, setFile] = useState(null);
+  const [preview, setPreview] = useState(null);
   const endRef = useRef(null);
+  const fileRef = useRef(null);
+
+  const pickFile = (f) => {
+    if (!f) return;
+    if (!f.type?.startsWith('image/')) return;
+    setFile(f);
+    setPreview(URL.createObjectURL(f));
+  };
+  const clearFile = () => {
+    setFile(null);
+    setPreview(null);
+    if (fileRef.current) fileRef.current.value = '';
+  };
 
   const enabled =
     !!usuario?.id &&
@@ -83,8 +100,9 @@ export default function SupportWidget() {
 
   const send = async () => {
     const body = text.trim();
-    if (!body || sending) return;
+    if ((!body && !file) || sending) return;
     setSending(true);
+    const localPreview = preview;
     // Optimista.
     setItems((prev) => [
       ...prev,
@@ -92,13 +110,20 @@ export default function SupportWidget() {
         id: `tmp-${Date.now()}`,
         fromPlatform: false,
         body,
+        imageUrl: localPreview,
         senderName: usuario?.name,
         createdAt: new Date().toISOString(),
       },
     ]);
     setText('');
+    clearFile();
     try {
-      await sendSupportMessage(body);
+      let imageUrl;
+      if (file) {
+        const { data } = await uploadSupportImage(file);
+        imageUrl = data?.url;
+      }
+      await sendSupportMessage(body, imageUrl);
       await loadThread();
     } catch {
       /* deja el optimista */
@@ -111,6 +136,14 @@ export default function SupportWidget() {
 
   return (
     <>
+      {/* Fondo oscurecido al abrir el chat */}
+      {open && (
+        <div
+          onClick={() => setOpen(false)}
+          className="fixed inset-0 z-[75] bg-black/40 backdrop-blur-[1px] transition-opacity"
+        />
+      )}
+
       {/* Panel */}
       {open && (
         <div className="fixed bottom-24 right-4 z-[80] flex h-[70vh] max-h-[560px] w-[92vw] max-w-sm flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl">
@@ -150,7 +183,23 @@ export default function SupportWidget() {
                         : 'rounded-br-sm bg-orange-500 text-white'
                     }`}
                   >
-                    <p className="whitespace-pre-wrap break-words">{m.body}</p>
+                    {m.imageUrl && (
+                      <a
+                        href={m.imageUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mb-1 block"
+                      >
+                        <img
+                          src={m.imageUrl}
+                          alt="adjunto"
+                          className="max-h-48 w-full rounded-lg object-cover"
+                        />
+                      </a>
+                    )}
+                    {m.body && (
+                      <p className="whitespace-pre-wrap break-words">{m.body}</p>
+                    )}
                     <p
                       className={`mt-1 text-[10px] ${
                         m.fromPlatform ? 'text-gray-400' : 'text-white/70'
@@ -165,27 +214,58 @@ export default function SupportWidget() {
             <div ref={endRef} />
           </div>
 
-          <div className="flex items-end gap-2 border-t border-gray-100 p-2">
-            <textarea
-              rows={1}
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  send();
-                }
-              }}
-              placeholder="Escribe tu mensaje…"
-              className="max-h-28 flex-1 resize-none rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-1 focus:ring-orange-400"
-            />
-            <button
-              onClick={send}
-              disabled={sending || !text.trim()}
-              className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-orange-500 text-white hover:bg-orange-600 disabled:opacity-50"
-            >
-              <PaperAirplaneIcon className="h-5 w-5" />
-            </button>
+          <div className="border-t border-gray-100 p-2">
+            {preview && (
+              <div className="relative mb-2 inline-block">
+                <img
+                  src={preview}
+                  alt="adjunto"
+                  className="h-16 w-16 rounded-lg border border-gray-200 object-cover"
+                />
+                <button
+                  onClick={clearFile}
+                  className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-gray-800 text-white"
+                >
+                  <XMarkIcon className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )}
+            <div className="flex items-end gap-2">
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => pickFile(e.target.files?.[0])}
+              />
+              <button
+                onClick={() => fileRef.current?.click()}
+                title="Adjuntar imagen"
+                className="flex h-10 w-10 flex-none items-center justify-center rounded-xl border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-orange-500"
+              >
+                <PhotoIcon className="h-5 w-5" />
+              </button>
+              <textarea
+                rows={1}
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    send();
+                  }
+                }}
+                placeholder="Escribe tu mensaje…"
+                className="max-h-28 flex-1 resize-none rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-1 focus:ring-orange-400"
+              />
+              <button
+                onClick={send}
+                disabled={sending || (!text.trim() && !file)}
+                className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-orange-500 text-white hover:bg-orange-600 disabled:opacity-50"
+              >
+                <PaperAirplaneIcon className="h-5 w-5" />
+              </button>
+            </div>
           </div>
         </div>
       )}
