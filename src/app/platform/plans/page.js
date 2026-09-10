@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CheckIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import RoleGuard from '@/auth/roleGuard';
 import Button from '@/components/ui/Button';
+import MoneyInput from '@/components/ui/MoneyInput';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import { useToast } from '@/context/toastContext';
 import { TOGGLEABLE_MODULES } from '@/config/modules';
@@ -193,12 +194,9 @@ function PlatformPlans() {
             <label className="mt-3 block text-[11px] font-semibold uppercase tracking-wide text-gray-500">
               Precio mensual (COP)
             </label>
-            <input
-              type="number"
+            <MoneyInput
               value={p.priceMonthly ?? 0}
-              onChange={(e) =>
-                setPlanField(p.id, 'priceMonthly', Number(e.target.value))
-              }
+              onChange={(v) => setPlanField(p.id, 'priceMonthly', Number(v) || 0)}
               className="mt-0.5 w-full rounded-lg border border-gray-200 px-2 py-1.5 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
             />
 

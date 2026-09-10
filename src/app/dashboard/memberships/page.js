@@ -438,10 +438,10 @@ export default function MembershipsPage() {
                   <input
                     value={form.name}
                     onChange={(e) =>
-                      setForm((f) => ({ ...f, name: e.target.value }))
+                      setForm((f) => ({ ...f, name: e.target.value.toUpperCase() }))
                     }
                     placeholder="Ej: Mensualidad guarda cascos, Plan cancha…"
-                    className={inputCls}
+                    className={`${inputCls} uppercase`}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-3">

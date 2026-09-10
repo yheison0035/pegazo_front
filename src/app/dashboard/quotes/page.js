@@ -11,6 +11,7 @@ import {
 } from '@heroicons/react/24/outline';
 import RoleGuard from '@/auth/roleGuard';
 import StatusBadge from '@/components/ui/StatusBadge';
+import MoneyInput from '@/components/ui/MoneyInput';
 import EmptyState from '@/components/ui/EmptyState';
 import { Roles, ALL_EXCEPT_BARBER } from '@/config/roles';
 import { useAuth } from '@/context/authContext';
@@ -399,11 +400,10 @@ export default function QuotesPage() {
                           />
                         </td>
                         <td className="px-3 py-2">
-                          <input
-                            type="number"
-                            min="0"
+                          <MoneyInput
                             value={i.price}
-                            onChange={(e) => updateItem(i.key, 'price', e.target.value)}
+                            onChange={(v) => updateItem(i.key, 'price', v)}
+                            placeholder="$ 0"
                             className="w-28 rounded border border-gray-200 px-2 py-1 text-sm"
                           />
                         </td>

@@ -14,6 +14,7 @@ import {
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
 import Button from '@/components/ui/Button';
+import MoneyInput from '@/components/ui/MoneyInput';
 import TableActionButton from '@/components/ui/TableActionButton';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
@@ -384,7 +385,12 @@ export default function AssetsPage() {
                   <input
                     autoFocus
                     value={editing.name}
-                    onChange={(e) => setEditing({ ...editing, name: e.target.value })}
+                    onChange={(e) =>
+                      setEditing({
+                        ...editing,
+                        name: e.target.value.toUpperCase(),
+                      })
+                    }
                     placeholder="Ej: Computador mostrador, Vitrina, Moto de domicilios"
                     className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
                   />
@@ -491,14 +497,10 @@ export default function AssetsPage() {
                   <label className="mb-1 block text-xs font-semibold text-gray-600">
                     Valor unitario *
                   </label>
-                  <input
-                    type="number"
-                    min="0"
+                  <MoneyInput
                     value={editing.unitCost}
-                    onChange={(e) =>
-                      setEditing({ ...editing, unitCost: e.target.value })
-                    }
-                    placeholder="COP por unidad"
+                    onChange={(v) => setEditing({ ...editing, unitCost: v })}
+                    placeholder="$ por unidad"
                     className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
                   />
                 </div>
@@ -533,14 +535,10 @@ export default function AssetsPage() {
                   <label className="mb-1 block text-xs font-semibold text-gray-600">
                     Valor de salvamento
                   </label>
-                  <input
-                    type="number"
-                    min="0"
+                  <MoneyInput
                     value={editing.salvageValue}
-                    onChange={(e) =>
-                      setEditing({ ...editing, salvageValue: e.target.value })
-                    }
-                    placeholder="0 (valor residual estimado)"
+                    onChange={(v) => setEditing({ ...editing, salvageValue: v })}
+                    placeholder="$ 0 (valor residual estimado)"
                     className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
                   />
                 </div>
