@@ -14,6 +14,7 @@ import RoleGuard from '@/auth/roleGuard';
 import Button from '@/components/ui/Button';
 import { Roles, ALL_EXCEPT_BARBER } from '@/config/roles';
 import { useAuth } from '@/context/authContext';
+import useTerms from '@/hooks/useTerms';
 import { getLoyaltyCustomers } from '@/lib/api/routes/customers';
 import { syncLoyaltyFromSales } from '@/lib/api/routes/company';
 import { SALES_CHANGED_EVENT } from '@/lib/api/routes/sales';
@@ -25,6 +26,7 @@ import { loyaltyWhatsappMessage } from '@/lib/loyaltyMessage';
 
 export default function LoyaltyPage() {
   const { usuario } = useAuth();
+  const t = useTerms();
   const isOwnerAdmin = ['SUPER_ADMIN', 'ADMIN'].includes(usuario?.role);
   const [syncing, setSyncing] = useState(false);
   const [data, setData] = useState([]);
@@ -262,7 +264,8 @@ export default function LoyaltyPage() {
                           {L.nextDiscount > 0 && (
                             <span className="inline-flex items-center gap-1 rounded-full bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5">
                               <GiftIcon className="w-3.5 h-3.5" />
-                              Próximo corte: {L.nextDiscount}% dcto
+                              Próximo {(t.service || 'servicio').toLowerCase()}:{' '}
+                              {L.nextDiscount}% dcto
                             </span>
                           )}
                           {L.expired && (

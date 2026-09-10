@@ -22,6 +22,7 @@ import { SALES_CHANGED_EVENT } from '@/lib/api/routes/sales';
 import { formatCOP, formatDateOnly } from '@/lib/api/utils/utils';
 import { segmentMeta } from '@/lib/customerSegment';
 import { useAuth } from '@/context/authContext';
+import useTerms from '@/hooks/useTerms';
 import { effectiveModules } from '@/lib/appointmentsAccess';
 import ClinicalHistory from '@/components/dashboard/clinical/ClinicalHistory';
 import { statusMeta } from '@/lib/appointmentStatus';
@@ -48,6 +49,7 @@ export default function CustomerProfile() {
     else router.push('/dashboard/customers');
   };
   const { usuario } = useAuth();
+  const t = useTerms();
   // La historia clínica solo aparece en verticales de salud (módulo 'clinical').
   const showClinical = effectiveModules(usuario).includes('clinical');
   // El odontograma solo aplica a odontología.
@@ -264,8 +266,8 @@ export default function CustomerProfile() {
             </div>
           ) : loyalty.nextDiscount > 0 ? (
             <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">
-              🎉 En su próximo corte (visita #{loyalty.nextVisit}) tiene{' '}
-              {loyalty.nextDiscount}% de descuento.
+              🎉 En su próximo {(t.service || 'servicio').toLowerCase()} (visita
+              #{loyalty.nextVisit}) tiene {loyalty.nextDiscount}% de descuento.
             </div>
           ) : (
             <p className="mt-2 text-xs text-gray-500">
