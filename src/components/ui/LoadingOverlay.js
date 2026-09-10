@@ -1,12 +1,26 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/authContext';
+import {
+  isBackgroundRefreshing,
+  subscribeBackgroundRefresh,
+} from '@/lib/liveRefresh';
 
 export default function LoadingOverlay({ show = false, text = 'Cargando...' }) {
   const auth = useAuth();
   const logo = auth?.usuario?.company?.logo || '/images/logo_pegazo_icon.png';
 
-  if (!show) return null;
+  // Durante un refresco en segundo plano (sondeo en vivo) NO mostramos el
+  // overlay: los datos se actualizan solos, sin parpadeo. Solo se ve en la
+  // carga inicial o en acciones explícitas del usuario.
+  const [bg, setBg] = useState(false);
+  useEffect(() => {
+    setBg(isBackgroundRefreshing());
+    return subscribeBackgroundRefresh(setBg);
+  }, []);
+
+  if (!show || bg) return null;
 
   return (
     <div className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-white/75 backdrop-blur-sm">
