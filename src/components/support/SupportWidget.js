@@ -8,6 +8,7 @@ import {
   PhotoIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/authContext';
+import ImageLightbox from '@/components/ui/ImageLightbox';
 import {
   getSupportThread,
   sendSupportMessage,
@@ -37,6 +38,7 @@ export default function SupportWidget() {
   const [sending, setSending] = useState(false);
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
+  const [zoomSrc, setZoomSrc] = useState(null);
   const endRef = useRef(null);
   const fileRef = useRef(null);
 
@@ -184,18 +186,17 @@ export default function SupportWidget() {
                     }`}
                   >
                     {m.imageUrl && (
-                      <a
-                        href={m.imageUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="mb-1 block"
+                      <button
+                        type="button"
+                        onClick={() => setZoomSrc(m.imageUrl)}
+                        className="mb-1 block w-full"
                       >
                         <img
                           src={m.imageUrl}
                           alt="adjunto"
-                          className="max-h-48 w-full rounded-lg object-cover"
+                          className="max-h-48 w-full cursor-zoom-in rounded-lg object-cover"
                         />
-                      </a>
+                      </button>
                     )}
                     {m.body && (
                       <p className="whitespace-pre-wrap break-words">{m.body}</p>
@@ -287,6 +288,10 @@ export default function SupportWidget() {
           </span>
         )}
       </button>
+
+      {zoomSrc && (
+        <ImageLightbox src={zoomSrc} onClose={() => setZoomSrc(null)} />
+      )}
     </>
   );
 }
