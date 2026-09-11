@@ -9,7 +9,15 @@ import {
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
-import { getTaxCalendar } from '@/lib/api/routes/tax';
+import TaxObligationsPanel from '@/components/tax/TaxObligationsPanel';
+import {
+  getTaxCalendar,
+  getTaxObligations,
+  getTaxProfile,
+  updateTaxProfile,
+  getTaxYear,
+  updateTaxYear,
+} from '@/lib/api/routes/tax';
 
 const OBLIGATION_LABEL = {
   IVA: 'IVA',
@@ -150,6 +158,17 @@ export default function CalendarioTributarioPage() {
               Régimen: {data.regime}
             </span>
           )}
+        </div>
+
+        {/* Obligaciones DIAN: ¿debe declarar renta? + qué debe presentar */}
+        <div className="mb-5">
+          <TaxObligationsPanel
+            loadObligations={getTaxObligations}
+            loadProfile={getTaxProfile}
+            saveProfile={updateTaxProfile}
+            loadYear={getTaxYear}
+            saveYear={updateTaxYear}
+          />
         </div>
 
         {/* Aviso */}
