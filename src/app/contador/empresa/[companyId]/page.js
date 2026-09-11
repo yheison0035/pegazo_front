@@ -6,7 +6,11 @@ import Link from 'next/link';
 import {
   ArrowLeftIcon,
   ArrowDownTrayIcon,
+  PlusIcon,
+  TrashIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
+import MoneyInput from '@/components/ui/MoneyInput';
 import {
   getAccountantPortfolio,
   getAccCompanyFinancials,
@@ -14,6 +18,9 @@ import {
   getAccCompanyLedger,
   getAccCompanyLedgerAccounts,
   getAccCompanyTaxCalendar,
+  getAccCompanyEntries,
+  createAccCompanyEntry,
+  deleteAccCompanyEntry,
 } from '@/lib/api/routes/accountant';
 
 function cop(n) {
@@ -108,6 +115,9 @@ export default function ContadorEmpresa() {
   const [booksTab, setBooksTab] = useState('journal');
   const [accounts, setAccounts] = useState([]);
   const [calendar, setCalendar] = useState(null);
+  const [entries, setEntries] = useState([]);
+  const [entryForm, setEntryForm] = useState(null); // {date, description, reference, lines:[]}
+  const [entryBusy, setEntryBusy] = useState(false);
 
   useEffect(() => {
     getAccountantPortfolio()
@@ -133,6 +143,13 @@ export default function ContadorEmpresa() {
         setAccounts((await getAccCompanyLedgerAccounts(companyId))?.data || []);
       } else if (view === 'calendario') {
         setCalendar((await getAccCompanyTaxCalendar(companyId))?.data || null);
+      } else if (view === 'asientos') {
+        const [e1, e2] = await Promise.all([
+          getAccCompanyEntries(companyId),
+          getAccCompanyLedgerAccounts(companyId),
+        ]);
+        setEntries(e1?.data || []);
+        setAccounts(e2?.data || []);
       }
     } catch (e) {
       setError(e.message || 'No se pudo cargar.');
@@ -168,6 +185,72 @@ export default function ContadorEmpresa() {
   const cal = calendar?.deadlines || [];
   const daysLabel = (n) => (n < 0 ? `Venció hace ${Math.abs(n)}d` : n === 0 ? 'Hoy' : `Faltan ${n}d`);
 
+  // ----- Asientos manuales -----
+  const openEntry = () =>
+    setEntryForm({
+      date: today(),
+      description: '',
+      reference: '',
+      lines: [
+        { accountCode: '', debit: '', credit: '' },
+        { accountCode: '', debit: '', credit: '' },
+      ],
+    });
+  const setLine = (i, patch) =>
+    setEntryForm((f) => ({
+      ...f,
+      lines: f.lines.map((l, j) => (j === i ? { ...l, ...patch } : l)),
+    }));
+  const addLine = () =>
+    setEntryForm((f) => ({ ...f, lines: [...f.lines, { accountCode: '', debit: '', credit: '' }] }));
+  const removeLine = (i) =>
+    setEntryForm((f) => ({ ...f, lines: f.lines.filter((_, j) => j !== i) }));
+
+  const totalD = (entryForm?.lines || []).reduce((s, l) => s + (Number(l.debit) || 0), 0);
+  const totalC = (entryForm?.lines || []).reduce((s, l) => s + (Number(l.credit) || 0), 0);
+  const cuadra = totalD === totalC && totalD > 0;
+
+  const saveEntry = async () => {
+    if (!entryForm.description.trim() || !cuadra) return;
+    setEntryBusy(true);
+    try {
+      await createAccCompanyEntry(companyId, {
+        date: entryForm.date,
+        description: entryForm.description.trim(),
+        reference: entryForm.reference.trim() || null,
+        lines: entryForm.lines
+          .filter((l) => l.accountCode && (Number(l.debit) || Number(l.credit)))
+          .map((l) => {
+            const acc = accounts.find((a) => a.code === l.accountCode);
+            return {
+              accountCode: l.accountCode,
+              accountName: acc?.name || null,
+              debit: Number(l.debit) || 0,
+              credit: Number(l.credit) || 0,
+            };
+          }),
+      });
+      setEntryForm(null);
+      load();
+    } catch (e) {
+      setError(e.message || 'No se pudo guardar el asiento.');
+    } finally {
+      setEntryBusy(false);
+    }
+  };
+
+  const removeEntry = async (id) => {
+    setEntryBusy(true);
+    try {
+      await deleteAccCompanyEntry(companyId, id);
+      load();
+    } catch {
+      /* noop */
+    } finally {
+      setEntryBusy(false);
+    }
+  };
+
   return (
     <div>
       <Link href="/contador" className="mb-3 inline-flex items-center gap-1 text-sm text-gray-500 hover:text-orange-600">
@@ -185,6 +268,7 @@ export default function ContadorEmpresa() {
       <div className="mb-3 flex flex-wrap gap-1 rounded-xl bg-gray-100 p-1">
         {[
           ['estados', 'Estados financieros'],
+          ['asientos', 'Asientos'],
           ['libros', 'Libros'],
           ['plan', 'Plan de cuentas'],
           ['calendario', 'Calendario'],
@@ -201,8 +285,8 @@ export default function ContadorEmpresa() {
         ))}
       </div>
 
-      {/* Rango (no aplica a plan) */}
-      {view !== 'plan' && view !== 'calendario' && (
+      {/* Rango (no aplica a plan/calendario/asientos) */}
+      {view !== 'plan' && view !== 'calendario' && view !== 'asientos' && (
         <div className="mb-4 flex flex-wrap items-end gap-3">
           <div>
             <label className="mb-1 block text-[11px] font-semibold text-gray-500">Desde</label>
@@ -296,6 +380,63 @@ export default function ContadorEmpresa() {
             </div>
           )}
         </>
+      )}
+
+      {/* ===== ASIENTOS MANUALES ===== */}
+      {view === 'asientos' && (
+        <div>
+          <div className="mb-3 flex items-center justify-between">
+            <p className="text-sm text-gray-500">
+              Registra la contabilidad a mano (partida doble). Debe cuadrar.
+            </p>
+            <button
+              onClick={openEntry}
+              className="inline-flex items-center gap-1 rounded-lg bg-orange-500 px-3 py-2 text-sm font-semibold text-white hover:bg-orange-600"
+            >
+              <PlusIcon className="h-4 w-4" /> Nuevo asiento
+            </button>
+          </div>
+          {entries.length === 0 && !loading ? (
+            <div className="rounded-2xl border border-dashed border-gray-200 py-12 text-center text-gray-400">
+              Sin asientos aún. Crea el primero con “Nuevo asiento”.
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {entries.map((e) => {
+                const tot = (e.lines || []).reduce((s, l) => s + (l.debit || 0), 0);
+                return (
+                  <div key={e.id} className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+                    <div className="flex items-center justify-between gap-2 border-b border-gray-50 bg-gray-50/50 px-4 py-2">
+                      <div className="min-w-0">
+                        <span className="font-mono text-xs text-gray-500">{fmtDate(e.date)}</span>
+                        <span className="ml-2 text-sm text-gray-700">{e.description}</span>
+                        {e.reference && <span className="ml-2 text-[11px] text-gray-400">({e.reference})</span>}
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs font-semibold tabular-nums text-gray-500">{cop(tot)}</span>
+                        <button onClick={() => removeEntry(e.id)} disabled={entryBusy} title="Eliminar" className="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-500">
+                          <TrashIcon className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                    <table className="min-w-full text-sm">
+                      <tbody>
+                        {e.lines.map((l) => (
+                          <tr key={l.id} className="border-t border-gray-50">
+                            <td className="w-16 px-4 py-1.5 font-mono text-xs text-gray-400">{l.accountCode}</td>
+                            <td className="px-2 py-1.5 text-gray-700">{l.accountName || ''}</td>
+                            <td className="w-28 px-4 py-1.5 text-right tabular-nums">{l.debit ? num(l.debit) : ''}</td>
+                            <td className="w-28 px-4 py-1.5 text-right tabular-nums">{l.credit ? num(l.credit) : ''}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       )}
 
       {/* ===== LIBROS ===== */}
@@ -393,6 +534,108 @@ export default function ContadorEmpresa() {
               <span className={`flex-none rounded-lg px-3 py-1.5 text-xs font-bold ${d.status === 'VENCIDO' ? 'bg-red-50 text-red-600' : d.status === 'PROXIMO' ? 'bg-amber-50 text-amber-600' : 'bg-gray-50 text-gray-500'}`}>{daysLabel(d.daysLeft)}</span>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* ===== MODAL NUEVO ASIENTO ===== */}
+      {entryForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setEntryForm(null)}>
+          <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-5 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-gray-800">Nuevo asiento</h2>
+              <button onClick={() => setEntryForm(null)} className="text-gray-400 hover:text-gray-600">
+                <XMarkIcon className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-gray-600">Fecha *</label>
+                <input type="date" value={entryForm.date} onChange={(e) => setEntryForm({ ...entryForm, date: e.target.value })} className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm" />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="mb-1 block text-xs font-semibold text-gray-600">Descripción *</label>
+                <input value={entryForm.description} onChange={(e) => setEntryForm({ ...entryForm, description: e.target.value })} placeholder="Ej: Compra de mercancía" className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm" />
+              </div>
+            </div>
+
+            {/* Líneas */}
+            <div className="mt-4 overflow-x-auto rounded-xl border border-gray-100">
+              <table className="min-w-full text-sm">
+                <thead>
+                  <tr className="bg-gray-50/60 text-left text-[11px] uppercase text-gray-500">
+                    <th className="px-3 py-2">Cuenta</th>
+                    <th className="w-32 px-3 py-2 text-right">Débito</th>
+                    <th className="w-32 px-3 py-2 text-right">Crédito</th>
+                    <th className="w-10 px-2 py-2"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {entryForm.lines.map((l, i) => (
+                    <tr key={i} className="border-t border-gray-50">
+                      <td className="px-3 py-1.5">
+                        <select
+                          value={l.accountCode}
+                          onChange={(e) => setLine(i, { accountCode: e.target.value })}
+                          className="w-full rounded-lg border border-gray-200 px-2 py-1.5 text-sm focus:border-orange-400 focus:outline-none"
+                        >
+                          <option value="">Elegir cuenta…</option>
+                          {accounts.map((a) => (
+                            <option key={a.id || a.code} value={a.code}>
+                              {a.code} · {a.name}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                      <td className="px-2 py-1.5">
+                        <MoneyInput value={l.debit} onChange={(v) => setLine(i, { debit: v, credit: '' })} placeholder="$ 0" className="w-full rounded-lg border border-gray-200 px-2 py-1.5 text-right text-sm" />
+                      </td>
+                      <td className="px-2 py-1.5">
+                        <MoneyInput value={l.credit} onChange={(v) => setLine(i, { credit: v, debit: '' })} placeholder="$ 0" className="w-full rounded-lg border border-gray-200 px-2 py-1.5 text-right text-sm" />
+                      </td>
+                      <td className="px-2 py-1.5 text-center">
+                        {entryForm.lines.length > 2 && (
+                          <button onClick={() => removeLine(i)} className="text-gray-300 hover:text-red-500">
+                            <XMarkIcon className="h-4 w-4" />
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr className="border-t border-gray-100 bg-gray-50/60 font-semibold text-gray-700">
+                    <td className="px-3 py-2 text-right text-xs">Totales</td>
+                    <td className="px-3 py-2 text-right tabular-nums">{num(totalD)}</td>
+                    <td className="px-3 py-2 text-right tabular-nums">{num(totalC)}</td>
+                    <td></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+
+            <div className="mt-2 flex items-center justify-between">
+              <button onClick={addLine} className="inline-flex items-center gap-1 text-sm font-medium text-orange-600 hover:text-orange-700">
+                <PlusIcon className="h-4 w-4" /> Agregar línea
+              </button>
+              <span className={`text-xs font-semibold ${cuadra ? 'text-emerald-600' : 'text-red-500'}`}>
+                {cuadra ? '✓ Cuadra' : `Descuadre: ${num(Math.abs(totalD - totalC))}`}
+              </span>
+            </div>
+
+            <div className="mt-5 flex justify-end gap-2">
+              <button onClick={() => setEntryForm(null)} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50">
+                Cancelar
+              </button>
+              <button
+                onClick={saveEntry}
+                disabled={entryBusy || !cuadra || !entryForm.description.trim()}
+                className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600 disabled:opacity-50"
+              >
+                {entryBusy ? 'Guardando…' : 'Guardar asiento'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
