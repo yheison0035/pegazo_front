@@ -32,7 +32,13 @@ import {
   createAccCompanyParty,
   updateAccCompanyParty,
   deleteAccCompanyParty,
+  getAccCompanyFiscalProfile,
+  updateAccCompanyFiscalProfile,
+  getAccCompanyTaxYear,
+  updateAccCompanyTaxYear,
+  getAccCompanyTaxObligations,
 } from '@/lib/api/routes/accountant';
+import TaxObligationsPanel from '@/components/tax/TaxObligationsPanel';
 import { PaperClipIcon, PencilSquareIcon, UsersIcon } from '@heroicons/react/24/outline';
 
 const PARTY_KINDS = [
@@ -828,8 +834,21 @@ export default function ContadorEmpresa() {
       )}
 
       {/* ===== IMPUESTOS ===== */}
-      {view === 'impuestos' && taxSummary && (
+      {view === 'impuestos' && (
         <div>
+          {/* Obligaciones DIAN: ¿debe declarar renta? + qué debe presentar */}
+          <div className="mb-5">
+            <TaxObligationsPanel
+              loadObligations={(p) => getAccCompanyTaxObligations(companyId, p)}
+              loadProfile={() => getAccCompanyFiscalProfile(companyId)}
+              saveProfile={(d) => updateAccCompanyFiscalProfile(companyId, d)}
+              loadYear={(y) => getAccCompanyTaxYear(companyId, y)}
+              saveYear={(d) => updateAccCompanyTaxYear(companyId, d)}
+            />
+          </div>
+
+          {taxSummary && (
+            <>
           <p className="mb-3 text-sm text-gray-500">
             Lo que arrojan tus cuentas de impuestos en el periodo, para preparar
             las declaraciones. Los vencimientos están en la pestaña Calendario.
@@ -863,6 +882,8 @@ export default function ContadorEmpresa() {
             importación. Ajusta cuentas en Plan de cuentas si tu negocio lo
             requiere.
           </p>
+            </>
+          )}
         </div>
       )}
 

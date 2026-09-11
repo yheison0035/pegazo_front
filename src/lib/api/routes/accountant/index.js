@@ -108,6 +108,31 @@ export async function uploadAccCompanyDoc(companyId, file) {
     body: fd,
   });
 }
+// Perfil fiscal (responsabilidades del RUT) de una empresa enlazada.
+export async function getAccCompanyFiscalProfile(companyId) {
+  return apiFetch(`/accountant/companies/${companyId}/fiscal-profile`);
+}
+export async function updateAccCompanyFiscalProfile(companyId, data) {
+  return apiFetch(`/accountant/companies/${companyId}/fiscal-profile`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+// Magnitudes anuales (topes de renta).
+export async function getAccCompanyTaxYear(companyId, year) {
+  return apiFetch(`/accountant/companies/${companyId}/tax-year${qs({ year })}`);
+}
+export async function updateAccCompanyTaxYear(companyId, data) {
+  return apiFetch(`/accountant/companies/${companyId}/tax-year`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+// Obligaciones DIAN derivadas (¿debe declarar renta?).
+export async function getAccCompanyTaxObligations(companyId, params = {}) {
+  return apiFetch(`/accountant/companies/${companyId}/tax-obligations${qs(params)}`);
+}
+
 export async function getAccCompanyParties(companyId, params = {}) {
   return apiFetch(`/accountant/companies/${companyId}/parties${qs(params)}`);
 }

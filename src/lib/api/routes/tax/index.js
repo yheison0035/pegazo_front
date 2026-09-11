@@ -12,6 +12,25 @@ export async function getTaxCalendar(params = {}) {
   return apiFetch(`/tax/calendar${qs(params)}`);
 }
 
+// Perfil fiscal (responsabilidades del RUT).
+export async function getTaxProfile() {
+  return apiFetch('/tax/profile');
+}
+export async function updateTaxProfile(data) {
+  return apiFetch('/tax/profile', { method: 'PATCH', body: JSON.stringify(data) });
+}
+// Magnitudes anuales (topes de renta).
+export async function getTaxYear(year) {
+  return apiFetch(`/tax/tax-year${qs({ year })}`);
+}
+export async function updateTaxYear(data) {
+  return apiFetch('/tax/tax-year', { method: 'PATCH', body: JSON.stringify(data) });
+}
+// Obligaciones DIAN derivadas (¿debe declarar renta?).
+export async function getTaxObligations(params = {}) {
+  return apiFetch(`/tax/obligations${qs(params)}`);
+}
+
 // ---- Plataforma ----
 export async function getTaxDeadlines(year) {
   return apiFetch(`/tax/deadlines${qs({ year })}`);
