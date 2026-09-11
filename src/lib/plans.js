@@ -112,6 +112,7 @@ export const MODULE_MIN_PLAN = {
   bank: 'ALTURA', // avisos de consignación (banco)
   clinical: 'ALTURA', // historia clínica (salud)
   assets: 'ALTURA', // Contabilidad · activos fijos
+  'plan-cuentas': 'ALTURA', // Contabilidad · plan de cuentas
   // Órbita: cadena / empresa
   'nomina-electronica': 'ORBITA', // nómina electrónica
 };
