@@ -47,19 +47,25 @@ export default function ContadorLayout({ children }) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="sticky top-0 z-40 border-b border-gray-200 bg-white/90 backdrop-blur">
+      <header className="sticky top-0 z-40 border-b border-orange-500/10 bg-gradient-to-r from-[#0b0f19] to-[#05070d] shadow-lg">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3">
-          <div className="flex items-center gap-2">
-            <img src="/images/logo_pegazo.png" alt="Pegazo" className="h-8 w-auto" />
-            <span className="rounded-full bg-orange-50 px-2.5 py-0.5 text-[11px] font-semibold text-orange-600">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <img
+              src="/images/logo_pegazo.png"
+              alt="Pegazo"
+              className="h-7 w-auto flex-none sm:h-8"
+            />
+            <span className="flex-none rounded-full bg-orange-500/20 px-2.5 py-0.5 text-[11px] font-semibold text-orange-300">
               Contador
             </span>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="hidden text-sm text-gray-500 sm:inline">{name}</span>
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="hidden truncate text-sm text-white/70 sm:inline">
+              {name}
+            </span>
             <button
               onClick={logout}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50"
+              className="inline-flex flex-none items-center gap-1.5 rounded-lg border border-white/15 px-3 py-1.5 text-sm text-white/80 transition hover:bg-white/10 hover:text-white"
             >
               <ArrowRightOnRectangleIcon className="h-4 w-4" /> Salir
             </button>
