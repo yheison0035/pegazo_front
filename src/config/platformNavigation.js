@@ -8,6 +8,7 @@ import {
   Squares2X2Icon,
   BanknotesIcon,
   ChatBubbleLeftRightIcon,
+  CalendarDaysIcon,
 } from '@heroicons/react/24/outline';
 
 export const PLATFORM_NAVIGATION = [
@@ -48,6 +49,11 @@ export const PLATFORM_NAVIGATION = [
         name: 'Soporte',
         href: '/platform/support',
         icon: ChatBubbleLeftRightIcon,
+      },
+      {
+        name: 'Calendario tributario',
+        href: '/platform/tax-calendar',
+        icon: CalendarDaysIcon,
       },
       {
         name: 'Estadísticas Globales',
