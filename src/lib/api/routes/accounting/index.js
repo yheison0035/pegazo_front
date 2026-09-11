@@ -14,3 +14,6 @@ export async function getJournal(params = {}) {
 export async function getLedger(params = {}) {
   return apiFetch(`/accounting/ledger${qs(params)}`);
 }
+export async function getFinancials(params = {}) {
+  return apiFetch(`/accounting/financials${qs(params)}`);
+}
