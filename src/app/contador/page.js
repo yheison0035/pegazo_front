@@ -8,10 +8,15 @@ import {
   CheckIcon,
   BuildingOffice2Icon,
 } from '@heroicons/react/24/outline';
-import { getAccountantMe } from '@/lib/api/routes/accountant';
+import Link from 'next/link';
+import {
+  getAccountantMe,
+  getAccountantPortfolio,
+} from '@/lib/api/routes/accountant';
 
 export default function ContadorPortal() {
   const [me, setMe] = useState(null);
+  const [companies, setCompanies] = useState([]);
   const [qr, setQr] = useState('');
   const [copied, setCopied] = useState(false);
 
@@ -30,6 +35,12 @@ export default function ContadorPortal() {
       } catch {
         /* noop */
       }
+    }
+    try {
+      const p = await getAccountantPortfolio();
+      setCompanies(p?.data || []);
+    } catch {
+      /* noop */
     }
   }, []);
 
@@ -117,13 +128,44 @@ export default function ContadorPortal() {
             <BuildingOffice2Icon className="h-5 w-5 text-orange-500" />
             <h2 className="text-sm font-bold text-gray-800">Tus empresas</h2>
           </div>
-          <div className="rounded-2xl border border-dashed border-gray-200 py-14 text-center text-gray-400">
-            Aún no tienes empresas enlazadas.
-            <p className="mt-1 text-xs">
-              Comparte tu llave <b>{me?.accountantKey || ''}</b> con el negocio:
-              al activar Contabilidad y enlazarte, aparecerá aquí.
-            </p>
-          </div>
+          {companies.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-gray-200 py-14 text-center text-gray-400">
+              Aún no tienes empresas enlazadas.
+              <p className="mt-1 text-xs">
+                Comparte tu llave <b>{me?.accountantKey || ''}</b> con el negocio:
+                al activar Contabilidad y enlazarte, aparecerá aquí.
+              </p>
+            </div>
+          ) : (
+            <ul className="space-y-2">
+              {companies.map((c) => (
+                <li key={c.companyId}>
+                  <Link
+                    href={`/contador/empresa/${c.companyId}`}
+                    className="flex items-center gap-3 rounded-2xl border border-gray-100 p-3 transition hover:border-orange-200 hover:bg-orange-50/40"
+                  >
+                    <img
+                      src={c.logo || '/images/no-image.png'}
+                      alt=""
+                      className="h-10 w-10 flex-none rounded-lg border border-gray-100 object-contain"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-gray-800">
+                        {c.name}
+                      </p>
+                      <p className="text-[11px] text-gray-400">
+                        {c.type}
+                        {c.nit ? ` · NIT ${c.nit}` : ''}
+                      </p>
+                    </div>
+                    <span className="flex-none text-xs font-semibold text-orange-600">
+                      Ver contabilidad →
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
     </div>
