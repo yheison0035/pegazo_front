@@ -76,6 +76,7 @@ export default function useNavigation() {
     modules.push('assets');
     modules.push('plan-cuentas');
     modules.push('libros');
+    modules.push('estados-financieros');
   }
 
   // Facturación electrónica DIAN: aún NO está liberada al 100%, así que SOLO se
