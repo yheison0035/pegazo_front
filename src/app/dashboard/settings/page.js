@@ -1136,8 +1136,9 @@ function AccountingSectionCard({ initial }) {
           <div>
             <h2 className="text-base font-bold text-gray-800">Contabilidad</h2>
             <p className="text-sm text-gray-500">
-              Activa la sección de Contabilidad en tu menú para llevar tus
-              activos y su depreciación. Pronto: estados financieros e impuestos.
+              Activa la sección de Contabilidad en tu menú: activos, libros,
+              estados financieros, impuestos y calendario tributario. Si enlazas
+              un contador, él lleva el detalle y tú ves solo un resumen simple.
             </p>
           </div>
         </div>
