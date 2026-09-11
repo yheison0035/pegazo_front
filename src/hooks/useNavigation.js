@@ -74,6 +74,7 @@ export default function useNavigation() {
   // decide si queda desbloqueada o con candado. Disponible en cualquier tipo.
   if (usuario.company?.accountingEnabled) {
     modules.push('assets');
+    modules.push('plan-cuentas');
   }
 
   // Facturación electrónica DIAN: aún NO está liberada al 100%, así que SOLO se
