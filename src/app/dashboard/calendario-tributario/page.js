@@ -17,6 +17,7 @@ import {
   updateTaxProfile,
   getTaxYear,
   updateTaxYear,
+  runTaxAlerts,
 } from '@/lib/api/routes/tax';
 
 const OBLIGATION_LABEL = {
@@ -63,6 +64,8 @@ function daysLabel(n) {
 export default function CalendarioTributarioPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [checkMsg, setCheckMsg] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -81,6 +84,24 @@ export default function CalendarioTributarioPage() {
   }, [load]);
 
   useLiveRefresh(load);
+
+  const checkNow = useCallback(async () => {
+    setChecking(true);
+    setCheckMsg('');
+    try {
+      const res = await runTaxAlerts();
+      const n = res?.data?.created ?? 0;
+      setCheckMsg(
+        n > 0
+          ? `Se crearon ${n} aviso${n !== 1 ? 's' : ''} en tu campana.`
+          : 'Todo al día: no hay vencimientos por avisar.',
+      );
+    } catch {
+      setCheckMsg('No se pudo revisar en este momento.');
+    } finally {
+      setChecking(false);
+    }
+  }, []);
 
   const deadlines = data?.deadlines || [];
   const proximos = deadlines.filter((d) => d.status === 'PROXIMO');
@@ -134,17 +155,31 @@ export default function CalendarioTributarioPage() {
       <div className="relative mx-auto w-full max-w-3xl p-4">
         <LoadingOverlay show={loading} text="Cargando calendario..." />
 
-        <div className="mb-4">
-          <h1 className="flex items-center gap-2 text-2xl font-semibold text-gray-800">
-            <CalendarDaysIcon className="h-6 w-6 text-orange-500" /> Calendario
-            tributario
-          </h1>
-          <p className="text-sm text-gray-500">
-            Tus vencimientos según el último dígito de tu NIT
-            {data?.nitDigit ? ` (${data.nitDigit})` : ''} y tu régimen. Te
-            avisamos cuando se acercan.
-          </p>
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <div>
+            <h1 className="flex items-center gap-2 text-2xl font-semibold text-gray-800">
+              <CalendarDaysIcon className="h-6 w-6 text-orange-500" /> Calendario
+              tributario
+            </h1>
+            <p className="text-sm text-gray-500">
+              Tus vencimientos según el último dígito de tu NIT
+              {data?.nitDigit ? ` (${data.nitDigit})` : ''} y tu régimen. Te
+              avisamos en la campana cuando se acercan.
+            </p>
+          </div>
+          <button
+            onClick={checkNow}
+            disabled={checking}
+            className="flex-none rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-60"
+          >
+            {checking ? 'Revisando...' : 'Revisar ahora'}
+          </button>
         </div>
+        {checkMsg && (
+          <div className="mb-4 rounded-xl border border-gray-100 bg-gray-50 px-3 py-2 text-xs text-gray-600">
+            {checkMsg}
+          </div>
+        )}
 
         {/* Resumen */}
         <div className="mb-4 flex flex-wrap items-center gap-3">

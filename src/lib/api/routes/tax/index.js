@@ -30,6 +30,10 @@ export async function updateTaxYear(data) {
 export async function getTaxObligations(params = {}) {
   return apiFetch(`/tax/obligations${qs(params)}`);
 }
+// Revisa ahora los vencimientos y crea avisos en la campana.
+export async function runTaxAlerts() {
+  return apiFetch('/tax/run-alerts', { method: 'POST' });
+}
 
 // ---- Plataforma ----
 export async function getTaxDeadlines(year) {
