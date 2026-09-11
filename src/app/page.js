@@ -620,6 +620,7 @@ export default function Landing() {
                 ['#diferencia', 'Por qué Pegazo'],
                 ['#funciones', 'Funciones'],
                 ['#negocios', 'Para tu negocio'],
+                ['#contadores', 'Contadores'],
                 ['#planes', 'Planes'],
               ].map(([href, label]) => (
                 <a
@@ -1238,8 +1239,11 @@ export default function Landing() {
                 ['👥', 'Terceros', 'Clientes, proveedores y empleados'],
                 ['📊', 'Estados financieros', 'Resultados, balance y flujo de caja'],
                 ['📚', 'Libros', 'Diario, mayor, balance de prueba y auxiliar'],
+                ['🏛️', 'Activos fijos', 'Registro y depreciación en los libros'],
                 ['🧾', 'Impuestos', 'IVA, retención en la fuente e ICA'],
-                ['📅', 'Calendario tributario', 'Vencimientos según NIT y régimen'],
+                ['📅', 'Calendario tributario', 'Vencimientos según NIT y régimen, con avisos'],
+                ['⚖️', 'Obligaciones DIAN', '¿Debe declarar renta? y qué presentar'],
+                ['📄', 'Borrador de renta', 'Consolidado anual e impuesto estimado'],
                 ['💼', 'Nómina y conciliación', 'Asiento de nómina y cuadre bancario'],
                 ['🔒', 'Cierre de periodo', 'Blinda los meses ya declarados'],
                 ['📤', 'Exporta a Excel', 'Libros y estados descargables'],
