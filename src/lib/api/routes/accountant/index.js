@@ -132,6 +132,10 @@ export async function updateAccCompanyTaxYear(companyId, data) {
 export async function getAccCompanyTaxObligations(companyId, params = {}) {
   return apiFetch(`/accountant/companies/${companyId}/tax-obligations${qs(params)}`);
 }
+// Borrador de declaración de renta.
+export async function getAccCompanyRenta(companyId, params = {}) {
+  return apiFetch(`/accountant/companies/${companyId}/renta${qs(params)}`);
+}
 
 export async function getAccCompanyParties(companyId, params = {}) {
   return apiFetch(`/accountant/companies/${companyId}/parties${qs(params)}`);

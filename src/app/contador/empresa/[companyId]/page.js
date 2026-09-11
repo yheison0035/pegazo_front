@@ -37,8 +37,10 @@ import {
   getAccCompanyTaxYear,
   updateAccCompanyTaxYear,
   getAccCompanyTaxObligations,
+  getAccCompanyRenta,
 } from '@/lib/api/routes/accountant';
 import TaxObligationsPanel from '@/components/tax/TaxObligationsPanel';
+import RentaDraftPanel from '@/components/tax/RentaDraftPanel';
 import { PaperClipIcon, PencilSquareIcon, UsersIcon } from '@heroicons/react/24/outline';
 
 const PARTY_KINDS = [
@@ -523,6 +525,7 @@ export default function ContadorEmpresa() {
           ['asientos', 'Asientos'],
           ['terceros', 'Terceros'],
           ['impuestos', 'Impuestos'],
+          ['renta', 'Renta'],
           ['conciliacion', 'Conciliación'],
           ['libros', 'Libros'],
           ['plan', 'Plan de cuentas'],
@@ -884,6 +887,18 @@ export default function ContadorEmpresa() {
           </p>
             </>
           )}
+        </div>
+      )}
+
+      {/* ===== DECLARACIÓN DE RENTA (BORRADOR) ===== */}
+      {view === 'renta' && (
+        <div>
+          <p className="mb-3 text-sm text-gray-500">
+            Consolidado anual e impuesto estimado a partir de los libros. Es un
+            borrador para preparar la declaración; ajústalo con la depuración
+            fiscal (rentas exentas, deducciones, descuentos).
+          </p>
+          <RentaDraftPanel load={(p) => getAccCompanyRenta(companyId, p)} />
         </div>
       )}
 
