@@ -268,7 +268,13 @@ function Editor({ item, onClose, onSaved }) {
           )}
         </div>
 
-        <p className="mt-6 mb-2 text-sm font-semibold text-gray-800">Módulos</p>
+        <p className="mt-6 mb-1 text-sm font-semibold text-gray-800">Módulos</p>
+        <p className="mb-2 text-xs text-gray-400">
+          Agrupados igual que en el menú del dueño (Atención, Ventas, Clientes,
+          Catálogo, Finanzas, Administración, Tienda online). La sección
+          Contabilidad y la DIAN no se activan aquí: se encienden por empresa
+          desde su panel (contabilidad, contador, facturación electrónica).
+        </p>
         <div className="space-y-4">
           {Object.entries(MODULE_GROUPS).map(([group, list]) => (
             <div key={group}>
