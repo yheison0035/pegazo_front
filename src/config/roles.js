@@ -13,6 +13,7 @@ export const Roles = {
   MESERO: 'MESERO',
   COCINERO: 'COCINERO',
   PROFESIONAL: 'PROFESIONAL',
+  CONTADOR: 'CONTADOR',
 };
 
 // Roles "solo lo suyo": el barbero/profesional únicamente ve SU información
