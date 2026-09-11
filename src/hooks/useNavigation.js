@@ -73,11 +73,18 @@ export default function useNavigation() {
   // muestra cuando el dueño la activa (accountingEnabled); el plan (Altura+)
   // decide si queda desbloqueada o con candado. Disponible en cualquier tipo.
   if (usuario.company?.accountingEnabled) {
-    modules.push('assets');
-    modules.push('plan-cuentas');
-    modules.push('libros');
-    modules.push('estados-financieros');
-    modules.push('calendario-tributario');
+    if (usuario.company?.hasAccountant) {
+      // La lleva un contador enlazado → el dueño ve solo el resumen simple, no
+      // los módulos técnicos (no saturarlo). El detalle vive en el portal del
+      // contador.
+      modules.push('resumen-contable');
+    } else {
+      modules.push('assets');
+      modules.push('plan-cuentas');
+      modules.push('libros');
+      modules.push('estados-financieros');
+      modules.push('calendario-tributario');
+    }
   }
 
   // Facturación electrónica DIAN: aún NO está liberada al 100%, así que SOLO se
