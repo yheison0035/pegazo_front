@@ -68,3 +68,17 @@ export async function getAccCompanyLedgerAccounts(companyId) {
 export async function getAccCompanyTaxCalendar(companyId, params = {}) {
   return apiFetch(`/accountant/companies/${companyId}/tax-calendar${qs(params)}`);
 }
+export async function getAccCompanyEntries(companyId, params = {}) {
+  return apiFetch(`/accountant/companies/${companyId}/entries${qs(params)}`);
+}
+export async function createAccCompanyEntry(companyId, payload) {
+  return apiFetch(`/accountant/companies/${companyId}/entries`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+export async function deleteAccCompanyEntry(companyId, entryId) {
+  return apiFetch(`/accountant/companies/${companyId}/entries/${entryId}`, {
+    method: 'DELETE',
+  });
+}
