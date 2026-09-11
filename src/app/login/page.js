@@ -16,6 +16,7 @@ import {
   ArrowRightOnRectangleIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/authContext';
+import { accountantLogin } from '@/lib/api/routes/accountant';
 
 const HIGHLIGHTS = [
   {
@@ -41,6 +42,7 @@ const HIGHLIGHTS = [
 ];
 
 export default function Login() {
+  const [mode, setMode] = useState('empresa'); // empresa | contador
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -69,6 +71,20 @@ export default function Login() {
     setLoading(true);
 
     try {
+      if (mode === 'contador') {
+        // Sesión de contador (identidad independiente): guarda su token y va a
+        // su portal. No pasa por el authContext de empresas.
+        const res = await accountantLogin(email, password);
+        const data = res?.data;
+        if (!data?.access_token) throw new Error('No se recibió token.');
+        localStorage.setItem('token', data.access_token);
+        localStorage.setItem('sessionType', 'accountant');
+        localStorage.setItem('contador', JSON.stringify(data.accountant));
+        localStorage.removeItem('usuario');
+        router.push('/contador');
+        return;
+      }
+
       const user = await login(email, password);
       const role = user?.role;
 
@@ -194,6 +210,30 @@ export default function Login() {
                 </div>
               </div>
 
+              {/* Switch Empresa | Contador */}
+              <div className="mb-5 grid grid-cols-2 gap-1 rounded-2xl border border-white/10 bg-white/5 p-1">
+                {[
+                  ['empresa', 'Empresa'],
+                  ['contador', 'Contador'],
+                ].map(([k, l]) => (
+                  <button
+                    key={k}
+                    type="button"
+                    onClick={() => {
+                      setMode(k);
+                      setError('');
+                    }}
+                    className={`rounded-xl py-2 text-sm font-semibold transition ${
+                      mode === k
+                        ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow'
+                        : 'text-white/60 hover:text-white'
+                    }`}
+                  >
+                    {l}
+                  </button>
+                ))}
+              </div>
+
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold text-white/60">
@@ -282,17 +322,29 @@ export default function Login() {
                 </button>
               </form>
 
-              <p className="mt-6 text-center text-sm text-white/50">
-                ¿No tienes cuenta?{' '}
-                <a
-                  href="https://wa.me/573186356609?text=Hola%2C%20quiero%20cotizar%20Pegazo%20para%20mi%20negocio."
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-semibold text-orange-300 hover:text-orange-200"
-                >
-                  Cotiza tu plan por WhatsApp
-                </a>
-              </p>
+              {mode === 'contador' ? (
+                <p className="mt-6 text-center text-sm text-white/50">
+                  ¿Eres contador y no tienes cuenta?{' '}
+                  <a
+                    href="/register-contador"
+                    className="font-semibold text-orange-300 hover:text-orange-200"
+                  >
+                    Regístrate como contador
+                  </a>
+                </p>
+              ) : (
+                <p className="mt-6 text-center text-sm text-white/50">
+                  ¿No tienes cuenta?{' '}
+                  <a
+                    href="https://wa.me/573186356609?text=Hola%2C%20quiero%20cotizar%20Pegazo%20para%20mi%20negocio."
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold text-orange-300 hover:text-orange-200"
+                  >
+                    Cotiza tu plan por WhatsApp
+                  </a>
+                </p>
+              )}
 
               <div className="mt-5 flex items-center justify-center gap-4 border-t border-white/10 pt-4 text-[11px] text-white/40">
                 <span className="inline-flex items-center gap-1.5">
