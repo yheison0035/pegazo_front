@@ -19,6 +19,15 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const storedUser = localStorage.getItem('usuario');
     const token = localStorage.getItem('token');
+    const sessionType = localStorage.getItem('sessionType');
+
+    // Sesión de CONTADOR: no pertenece a ninguna empresa; su sesión la maneja
+    // el portal /contador. Aquí no restauramos usuario ni llamamos /auth/me
+    // (ese token no es de un usuario de empresa).
+    if (sessionType === 'accountant') {
+      setLoading(false);
+      return;
+    }
 
     if (storedUser && token) {
       setUsuario(JSON.parse(storedUser));
@@ -56,6 +65,8 @@ export const AuthProvider = ({ children }) => {
       if (!token) throw new Error('Token no recibido');
 
       localStorage.setItem('token', token);
+      localStorage.setItem('sessionType', 'company');
+      localStorage.removeItem('contador');
 
       const profile = await apiFetch('/auth/me');
       const { data: userData } = profile;
@@ -76,6 +87,8 @@ export const AuthProvider = ({ children }) => {
     if (!token) throw new Error('No se recibió token del servidor');
 
     localStorage.setItem('token', token);
+    localStorage.setItem('sessionType', 'company');
+    localStorage.removeItem('contador');
 
     const profile = await apiFetch('/auth/me');
     const { data: userData } = profile;
@@ -88,6 +101,12 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     apiLogout();
+    try {
+      localStorage.removeItem('sessionType');
+      localStorage.removeItem('contador');
+    } catch {
+      /* ignora */
+    }
     // Limpia la marca de "agenda ya mostrada" para que el modal de citas
     // vuelva a aparecer en el próximo inicio de sesión.
     try {
