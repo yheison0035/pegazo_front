@@ -22,6 +22,7 @@ import {
   getAccCompanyLedgerAccounts,
   getAccCompanyTaxCalendar,
   getAccCompanyTaxSummary,
+  setAccCompanyClose,
   getAccCompanyEntries,
   createAccCompanyEntry,
   deleteAccCompanyEntry,
@@ -142,6 +143,8 @@ export default function ContadorEmpresa() {
   const [entryBusy, setEntryBusy] = useState(false);
   const [importResult, setImportResult] = useState(null);
   const [importing, setImporting] = useState(false);
+  const [closeDate, setCloseDate] = useState('');
+  const [closeBusy, setCloseBusy] = useState(false);
   const [parties, setParties] = useState([]);
   const [partyKind, setPartyKind] = useState('');
   const [partyForm, setPartyForm] = useState(null);
@@ -152,9 +155,25 @@ export default function ContadorEmpresa() {
       .then((r) => {
         const c = (r?.data || []).find((x) => String(x.companyId) === String(companyId));
         setCompany(c || null);
+        setCloseDate(c?.booksClosedUntil ? new Date(c.booksClosedUntil).toISOString().slice(0, 10) : '');
       })
       .catch(() => {});
   }, [companyId]);
+
+  const applyClose = async (date) => {
+    setCloseBusy(true);
+    setError('');
+    try {
+      const res = await setAccCompanyClose(companyId, date || null);
+      const until = res?.data?.booksClosedUntil;
+      setCompany((c) => (c ? { ...c, booksClosedUntil: until } : c));
+      setCloseDate(until ? new Date(until).toISOString().slice(0, 10) : '');
+    } catch (e) {
+      setError(e.message || 'No se pudo cambiar el cierre.');
+    } finally {
+      setCloseBusy(false);
+    }
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -583,6 +602,41 @@ export default function ContadorEmpresa() {
                 <PlusIcon className="h-4 w-4" /> Nuevo asiento
               </button>
             </div>
+          </div>
+
+          {/* Cierre de periodo */}
+          <div className="mb-3 flex flex-wrap items-center gap-2 rounded-2xl border border-gray-100 bg-white p-3 shadow-sm">
+            <span className="text-xs font-semibold text-gray-500">Cierre de periodo:</span>
+            {company?.booksClosedUntil ? (
+              <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] font-semibold text-gray-600">
+                Cerrado hasta {fmtDate(company.booksClosedUntil)}
+              </span>
+            ) : (
+              <span className="text-[11px] text-gray-400">Sin cierre (todo editable)</span>
+            )}
+            <span className="flex-1" />
+            <input
+              type="date"
+              value={closeDate}
+              onChange={(e) => setCloseDate(e.target.value)}
+              className="rounded-lg border border-gray-200 px-2 py-1.5 text-sm"
+            />
+            <button
+              onClick={() => applyClose(closeDate)}
+              disabled={closeBusy || !closeDate}
+              className="rounded-lg bg-gray-800 px-3 py-1.5 text-sm font-semibold text-white hover:bg-gray-900 disabled:opacity-50"
+            >
+              Cerrar hasta
+            </button>
+            {company?.booksClosedUntil && (
+              <button
+                onClick={() => applyClose(null)}
+                disabled={closeBusy}
+                className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50"
+              >
+                Reabrir
+              </button>
+            )}
           </div>
 
           {importResult && (

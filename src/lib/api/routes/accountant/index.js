@@ -74,6 +74,12 @@ export async function getAccCompanyTaxCalendar(companyId, params = {}) {
 export async function getAccCompanyTaxSummary(companyId, params = {}) {
   return apiFetch(`/accountant/companies/${companyId}/tax-summary${qs(params)}`);
 }
+export async function setAccCompanyClose(companyId, date) {
+  return apiFetch(`/accountant/companies/${companyId}/close`, {
+    method: 'PATCH',
+    body: JSON.stringify({ date: date || null }),
+  });
+}
 export async function getAccCompanyEntries(companyId, params = {}) {
   return apiFetch(`/accountant/companies/${companyId}/entries${qs(params)}`);
 }
