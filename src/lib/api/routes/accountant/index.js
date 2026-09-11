@@ -37,6 +37,13 @@ export async function unlinkAccountant(accountantId) {
 export async function getAccountantPortfolio() {
   return apiFetch('/accountant/portfolio');
 }
+// El contador crea una empresa "solo contabilidad".
+export async function createAccountantCompany(payload) {
+  return apiFetch('/accountant/companies', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
 
 function qs(params = {}) {
   const s = new URLSearchParams(
