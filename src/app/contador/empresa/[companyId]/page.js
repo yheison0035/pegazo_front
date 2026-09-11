@@ -147,6 +147,10 @@ export default function ContadorEmpresa() {
   const [closeBusy, setCloseBusy] = useState(false);
   const [payrollForm, setPayrollForm] = useState(null);
   const [payrollBusy, setPayrollBusy] = useState(false);
+  const [reconAccount, setReconAccount] = useState('');
+  const [recon, setRecon] = useState(null);
+  const [reconStatement, setReconStatement] = useState('');
+  const [reconChecked, setReconChecked] = useState({});
   const [parties, setParties] = useState([]);
   const [partyKind, setPartyKind] = useState('');
   const [partyForm, setPartyForm] = useState(null);
@@ -210,13 +214,20 @@ export default function ContadorEmpresa() {
         setParties((await getAccCompanyParties(companyId))?.data || []);
       } else if (view === 'impuestos') {
         setTaxSummary((await getAccCompanyTaxSummary(companyId, params))?.data || null);
+      } else if (view === 'conciliacion') {
+        const accs = (await getAccCompanyLedgerAccounts(companyId))?.data || [];
+        setAccounts(accs);
+        const acc = reconAccount || (accs.find((a) => a.code === '1110') ? '1110' : '1105');
+        if (!reconAccount) setReconAccount(acc);
+        setRecon((await getAccCompanyAuxiliary(companyId, { ...params, account: acc }))?.data || null);
+        setReconChecked({});
       }
     } catch (e) {
       setError(e.message || 'No se pudo cargar.');
     } finally {
       setLoading(false);
     }
-  }, [companyId, view, booksTab, auxAccount, start, end]);
+  }, [companyId, view, booksTab, auxAccount, reconAccount, start, end]);
 
   useEffect(() => {
     load();
@@ -506,6 +517,7 @@ export default function ContadorEmpresa() {
           ['asientos', 'Asientos'],
           ['terceros', 'Terceros'],
           ['impuestos', 'Impuestos'],
+          ['conciliacion', 'Conciliación'],
           ['libros', 'Libros'],
           ['plan', 'Plan de cuentas'],
           ['calendario', 'Calendario'],
@@ -522,8 +534,8 @@ export default function ContadorEmpresa() {
         ))}
       </div>
 
-      {/* Rango (aplica a estados, libros e impuestos) */}
-      {['estados', 'libros', 'impuestos'].includes(view) && (
+      {/* Rango (aplica a estados, libros, impuestos y conciliación) */}
+      {['estados', 'libros', 'impuestos', 'conciliacion'].includes(view) && (
         <div className="mb-4 flex flex-wrap items-end gap-3">
           <div>
             <label className="mb-1 block text-[11px] font-semibold text-gray-500">Desde</label>
@@ -851,6 +863,83 @@ export default function ContadorEmpresa() {
             importación. Ajusta cuentas en Plan de cuentas si tu negocio lo
             requiere.
           </p>
+        </div>
+      )}
+
+      {/* ===== CONCILIACIÓN BANCARIA ===== */}
+      {view === 'conciliacion' && (
+        <div>
+          <div className="mb-3 flex flex-wrap items-end gap-3">
+            <div>
+              <label className="mb-1 block text-[11px] font-semibold text-gray-500">Cuenta de banco/caja</label>
+              <select value={reconAccount} onChange={(e) => setReconAccount(e.target.value)} className="rounded-xl border border-gray-200 px-3 py-2 text-sm">
+                {accounts.filter((a) => a.type === 'ASSET').map((a) => (
+                  <option key={a.id || a.code} value={a.code}>{a.code} · {a.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-[11px] font-semibold text-gray-500">Saldo según extracto</label>
+              <MoneyInput value={reconStatement} onChange={setReconStatement} placeholder="$ 0" className="w-40 rounded-xl border border-gray-200 px-3 py-2 text-sm" />
+            </div>
+          </div>
+
+          {recon && (
+            <>
+              {(() => {
+                const libro = recon.totals?.balance || 0;
+                const extracto = Number(reconStatement) || 0;
+                const noConc = (recon.movements || []).reduce((s, m, i) => s + (reconChecked[i] ? 0 : (m.debit - m.credit)), 0);
+                const dif = libro - extracto;
+                return (
+                  <div className="mb-3 grid grid-cols-3 gap-3">
+                    <div className="rounded-2xl border border-gray-100 bg-white p-4 text-center shadow-sm">
+                      <p className="text-[10px] font-semibold uppercase text-gray-400">Saldo en libros</p>
+                      <p className="mt-1 text-lg font-bold tabular-nums text-gray-900">{cop(libro)}</p>
+                    </div>
+                    <div className="rounded-2xl border border-gray-100 bg-white p-4 text-center shadow-sm">
+                      <p className="text-[10px] font-semibold uppercase text-gray-400">Según extracto</p>
+                      <p className="mt-1 text-lg font-bold tabular-nums text-gray-900">{cop(extracto)}</p>
+                    </div>
+                    <div className={`rounded-2xl p-4 text-center text-white shadow-sm ${dif === 0 ? 'bg-emerald-600' : 'bg-amber-500'}`}>
+                      <p className="text-[10px] font-semibold uppercase text-white/80">Diferencia</p>
+                      <p className="mt-1 text-lg font-bold tabular-nums">{cop(dif)}</p>
+                    </div>
+                  </div>
+                );
+              })()}
+              <p className="mb-2 text-xs text-gray-500">Marca lo que ya aparece en el extracto para ubicar lo pendiente.</p>
+              <div className="overflow-x-auto rounded-2xl border border-gray-100 bg-white shadow-sm">
+                <table className="min-w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-100 bg-gray-50/60 text-left text-xs uppercase text-gray-500">
+                      <th className="px-3 py-3">✓</th>
+                      <th className="px-4 py-3">Fecha</th>
+                      <th className="px-4 py-3">Detalle</th>
+                      <th className="px-4 py-3 text-right">Débito</th>
+                      <th className="px-4 py-3 text-right">Crédito</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50">
+                    {(recon.movements || []).map((m, i) => (
+                      <tr key={i} className={reconChecked[i] ? 'text-gray-400' : 'text-gray-700'}>
+                        <td className="px-3 py-2">
+                          <input type="checkbox" checked={!!reconChecked[i]} onChange={(e) => setReconChecked({ ...reconChecked, [i]: e.target.checked })} />
+                        </td>
+                        <td className="px-4 py-2 font-mono text-xs text-gray-500">{m.date}</td>
+                        <td className="px-4 py-2">{m.description}</td>
+                        <td className="px-4 py-2 text-right tabular-nums">{m.debit ? num(m.debit) : ''}</td>
+                        <td className="px-4 py-2 text-right tabular-nums">{m.credit ? num(m.credit) : ''}</td>
+                      </tr>
+                    ))}
+                    {(recon.movements || []).length === 0 && (
+                      <tr><td colSpan={5} className="px-4 py-8 text-center text-gray-400">Sin movimientos de esta cuenta en el periodo.</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
         </div>
       )}
 
