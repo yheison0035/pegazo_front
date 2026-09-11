@@ -385,6 +385,12 @@ export const NAVIGATION = [
     section: 'Contabilidad',
     items: [
       {
+        name: 'Resumen contable',
+        href: '/dashboard/resumen-contable',
+        icon: ChartPieIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN'],
+      },
+      {
         name: 'Activos',
         href: '/dashboard/assets',
         icon: BuildingLibraryIcon,
