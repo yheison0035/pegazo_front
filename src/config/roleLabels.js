@@ -18,6 +18,7 @@ const BASE_LABELS = {
   // vertical (Barbero, Doctor, Estilista…). BARBERO queda como alias heredado.
   PROFESIONAL: 'Profesional',
   BARBERO: 'Profesional',
+  CONTADOR: 'Contador',
 };
 
 // Roles cuyo nombre visible se toma de la terminología del negocio (attendant):
@@ -81,8 +82,13 @@ const DEFAULT_ROLES = ['ADMIN', 'ASESOR', 'CAJA', 'BODEGUERO', 'RECEPCIONISTA'];
 // `override` opcional: roles configurados en BD para el tipo
 // (company.typeRoles). Si no viene, usa el mapa por defecto del código.
 export function assignableRolesForType(type, override) {
-  if (Array.isArray(override) && override.length) return override;
-  return ROLES_BY_TYPE[type] || DEFAULT_ROLES;
+  const base =
+    Array.isArray(override) && override.length
+      ? override
+      : ROLES_BY_TYPE[type] || DEFAULT_ROLES;
+  // CONTADOR es transversal: cualquier negocio puede invitar a su contador
+  // (accede a la sección Contabilidad). Se ofrece siempre, al final.
+  return base.includes('CONTADOR') ? base : [...base, 'CONTADOR'];
 }
 
 /**

@@ -210,7 +210,7 @@ export default function AssetsPage() {
   ];
 
   return (
-    <RoleGuard allowedRoles={[Roles.SUPER_ADMIN, Roles.ADMIN]}>
+    <RoleGuard allowedRoles={[Roles.SUPER_ADMIN, Roles.ADMIN, Roles.CONTADOR]}>
       <div className="relative mx-auto w-full max-w-5xl p-4">
         <LoadingOverlay show={loading} text="Cargando activos..." />
 
