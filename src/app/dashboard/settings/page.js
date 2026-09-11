@@ -14,7 +14,14 @@ import {
   ReceiptPercentIcon,
   ChatBubbleBottomCenterTextIcon,
   EnvelopeIcon,
+  KeyIcon,
+  TrashIcon,
 } from '@heroicons/react/24/outline';
+import {
+  linkAccountant,
+  getLinkedAccountants,
+  unlinkAccountant,
+} from '@/lib/api/routes/accountant';
 import { getTerms } from '@/config/terminology';
 import Button from '@/components/ui/Button';
 import AlertModal from '@/components/dashboard/modals/alertModal';
@@ -1160,6 +1167,117 @@ function AccountingSectionCard({ initial }) {
   );
 }
 
+// Enlazar el contador (por su llave) para que lleve la contabilidad. Solo se
+// muestra cuando la Contabilidad está activada.
+function AccountantLinkCard() {
+  const [key, setKey] = useState('');
+  const [rows, setRows] = useState([]);
+  const [busy, setBusy] = useState(false);
+  const [alert, setAlert] = useState({});
+
+  const load = async () => {
+    try {
+      const res = await getLinkedAccountants();
+      setRows(res?.data || []);
+    } catch {
+      /* noop */
+    }
+  };
+  useEffect(() => {
+    load();
+  }, []);
+
+  const doLink = async () => {
+    const k = key.trim().toUpperCase();
+    if (!k) return;
+    setBusy(true);
+    try {
+      const res = await linkAccountant(k);
+      setAlert({
+        type: 'success',
+        message: `Enlazado con ${res?.data?.name || 'el contador'}.`,
+      });
+      setKey('');
+      load();
+    } catch (e) {
+      setAlert({ type: 'error', message: e.message || 'No se pudo enlazar.' });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const doUnlink = async (id) => {
+    setBusy(true);
+    try {
+      await unlinkAccountant(id);
+      load();
+    } catch (e) {
+      setAlert({ type: 'error', message: e.message || 'No se pudo quitar.' });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+      <div className="flex items-start gap-3">
+        <div className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-orange-50 text-orange-600">
+          <KeyIcon className="h-5 w-5" />
+        </div>
+        <div>
+          <h2 className="text-base font-bold text-gray-800">Tu contador</h2>
+          <p className="text-sm text-gray-500">
+            Pega la llave que te comparte tu contador (registrado en Pegazo) para
+            que lleve tu contabilidad. Podrá ver tus libros y estados.
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-end gap-2">
+        <input
+          value={key}
+          onChange={(e) => setKey(e.target.value.toUpperCase())}
+          placeholder="Ej: PZ-6RLE2A6U"
+          className="flex-1 rounded-xl border border-gray-200 px-3 py-2 font-mono text-sm uppercase focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+        />
+        <Button variant="primary" onClick={doLink} loading={busy}>
+          Enlazar
+        </Button>
+      </div>
+
+      {rows.length > 0 && (
+        <ul className="mt-4 space-y-2">
+          {rows.map((r) => (
+            <li
+              key={r.accountantId}
+              className="flex items-center justify-between rounded-xl border border-gray-100 px-3 py-2"
+            >
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-gray-800">
+                  {r.name}
+                </p>
+                <p className="text-[11px] text-gray-400">
+                  {r.email} · {r.accountantKey}
+                </p>
+              </div>
+              <button
+                onClick={() => doUnlink(r.accountantId)}
+                disabled={busy}
+                title="Quitar"
+                className="flex-none rounded-lg border border-gray-200 p-2 text-gray-400 hover:bg-red-50 hover:text-red-500"
+              >
+                <TrashIcon className="h-4 w-4" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <AlertModal type={alert.type} message={alert.message} onClose={() => setAlert({})} />
+    </div>
+  );
+}
+
 function AccountingBasisCard({ initial }) {
   const auth = useAuth();
   const usuario = auth?.usuario;
@@ -1579,6 +1697,7 @@ export default function Settings() {
             <FiscalCard initial={settings} />
             <CashPolicyCard initial={settings} />
             <AccountingSectionCard initial={settings} />
+            {settings?.accountingEnabled && <AccountantLinkCard />}
             <AccountingBasisCard initial={settings} />
             <BooksCloseCard initial={settings} />
             {isServices && <HoursCard initial={settings} />}
