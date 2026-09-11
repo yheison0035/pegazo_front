@@ -1,7 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import QRCode from 'qrcode';
+import Link from 'next/link';
 import {
   KeyIcon,
   ClipboardDocumentIcon,
@@ -9,32 +10,49 @@ import {
   BuildingOffice2Icon,
   PlusIcon,
   XMarkIcon,
+  MagnifyingGlassIcon,
+  QrCodeIcon,
+  ArrowRightIcon,
 } from '@heroicons/react/24/outline';
-import Link from 'next/link';
 import {
   getAccountantMe,
   getAccountantPortfolio,
   createAccountantCompany,
 } from '@/lib/api/routes/accountant';
 
+// Color de avatar derivado del nombre (para las tarjetas sin logo).
+const AVATAR_COLORS = [
+  'bg-orange-100 text-orange-700',
+  'bg-emerald-100 text-emerald-700',
+  'bg-blue-100 text-blue-700',
+  'bg-purple-100 text-purple-700',
+  'bg-rose-100 text-rose-700',
+  'bg-teal-100 text-teal-700',
+];
+function avatarColor(name = '') {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (h + name.charCodeAt(i)) % AVATAR_COLORS.length;
+  return AVATAR_COLORS[h];
+}
+
 export default function ContadorPortal() {
   const [me, setMe] = useState(null);
   const [companies, setCompanies] = useState([]);
-  const [creating, setCreating] = useState(null); // form nueva empresa
+  const [q, setQ] = useState('');
+  const [creating, setCreating] = useState(null);
   const [busy, setBusy] = useState(false);
   const [qr, setQr] = useState('');
+  const [showQr, setShowQr] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const load = useCallback(async () => {
     try {
       const res = await getAccountantMe();
-      const data = res?.data;
-      if (data) {
-        setMe(data);
-        localStorage.setItem('contador', JSON.stringify(data));
+      if (res?.data) {
+        setMe(res.data);
+        localStorage.setItem('contador', JSON.stringify(res.data));
       }
     } catch {
-      // Respaldo: lo guardado al iniciar sesión.
       try {
         setMe(JSON.parse(localStorage.getItem('contador') || 'null'));
       } catch {
@@ -53,13 +71,36 @@ export default function ContadorPortal() {
     load();
   }, [load]);
 
-  // Genera el QR de la llave (local, sin llamadas externas).
   useEffect(() => {
     if (!me?.accountantKey) return;
-    QRCode.toDataURL(me.accountantKey, { width: 220, margin: 1 })
+    QRCode.toDataURL(me.accountantKey, { width: 200, margin: 1 })
       .then(setQr)
       .catch(() => setQr(''));
   }, [me?.accountantKey]);
+
+  const stats = useMemo(() => {
+    const pegazo = companies.filter((c) => !c.accountingOnly).length;
+    return { total: companies.length, pegazo, externas: companies.length - pegazo };
+  }, [companies]);
+
+  const filtered = useMemo(() => {
+    const t = q.trim().toLowerCase();
+    if (!t) return companies;
+    return companies.filter(
+      (c) =>
+        c.name?.toLowerCase().includes(t) || String(c.nit || '').includes(t),
+    );
+  }, [companies, q]);
+
+  const copyKey = async () => {
+    try {
+      await navigator.clipboard.writeText(me.accountantKey);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* noop */
+    }
+  };
 
   const saveCompany = async () => {
     const name = (creating?.name || '').trim();
@@ -80,146 +121,138 @@ export default function ContadorPortal() {
     }
   };
 
-  const copyKey = async () => {
-    try {
-      await navigator.clipboard.writeText(me.accountantKey);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    } catch {
-      /* noop */
-    }
-  };
-
   return (
     <div>
-      <div className="mb-5">
-        <h1 className="text-2xl font-bold text-gray-800">
-          Hola{me?.name ? `, ${me.name}` : ''} 👋
-        </h1>
-        <p className="text-sm text-gray-500">
-          Este es tu portal. Comparte tu llave con los negocios para que te
-          enlacen y verás aquí la contabilidad de cada uno.
-        </p>
+      {/* Encabezado */}
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">
+            Hola{me?.name ? `, ${me.name}` : ''} 👋
+          </h1>
+          <p className="text-sm text-gray-500">
+            Tu portafolio de empresas. Lleva su contabilidad de punta a punta.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2 text-xs">
+          <span className="rounded-full bg-gray-100 px-3 py-1 font-semibold text-gray-600">
+            {stats.total} empresa{stats.total !== 1 ? 's' : ''}
+          </span>
+          <span className="rounded-full bg-orange-50 px-3 py-1 font-semibold text-orange-600">
+            {stats.pegazo} Pegazo
+          </span>
+          <span className="rounded-full bg-gray-100 px-3 py-1 font-semibold text-gray-500">
+            {stats.externas} externas
+          </span>
+        </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-[320px_1fr]">
-        {/* Llave + QR */}
-        <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-          <div className="mb-3 flex items-center gap-2">
-            <KeyIcon className="h-5 w-5 text-orange-500" />
-            <h2 className="text-sm font-bold text-gray-800">Tu llave de contador</h2>
-          </div>
-          <p className="mb-3 text-xs text-gray-500">
-            El dueño la pega o escanea al activar Contabilidad para enlazarte su
-            empresa.
-          </p>
-
-          <div className="flex items-center justify-between gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5">
-            <span className="font-mono text-lg font-bold tracking-wider text-gray-800">
-              {me?.accountantKey || '—'}
-            </span>
-            <button
-              onClick={copyKey}
-              title="Copiar"
-              className="flex-none rounded-lg bg-orange-500 p-2 text-white hover:bg-orange-600"
-            >
-              {copied ? (
-                <CheckIcon className="h-4 w-4" />
-              ) : (
-                <ClipboardDocumentIcon className="h-4 w-4" />
-              )}
-            </button>
-          </div>
-
-          {qr && (
-            <div className="mt-4 flex flex-col items-center">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={qr}
-                alt="QR de tu llave"
-                className="rounded-xl border border-gray-100"
+      <div className="grid gap-4 lg:grid-cols-[1fr_300px]">
+        {/* Portafolio */}
+        <div className="order-2 lg:order-1">
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <div className="relative flex-1">
+              <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Buscar empresa o NIT…"
+                className="w-full rounded-xl border border-gray-200 py-2 pl-9 pr-3 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
               />
-              <p className="mt-2 text-[11px] text-gray-400">
-                Escanea para enlazar
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Portafolio (se llena en el siguiente paso) */}
-        <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-          <div className="mb-3 flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <BuildingOffice2Icon className="h-5 w-5 text-orange-500" />
-              <h2 className="text-sm font-bold text-gray-800">Tus empresas</h2>
             </div>
             <button
               onClick={() => setCreating({ name: '', nit: '', taxRegime: '' })}
-              className="inline-flex items-center gap-1 rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-orange-600"
+              className="inline-flex items-center gap-1 rounded-xl bg-orange-500 px-3 py-2 text-sm font-semibold text-white hover:bg-orange-600"
             >
               <PlusIcon className="h-4 w-4" /> Nueva empresa
             </button>
           </div>
-          {companies.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-gray-200 py-12 text-center text-gray-400">
-              Aún no tienes empresas.
-              <p className="mt-1 text-xs">
-                Crea una tú mismo con <b>Nueva empresa</b>, o comparte tu llave{' '}
-                <b>{me?.accountantKey || ''}</b> con un negocio de Pegazo para que
-                te enlace.
-              </p>
+
+          {filtered.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-gray-200 bg-white py-14 text-center text-gray-400">
+              {companies.length === 0 ? (
+                <>
+                  Aún no tienes empresas.
+                  <p className="mt-1 text-xs">
+                    Crea una con <b>Nueva empresa</b>, o comparte tu llave{' '}
+                    <b>{me?.accountantKey}</b> con un negocio de Pegazo.
+                  </p>
+                </>
+              ) : (
+                'No hay empresas que coincidan.'
+              )}
             </div>
           ) : (
-            <ul className="space-y-2">
-              {companies.map((c) => (
-                <li key={c.companyId}>
-                  <Link
-                    href={`/contador/empresa/${c.companyId}`}
-                    className="flex items-center gap-3 rounded-2xl border border-gray-100 p-3 transition hover:border-orange-200 hover:bg-orange-50/40"
-                  >
-                    <img
-                      src={c.logo || '/images/no-image.png'}
-                      alt=""
-                      className="h-10 w-10 flex-none rounded-lg border border-gray-100 object-contain"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className="flex items-center gap-2 truncate text-sm font-semibold text-gray-800">
-                        {c.name}
-                        <span
-                          className={`flex-none rounded-full px-2 py-0.5 text-[9px] font-semibold ${
-                            c.accountingOnly
-                              ? 'bg-gray-100 text-gray-500'
-                              : 'bg-orange-50 text-orange-600'
-                          }`}
-                        >
-                          {c.accountingOnly ? 'Solo contabilidad' : 'Pegazo'}
-                        </span>
-                      </p>
-                      <p className="text-[11px] text-gray-400">
-                        {c.nit ? `NIT ${c.nit}` : c.type}
-                      </p>
-                    </div>
-                    <span className="flex-none text-xs font-semibold text-orange-600">
-                      Ver contabilidad →
+            <div className="grid gap-3 sm:grid-cols-2">
+              {filtered.map((c) => (
+                <Link
+                  key={c.companyId}
+                  href={`/contador/empresa/${c.companyId}`}
+                  className="group flex items-center gap-3 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-orange-200 hover:shadow-md"
+                >
+                  {c.logo ? (
+                    <img src={c.logo} alt="" className="h-11 w-11 flex-none rounded-xl border border-gray-100 object-contain" />
+                  ) : (
+                    <span className={`flex h-11 w-11 flex-none items-center justify-center rounded-xl text-lg font-bold ${avatarColor(c.name)}`}>
+                      {(c.name || '?').charAt(0)}
                     </span>
-                  </Link>
-                </li>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-bold text-gray-800">{c.name}</p>
+                    <p className="text-[11px] text-gray-400">{c.nit ? `NIT ${c.nit}` : c.type}</p>
+                    <span
+                      className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[9px] font-semibold ${
+                        c.accountingOnly ? 'bg-gray-100 text-gray-500' : 'bg-orange-50 text-orange-600'
+                      }`}
+                    >
+                      {c.accountingOnly ? 'Solo contabilidad' : 'Pegazo'}
+                    </span>
+                  </div>
+                  <ArrowRightIcon className="h-4 w-4 flex-none text-gray-300 transition group-hover:translate-x-0.5 group-hover:text-orange-500" />
+                </Link>
               ))}
-            </ul>
+            </div>
           )}
+        </div>
+
+        {/* Llave + QR (aside) */}
+        <div className="order-1 lg:order-2">
+          <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+            <div className="mb-2 flex items-center gap-2">
+              <KeyIcon className="h-5 w-5 text-orange-500" />
+              <h2 className="text-sm font-bold text-gray-800">Tu llave</h2>
+            </div>
+            <p className="mb-3 text-[11px] text-gray-500">
+              El dueño la pega o escanea al activar Contabilidad para enlazarte.
+            </p>
+            <div className="flex items-center justify-between gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2">
+              <span className="font-mono text-base font-bold tracking-wider text-gray-800">
+                {me?.accountantKey || '—'}
+              </span>
+              <button onClick={copyKey} title="Copiar" className="flex-none rounded-lg bg-orange-500 p-2 text-white hover:bg-orange-600">
+                {copied ? <CheckIcon className="h-4 w-4" /> : <ClipboardDocumentIcon className="h-4 w-4" />}
+              </button>
+            </div>
+            <button
+              onClick={() => setShowQr((v) => !v)}
+              className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-orange-600 hover:text-orange-700"
+            >
+              <QrCodeIcon className="h-4 w-4" /> {showQr ? 'Ocultar QR' : 'Mostrar QR'}
+            </button>
+            {showQr && qr && (
+              <div className="mt-3 flex flex-col items-center">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={qr} alt="QR de tu llave" className="rounded-xl border border-gray-100" />
+                <p className="mt-1 text-[11px] text-gray-400">Escanea para enlazar</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Modal nueva empresa (solo contabilidad) */}
+      {/* Modal nueva empresa */}
       {creating && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-          onClick={() => setCreating(null)}
-        >
-          <div
-            className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setCreating(null)}>
+          <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-lg font-bold text-gray-800">Nueva empresa</h2>
               <button onClick={() => setCreating(null)} className="text-gray-400 hover:text-gray-600">
@@ -227,12 +260,9 @@ export default function ContadorPortal() {
               </button>
             </div>
             <p className="mb-3 text-xs text-gray-500">
-              Para un cliente que no está en Pegazo. Le llevarás la contabilidad
-              con asientos manuales.
+              Para un cliente que no está en Pegazo. Le llevarás la contabilidad con asientos manuales.
             </p>
-            <label className="mb-1 block text-xs font-semibold text-gray-600">
-              Nombre de la empresa *
-            </label>
+            <label className="mb-1 block text-xs font-semibold text-gray-600">Nombre de la empresa *</label>
             <input
               autoFocus
               value={creating.name}
@@ -243,20 +273,11 @@ export default function ContadorPortal() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="mb-1 block text-xs font-semibold text-gray-600">NIT</label>
-                <input
-                  value={creating.nit}
-                  onChange={(e) => setCreating({ ...creating, nit: e.target.value })}
-                  placeholder="Opcional"
-                  className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
-                />
+                <input value={creating.nit} onChange={(e) => setCreating({ ...creating, nit: e.target.value })} placeholder="Opcional" className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20" />
               </div>
               <div>
                 <label className="mb-1 block text-xs font-semibold text-gray-600">Régimen</label>
-                <select
-                  value={creating.taxRegime}
-                  onChange={(e) => setCreating({ ...creating, taxRegime: e.target.value })}
-                  className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
-                >
+                <select value={creating.taxRegime} onChange={(e) => setCreating({ ...creating, taxRegime: e.target.value })} className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20">
                   <option value="">—</option>
                   <option value="SIMPLE">Simple</option>
                   <option value="ORDINARIO">Ordinario</option>
@@ -264,17 +285,10 @@ export default function ContadorPortal() {
               </div>
             </div>
             <div className="mt-5 flex justify-end gap-2">
-              <button
-                onClick={() => setCreating(null)}
-                className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
-              >
+              <button onClick={() => setCreating(null)} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50">
                 Cancelar
               </button>
-              <button
-                onClick={saveCompany}
-                disabled={busy || !creating.name.trim()}
-                className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600 disabled:opacity-50"
-              >
+              <button onClick={saveCompany} disabled={busy || !creating.name.trim()} className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600 disabled:opacity-50">
                 {busy ? 'Creando…' : 'Crear empresa'}
               </button>
             </div>
