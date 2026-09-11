@@ -3,9 +3,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import * as XLSX from 'xlsx';
 import {
   ArrowLeftIcon,
   ArrowDownTrayIcon,
+  ArrowUpTrayIcon,
   PlusIcon,
   TrashIcon,
   XMarkIcon,
@@ -21,6 +23,7 @@ import {
   getAccCompanyEntries,
   createAccCompanyEntry,
   deleteAccCompanyEntry,
+  importAccCompanyEntries,
 } from '@/lib/api/routes/accountant';
 
 function cop(n) {
@@ -118,6 +121,8 @@ export default function ContadorEmpresa() {
   const [entries, setEntries] = useState([]);
   const [entryForm, setEntryForm] = useState(null); // {date, description, reference, lines:[]}
   const [entryBusy, setEntryBusy] = useState(false);
+  const [importResult, setImportResult] = useState(null);
+  const [importing, setImporting] = useState(false);
 
   useEffect(() => {
     getAccountantPortfolio()
@@ -248,6 +253,65 @@ export default function ContadorEmpresa() {
       /* noop */
     } finally {
       setEntryBusy(false);
+    }
+  };
+
+  // Descarga una plantilla .xlsx: hoja "Movimientos" (a llenar) + hoja "Cuentas"
+  // con el PUC de la empresa (para saber qué códigos usar).
+  const downloadTemplate = () => {
+    const wb = XLSX.utils.book_new();
+    const movs = [
+      ['Fecha', 'Descripcion', 'CuentaDebito', 'CuentaCredito', 'Valor', 'Referencia'],
+      ['2026-09-01', 'Ejemplo: venta de contado', '1105', '4135', 100000, 'FAC-001'],
+    ];
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(movs), 'Movimientos');
+    const cuentas = [['Codigo', 'Cuenta', 'Naturaleza']].concat(
+      (accounts || []).map((a) => [a.code, a.name, a.nature]),
+    );
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(cuentas), 'Cuentas');
+    XLSX.writeFile(wb, `plantilla-contable_${company?.name || companyId}.xlsx`);
+  };
+
+  const norm = (s) =>
+    String(s || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-z]/g, '');
+
+  const onImportFile = async (file) => {
+    if (!file) return;
+    setImporting(true);
+    setImportResult(null);
+    setError('');
+    try {
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, { cellDates: true });
+      const ws = wb.Sheets['Movimientos'] || wb.Sheets[wb.SheetNames[0]];
+      const raw = XLSX.utils.sheet_to_json(ws, { raw: false, defval: '' });
+      const rows = raw.map((r) => {
+        const m = {};
+        for (const k of Object.keys(r)) m[norm(k)] = r[k];
+        return {
+          fecha: m.fecha,
+          descripcion: m.descripcion,
+          cuentaDebito: m.cuentadebito,
+          cuentaCredito: m.cuentacredito,
+          valor: Number(String(m.valor).replace(/[^\d.-]/g, '')) || 0,
+          referencia: m.referencia,
+        };
+      });
+      if (!rows.length) {
+        setError('El archivo no tiene filas en la hoja "Movimientos".');
+        return;
+      }
+      const res = await importAccCompanyEntries(companyId, rows);
+      setImportResult(res?.data || null);
+      load();
+    } catch (e) {
+      setError(e.message || 'No se pudo importar el archivo.');
+    } finally {
+      setImporting(false);
     }
   };
 
@@ -385,17 +449,58 @@ export default function ContadorEmpresa() {
       {/* ===== ASIENTOS MANUALES ===== */}
       {view === 'asientos' && (
         <div>
-          <div className="mb-3 flex items-center justify-between">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <p className="text-sm text-gray-500">
-              Registra la contabilidad a mano (partida doble). Debe cuadrar.
+              Registra a mano o importa un Excel para alimentar los libros.
             </p>
-            <button
-              onClick={openEntry}
-              className="inline-flex items-center gap-1 rounded-lg bg-orange-500 px-3 py-2 text-sm font-semibold text-white hover:bg-orange-600"
-            >
-              <PlusIcon className="h-4 w-4" /> Nuevo asiento
-            </button>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={downloadTemplate}
+                className="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50"
+              >
+                <ArrowDownTrayIcon className="h-4 w-4" /> Plantilla
+              </button>
+              <label className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-orange-200 bg-orange-50 px-3 py-2 text-sm font-semibold text-orange-700 hover:bg-orange-100">
+                <ArrowUpTrayIcon className="h-4 w-4" />
+                {importing ? 'Importando…' : 'Importar Excel'}
+                <input
+                  type="file"
+                  accept=".xlsx,.xls,.csv"
+                  className="hidden"
+                  disabled={importing}
+                  onChange={(e) => {
+                    onImportFile(e.target.files?.[0]);
+                    e.target.value = '';
+                  }}
+                />
+              </label>
+              <button
+                onClick={openEntry}
+                className="inline-flex items-center gap-1 rounded-lg bg-orange-500 px-3 py-2 text-sm font-semibold text-white hover:bg-orange-600"
+              >
+                <PlusIcon className="h-4 w-4" /> Nuevo asiento
+              </button>
+            </div>
           </div>
+
+          {importResult && (
+            <div className="mb-3 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+              <p className="text-sm font-semibold text-gray-800">
+                Importación: {importResult.created} de {importResult.total} asientos creados
+                {importResult.errors?.length ? ` · ${importResult.errors.length} con error` : ''}
+              </p>
+              {importResult.errors?.length > 0 && (
+                <ul className="mt-2 max-h-40 space-y-1 overflow-y-auto text-xs text-red-600">
+                  {importResult.errors.slice(0, 30).map((er, i) => (
+                    <li key={i}>Fila {er.row}: {er.message}</li>
+                  ))}
+                </ul>
+              )}
+              <button onClick={() => setImportResult(null)} className="mt-2 text-xs text-gray-400 hover:text-gray-600">
+                Cerrar
+              </button>
+            </div>
+          )}
           {entries.length === 0 && !loading ? (
             <div className="rounded-2xl border border-dashed border-gray-200 py-12 text-center text-gray-400">
               Sin asientos aún. Crea el primero con “Nuevo asiento”.

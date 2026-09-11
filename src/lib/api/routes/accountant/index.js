@@ -82,3 +82,9 @@ export async function deleteAccCompanyEntry(companyId, entryId) {
     method: 'DELETE',
   });
 }
+export async function importAccCompanyEntries(companyId, rows) {
+  return apiFetch(`/accountant/companies/${companyId}/import`, {
+    method: 'POST',
+    body: JSON.stringify({ rows }),
+  });
+}
