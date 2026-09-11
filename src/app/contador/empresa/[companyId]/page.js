@@ -33,7 +33,7 @@ import {
   updateAccCompanyParty,
   deleteAccCompanyParty,
 } from '@/lib/api/routes/accountant';
-import { PaperClipIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
+import { PaperClipIcon, PencilSquareIcon, UsersIcon } from '@heroicons/react/24/outline';
 
 const PARTY_KINDS = [
   ['CLIENTE', 'Cliente'],
@@ -145,6 +145,8 @@ export default function ContadorEmpresa() {
   const [importing, setImporting] = useState(false);
   const [closeDate, setCloseDate] = useState('');
   const [closeBusy, setCloseBusy] = useState(false);
+  const [payrollForm, setPayrollForm] = useState(null);
+  const [payrollBusy, setPayrollBusy] = useState(false);
   const [parties, setParties] = useState([]);
   const [partyKind, setPartyKind] = useState('');
   const [partyForm, setPartyForm] = useState(null);
@@ -375,6 +377,56 @@ export default function ContadorEmpresa() {
     }
   };
 
+  // ----- Nómina (asiento guiado) -----
+  const pickAcc = (prefer, fallback) =>
+    accounts.find((a) => a.code === prefer)?.code ||
+    accounts.find((a) => a.code === fallback)?.code ||
+    '';
+  const openPayroll = () =>
+    setPayrollForm({
+      date: today(),
+      employee: '',
+      expenseAccount: pickAcc('5110', '5105'),
+      deductionAccount: pickAcc('2370', '2365'),
+      cashAccount: pickAcc('1105', '1110'),
+      devengado: '',
+      deducciones: '',
+    });
+  const payrollNeto =
+    (Number(payrollForm?.devengado) || 0) - (Number(payrollForm?.deducciones) || 0);
+  const savePayroll = async () => {
+    const f = payrollForm;
+    const dev = Number(f.devengado) || 0;
+    const ded = Number(f.deducciones) || 0;
+    if (!f.employee.trim() || dev <= 0 || !f.expenseAccount || !f.cashAccount) return;
+    if (ded < 0 || ded > dev) {
+      setError('Las deducciones no pueden superar el devengado.');
+      return;
+    }
+    const nameOf = (code) => accounts.find((a) => a.code === code)?.name || null;
+    const lines = [
+      { accountCode: f.expenseAccount, accountName: nameOf(f.expenseAccount), debit: dev, credit: 0 },
+    ];
+    if (ded > 0)
+      lines.push({ accountCode: f.deductionAccount, accountName: nameOf(f.deductionAccount), debit: 0, credit: ded });
+    lines.push({ accountCode: f.cashAccount, accountName: nameOf(f.cashAccount), debit: 0, credit: dev - ded });
+    setPayrollBusy(true);
+    try {
+      await createAccCompanyEntry(companyId, {
+        date: f.date,
+        description: `Nómina · ${f.employee.trim()}`,
+        reference: 'NOMINA',
+        lines,
+      });
+      setPayrollForm(null);
+      load();
+    } catch (e) {
+      setError(e.message || 'No se pudo registrar la nómina.');
+    } finally {
+      setPayrollBusy(false);
+    }
+  };
+
   // Descarga una plantilla .xlsx: hoja "Movimientos" (a llenar) + hoja "Cuentas"
   // con el PUC de la empresa (para saber qué códigos usar).
   const downloadTemplate = () => {
@@ -595,6 +647,12 @@ export default function ContadorEmpresa() {
                   }}
                 />
               </label>
+              <button
+                onClick={openPayroll}
+                className="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50"
+              >
+                <UsersIcon className="h-4 w-4" /> Nómina
+              </button>
               <button
                 onClick={openEntry}
                 className="inline-flex items-center gap-1 rounded-lg bg-orange-500 px-3 py-2 text-sm font-semibold text-white hover:bg-orange-600"
@@ -1107,6 +1165,70 @@ export default function ContadorEmpresa() {
                 className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600 disabled:opacity-50"
               >
                 {entryBusy ? 'Guardando…' : 'Guardar asiento'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== MODAL NÓMINA ===== */}
+      {payrollForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setPayrollForm(null)}>
+          <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-gray-800">Registrar nómina</h2>
+              <button onClick={() => setPayrollForm(null)} className="text-gray-400 hover:text-gray-600"><XMarkIcon className="h-5 w-5" /></button>
+            </div>
+            <p className="mb-3 text-xs text-gray-500">
+              Genera el asiento contable del pago de nómina. Tú pones los valores;
+              el sistema arma el asiento balanceado.
+            </p>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-gray-600">Fecha *</label>
+                <input type="date" value={payrollForm.date} onChange={(e) => setPayrollForm({ ...payrollForm, date: e.target.value })} className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm" />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-gray-600">Empleado *</label>
+                <input value={payrollForm.employee} onChange={(e) => setPayrollForm({ ...payrollForm, employee: e.target.value })} placeholder="Nombre" className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm" />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-gray-600">Devengado (salario) *</label>
+                <MoneyInput value={payrollForm.devengado} onChange={(v) => setPayrollForm({ ...payrollForm, devengado: v })} placeholder="$ 0" className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm" />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-gray-600">Deducciones</label>
+                <MoneyInput value={payrollForm.deducciones} onChange={(v) => setPayrollForm({ ...payrollForm, deducciones: v })} placeholder="$ 0" className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm" />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-gray-600">Cuenta de gasto</label>
+                <select value={payrollForm.expenseAccount} onChange={(e) => setPayrollForm({ ...payrollForm, expenseAccount: e.target.value })} className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm">
+                  {accounts.map((a) => <option key={a.id || a.code} value={a.code}>{a.code} · {a.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-gray-600">Cuenta de pago</label>
+                <select value={payrollForm.cashAccount} onChange={(e) => setPayrollForm({ ...payrollForm, cashAccount: e.target.value })} className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm">
+                  {accounts.map((a) => <option key={a.id || a.code} value={a.code}>{a.code} · {a.name}</option>)}
+                </select>
+              </div>
+              {Number(payrollForm.deducciones) > 0 && (
+                <div className="sm:col-span-2">
+                  <label className="mb-1 block text-xs font-semibold text-gray-600">Cuenta de deducciones (por pagar)</label>
+                  <select value={payrollForm.deductionAccount} onChange={(e) => setPayrollForm({ ...payrollForm, deductionAccount: e.target.value })} className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm">
+                    {accounts.map((a) => <option key={a.id || a.code} value={a.code}>{a.code} · {a.name}</option>)}
+                  </select>
+                </div>
+              )}
+            </div>
+            <div className="mt-3 flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2 text-sm">
+              <span className="text-gray-500">Neto a pagar</span>
+              <span className="font-bold tabular-nums text-gray-900">{cop(payrollNeto)}</span>
+            </div>
+            <div className="mt-5 flex justify-end gap-2">
+              <button onClick={() => setPayrollForm(null)} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50">Cancelar</button>
+              <button onClick={savePayroll} disabled={payrollBusy || !payrollForm.employee.trim() || !(Number(payrollForm.devengado) > 0)} className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600 disabled:opacity-50">
+                {payrollBusy ? 'Guardando…' : 'Registrar nómina'}
               </button>
             </div>
           </div>
