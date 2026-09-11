@@ -115,6 +115,7 @@ export const MODULE_MIN_PLAN = {
   'plan-cuentas': 'ALTURA', // Contabilidad · plan de cuentas
   libros: 'ALTURA', // Contabilidad · libro diario y mayor
   'estados-financieros': 'ALTURA', // Contabilidad · estados financieros
+  'calendario-tributario': 'ALTURA', // Contabilidad · calendario tributario
   // Órbita: cadena / empresa
   'nomina-electronica': 'ORBITA', // nómina electrónica
 };

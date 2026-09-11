@@ -408,6 +408,12 @@ export const NAVIGATION = [
         icon: ChartPieIcon,
         roles: ['SUPER_ADMIN', 'ADMIN', 'CONTADOR'],
       },
+      {
+        name: 'Calendario tributario',
+        href: '/dashboard/calendario-tributario',
+        icon: CalendarDaysIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN', 'CONTADOR'],
+      },
     ],
   },
 

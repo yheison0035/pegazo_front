@@ -77,6 +77,7 @@ export default function useNavigation() {
     modules.push('plan-cuentas');
     modules.push('libros');
     modules.push('estados-financieros');
+    modules.push('calendario-tributario');
   }
 
   // Facturación electrónica DIAN: aún NO está liberada al 100%, así que SOLO se
