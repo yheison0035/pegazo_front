@@ -88,3 +88,11 @@ export async function importAccCompanyEntries(companyId, rows) {
     body: JSON.stringify({ rows }),
   });
 }
+export async function uploadAccCompanyDoc(companyId, file) {
+  const fd = new FormData();
+  fd.append('file', file);
+  return apiFetch(`/accountant/companies/${companyId}/upload`, {
+    method: 'POST',
+    body: fd,
+  });
+}
