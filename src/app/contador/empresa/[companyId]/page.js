@@ -24,7 +24,9 @@ import {
   createAccCompanyEntry,
   deleteAccCompanyEntry,
   importAccCompanyEntries,
+  uploadAccCompanyDoc,
 } from '@/lib/api/routes/accountant';
+import { PaperClipIcon } from '@heroicons/react/24/outline';
 
 function cop(n) {
   const v = Number(n) || 0;
@@ -196,11 +198,32 @@ export default function ContadorEmpresa() {
       date: today(),
       description: '',
       reference: '',
+      attachmentUrl: '',
+      attachmentName: '',
+      uploading: false,
       lines: [
         { accountCode: '', debit: '', credit: '' },
         { accountCode: '', debit: '', credit: '' },
       ],
     });
+
+  const uploadDoc = async (file) => {
+    if (!file) return;
+    setEntryForm((f) => ({ ...f, uploading: true }));
+    try {
+      const res = await uploadAccCompanyDoc(companyId, file);
+      const d = res?.data;
+      setEntryForm((f) => ({
+        ...f,
+        attachmentUrl: d?.url || '',
+        attachmentName: d?.name || file.name,
+        uploading: false,
+      }));
+    } catch (e) {
+      setError(e.message || 'No se pudo subir el documento.');
+      setEntryForm((f) => ({ ...f, uploading: false }));
+    }
+  };
   const setLine = (i, patch) =>
     setEntryForm((f) => ({
       ...f,
@@ -223,6 +246,8 @@ export default function ContadorEmpresa() {
         date: entryForm.date,
         description: entryForm.description.trim(),
         reference: entryForm.reference.trim() || null,
+        attachmentUrl: entryForm.attachmentUrl || null,
+        attachmentName: entryForm.attachmentName || null,
         lines: entryForm.lines
           .filter((l) => l.accountCode && (Number(l.debit) || Number(l.credit)))
           .map((l) => {
@@ -518,6 +543,11 @@ export default function ContadorEmpresa() {
                         {e.reference && <span className="ml-2 text-[11px] text-gray-400">({e.reference})</span>}
                       </div>
                       <div className="flex items-center gap-3">
+                        {e.attachmentUrl && (
+                          <a href={e.attachmentUrl} target="_blank" rel="noreferrer" title={e.attachmentName || 'Documento'} className="text-gray-400 hover:text-orange-600">
+                            <PaperClipIcon className="h-4 w-4" />
+                          </a>
+                        )}
                         <span className="text-xs font-semibold tabular-nums text-gray-500">{cop(tot)}</span>
                         <button onClick={() => removeEntry(e.id)} disabled={entryBusy} title="Eliminar" className="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-500">
                           <TrashIcon className="h-4 w-4" />
@@ -726,6 +756,35 @@ export default function ContadorEmpresa() {
               <span className={`text-xs font-semibold ${cuadra ? 'text-emerald-600' : 'text-red-500'}`}>
                 {cuadra ? '✓ Cuadra' : `Descuadre: ${num(Math.abs(totalD - totalC))}`}
               </span>
+            </div>
+
+            {/* Documento soporte */}
+            <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-dashed border-gray-200 p-3">
+              <PaperClipIcon className="h-4 w-4 text-gray-400" />
+              {entryForm.attachmentUrl ? (
+                <>
+                  <a href={entryForm.attachmentUrl} target="_blank" rel="noreferrer" className="truncate text-sm font-medium text-orange-600 hover:underline">
+                    {entryForm.attachmentName || 'documento'}
+                  </a>
+                  <button onClick={() => setEntryForm({ ...entryForm, attachmentUrl: '', attachmentName: '' })} className="text-gray-400 hover:text-red-500">
+                    <XMarkIcon className="h-4 w-4" />
+                  </button>
+                </>
+              ) : (
+                <label className="cursor-pointer text-sm font-medium text-gray-600 hover:text-orange-600">
+                  {entryForm.uploading ? 'Subiendo…' : 'Adjuntar documento soporte (factura/recibo)'}
+                  <input
+                    type="file"
+                    accept="image/*,application/pdf"
+                    className="hidden"
+                    disabled={entryForm.uploading}
+                    onChange={(e) => {
+                      uploadDoc(e.target.files?.[0]);
+                      e.target.value = '';
+                    }}
+                  />
+                </label>
+              )}
             </div>
 
             <div className="mt-5 flex justify-end gap-2">
