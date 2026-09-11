@@ -74,10 +74,12 @@ export default function useNavigation() {
   // decide si queda desbloqueada o con candado. Disponible en cualquier tipo.
   if (usuario.company?.accountingEnabled) {
     if (usuario.company?.hasAccountant) {
-      // La lleva un contador enlazado → el dueño ve solo el resumen simple, no
-      // los módulos técnicos (no saturarlo). El detalle vive en el portal del
-      // contador.
+      // La lleva un contador enlazado. El detalle técnico (plan de cuentas,
+      // libros, estados financieros, calendario) vive con el contador para no
+      // saturar al dueño. Pero el dueño SÍ ve lo que entiende: el resumen simple
+      // y sus Activos (los bienes/equipos de su negocio).
       modules.push('resumen-contable');
+      modules.push('assets');
     } else {
       modules.push('assets');
       modules.push('plan-cuentas');
