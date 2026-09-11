@@ -1711,7 +1711,10 @@ export default function Settings() {
         ) : (
           <>
             {/* Navegación rápida entre módulos */}
-            <div className="sticky top-0 z-10 -mx-4 mb-5 flex flex-wrap gap-2 border-b border-gray-100 bg-white/90 px-4 py-3 backdrop-blur">
+            <div className="sticky top-0 z-20 -mx-4 mb-6 flex flex-wrap items-center gap-2 border-b border-gray-200 bg-white px-4 py-3 shadow-sm">
+              <span className="mr-1 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                Ir a
+              </span>
               {[
                 ['empresa', 'Mi empresa'],
                 ['apariencia', 'Apariencia'],
@@ -1723,7 +1726,7 @@ export default function Settings() {
                 <a
                   key={id}
                   href={`#${id}`}
-                  className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 transition hover:bg-orange-50 hover:text-orange-600"
+                  className="rounded-full border border-gray-200 bg-gray-50 px-3.5 py-1.5 text-xs font-semibold text-gray-600 transition hover:border-orange-300 hover:bg-orange-50 hover:text-orange-600"
                 >
                   {label}
                 </a>
