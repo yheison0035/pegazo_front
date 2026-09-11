@@ -588,6 +588,9 @@ export default function Landing() {
             <a href="#negocios" className="hover:text-white">
               Para tu negocio
             </a>
+            <a href="#contadores" className="hover:text-white">
+              Contadores
+            </a>
             <a href="#planes" className="hover:text-white">
               Planes
             </a>
@@ -1172,6 +1175,93 @@ export default function Landing() {
         </p>
       </section>
 
+      {/* ¿ERES CONTADOR? */}
+      <section
+        id="contadores"
+        data-reveal
+        className="relative overflow-hidden bg-gradient-to-br from-[#0b0f19] via-neutral-950 to-black py-20 text-white"
+      >
+        <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-orange-600/20 blur-[120px]" />
+        <div className="relative mx-auto max-w-6xl px-5">
+          {/* Enfoque Empresa | Contador */}
+          <div className="mx-auto mb-6 flex w-fit items-center gap-1 rounded-full border border-white/10 bg-white/5 p-1 text-sm">
+            <a href="#negocios" className="rounded-full px-4 py-1.5 text-white/60 transition hover:text-white">
+              Empresa
+            </a>
+            <span className="rounded-full bg-gradient-to-r from-orange-500 to-amber-500 px-4 py-1.5 font-semibold text-white shadow">
+              Contador
+            </span>
+          </div>
+
+          <div className="grid items-center gap-10 lg:grid-cols-2">
+            <div>
+              <h2 className="text-3xl font-black leading-tight sm:text-4xl">
+                ¿Eres{' '}
+                <span className="bg-gradient-to-r from-orange-400 to-amber-300 bg-clip-text text-transparent">
+                  contador
+                </span>
+                ?
+              </h2>
+              <p className="mt-4 text-white/70">
+                Lleva la contabilidad de todos tus clientes desde un solo lugar:
+                los negocios que ya usan Pegazo y también los tuyos externos.
+                Regístrate, obtén tu llave y el negocio te enlaza en segundos.
+              </p>
+              <div className="mt-7 flex flex-wrap gap-3">
+                <a
+                  href="/register-contador"
+                  className="rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-orange-500/25 transition hover:from-orange-400 hover:to-amber-400"
+                >
+                  Regístrate como contador
+                </a>
+                <a
+                  href="/login"
+                  className="rounded-xl border border-white/15 px-6 py-3 text-sm font-semibold text-white/80 transition hover:bg-white/10 hover:text-white"
+                >
+                  Iniciar sesión
+                </a>
+              </div>
+              <p className="mt-4 text-xs text-white/40">
+                Tu portafolio, tu llave única con QR, y la contabilidad de cada
+                empresa siempre a la mano.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+              {[
+                ['🏢', 'Portafolio multi-empresa', 'Pegazo + externas, en un panel'],
+                ['➕', 'Crea empresas', 'Clientes fuera de Pegazo (solo contabilidad)'],
+                ['🔑', 'Llave única + QR', 'El negocio te enlaza al instante'],
+                ['📒', 'Asientos manuales', 'Partida doble con cuadre automático'],
+                ['📥', 'Importar Excel', 'Sube movimientos y se crean los asientos'],
+                ['📎', 'Documentos soporte', 'Adjunta facturas y recibos'],
+                ['👥', 'Terceros', 'Clientes, proveedores y empleados'],
+                ['📊', 'Estados financieros', 'Resultados, balance y flujo de caja'],
+                ['📚', 'Libros', 'Diario, mayor, balance de prueba y auxiliar'],
+                ['🧾', 'Impuestos', 'IVA, retención en la fuente e ICA'],
+                ['📅', 'Calendario tributario', 'Vencimientos según NIT y régimen'],
+                ['💼', 'Nómina y conciliación', 'Asiento de nómina y cuadre bancario'],
+                ['🔒', 'Cierre de periodo', 'Blinda los meses ya declarados'],
+                ['📤', 'Exporta a Excel', 'Libros y estados descargables'],
+              ].map(([emoji, title, desc]) => (
+                <div
+                  key={title}
+                  className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3.5"
+                >
+                  <span className="text-lg leading-none" aria-hidden>
+                    {emoji}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-white">{title}</p>
+                    <p className="text-[11px] text-white/50">{desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* FAQ */}
       <section className="bg-neutral-50 py-20">
         <div className="mx-auto max-w-3xl px-5">
@@ -1258,6 +1348,9 @@ export default function Landing() {
             </a>
             <a href="#negocios" className="hover:text-white">
               Para tu negocio
+            </a>
+            <a href="#contadores" className="hover:text-white">
+              Contadores
             </a>
             <a href="#planes" className="hover:text-white">
               Planes
