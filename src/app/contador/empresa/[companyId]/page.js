@@ -21,6 +21,7 @@ import {
   getAccCompanyAuxiliary,
   getAccCompanyLedgerAccounts,
   getAccCompanyTaxCalendar,
+  getAccCompanyTaxSummary,
   getAccCompanyEntries,
   createAccCompanyEntry,
   deleteAccCompanyEntry,
@@ -135,6 +136,7 @@ export default function ContadorEmpresa() {
   const [booksTab, setBooksTab] = useState('journal');
   const [accounts, setAccounts] = useState([]);
   const [calendar, setCalendar] = useState(null);
+  const [taxSummary, setTaxSummary] = useState(null);
   const [entries, setEntries] = useState([]);
   const [entryForm, setEntryForm] = useState(null); // {date, description, reference, lines:[]}
   const [entryBusy, setEntryBusy] = useState(false);
@@ -185,6 +187,8 @@ export default function ContadorEmpresa() {
         setAccounts(e2?.data || []);
       } else if (view === 'terceros') {
         setParties((await getAccCompanyParties(companyId))?.data || []);
+      } else if (view === 'impuestos') {
+        setTaxSummary((await getAccCompanyTaxSummary(companyId, params))?.data || null);
       }
     } catch (e) {
       setError(e.message || 'No se pudo cargar.');
@@ -430,6 +434,7 @@ export default function ContadorEmpresa() {
           ['estados', 'Estados financieros'],
           ['asientos', 'Asientos'],
           ['terceros', 'Terceros'],
+          ['impuestos', 'Impuestos'],
           ['libros', 'Libros'],
           ['plan', 'Plan de cuentas'],
           ['calendario', 'Calendario'],
@@ -446,8 +451,8 @@ export default function ContadorEmpresa() {
         ))}
       </div>
 
-      {/* Rango (no aplica a plan/calendario/asientos) */}
-      {view !== 'plan' && view !== 'calendario' && view !== 'asientos' && (
+      {/* Rango (aplica a estados, libros e impuestos) */}
+      {['estados', 'libros', 'impuestos'].includes(view) && (
         <div className="mb-4 flex flex-wrap items-end gap-3">
           <div>
             <label className="mb-1 block text-[11px] font-semibold text-gray-500">Desde</label>
@@ -695,6 +700,45 @@ export default function ContadorEmpresa() {
               </table>
             </div>
           )}
+        </div>
+      )}
+
+      {/* ===== IMPUESTOS ===== */}
+      {view === 'impuestos' && taxSummary && (
+        <div>
+          <p className="mb-3 text-sm text-gray-500">
+            Lo que arrojan tus cuentas de impuestos en el periodo, para preparar
+            las declaraciones. Los vencimientos están en la pestaña Calendario.
+          </p>
+          <div className="mb-3 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">Ingresos del periodo</p>
+            <p className="text-lg font-bold tabular-nums text-gray-900">{cop(taxSummary.income)}</p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {[
+              ['IVA', taxSummary.iva, 'IVA por pagar'],
+              ['Retención', taxSummary.retefuente, 'Retención en la fuente'],
+              ['ICA', taxSummary.ica, 'ICA por pagar'],
+            ].map(([label, t, sub]) => (
+              <div key={label} className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">{label}</p>
+                <p className="text-xs text-gray-400">{sub}</p>
+                <p className={`mt-1 text-xl font-bold tabular-nums ${t.balance > 0 ? 'text-orange-600' : 'text-gray-500'}`}>
+                  {cop(t.balance)}
+                </p>
+                <div className="mt-2 flex justify-between text-[11px] text-gray-400">
+                  <span>Generado: {num(t.credit)}</span>
+                  <span>Pagado/desc.: {num(t.debit)}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="mt-4 rounded-2xl bg-orange-50/60 px-4 py-3 text-xs text-orange-700">
+            El IVA de las ventas se registra solo (base a Ingresos, IVA a "IVA por
+            pagar"). Las retenciones e ICA se alimentan con asientos o
+            importación. Ajusta cuentas en Plan de cuentas si tu negocio lo
+            requiere.
+          </p>
         </div>
       )}
 
