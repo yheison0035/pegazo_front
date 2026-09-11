@@ -16,6 +16,7 @@ import {
   EnvelopeIcon,
   KeyIcon,
   TrashIcon,
+  BanknotesIcon,
 } from '@heroicons/react/24/outline';
 import {
   linkAccountant,
@@ -1645,6 +1646,29 @@ function LoyaltySettings() {
   );
 }
 
+// Encabezado + rejilla de una sección de configuración (agrupa tarjetas por
+// módulo para que el dueño encuentre todo organizado).
+function SettingsSection({ id, icon: Icon, title, subtitle, children }) {
+  return (
+    <section id={id} className="scroll-mt-24">
+      <div className="mb-3 flex items-center gap-2.5">
+        <span className="flex h-9 w-9 flex-none items-center justify-center rounded-xl bg-orange-50 text-orange-600">
+          <Icon className="h-5 w-5" />
+        </span>
+        <div className="min-w-0">
+          <h2 className="text-sm font-bold uppercase tracking-wide text-gray-700">
+            {title}
+          </h2>
+          {subtitle && <p className="text-xs text-gray-400">{subtitle}</p>}
+        </div>
+      </div>
+      <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-2">
+        {children}
+      </div>
+    </section>
+  );
+}
+
 export default function Settings() {
   const auth = useAuth();
   const usuario = auth?.usuario;
@@ -1684,25 +1708,101 @@ export default function Settings() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-2">
-            <ThemeSettings />
-            <CompanyProfileCard initial={settings} />
-            <div className="lg:col-span-2">
-              <FontSettings />
+          <>
+            {/* Navegación rápida entre módulos */}
+            <div className="sticky top-0 z-10 -mx-4 mb-5 flex flex-wrap gap-2 border-b border-gray-100 bg-white/90 px-4 py-3 backdrop-blur">
+              {[
+                ['empresa', 'Mi empresa'],
+                ['apariencia', 'Apariencia'],
+                ['ventas', 'Ventas y caja'],
+                ['impuestos', 'Impuestos'],
+                ['contabilidad', 'Contabilidad'],
+                ...(isServices ? [['citas', 'Citas y fidelización']] : []),
+              ].map(([id, label]) => (
+                <a
+                  key={id}
+                  href={`#${id}`}
+                  className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 transition hover:bg-orange-50 hover:text-orange-600"
+                >
+                  {label}
+                </a>
+              ))}
             </div>
-            {/* La terminología es ancha (muchos campos): ocupa toda la fila. */}
-            <div className="lg:col-span-2">
-              <TerminologyCard initial={settings} />
+
+            <div className="space-y-8">
+              {/* ── Mi empresa ── */}
+              <SettingsSection
+                id="empresa"
+                icon={BuildingStorefrontIcon}
+                title="Mi empresa"
+                subtitle="Identidad, contacto y cómo se llaman las cosas en tu negocio."
+              >
+                <CompanyProfileCard initial={settings} />
+                <div className="lg:col-span-2">
+                  <TerminologyCard initial={settings} />
+                </div>
+              </SettingsSection>
+
+              {/* ── Apariencia ── */}
+              <SettingsSection
+                id="apariencia"
+                icon={SwatchIcon}
+                title="Apariencia"
+                subtitle="El color y la tipografía de tu panel."
+              >
+                <ThemeSettings />
+                <div className="lg:col-span-2">
+                  <FontSettings />
+                </div>
+              </SettingsSection>
+
+              {/* ── Ventas y caja ── */}
+              <SettingsSection
+                id="ventas"
+                icon={BanknotesIcon}
+                title="Ventas y caja"
+                subtitle="Reglas para vender y manejar la caja."
+              >
+                <CashPolicyCard initial={settings} />
+              </SettingsSection>
+
+              {/* ── Impuestos ── */}
+              <SettingsSection
+                id="impuestos"
+                icon={ReceiptPercentIcon}
+                title="Impuestos"
+                subtitle="IVA por defecto y datos fiscales del negocio."
+              >
+                <FiscalCard initial={settings} />
+              </SettingsSection>
+
+              {/* ── Contabilidad ── */}
+              <SettingsSection
+                id="contabilidad"
+                icon={CalculatorIcon}
+                title="Contabilidad"
+                subtitle="Actívala, enlaza a tu contador y controla el cierre de periodos."
+              >
+                <AccountingSectionCard initial={settings} />
+                {settings?.accountingEnabled && <AccountantLinkCard />}
+                <AccountingBasisCard initial={settings} />
+                <BooksCloseCard initial={settings} />
+              </SettingsSection>
+
+              {/* ── Citas y fidelización (solo negocios de servicios) ── */}
+              {isServices && (
+                <SettingsSection
+                  id="citas"
+                  icon={ClockIcon}
+                  title="Citas y fidelización"
+                  subtitle="Horario de atención y programa de fidelización."
+                >
+                  <HoursCard initial={settings} />
+                  <LoyaltySettings />
+                </SettingsSection>
+              )}
             </div>
-            <FiscalCard initial={settings} />
-            <CashPolicyCard initial={settings} />
-            <AccountingSectionCard initial={settings} />
-            {settings?.accountingEnabled && <AccountantLinkCard />}
-            <AccountingBasisCard initial={settings} />
-            <BooksCloseCard initial={settings} />
-            {isServices && <HoursCard initial={settings} />}
-            {isServices && <LoyaltySettings />}
-          </div>
+          </>
         )}
       </div>
     </RoleGuard>
