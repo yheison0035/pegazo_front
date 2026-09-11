@@ -25,8 +25,20 @@ import {
   deleteAccCompanyEntry,
   importAccCompanyEntries,
   uploadAccCompanyDoc,
+  getAccCompanyParties,
+  createAccCompanyParty,
+  updateAccCompanyParty,
+  deleteAccCompanyParty,
 } from '@/lib/api/routes/accountant';
-import { PaperClipIcon } from '@heroicons/react/24/outline';
+import { PaperClipIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
+
+const PARTY_KINDS = [
+  ['CLIENTE', 'Cliente'],
+  ['PROVEEDOR', 'Proveedor'],
+  ['EMPLEADO', 'Empleado'],
+  ['OTRO', 'Otro'],
+];
+const PARTY_KIND_LABEL = Object.fromEntries(PARTY_KINDS);
 
 function cop(n) {
   const v = Number(n) || 0;
@@ -125,6 +137,10 @@ export default function ContadorEmpresa() {
   const [entryBusy, setEntryBusy] = useState(false);
   const [importResult, setImportResult] = useState(null);
   const [importing, setImporting] = useState(false);
+  const [parties, setParties] = useState([]);
+  const [partyKind, setPartyKind] = useState('');
+  const [partyForm, setPartyForm] = useState(null);
+  const [partyBusy, setPartyBusy] = useState(false);
 
   useEffect(() => {
     getAccountantPortfolio()
@@ -157,6 +173,8 @@ export default function ContadorEmpresa() {
         ]);
         setEntries(e1?.data || []);
         setAccounts(e2?.data || []);
+      } else if (view === 'terceros') {
+        setParties((await getAccCompanyParties(companyId))?.data || []);
       }
     } catch (e) {
       setError(e.message || 'No se pudo cargar.');
@@ -191,6 +209,49 @@ export default function ContadorEmpresa() {
 
   const cal = calendar?.deadlines || [];
   const daysLabel = (n) => (n < 0 ? `Venció hace ${Math.abs(n)}d` : n === 0 ? 'Hoy' : `Faltan ${n}d`);
+
+  // ----- Terceros -----
+  const filteredParties = partyKind ? parties.filter((p) => p.kind === partyKind) : parties;
+  const openParty = (p) =>
+    setPartyForm(
+      p
+        ? { ...p }
+        : { kind: 'CLIENTE', name: '', docType: 'NIT', docNumber: '', email: '', phone: '', address: '' },
+    );
+  const saveParty = async () => {
+    if (!partyForm.name.trim()) return;
+    setPartyBusy(true);
+    try {
+      const payload = {
+        kind: partyForm.kind,
+        name: partyForm.name.trim(),
+        docType: partyForm.docType || null,
+        docNumber: partyForm.docNumber?.trim() || null,
+        email: partyForm.email?.trim() || null,
+        phone: partyForm.phone?.trim() || null,
+        address: partyForm.address?.trim() || null,
+      };
+      if (partyForm.id) await updateAccCompanyParty(companyId, partyForm.id, payload);
+      else await createAccCompanyParty(companyId, payload);
+      setPartyForm(null);
+      load();
+    } catch (e) {
+      setError(e.message || 'No se pudo guardar el tercero.');
+    } finally {
+      setPartyBusy(false);
+    }
+  };
+  const removeParty = async (id) => {
+    setPartyBusy(true);
+    try {
+      await deleteAccCompanyParty(companyId, id);
+      load();
+    } catch {
+      /* noop */
+    } finally {
+      setPartyBusy(false);
+    }
+  };
 
   // ----- Asientos manuales -----
   const openEntry = () =>
@@ -358,6 +419,7 @@ export default function ContadorEmpresa() {
         {[
           ['estados', 'Estados financieros'],
           ['asientos', 'Asientos'],
+          ['terceros', 'Terceros'],
           ['libros', 'Libros'],
           ['plan', 'Plan de cuentas'],
           ['calendario', 'Calendario'],
@@ -569,6 +631,58 @@ export default function ContadorEmpresa() {
                   </div>
                 );
               })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ===== TERCEROS ===== */}
+      {view === 'terceros' && (
+        <div>
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-wrap gap-1 rounded-xl bg-gray-100 p-1">
+              <button onClick={() => setPartyKind('')} className={`rounded-lg px-3 py-1 text-xs font-medium ${partyKind === '' ? 'bg-white text-orange-600 shadow-sm' : 'text-gray-500'}`}>Todos</button>
+              {PARTY_KINDS.map(([k, l]) => (
+                <button key={k} onClick={() => setPartyKind(k)} className={`rounded-lg px-3 py-1 text-xs font-medium ${partyKind === k ? 'bg-white text-orange-600 shadow-sm' : 'text-gray-500'}`}>{l}</button>
+              ))}
+            </div>
+            <button onClick={() => openParty(null)} className="inline-flex items-center gap-1 rounded-lg bg-orange-500 px-3 py-2 text-sm font-semibold text-white hover:bg-orange-600">
+              <PlusIcon className="h-4 w-4" /> Nuevo tercero
+            </button>
+          </div>
+          {filteredParties.length === 0 && !loading ? (
+            <div className="rounded-2xl border border-dashed border-gray-200 py-12 text-center text-gray-400">
+              Sin terceros. Agrega clientes, proveedores o empleados.
+            </div>
+          ) : (
+            <div className="overflow-x-auto rounded-2xl border border-gray-100 bg-white shadow-sm">
+              <table className="min-w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-100 bg-gray-50/60 text-left text-xs uppercase text-gray-500">
+                    <th className="px-4 py-3">Nombre</th>
+                    <th className="px-4 py-3">Tipo</th>
+                    <th className="px-4 py-3">Documento</th>
+                    <th className="px-4 py-3">Contacto</th>
+                    <th className="px-4 py-3 text-right">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {filteredParties.map((p) => (
+                    <tr key={p.id} className="text-gray-700">
+                      <td className="px-4 py-2.5 font-medium text-gray-800">{p.name}</td>
+                      <td className="px-4 py-2.5 text-xs text-gray-500">{PARTY_KIND_LABEL[p.kind] || p.kind}</td>
+                      <td className="px-4 py-2.5 text-xs text-gray-500">{p.docType ? `${p.docType} ${p.docNumber || ''}` : '—'}</td>
+                      <td className="px-4 py-2.5 text-xs text-gray-400">{[p.phone, p.email].filter(Boolean).join(' · ') || '—'}</td>
+                      <td className="px-4 py-2.5">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button onClick={() => openParty(p)} className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-orange-600"><PencilSquareIcon className="h-4 w-4" /></button>
+                          <button onClick={() => removeParty(p.id)} disabled={partyBusy} className="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-500"><TrashIcon className="h-4 w-4" /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
@@ -797,6 +911,62 @@ export default function ContadorEmpresa() {
                 className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600 disabled:opacity-50"
               >
                 {entryBusy ? 'Guardando…' : 'Guardar asiento'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== MODAL TERCERO ===== */}
+      {partyForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setPartyForm(null)}>
+          <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-gray-800">{partyForm.id ? 'Editar tercero' : 'Nuevo tercero'}</h2>
+              <button onClick={() => setPartyForm(null)} className="text-gray-400 hover:text-gray-600"><XMarkIcon className="h-5 w-5" /></button>
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-gray-600">Tipo *</label>
+                <select value={partyForm.kind} onChange={(e) => setPartyForm({ ...partyForm, kind: e.target.value })} className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm">
+                  {PARTY_KINDS.map(([k, l]) => <option key={k} value={k}>{l}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-gray-600">Nombre *</label>
+                <input value={partyForm.name} onChange={(e) => setPartyForm({ ...partyForm, name: e.target.value })} className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm" />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-gray-600">Tipo documento</label>
+                <select value={partyForm.docType || ''} onChange={(e) => setPartyForm({ ...partyForm, docType: e.target.value })} className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm">
+                  <option value="">—</option>
+                  <option value="NIT">NIT</option>
+                  <option value="CC">Cédula</option>
+                  <option value="CE">Cédula extranjería</option>
+                  <option value="PASAPORTE">Pasaporte</option>
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-gray-600">Número doc.</label>
+                <input value={partyForm.docNumber || ''} onChange={(e) => setPartyForm({ ...partyForm, docNumber: e.target.value })} className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm" />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-gray-600">Teléfono</label>
+                <input value={partyForm.phone || ''} onChange={(e) => setPartyForm({ ...partyForm, phone: e.target.value })} className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm" />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-gray-600">Correo</label>
+                <input value={partyForm.email || ''} onChange={(e) => setPartyForm({ ...partyForm, email: e.target.value })} className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm" />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="mb-1 block text-xs font-semibold text-gray-600">Dirección</label>
+                <input value={partyForm.address || ''} onChange={(e) => setPartyForm({ ...partyForm, address: e.target.value })} className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm" />
+              </div>
+            </div>
+            <div className="mt-5 flex justify-end gap-2">
+              <button onClick={() => setPartyForm(null)} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50">Cancelar</button>
+              <button onClick={saveParty} disabled={partyBusy || !partyForm.name.trim()} className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600 disabled:opacity-50">
+                {partyBusy ? 'Guardando…' : 'Guardar'}
               </button>
             </div>
           </div>

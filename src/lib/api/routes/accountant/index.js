@@ -96,3 +96,23 @@ export async function uploadAccCompanyDoc(companyId, file) {
     body: fd,
   });
 }
+export async function getAccCompanyParties(companyId, params = {}) {
+  return apiFetch(`/accountant/companies/${companyId}/parties${qs(params)}`);
+}
+export async function createAccCompanyParty(companyId, data) {
+  return apiFetch(`/accountant/companies/${companyId}/parties`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+export async function updateAccCompanyParty(companyId, partyId, data) {
+  return apiFetch(`/accountant/companies/${companyId}/parties/${partyId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+export async function deleteAccCompanyParty(companyId, partyId) {
+  return apiFetch(`/accountant/companies/${companyId}/parties/${partyId}`, {
+    method: 'DELETE',
+  });
+}
