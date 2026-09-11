@@ -62,6 +62,9 @@ export async function getAccCompanyJournal(companyId, params = {}) {
 export async function getAccCompanyLedger(companyId, params = {}) {
   return apiFetch(`/accountant/companies/${companyId}/ledger${qs(params)}`);
 }
+export async function getAccCompanyAuxiliary(companyId, params = {}) {
+  return apiFetch(`/accountant/companies/${companyId}/auxiliary${qs(params)}`);
+}
 export async function getAccCompanyLedgerAccounts(companyId) {
   return apiFetch(`/accountant/companies/${companyId}/ledger-accounts`);
 }

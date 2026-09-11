@@ -18,6 +18,7 @@ import {
   getAccCompanyFinancials,
   getAccCompanyJournal,
   getAccCompanyLedger,
+  getAccCompanyAuxiliary,
   getAccCompanyLedgerAccounts,
   getAccCompanyTaxCalendar,
   getAccCompanyEntries,
@@ -129,6 +130,8 @@ export default function ContadorEmpresa() {
   const [finTab, setFinTab] = useState('pyg');
   const [journal, setJournal] = useState(null);
   const [ledger, setLedger] = useState(null);
+  const [aux, setAux] = useState(null);
+  const [auxAccount, setAuxAccount] = useState('');
   const [booksTab, setBooksTab] = useState('journal');
   const [accounts, setAccounts] = useState([]);
   const [calendar, setCalendar] = useState(null);
@@ -161,7 +164,14 @@ export default function ContadorEmpresa() {
       } else if (view === 'libros') {
         if (booksTab === 'journal')
           setJournal((await getAccCompanyJournal(companyId, params))?.data || null);
-        else setLedger((await getAccCompanyLedger(companyId, params))?.data || null);
+        else if (booksTab === 'ledger' || booksTab === 'trial')
+          setLedger((await getAccCompanyLedger(companyId, params))?.data || null);
+        else if (booksTab === 'auxiliary') {
+          const accs = (await getAccCompanyLedgerAccounts(companyId))?.data || [];
+          setAccounts(accs);
+          if (auxAccount)
+            setAux((await getAccCompanyAuxiliary(companyId, { ...params, account: auxAccount }))?.data || null);
+        }
       } else if (view === 'plan') {
         setAccounts((await getAccCompanyLedgerAccounts(companyId))?.data || []);
       } else if (view === 'calendario') {
@@ -181,7 +191,7 @@ export default function ContadorEmpresa() {
     } finally {
       setLoading(false);
     }
-  }, [companyId, view, booksTab, start, end]);
+  }, [companyId, view, booksTab, auxAccount, start, end]);
 
   useEffect(() => {
     load();
@@ -691,8 +701,8 @@ export default function ContadorEmpresa() {
       {/* ===== LIBROS ===== */}
       {view === 'libros' && (
         <>
-          <div className="mb-3 flex rounded-xl bg-gray-100 p-1">
-            {[['journal', 'Libro diario'], ['ledger', 'Libro mayor']].map(([k, l]) => (
+          <div className="mb-3 flex flex-wrap gap-1 rounded-xl bg-gray-100 p-1">
+            {[['journal', 'Libro diario'], ['ledger', 'Libro mayor'], ['trial', 'Balance de prueba'], ['auxiliary', 'Auxiliar']].map(([k, l]) => (
               <button key={k} onClick={() => setBooksTab(k)} className={`rounded-lg px-3 py-1.5 text-sm font-medium ${booksTab === k ? 'bg-white text-orange-600 shadow-sm' : 'text-gray-500'}`}>{l}</button>
             ))}
           </div>
@@ -740,6 +750,94 @@ export default function ContadorEmpresa() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+
+          {/* Balance de prueba: mayor + totales (deben ser iguales) */}
+          {booksTab === 'trial' && ledger && (
+            <div className="overflow-x-auto rounded-2xl border border-gray-100 bg-white shadow-sm">
+              <table className="min-w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-100 bg-gray-50/60 text-left text-xs uppercase text-gray-500">
+                    <th className="px-4 py-3">Cuenta</th>
+                    <th className="px-4 py-3 text-right">Débito</th>
+                    <th className="px-4 py-3 text-right">Crédito</th>
+                    <th className="px-4 py-3 text-right">Saldo</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {ledger.accounts.map((a) => (
+                    <tr key={a.code} className="text-gray-700">
+                      <td className="px-4 py-2.5"><span className="font-mono text-xs text-gray-400">{a.code}</span> {a.name}</td>
+                      <td className="px-4 py-2.5 text-right tabular-nums">{a.debit ? num(a.debit) : '—'}</td>
+                      <td className="px-4 py-2.5 text-right tabular-nums">{a.credit ? num(a.credit) : '—'}</td>
+                      <td className="px-4 py-2.5 text-right font-semibold tabular-nums text-gray-900">{num(a.balance)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  {(() => {
+                    const td = ledger.accounts.reduce((s, a) => s + (a.debit || 0), 0);
+                    const tc = ledger.accounts.reduce((s, a) => s + (a.credit || 0), 0);
+                    return (
+                      <tr className="border-t border-gray-200 bg-gray-50 font-bold text-gray-800">
+                        <td className="px-4 py-3">Totales {td === tc ? '· ✓ cuadra' : '· ⚠ descuadre'}</td>
+                        <td className="px-4 py-3 text-right tabular-nums">{num(td)}</td>
+                        <td className="px-4 py-3 text-right tabular-nums">{num(tc)}</td>
+                        <td className="px-4 py-3"></td>
+                      </tr>
+                    );
+                  })()}
+                </tfoot>
+              </table>
+            </div>
+          )}
+
+          {/* Libro auxiliar: detalle de una cuenta con saldo corrido */}
+          {booksTab === 'auxiliary' && (
+            <div>
+              <div className="mb-3">
+                <label className="mb-1 block text-[11px] font-semibold text-gray-500">Cuenta</label>
+                <select
+                  value={auxAccount}
+                  onChange={(e) => setAuxAccount(e.target.value)}
+                  className="w-full max-w-md rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none"
+                >
+                  <option value="">Elige una cuenta…</option>
+                  {accounts.map((a) => (
+                    <option key={a.id || a.code} value={a.code}>{a.code} · {a.name}</option>
+                  ))}
+                </select>
+              </div>
+              {aux && auxAccount && (
+                <div className="overflow-x-auto rounded-2xl border border-gray-100 bg-white shadow-sm">
+                  <table className="min-w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-100 bg-gray-50/60 text-left text-xs uppercase text-gray-500">
+                        <th className="px-4 py-3">Fecha</th>
+                        <th className="px-4 py-3">Detalle</th>
+                        <th className="px-4 py-3 text-right">Débito</th>
+                        <th className="px-4 py-3 text-right">Crédito</th>
+                        <th className="px-4 py-3 text-right">Saldo</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50">
+                      {aux.movements.map((m, i) => (
+                        <tr key={i} className="text-gray-700">
+                          <td className="px-4 py-2 font-mono text-xs text-gray-500">{m.date}</td>
+                          <td className="px-4 py-2 text-gray-700">{m.description}</td>
+                          <td className="px-4 py-2 text-right tabular-nums">{m.debit ? num(m.debit) : ''}</td>
+                          <td className="px-4 py-2 text-right tabular-nums">{m.credit ? num(m.credit) : ''}</td>
+                          <td className="px-4 py-2 text-right font-semibold tabular-nums text-gray-900">{num(m.balance)}</td>
+                        </tr>
+                      ))}
+                      {aux.movements.length === 0 && (
+                        <tr><td colSpan={5} className="px-4 py-8 text-center text-gray-400">Sin movimientos de esta cuenta en el periodo.</td></tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           )}
         </>
