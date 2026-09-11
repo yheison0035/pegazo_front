@@ -113,6 +113,7 @@ export const MODULE_MIN_PLAN = {
   clinical: 'ALTURA', // historia clínica (salud)
   assets: 'ALTURA', // Contabilidad · activos fijos
   'plan-cuentas': 'ALTURA', // Contabilidad · plan de cuentas
+  libros: 'ALTURA', // Contabilidad · libro diario y mayor
   // Órbita: cadena / empresa
   'nomina-electronica': 'ORBITA', // nómina electrónica
 };
