@@ -38,9 +38,12 @@ import {
   updateAccCompanyTaxYear,
   getAccCompanyTaxObligations,
   getAccCompanyRenta,
+  getAccCompanyAlertPrefs,
+  updateAccCompanyAlertPrefs,
 } from '@/lib/api/routes/accountant';
 import TaxObligationsPanel from '@/components/tax/TaxObligationsPanel';
 import RentaDraftPanel from '@/components/tax/RentaDraftPanel';
+import TaxAlertPrefs from '@/components/tax/TaxAlertPrefs';
 import { PaperClipIcon, PencilSquareIcon, UsersIcon } from '@heroicons/react/24/outline';
 
 const PARTY_KINDS = [
@@ -1147,9 +1150,14 @@ export default function ContadorEmpresa() {
       )}
 
       {/* ===== CALENDARIO ===== */}
-      {view === 'calendario' && calendar && (
+      {view === 'calendario' && (
         <div className="space-y-2">
-          {cal.length === 0 && <div className="rounded-2xl border border-dashed border-gray-200 py-10 text-center text-gray-400">Sin vencimientos cargados para esta empresa.</div>}
+          <TaxAlertPrefs
+            className="mb-3"
+            load={() => getAccCompanyAlertPrefs(companyId)}
+            save={(patch) => updateAccCompanyAlertPrefs(companyId, patch)}
+          />
+          {calendar && cal.length === 0 && <div className="rounded-2xl border border-dashed border-gray-200 py-10 text-center text-gray-400">Sin vencimientos cargados para esta empresa.</div>}
           {cal.map((d) => (
             <div key={d.id} className={`flex items-center justify-between gap-3 rounded-2xl border bg-white p-3 shadow-sm ${d.status === 'VENCIDO' ? 'border-red-200' : d.status === 'PROXIMO' ? 'border-amber-200' : 'border-gray-100'}`}>
               <div className="min-w-0">
