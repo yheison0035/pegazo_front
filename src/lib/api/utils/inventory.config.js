@@ -113,7 +113,7 @@ export const getFormFieldsInventory = (usuario) => {
     {
       name: 'description',
       label: 'Descripción',
-      type: 'textarea',
+      type: 'richtext',
       required: false,
       disabled: false,
     },

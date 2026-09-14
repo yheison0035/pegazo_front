@@ -10,6 +10,7 @@ import {
 } from '@heroicons/react/24/outline';
 import Button from '@/components/ui/Button';
 import { useState, useEffect } from 'react';
+import RichTextEditor from '@/components/dashboard/form/RichTextEditor';
 
 export default function InventorySpecsModal({
   open,
@@ -62,20 +63,21 @@ export default function InventorySpecsModal({
             <h3 className="text-lg font-semibold mb-3">Características</h3>
 
             {features.map((f, idx) => (
-              <div key={idx} className="flex items-start gap-2 mb-2">
-                <textarea
-                  type="text"
-                  placeholder="Ej: Material impermeable"
-                  value={f.title}
-                  onChange={(e) => {
-                    const copy = [...features];
-                    copy[idx].title = e.target.value;
-                    setFeatures(copy);
-                  }}
-                  className={`flex-1 border rounded-lg px-3 py-2 ${
-                    f.visible === false ? 'opacity-50' : ''
-                  }`}
-                />
+              <div key={idx} className="flex items-start gap-2 mb-3">
+                <div
+                  className={`flex-1 ${f.visible === false ? 'opacity-50' : ''}`}
+                >
+                  <RichTextEditor
+                    value={f.title}
+                    onChange={(html) => {
+                      const copy = [...features];
+                      copy[idx].title = html;
+                      setFeatures(copy);
+                    }}
+                    placeholder="Ej: Material impermeable de alta resistencia"
+                    minHeight={80}
+                  />
+                </div>
 
                 <button
                   type="button"
@@ -136,19 +138,20 @@ export default function InventorySpecsModal({
                     s.visible === false ? 'opacity-50' : ''
                   }`}
                 />
-                <input
-                  type="text"
-                  placeholder="Valor (Ej: 1.2 kg)"
-                  value={s.value}
-                  onChange={(e) => {
-                    const copy = [...specs];
-                    copy[idx].value = e.target.value;
-                    setSpecs(copy);
-                  }}
-                  className={`flex-1 border rounded-lg px-3 py-2 ${
-                    s.visible === false ? 'opacity-50' : ''
-                  }`}
-                />
+                <div
+                  className={`flex-1 ${s.visible === false ? 'opacity-50' : ''}`}
+                >
+                  <RichTextEditor
+                    value={s.value}
+                    onChange={(html) => {
+                      const copy = [...specs];
+                      copy[idx].value = html;
+                      setSpecs(copy);
+                    }}
+                    placeholder="Valor (Ej: 1.2 kg)"
+                    minHeight={70}
+                  />
+                </div>
 
                 <button
                   type="button"

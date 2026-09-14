@@ -4,6 +4,7 @@ import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import DepartaCiudad from '@/components/dashboard/select/depart_ciud';
 import BtnReturn from '../buttons/return';
 import BtnSave from '../buttons/save';
+import RichTextEditor from './RichTextEditor';
 import useUsers from '@/lib/api/hooks/useUsers';
 import {
   formatCOP,
@@ -616,6 +617,23 @@ export default function DinamicForm({
                         ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
                         : 'focus:ring-2 focus:ring-orange-500 focus:border-orange-500'
                     }`}
+                  />
+                </div>
+              );
+            }
+
+            if (type === 'richtext') {
+              return (
+                <div key={name} className="flex flex-col col-span-full">
+                  <label className="text-sm font-medium text-gray-700 mb-1">
+                    {label}
+                  </label>
+                  <RichTextEditor
+                    value={inputValue || ''}
+                    onChange={(html) =>
+                      handleChange({ target: { name, value: html } })
+                    }
+                    placeholder="Describe el producto: usa negrita, listas, enlaces…"
                   />
                 </div>
               );
