@@ -5,6 +5,8 @@ import {
   PlusIcon,
   TrashIcon,
   CheckCircleIcon,
+  EyeIcon,
+  EyeSlashIcon,
 } from '@heroicons/react/24/outline';
 import Button from '@/components/ui/Button';
 import { useState, useEffect } from 'react';
@@ -60,7 +62,7 @@ export default function InventorySpecsModal({
             <h3 className="text-lg font-semibold mb-3">Características</h3>
 
             {features.map((f, idx) => (
-              <div key={idx} className="flex gap-2 mb-2">
+              <div key={idx} className="flex items-start gap-2 mb-2">
                 <textarea
                   type="text"
                   placeholder="Ej: Material impermeable"
@@ -70,14 +72,34 @@ export default function InventorySpecsModal({
                     copy[idx].title = e.target.value;
                     setFeatures(copy);
                   }}
-                  className="flex-1 border rounded-lg px-3 py-2"
+                  className={`flex-1 border rounded-lg px-3 py-2 ${
+                    f.visible === false ? 'opacity-50' : ''
+                  }`}
                 />
 
                 <button
+                  type="button"
+                  title={f.visible === false ? 'Oculto en la tienda' : 'Visible en la tienda'}
+                  onClick={() => {
+                    const copy = [...features];
+                    copy[idx].visible = copy[idx].visible === false;
+                    setFeatures(copy);
+                  }}
+                  className="mt-1 text-gray-500 hover:text-orange-600 cursor-pointer"
+                >
+                  {f.visible === false ? (
+                    <EyeSlashIcon className="w-5 h-5" />
+                  ) : (
+                    <EyeIcon className="w-5 h-5" />
+                  )}
+                </button>
+
+                <button
+                  type="button"
                   onClick={() =>
                     setFeatures(features.filter((_, i) => i !== idx))
                   }
-                  className="text-red-500 hover:text-red-700 cursor-pointer"
+                  className="mt-1 text-red-500 hover:text-red-700 cursor-pointer"
                 >
                   <TrashIcon className="w-5 h-5" />
                 </button>
@@ -88,7 +110,9 @@ export default function InventorySpecsModal({
               variant="add"
               icon={PlusIcon}
               className="mt-2"
-              onClick={() => setFeatures([...features, { title: '' }])}
+              onClick={() =>
+                setFeatures([...features, { title: '', visible: true }])
+              }
             >
               Agregar característica
             </Button>
@@ -98,7 +122,7 @@ export default function InventorySpecsModal({
             <h3 className="text-lg font-semibold mb-3">Especificaciones</h3>
 
             {specs.map((s, idx) => (
-              <div key={idx} className="flex gap-2 mb-2">
+              <div key={idx} className="flex items-start gap-2 mb-2">
                 <input
                   type="text"
                   placeholder="Clave (Ej: Peso)"
@@ -108,7 +132,9 @@ export default function InventorySpecsModal({
                     copy[idx].key = e.target.value;
                     setSpecs(copy);
                   }}
-                  className="w-1/3 border rounded-lg px-3 py-2"
+                  className={`w-1/3 border rounded-lg px-3 py-2 ${
+                    s.visible === false ? 'opacity-50' : ''
+                  }`}
                 />
                 <input
                   type="text"
@@ -119,12 +145,32 @@ export default function InventorySpecsModal({
                     copy[idx].value = e.target.value;
                     setSpecs(copy);
                   }}
-                  className="flex-1 border rounded-lg px-3 py-2"
+                  className={`flex-1 border rounded-lg px-3 py-2 ${
+                    s.visible === false ? 'opacity-50' : ''
+                  }`}
                 />
 
                 <button
+                  type="button"
+                  title={s.visible === false ? 'Oculto en la tienda' : 'Visible en la tienda'}
+                  onClick={() => {
+                    const copy = [...specs];
+                    copy[idx].visible = copy[idx].visible === false;
+                    setSpecs(copy);
+                  }}
+                  className="mt-1 text-gray-500 hover:text-orange-600 cursor-pointer"
+                >
+                  {s.visible === false ? (
+                    <EyeSlashIcon className="w-5 h-5" />
+                  ) : (
+                    <EyeIcon className="w-5 h-5" />
+                  )}
+                </button>
+
+                <button
+                  type="button"
                   onClick={() => setSpecs(specs.filter((_, i) => i !== idx))}
-                  className="text-red-500 hover:text-red-700 cursor-pointer"
+                  className="mt-1 text-red-500 hover:text-red-700 cursor-pointer"
                 >
                   <TrashIcon className="w-5 h-5" />
                 </button>
@@ -135,7 +181,9 @@ export default function InventorySpecsModal({
               variant="add"
               icon={PlusIcon}
               className="mt-2"
-              onClick={() => setSpecs([...specs, { key: '', value: '' }])}
+              onClick={() =>
+                setSpecs([...specs, { key: '', value: '', visible: true }])
+              }
             >
               Agregar especificación
             </Button>
