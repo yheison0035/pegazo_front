@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import useLiveRefresh from '@/hooks/useLiveRefresh';
-import { EyeIcon, TruckIcon } from '@heroicons/react/24/outline';
+import { EyeIcon } from '@heroicons/react/24/outline';
 import RoleGuard from '@/auth/roleGuard';
 import { Roles, ALL_EXCEPT_BARBER } from '@/config/roles';
 import Pagination from '@/components/dashboard/tables/segments/pagination';
@@ -17,6 +17,9 @@ import {
   paymentBadge,
   orderCustomerName,
   orderCustomerPhone,
+  orderWhatsappUrl,
+  orderConfirmMessage,
+  WhatsappIcon,
 } from '@/components/dashboard/orders/orderHelpers';
 
 export default function Orders() {
@@ -133,8 +136,22 @@ export default function Orders() {
                       {o.code}
                     </td>
                     <td className="px-5 py-4">{orderCustomerName(o)}</td>
-                    <td className="px-5 py-4 text-gray-500">
-                      {orderCustomerPhone(o) || '—'}
+                    <td className="px-5 py-4">
+                      {orderCustomerPhone(o) ? (
+                        <a
+                          href={orderWhatsappUrl(o, orderConfirmMessage(o))}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          title="Escribir al cliente por WhatsApp (confirmar pedido)"
+                          className="inline-flex items-center gap-1.5 rounded-full bg-green-50 px-2.5 py-1 text-sm font-medium text-green-700 hover:bg-green-100"
+                        >
+                          <WhatsappIcon className="w-4 h-4" />
+                          {orderCustomerPhone(o)}
+                        </a>
+                      ) : (
+                        <span className="text-gray-400">—</span>
+                      )}
                     </td>
                     <td className="px-5 py-4 text-center">{o._count?.items ?? 0}</td>
                     <td className="px-5 py-4 text-right font-semibold text-gray-800">
@@ -171,10 +188,10 @@ export default function Orders() {
               </p>
             )}
             {orders.map((o) => (
-              <button
+              <div
                 key={o.id}
                 onClick={() => setSelected(o.id)}
-                className="w-full text-left px-4 py-4 hover:bg-orange-50/40 transition"
+                className="w-full text-left px-4 py-4 hover:bg-orange-50/40 transition cursor-pointer"
               >
                 <div className="flex items-center justify-between">
                   <span className="font-medium text-gray-800">{o.code}</span>
@@ -183,7 +200,7 @@ export default function Orders() {
                   </span>
                 </div>
                 <div className="mt-1 text-sm text-gray-600">
-                  {orderCustomerName(o)} · {orderCustomerPhone(o) || 'sin teléfono'}
+                  {orderCustomerName(o)}
                 </div>
                 <div className="mt-2 flex items-center gap-2 flex-wrap">
                   {paymentBadge(o.paymentStatus)}
@@ -192,7 +209,19 @@ export default function Orders() {
                     {formatDateTime(o.saleDate)}
                   </span>
                 </div>
-              </button>
+                {orderCustomerPhone(o) && (
+                  <a
+                    href={orderWhatsappUrl(o, orderConfirmMessage(o))}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-green-50 px-2.5 py-1 text-sm font-medium text-green-700"
+                  >
+                    <WhatsappIcon className="w-4 h-4" />
+                    {orderCustomerPhone(o)}
+                  </a>
+                )}
+              </div>
             ))}
           </div>
 
