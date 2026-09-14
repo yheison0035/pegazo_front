@@ -16,7 +16,7 @@ export const getFormFieldsCategories = () => [
   {
     name: 'description',
     label: 'Descripción',
-    type: 'textarea',
+    type: 'richtext',
     required: false,
   },
   {
