@@ -57,10 +57,20 @@ export default function StorePaymentMethods() {
   useEffect(() => {
     getStorePayments()
       .then((r) => {
-        setMethods(r?.data?.storePaymentMethods || []);
         setWompiReady(!!r?.data?.wompiReady);
+        const arr = r?.data?.storePaymentMethods;
+        if (Array.isArray(arr) && arr.length > 0) {
+          setMethods(arr);
+        } else {
+          // Sin configurar: por defecto contra entrega + pago en línea (igual que
+          // se ve en la tienda). Lo PERSISTIMOS para que el estado sea explícito
+          // y los toggles queden 100% sincronizados con la página.
+          const def = ['COD', 'ONLINE'];
+          setMethods(def);
+          updateStorePayments(def).catch(() => {});
+        }
       })
-      .catch(() => setMethods([]));
+      .catch(() => setMethods(['COD', 'ONLINE']));
   }, []);
 
   const has = (m) => methods?.includes(m);
@@ -88,8 +98,9 @@ export default function StorePaymentMethods() {
         {saving && <span className="text-xs text-gray-400">Guardando…</span>}
       </div>
       <p className="mb-4 text-sm text-gray-500">
-        Elige qué opciones de pago verá tu cliente en el checkout. Si no marcas
-        ninguna, se muestran contra entrega y pago en línea (si tienes Wompi).
+        Elige qué opciones de pago verá tu cliente en el checkout. Lo que
+        actives aquí aparece en la tienda; lo que desactives, no. (Los cambios
+        se ven al recargar la tienda.)
       </p>
 
       <div className="space-y-2.5">

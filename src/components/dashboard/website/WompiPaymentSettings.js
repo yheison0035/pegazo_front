@@ -17,7 +17,6 @@ export default function WompiPaymentSettings() {
   const [integrity, setIntegrity] = useState('');
   const [events, setEvents] = useState('');
   const [priv, setPriv] = useState('');
-  const [enabled, setEnabled] = useState(false);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState(null);
 
@@ -27,7 +26,6 @@ export default function WompiPaymentSettings() {
       const d = res?.data || {};
       setCfg(d);
       setPublicKey(d.wompiPublicKey || '');
-      setEnabled(!!d.wompiEnabled);
     } catch {
       /* noop */
     }
@@ -46,9 +44,10 @@ export default function WompiPaymentSettings() {
     setSaving(true);
     setMsg(null);
     try {
-      const dto = { wompiEnabled: enabled, wompiPublicKey: publicKey };
+      const dto = { wompiPublicKey: publicKey };
       // Solo se envían los secretos que el dueño escribió (los vacíos se
-      // conservan tal cual estaban).
+      // conservan tal cual estaban). La conexión se activa automáticamente en el
+      // backend cuando la cuenta Wompi queda completa.
       if (integrity.trim()) dto.wompiIntegritySecret = integrity.trim();
       if (events.trim()) dto.wompiEventsSecret = events.trim();
       if (priv.trim()) dto.wompiPrivateKey = priv.trim();
@@ -58,7 +57,6 @@ export default function WompiPaymentSettings() {
       setIntegrity('');
       setEvents('');
       setPriv('');
-      if (res?.data) setEnabled(!!res.data.wompiEnabled);
       flash('success', 'Pagos en línea guardados.');
     } catch (e) {
       flash('error', e?.message || 'No se pudo guardar.');
@@ -148,15 +146,12 @@ export default function WompiPaymentSettings() {
           />
         </div>
 
-        <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
-          <input
-            type="checkbox"
-            checked={enabled}
-            onChange={(e) => setEnabled(e.target.checked)}
-            className="h-4 w-4 cursor-pointer accent-orange-500"
-          />
-          Activar pagos en línea en mi tienda
-        </label>
+        <p className="rounded-lg bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
+          Tu tienda queda <b>conectada automáticamente</b> a pagos en línea en
+          cuanto guardes la llave pública, el secreto de integridad y el secreto
+          de eventos. Para mostrar u ocultar el método en el checkout usa
+          <b> “Métodos de pago de la tienda”</b> arriba.
+        </p>
 
         <p className="rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-500">
           El <b>webhook de eventos</b> en tu panel de Wompi debe apuntar a la URL
