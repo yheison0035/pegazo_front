@@ -628,36 +628,12 @@ export default function WebsitePage() {
               </div>
             </Section>
 
-            {/* ---------- SEO ---------- */}
+            {/* ---------- PIE DE PÁGINA ---------- */}
             <Section
-              title="SEO"
-              description="Cómo aparece tu tienda en Google y al compartirla."
+              title="Pie de página"
+              description="Texto legal que aparece al final de tu tienda."
             >
               <div className="grid gap-4">
-                <Field label="Título para buscadores" hint="Máximo 70 caracteres">
-                  <input
-                    type="text"
-                    maxLength={70}
-                    value={form.metaTitle}
-                    placeholder={config.websiteName || config.name}
-                    onChange={(e) => set('metaTitle')(e.target.value)}
-                    className={inputClass}
-                  />
-                </Field>
-
-                <Field
-                  label="Descripción para buscadores"
-                  hint="Máximo 160 caracteres recomendados"
-                >
-                  <textarea
-                    rows={3}
-                    maxLength={320}
-                    value={form.metaDescription}
-                    onChange={(e) => set('metaDescription')(e.target.value)}
-                    className={inputClass}
-                  />
-                </Field>
-
                 <Field label="Texto legal del pie de página">
                   <input
                     type="text"
