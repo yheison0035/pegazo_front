@@ -28,3 +28,13 @@ export async function updateOrderFulfillment(id, dto) {
     body: JSON.stringify(dto),
   });
 }
+
+// Cancela el pedido (queda CANCELADA) y devuelve el stock si se había descontado.
+export async function cancelOrder(id) {
+  return apiFetch(`/sales/orders/${id}/cancel`, { method: 'PATCH' });
+}
+
+// Elimina el pedido por completo (también restaura stock en el backend).
+export async function deleteOrder(id) {
+  return apiFetch(`/sales/${id}`, { method: 'DELETE' });
+}
