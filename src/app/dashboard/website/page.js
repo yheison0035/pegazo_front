@@ -858,7 +858,10 @@ export default function WebsitePage() {
                             className={inputClass}
                           />
                         </Field>
-                        <Field label="Enlace del botón">
+                        <Field
+                          label="Enlace banner"
+                          hint="A dónde lleva TODO el banner al hacer clic (ej. /ofertas)"
+                        >
                           <input
                             type="text"
                             value={editingBanner.buttonUrl}
@@ -973,7 +976,10 @@ export default function WebsitePage() {
                     />
                   </Field>
 
-                  <Field label="Enlace del botón" hint="Por ejemplo /ofertas">
+                  <Field
+                    label="Enlace banner"
+                    hint="A dónde lleva TODO el banner al hacer clic (ej. /ofertas)"
+                  >
                     <input
                       type="text"
                       value={newBanner.buttonUrl}
