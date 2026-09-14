@@ -17,7 +17,13 @@ import {
 } from './orderHelpers';
 
 export default function OrderDetailModal({ orderId, onClose, onUpdated }) {
-  const { getOrderById, updateOrderFulfillment, loading } = useOrders();
+  const {
+    getOrderById,
+    updateOrderFulfillment,
+    cancelOrder,
+    deleteOrder,
+    loading,
+  } = useOrders();
   const [order, setOrder] = useState(null);
   const [form, setForm] = useState({
     shippingStatus: '',
@@ -95,6 +101,44 @@ export default function OrderDetailModal({ orderId, onClose, onUpdated }) {
   const saveAndNotify = async (status) => {
     notify(status); // síncrono, dentro del click
     await save({ shippingStatus: status });
+  };
+
+  const doCancel = async () => {
+    if (
+      !window.confirm(
+        '¿Cancelar este pedido? Si ya se había descontado inventario, se devolverá al stock.',
+      )
+    )
+      return;
+    setSaving(true);
+    try {
+      await cancelOrder(orderId);
+      onUpdated?.();
+      onClose();
+    } catch (e) {
+      // deja abierto para reintentar
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const doDelete = async () => {
+    if (
+      !window.confirm(
+        '¿Eliminar el pedido por completo? Esta acción no se puede deshacer (el stock se restaura).',
+      )
+    )
+      return;
+    setSaving(true);
+    try {
+      await deleteOrder(orderId);
+      onUpdated?.();
+      onClose();
+    } catch (e) {
+      // deja abierto para reintentar
+    } finally {
+      setSaving(false);
+    }
   };
 
   const address = order ? orderShippingAddress(order) : '';
@@ -340,6 +384,31 @@ export default function OrderDetailModal({ orderId, onClose, onUpdated }) {
                   </button>
                 </div>
               </div>
+
+              {/* Cancelar / eliminar el pedido (devuelve stock si corresponde) */}
+              {order.saleStatus !== 'CANCELADA' && (
+                <div className="flex flex-wrap items-center gap-2 rounded-xl border border-gray-100 p-3">
+                  <p className="text-sm text-gray-500">
+                    ¿El cliente desistió o hubo un error?
+                  </p>
+                  <div className="ml-auto flex gap-2">
+                    <button
+                      onClick={doCancel}
+                      disabled={saving || loading}
+                      className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-700 hover:bg-amber-100 disabled:opacity-50"
+                    >
+                      Cancelar y devolver stock
+                    </button>
+                    <button
+                      onClick={doDelete}
+                      disabled={saving || loading}
+                      className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-100 disabled:opacity-50"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                </div>
+              )}
             </>
           )}
         </div>

@@ -5,6 +5,8 @@ import {
   getOrders,
   getOrderById,
   updateOrderFulfillment,
+  cancelOrder,
+  deleteOrder,
 } from '../routes/orders';
 
 export default function useOrders() {
@@ -30,11 +32,15 @@ export default function useOrders() {
     (id, dto) => wrap(updateOrderFulfillment, id, dto),
     [wrap]
   );
+  const cancelOrderFn = useCallback((id) => wrap(cancelOrder, id), [wrap]);
+  const deleteOrderFn = useCallback((id) => wrap(deleteOrder, id), [wrap]);
 
   return {
     getOrders: getOrdersFn,
     getOrderById: getOrderByIdFn,
     updateOrderFulfillment: updateFulfillmentFn,
+    cancelOrder: cancelOrderFn,
+    deleteOrder: deleteOrderFn,
     loading,
     error,
   };
