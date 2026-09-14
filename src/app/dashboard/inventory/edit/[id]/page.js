@@ -132,11 +132,13 @@ export default function EditProduct() {
       features: (formData.features || []).map((f) => ({
         title: f.title,
         ...(f.order != null ? { order: f.order } : {}),
+        visible: f.visible !== false,
       })),
       specifications: (formData.specifications || []).map((s) => ({
         key: s.key,
         value: s.value,
         ...(s.order != null ? { order: s.order } : {}),
+        visible: s.visible !== false,
       })),
     };
 
