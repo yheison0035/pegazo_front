@@ -136,6 +136,16 @@ export async function getAccCompanyTaxObligations(companyId, params = {}) {
 export async function getAccCompanyRenta(companyId, params = {}) {
   return apiFetch(`/accountant/companies/${companyId}/renta${qs(params)}`);
 }
+// Preferencias de avisos de vencimientos (campana / correo).
+export async function getAccCompanyAlertPrefs(companyId) {
+  return apiFetch(`/accountant/companies/${companyId}/alert-prefs`);
+}
+export async function updateAccCompanyAlertPrefs(companyId, data) {
+  return apiFetch(`/accountant/companies/${companyId}/alert-prefs`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
 
 export async function getAccCompanyParties(companyId, params = {}) {
   return apiFetch(`/accountant/companies/${companyId}/parties${qs(params)}`);

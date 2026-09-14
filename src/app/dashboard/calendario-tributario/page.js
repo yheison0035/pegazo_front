@@ -11,6 +11,7 @@ import { Roles } from '@/config/roles';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import TaxObligationsPanel from '@/components/tax/TaxObligationsPanel';
 import RentaDraftPanel from '@/components/tax/RentaDraftPanel';
+import TaxAlertPrefs from '@/components/tax/TaxAlertPrefs';
 import {
   getTaxCalendar,
   getTaxObligations,
@@ -20,6 +21,8 @@ import {
   updateTaxYear,
   runTaxAlerts,
   getTaxRenta,
+  getTaxAlertPrefs,
+  updateTaxAlertPrefs,
 } from '@/lib/api/routes/tax';
 
 const OBLIGATION_LABEL = {
@@ -206,6 +209,11 @@ export default function CalendarioTributarioPage() {
             loadYear={getTaxYear}
             saveYear={updateTaxYear}
           />
+        </div>
+
+        {/* Preferencias de avisos (campana / correo) */}
+        <div className="mb-5">
+          <TaxAlertPrefs load={getTaxAlertPrefs} save={updateTaxAlertPrefs} />
         </div>
 
         {/* Declaración de renta: consolidado anual + impuesto estimado */}

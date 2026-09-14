@@ -34,6 +34,13 @@ export async function getTaxObligations(params = {}) {
 export async function runTaxAlerts() {
   return apiFetch('/tax/run-alerts', { method: 'POST' });
 }
+// Preferencias de avisos (campana / correo).
+export async function getTaxAlertPrefs() {
+  return apiFetch('/tax/alert-prefs');
+}
+export async function updateTaxAlertPrefs(data) {
+  return apiFetch('/tax/alert-prefs', { method: 'PATCH', body: JSON.stringify(data) });
+}
 // Borrador de declaración de renta (consolidado + impuesto estimado).
 export async function getTaxRenta(params = {}) {
   return apiFetch(`/tax/renta${qs(params)}`);
