@@ -140,3 +140,15 @@ export async function updateStorePayments(storePaymentMethods) {
     body: JSON.stringify({ storePaymentMethods }),
   });
 }
+
+// Envíos de la tienda online (métodos on/off + tarifa fija + gratis desde X).
+export async function getStoreShipping() {
+  return apiFetch('/company/store-shipping');
+}
+
+export async function updateStoreShipping(storeShipping) {
+  return apiFetch('/company/store-shipping', {
+    method: 'PATCH',
+    body: JSON.stringify({ storeShipping }),
+  });
+}
