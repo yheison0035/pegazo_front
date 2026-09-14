@@ -113,6 +113,9 @@ export default function EditProduct() {
       purchasePrice: parseCOPToNumber(formData.purchasePrice) || 0,
       salePrice: parseCOPToNumber(formData.salePrice) ?? undefined,
       oldPrice: parseCOPToNumber(formData.oldPrice) ?? undefined,
+      // null cuando se deja vacío: limpia el precio online y la tienda vuelve a
+      // usar el precio de venta (salePrice).
+      onlinePrice: parseCOPToNumber(formData.onlinePrice),
       minStock: numOrUndef(formData.minStock),
       unit: formData.unit || undefined,
       trackStock: formData.trackStock,
