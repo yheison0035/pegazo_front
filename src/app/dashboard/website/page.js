@@ -274,6 +274,25 @@ export default function WebsitePage() {
     }
   };
 
+  // Reemplaza la imagen de un banner ya creado: sube la nueva y la guarda.
+  const handleReplaceBannerImage = async (banner, file) => {
+    if (!file) return;
+    setUploading(`banner-${banner.id}`);
+    try {
+      const res = await uploadWebsiteImage(file);
+      await updateWebsiteBanner(banner.id, { image: res.url });
+      setAlert({ type: 'success', message: 'Imagen del banner actualizada' });
+      load();
+    } catch (err) {
+      setAlert({
+        type: 'error',
+        message: err.message || 'No se pudo cambiar la imagen',
+      });
+    } finally {
+      setUploading('');
+    }
+  };
+
   const confirmDeleteBanner = async () => {
     const banner = bannerToDelete;
     try {
@@ -705,6 +724,26 @@ export default function WebsitePage() {
                         {banner.subtitle || '—'}
                       </p>
                     </div>
+
+                    {/* Cambiar la imagen del banner ya creado */}
+                    <label
+                      className="flex cursor-pointer items-center gap-1.5 rounded-full border border-gray-300 px-3 py-1 text-xs font-medium text-gray-600 hover:bg-gray-50"
+                      title="Cambiar imagen del banner"
+                    >
+                      <ArrowUpTrayIcon className="h-4 w-4" />
+                      {uploading === `banner-${banner.id}`
+                        ? 'Subiendo…'
+                        : 'Cambiar imagen'}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        disabled={uploading === `banner-${banner.id}`}
+                        onChange={(e) =>
+                          handleReplaceBannerImage(banner, e.target.files?.[0])
+                        }
+                      />
+                    </label>
 
                     <button
                       type="button"
