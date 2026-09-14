@@ -735,6 +735,13 @@ export default function WebsitePage() {
               title="Banners de portada"
               description="Carrusel a todo el ancho en la página principal. Se muestra la imagen COMPLETA (no se recorta); usa imágenes horizontales y deja lo importante hacia el centro."
             >
+              <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                <b>Importante:</b> si tu imagen ya trae el texto y el diseño (por
+                ejemplo la hiciste con IA con título, precios y botón), deja{' '}
+                <b>vacíos</b> el Título, Subtítulo y Botón para que no se dupliquen
+                encima. Úsalos solo cuando subas una imagen “limpia” (solo foto).
+              </div>
+
               <div className="space-y-3">
                 {banners.length === 0 && (
                   <p className="text-sm text-gray-400">
