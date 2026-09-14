@@ -158,6 +158,7 @@ export default function NewProduct() {
       purchasePrice: parseCOPToNumber(formData.purchasePrice) || 0,
       salePrice: parseCOPToNumber(formData.salePrice),
       oldPrice: parseCOPToNumber(formData.oldPrice),
+      onlinePrice: parseCOPToNumber(formData.onlinePrice),
     };
 
     try {

@@ -52,6 +52,7 @@ export const getEmptyInventory = () => ({
   purchasePrice: '',
   oldPrice: '',
   salePrice: '',
+  onlinePrice: '',
   categoryId: '',
   brandId: '',
   minStock: 0,
@@ -181,7 +182,7 @@ export const getFormFieldsInventory = (usuario) => {
 
     {
       name: 'salePrice',
-      label: 'Precio de Venta',
+      label: 'Precio de venta (tienda física)',
       type: 'text',
       required: true,
       disabled: false,
@@ -189,8 +190,14 @@ export const getFormFieldsInventory = (usuario) => {
     ...(showOldPrice
       ? [
           {
+            name: 'onlinePrice',
+            label: 'Precio en la tienda online',
+            type: 'text',
+            required: false,
+          },
+          {
             name: 'oldPrice',
-            label: 'Precio de Venta (Anteriormente)',
+            label: 'Precio anterior (tachado en la tienda online)',
             type: 'text',
             required: false,
           },
