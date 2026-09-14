@@ -128,3 +128,15 @@ export async function updateWompiConfig(dto) {
     body: JSON.stringify(dto),
   });
 }
+
+// Métodos de pago aceptados en la tienda online (COD / ONLINE / ADDI).
+export async function getStorePayments() {
+  return apiFetch('/company/store-payments');
+}
+
+export async function updateStorePayments(storePaymentMethods) {
+  return apiFetch('/company/store-payments', {
+    method: 'PATCH',
+    body: JSON.stringify({ storePaymentMethods }),
+  });
+}

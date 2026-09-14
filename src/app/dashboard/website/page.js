@@ -12,6 +12,7 @@ import AlertModal from '@/components/dashboard/modals/alertModal';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import Button from '@/components/ui/Button';
 import WompiPaymentSettings from '@/components/dashboard/website/WompiPaymentSettings';
+import StorePaymentMethods from '@/components/dashboard/website/StorePaymentMethods';
 import {
   getWebsiteConfig,
   updateWebsiteConfig,
@@ -673,6 +674,13 @@ export default function WebsitePage() {
               </Button>
             </div>
           </form>
+        )}
+
+        {/* ---------- MÉTODOS DE PAGO DE LA TIENDA (el dueño elige) ---------- */}
+        {!loading && (
+          <div className="mt-5">
+            <StorePaymentMethods />
+          </div>
         )}
 
         {/* ---------- PAGOS EN LÍNEA (Wompi por empresa) ---------- */}
