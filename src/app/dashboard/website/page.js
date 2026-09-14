@@ -13,6 +13,7 @@ import ConfirmModal from '@/components/ui/ConfirmModal';
 import Button from '@/components/ui/Button';
 import WompiPaymentSettings from '@/components/dashboard/website/WompiPaymentSettings';
 import StorePaymentMethods from '@/components/dashboard/website/StorePaymentMethods';
+import StoreShippingSettings from '@/components/dashboard/website/StoreShippingSettings';
 import {
   getWebsiteConfig,
   updateWebsiteConfig,
@@ -680,6 +681,13 @@ export default function WebsitePage() {
         {!loading && (
           <div className="mt-5">
             <StorePaymentMethods />
+          </div>
+        )}
+
+        {/* ---------- ENVÍOS (métodos y tarifas) ---------- */}
+        {!loading && (
+          <div className="mt-5">
+            <StoreShippingSettings />
           </div>
         )}
 
