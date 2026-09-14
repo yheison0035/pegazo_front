@@ -699,7 +699,7 @@ export default function WebsitePage() {
           <div className="mt-5">
             <Section
               title="Banners de portada"
-              description="Se muestran en un carrusel en la página principal."
+              description="Carrusel a todo el ancho en la página principal. Se muestra la imagen COMPLETA (no se recorta); usa imágenes horizontales y deja lo importante hacia el centro."
             >
               <div className="space-y-3">
                 {banners.length === 0 && (
@@ -756,7 +756,7 @@ export default function WebsitePage() {
 
               <div className="mt-5 rounded-lg border border-dashed border-gray-300 p-4">
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <Field label="Imagen del banner" hint="Recomendado 1600×700 px">
+                  <Field label="Imagen del banner" hint="Recomendado 1920×600 px (horizontal, formato ancho ~3:1)">
                     <div className="flex items-center gap-3">
                       {newBanner.image && (
                         // eslint-disable-next-line @next/next/no-img-element
