@@ -11,6 +11,9 @@ import {
   orderCustomerName,
   orderCustomerPhone,
   orderShippingAddress,
+  orderWhatsappUrl,
+  shippingMessage,
+  WhatsappIcon,
 } from './orderHelpers';
 
 export default function OrderDetailModal({ orderId, onClose, onUpdated }) {
@@ -22,6 +25,9 @@ export default function OrderDetailModal({ orderId, onClose, onUpdated }) {
     trackingNumber: '',
     notes: '',
   });
+  // Solo para "No entregado": motivo + fecha de reprogramación.
+  const [failReason, setFailReason] = useState('');
+  const [reschedule, setReschedule] = useState('');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -48,10 +54,34 @@ export default function OrderDetailModal({ orderId, onClose, onUpdated }) {
     };
   }, [orderId, getOrderById, onClose]);
 
+  // Abre el WhatsApp del cliente con el mensaje del estado indicado. Se llama
+  // ANTES de guardar (dentro del gesto del usuario) para evitar el bloqueo de
+  // pop-ups del navegador.
+  const notify = (status) => {
+    if (!order) return;
+    const url = orderWhatsappUrl(order, shippingMessage(status, order));
+    if (url) window.open(url, '_blank', 'noopener');
+  };
+
+  const buildPayload = (override = {}) => {
+    const next = { ...form, ...override };
+    // "No entregado": adjunta motivo + reprogramación a las notas.
+    if (next.shippingStatus === 'FALLIDO') {
+      const extra = [
+        failReason ? `No entregado: ${failReason}` : '',
+        reschedule ? `Reprogramar: ${reschedule}` : '',
+      ]
+        .filter(Boolean)
+        .join(' · ');
+      if (extra) next.notes = [form.notes, extra].filter(Boolean).join(' — ');
+    }
+    return next;
+  };
+
   const save = async (override = {}) => {
     setSaving(true);
     try {
-      await updateOrderFulfillment(orderId, { ...form, ...override });
+      await updateOrderFulfillment(orderId, buildPayload(override));
       onUpdated?.();
       onClose();
     } catch (e) {
@@ -59,6 +89,12 @@ export default function OrderDetailModal({ orderId, onClose, onUpdated }) {
     } finally {
       setSaving(false);
     }
+  };
+
+  // Guarda el estado elegido y de una vez abre el WhatsApp para avisar al cliente.
+  const saveAndNotify = async (status) => {
+    notify(status); // síncrono, dentro del click
+    await save({ shippingStatus: status });
   };
 
   const address = order ? orderShippingAddress(order) : '';
@@ -221,20 +257,79 @@ export default function OrderDetailModal({ orderId, onClose, onUpdated }) {
                   </div>
                 </div>
 
+                {/* No entregado: motivo + reprogramación */}
+                {form.shippingStatus === 'FALLIDO' && (
+                  <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 rounded-lg border border-red-100 bg-red-50/50 p-3">
+                    <div>
+                      <label className="text-xs font-medium text-gray-600">
+                        Motivo de no entrega
+                      </label>
+                      <input
+                        value={failReason}
+                        onChange={(e) => setFailReason(e.target.value)}
+                        placeholder="Ej: cliente ausente, dirección errada…"
+                        className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-gray-600">
+                        Reprogramar entrega
+                      </label>
+                      <input
+                        type="date"
+                        value={reschedule}
+                        onChange={(e) => setReschedule(e.target.value)}
+                        className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Cambios rápidos de estado (guardan y avisan al cliente) */}
                 <div className="mt-4 flex flex-wrap gap-2">
                   <button
-                    onClick={() => save({ shippingStatus: 'EN_CAMINO' })}
+                    onClick={() => saveAndNotify('ASIGNADO_TRANSPORTADORA')}
+                    disabled={saving || loading}
+                    className="rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    Despachado
+                  </button>
+                  <button
+                    onClick={() => saveAndNotify('EN_CAMINO')}
                     disabled={saving || loading}
                     className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
                   >
-                    Marcar en camino
+                    En camino
                   </button>
                   <button
-                    onClick={() => save({ shippingStatus: 'ENTREGADO' })}
+                    onClick={() => saveAndNotify('ENTREGADO')}
                     disabled={saving || loading}
                     className="rounded-lg bg-green-600 px-3 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
                   >
-                    Marcar entregado
+                    Entregado
+                  </button>
+                  <button
+                    onClick={() => saveAndNotify('FALLIDO')}
+                    disabled={saving || loading}
+                    className="rounded-lg bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                  >
+                    No entregado
+                  </button>
+                </div>
+
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={() => notify(form.shippingStatus)}
+                    disabled={!orderCustomerPhone(order)}
+                    title={
+                      orderCustomerPhone(order)
+                        ? 'Avisar al cliente por WhatsApp el estado actual'
+                        : 'El pedido no tiene teléfono'
+                    }
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-green-500 px-3 py-2 text-sm font-medium text-white hover:bg-green-600 disabled:opacity-50"
+                  >
+                    <WhatsappIcon className="w-4 h-4" />
+                    Notificar por WhatsApp
                   </button>
                   <button
                     onClick={() => save()}
