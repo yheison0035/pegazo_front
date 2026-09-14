@@ -6,6 +6,9 @@ import {
   TrashIcon,
   ArrowUpTrayIcon,
   GlobeAltIcon,
+  PencilSquareIcon,
+  CheckIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import RoleGuard from '@/auth/roleGuard';
 import AlertModal from '@/components/dashboard/modals/alertModal';
@@ -149,6 +152,7 @@ export default function WebsitePage() {
   const [uploading, setUploading] = useState('');
   const [alert, setAlert] = useState({});
   const [bannerToDelete, setBannerToDelete] = useState(null);
+  const [editingBanner, setEditingBanner] = useState(null);
   const [showAllThemes, setShowAllThemes] = useState(false);
 
   const load = useCallback(async () => {
@@ -268,6 +272,41 @@ export default function WebsitePage() {
   const handleToggleBanner = async (banner) => {
     try {
       await updateWebsiteBanner(banner.id, { active: !banner.active });
+      load();
+    } catch (err) {
+      setAlert({ type: 'error', message: err.message });
+    }
+  };
+
+  // Abre el editor de un banner con sus valores actuales.
+  const startEditBanner = (banner) => {
+    setEditingBanner({
+      id: banner.id,
+      title: banner.title || '',
+      subtitle: banner.subtitle || '',
+      buttonText: banner.buttonText || '',
+      buttonUrl: banner.buttonUrl || '',
+      order: banner.order ?? 0,
+    });
+  };
+
+  const setEditField = (k) => (e) =>
+    setEditingBanner((b) => ({ ...b, [k]: e.target.value }));
+
+  // Guarda todos los campos editables del banner.
+  const handleSaveBannerEdit = async () => {
+    const b = editingBanner;
+    if (!b) return;
+    try {
+      await updateWebsiteBanner(b.id, {
+        title: b.title,
+        subtitle: b.subtitle,
+        buttonText: b.buttonText,
+        buttonUrl: b.buttonUrl,
+        order: Number(b.order) || 0,
+      });
+      setEditingBanner(null);
+      setAlert({ type: 'success', message: 'Banner actualizado' });
       load();
     } catch (err) {
       setAlert({ type: 'error', message: err.message });
@@ -706,65 +745,149 @@ export default function WebsitePage() {
                 {banners.map((banner) => (
                   <div
                     key={banner.id}
-                    className="flex flex-col gap-3 rounded-lg border border-gray-200 p-3 sm:flex-row sm:items-center"
+                    className="rounded-lg border border-gray-200 p-3"
                   >
-                    {/* Imagen de Cloudinary, se muestra tal cual */}
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={banner.image}
-                      alt={banner.title || 'Banner'}
-                      className="h-16 w-28 rounded object-cover"
-                    />
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                      {/* Imagen de Cloudinary, se muestra tal cual */}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={banner.image}
+                        alt={banner.title || 'Banner'}
+                        className="h-16 w-28 rounded object-cover"
+                      />
 
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-800">
-                        {banner.title || 'Sin título'}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {banner.subtitle || '—'}
-                      </p>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-800">
+                          {banner.title || 'Sin título'}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {banner.subtitle || '—'}
+                        </p>
+                      </div>
+
+                      {/* Cambiar la imagen del banner ya creado */}
+                      <label
+                        className="flex cursor-pointer items-center gap-1.5 rounded-full border border-gray-300 px-3 py-1 text-xs font-medium text-gray-600 hover:bg-gray-50"
+                        title="Cambiar imagen del banner"
+                      >
+                        <ArrowUpTrayIcon className="h-4 w-4" />
+                        {uploading === `banner-${banner.id}`
+                          ? 'Subiendo…'
+                          : 'Cambiar imagen'}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          disabled={uploading === `banner-${banner.id}`}
+                          onChange={(e) =>
+                            handleReplaceBannerImage(banner, e.target.files?.[0])
+                          }
+                        />
+                      </label>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          editingBanner?.id === banner.id
+                            ? setEditingBanner(null)
+                            : startEditBanner(banner)
+                        }
+                        className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium ${
+                          editingBanner?.id === banner.id
+                            ? 'border-orange-300 bg-orange-50 text-orange-600'
+                            : 'border-gray-300 text-gray-600 hover:bg-gray-50'
+                        }`}
+                      >
+                        <PencilSquareIcon className="h-4 w-4" />
+                        Editar
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleToggleBanner(banner)}
+                        className={`rounded-full px-3 py-1 text-xs font-medium ${
+                          banner.active
+                            ? 'bg-green-50 text-green-600'
+                            : 'bg-gray-100 text-gray-500'
+                        }`}
+                      >
+                        {banner.active ? 'Visible' : 'Oculto'}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setBannerToDelete(banner)}
+                        className="text-gray-400 hover:text-red-500"
+                        aria-label="Eliminar banner"
+                      >
+                        <TrashIcon className="h-5 w-5" />
+                      </button>
                     </div>
 
-                    {/* Cambiar la imagen del banner ya creado */}
-                    <label
-                      className="flex cursor-pointer items-center gap-1.5 rounded-full border border-gray-300 px-3 py-1 text-xs font-medium text-gray-600 hover:bg-gray-50"
-                      title="Cambiar imagen del banner"
-                    >
-                      <ArrowUpTrayIcon className="h-4 w-4" />
-                      {uploading === `banner-${banner.id}`
-                        ? 'Subiendo…'
-                        : 'Cambiar imagen'}
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        disabled={uploading === `banner-${banner.id}`}
-                        onChange={(e) =>
-                          handleReplaceBannerImage(banner, e.target.files?.[0])
-                        }
-                      />
-                    </label>
-
-                    <button
-                      type="button"
-                      onClick={() => handleToggleBanner(banner)}
-                      className={`rounded-full px-3 py-1 text-xs font-medium ${
-                        banner.active
-                          ? 'bg-green-50 text-green-600'
-                          : 'bg-gray-100 text-gray-500'
-                      }`}
-                    >
-                      {banner.active ? 'Visible' : 'Oculto'}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setBannerToDelete(banner)}
-                      className="text-gray-400 hover:text-red-500"
-                      aria-label="Eliminar banner"
-                    >
-                      <TrashIcon className="h-5 w-5" />
-                    </button>
+                    {/* Editor de textos del banner */}
+                    {editingBanner?.id === banner.id && (
+                      <div className="mt-3 grid gap-3 border-t border-gray-100 pt-3 sm:grid-cols-2">
+                        <Field label="Título">
+                          <input
+                            type="text"
+                            value={editingBanner.title}
+                            onChange={setEditField('title')}
+                            className={inputClass}
+                          />
+                        </Field>
+                        <Field label="Subtítulo">
+                          <input
+                            type="text"
+                            value={editingBanner.subtitle}
+                            onChange={setEditField('subtitle')}
+                            className={inputClass}
+                          />
+                        </Field>
+                        <Field label="Texto del botón">
+                          <input
+                            type="text"
+                            value={editingBanner.buttonText}
+                            onChange={setEditField('buttonText')}
+                            className={inputClass}
+                          />
+                        </Field>
+                        <Field label="Enlace del botón">
+                          <input
+                            type="text"
+                            value={editingBanner.buttonUrl}
+                            onChange={setEditField('buttonUrl')}
+                            placeholder="Ej: /ofertas"
+                            className={inputClass}
+                          />
+                        </Field>
+                        <Field label="Orden">
+                          <input
+                            type="number"
+                            value={editingBanner.order}
+                            onChange={setEditField('order')}
+                            className={inputClass}
+                          />
+                        </Field>
+                        <div className="flex items-end gap-2">
+                          <button
+                            type="button"
+                            onClick={handleSaveBannerEdit}
+                            className="flex items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600"
+                          >
+                            <CheckIcon className="h-4 w-4" />
+                            Guardar
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setEditingBanner(null)}
+                            className="flex items-center gap-1.5 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
+                          >
+                            <XMarkIcon className="h-4 w-4" />
+                            Cancelar
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
