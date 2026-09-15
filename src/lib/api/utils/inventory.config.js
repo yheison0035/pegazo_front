@@ -53,6 +53,7 @@ export const getEmptyInventory = () => ({
   oldPrice: '',
   salePrice: '',
   onlinePrice: '',
+  publishInEcommerce: true,
   categoryId: '',
   brandId: '',
   minStock: 0,
@@ -186,20 +187,37 @@ export const getFormFieldsInventory = (usuario) => {
       type: 'text',
       required: true,
       disabled: false,
+      helperText: 'Precio con el que se vende en el punto de venta (POS).',
+    },
+    // Habilitar el producto en la tienda online: al activarlo aparecen los precios
+    // online (venta online + precio anterior tachado).
+    {
+      name: 'publishInEcommerce',
+      label: 'Habilitar en tienda online',
+      type: 'checkbox',
+      required: false,
+      helperText:
+        'Si lo activas, defines el precio para la tienda online (puede ser distinto al físico).',
     },
     ...(showOldPrice
       ? [
           {
             name: 'onlinePrice',
-            label: 'Precio en la tienda online',
+            label: 'Precio de venta (tienda online)',
             type: 'text',
             required: false,
+            helperText:
+              'Precio que ve el cliente en la tienda online (si lo dejas vacío, usa el de tienda física).',
+            hideWhen: (fd) => !fd.publishInEcommerce,
           },
           {
             name: 'oldPrice',
-            label: 'Precio anterior (tachado en la tienda online)',
+            label: 'Precio anterior (tachado en tienda online)',
             type: 'text',
             required: false,
+            helperText:
+              'Se muestra tachado junto al precio online para resaltar el descuento.',
+            hideWhen: (fd) => !fd.publishInEcommerce,
           },
         ]
       : []),
