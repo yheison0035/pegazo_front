@@ -30,6 +30,7 @@ import {
   WEBSITE_FONTS,
   themeColors,
 } from '@/config/websiteThemes';
+import { getStoreEditLink } from '@/lib/api/routes/company';
 
 const EMPTY_BANNER = {
   image: '',
@@ -354,12 +355,41 @@ export default function WebsitePage() {
   return (
     <RoleGuard allowedRoles={['SUPER_ADMIN', 'SUPER_PLATFORM_ADMIN']}>
       <div className="w-full pb-10">
-        <div className="mb-4">
-          <h1 className="text-2xl font-semibold text-gray-800">Tienda online</h1>
-          <p className="text-sm text-gray-500">
-            Diseño y contenido de tu tienda. Los cambios se ven en tu dominio al
-            recargar.
-          </p>
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold text-gray-800">
+              Tienda online
+            </h1>
+            <p className="text-sm text-gray-500">
+              Diseño y contenido de tu tienda. Los cambios se ven en tu dominio
+              al recargar.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={async () => {
+              try {
+                const res = await getStoreEditLink();
+                const url = res?.storeUrl;
+                if (url) window.open(url, '_blank', 'noopener');
+                else
+                  setAlert({
+                    type: 'warning',
+                    message:
+                      'Configura primero el dominio de tu tienda para poder editarla.',
+                  });
+              } catch (e) {
+                setAlert({
+                  type: 'error',
+                  message: e?.message || 'No se pudo abrir el editor.',
+                });
+              }
+            }}
+            className="inline-flex items-center gap-2 rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-600"
+          >
+            <PencilSquareIcon className="h-5 w-5" />
+            Editar textos en la tienda
+          </button>
         </div>
 
         {loading ? (

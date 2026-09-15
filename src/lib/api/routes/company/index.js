@@ -152,3 +152,8 @@ export async function updateStoreShipping(storeShipping) {
     body: JSON.stringify({ storeShipping }),
   });
 }
+
+// Token para editar la tienda inline (botón "Editar mi tienda" del CRM).
+export async function getStoreEditLink() {
+  return apiFetch('/website/edit-token');
+}
