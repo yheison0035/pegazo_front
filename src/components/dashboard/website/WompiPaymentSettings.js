@@ -1,12 +1,53 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { CreditCardIcon, CheckBadgeIcon } from '@heroicons/react/24/outline';
+import {
+  CreditCardIcon,
+  CheckBadgeIcon,
+  EyeIcon,
+  EyeSlashIcon,
+} from '@heroicons/react/24/outline';
 import Button from '@/components/ui/Button';
 import { getWompiConfig, updateWompiConfig } from '@/lib/api/routes/company';
 
 const inputCls =
   'w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20';
+
+// Campo de secreto con "ojito" para ver lo que se pega (y validar que quedó bien).
+function SecretField({ label, value, onChange, placeholder, hint }) {
+  const [show, setShow] = useState(false);
+  return (
+    <div>
+      <label className="mb-1 block text-xs font-semibold text-gray-600">
+        {label}
+      </label>
+      <div className="relative">
+        <input
+          type={show ? 'text' : 'password'}
+          className={`${inputCls} pr-10`}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          autoComplete="off"
+          spellCheck={false}
+        />
+        <button
+          type="button"
+          onClick={() => setShow((s) => !s)}
+          title={show ? 'Ocultar' : 'Ver'}
+          className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"
+        >
+          {show ? (
+            <EyeSlashIcon className="h-5 w-5" />
+          ) : (
+            <EyeIcon className="h-5 w-5" />
+          )}
+        </button>
+      </div>
+      {hint && <p className="mt-1 text-[11px] text-gray-400">{hint}</p>}
+    </div>
+  );
+}
 
 // Cada negocio conecta SU cuenta Wompi: el dinero de sus ventas online cae en
 // su propio banco. Los secretos se guardan enmascarados y solo se reenvían si
@@ -104,47 +145,29 @@ export default function WompiPaymentSettings() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <label className="mb-1 block text-xs font-semibold text-gray-600">
-              Secreto de integridad
-            </label>
-            <input
-              type="password"
-              className={inputCls}
-              value={integrity}
-              onChange={(e) => setIntegrity(e.target.value)}
-              placeholder={secretPh(cfg.hasIntegrity)}
-              autoComplete="off"
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-xs font-semibold text-gray-600">
-              Secreto de eventos (webhook)
-            </label>
-            <input
-              type="password"
-              className={inputCls}
-              value={events}
-              onChange={(e) => setEvents(e.target.value)}
-              placeholder={secretPh(cfg.hasEvents)}
-              autoComplete="off"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="mb-1 block text-xs font-semibold text-gray-600">
-            Llave privada (opcional, para conciliar pagos)
-          </label>
-          <input
-            type="password"
-            className={inputCls}
-            value={priv}
-            onChange={(e) => setPriv(e.target.value)}
-            placeholder={secretPh(cfg.hasPrivate)}
-            autoComplete="off"
+          <SecretField
+            label="Secreto de integridad"
+            value={integrity}
+            onChange={(e) => setIntegrity(e.target.value)}
+            placeholder={secretPh(cfg.hasIntegrity)}
+            hint="Empieza con test_integrity_ (pruebas) o prod_integrity_ (real)."
+          />
+          <SecretField
+            label="Secreto de eventos (webhook)"
+            value={events}
+            onChange={(e) => setEvents(e.target.value)}
+            placeholder={secretPh(cfg.hasEvents)}
+            hint="Empieza con test_events_ o prod_events_. ¡No lo confundas con integridad!"
           />
         </div>
+
+        <SecretField
+          label="Llave privada (opcional, para conciliar pagos)"
+          value={priv}
+          onChange={(e) => setPriv(e.target.value)}
+          placeholder={secretPh(cfg.hasPrivate)}
+          hint="Empieza con prv_test_ o prv_prod_."
+        />
 
         <p className="rounded-lg bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
           Tu tienda queda <b>conectada automáticamente</b> a pagos en línea en
