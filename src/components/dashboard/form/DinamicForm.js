@@ -42,6 +42,7 @@ const PRICE_FIELDS = new Set([
   'purchasePrice',
   'purchaseTotal',
   'salePrice',
+  'onlinePrice',
   'oldPrice',
   'amount',
   'price',

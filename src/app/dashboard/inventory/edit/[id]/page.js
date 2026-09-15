@@ -116,6 +116,7 @@ export default function EditProduct() {
       // null cuando se deja vacío: limpia el precio online y la tienda vuelve a
       // usar el precio de venta (salePrice).
       onlinePrice: parseCOPToNumber(formData.onlinePrice),
+      publishInEcommerce: Boolean(formData.publishInEcommerce),
       minStock: numOrUndef(formData.minStock),
       unit: formData.unit || undefined,
       trackStock: formData.trackStock,
