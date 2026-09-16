@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { XMarkIcon, TruckIcon } from '@heroicons/react/24/outline';
 import useOrders from '@/lib/api/hooks/useOrders';
 import { formatCOP, formatDateTime } from '@/lib/api/utils/utils';
@@ -36,11 +36,21 @@ export default function OrderDetailModal({ orderId, onClose, onUpdated }) {
   const [reschedule, setReschedule] = useState('');
   const [saving, setSaving] = useState(false);
 
+  // Refs para no re-ejecutar la carga en cada re-render del padre (antes las deps
+  // getOrderById/onChange cambiaban de identidad y el efecto se volvía a correr,
+  // reseteando el formulario y BORRANDO lo que el usuario estaba escribiendo).
+  const getOrderByIdRef = useRef(getOrderById);
+  getOrderByIdRef.current = getOrderById;
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
+  // Solo carga cuando cambia el pedido seleccionado (orderId), nunca por un
+  // re-render del listado en vivo.
   useEffect(() => {
     let active = true;
     (async () => {
       try {
-        const res = await getOrderById(orderId);
+        const res = await getOrderByIdRef.current(orderId);
         if (!active) return;
         const o = res.data;
         setOrder(o);
@@ -52,13 +62,13 @@ export default function OrderDetailModal({ orderId, onClose, onUpdated }) {
         });
       } catch (e) {
         // el modal se cierra si falla la carga
-        onClose();
+        onCloseRef.current();
       }
     })();
     return () => {
       active = false;
     };
-  }, [orderId, getOrderById, onClose]);
+  }, [orderId]);
 
   // Abre el WhatsApp del cliente con el mensaje del estado indicado. Se llama
   // ANTES de guardar (dentro del gesto del usuario) para evitar el bloqueo de
