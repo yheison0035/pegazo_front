@@ -11,6 +11,7 @@ import {
   LockClosedIcon,
 } from '@heroicons/react/24/outline';
 import useOrders from '@/lib/api/hooks/useOrders';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 import { formatCOP, formatDateTime } from '@/lib/api/utils/utils';
 import {
   SHIPPING_STATUS_OPTIONS,
@@ -43,6 +44,8 @@ export default function OrderDetailModal({ orderId, onClose, onUpdated }) {
   const [failReason, setFailReason] = useState('');
   const [reschedule, setReschedule] = useState('');
   const [saving, setSaving] = useState(false);
+  // Diálogo de confirmación con el diseño del sitio (reemplaza window.confirm).
+  const [confirmDialog, setConfirmDialog] = useState(null);
 
   // Refs para no re-ejecutar la carga en cada re-render (evita borrar el form).
   const getOrderByIdRef = useRef(getOrderById);
@@ -128,39 +131,40 @@ export default function OrderDetailModal({ orderId, onClose, onUpdated }) {
     }
   };
 
-  const doCancel = async () => {
-    if (
-      !window.confirm(
-        '¿Cancelar este pedido? Si ya se había descontado inventario, se devolverá al stock.',
-      )
-    )
-      return;
-    setSaving(true);
-    try {
-      await cancelOrder(orderId);
-      onUpdated?.();
-      onClose();
-    } catch (e) {
-      /* noop */
-    } finally {
-      setSaving(false);
-    }
-  };
+  const doCancel = () =>
+    setConfirmDialog({
+      title: 'Cancelar pedido',
+      message:
+        'Si ya se había descontado inventario, se devolverá al stock. ¿Deseas cancelar este pedido?',
+      confirmText: 'Cancelar pedido',
+      tone: 'primary',
+      action: async () => {
+        await cancelOrder(orderId);
+      },
+    });
 
-  const doDelete = async () => {
-    if (
-      !window.confirm(
-        '¿Eliminar el pedido por completo? Esta acción no se puede deshacer (el stock se restaura).',
-      )
-    )
-      return;
+  const doDelete = () =>
+    setConfirmDialog({
+      title: 'Eliminar pedido',
+      message:
+        'Esta acción no se puede deshacer (el stock se restaura). ¿Eliminar el pedido por completo?',
+      confirmText: 'Eliminar',
+      tone: 'danger',
+      action: async () => {
+        await deleteOrder(orderId);
+      },
+    });
+
+  const runConfirm = async () => {
+    if (!confirmDialog) return;
     setSaving(true);
     try {
-      await deleteOrder(orderId);
+      await confirmDialog.action();
+      setConfirmDialog(null);
       onUpdated?.();
       onClose();
     } catch (e) {
-      /* noop */
+      /* deja el diálogo abierto para reintentar */
     } finally {
       setSaving(false);
     }
@@ -505,6 +509,17 @@ export default function OrderDetailModal({ orderId, onClose, onUpdated }) {
           )}
         </div>
       </div>
+
+      <ConfirmModal
+        open={!!confirmDialog}
+        title={confirmDialog?.title}
+        message={confirmDialog?.message}
+        confirmText={confirmDialog?.confirmText}
+        tone={confirmDialog?.tone}
+        loading={saving}
+        onConfirm={runConfirm}
+        onCancel={() => setConfirmDialog(null)}
+      />
     </div>
   );
 }
