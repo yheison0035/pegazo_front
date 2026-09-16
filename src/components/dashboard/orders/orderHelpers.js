@@ -2,7 +2,7 @@
 // etiquetas siguen el flujo del negocio: confirmado → empacando → despachado →
 // en camino → entregado / no entregado.
 export const SHIPPING_STATUS_OPTIONS = [
-  { id: 'PENDIENTE', name: 'Confirmado · Empacando' },
+  { id: 'PENDIENTE', name: 'Empacando' },
   { id: 'ASIGNADO_TRANSPORTADORA', name: 'Despachado' },
   { id: 'EN_CAMINO', name: 'En camino' },
   { id: 'ENTREGADO', name: 'Entregado' },
