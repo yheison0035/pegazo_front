@@ -309,7 +309,7 @@ export default function FacturacionElectronica() {
             </div>
           )}
 
-          <div className="flex justify-end border-t border-gray-100 pt-4">
+          <div className="sticky bottom-0 z-10 flex justify-end border-t border-gray-200 bg-white/95 py-3 backdrop-blur">
             <Button variant="primary" onClick={save} loading={busy}>
               Guardar configuración
             </Button>
