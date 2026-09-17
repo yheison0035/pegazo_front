@@ -609,7 +609,7 @@ export default function PayablesPage() {
                 />
               </Field>
             </div>
-            <div className="mt-5 flex justify-end gap-2">
+            <div className="sticky bottom-0 -mx-5 -mb-5 mt-5 flex justify-end gap-2 border-t border-gray-200 bg-white px-5 py-3">
               <Button variant="secondary" onClick={() => setForm(null)}>
                 Cancelar
               </Button>
