@@ -31,16 +31,47 @@ const EMPTY = {
   dine_in: { enabled: false },
 };
 
-// Transportadora que viene pre-cargada la primera vez (editable).
-const seedCarrier = () => ({
-  id: 'interrapidisimo',
-  name: 'Interrapidísimo',
-  logo: '',
-  enabled: true,
-  cod: true,
-  national: { cost: 15000, days: '3 a 5 días hábiles' },
-  overrides: [],
-});
+// Zonas apartadas de Colombia: la mayoría de tiendas les cobra un recargo y da
+// tiempos más largos. (Nombres iguales a locations.data para que coincidan.)
+const APARTADOS = [
+  'Amazonas',
+  'Guainía',
+  'Vaupés',
+  'Vichada',
+  'Guaviare',
+  'Chocó',
+  'Putumayo',
+  'Caquetá',
+  'Arauca',
+  'San Andrés y Providencia',
+];
+
+// Catálogo de transportadoras de CONTRA ENTREGA en Colombia, con el formato que
+// usan las tiendas: tarifa nacional plana + recargo para zonas apartadas, y los
+// TIEMPOS reales publicados por cada una. Los COSTOS son estimados de mercado y
+// se dejan EDITABLES (cada quien ajusta a su contrato para no perder dinero).
+const CARRIER_SEED = [
+  { id: 'interrapidisimo', name: 'Interrapidísimo', nal: 13000, nalDays: '1 a 3 días hábiles', apCost: 22000, apDays: '3 a 6 días hábiles' },
+  { id: 'servientrega', name: 'Servientrega', nal: 15000, nalDays: '1 a 3 días hábiles', apCost: 26000, apDays: '3 a 6 días hábiles' },
+  { id: 'coordinadora', name: 'Coordinadora', nal: 14500, nalDays: '1 a 4 días hábiles', apCost: 25000, apDays: '4 a 7 días hábiles' },
+  { id: 'envia', name: 'Envía', nal: 13500, nalDays: '1 a 4 días hábiles', apCost: 23000, apDays: '4 a 7 días hábiles' },
+  { id: 'tcc', name: 'TCC', nal: 14000, nalDays: '1 a 4 días hábiles', apCost: 24000, apDays: '3 a 6 días hábiles' },
+];
+
+// Genera las transportadoras sugeridas. Solo la primera (la que ya usas) queda
+// ACTIVA por defecto; las demás cargadas pero apagadas para que actives las que
+// tengas contrato.
+function suggestedCarriers() {
+  return CARRIER_SEED.map((c, i) => ({
+    id: c.id,
+    name: c.name,
+    logo: '',
+    enabled: i === 0,
+    cod: true,
+    national: { cost: c.nal, days: c.nalDays },
+    overrides: APARTADOS.map((d) => ({ department: d, cost: c.apCost, days: c.apDays })),
+  }));
+}
 
 const newCarrier = () => ({
   id: `carrier-${Date.now()}`,
@@ -109,16 +140,16 @@ export default function StoreShippingSettings() {
                     ? c.overrides.map((o) => ({ department: o.department || '', cost: o.cost ?? 0, days: o.days || '' }))
                     : [],
                 }))
-              : [seedCarrier()],
+              : suggestedCarriers(),
           );
         } else {
           setCfg(EMPTY);
-          setCarriers([seedCarrier()]);
+          setCarriers(suggestedCarriers());
         }
       })
       .catch(() => {
         setCfg(EMPTY);
-        setCarriers([seedCarrier()]);
+        setCarriers(suggestedCarriers());
       });
   }, []);
 
@@ -141,6 +172,14 @@ export default function StoreShippingSettings() {
     );
   const removeOverride = (i, oi) =>
     setCarriers((cs) => cs.map((c, idx) => (idx === i ? { ...c, overrides: c.overrides.filter((_, oidx) => oidx !== oi) } : c)));
+
+  // Agrega las transportadoras sugeridas que aún no estén en la lista (por id).
+  const loadSuggested = () =>
+    setCarriers((cs) => {
+      const have = new Set(cs.map((c) => c.id));
+      const toAdd = suggestedCarriers().filter((c) => !have.has(c.id));
+      return [...cs, ...toAdd];
+    });
 
   const anyEnabled = cfg && METHODS.some((m) => cfg[m.key]?.enabled);
 
@@ -249,9 +288,21 @@ export default function StoreShippingSettings() {
               Define tarifas y <b>tiempos de entrega</b> por destino. El cliente los verá al elegir su ciudad.
             </p>
           </div>
-          <Button onClick={addCarrier} variant="secondary" className="flex-none">
-            <PlusIcon className="mr-1 h-4 w-4" /> Agregar
-          </Button>
+          <div className="flex flex-none gap-2">
+            <Button onClick={loadSuggested} variant="secondary">
+              Cargar sugeridas
+            </Button>
+            <Button onClick={addCarrier} variant="secondary">
+              <PlusIcon className="mr-1 h-4 w-4" /> Agregar
+            </Button>
+          </div>
+        </div>
+
+        <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+          <b>Importante:</b> las tarifas cargadas son <b>estimados de mercado, editables</b>. La contra
+          entrega cobra <b>flete + comisión de recaudo</b> (≈ 1% a 4,3% del valor recaudado, con un
+          mínimo por envío). Ajusta cada tarifa a tu contrato para <b>no perder dinero</b>. Deja
+          activas solo las transportadoras con las que tengas convenio.
         </div>
 
         {/* Envío gratis global */}
