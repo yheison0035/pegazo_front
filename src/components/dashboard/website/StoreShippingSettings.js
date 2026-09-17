@@ -13,6 +13,7 @@ import {
 import Button from '@/components/ui/Button';
 import { getStoreShipping, updateStoreShipping } from '@/lib/api/routes/company';
 import { locations } from '@/lib/api/utils/locations.data';
+import { formatCOP } from '@/lib/api/utils/utils';
 
 const DEPARTMENTS = locations.map((l) => l.department);
 
@@ -105,6 +106,26 @@ function Toggle({ checked, onChange }) {
 
 const input =
   'w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none';
+
+// Campo de PRECIO con el MISMO formato del resto del CRM (inventario, etc.):
+// muestra el valor como moneda ($ 15.000) y guarda solo el número.
+// allowEmpty = deja el campo vacío (para "envío gratis desde" opcional).
+function MoneyInput({ value, onChange, placeholder, allowEmpty = false, className }) {
+  return (
+    <input
+      type="text"
+      inputMode="numeric"
+      value={value === '' || value == null ? '' : formatCOP(value)}
+      onChange={(e) => {
+        const digits = String(e.target.value).replace(/\D/g, '');
+        if (digits === '') return onChange(allowEmpty ? '' : 0);
+        onChange(Number(digits));
+      }}
+      placeholder={placeholder}
+      className={className || `mt-1 ${input}`}
+    />
+  );
+}
 
 export default function StoreShippingSettings() {
   const [cfg, setCfg] = useState(null);
@@ -265,15 +286,15 @@ export default function StoreShippingSettings() {
               {fee && cfg[key].enabled && (
                 <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <label className="text-xs font-medium text-gray-600">
-                    {key === 'shipping' ? 'Tarifa fija (respaldo, COP)' : 'Tarifa (COP)'}
-                    <input type="number" min="0" value={cfg[key].fee} onChange={(e) => set(key, { fee: e.target.value })} className={`mt-1 ${input}`} placeholder="Ej: 8000" />
+                    {key === 'shipping' ? 'Tarifa fija (respaldo)' : 'Tarifa'}
+                    <MoneyInput value={cfg[key].fee} onChange={(v) => set(key, { fee: v })} placeholder="Ej: $ 8.000" />
                   </label>
                   {/* El "envío gratis desde" del envío nacional se define UNA sola vez
                       abajo (global de transportadoras). Aquí solo para domicilio local. */}
                   {key !== 'shipping' && (
                     <label className="text-xs font-medium text-gray-600">
                       Envío gratis desde (opcional)
-                      <input type="number" min="0" value={cfg[key].freeFrom} onChange={(e) => set(key, { freeFrom: e.target.value })} className={`mt-1 ${input}`} placeholder="Ej: 100000" />
+                      <MoneyInput value={cfg[key].freeFrom} onChange={(v) => set(key, { freeFrom: v })} placeholder="Ej: $ 100.000" allowEmpty />
                     </label>
                   )}
                 </div>
@@ -311,8 +332,8 @@ export default function StoreShippingSettings() {
 
         {/* Envío gratis global */}
         <label className="mt-4 block max-w-xs text-xs font-medium text-gray-600">
-          Envío gratis desde (global, COP)
-          <input type="number" min="0" value={freeFrom} onChange={(e) => setFreeFrom(e.target.value)} className={`mt-1 ${input}`} placeholder="Ej: 150000" />
+          Envío gratis desde (global)
+          <MoneyInput value={freeFrom} onChange={setFreeFrom} placeholder="Ej: $ 150.000" allowEmpty />
           <span className="mt-1 block text-[11px] font-normal text-gray-400">
             Si el pedido alcanza este valor, el envío es gratis en cualquier transportadora.
           </span>
@@ -349,8 +370,8 @@ export default function StoreShippingSettings() {
 
               <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <label className="text-xs font-medium text-gray-600">
-                  Tarifa nacional (COP)
-                  <input type="number" min="0" value={c.national.cost} onChange={(e) => updateNational(i, { cost: e.target.value })} className={`mt-1 ${input}`} placeholder="Ej: 15000" />
+                  Tarifa nacional
+                  <MoneyInput value={c.national.cost} onChange={(v) => updateNational(i, { cost: v })} placeholder="Ej: $ 15.000" />
                 </label>
                 <label className="text-xs font-medium text-gray-600">
                   Tiempo de entrega nacional
@@ -389,7 +410,7 @@ export default function StoreShippingSettings() {
                             <option key={d} value={d}>{d}</option>
                           ))}
                         </select>
-                        <input type="number" min="0" value={o.cost} onChange={(e) => updateOverride(i, oi, { cost: e.target.value })} className={input} placeholder="Costo" />
+                        <MoneyInput value={o.cost} onChange={(v) => updateOverride(i, oi, { cost: v })} placeholder="Costo" className={input} />
                         <input value={o.days} onChange={(e) => updateOverride(i, oi, { days: e.target.value })} className={input} placeholder="Tiempo (ej: 1 a 2 días)" />
                         <button onClick={() => removeOverride(i, oi)} className="flex items-center justify-center rounded-lg px-2 text-gray-400 hover:bg-red-50 hover:text-red-500">
                           <TrashIcon className="h-4 w-4" />
