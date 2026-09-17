@@ -347,16 +347,31 @@ export default function StoreShippingSettings() {
           )}
 
           {carriers.map((c, i) => (
-            <div key={c.id} className="rounded-2xl border border-gray-200 p-4">
+            <div
+              key={c.id}
+              className={`rounded-2xl border p-4 ${
+                c.enabled ? 'border-gray-200' : 'border-gray-100 bg-gray-50/60'
+              }`}
+            >
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
-                  <TruckIcon className="h-5 w-5 text-orange-500" />
-                  <input
-                    value={c.name}
-                    onChange={(e) => updateCarrier(i, { name: e.target.value })}
-                    placeholder="Nombre (ej: Interrapidísimo)"
-                    className="rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm font-semibold focus:border-orange-400 focus:outline-none"
+                  <TruckIcon
+                    className={`h-5 w-5 ${
+                      c.enabled ? 'text-orange-500' : 'text-gray-400'
+                    }`}
                   />
+                  {c.enabled ? (
+                    <input
+                      value={c.name}
+                      onChange={(e) => updateCarrier(i, { name: e.target.value })}
+                      placeholder="Nombre (ej: Interrapidísimo)"
+                      className="rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm font-semibold focus:border-orange-400 focus:outline-none"
+                    />
+                  ) : (
+                    <span className="text-sm font-semibold text-gray-500">
+                      {c.name || 'Transportadora'}
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center gap-3">
                   <label className="flex items-center gap-1.5 text-xs text-gray-600">
@@ -368,6 +383,8 @@ export default function StoreShippingSettings() {
                 </div>
               </div>
 
+              {c.enabled && (
+                <>
               <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <label className="text-xs font-medium text-gray-600">
                   Tarifa nacional
@@ -420,6 +437,8 @@ export default function StoreShippingSettings() {
                   </div>
                 )}
               </div>
+                </>
+              )}
             </div>
           ))}
         </div>
