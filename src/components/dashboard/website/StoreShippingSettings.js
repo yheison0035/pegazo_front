@@ -6,9 +6,15 @@ import {
   HomeModernIcon,
   BuildingStorefrontIcon,
   MapPinIcon,
+  PlusIcon,
+  TrashIcon,
+  BanknotesIcon,
 } from '@heroicons/react/24/outline';
 import Button from '@/components/ui/Button';
 import { getStoreShipping, updateStoreShipping } from '@/lib/api/routes/company';
+import { locations } from '@/lib/api/utils/locations.data';
+
+const DEPARTMENTS = locations.map((l) => l.department);
 
 // Métodos con tarifa (envío/domicilio) y solo-toggle (recoger/mesa).
 const METHODS = [
@@ -24,6 +30,27 @@ const EMPTY = {
   pickup: { enabled: false },
   dine_in: { enabled: false },
 };
+
+// Transportadora que viene pre-cargada la primera vez (editable).
+const seedCarrier = () => ({
+  id: 'interrapidisimo',
+  name: 'Interrapidísimo',
+  logo: '',
+  enabled: true,
+  cod: true,
+  national: { cost: 15000, days: '3 a 5 días hábiles' },
+  overrides: [],
+});
+
+const newCarrier = () => ({
+  id: `carrier-${Date.now()}`,
+  name: '',
+  logo: '',
+  enabled: true,
+  cod: true,
+  national: { cost: 0, days: '' },
+  overrides: [],
+});
 
 function Toggle({ checked, onChange }) {
   return (
@@ -45,8 +72,13 @@ function Toggle({ checked, onChange }) {
   );
 }
 
+const input =
+  'w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none';
+
 export default function StoreShippingSettings() {
   const [cfg, setCfg] = useState(null);
+  const [carriers, setCarriers] = useState([]);
+  const [freeFrom, setFreeFrom] = useState('');
   const [configured, setConfigured] = useState(false);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');
@@ -63,14 +95,52 @@ export default function StoreShippingSettings() {
             pickup: { enabled: !!s.pickup?.enabled },
             dine_in: { enabled: !!s.dine_in?.enabled },
           });
+          setFreeFrom(s.freeFrom ?? s.shipping?.freeFrom ?? '');
+          setCarriers(
+            Array.isArray(s.carriers) && s.carriers.length
+              ? s.carriers.map((c) => ({
+                  id: c.id || `carrier-${Math.random().toString(36).slice(2)}`,
+                  name: c.name || '',
+                  logo: c.logo || '',
+                  enabled: c.enabled !== false,
+                  cod: c.cod !== false,
+                  national: { cost: c.national?.cost ?? 0, days: c.national?.days || '' },
+                  overrides: Array.isArray(c.overrides)
+                    ? c.overrides.map((o) => ({ department: o.department || '', cost: o.cost ?? 0, days: o.days || '' }))
+                    : [],
+                }))
+              : [seedCarrier()],
+          );
         } else {
           setCfg(EMPTY);
+          setCarriers([seedCarrier()]);
         }
       })
-      .catch(() => setCfg(EMPTY));
+      .catch(() => {
+        setCfg(EMPTY);
+        setCarriers([seedCarrier()]);
+      });
   }, []);
 
   const set = (k, patch) => setCfg((c) => ({ ...c, [k]: { ...c[k], ...patch } }));
+
+  // ---- Operaciones sobre transportadoras ----
+  const updateCarrier = (i, patch) =>
+    setCarriers((cs) => cs.map((c, idx) => (idx === i ? { ...c, ...patch } : c)));
+  const updateNational = (i, patch) =>
+    setCarriers((cs) => cs.map((c, idx) => (idx === i ? { ...c, national: { ...c.national, ...patch } } : c)));
+  const addCarrier = () => setCarriers((cs) => [...cs, newCarrier()]);
+  const removeCarrier = (i) => setCarriers((cs) => cs.filter((_, idx) => idx !== i));
+  const addOverride = (i) =>
+    setCarriers((cs) => cs.map((c, idx) => (idx === i ? { ...c, overrides: [...c.overrides, { department: '', cost: 0, days: '' }] } : c)));
+  const updateOverride = (i, oi, patch) =>
+    setCarriers((cs) =>
+      cs.map((c, idx) =>
+        idx === i ? { ...c, overrides: c.overrides.map((o, oidx) => (oidx === oi ? { ...o, ...patch } : o)) } : c,
+      ),
+    );
+  const removeOverride = (i, oi) =>
+    setCarriers((cs) => cs.map((c, idx) => (idx === i ? { ...c, overrides: c.overrides.filter((_, oidx) => oidx !== oi) } : c)));
 
   const anyEnabled = cfg && METHODS.some((m) => cfg[m.key]?.enabled);
 
@@ -87,11 +157,23 @@ export default function StoreShippingSettings() {
         local_delivery: { enabled: cfg.local_delivery.enabled, fee: Number(cfg.local_delivery.fee) || 0, freeFrom: cfg.local_delivery.freeFrom === '' ? null : Number(cfg.local_delivery.freeFrom) },
         pickup: { enabled: cfg.pickup.enabled },
         dine_in: { enabled: cfg.dine_in.enabled },
+        freeFrom: freeFrom === '' ? null : Number(freeFrom),
+        carriers: carriers.map((c) => ({
+          id: c.id,
+          name: c.name,
+          logo: c.logo || null,
+          enabled: c.enabled,
+          cod: c.cod,
+          national: { cost: Number(c.national.cost) || 0, days: c.national.days || null },
+          overrides: c.overrides
+            .filter((o) => o.department)
+            .map((o) => ({ department: o.department, cost: Number(o.cost) || 0, days: o.days || null })),
+        })),
       };
       const r = await updateStoreShipping(payload);
       if (r?.success) {
         setConfigured(true);
-        setMsg('Guardado. En tu tienda se mostrarán solo los métodos activados.');
+        setMsg('Guardado. En tu tienda se mostrarán los métodos y transportadoras activados.');
       }
     } catch (e) {
       setMsg(e?.message || 'No se pudo guardar.');
@@ -102,72 +184,174 @@ export default function StoreShippingSettings() {
 
   if (!cfg) return null;
 
-  const money = 'w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none';
-
   return (
-    <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-      <h2 className="text-base font-bold text-gray-800">Métodos y tarifas de envío</h2>
-      <p className="mb-4 text-sm text-gray-500">
-        Activa los métodos de entrega de tu tienda y ponles su tarifa. Al guardar,
-        el cliente verá <b>solo</b> los que actives aquí.
-      </p>
+    <div className="space-y-5">
+      {/* Métodos de entrega */}
+      <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+        <h2 className="text-base font-bold text-gray-800">Métodos de entrega</h2>
+        <p className="mb-4 text-sm text-gray-500">
+          Activa los métodos de tu tienda. Al guardar, el cliente verá <b>solo</b> los que actives.
+        </p>
 
-      {!configured && (
-        <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
-          Hoy tu tienda usa la configuración automática por tipo de negocio.
-          Personaliza los envíos activando los métodos y guardando.
-        </div>
-      )}
-
-      <div className="space-y-2.5">
-        {METHODS.map(({ key, label, sub, icon: Icon, fee }) => (
-          <div key={key} className="rounded-xl border border-gray-100 p-3">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-start gap-3">
-                <span className="mt-0.5 flex h-9 w-9 flex-none items-center justify-center rounded-xl bg-orange-50 text-orange-600">
-                  <Icon className="h-5 w-5" />
-                </span>
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-gray-800">{label}</p>
-                  <p className="text-xs text-gray-500">{sub}</p>
-                </div>
-              </div>
-              <Toggle checked={!!cfg[key].enabled} onChange={(v) => set(key, { enabled: v })} />
-            </div>
-
-            {fee && cfg[key].enabled && (
-              <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <label className="text-xs font-medium text-gray-600">
-                  Tarifa (COP)
-                  <input
-                    type="number"
-                    min="0"
-                    value={cfg[key].fee}
-                    onChange={(e) => set(key, { fee: e.target.value })}
-                    className={`mt-1 ${money}`}
-                    placeholder="Ej: 8000"
-                  />
-                </label>
-                <label className="text-xs font-medium text-gray-600">
-                  Envío gratis desde (opcional)
-                  <input
-                    type="number"
-                    min="0"
-                    value={cfg[key].freeFrom}
-                    onChange={(e) => set(key, { freeFrom: e.target.value })}
-                    className={`mt-1 ${money}`}
-                    placeholder="Ej: 100000"
-                  />
-                </label>
-              </div>
-            )}
+        {!configured && (
+          <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            Hoy tu tienda usa la configuración automática por tipo de negocio.
+            Personaliza los envíos activando los métodos y guardando.
           </div>
-        ))}
+        )}
+
+        <div className="space-y-2.5">
+          {METHODS.map(({ key, label, sub, icon: Icon, fee }) => (
+            <div key={key} className="rounded-xl border border-gray-100 p-3">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-start gap-3">
+                  <span className="mt-0.5 flex h-9 w-9 flex-none items-center justify-center rounded-xl bg-orange-50 text-orange-600">
+                    <Icon className="h-5 w-5" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-gray-800">{label}</p>
+                    <p className="text-xs text-gray-500">{sub}</p>
+                  </div>
+                </div>
+                <Toggle checked={!!cfg[key].enabled} onChange={(v) => set(key, { enabled: v })} />
+              </div>
+
+              {key === 'shipping' && cfg.shipping.enabled && (
+                <p className="mt-2 rounded-lg bg-blue-50 px-3 py-1.5 text-xs text-blue-700">
+                  El costo del envío nacional se toma de las <b>Transportadoras</b> de abajo
+                  (por destino). La tarifa fija de aquí solo se usa si no hay transportadoras.
+                </p>
+              )}
+
+              {fee && cfg[key].enabled && (
+                <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <label className="text-xs font-medium text-gray-600">
+                    {key === 'shipping' ? 'Tarifa fija (respaldo, COP)' : 'Tarifa (COP)'}
+                    <input type="number" min="0" value={cfg[key].fee} onChange={(e) => set(key, { fee: e.target.value })} className={`mt-1 ${input}`} placeholder="Ej: 8000" />
+                  </label>
+                  <label className="text-xs font-medium text-gray-600">
+                    Envío gratis desde (opcional)
+                    <input type="number" min="0" value={cfg[key].freeFrom} onChange={(e) => set(key, { freeFrom: e.target.value })} className={`mt-1 ${input}`} placeholder="Ej: 100000" />
+                  </label>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
 
-      {msg && <p className="mt-3 text-xs text-gray-500">{msg}</p>}
+      {/* Transportadoras */}
+      <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h2 className="text-base font-bold text-gray-800">Transportadoras (envío / contra entrega)</h2>
+            <p className="text-sm text-gray-500">
+              Define tarifas y <b>tiempos de entrega</b> por destino. El cliente los verá al elegir su ciudad.
+            </p>
+          </div>
+          <Button onClick={addCarrier} variant="secondary" className="flex-none">
+            <PlusIcon className="mr-1 h-4 w-4" /> Agregar
+          </Button>
+        </div>
 
-      <div className="mt-4">
+        {/* Envío gratis global */}
+        <label className="mt-4 block max-w-xs text-xs font-medium text-gray-600">
+          Envío gratis desde (global, COP)
+          <input type="number" min="0" value={freeFrom} onChange={(e) => setFreeFrom(e.target.value)} className={`mt-1 ${input}`} placeholder="Ej: 150000" />
+          <span className="mt-1 block text-[11px] font-normal text-gray-400">
+            Si el pedido alcanza este valor, el envío es gratis en cualquier transportadora.
+          </span>
+        </label>
+
+        <div className="mt-4 space-y-4">
+          {carriers.length === 0 && (
+            <p className="rounded-xl border border-dashed border-gray-200 px-4 py-8 text-center text-sm text-gray-400">
+              Sin transportadoras. Agrega una para cobrar y mostrar tiempos por destino.
+            </p>
+          )}
+
+          {carriers.map((c, i) => (
+            <div key={c.id} className="rounded-2xl border border-gray-200 p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <TruckIcon className="h-5 w-5 text-orange-500" />
+                  <input
+                    value={c.name}
+                    onChange={(e) => updateCarrier(i, { name: e.target.value })}
+                    placeholder="Nombre (ej: Interrapidísimo)"
+                    className="rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm font-semibold focus:border-orange-400 focus:outline-none"
+                  />
+                </div>
+                <div className="flex items-center gap-3">
+                  <label className="flex items-center gap-1.5 text-xs text-gray-600">
+                    Activa <Toggle checked={c.enabled} onChange={(v) => updateCarrier(i, { enabled: v })} />
+                  </label>
+                  <button onClick={() => removeCarrier(i)} title="Eliminar" className="rounded-lg p-2 text-gray-400 transition hover:bg-red-50 hover:text-red-500">
+                    <TrashIcon className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <label className="text-xs font-medium text-gray-600">
+                  Tarifa nacional (COP)
+                  <input type="number" min="0" value={c.national.cost} onChange={(e) => updateNational(i, { cost: e.target.value })} className={`mt-1 ${input}`} placeholder="Ej: 15000" />
+                </label>
+                <label className="text-xs font-medium text-gray-600">
+                  Tiempo de entrega nacional
+                  <input value={c.national.days} onChange={(e) => updateNational(i, { days: e.target.value })} className={`mt-1 ${input}`} placeholder="Ej: 3 a 5 días hábiles" />
+                </label>
+              </div>
+
+              <label className="mt-3 flex items-center gap-2 text-xs font-medium text-gray-600">
+                <BanknotesIcon className="h-4 w-4 text-green-600" />
+                Acepta pago contra entrega
+                <Toggle checked={c.cod} onChange={(v) => updateCarrier(i, { cod: v })} />
+              </label>
+
+              <label className="mt-3 block text-xs font-medium text-gray-600">
+                Logo (URL, opcional)
+                <input value={c.logo} onChange={(e) => updateCarrier(i, { logo: e.target.value })} className={`mt-1 ${input}`} placeholder="https://…" />
+              </label>
+
+              {/* Overrides por departamento */}
+              <div className="mt-4 rounded-xl bg-gray-50 p-3">
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="text-xs font-semibold text-gray-700">Tarifas por departamento (opcional)</p>
+                  <button onClick={() => addOverride(i)} className="inline-flex items-center gap-1 rounded-lg bg-white px-2.5 py-1 text-xs font-medium text-orange-600 shadow-sm hover:bg-orange-50">
+                    <PlusIcon className="h-3.5 w-3.5" /> Agregar zona
+                  </button>
+                </div>
+                {c.overrides.length === 0 ? (
+                  <p className="text-[11px] text-gray-400">Sin overrides: todos los destinos usan la tarifa nacional.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {c.overrides.map((o, oi) => (
+                      <div key={oi} className="grid grid-cols-1 gap-2 sm:grid-cols-[1.2fr_0.8fr_1.2fr_auto]">
+                        <select value={o.department} onChange={(e) => updateOverride(i, oi, { department: e.target.value })} className={input}>
+                          <option value="">Departamento…</option>
+                          {DEPARTMENTS.map((d) => (
+                            <option key={d} value={d}>{d}</option>
+                          ))}
+                        </select>
+                        <input type="number" min="0" value={o.cost} onChange={(e) => updateOverride(i, oi, { cost: e.target.value })} className={input} placeholder="Costo" />
+                        <input value={o.days} onChange={(e) => updateOverride(i, oi, { days: e.target.value })} className={input} placeholder="Tiempo (ej: 1 a 2 días)" />
+                        <button onClick={() => removeOverride(i, oi)} className="flex items-center justify-center rounded-lg px-2 text-gray-400 hover:bg-red-50 hover:text-red-500">
+                          <TrashIcon className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {msg && <p className="text-xs text-gray-500">{msg}</p>}
+
+      <div>
         <Button onClick={save} loading={saving} disabled={saving} variant="primary">
           {saving ? 'Guardando…' : 'Guardar envíos'}
         </Button>
