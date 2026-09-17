@@ -268,10 +268,14 @@ export default function StoreShippingSettings() {
                     {key === 'shipping' ? 'Tarifa fija (respaldo, COP)' : 'Tarifa (COP)'}
                     <input type="number" min="0" value={cfg[key].fee} onChange={(e) => set(key, { fee: e.target.value })} className={`mt-1 ${input}`} placeholder="Ej: 8000" />
                   </label>
-                  <label className="text-xs font-medium text-gray-600">
-                    Envío gratis desde (opcional)
-                    <input type="number" min="0" value={cfg[key].freeFrom} onChange={(e) => set(key, { freeFrom: e.target.value })} className={`mt-1 ${input}`} placeholder="Ej: 100000" />
-                  </label>
+                  {/* El "envío gratis desde" del envío nacional se define UNA sola vez
+                      abajo (global de transportadoras). Aquí solo para domicilio local. */}
+                  {key !== 'shipping' && (
+                    <label className="text-xs font-medium text-gray-600">
+                      Envío gratis desde (opcional)
+                      <input type="number" min="0" value={cfg[key].freeFrom} onChange={(e) => set(key, { freeFrom: e.target.value })} className={`mt-1 ${input}`} placeholder="Ej: 100000" />
+                    </label>
+                  )}
                 </div>
               )}
             </div>
