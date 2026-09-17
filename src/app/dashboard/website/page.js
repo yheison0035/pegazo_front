@@ -143,6 +143,38 @@ function ColorField({ label, value, fallback, onChange }) {
   );
 }
 
+const TABS = [
+  { id: 'diseno', label: 'Diseño' },
+  { id: 'identidad', label: 'Identidad' },
+  { id: 'portada', label: 'Portada' },
+  { id: 'contacto', label: 'Contacto' },
+  { id: 'pagos', label: 'Pagos' },
+  { id: 'envios', label: 'Envíos' },
+];
+// Tabs cuyo contenido vive dentro del <form> con "Guardar cambios".
+const FORM_TABS = ['diseno', 'identidad', 'portada', 'contacto'];
+
+function WebsiteTabs({ tab, setTab }) {
+  return (
+    <div className="mb-5 flex gap-1 overflow-x-auto rounded-xl border border-gray-200 bg-white p-1 shadow-sm">
+      {TABS.map((t) => (
+        <button
+          key={t.id}
+          type="button"
+          onClick={() => setTab(t.id)}
+          className={`whitespace-nowrap rounded-lg px-4 py-2 text-sm font-semibold transition ${
+            tab === t.id
+              ? 'bg-orange-500 text-white'
+              : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'
+          }`}
+        >
+          {t.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export default function WebsitePage() {
   const [config, setConfig] = useState(null);
   const [form, setForm] = useState({});
@@ -155,6 +187,7 @@ export default function WebsitePage() {
   const [bannerToDelete, setBannerToDelete] = useState(null);
   const [editingBanner, setEditingBanner] = useState(null);
   const [showAllThemes, setShowAllThemes] = useState(false);
+  const [tab, setTab] = useState('diseno');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -412,7 +445,7 @@ export default function WebsitePage() {
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSave} className="space-y-5">
+          <>
             <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
               Tienda publicada en{' '}
               <a
@@ -425,6 +458,12 @@ export default function WebsitePage() {
               </a>
             </div>
 
+            <WebsiteTabs tab={tab} setTab={setTab} />
+
+            {FORM_TABS.includes(tab) && (
+              <form onSubmit={handleSave} className="space-y-5">
+                {tab === 'diseno' && (
+                  <>
             {/* ---------- DISEÑO ---------- */}
             <Section
               title="Tema"
@@ -527,6 +566,11 @@ export default function WebsitePage() {
               </div>
             </Section>
 
+                  </>
+                )}
+
+                {tab === 'identidad' && (
+                  <>
             {/* ---------- IDENTIDAD ---------- */}
             <Section
               title="Identidad"
@@ -615,6 +659,11 @@ export default function WebsitePage() {
               </div>
             </Section>
 
+                  </>
+                )}
+
+                {tab === 'portada' && (
+                  <>
             {/* ---------- PORTADA ---------- */}
             <Section
               title="Portada"
@@ -641,6 +690,11 @@ export default function WebsitePage() {
               </div>
             </Section>
 
+                  </>
+                )}
+
+                {tab === 'contacto' && (
+                  <>
             {/* ---------- CONTACTO ---------- */}
             <Section
               title="Contacto y redes"
@@ -733,33 +787,36 @@ export default function WebsitePage() {
               </div>
             </Section>
 
-            <div className="sticky bottom-0 flex justify-end gap-3 border-t border-gray-200 bg-white/90 py-3 backdrop-blur">
-              <Button variant="primary" type="submit" loading={saving}>
-                {saving ? 'Guardando…' : 'Guardar cambios'}
-              </Button>
-            </div>
-          </form>
+                  </>
+                )}
+
+                <div className="sticky bottom-0 flex justify-end gap-3 border-t border-gray-200 bg-white/90 py-3 backdrop-blur">
+                  <Button variant="primary" type="submit" loading={saving}>
+                    {saving ? 'Guardando…' : 'Guardar cambios'}
+                  </Button>
+                </div>
+              </form>
+            )}
+          </>
         )}
 
-        {/* ---------- MÉTODOS DE PAGO DE LA TIENDA (el dueño elige) ---------- */}
-        {!loading && (
-          <div className="mt-5">
+        {/* ---------- PAGOS (métodos de la tienda + Wompi en línea) ---------- */}
+        {!loading && config?.websiteEnabled && tab === 'pagos' && (
+          <div className="mt-5 space-y-5">
             <StorePaymentMethods />
+            <WompiPaymentSettings />
           </div>
         )}
 
-        {/* ---------- ENVÍOS (métodos y tarifas) ---------- */}
-        {!loading && (
+        {/* ---------- ENVÍOS (transportadoras y tarifas) ---------- */}
+        {!loading && config?.websiteEnabled && tab === 'envios' && (
           <div className="mt-5">
             <StoreShippingSettings />
           </div>
         )}
 
-        {/* ---------- PAGOS EN LÍNEA (Wompi por empresa) ---------- */}
-        {!loading && <WompiPaymentSettings />}
-
-        {/* ---------- BANNERS (fuera del form para no anidar formularios) ---------- */}
-        {!loading && config?.websiteEnabled && (
+        {/* ---------- BANNERS (en el tab Portada; fuera del form) ---------- */}
+        {!loading && config?.websiteEnabled && tab === 'portada' && (
           <div className="mt-5">
             <Section
               title="Banners de portada"
