@@ -444,9 +444,8 @@ export default function StoreShippingSettings() {
         </div>
       </div>
 
-      {msg && <p className="text-xs text-gray-500">{msg}</p>}
-
-      <div>
+      <div className="sticky bottom-0 z-10 flex items-center justify-end gap-3 border-t border-gray-200 bg-white/95 py-3 backdrop-blur">
+        {msg && <p className="mr-auto text-xs text-gray-500">{msg}</p>}
         <Button onClick={save} loading={saving} disabled={saving} variant="primary">
           {saving ? 'Guardando…' : 'Guardar envíos'}
         </Button>

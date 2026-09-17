@@ -839,7 +839,7 @@ export default function DinamicForm({
         )}
       </div>
 
-      <div className="flex justify-end mt-6 gap-3">
+      <div className="sticky bottom-0 z-10 mt-6 flex justify-end gap-3 border-t border-gray-200 bg-white/95 py-3 backdrop-blur">
         {module !== 'sales' && (
           <BtnReturn route={`/dashboard/${module}`} disabled={loading} />
         )}

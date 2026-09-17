@@ -183,7 +183,7 @@ export default function WompiPaymentSettings() {
         </p>
       </div>
 
-      <div className="mt-6 flex items-center gap-3">
+      <div className="sticky bottom-0 z-10 mt-6 flex items-center gap-3 border-t border-gray-200 bg-white/95 py-3 backdrop-blur">
         <Button variant="primary" onClick={save} loading={saving}>
           Guardar pagos
         </Button>
