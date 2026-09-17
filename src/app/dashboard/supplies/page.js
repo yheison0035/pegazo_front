@@ -286,7 +286,7 @@ export default function Supplies() {
           onClick={() => setForm(null)}
         >
           <div
-            className="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl"
+            className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-5 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-3 flex items-center justify-between">
@@ -423,7 +423,7 @@ export default function Supplies() {
               )}
             </div>
 
-            <div className="mt-4 flex justify-end gap-2">
+            <div className="sticky bottom-0 -mx-5 -mb-5 mt-4 flex justify-end gap-2 border-t border-gray-200 bg-white px-5 py-3">
               <Button variant="secondary" onClick={() => setForm(null)}>
                 Cancelar
               </Button>

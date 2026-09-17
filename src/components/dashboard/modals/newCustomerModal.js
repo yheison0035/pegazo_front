@@ -101,8 +101,8 @@ export default function NewCustomerModal({ localId, onClose, onCreated }) {
 
   return createPortal(
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+      <div className="flex max-h-[92vh] w-full max-w-md flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="flex flex-none items-center justify-between border-b border-gray-200 px-6 py-4">
           <h3 className="text-lg font-semibold text-gray-800">Nuevo cliente</h3>
           <button
             type="button"
@@ -113,7 +113,7 @@ export default function NewCustomerModal({ localId, onClose, onCreated }) {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 px-6 py-5">
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col space-y-4 overflow-y-auto px-6 py-5">
           {/* Documento con autocompletado */}
           <div className="flex flex-col">
             <label className="mb-1 text-sm font-medium text-gray-700">
@@ -164,7 +164,7 @@ export default function NewCustomerModal({ localId, onClose, onCreated }) {
             </p>
           )}
 
-          <div className="flex justify-end gap-3 pt-2">
+          <div className="sticky bottom-0 -mx-6 -mb-5 mt-auto flex justify-end gap-3 border-t border-gray-200 bg-white px-6 py-3">
             <Button type="button" variant="secondary" onClick={onClose}>
               Cancelar
             </Button>
