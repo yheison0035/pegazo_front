@@ -609,7 +609,7 @@ function EntryModal({ customerId, appointments = [], onClose, onSaved }) {
           </div>
         </div>
         {err && <p className="mt-3 text-sm text-red-600">{err}</p>}
-        <div className="mt-6 flex justify-end gap-2">
+        <div className="sticky bottom-0 -mx-6 -mb-6 mt-6 flex justify-end gap-2 border-t border-gray-200 bg-white px-6 py-3">
           <Button variant="secondary" size="sm" onClick={onClose}>Cancelar</Button>
           <Button variant="primary" size="sm" loading={saving} disabled={uploading} onClick={save}>
             Guardar evolución
@@ -765,7 +765,7 @@ function ConsentModal({ customerId, onClose, onSaved }) {
           </div>
         </div>
         {err && <p className="mt-3 text-sm text-red-600">{err}</p>}
-        <div className="mt-6 flex justify-end gap-2">
+        <div className="sticky bottom-0 -mx-6 -mb-6 mt-6 flex justify-end gap-2 border-t border-gray-200 bg-white px-6 py-3">
           <Button variant="secondary" size="sm" onClick={onClose}>
             Cancelar
           </Button>
