@@ -1677,6 +1677,7 @@ export default function Settings() {
   const isServices = isServicesBusiness(usuario);
   // La configuración del CRM solo la maneja el dueño o el administrador.
   const canConfig = ['SUPER_ADMIN', 'ADMIN'].includes(usuario?.role);
+  const [tab, setTab] = useState('empresa');
 
   useEffect(() => {
     if (!canConfig) return;
@@ -1710,11 +1711,8 @@ export default function Settings() {
           </div>
         ) : (
           <>
-            {/* Navegación rápida entre módulos */}
-            <div className="sticky top-0 z-20 -mx-4 mb-6 flex flex-wrap items-center gap-2 border-b border-gray-200 bg-white px-4 py-3 shadow-sm">
-              <span className="mr-1 text-xs font-semibold uppercase tracking-wide text-gray-400">
-                Ir a
-              </span>
+            {/* Tabs de configuración (como la tienda online) */}
+            <div className="mb-6 flex gap-1 overflow-x-auto rounded-xl border border-gray-200 bg-white p-1 shadow-sm">
               {[
                 ['empresa', 'Mi empresa'],
                 ['apariencia', 'Apariencia'],
@@ -1723,78 +1721,93 @@ export default function Settings() {
                 ['contabilidad', 'Contabilidad'],
                 ...(isServices ? [['citas', 'Citas y fidelización']] : []),
               ].map(([id, label]) => (
-                <a
+                <button
                   key={id}
-                  href={`#${id}`}
-                  className="rounded-full border border-gray-200 bg-gray-50 px-3.5 py-1.5 text-xs font-semibold text-gray-600 transition hover:border-orange-300 hover:bg-orange-50 hover:text-orange-600"
+                  type="button"
+                  onClick={() => setTab(id)}
+                  className={`whitespace-nowrap rounded-lg px-4 py-2 text-sm font-semibold transition ${
+                    tab === id
+                      ? 'bg-orange-500 text-white'
+                      : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'
+                  }`}
                 >
                   {label}
-                </a>
+                </button>
               ))}
             </div>
 
-            <div className="space-y-8">
+            <div>
               {/* ── Mi empresa ── */}
-              <SettingsSection
-                id="empresa"
-                icon={BuildingStorefrontIcon}
-                title="Mi empresa"
-                subtitle="Identidad, contacto y cómo se llaman las cosas en tu negocio."
-              >
-                <CompanyProfileCard initial={settings} />
-                <div className="lg:col-span-2">
-                  <TerminologyCard initial={settings} />
-                </div>
-              </SettingsSection>
+              {tab === 'empresa' && (
+                <SettingsSection
+                  id="empresa"
+                  icon={BuildingStorefrontIcon}
+                  title="Mi empresa"
+                  subtitle="Identidad, contacto y cómo se llaman las cosas en tu negocio."
+                >
+                  <CompanyProfileCard initial={settings} />
+                  <div className="lg:col-span-2">
+                    <TerminologyCard initial={settings} />
+                  </div>
+                </SettingsSection>
+              )}
 
               {/* ── Apariencia ── */}
-              <SettingsSection
-                id="apariencia"
-                icon={SwatchIcon}
-                title="Apariencia"
-                subtitle="El color y la tipografía de tu panel."
-              >
-                <ThemeSettings />
-                <div className="lg:col-span-2">
-                  <FontSettings />
-                </div>
-              </SettingsSection>
+              {tab === 'apariencia' && (
+                <SettingsSection
+                  id="apariencia"
+                  icon={SwatchIcon}
+                  title="Apariencia"
+                  subtitle="El color y la tipografía de tu panel."
+                >
+                  <ThemeSettings />
+                  <div className="lg:col-span-2">
+                    <FontSettings />
+                  </div>
+                </SettingsSection>
+              )}
 
               {/* ── Ventas y caja ── */}
-              <SettingsSection
-                id="ventas"
-                icon={BanknotesIcon}
-                title="Ventas y caja"
-                subtitle="Reglas para vender y manejar la caja."
-              >
-                <CashPolicyCard initial={settings} />
-              </SettingsSection>
+              {tab === 'ventas' && (
+                <SettingsSection
+                  id="ventas"
+                  icon={BanknotesIcon}
+                  title="Ventas y caja"
+                  subtitle="Reglas para vender y manejar la caja."
+                >
+                  <CashPolicyCard initial={settings} />
+                </SettingsSection>
+              )}
 
               {/* ── Impuestos ── */}
-              <SettingsSection
-                id="impuestos"
-                icon={ReceiptPercentIcon}
-                title="Impuestos"
-                subtitle="IVA por defecto y datos fiscales del negocio."
-              >
-                <FiscalCard initial={settings} />
-              </SettingsSection>
+              {tab === 'impuestos' && (
+                <SettingsSection
+                  id="impuestos"
+                  icon={ReceiptPercentIcon}
+                  title="Impuestos"
+                  subtitle="IVA por defecto y datos fiscales del negocio."
+                >
+                  <FiscalCard initial={settings} />
+                </SettingsSection>
+              )}
 
               {/* ── Contabilidad ── */}
-              <SettingsSection
-                id="contabilidad"
-                icon={CalculatorIcon}
-                title="Contabilidad"
-                subtitle="Actívala, enlaza a tu contador y controla el cierre de periodos."
-              >
-                <AccountingSectionCard initial={settings} />
-                {settings?.accountingEnabled && <AccountantLinkCard />}
-                <AccountingBasisCard initial={settings} />
-                <BooksCloseCard initial={settings} />
-              </SettingsSection>
+              {tab === 'contabilidad' && (
+                <SettingsSection
+                  id="contabilidad"
+                  icon={CalculatorIcon}
+                  title="Contabilidad"
+                  subtitle="Actívala, enlaza a tu contador y controla el cierre de periodos."
+                >
+                  <AccountingSectionCard initial={settings} />
+                  {settings?.accountingEnabled && <AccountantLinkCard />}
+                  <AccountingBasisCard initial={settings} />
+                  <BooksCloseCard initial={settings} />
+                </SettingsSection>
+              )}
 
               {/* ── Citas y fidelización (solo negocios de servicios) ── */}
-              {isServices && (
+              {isServices && tab === 'citas' && (
                 <SettingsSection
                   id="citas"
                   icon={ClockIcon}
