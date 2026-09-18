@@ -124,18 +124,7 @@ export default function NewProduct() {
       });
     }
 
-    if (showOldPrice && !noStock) {
-      if (
-        !formData.features ||
-        (formData.features.length === 0 && !formData.specifications) ||
-        formData.specifications.length === 0
-      ) {
-        return setAlert({
-          type: 'warning',
-          message: 'Debes incluirle sus caracteristicas y especificaciones.',
-        });
-      }
-    }
+    // Las características y especificaciones son OPCIONALES: no se exigen al crear.
 
     if (!noStock) {
       const check = validateProductVariants(variants, usuario);
