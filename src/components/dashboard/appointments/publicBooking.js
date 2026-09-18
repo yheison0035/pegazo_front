@@ -69,6 +69,15 @@ function buildDays(n = 21) {
   return out;
 }
 
+// Parte "COMBO PREMIUM (corte + barba + ...)" en título + contenido, para
+// mostrar TODO lo que incluye el servicio sin recortar.
+function splitServiceName(name) {
+  const s = String(name || '').trim();
+  const i = s.indexOf('(');
+  if (i > 0) return { title: s.slice(0, i).trim(), detail: s.slice(i).trim() };
+  return { title: s, detail: '' };
+}
+
 export default function PublicBooking({ slug = '' }) {
   // ---- Config de la empresa (marca + skin) ----
   const [config, setConfig] = useState(null);
@@ -161,6 +170,13 @@ export default function PublicBooking({ slug = '' }) {
       })
       .catch(() => setSlots([]));
   }, [barber, date]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Al cambiar de paso/vista (es SPA, no recarga) volvemos arriba, así el
+  // siguiente paso siempre empieza desde el inicio.
+  useEffect(() => {
+    if (typeof window !== 'undefined')
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [step, started, success]);
 
   // ---- Selección (avanza al siguiente paso) ----
   const pickLocal = (l) => {
@@ -419,32 +435,44 @@ export default function PublicBooking({ slug = '' }) {
                       </div>
                       <div className="bk-panel relative p-3 sm:p-4">
                         <Corners />
-                        {g.items.map((s) => (
-                          <button
-                            key={s.id}
-                            type="button"
-                            onClick={() => pickService(s)}
-                            className="bk-svc w-full text-left"
-                          >
-                            <span className="min-w-0 flex-1">
-                              <span className="block truncate font-semibold">
-                                {s.name}
-                              </span>
-                              <span className="block text-xs text-[var(--bk-text-muted)]">
-                                {s.duration} min
-                              </span>
-                            </span>
-                            <span
-                              style={displayStyle}
-                              className="flex-none font-bold text-[var(--bk-accent)]"
+                        {g.items.map((s) => {
+                          const { title, detail } = splitServiceName(s.name);
+                          return (
+                            <button
+                              key={s.id}
+                              type="button"
+                              onClick={() => pickService(s)}
+                              className="bk-svc w-full text-left"
                             >
-                              {s.priceFrom
-                                ? `$${formatPrice(s.priceFrom)}`
-                                : 'A convenir'}
-                            </span>
-                            <span className="go flex-none text-lg font-bold">›</span>
-                          </button>
-                        ))}
+                              <span className="min-w-0 flex-1">
+                                <span className="block font-semibold leading-snug">
+                                  {title}
+                                </span>
+                                {detail && (
+                                  <span className="mt-0.5 block text-xs leading-snug text-[var(--bk-text-muted)]">
+                                    {detail}
+                                  </span>
+                                )}
+                                <span className="mt-1 block text-[11px] uppercase tracking-wide text-[var(--bk-text-muted)]/80">
+                                  {s.duration} min
+                                </span>
+                              </span>
+                              <span className="flex flex-none flex-col items-end gap-1">
+                                <span
+                                  style={displayStyle}
+                                  className="font-bold text-[var(--bk-accent)]"
+                                >
+                                  {s.priceFrom
+                                    ? `$${formatPrice(s.priceFrom)}`
+                                    : 'A convenir'}
+                                </span>
+                                <span className="go text-lg font-bold leading-none">
+                                  ›
+                                </span>
+                              </span>
+                            </button>
+                          );
+                        })}
                       </div>
                     </section>
                   ))}

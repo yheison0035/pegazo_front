@@ -78,6 +78,8 @@ export default async function Page({ params }) {
   const { slug } = await params;
   return (
     <div className={`${display.variable} min-h-screen w-full bg-black`}>
+      {/* El documento en negro: evita el fondo blanco del overscroll en móvil. */}
+      <style>{`html,body{background:#08070a !important;overscroll-behavior:none}`}</style>
       <PublicBooking slug={slug} />
     </div>
   );
