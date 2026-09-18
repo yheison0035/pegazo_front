@@ -295,7 +295,7 @@ export default function PublicBooking({ slug = '' }) {
         <h1
           style={displayStyle}
           className={`mt-3 text-2xl font-bold tracking-tight sm:text-4xl ${
-            ornate ? 'bk-gold bk-shimmer uppercase' : ''
+            ornate ? 'bk-gold uppercase' : ''
           }`}
         >
           {ornate ? (
@@ -634,10 +634,17 @@ function Hero({ config, displayStyle, onEnter }) {
   const intro = config.intro || {};
   return (
     <div className="bk-hero relative z-10 px-4">
-      <div className="bk-mts">
-        <MountainsBackdrop />
-      </div>
-      <CrossedAxes />
+      {config.heroImage ? (
+        <div
+          className="bk-hero-img"
+          style={{ backgroundImage: `url("${config.heroImage}")` }}
+        />
+      ) : (
+        <div className="bk-mts">
+          <MountainsBackdrop />
+        </div>
+      )}
+      {!config.heroImage && <CrossedAxes />}
       {config.logo ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={config.logo} alt={config.name} className="bk-hero-logo" />
@@ -657,7 +664,7 @@ function Hero({ config, displayStyle, onEnter }) {
       </p>
       <h1
         style={displayStyle}
-        className="bk-gold bk-shimmer mt-2 text-4xl font-black uppercase leading-none sm:text-6xl"
+        className="bk-gold mt-2 text-4xl font-black uppercase leading-none sm:text-6xl"
       >
         {config.name}
       </h1>
