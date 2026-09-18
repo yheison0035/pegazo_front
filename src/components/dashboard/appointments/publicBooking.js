@@ -507,8 +507,15 @@ export default function PublicBooking({ slug = '' }) {
 
               {/* 3. PROFESIONAL */}
               {step === 2 && (
-                <div className="bk-grid grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {barbers.length === 0 && <Skeletons n={3} tall />}
+                <div className="flex flex-wrap justify-center gap-4">
+                  {barbers.length === 0 &&
+                    Array.from({ length: 3 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="w-full animate-pulse rounded-2xl border border-[var(--bk-border)] bg-[var(--bk-surface)] sm:w-[calc(50%_-_0.5rem)] lg:w-[calc(33.333%_-_0.667rem)]"
+                        style={{ aspectRatio: '4/3' }}
+                      />
+                    ))}
                   {barbers.map((b) => {
                     const active = barber?.id === b.id;
                     return (
@@ -517,7 +524,7 @@ export default function PublicBooking({ slug = '' }) {
                         type="button"
                         whileTap={{ scale: 0.98 }}
                         onClick={() => pickBarber(b)}
-                        className={`bk-card group relative overflow-hidden rounded-2xl border ${
+                        className={`bk-card group relative w-full overflow-hidden rounded-2xl border sm:w-[calc(50%_-_0.5rem)] lg:w-[calc(33.333%_-_0.667rem)] ${
                           active
                             ? 'is-active border-[var(--bk-accent)]'
                             : 'border-[var(--bk-border)]'
@@ -534,16 +541,16 @@ export default function PublicBooking({ slug = '' }) {
                           alt={b.name}
                           className="aspect-[4/3] w-full object-cover object-top sm:aspect-[4/5]"
                         />
-                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent px-2 pb-2.5 pt-8 text-center">
+                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent px-3 pb-3 pt-10 text-center">
                           <p
                             style={displayStyle}
-                            className="truncate text-sm font-bold text-white sm:text-base"
+                            className="truncate text-base font-bold text-white sm:text-lg"
                           >
                             {b.name}
                           </p>
                         </div>
                         {active && (
-                          <span className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-[var(--bk-accent)] text-[var(--bk-accent-contrast)]">
+                          <span className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-[var(--bk-accent)] text-[var(--bk-accent-contrast)]">
                             <CheckIcon className="h-4 w-4" strokeWidth={3} />
                           </span>
                         )}
@@ -645,20 +652,60 @@ export default function PublicBooking({ slug = '' }) {
               {/* 6. CONFIRMAR */}
               {step === 5 && (
                 <div className="space-y-5">
-                  <div className="rounded-2xl border border-[var(--bk-border-strong)] bg-[var(--bk-accent-soft)] p-5">
-                    <Row icon={BuildingStorefrontIcon} label="Sede" value={local?.name} />
-                    <Row icon={ScissorsIcon} label="Servicio" value={service?.name} sub={`${service?.duration} min · ${service?.priceFrom ? `$${formatPrice(service.priceFrom)}` : 'A convenir'}`} />
-                    <Row icon={UserIcon} label="Profesional" value={barber?.name} />
-                    <Row
-                      icon={CalendarDaysIcon}
-                      label="Fecha"
-                      value={
-                        selectedDay
-                          ? `${selectedDay.dow} ${selectedDay.day} ${selectedDay.month}`
-                          : date
-                      }
-                    />
-                    <Row icon={ClockIcon} label="Hora" value={time} last />
+                  <div className="overflow-hidden rounded-2xl border border-[var(--bk-border-strong)] bg-[var(--bk-accent-soft)]">
+                    {barber && (
+                      <div className="flex items-center gap-4 border-b border-white/10 p-4">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={
+                            barber.avatar ||
+                            `https://ui-avatars.com/api/?size=200&background=1a1a1a&color=d4af37&name=${encodeURIComponent(
+                              barber.name || 'B',
+                            )}`
+                          }
+                          alt={barber.name}
+                          className="h-20 w-20 flex-none rounded-xl object-cover object-top"
+                        />
+                        <div className="min-w-0">
+                          <p className="text-[11px] uppercase tracking-widest text-[var(--bk-accent)]">
+                            Tu profesional
+                          </p>
+                          <p
+                            style={displayStyle}
+                            className="truncate text-lg font-bold"
+                          >
+                            {barber.name}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                    <div className="p-5">
+                      <Row
+                        icon={BuildingStorefrontIcon}
+                        label="Sede"
+                        value={local?.name}
+                      />
+                      <Row
+                        icon={ScissorsIcon}
+                        label="Servicio"
+                        value={service?.name}
+                        sub={`${service?.duration} min · ${
+                          service?.priceFrom
+                            ? `$${formatPrice(service.priceFrom)}`
+                            : 'A convenir'
+                        }`}
+                      />
+                      <Row
+                        icon={CalendarDaysIcon}
+                        label="Fecha"
+                        value={
+                          selectedDay
+                            ? `${selectedDay.dow} ${selectedDay.day} ${selectedDay.month}`
+                            : date
+                        }
+                      />
+                      <Row icon={ClockIcon} label="Hora" value={time} last />
+                    </div>
                   </div>
                 </div>
               )}
@@ -903,19 +950,19 @@ function OptionCard({ active, onClick, children, className = '' }) {
 function Row({ icon: Icon, label, value, sub, last }) {
   return (
     <div
-      className={`flex items-center gap-3 py-2.5 ${
+      className={`flex items-start gap-3 py-2.5 ${
         last ? '' : 'border-b border-[var(--bk-border)]'
       }`}
     >
-      <span className="flex h-9 w-9 flex-none items-center justify-center rounded-lg bg-[var(--bk-accent-soft)] text-[var(--bk-accent)]">
+      <span className="mt-0.5 flex h-9 w-9 flex-none items-center justify-center rounded-lg bg-[var(--bk-accent-soft)] text-[var(--bk-accent)]">
         <Icon className="h-4 w-4" />
       </span>
       <div className="min-w-0 flex-1">
         <p className="text-[11px] uppercase tracking-wide text-[var(--bk-text-muted)]">
           {label}
         </p>
-        <p className="truncate font-semibold">{value || '—'}</p>
-        {sub && <p className="truncate text-xs text-[var(--bk-text-muted)]">{sub}</p>}
+        <p className="font-semibold leading-snug break-words">{value || '—'}</p>
+        {sub && <p className="text-xs text-[var(--bk-text-muted)]">{sub}</p>}
       </div>
     </div>
   );
