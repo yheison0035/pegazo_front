@@ -5,6 +5,18 @@ export async function getCompanySettings() {
   return apiFetch('/company/settings');
 }
 
+// Diseño de la página pública de citas (/booking/:slug).
+export async function getBookingPageConfig() {
+  return apiFetch('/company/booking-config');
+}
+
+export async function updateBookingPageConfig(dto) {
+  return apiFetch('/company/booking-config', {
+    method: 'PATCH',
+    body: JSON.stringify(dto),
+  });
+}
+
 // Actualiza la configuración de fidelización (tarjeta de sellos).
 export async function updateLoyalty(dto) {
   return apiFetch('/company/loyalty', {

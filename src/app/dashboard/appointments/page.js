@@ -6,6 +6,7 @@ import {
   PlusIcon,
   CalendarDaysIcon,
   ListBulletIcon,
+  PaintBrushIcon,
 } from '@heroicons/react/24/outline';
 import AppointmentsCalendar from '@/components/dashboard/appointments/AppointmentsCalendar';
 import Button from '@/components/ui/Button';
@@ -123,6 +124,17 @@ export default function Appointments() {
                 <ListBulletIcon className="h-4 w-4" /> Lista
               </button>
             </div>
+
+            {/* Solo dueño/admin: editar el diseño de la página pública de citas. */}
+            {['SUPER_ADMIN', 'ADMIN'].includes(usuario?.role) && (
+              <Button
+                variant="secondary"
+                icon={PaintBrushIcon}
+                href="/dashboard/appointments/design"
+              >
+                Diseño de la página
+              </Button>
+            )}
 
             {/* El barbero solo visualiza: no puede crear citas. */}
             {!['BARBERO', 'PROFESIONAL'].includes(usuario?.role) && (
