@@ -257,9 +257,9 @@ export default function PublicBooking({ slug = '' }) {
     <div
       style={skin.style}
       data-skin={config.skin}
-      className={`relative flex min-h-screen w-full flex-col overflow-x-hidden bg-[var(--bk-bg)] text-[var(--bk-text)] ${
+      className={`relative flex w-full flex-col overflow-x-hidden bg-[var(--bk-bg)] text-[var(--bk-text)] ${
         ornate ? 'bk-stone' : ''
-      }`}
+      } ${showHero ? 'h-[100svh] overflow-hidden' : 'min-h-screen'}`}
     >
       {ornate && <style>{WARRIOR_CSS}</style>}
       {ornate && <Embers />}
@@ -683,6 +683,9 @@ function Hero({ config, displayStyle, onEnter }) {
       <button className="bk-enter mt-4" onClick={onEnter}>
         {intro.cta || 'Comienza tu leyenda'} ⚔
       </button>
+      <div className="mt-5 text-[11px] uppercase tracking-[0.25em] text-[var(--bk-text-muted)]/80">
+        Reserva en 60 segundos
+      </div>
     </div>
   );
 }
