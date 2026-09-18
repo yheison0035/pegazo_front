@@ -123,11 +123,12 @@ export const WARRIOR_CSS = `
 
 /* Brasas (canvas) y cuervos */
 [data-skin="dark"] .bk-embers { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
-[data-skin="dark"] .bk-raven { position: fixed; z-index: 2; color: #050406; opacity: .9;
-  filter: drop-shadow(0 6px 10px rgba(0,0,0,.6)); }
-[data-skin="dark"] .bk-raven .eye { fill: var(--bk-gold-2); }
-[data-skin="dark"] .bk-raven.tl { top: 6px; left: 4px; width: 84px; transform: scaleX(-1); }
-[data-skin="dark"] .bk-raven.br { bottom: 96px; right: 4px; width: 92px; }
+[data-skin="dark"] .bk-raven { position: fixed; z-index: 2; color: #0a0810; opacity: .96;
+  filter: drop-shadow(1px 1px 0 var(--bk-gold-3)) drop-shadow(-1px -1px 0 var(--bk-gold-3))
+    drop-shadow(0 0 7px rgba(212,175,55,.45)); }
+[data-skin="dark"] .bk-raven .eye { fill: var(--bk-gold-1); }
+[data-skin="dark"] .bk-raven.tl { top: 14px; left: 8px; width: 96px; transform: scaleX(-1); }
+[data-skin="dark"] .bk-raven.br { bottom: 112px; right: 8px; width: 104px; }
 @keyframes bk-bob { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-4px) } }
 [data-skin="dark"] .bk-raven svg { animation: bk-bob 5.5s ease-in-out infinite; }
 [data-skin="dark"] .bk-raven.br svg { animation-duration: 6.8s; animation-delay: .6s; }
@@ -138,8 +139,14 @@ export const WARRIOR_CSS = `
   padding: 20px 0 40px; overflow: hidden; }
 [data-skin="dark"] .bk-mts { position: absolute; inset: 0; z-index: 0; overflow: hidden; opacity: .9; }
 [data-skin="dark"] .bk-mts svg { position: absolute; bottom: 0; left: -20%; width: 140%; }
-[data-skin="dark"] .bk-axes { position: absolute; top: 46%; left: 50%; width: min(72vw,300px);
-  transform: translate(-50%,-60%); z-index: 0; color: var(--bk-gold-3); opacity: .45; }
+[data-skin="dark"] .bk-axes { position: absolute; top: 44%; left: 50%; width: min(76vw,320px);
+  transform: translate(-50%,-60%); z-index: 0; color: var(--bk-gold-2); opacity: .32;
+  filter: drop-shadow(0 0 10px rgba(212,175,55,.25)); }
+/* Imagen de fondo opcional de la portada (arte real del negocio) */
+[data-skin="dark"] .bk-hero-img { position: absolute; inset: 0; z-index: 0; background-size: cover;
+  background-position: center; }
+[data-skin="dark"] .bk-hero-img::after { content: ""; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(8,7,10,.55) 0%, rgba(8,7,10,.35) 40%, var(--bk-bg) 100%); }
 [data-skin="dark"] .bk-hero > * { position: relative; z-index: 1; }
 [data-skin="dark"] .bk-hero-logo { width: min(58vw,220px); filter: drop-shadow(0 8px 26px rgba(0,0,0,.7));
   animation: bk-logoin 1s cubic-bezier(.2,.7,.2,1) both; }
