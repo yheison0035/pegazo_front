@@ -14,6 +14,11 @@ import {
   Corners,
   RuneDivider,
   AngleBrackets,
+  Ravens,
+  Embers,
+  MountainsBackdrop,
+  CrossedAxes,
+  groupServices,
 } from './bookingWarrior';
 import {
   BuildingStorefrontIcon,
@@ -82,6 +87,7 @@ export default function PublicBooking({ slug = '' }) {
   const [restReason, setRestReason] = useState('');
   const [time, setTime] = useState('');
   const [success, setSuccess] = useState(false);
+  const [started, setStarted] = useState(false); // portada (intro) del skin oscuro
 
   const { getPublicLocals } = useLocals();
   const { getAvailability, availabilityLoading } = useAppointments();
@@ -240,6 +246,12 @@ export default function PublicBooking({ slug = '' }) {
   }
 
   const ornate = skin.ornaments;
+  const showHero = ornate && !started && !success;
+  // Servicios agrupados en categorías (estilo menú) si el negocio define reglas.
+  const grouped = groupServices(services, config?.serviceGroups);
+  // Panel del paso: se omite en Servicio cuando hay categorías (cada categoría
+  // es su propio panel, como el menú).
+  const stepPanel = ornate && !(step === 1 && grouped);
 
   return (
     <div
@@ -250,9 +262,19 @@ export default function PublicBooking({ slug = '' }) {
       }`}
     >
       {ornate && <style>{WARRIOR_CSS}</style>}
+      {ornate && <Embers />}
+      {ornate && <Ravens />}
       {/* Fondo del skin */}
       {ornate && <WarriorBackdrop logo={config.logo} />}
 
+      {showHero ? (
+        <Hero
+          config={config}
+          displayStyle={displayStyle}
+          onEnter={() => setStarted(true)}
+        />
+      ) : (
+      <>
       {/* Encabezado */}
       <header className="relative z-10 px-4 pt-6 text-center sm:pt-8">
         {config.logo ? (
@@ -335,10 +357,8 @@ export default function PublicBooking({ slug = '' }) {
               exit={{ opacity: 0, x: -24 }}
               transition={{ duration: 0.22, ease: 'easeOut' }}
             >
-              <div
-                className={ornate ? 'bk-panel relative p-5 sm:p-6' : ''}
-              >
-                {ornate && <Corners />}
+              <div className={stepPanel ? 'bk-panel relative p-5 sm:p-6' : ''}>
+                {stepPanel && <Corners />}
                 <StepTitle index={step} displayStyle={displayStyle} ornate={ornate} />
 
               {/* 1. SEDE */}
@@ -370,7 +390,55 @@ export default function PublicBooking({ slug = '' }) {
               )}
 
               {/* 2. SERVICIO */}
-              {step === 1 && (
+              {step === 1 && grouped && (
+                <div className="mt-4 space-y-4">
+                  {grouped.map((g) => (
+                    <section key={g.title} className="bk-cat">
+                      <div className="bk-cathead">
+                        <span className="bk-badge flex h-9 w-9 flex-none items-center justify-center rounded-full text-[var(--bk-accent)]">
+                          <ScissorsIcon className="h-4 w-4" />
+                        </span>
+                        <h3
+                          style={displayStyle}
+                          className="bk-gold text-base font-bold uppercase tracking-wide"
+                        >
+                          {g.title}
+                        </h3>
+                      </div>
+                      <div className="bk-panel relative p-3 sm:p-4">
+                        <Corners />
+                        {g.items.map((s) => (
+                          <button
+                            key={s.id}
+                            type="button"
+                            onClick={() => pickService(s)}
+                            className="bk-svc w-full text-left"
+                          >
+                            <span className="min-w-0 flex-1">
+                              <span className="block truncate font-semibold">
+                                {s.name}
+                              </span>
+                              <span className="block text-xs text-[var(--bk-text-muted)]">
+                                {s.duration} min
+                              </span>
+                            </span>
+                            <span
+                              style={displayStyle}
+                              className="flex-none font-bold text-[var(--bk-accent)]"
+                            >
+                              {s.priceFrom
+                                ? `$${formatPrice(s.priceFrom)}`
+                                : 'A convenir'}
+                            </span>
+                            <span className="go flex-none text-lg font-bold">›</span>
+                          </button>
+                        ))}
+                      </div>
+                    </section>
+                  ))}
+                </div>
+              )}
+              {step === 1 && !grouped && (
                 <div className="bk-grid grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {services.length === 0 && <Skeletons n={4} />}
                   {services.map((s) => (
@@ -539,6 +607,8 @@ export default function PublicBooking({ slug = '' }) {
           )}
         </AnimatePresence>
       </main>
+      </>
+      )}
 
       {/* Botón fijo de reservar (solo en confirmación) */}
       {step === 5 && !success && (
@@ -559,6 +629,51 @@ export default function PublicBooking({ slug = '' }) {
 }
 
 /* ---------------- Subcomponentes ---------------- */
+
+function Hero({ config, displayStyle, onEnter }) {
+  const intro = config.intro || {};
+  return (
+    <div className="bk-hero relative z-10 px-4">
+      <div className="bk-mts">
+        <MountainsBackdrop />
+      </div>
+      <CrossedAxes />
+      {config.logo ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={config.logo} alt={config.name} className="bk-hero-logo" />
+      ) : (
+        <div
+          style={displayStyle}
+          className="bk-gold text-4xl font-black uppercase sm:text-5xl"
+        >
+          {config.name}
+        </div>
+      )}
+      <p
+        style={displayStyle}
+        className="bk-gold mt-3 text-sm italic sm:text-base"
+      >
+        {config.subtitle || 'Más que un corte, es actitud'}
+      </p>
+      <h1
+        style={displayStyle}
+        className="bk-gold bk-shimmer mt-2 text-4xl font-black uppercase leading-none sm:text-6xl"
+      >
+        {config.name}
+      </h1>
+      <div className="mt-3 text-[11px] uppercase tracking-[0.4em] text-[var(--bk-text-muted)]">
+        {intro.pills || 'Disciplina · Estilo · Actitud'}
+      </div>
+      <RuneDivider />
+      <button className="bk-enter mt-4" onClick={onEnter}>
+        {intro.cta || 'Comienza tu leyenda'} ⚔
+      </button>
+      <div className="mt-6 text-[11px] uppercase tracking-[0.2em] text-[var(--bk-text-muted)]/70">
+        ▾ Reserva en 60 segundos ▾
+      </div>
+    </div>
+  );
+}
 
 function Stepper({ step }) {
   return (
