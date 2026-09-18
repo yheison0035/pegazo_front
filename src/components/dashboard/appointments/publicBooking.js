@@ -520,12 +520,12 @@ export default function PublicBooking({ slug = '' }) {
                       <img
                         src={
                           b.avatar ||
-                          `https://ui-avatars.com/api/?background=1a1a1a&color=f59e0b&name=${encodeURIComponent(
+                          `https://ui-avatars.com/api/?size=256&background=1a1a1a&color=f59e0b&name=${encodeURIComponent(
                             b.name || 'B',
                           )}`
                         }
                         alt={b.name}
-                        className="mx-auto mb-2 h-16 w-16 rounded-xl object-cover sm:h-20 sm:w-20"
+                        className="mx-auto mb-2.5 aspect-square w-full rounded-xl object-cover"
                       />
                       <p className="truncate text-sm font-semibold">{b.name}</p>
                     </OptionCard>
