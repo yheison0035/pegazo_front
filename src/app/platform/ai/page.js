@@ -68,22 +68,28 @@ function PlatformAiInner() {
     }));
   };
 
+  // Guarda lo que esté en pantalla (sin toast). Devuelve la config actualizada.
+  const persist = async () => {
+    const dto = {
+      enabled: form.enabled,
+      provider: form.provider,
+      model: form.model,
+      baseUrl: form.baseUrl,
+    };
+    // La key solo se manda si escribió una nueva (no pisar la guardada).
+    if (form.apiKey && form.apiKey.trim()) dto.apiKey = form.apiKey.trim();
+
+    const { data } = await updatePlatformAiSettings(dto);
+    setKeyPreview(data?.keyPreview || '');
+    setHasKey(!!data?.hasKey);
+    setForm((f) => ({ ...f, apiKey: '' }));
+    return data;
+  };
+
   const save = async () => {
     setSaving(true);
     try {
-      const dto = {
-        enabled: form.enabled,
-        provider: form.provider,
-        model: form.model,
-        baseUrl: form.baseUrl,
-      };
-      // La key solo se manda si escribió una nueva (no pisar la guardada).
-      if (form.apiKey && form.apiKey.trim()) dto.apiKey = form.apiKey.trim();
-
-      const { data } = await updatePlatformAiSettings(dto);
-      setKeyPreview(data?.keyPreview || '');
-      setHasKey(!!data?.hasKey);
-      setForm((f) => ({ ...f, apiKey: '' }));
+      await persist();
       setTestResult(null);
       toast.show({ type: 'success', message: 'Configuración de IA guardada.' });
     } catch (e) {
@@ -93,11 +99,12 @@ function PlatformAiInner() {
     }
   };
 
-  // Prueba real: pide a la IA generar contenido de un producto de ejemplo.
+  // Prueba real: guarda lo de pantalla y pide a la IA generar un ejemplo.
   const testConnection = async () => {
     setTesting(true);
     setTestResult(null);
     try {
+      await persist(); // asegura que la key/modelo/activar estén guardados
       const { data } = await generateProductContent({
         name: 'Audífonos Bluetooth de prueba',
       });
@@ -257,9 +264,11 @@ function PlatformAiInner() {
             <button
               type="button"
               onClick={testConnection}
-              disabled={testing || !hasKey}
+              disabled={testing || (!hasKey && !form.apiKey.trim())}
               className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-              title={!hasKey ? 'Primero guarda una API key' : ''}
+              title={
+                !hasKey && !form.apiKey.trim() ? 'Pega primero la API key' : ''
+              }
             >
               {testing ? 'Probando…' : 'Probar conexión'}
             </button>
