@@ -9,6 +9,7 @@ import {
   MegaphoneIcon,
   CheckCircleIcon,
   Square3Stack3DIcon,
+  SparklesIcon,
 } from '@heroicons/react/24/outline';
 
 import RoleGuard from '@/auth/roleGuard';
@@ -34,6 +35,13 @@ const CARDS = [
     title: 'Planes y funciones',
     desc: 'Precios, límites y qué módulo desbloquea cada plan. Configurable.',
     accent: 'text-indigo-600',
+  },
+  {
+    href: '/platform/ai',
+    icon: SparklesIcon,
+    title: 'Inteligencia Artificial',
+    desc: 'Proveedor y API key para generar contenido de productos con IA.',
+    accent: 'text-fuchsia-600',
   },
   {
     href: '/platform/coupons',

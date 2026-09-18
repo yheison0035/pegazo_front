@@ -15,6 +15,7 @@ import { parseCOPToNumber } from '@/lib/api/utils/utils';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import Button from '@/components/ui/Button';
 import InventorySpecsModal from '@/components/dashboard/inventory/inventorySpecsModal';
+import AiGenerateButton from '@/components/dashboard/inventory/aiGenerateButton';
 import {
   PlusIcon,
   ArrowRightIcon,
@@ -255,16 +256,25 @@ export default function NewProduct() {
             </h2>
             <p className="text-sm text-gray-500 mt-1">{newSubtitle}</p>
           </div>
-          {showOldPrice && (
-            <Button
-              variant="add"
-              icon={PlusIcon}
-              type="button"
-              onClick={canOpenSpecsModal}
-            >
-              Características y especificaciones
-            </Button>
-          )}
+          <div className="flex flex-wrap items-center gap-2">
+            <AiGenerateButton
+              formData={formData}
+              setFormData={setFormData}
+              onNotify={(a) =>
+                setAlert({ type: a.type, message: a.message, url: '' })
+              }
+            />
+            {showOldPrice && (
+              <Button
+                variant="add"
+                icon={PlusIcon}
+                type="button"
+                onClick={canOpenSpecsModal}
+              >
+                Características y especificaciones
+              </Button>
+            )}
+          </div>
         </div>
 
         <DinamicForm
