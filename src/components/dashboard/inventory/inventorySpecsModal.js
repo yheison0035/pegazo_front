@@ -11,6 +11,8 @@ import {
 import Button from '@/components/ui/Button';
 import { useState, useEffect } from 'react';
 import RichTextEditor from '@/components/dashboard/form/RichTextEditor';
+import AiGenerateButton from '@/components/dashboard/inventory/aiGenerateButton';
+import { useToast } from '@/context/toastContext';
 
 // Botón para mostrar/ocultar el ítem en la tienda (píldora clara).
 function VisibilityToggle({ visible, onToggle }) {
@@ -92,6 +94,7 @@ export default function InventorySpecsModal({
 }) {
   const [features, setFeatures] = useState([]);
   const [specs, setSpecs] = useState([]);
+  const toast = useToast();
 
   useEffect(() => {
     if (open) {
@@ -192,16 +195,32 @@ export default function InventorySpecsModal({
                 ))}
               </div>
 
-              <Button
-                variant="add"
-                icon={PlusIcon}
-                className="mt-3"
-                onClick={() =>
-                  setFeatures([...features, { title: '', visible: true }])
-                }
-              >
-                Agregar característica
-              </Button>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <Button
+                  variant="add"
+                  icon={PlusIcon}
+                  onClick={() =>
+                    setFeatures([...features, { title: '', visible: true }])
+                  }
+                >
+                  Agregar característica
+                </Button>
+                <AiGenerateButton
+                  small
+                  name={formData?.name}
+                  field="feature"
+                  label="Agregar con IA"
+                  existing={features
+                    .map((f) => (f.title || '').replace(/<[^>]+>/g, '').trim())
+                    .filter(Boolean)}
+                  onResult={({ data, error }) => {
+                    if (error) return toast.show({ type: 'error', message: error });
+                    const t = (data?.feature || '').trim();
+                    if (t)
+                      setFeatures((prev) => [...prev, { title: t, visible: true }]);
+                  }}
+                />
+              </div>
             </section>
 
             {/* Especificaciones */}
@@ -266,16 +285,37 @@ export default function InventorySpecsModal({
                 ))}
               </div>
 
-              <Button
-                variant="add"
-                icon={PlusIcon}
-                className="mt-3"
-                onClick={() =>
-                  setSpecs([...specs, { key: '', value: '', visible: true }])
-                }
-              >
-                Agregar especificación
-              </Button>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <Button
+                  variant="add"
+                  icon={PlusIcon}
+                  onClick={() =>
+                    setSpecs([...specs, { key: '', value: '', visible: true }])
+                  }
+                >
+                  Agregar especificación
+                </Button>
+                <AiGenerateButton
+                  small
+                  name={formData?.name}
+                  field="specification"
+                  label="Agregar con IA"
+                  existing={specs.map((s) => (s.key || '').trim()).filter(Boolean)}
+                  onResult={({ data, error }) => {
+                    if (error) return toast.show({ type: 'error', message: error });
+                    const spec = data?.specification || {};
+                    if (spec.key || spec.value)
+                      setSpecs((prev) => [
+                        ...prev,
+                        {
+                          key: spec.key || '',
+                          value: spec.value || '',
+                          visible: true,
+                        },
+                      ]);
+                  }}
+                />
+              </div>
             </section>
           </div>
 
