@@ -509,27 +509,47 @@ export default function PublicBooking({ slug = '' }) {
               {step === 2 && (
                 <div className="bk-grid grid grid-cols-2 gap-3 sm:grid-cols-3">
                   {barbers.length === 0 && <Skeletons n={3} tall />}
-                  {barbers.map((b) => (
-                    <OptionCard
-                      key={b.id}
-                      active={barber?.id === b.id}
-                      onClick={() => pickBarber(b)}
-                      className="text-center"
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={
-                          b.avatar ||
-                          `https://ui-avatars.com/api/?size=256&background=1a1a1a&color=f59e0b&name=${encodeURIComponent(
-                            b.name || 'B',
-                          )}`
-                        }
-                        alt={b.name}
-                        className="mx-auto mb-2.5 aspect-square w-full rounded-xl object-cover"
-                      />
-                      <p className="truncate text-sm font-semibold">{b.name}</p>
-                    </OptionCard>
-                  ))}
+                  {barbers.map((b) => {
+                    const active = barber?.id === b.id;
+                    return (
+                      <motion.button
+                        key={b.id}
+                        type="button"
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => pickBarber(b)}
+                        className={`bk-card group relative overflow-hidden rounded-2xl border ${
+                          active
+                            ? 'is-active border-[var(--bk-accent)]'
+                            : 'border-[var(--bk-border)]'
+                        }`}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={
+                            b.avatar ||
+                            `https://ui-avatars.com/api/?size=400&background=1a1a1a&color=d4af37&name=${encodeURIComponent(
+                              b.name || 'B',
+                            )}`
+                          }
+                          alt={b.name}
+                          className="aspect-[4/5] w-full object-cover"
+                        />
+                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent px-2 pb-2.5 pt-8 text-center">
+                          <p
+                            style={displayStyle}
+                            className="truncate text-sm font-bold text-white sm:text-base"
+                          >
+                            {b.name}
+                          </p>
+                        </div>
+                        {active && (
+                          <span className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-[var(--bk-accent)] text-[var(--bk-accent-contrast)]">
+                            <CheckIcon className="h-4 w-4" strokeWidth={3} />
+                          </span>
+                        )}
+                      </motion.button>
+                    );
+                  })}
                 </div>
               )}
 
