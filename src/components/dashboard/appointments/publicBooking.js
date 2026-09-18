@@ -683,9 +683,6 @@ function Hero({ config, displayStyle, onEnter }) {
       <button className="bk-enter mt-4" onClick={onEnter}>
         {intro.cta || 'Comienza tu leyenda'} ⚔
       </button>
-      <div className="mt-6 text-[11px] uppercase tracking-[0.2em] text-[var(--bk-text-muted)]/70">
-        ▾ Reserva en 60 segundos ▾
-      </div>
     </div>
   );
 }
