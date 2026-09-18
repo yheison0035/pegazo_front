@@ -1,7 +1,13 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { XMarkIcon, PlusIcon, PhotoIcon } from '@heroicons/react/24/outline';
+import {
+  XMarkIcon,
+  PlusIcon,
+  PhotoIcon,
+  CameraIcon,
+} from '@heroicons/react/24/outline';
+import PhotoStudioModal from './photoStudioModal';
 
 export default function ImageUploader({
   images,
@@ -12,6 +18,12 @@ export default function ImageUploader({
   const inputRef = useRef(null);
   const dragItem = useRef(null);
   const dragOverItem = useRef(null);
+  const [studioOpen, setStudioOpen] = useState(false);
+
+  // Foto lista desde el estudio: entra como una imagen nueva más (archivo).
+  const handleStudioResult = ({ file, url }) => {
+    setImages((prev) => [...prev, { id: null, file, url }]);
+  };
 
   const handleFileSelect = (e) => {
     const files = Array.from(e.target.files);
@@ -63,6 +75,15 @@ export default function ImageUploader({
             Arrastra las imágenes para cambiar el orden. La primera será la
             imagen principal.
           </p>
+
+          <button
+            type="button"
+            onClick={() => setStudioOpen(true)}
+            className="mb-3 inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-orange-600 to-[#111827] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
+          >
+            <CameraIcon className="h-5 w-5" />
+            Tomar / editar foto tipo tienda
+          </button>
 
           <div className="flex items-center gap-3 flex-wrap">
             {images.map((img, index) => (
@@ -117,6 +138,12 @@ export default function ImageUploader({
           </div>
         </div>
       )}
+
+      <PhotoStudioModal
+        open={studioOpen}
+        onClose={() => setStudioOpen(false)}
+        onResult={handleStudioResult}
+      />
     </div>
   );
 }
