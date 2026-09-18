@@ -401,7 +401,10 @@ export default function PublicBooking({ slug = '' }) {
               {step === 1 && grouped && (
                 <div className="mt-4 space-y-4">
                   {grouped.map((g) => (
-                    <section key={g.title} className="bk-cat">
+                    <section
+                      key={g.title}
+                      className={`bk-cat ${g.highlight ? 'bk-cat-hi' : ''}`}
+                    >
                       <div className="bk-cathead">
                         <span className="bk-badge flex h-9 w-9 flex-none items-center justify-center rounded-full text-[var(--bk-accent)]">
                           <ScissorsIcon className="h-4 w-4" />
@@ -412,6 +415,7 @@ export default function PublicBooking({ slug = '' }) {
                         >
                           {g.title}
                         </h3>
+                        {g.highlight && <span className="bk-hi-tag">★ Recomendado</span>}
                       </div>
                       <div className="bk-panel relative p-3 sm:p-4">
                         <Corners />

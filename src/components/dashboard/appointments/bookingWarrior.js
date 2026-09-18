@@ -177,6 +177,13 @@ export const WARRIOR_CSS = `
 
 /* Menú categorizado (filas de servicio estilo carta) */
 [data-skin="dark"] .bk-cat + .bk-cat { margin-top: 16px; }
+/* Categoría destacada (Premium) */
+[data-skin="dark"] .bk-cat-hi .bk-panel {
+  box-shadow: 0 0 0 1px var(--bk-gold-2), 0 0 30px rgba(212,175,55,.3), 0 12px 36px rgba(0,0,0,.55); }
+[data-skin="dark"] .bk-hi-tag { display: inline-flex; align-items: center; gap: 4px; margin-left: auto;
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase; font-weight: 700; color: #14100a;
+  background: linear-gradient(180deg, var(--bk-gold-1), var(--bk-gold-3)); padding: 3px 9px; border-radius: 20px;
+  box-shadow: 0 0 12px rgba(212,175,55,.35); }
 [data-skin="dark"] .bk-cathead { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
 [data-skin="dark"] .bk-svc { display: flex; align-items: center; gap: 10px; cursor: pointer;
   padding: 11px 6px; border-bottom: 1px solid rgba(212,175,55,.14); transition: .16s; }
