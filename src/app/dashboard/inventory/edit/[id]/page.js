@@ -14,6 +14,7 @@ import { parseCOPToNumber } from '@/lib/api/utils/utils';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import Button from '@/components/ui/Button';
 import InventorySpecsModal from '@/components/dashboard/inventory/inventorySpecsModal';
+import AiGenerateButton from '@/components/dashboard/inventory/aiGenerateButton';
 import RecipeModal from '@/components/dashboard/inventory/recipeModal';
 import { PencilIcon, BeakerIcon } from '@heroicons/react/24/outline';
 import { canSeeOldPrice } from '@/hooks/inventory.permissions';
@@ -255,6 +256,13 @@ export default function EditProduct() {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <AiGenerateButton
+              formData={formData}
+              setFormData={setFormData}
+              onNotify={(a) =>
+                setAlert({ type: a.type, message: a.message, url: '' })
+              }
+            />
             {showRecipe && (
               <Button
                 variant="add"
