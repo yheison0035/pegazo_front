@@ -41,15 +41,15 @@ function VisibilityToggle({ visible, onToggle }) {
 function ItemCard({ index, label, hidden, onToggle, onDelete, children }) {
   return (
     <div
-      className={`rounded-xl border p-3 transition ${
+      className={`rounded-xl border p-4 transition ${
         hidden
-          ? 'border-gray-200 bg-gray-50 opacity-70'
-          : 'border-gray-200 bg-white shadow-sm'
+          ? 'border-gray-200 bg-gray-100 opacity-70'
+          : 'border-gray-200 bg-gray-50/80 hover:border-gray-300'
       }`}
     >
-      <div className="mb-2 flex items-center justify-between">
+      <div className="mb-3 flex items-center justify-between">
         <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
-          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-orange-100 text-[11px] font-bold text-orange-600">
+          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-orange-100 text-xs font-bold text-orange-600">
             {index + 1}
           </span>
           {label}
@@ -73,7 +73,7 @@ function ItemCard({ index, label, hidden, onToggle, onDelete, children }) {
 
 function SectionHeader({ color, title, subtitle, count }) {
   return (
-    <div className="mb-3 flex items-center gap-3">
+    <div className="mb-4 flex items-center gap-3">
       <span className={`h-6 w-1.5 rounded-full ${color}`} />
       <div className="flex-1">
         <h3 className="text-base font-bold text-gray-800">{title}</h3>
@@ -134,7 +134,7 @@ export default function InventorySpecsModal({
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-sm">
       <div className="flex min-h-full items-center justify-center p-4">
-        <div className="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
           {/* Cabecera */}
           <div className="relative shrink-0 bg-gradient-to-r from-orange-600 to-[#111827] px-6 py-5 text-white">
             <button
@@ -153,9 +153,9 @@ export default function InventorySpecsModal({
           </div>
 
           {/* Cuerpo con scroll */}
-          <div className="min-h-0 flex-1 space-y-8 overflow-y-auto bg-gray-50/60 p-6">
+          <div className="min-h-0 flex-1 space-y-6 overflow-y-auto bg-gray-100/70 p-5 sm:p-6">
             {/* Características */}
-            <section>
+            <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
               <SectionHeader
                 color="bg-orange-500"
                 title="Características"
@@ -163,7 +163,7 @@ export default function InventorySpecsModal({
                 count={features.length}
               />
 
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {features.length === 0 && (
                   <p className="rounded-xl border border-dashed border-gray-300 bg-white px-4 py-6 text-center text-sm text-gray-400">
                     Aún no hay características. Agrega la primera abajo.
@@ -195,7 +195,7 @@ export default function InventorySpecsModal({
                 ))}
               </div>
 
-              <div className="mt-3 flex flex-wrap items-center gap-2">
+              <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-gray-100 pt-5">
                 <Button
                   variant="add"
                   icon={PlusIcon}
@@ -224,7 +224,7 @@ export default function InventorySpecsModal({
             </section>
 
             {/* Especificaciones */}
-            <section>
+            <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
               <SectionHeader
                 color="bg-gray-800"
                 title="Especificaciones técnicas"
@@ -232,7 +232,7 @@ export default function InventorySpecsModal({
                 count={specs.length}
               />
 
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {specs.length === 0 && (
                   <p className="rounded-xl border border-dashed border-gray-300 bg-white px-4 py-6 text-center text-sm text-gray-400">
                     Aún no hay especificaciones. Agrega la primera abajo.
@@ -285,7 +285,7 @@ export default function InventorySpecsModal({
                 ))}
               </div>
 
-              <div className="mt-3 flex flex-wrap items-center gap-2">
+              <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-gray-100 pt-5">
                 <Button
                   variant="add"
                   icon={PlusIcon}
