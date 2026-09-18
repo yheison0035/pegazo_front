@@ -126,3 +126,17 @@ export async function getAvailability(params = {}) {
     slots: res?.slots || res?.data || [],
   };
 }
+
+// Config pública de la página de citas por slug (marca + skin del diseño).
+// Devuelve { companyId, name, logo, whatsapp, accent, skin, tagline, subtitle,
+// heroImage, type } o null si el negocio no existe.
+export async function getBookingConfig(slug) {
+  try {
+    const res = await apiFetch(
+      `/appointments/booking-config/${encodeURIComponent(slug)}`,
+    );
+    return res?.data || null;
+  } catch {
+    return null;
+  }
+}

@@ -1,88 +1,73 @@
+import { Cinzel } from 'next/font/google';
 import PublicBooking from '@/components/dashboard/appointments/publicBooking';
 
-const LOGO =
-  'https://res.cloudinary.com/dl7g5sslz/image/upload/v1777311594/logo_ragnor_okgsb8.png';
+// Fuente display para el skin "guerrero" (grabada tipo Norse). Se expone como
+// variable CSS; solo el skin oscuro la usa.
+const display = Cinzel({
+  subsets: ['latin'],
+  weight: ['600', '700', '800'],
+  variable: '--bk-font-display',
+  display: 'swap',
+});
 
 export const dynamic = 'force-dynamic';
 
-export const metadata = {
-  metadataBase: new URL('https://pegazo.co'),
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
 
-  title: {
-    default: 'RAGNOR BARBER',
-    template: '%s | RAGNOR BARBER',
-  },
+// Config pública del negocio (para metadata dinámica por slug).
+async function fetchConfig(slug) {
+  try {
+    const res = await fetch(
+      `${API_URL}/appointments/booking-config/${encodeURIComponent(slug)}`,
+      { cache: 'no-store' },
+    );
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json?.data || null;
+  } catch {
+    return null;
+  }
+}
 
-  description:
-    'Reserva tu cita en RAGNOR BARBER. Corte, barba y estilo profesional.',
+export async function generateMetadata({ params }) {
+  const { slug } = await params;
+  const cfg = await fetchConfig(slug);
+  const name = cfg?.name || 'Agenda tu cita';
+  const desc = `Reserva tu cita en ${name} fácil y rápido.`;
+  const images = cfg?.logo ? [{ url: cfg.logo }] : [];
 
-  icons: {
-    icon: [
-      {
-        url: 'https://res.cloudinary.com/dl7g5sslz/image/upload/v1777332078/logo_ragnor_pvnvqe.ico',
-      },
-      {
-        url: 'https://res.cloudinary.com/dl7g5sslz/image/upload/v1777311594/logo_ragnor_okgsb8.png',
-        type: 'image/png',
-      },
-    ],
-    shortcut: ['/favicon.ico'],
-    apple: ['/apple-icon.png'],
-  },
+  return {
+    metadataBase: new URL('https://pegazo.co'),
+    title: { default: name, template: `%s | ${name}` },
+    description: desc,
+    icons: cfg?.logo
+      ? { icon: cfg.logo, shortcut: cfg.logo, apple: cfg.logo }
+      : undefined,
+    openGraph: {
+      title: name,
+      description: desc,
+      url: `https://pegazo.co/booking/${slug}`,
+      siteName: name,
+      images,
+      locale: 'es_CO',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: name,
+      description: 'Reserva tu cita ahora mismo',
+      images: images.map((i) => i.url),
+    },
+    themeColor: '#000000',
+    robots: { index: true, follow: true },
+  };
+}
 
-  keywords: [
-    'barbería',
-    'corte de cabello',
-    'barba',
-    'Ragnor Barber',
-    'barbería cerca',
-  ],
-
-  authors: [{ name: 'RAGNOR BARBER' }],
-
-  openGraph: {
-    title: 'RAGNOR BARBER',
-    description:
-      'Agenda tu cita fácil y rápido en RAGNOR BARBER. Servicio premium.',
-    url: 'https://pegazo.co/booking/ragnorbarber',
-    siteName: 'RAGNOR BARBER',
-    images: [
-      {
-        url: LOGO,
-        width: 1200,
-        height: 630,
-        alt: 'RAGNOR BARBER Logo',
-      },
-    ],
-    locale: 'es_CO',
-    type: 'website',
-  },
-
-  twitter: {
-    card: 'summary_large_image',
-    title: 'RAGNOR BARBER',
-    description: 'Reserva tu cita ahora mismo',
-    images: [LOGO],
-  },
-
-  icons: {
-    icon: LOGO,
-    shortcut: LOGO,
-    apple: LOGO,
-  },
-
-  themeColor: '#000000',
-
-  robots: {
-    index: true,
-    follow: true,
-  },
-};
-
-export default function Page() {
+export default async function Page({ params }) {
+  const { slug } = await params;
   return (
-    <div className="min-h-screen w-full bg-black">
-      <PublicBooking />
+    <div className={`${display.variable} min-h-screen w-full bg-black`}>
+      <PublicBooking slug={slug} />
     </div>
   );
 }
