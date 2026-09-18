@@ -52,6 +52,7 @@ function DesignInner() {
     introPills: '',
     heroImage: '',
     ravenImage: '',
+    musicUrl: '',
   });
 
   const load = useCallback(async () => {
@@ -70,6 +71,7 @@ function DesignInner() {
         introPills: data?.introPills || '',
         heroImage: data?.heroImage || '',
         ravenImage: data?.ravenImage || '',
+        musicUrl: data?.musicUrl || '',
       });
     } catch (e) {
       toast.show({ type: 'error', message: e.message || 'Error al cargar' });
@@ -229,6 +231,21 @@ function DesignInner() {
               placeholder="573001234567 (con indicativo del país)"
               className={inputCls}
             />
+          </div>
+
+          <div>
+            <label className={labelCls}>Música de fondo (URL de un MP3, opcional)</label>
+            <input
+              value={form.musicUrl}
+              onChange={set('musicUrl')}
+              placeholder="https://…/ambientacion.mp3"
+              className={inputCls}
+            />
+            <p className="mt-1 text-[11px] text-gray-400">
+              Aparece un botón de sonido <strong>apagado por defecto</strong>; el
+              visitante decide si lo activa (a volumen moderado, en bucle). Usa una
+              pista libre de derechos.
+            </p>
           </div>
 
           {/* Solo skin oscuro: portada */}

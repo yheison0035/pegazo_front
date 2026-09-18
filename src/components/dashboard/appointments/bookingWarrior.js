@@ -59,7 +59,21 @@ export const WARRIOR_CSS = `
   background: linear-gradient(180deg, var(--bk-gold-1) 0%, var(--bk-gold-2) 55%, var(--bk-gold-3) 100%);
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent; color: transparent;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,.65));
 }
+
+/* Fondo fijo del guerrero (siempre visible detrás de todo el flujo) */
+[data-skin="dark"] .bk-fixed-bg { position: fixed; inset: 0; z-index: 0; background-size: cover;
+  background-position: center 22%; }
+[data-skin="dark"] .bk-fixed-bg::after { content: ""; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(8,7,10,.5) 0%, rgba(8,7,10,.64) 42%, rgba(8,7,10,.82) 100%); }
+
+/* Cuervo pequeño dentro de los botones */
+[data-skin="dark"] .bk-btn-raven { height: 1.5em; width: auto; object-fit: contain;
+  display: inline-block; vertical-align: middle; filter: drop-shadow(0 1px 2px rgba(0,0,0,.5)); }
+
+/* Textos legibles sobre el fondo */
+[data-skin="dark"] .bk-legible { text-shadow: 0 1px 4px rgba(0,0,0,.7); }
 /* Brillo que recorre el título */
 [data-skin="dark"] .bk-shimmer {
   position: relative; overflow: hidden;
@@ -151,17 +165,6 @@ export const WARRIOR_CSS = `
 [data-skin="dark"] .bk-hero > .bk-hero-img::after { content: ""; position: absolute; inset: 0;
   background: linear-gradient(180deg, rgba(8,7,10,.18) 0%, rgba(8,7,10,.22) 46%, rgba(8,7,10,.72) 78%, var(--bk-bg) 100%); }
 
-/* Cuervo real (PNG) flanqueando la portada — responsive */
-[data-skin="dark"] .bk-hero-raven { position: absolute; top: -2%; z-index: 1; width: 40%;
-  max-width: 220px; pointer-events: none; opacity: .96;
-  filter: drop-shadow(0 12px 22px rgba(0,0,0,.55)); }
-[data-skin="dark"] .bk-hero-raven.left { left: -6%; }
-[data-skin="dark"] .bk-hero-raven.right { right: -6%; transform: scaleX(-1); }
-@media (min-width: 768px) {
-  [data-skin="dark"] .bk-hero-raven { width: 27%; max-width: 320px; top: 0; }
-  [data-skin="dark"] .bk-hero-raven.left { left: 0; }
-  [data-skin="dark"] .bk-hero-raven.right { right: 0; }
-}
 [data-skin="dark"] .bk-hero-logo { width: min(58vw,220px); filter: drop-shadow(0 8px 26px rgba(0,0,0,.7));
   animation: bk-logoin 1s cubic-bezier(.2,.7,.2,1) both; }
 @keyframes bk-logoin { from { opacity: 0; transform: translateY(-16px) scale(.9) } to { opacity: 1; transform: none } }
@@ -187,7 +190,6 @@ export const WARRIOR_CSS = `
   [data-skin="dark"] .bk-rise,
   [data-skin="dark"] .bk-hero-logo,
   [data-skin="dark"] .bk-raven svg,
-  [data-skin="dark"] .bk-hero-raven,
   [data-skin="dark"] .bk-enter,
   [data-skin="dark"] .bk-grid > * { animation: none; }
 }
