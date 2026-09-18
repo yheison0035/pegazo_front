@@ -1,7 +1,7 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import useAppointments from '@/lib/api/hooks/useAppointments';
 import useLocals from '@/lib/api/hooks/useLocals';
 import useServices from '@/lib/api/hooks/useServices';
@@ -14,7 +14,6 @@ import {
   Corners,
   RuneDivider,
   AngleBrackets,
-  Ravens,
   Embers,
   MountainsBackdrop,
   CrossedAxes,
@@ -29,6 +28,8 @@ import {
   CheckIcon,
   ChevronLeftIcon,
   ArrowRightIcon,
+  SpeakerWaveIcon,
+  SpeakerXMarkIcon,
 } from '@heroicons/react/24/outline';
 
 const STEPS = [
@@ -262,10 +263,17 @@ export default function PublicBooking({ slug = '' }) {
       } ${showHero ? 'h-[100svh] overflow-hidden' : 'min-h-screen'}`}
     >
       {ornate && <style>{WARRIOR_CSS}</style>}
+      {config.musicUrl && <SoundToggle src={config.musicUrl} />}
+      {/* Guerrero SIEMPRE de fondo (todo el flujo) */}
+      {ornate && config.heroImage && (
+        <div
+          className="bk-fixed-bg"
+          style={{ backgroundImage: `url("${config.heroImage}")` }}
+        />
+      )}
       {ornate && <Embers />}
-      {ornate && !config.ravenImage && <Ravens />}
-      {/* Fondo del skin */}
-      {ornate && <WarriorBackdrop logo={config.logo} />}
+      {/* Sin imagen de fondo: textura de piedra + marca de agua */}
+      {ornate && !config.heroImage && <WarriorBackdrop logo={config.logo} />}
 
       {showHero ? (
         <Hero
@@ -619,7 +627,12 @@ export default function PublicBooking({ slug = '' }) {
               className="bk-cta flex flex-1 items-center justify-center gap-2 rounded-2xl bg-[var(--bk-accent)] px-6 py-4 text-base font-bold uppercase tracking-wide text-[var(--bk-accent-contrast)] shadow-lg transition hover:brightness-110"
             >
               {config.whatsapp ? 'Reservar por WhatsApp' : 'Reservar cita'}
-              <ArrowRightIcon className="h-5 w-5" />
+              {config.ravenImage ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={config.ravenImage} alt="" className="bk-btn-raven" />
+              ) : (
+                <ArrowRightIcon className="h-5 w-5" />
+              )}
             </button>
           </div>
         </div>
@@ -630,27 +643,57 @@ export default function PublicBooking({ slug = '' }) {
 
 /* ---------------- Subcomponentes ---------------- */
 
+// Botón de sonido opcional: APAGADO por defecto. La música (ambientación en
+// loop, volumen moderado) solo suena cuando el visitante toca el botón (gesto
+// que los navegadores exigen). Se recuerda la preferencia.
+function SoundToggle({ src }) {
+  const audioRef = useRef(null);
+  const [on, setOn] = useState(false);
+
+  useEffect(() => {
+    const a = audioRef.current;
+    if (!a) return;
+    a.volume = 0.32;
+    if (on) a.play().catch(() => {});
+    else a.pause();
+    try {
+      localStorage.setItem('bk-sound', on ? '1' : '0');
+    } catch {
+      /* almacenamiento no disponible */
+    }
+  }, [on]);
+
+  return (
+    <>
+      <audio ref={audioRef} src={src} loop preload="none" />
+      <button
+        type="button"
+        onClick={() => setOn((v) => !v)}
+        aria-label={on ? 'Silenciar música' : 'Activar música'}
+        title={on ? 'Silenciar' : 'Activar sonido'}
+        className="fixed left-3 top-3 z-40 flex h-10 w-10 items-center justify-center rounded-full border border-[var(--bk-accent)]/40 bg-black/55 text-[var(--bk-accent)] backdrop-blur transition hover:border-[var(--bk-accent)]"
+      >
+        {on ? (
+          <SpeakerWaveIcon className="h-5 w-5" />
+        ) : (
+          <SpeakerXMarkIcon className="h-5 w-5" />
+        )}
+      </button>
+    </>
+  );
+}
+
 function Hero({ config, displayStyle, onEnter }) {
   const intro = config.intro || {};
   return (
     <div className="bk-hero relative z-10 px-4">
-      {config.heroImage ? (
-        <div
-          className="bk-hero-img"
-          style={{ backgroundImage: `url("${config.heroImage}")` }}
-        />
-      ) : (
-        <div className="bk-mts">
-          <MountainsBackdrop />
-        </div>
-      )}
-      {!config.heroImage && <CrossedAxes />}
-      {config.ravenImage && (
+      {/* Sin imagen: montañas + hachas. Con imagen: el guerrero va de fondo fijo. */}
+      {!config.heroImage && (
         <>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={config.ravenImage} alt="" className="bk-hero-raven left" />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={config.ravenImage} alt="" className="bk-hero-raven right" />
+          <div className="bk-mts">
+            <MountainsBackdrop />
+          </div>
+          <CrossedAxes />
         </>
       )}
       {config.logo ? (
@@ -676,14 +719,20 @@ function Hero({ config, displayStyle, onEnter }) {
       >
         {config.name}
       </h1>
-      <div className="mt-3 text-[11px] uppercase tracking-[0.4em] text-[var(--bk-text-muted)]">
+      <div className="bk-legible mt-3 text-[11px] uppercase tracking-[0.4em] text-[var(--bk-text-muted)]">
         {intro.pills || 'Disciplina · Estilo · Actitud'}
       </div>
       <RuneDivider />
       <button className="bk-enter mt-4" onClick={onEnter}>
-        {intro.cta || 'Comienza tu leyenda'} ⚔
+        {intro.cta || 'Comienza tu leyenda'}
+        {config.ravenImage ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={config.ravenImage} alt="" className="bk-btn-raven ml-2" />
+        ) : (
+          ' ⚔'
+        )}
       </button>
-      <div className="mt-5 text-[11px] uppercase tracking-[0.25em] text-[var(--bk-text-muted)]/80">
+      <div className="bk-legible mt-5 text-[11px] uppercase tracking-[0.25em] text-[var(--bk-text-muted)]/80">
         Reserva en 60 segundos
       </div>
     </div>
