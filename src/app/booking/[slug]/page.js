@@ -12,7 +12,18 @@ const display = Cinzel({
 
 export const dynamic = 'force-dynamic';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
+// Base del API para el fetch de metadata (server). En algunos entornos la var
+// NEXT_PUBLIC no llega al runtime del servidor y cae a localhost; en producción
+// usamos la URL pública del API como respaldo para que el título/preview salga
+// con la marca del negocio al compartir el enlace.
+function resolveApiUrl() {
+  let url = process.env.NEXT_PUBLIC_API_URL || '';
+  if (!url || (process.env.NODE_ENV === 'production' && url.includes('localhost'))) {
+    url = 'https://admineuropeatvstoreback-production.up.railway.app';
+  }
+  return url.replace(/\/$/, '');
+}
+const API_URL = resolveApiUrl();
 
 // Config pública del negocio (para metadata dinámica por slug).
 async function fetchConfig(slug) {
