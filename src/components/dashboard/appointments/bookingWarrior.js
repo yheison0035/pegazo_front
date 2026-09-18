@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
+
 // Dirección de arte del skin "oscuro / guerrero" de la página de citas.
 // Todo aquí se activa solo cuando la raíz tiene [data-skin="dark"], así el
 // mismo componente sirve para los demás skins (claro/clásico) sin ornamentos.
@@ -119,9 +121,52 @@ export const WARRIOR_CSS = `
 [data-skin="dark"] .bk-grid > *:nth-child(7){animation-delay:.3s}
 [data-skin="dark"] .bk-grid > *:nth-child(n+8){animation-delay:.35s}
 
+/* Brasas (canvas) y cuervos */
+[data-skin="dark"] .bk-embers { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+[data-skin="dark"] .bk-raven { position: fixed; z-index: 2; color: #050406; opacity: .9;
+  filter: drop-shadow(0 6px 10px rgba(0,0,0,.6)); }
+[data-skin="dark"] .bk-raven .eye { fill: var(--bk-gold-2); }
+[data-skin="dark"] .bk-raven.tl { top: 6px; left: 4px; width: 84px; transform: scaleX(-1); }
+[data-skin="dark"] .bk-raven.br { bottom: 96px; right: 4px; width: 92px; }
+@keyframes bk-bob { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-4px) } }
+[data-skin="dark"] .bk-raven svg { animation: bk-bob 5.5s ease-in-out infinite; }
+[data-skin="dark"] .bk-raven.br svg { animation-duration: 6.8s; animation-delay: .6s; }
+
+/* Portada (hero) */
+[data-skin="dark"] .bk-hero { position: relative; min-height: calc(100dvh - 20px);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+  padding: 20px 0 40px; overflow: hidden; }
+[data-skin="dark"] .bk-mts { position: absolute; inset: 0; z-index: 0; overflow: hidden; opacity: .9; }
+[data-skin="dark"] .bk-mts svg { position: absolute; bottom: 0; left: -20%; width: 140%; }
+[data-skin="dark"] .bk-axes { position: absolute; top: 46%; left: 50%; width: min(72vw,300px);
+  transform: translate(-50%,-60%); z-index: 0; color: var(--bk-gold-3); opacity: .45; }
+[data-skin="dark"] .bk-hero > * { position: relative; z-index: 1; }
+[data-skin="dark"] .bk-hero-logo { width: min(58vw,220px); filter: drop-shadow(0 8px 26px rgba(0,0,0,.7));
+  animation: bk-logoin 1s cubic-bezier(.2,.7,.2,1) both; }
+@keyframes bk-logoin { from { opacity: 0; transform: translateY(-16px) scale(.9) } to { opacity: 1; transform: none } }
+[data-skin="dark"] .bk-enter { border: 0; cursor: pointer; border-radius: 40px; padding: 15px 32px;
+  font-family: var(--bk-font-display, serif); font-weight: 700; text-transform: uppercase; letter-spacing: .1em; font-size: 15px;
+  color: #14100a; background: linear-gradient(180deg, var(--bk-gold-1), var(--bk-gold-2) 55%, var(--bk-gold-3));
+  box-shadow: 0 0 0 1px var(--bk-gold-3), 0 12px 34px rgba(212,175,55,.35), inset 0 1px 0 rgba(255,255,255,.6);
+  animation: bk-beat 2.6s ease-in-out infinite; }
+@keyframes bk-beat { 50% { box-shadow: 0 0 0 1px var(--bk-gold-3), 0 14px 42px rgba(212,175,55,.55), inset 0 1px 0 rgba(255,255,255,.6) } }
+
+/* Menú categorizado (filas de servicio estilo carta) */
+[data-skin="dark"] .bk-cat + .bk-cat { margin-top: 16px; }
+[data-skin="dark"] .bk-cathead { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+[data-skin="dark"] .bk-svc { display: flex; align-items: center; gap: 10px; cursor: pointer;
+  padding: 11px 6px; border-bottom: 1px solid rgba(212,175,55,.14); transition: .16s; }
+[data-skin="dark"] .bk-svc:last-child { border-bottom: 0; }
+[data-skin="dark"] .bk-svc:hover { background: rgba(212,175,55,.06); padding-left: 12px; }
+[data-skin="dark"] .bk-svc .go { color: var(--bk-gold-3); transition: .16s; }
+[data-skin="dark"] .bk-svc:hover .go { color: var(--bk-gold-1); transform: translateX(3px); }
+
 @media (prefers-reduced-motion: reduce) {
   [data-skin="dark"] .bk-shimmer::after,
   [data-skin="dark"] .bk-rise,
+  [data-skin="dark"] .bk-hero-logo,
+  [data-skin="dark"] .bk-raven svg,
+  [data-skin="dark"] .bk-enter,
   [data-skin="dark"] .bk-grid > * { animation: none; }
 }
 `;
@@ -174,4 +219,152 @@ export function AngleBrackets({ children }) {
       <span className="text-[var(--bk-gold-2)]/80" aria-hidden="true">◥</span>
     </span>
   );
+}
+
+/** Cuervo (silueta) para las esquinas — motivo del menú. */
+function RavenSvg() {
+  return (
+    <svg viewBox="0 0 120 90" aria-hidden="true">
+      <g fill="currentColor">
+        <path d="M10 62 C24 70 44 70 60 60 C74 52 84 40 96 30 C90 44 82 54 70 62 C86 58 100 50 112 38 C108 56 92 70 72 74 C58 77 40 76 26 70 Z" />
+        <circle cx="98" cy="27" r="9" />
+        <polygon points="106,24 120,26 106,31" />
+        <circle className="eye" cx="100" cy="25" r="1.6" />
+        <path d="M8 60 L2 50 L18 58 Z" />
+        <path d="M52 66 L50 82 M62 64 L64 80" stroke="currentColor" strokeWidth="2.4" />
+      </g>
+    </svg>
+  );
+}
+export function Ravens() {
+  return (
+    <>
+      <div className="bk-raven tl"><RavenSvg /></div>
+      <div className="bk-raven br"><RavenSvg /></div>
+    </>
+  );
+}
+
+/** Montañas + drakkar para la portada. */
+export function MountainsBackdrop() {
+  return (
+    <svg viewBox="0 0 1200 420" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+      <defs>
+        <linearGradient id="bkmg" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stopColor="#1a1622" />
+          <stop offset="1" stopColor="#0a0810" />
+        </linearGradient>
+      </defs>
+      <path fill="#12101a" d="M0 260 L160 120 L300 240 L430 90 L560 230 L700 130 L860 250 L1000 110 L1130 240 L1200 180 L1200 420 L0 420Z" />
+      <path fill="url(#bkmg)" d="M0 320 L120 220 L260 320 L400 200 L540 320 L700 230 L880 330 L1040 210 L1200 300 L1200 420 L0 420Z" />
+      <g fill="#07060b" opacity="0.9" transform="translate(160,300)">
+        <path d="M-70 30 Q0 55 70 30 L60 40 Q0 60 -60 40Z" />
+        <path d="M-2 30 L-2 -34 L2 -34 L2 30Z" />
+        <path d="M2 -30 Q50 -20 44 6 L2 6Z" opacity="0.85" />
+        <path d="M-70 30 L-84 20 M70 30 L84 20" stroke="#07060b" strokeWidth="3" />
+      </g>
+    </svg>
+  );
+}
+
+/** Hachas cruzadas detrás del logo. */
+export function CrossedAxes() {
+  return (
+    <svg className="bk-axes" viewBox="0 0 320 200" fill="none" aria-hidden="true">
+      <g stroke="currentColor" strokeWidth="6" strokeLinecap="round">
+        <line x1="70" y1="180" x2="250" y2="20" />
+        <line x1="250" y1="180" x2="70" y2="20" />
+      </g>
+      <g fill="currentColor" opacity="0.7">
+        <path d="M240 10 q40 6 34 40 q-30 10 -44 -14Z" />
+        <path d="M80 10 q-40 6 -34 40 q30 10 44 -14Z" />
+      </g>
+    </svg>
+  );
+}
+
+/** Brasas doradas ascendentes (canvas ligero). Respeta reduce-motion. */
+export function Embers() {
+  const ref = useRef(null);
+  useEffect(() => {
+    const rm =
+      typeof window !== 'undefined' &&
+      window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (rm) return;
+    const c = ref.current;
+    if (!c) return;
+    const x = c.getContext('2d');
+    let W, H, raf, P;
+    const rs = () => {
+      W = c.width = window.innerWidth;
+      H = c.height = window.innerHeight;
+    };
+    const mk = () => ({
+      x: Math.random() * W,
+      y: H + 10,
+      r: Math.random() * 1.8 + 0.4,
+      s: Math.random() * 0.5 + 0.2,
+      o: Math.random() * 0.5 + 0.2,
+      d: (Math.random() - 0.5) * 0.3,
+    });
+    const loop = () => {
+      x.clearRect(0, 0, W, H);
+      for (const p of P) {
+        p.y -= p.s;
+        p.x += p.d;
+        p.o -= 0.0016;
+        if (p.y < -10 || p.o <= 0) Object.assign(p, mk());
+        x.beginPath();
+        x.arc(p.x, p.y, p.r, 0, 6.28);
+        x.fillStyle = `rgba(230,180,70,${p.o})`;
+        x.shadowBlur = 8;
+        x.shadowColor = 'rgba(230,170,60,.8)';
+        x.fill();
+      }
+      raf = requestAnimationFrame(loop);
+    };
+    rs();
+    window.addEventListener('resize', rs);
+    P = Array.from({ length: 42 }, mk);
+    loop();
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('resize', rs);
+    };
+  }, []);
+  return <canvas ref={ref} className="bk-embers" />;
+}
+
+// Agrupa los servicios en categorías según reglas del negocio (config).
+// Cada regla: { title, icon?, any?:[], all?:[], not?:[] } — palabras clave que
+// se buscan en el nombre. Primer grupo que hace match se lleva el servicio.
+export function groupServices(services, groups) {
+  if (!Array.isArray(groups) || !groups.length) return null;
+  const norm = (s) =>
+    (s || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '');
+  const matches = (name, g) => {
+    const n = norm(name);
+    const any = (g.any || []).map(norm);
+    const all = (g.all || []).map(norm);
+    const not = (g.not || []).map(norm);
+    if (not.some((w) => w && n.includes(w))) return false;
+    if (all.length && !all.every((w) => n.includes(w))) return false;
+    if (any.length && !any.some((w) => n.includes(w))) return false;
+    if (!any.length && !all.length) return false;
+    return true;
+  };
+  const buckets = groups.map((g) => ({ ...g, items: [] }));
+  const rest = [];
+  for (const s of services) {
+    const idx = buckets.findIndex((g) => matches(s.name, g));
+    if (idx >= 0) buckets[idx].items.push(s);
+    else rest.push(s);
+  }
+  const out = buckets.filter((b) => b.items.length);
+  if (rest.length) out.push({ title: 'Otros', items: rest });
+  return out;
 }
