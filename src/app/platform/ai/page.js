@@ -11,7 +11,7 @@ import {
 } from '@/lib/api/routes/platformAi';
 
 const DEFAULT_MODELS = {
-  gemini: 'gemini-2.0-flash',
+  gemini: 'gemini-3.6-flash',
   openai: 'llama-3.3-70b-versatile',
 };
 
@@ -20,7 +20,7 @@ function PlatformAiInner() {
   const [form, setForm] = useState({
     enabled: false,
     provider: 'gemini',
-    model: 'gemini-2.0-flash',
+    model: 'gemini-3.6-flash',
     baseUrl: '',
     apiKey: '', // solo se envía si el admin escribe una nueva
   });
@@ -39,7 +39,7 @@ function PlatformAiInner() {
         ...f,
         enabled: !!data?.enabled,
         provider: data?.provider || 'gemini',
-        model: data?.model || 'gemini-2.0-flash',
+        model: data?.model || 'gemini-3.6-flash',
         baseUrl: data?.baseUrl || '',
         apiKey: '',
       }));
