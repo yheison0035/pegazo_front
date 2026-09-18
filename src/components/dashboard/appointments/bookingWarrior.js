@@ -185,8 +185,8 @@ export const WARRIOR_CSS = `
   background: linear-gradient(180deg, var(--bk-gold-1), var(--bk-gold-3)); padding: 3px 9px; border-radius: 20px;
   box-shadow: 0 0 12px rgba(212,175,55,.35); }
 [data-skin="dark"] .bk-cathead { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
-[data-skin="dark"] .bk-svc { display: flex; align-items: center; gap: 10px; cursor: pointer;
-  padding: 11px 6px; border-bottom: 1px solid rgba(212,175,55,.14); transition: .16s; }
+[data-skin="dark"] .bk-svc { display: flex; align-items: flex-start; gap: 12px; cursor: pointer;
+  padding: 13px 6px; border-bottom: 1px solid rgba(212,175,55,.14); transition: .16s; }
 [data-skin="dark"] .bk-svc:last-child { border-bottom: 0; }
 [data-skin="dark"] .bk-svc:hover { background: rgba(212,175,55,.06); padding-left: 12px; }
 [data-skin="dark"] .bk-svc .go { color: var(--bk-gold-3); transition: .16s; }
