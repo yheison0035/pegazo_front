@@ -263,7 +263,7 @@ export default function PublicBooking({ slug = '' }) {
     >
       {ornate && <style>{WARRIOR_CSS}</style>}
       {ornate && <Embers />}
-      {ornate && <Ravens />}
+      {ornate && !config.ravenImage && <Ravens />}
       {/* Fondo del skin */}
       {ornate && <WarriorBackdrop logo={config.logo} />}
 
@@ -645,6 +645,14 @@ function Hero({ config, displayStyle, onEnter }) {
         </div>
       )}
       {!config.heroImage && <CrossedAxes />}
+      {config.ravenImage && (
+        <>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={config.ravenImage} alt="" className="bk-hero-raven left" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={config.ravenImage} alt="" className="bk-hero-raven right" />
+        </>
+      )}
       {config.logo ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={config.logo} alt={config.name} className="bk-hero-logo" />

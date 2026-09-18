@@ -38,6 +38,8 @@ function DesignInner() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadingRaven, setUploadingRaven] = useState(false);
+  const ravenRef = useRef(null);
   const [slug, setSlug] = useState(null);
   const [defaultAccent, setDefaultAccent] = useState('#d4af37');
   const [form, setForm] = useState({
@@ -49,6 +51,7 @@ function DesignInner() {
     introCta: '',
     introPills: '',
     heroImage: '',
+    ravenImage: '',
   });
 
   const load = useCallback(async () => {
@@ -66,6 +69,7 @@ function DesignInner() {
         introCta: data?.introCta || '',
         introPills: data?.introPills || '',
         heroImage: data?.heroImage || '',
+        ravenImage: data?.ravenImage || '',
       });
     } catch (e) {
       toast.show({ type: 'error', message: e.message || 'Error al cargar' });
@@ -80,20 +84,22 @@ function DesignInner() {
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
-  const onUpload = async (e) => {
+  const makeUpload = (field, setFlag, ref) => async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setUploading(true);
+    setFlag(true);
     try {
       const { data } = await uploadCompanyLogo(file);
-      if (data?.url) setForm((f) => ({ ...f, heroImage: data.url }));
+      if (data?.url) setForm((f) => ({ ...f, [field]: data.url }));
     } catch (err) {
       toast.show({ type: 'error', message: err.message || 'No se pudo subir' });
     } finally {
-      setUploading(false);
-      if (fileRef.current) fileRef.current.value = '';
+      setFlag(false);
+      if (ref.current) ref.current.value = '';
     }
   };
+  const onUpload = makeUpload('heroImage', setUploading, fileRef);
+  const onUploadRaven = makeUpload('ravenImage', setUploadingRaven, ravenRef);
 
   const save = async () => {
     setSaving(true);
@@ -294,6 +300,51 @@ function DesignInner() {
                 <p className="mt-1 text-[11px] text-gray-400">
                   Recomendado: foto vertical/temática (ej. el arte de tu marca).
                   Se oscurece automáticamente para que se lea el logo y el texto.
+                </p>
+              </div>
+
+              <div>
+                <label className={labelCls}>Cuervo decorativo (PNG con fondo transparente)</label>
+                {form.ravenImage ? (
+                  <div className="relative inline-block rounded-lg bg-gray-800 p-2">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={form.ravenImage}
+                      alt="Cuervo"
+                      className="h-24 w-40 object-contain"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setForm((f) => ({ ...f, ravenImage: '' }))}
+                      className="absolute -right-2 -top-2 rounded-full bg-red-500 p-1 text-white shadow"
+                      title="Quitar cuervo"
+                    >
+                      <XMarkIcon className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => ravenRef.current?.click()}
+                    disabled={uploadingRaven}
+                    className="flex h-24 w-40 flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-gray-300 text-gray-400 hover:border-orange-400 hover:text-orange-500 disabled:opacity-50"
+                  >
+                    <PhotoIcon className="h-6 w-6" />
+                    <span className="text-xs">
+                      {uploadingRaven ? 'Subiendo…' : 'Subir cuervo'}
+                    </span>
+                  </button>
+                )}
+                <input
+                  ref={ravenRef}
+                  type="file"
+                  accept="image/png,image/webp"
+                  className="hidden"
+                  onChange={onUploadRaven}
+                />
+                <p className="mt-1 text-[11px] text-gray-400">
+                  Se muestra flanqueando la portada (arriba a los lados). Usa un
+                  PNG recortado con fondo transparente.
                 </p>
               </div>
             </div>

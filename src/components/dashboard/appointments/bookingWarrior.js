@@ -144,10 +144,25 @@ export const WARRIOR_CSS = `
   filter: drop-shadow(0 0 10px rgba(212,175,55,.25)); }
 /* Imagen de fondo opcional de la portada (arte real del negocio) */
 [data-skin="dark"] .bk-hero-img { position: absolute; inset: 0; z-index: 0; background-size: cover;
-  background-position: center; }
+  background-position: center 12%; }
 [data-skin="dark"] .bk-hero-img::after { content: ""; position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(8,7,10,.55) 0%, rgba(8,7,10,.35) 40%, var(--bk-bg) 100%); }
+  background: linear-gradient(180deg, rgba(8,7,10,.42) 0%, rgba(8,7,10,.3) 38%, var(--bk-bg) 100%); }
 [data-skin="dark"] .bk-hero > * { position: relative; z-index: 1; }
+
+/* Cuervo real (PNG) flanqueando la portada — responsive */
+[data-skin="dark"] .bk-hero-raven { position: absolute; top: -2%; z-index: 1; width: 40%;
+  max-width: 220px; pointer-events: none; opacity: .96;
+  filter: drop-shadow(0 12px 22px rgba(0,0,0,.55)); }
+[data-skin="dark"] .bk-hero-raven.left { left: -6%; animation: bk-float 6s ease-in-out infinite; }
+[data-skin="dark"] .bk-hero-raven.right { right: -6%;
+  animation: bk-float-flip 6s ease-in-out .8s infinite; }
+@media (min-width: 768px) {
+  [data-skin="dark"] .bk-hero-raven { width: 27%; max-width: 320px; top: 0; }
+  [data-skin="dark"] .bk-hero-raven.left { left: 0; }
+  [data-skin="dark"] .bk-hero-raven.right { right: 0; }
+}
+@keyframes bk-float { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-6px) } }
+@keyframes bk-float-flip { 0%,100% { transform: translateY(0) scaleX(-1) } 50% { transform: translateY(-6px) scaleX(-1) } }
 [data-skin="dark"] .bk-hero-logo { width: min(58vw,220px); filter: drop-shadow(0 8px 26px rgba(0,0,0,.7));
   animation: bk-logoin 1s cubic-bezier(.2,.7,.2,1) both; }
 @keyframes bk-logoin { from { opacity: 0; transform: translateY(-16px) scale(.9) } to { opacity: 1; transform: none } }
@@ -173,6 +188,7 @@ export const WARRIOR_CSS = `
   [data-skin="dark"] .bk-rise,
   [data-skin="dark"] .bk-hero-logo,
   [data-skin="dark"] .bk-raven svg,
+  [data-skin="dark"] .bk-hero-raven,
   [data-skin="dark"] .bk-enter,
   [data-skin="dark"] .bk-grid > * { animation: none; }
 }
