@@ -39,6 +39,13 @@ const SKINS = {
       '--bk-accent-soft': `rgba(${rgb}, 0.12)`,
       '--bk-accent-ring': `rgba(${rgb}, 0.35)`,
       '--bk-radius': '0.9rem',
+      // Degradado dorado grabado (como el menú): claro -> oro -> bronce.
+      '--bk-gold-1': '#f7e7a8',
+      '--bk-gold-2': accent,
+      '--bk-gold-3': '#8a6a1f',
+      '--bk-frame': `rgba(${rgb}, 0.85)`,
+      '--bk-frame-soft': `rgba(${rgb}, 0.28)`,
+      '--bk-panel': 'rgba(10,9,12,0.72)',
     }),
     ornaments: true,
     display: true,

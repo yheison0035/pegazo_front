@@ -10,6 +10,12 @@ import { getBookingConfig } from '@/lib/api/routes/appointments';
 import { formatPrice } from '@/lib/api/utils/utils';
 import { resolveSkin } from './bookingSkins';
 import {
+  WARRIOR_CSS,
+  Corners,
+  RuneDivider,
+  AngleBrackets,
+} from './bookingWarrior';
+import {
   BuildingStorefrontIcon,
   ScissorsIcon,
   UserIcon,
@@ -233,13 +239,19 @@ export default function PublicBooking({ slug = '' }) {
     );
   }
 
+  const ornate = skin.ornaments;
+
   return (
     <div
       style={skin.style}
-      className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-[var(--bk-bg)] text-[var(--bk-text)]"
+      data-skin={config.skin}
+      className={`relative flex min-h-screen w-full flex-col overflow-x-hidden bg-[var(--bk-bg)] text-[var(--bk-text)] ${
+        ornate ? 'bk-stone' : ''
+      }`}
     >
+      {ornate && <style>{WARRIOR_CSS}</style>}
       {/* Fondo del skin */}
-      {skin.ornaments && <WarriorBackdrop logo={config.logo} />}
+      {ornate && <WarriorBackdrop logo={config.logo} />}
 
       {/* Encabezado */}
       <header className="relative z-10 px-4 pt-6 text-center sm:pt-8">
@@ -260,14 +272,26 @@ export default function PublicBooking({ slug = '' }) {
         )}
         <h1
           style={displayStyle}
-          className="mt-3 text-xl font-bold tracking-tight sm:text-3xl"
+          className={`mt-3 text-2xl font-bold tracking-tight sm:text-4xl ${
+            ornate ? 'bk-gold bk-shimmer uppercase' : ''
+          }`}
         >
-          {config.tagline || 'Agenda tu cita'}
+          {ornate ? (
+            <AngleBrackets>{config.tagline || 'Agenda tu cita'}</AngleBrackets>
+          ) : (
+            config.tagline || 'Agenda tu cita'
+          )}
         </h1>
-        <p className="mt-0.5 text-xs text-[var(--bk-accent)]/90 sm:text-sm">
+        <p
+          className={`mt-1 text-xs sm:text-sm ${
+            ornate
+              ? 'uppercase tracking-[0.25em] text-[var(--bk-text-muted)]'
+              : 'text-[var(--bk-accent)]/90'
+          }`}
+        >
           {config.subtitle || 'Reserva en segundos'}
         </p>
-        {skin.ornaments && <GoldDivider />}
+        {ornate && <RuneDivider />}
       </header>
 
       {/* Stepper */}
@@ -311,11 +335,15 @@ export default function PublicBooking({ slug = '' }) {
               exit={{ opacity: 0, x: -24 }}
               transition={{ duration: 0.22, ease: 'easeOut' }}
             >
-              <StepTitle index={step} displayStyle={displayStyle} />
+              <div
+                className={ornate ? 'bk-panel relative p-5 sm:p-6' : ''}
+              >
+                {ornate && <Corners />}
+                <StepTitle index={step} displayStyle={displayStyle} ornate={ornate} />
 
               {/* 1. SEDE */}
               {step === 0 && (
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="bk-grid grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {locals.length === 0 && <Skeletons n={2} />}
                   {locals.map((l) => (
                     <OptionCard
@@ -343,7 +371,7 @@ export default function PublicBooking({ slug = '' }) {
 
               {/* 2. SERVICIO */}
               {step === 1 && (
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="bk-grid grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {services.length === 0 && <Skeletons n={4} />}
                   {services.map((s) => (
                     <OptionCard
@@ -371,7 +399,7 @@ export default function PublicBooking({ slug = '' }) {
 
               {/* 3. PROFESIONAL */}
               {step === 2 && (
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                <div className="bk-grid grid grid-cols-2 gap-3 sm:grid-cols-3">
                   {barbers.length === 0 && <Skeletons n={3} tall />}
                   {barbers.map((b) => (
                     <OptionCard
@@ -506,6 +534,7 @@ export default function PublicBooking({ slug = '' }) {
                   </div>
                 </div>
               )}
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -517,7 +546,7 @@ export default function PublicBooking({ slug = '' }) {
           <div className="mx-auto flex max-w-2xl items-center gap-3">
             <button
               onClick={confirmar}
-              className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-[var(--bk-accent)] px-6 py-4 text-base font-bold text-[var(--bk-accent-contrast)] shadow-lg transition hover:brightness-110"
+              className="bk-cta flex flex-1 items-center justify-center gap-2 rounded-2xl bg-[var(--bk-accent)] px-6 py-4 text-base font-bold uppercase tracking-wide text-[var(--bk-accent-contrast)] shadow-lg transition hover:brightness-110"
             >
               {config.whatsapp ? 'Reservar por WhatsApp' : 'Reservar cita'}
               <ArrowRightIcon className="h-5 w-5" />
@@ -544,7 +573,7 @@ function Stepper({ step }) {
               <div
                 className={`flex h-7 w-7 items-center justify-center rounded-full border-2 transition sm:h-9 sm:w-9 ${
                   active
-                    ? 'border-[var(--bk-accent)] bg-[var(--bk-accent-soft)] text-[var(--bk-accent)]'
+                    ? 'bk-step-active border-[var(--bk-accent)] bg-[var(--bk-accent-soft)] text-[var(--bk-accent)]'
                     : done
                       ? 'border-[var(--bk-accent)] bg-[var(--bk-accent)] text-[var(--bk-accent-contrast)]'
                       : 'border-[var(--bk-border)] text-[var(--bk-text-muted)]'
@@ -580,7 +609,7 @@ function Stepper({ step }) {
   );
 }
 
-function StepTitle({ index, displayStyle }) {
+function StepTitle({ index, displayStyle, ornate }) {
   const titles = [
     'Elige la sede',
     'Elige el servicio',
@@ -589,15 +618,27 @@ function StepTitle({ index, displayStyle }) {
     'Elige la hora',
     'Confirma tu cita',
   ];
+  const Icon = STEPS[index].icon;
   return (
-    <div className="mb-4 flex items-center gap-2">
-      <span className="text-[11px] font-semibold uppercase tracking-widest text-[var(--bk-accent)]">
-        Paso {index + 1} de {STEPS.length}
-      </span>
-      <span className="h-1 w-1 rounded-full bg-[var(--bk-border-strong)]" />
-      <h2 style={displayStyle} className="text-lg font-bold">
-        {titles[index]}
-      </h2>
+    <div className="mb-4 flex items-center gap-3">
+      {ornate && (
+        <span className="bk-badge flex h-11 w-11 flex-none items-center justify-center rounded-full text-[var(--bk-accent)]">
+          <Icon className="h-5 w-5" />
+        </span>
+      )}
+      <div className="min-w-0">
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-[var(--bk-accent)]">
+          Paso {index + 1} de {STEPS.length}
+        </p>
+        <h2
+          style={displayStyle}
+          className={`text-lg font-bold sm:text-xl ${
+            ornate ? 'bk-gold uppercase tracking-wide' : ''
+          }`}
+        >
+          {titles[index]}
+        </h2>
+      </div>
     </div>
   );
 }
@@ -617,9 +658,9 @@ function OptionCard({ active, onClick, children, className = '' }) {
       type="button"
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      className={`w-full rounded-xl border p-3 text-left transition sm:rounded-2xl sm:p-3.5 ${
+      className={`bk-card w-full rounded-xl border p-3 text-left transition sm:rounded-2xl sm:p-3.5 ${
         active
-          ? 'border-[var(--bk-accent)] bg-[var(--bk-accent-soft)]'
+          ? 'is-active border-[var(--bk-accent)] bg-[var(--bk-accent-soft)]'
           : 'border-[var(--bk-border)] bg-[var(--bk-surface)] hover:border-[var(--bk-border-strong)] hover:bg-[var(--bk-surface-2)]'
       } ${className}`}
     >
@@ -709,17 +750,5 @@ function WarriorBackdrop({ logo }) {
         </div>
       )}
     </>
-  );
-}
-
-function GoldDivider() {
-  return (
-    <div className="mx-auto mt-4 flex max-w-xs items-center gap-2">
-      <span className="h-px flex-1 bg-gradient-to-r from-transparent to-[var(--bk-accent)]/60" />
-      <svg width="14" height="14" viewBox="0 0 24 24" className="text-[var(--bk-accent)]">
-        <path fill="currentColor" d="M12 2l2.5 7.5H22l-6 4.5 2.5 7.5L12 17l-6.5 4.5L8 14l-6-4.5h7.5z" />
-      </svg>
-      <span className="h-px flex-1 bg-gradient-to-l from-transparent to-[var(--bk-accent)]/60" />
-    </div>
   );
 }
