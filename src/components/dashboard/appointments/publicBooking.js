@@ -507,7 +507,7 @@ export default function PublicBooking({ slug = '' }) {
 
               {/* 3. PROFESIONAL */}
               {step === 2 && (
-                <div className="bk-grid grid grid-cols-2 gap-3 sm:grid-cols-3">
+                <div className="bk-grid grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {barbers.length === 0 && <Skeletons n={3} tall />}
                   {barbers.map((b) => {
                     const active = barber?.id === b.id;
@@ -532,7 +532,7 @@ export default function PublicBooking({ slug = '' }) {
                             )}`
                           }
                           alt={b.name}
-                          className="aspect-[4/5] w-full object-cover"
+                          className="aspect-[4/3] w-full object-cover object-top sm:aspect-[4/5]"
                         />
                         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent px-2 pb-2.5 pt-8 text-center">
                           <p
