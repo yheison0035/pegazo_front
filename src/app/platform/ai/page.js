@@ -7,6 +7,7 @@ import { SparklesIcon } from '@heroicons/react/24/outline';
 import {
   getPlatformAiSettings,
   updatePlatformAiSettings,
+  generateProductContent,
 } from '@/lib/api/routes/platformAi';
 
 const DEFAULT_MODELS = {
@@ -27,6 +28,8 @@ function PlatformAiInner() {
   const [hasKey, setHasKey] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState(null); // {ok, sample|message}
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -81,11 +84,35 @@ function PlatformAiInner() {
       setKeyPreview(data?.keyPreview || '');
       setHasKey(!!data?.hasKey);
       setForm((f) => ({ ...f, apiKey: '' }));
+      setTestResult(null);
       toast.show({ type: 'success', message: 'Configuración de IA guardada.' });
     } catch (e) {
       toast.show({ type: 'error', message: e.message || 'No se pudo guardar' });
     } finally {
       setSaving(false);
+    }
+  };
+
+  // Prueba real: pide a la IA generar contenido de un producto de ejemplo.
+  const testConnection = async () => {
+    setTesting(true);
+    setTestResult(null);
+    try {
+      const { data } = await generateProductContent({
+        name: 'Audífonos Bluetooth de prueba',
+      });
+      const ok = !!(data?.description || (data?.features || []).length);
+      setTestResult(
+        ok
+          ? { ok: true, sample: (data.description || '').replace(/<[^>]+>/g, '') }
+          : { ok: false, message: 'La IA respondió vacío. Revisa el modelo.' },
+      );
+      if (ok) toast.show({ type: 'success', message: '¡IA conectada y funcionando!' });
+    } catch (e) {
+      setTestResult({ ok: false, message: e?.message || 'No se pudo conectar' });
+      toast.show({ type: 'error', message: e?.message || 'No se pudo conectar' });
+    } finally {
+      setTesting(false);
     }
   };
 
@@ -113,6 +140,26 @@ function PlatformAiInner() {
         <div className="py-16 text-center text-gray-400">Cargando…</div>
       ) : (
         <div className="space-y-4 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+          {/* Estado de conexión */}
+          {form.enabled && hasKey ? (
+            <div className="flex flex-wrap items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+              <span className="h-2.5 w-2.5 rounded-full bg-green-500" />
+              <span className="font-semibold">IA conectada</span>
+              <span className="text-green-600">
+                · {form.provider === 'openai' ? 'OpenAI-compat' : 'Gemini'} ·{' '}
+                {form.model} · key {keyPreview}
+              </span>
+            </div>
+          ) : (
+            <div className="flex flex-wrap items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+              <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
+              <span className="font-semibold">Aún sin conectar</span>
+              <span className="text-amber-600">
+                · activa la IA, pega la API key y guarda
+              </span>
+            </div>
+          )}
+
           {/* Activar */}
           <label className="flex cursor-pointer items-center justify-between rounded-lg border border-gray-200 px-4 py-3">
             <span>
@@ -185,7 +232,37 @@ function PlatformAiInner() {
             />
           </div>
 
-          <div className="flex justify-end">
+          {testResult && (
+            <div
+              className={`rounded-lg border px-3 py-2 text-sm ${
+                testResult.ok
+                  ? 'border-green-200 bg-green-50 text-green-700'
+                  : 'border-red-200 bg-red-50 text-red-700'
+              }`}
+            >
+              {testResult.ok ? (
+                <>
+                  ✓ Conexión exitosa. Ejemplo generado:{' '}
+                  <span className="text-green-800">
+                    “{(testResult.sample || '').slice(0, 120)}…”
+                  </span>
+                </>
+              ) : (
+                <>✗ {testResult.message}</>
+              )}
+            </div>
+          )}
+
+          <div className="flex items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={testConnection}
+              disabled={testing || !hasKey}
+              className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              title={!hasKey ? 'Primero guarda una API key' : ''}
+            >
+              {testing ? 'Probando…' : 'Probar conexión'}
+            </button>
             <button
               onClick={save}
               disabled={saving}
