@@ -257,11 +257,17 @@ export default function EditProduct() {
           </div>
           <div className="flex flex-wrap gap-2">
             <AiGenerateButton
-              formData={formData}
-              setFormData={setFormData}
-              onNotify={(a) =>
-                setAlert({ type: a.type, message: a.message, url: '' })
-              }
+              name={formData.name}
+              field="description"
+              label="Generar descripción con IA"
+              onResult={({ data, error }) => {
+                if (error)
+                  return setAlert({ type: 'warning', message: error, url: '' });
+                setFormData((prev) => ({
+                  ...prev,
+                  description: data?.description || prev.description,
+                }));
+              }}
             />
             {showRecipe && (
               <Button
