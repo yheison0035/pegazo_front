@@ -13,6 +13,7 @@ import { useAuth } from '@/context/authContext';
 import DayBanner from '@/components/pos/DayBanner';
 import RenewalBanner from '@/components/billing/RenewalBanner';
 import SubscriptionDueModal from '@/components/billing/SubscriptionDueModal';
+import PaymentWall from '@/components/billing/PaymentWall';
 import SupportWidget from '@/components/support/SupportWidget';
 import { isDark, DARK_EVENT } from '@/lib/darkMode';
 import { CRM_FONTS_BY_ID, googleFontHref } from '@/config/crmFonts';
@@ -60,6 +61,8 @@ export default function Layout({ children }) {
     <RoleGuard allowedRoles={Object.values(Roles)}>
       <SplashScreen />
       <ImpersonationBanner />
+      {/* Muro de pago: si la empresa venció, bloquea todo el CRM. */}
+      <PaymentWall />
       <div
         data-crm-theme={theme}
         data-theme={dark ? 'dark' : undefined}
