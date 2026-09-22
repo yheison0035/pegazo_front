@@ -102,20 +102,30 @@ export default function CompanyDetail() {
   };
 
   const [userModal, setUserModal] = useState(null); // null | {} (nuevo) | user
+  const [payMonths, setPayMonths] = useState(1); // meses a registrar
 
   const c = data?.company;
   const b = data?.billing;
   const isActive = c?.status === 'ACTIVO';
 
-  const doRenew = async () => {
-    if (!confirm('¿Renovar esta empresa 30 días más?')) return;
+  const doRegisterPayment = async () => {
+    const months = Number(payMonths) || 1;
+    if (
+      !confirm(
+        `¿Registrar pago de ${months} mes(es) para ${c?.name}? Se extenderá la fecha de pago anclada al día de cobro.`,
+      )
+    )
+      return;
     setBusy('renew');
     try {
-      await renewCompany(Number(id), 30);
+      await renewCompany(Number(id), { months });
       await fetchData();
-      flash('success', 'Renovada 30 días. Si estaba suspendida, se reactivó.');
+      flash(
+        'success',
+        `Pago registrado: +${months} mes(es). Si estaba suspendida, se reactivó.`,
+      );
     } catch (e) {
-      flash('error', e?.message || 'No se pudo renovar.');
+      flash('error', e?.message || 'No se pudo registrar el pago.');
     } finally {
       setBusy('');
     }
@@ -235,14 +245,27 @@ export default function CompanyDetail() {
 
                 {/* Acciones rápidas */}
                 <div className="flex flex-wrap gap-2">
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    loading={busy === 'renew'}
-                    onClick={doRenew}
-                  >
-                    <ArrowPathIcon className="mr-1 h-4 w-4" /> Renovar 30 días
-                  </Button>
+                  <div className="inline-flex items-center overflow-hidden rounded-lg border border-gray-300">
+                    <select
+                      value={payMonths}
+                      onChange={(e) => setPayMonths(Number(e.target.value))}
+                      className="h-9 border-0 bg-white px-2 text-sm text-gray-700 focus:outline-none"
+                    >
+                      <option value={1}>1 mes</option>
+                      <option value={3}>3 meses</option>
+                      <option value={6}>6 meses</option>
+                      <option value={12}>12 meses</option>
+                    </select>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      loading={busy === 'renew'}
+                      onClick={doRegisterPayment}
+                      className="rounded-none"
+                    >
+                      <ArrowPathIcon className="mr-1 h-4 w-4" /> Registrar pago
+                    </Button>
+                  </div>
                   {isActive && (
                     <Button
                       variant="secondary"
@@ -272,10 +295,21 @@ export default function CompanyDetail() {
               </div>
 
               <div className="mt-4 flex flex-wrap gap-x-6 gap-y-1 border-t border-gray-100 pt-4 text-sm text-gray-600">
+                {(c.startDate || c.createdAt) && (
+                  <span>
+                    Inicio:{' '}
+                    <b>{formatDateOnly(c.startDate || c.createdAt)}</b>
+                  </span>
+                )}
                 <span>
                   Vence: <b>{b?.paidUntil ? formatDateOnly(b.paidUntil) : '—'}</b>{' '}
                   ({daysBadge()})
                 </span>
+                {c.paymentDay != null && (
+                  <span>
+                    Día de cobro: <b>{c.paymentDay}</b> de cada mes
+                  </span>
+                )}
                 {c.monthlyPrice != null && (
                   <span>
                     Precio/mes: <b>{cop(c.monthlyPrice)}</b>
