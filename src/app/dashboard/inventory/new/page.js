@@ -119,10 +119,18 @@ export default function NewProduct() {
     }
 
     if (!noStock && variants.length === 0) {
-      return setAlert({
-        type: 'warning',
-        message: 'Debes indicar la cantidad del producto.',
-      });
+      const vt = getProductFields(
+        usuario?.company?.type,
+        usuario?.company?.typeProductFields,
+      ).variantType;
+      if (vt === 'color') {
+        return setAlert({
+          type: 'warning',
+          message: 'Agrega al menos un color con su cantidad.',
+        });
+      }
+      // Vertical simple/peso: si no indican cantidad, queda en 0 por defecto.
+      variants = [{ color: 'ÚNICO', stock: 0 }];
     }
 
     // Las características y especificaciones son OPCIONALES: no se exigen al crear.
