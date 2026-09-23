@@ -183,12 +183,15 @@ export default function DinamicForm({
   // (unidad o peso). Conserva el id de la variante existente al editar.
   const handleSingleQty = useCallback(
     (raw) => {
-      const stock = Number(raw) || 0;
+      // Permite dejar el campo VACÍO mientras se edita (así el "0" no se queda
+      // pegado y se puede borrar). Al guardar, un campo vacío queda en 0.
+      const n = raw === '' ? '' : Number(raw);
+      const stock = n === '' || !Number.isFinite(n) ? '' : n;
       setFormData((prev) => {
         const existing = (prev.variants || [])[0];
         return {
           ...prev,
-          stock,
+          stock: stock === '' ? 0 : stock,
           variants: [
             {
               ...(existing?.id ? { id: existing.id } : {}),
@@ -548,10 +551,12 @@ export default function DinamicForm({
                   <div className="flex items-center gap-2">
                     <input
                       type="number"
+                      inputMode={isWeight ? 'decimal' : 'numeric'}
                       min={0}
                       step={isWeight ? 0.001 : 1}
                       value={current}
                       disabled={isLocked}
+                      onFocus={(e) => e.target.select()}
                       onChange={(e) => handleSingleQty(e.target.value)}
                       placeholder={isWeight ? 'Ej: 12.5' : 'Ej: 20'}
                       className="w-40 rounded-xl border border-gray-200 px-4 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
