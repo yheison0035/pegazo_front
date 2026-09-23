@@ -70,9 +70,11 @@ export async function updateProduct(id, dto) {
     createdById,
     updatedBy,
     updatedById,
-    publishInEcommerce,
     ...cleanDto
   } = dto;
+  // OJO: publishInEcommerce NO se desestructura aquí; debe viajar en el payload,
+  // si no, al editar el "Habilitar en tienda online" nunca se guarda (bug: el
+  // precio online sí persistía pero el check no).
 
   const cleanVariants = Array.isArray(cleanDto.variants)
     ? cleanDto.variants.map((v) => ({
