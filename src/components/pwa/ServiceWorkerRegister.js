@@ -2,59 +2,37 @@
 
 import { useEffect } from 'react';
 
-// Registra el service worker de Pegazo y mantiene la app instalada (PWA) al día:
-// - Busca nuevas versiones cada vez que vuelves a la app (foco).
-// - Cuando el nuevo service worker toma el control, recarga UNA vez para que
-//   se vean los últimos cambios (sin tener que reinstalar).
+// Registra el service worker de Pegazo (instalación PWA + notificaciones push).
+//
+// IMPORTANTE: NO recargamos la página cuando el SW se actualiza. Este SW no
+// cachea la app (los assets de Next ya llegan frescos en cada navegación), así
+// que forzar una recarga al "tomar control" (controllerchange) era innecesario
+// y provocaba un CICLO INFINITO de recarga (splash) en la PWA — sobre todo al
+// volver desde otra app (foco → update → skipWaiting → controllerchange →
+// reload → …). El SW se actualiza en segundo plano y la app sigue viva.
 export default function ServiceWorkerRegister() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (!('serviceWorker' in navigator)) return;
 
-    let hadController = !!navigator.serviceWorker.controller;
-    let refreshing = false;
-
-    const onControllerChange = () => {
-      // La primera vez que el SW toma control (sin uno previo) NO recargamos.
-      if (!hadController) {
-        hadController = true;
-        return;
-      }
-      if (refreshing) return;
-      refreshing = true;
-      window.location.reload();
-    };
-    navigator.serviceWorker.addEventListener(
-      'controllerchange',
-      onControllerChange,
-    );
-
     let reg;
-    const register = async () => {
+    (async () => {
       try {
         reg = await navigator.serviceWorker.register('/sw.js');
         reg.update().catch(() => {});
       } catch {
-        /* la web sigue funcionando igual */
+        /* la web sigue funcionando igual sin PWA */
       }
-    };
-    register();
+    })();
 
-    // Al volver a la app (foreground), revisa si hay una versión nueva.
+    // Al volver a la app, busca una versión nueva en segundo plano (SIN recargar).
     const onVisible = () => {
       if (document.visibilityState === 'visible' && reg) {
         reg.update().catch(() => {});
       }
     };
     document.addEventListener('visibilitychange', onVisible);
-
-    return () => {
-      navigator.serviceWorker.removeEventListener(
-        'controllerchange',
-        onControllerChange,
-      );
-      document.removeEventListener('visibilitychange', onVisible);
-    };
+    return () => document.removeEventListener('visibilitychange', onVisible);
   }, []);
 
   return null;

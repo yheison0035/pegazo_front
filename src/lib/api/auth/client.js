@@ -78,18 +78,12 @@ async function apiFetch(path, opts = {}) {
         }
         break;
       case 402:
-        // Suscripción vencida (impago). Refrescamos para que aparezca el muro
-        // de pago que bloquea el CRM.
+        // Suscripción vencida (impago): el backend bloqueó la escritura. NO
+        // recargamos (evita cualquier bucle); el muro de pago ya aparece según
+        // paidUntil de /auth/me y bloquea el CRM.
         message =
           data?.message ||
           'Tu suscripción venció. Realiza el pago para reactivar tu cuenta.';
-        if (
-          data?.error === 'SUBSCRIPTION_OVERDUE' &&
-          typeof window !== 'undefined' &&
-          window.location.pathname.startsWith('/dashboard')
-        ) {
-          window.location.reload();
-        }
         break;
       case 404:
         message = data?.message || 'Recurso no encontrado';
