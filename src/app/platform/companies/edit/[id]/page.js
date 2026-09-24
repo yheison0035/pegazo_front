@@ -12,6 +12,7 @@ import { getFormFieldsCompanies } from '@/lib/api/utils/companies.config';
 import {
   dayOfMonthFromDate,
   monthsBetweenISO,
+  nextMonthlyPaymentDate,
 } from '@/lib/api/utils/utils';
 import { MODULE_GROUPS, MODULE_KEYS } from '@/config/modules';
 
@@ -290,6 +291,11 @@ export default function EditCompany() {
       }
       if (data.billingMode === 'paquete') {
         patched.packageMonths = monthsBetweenISO(data.startDate, data.paidUntil);
+      } else {
+        patched.nextPaymentDate = nextMonthlyPaymentDate(
+          data.startDate,
+          data.paidUntil,
+        );
       }
       setFormData(patched);
     } catch (err) {

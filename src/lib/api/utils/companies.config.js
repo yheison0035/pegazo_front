@@ -15,6 +15,7 @@ export const getEmptyCompany = () => ({
   billingMode: 'mensual',
   monthlyPrice: '',
   paymentDay: '',
+  nextPaymentDate: '',
   packageMonths: '',
   adminName: '',
   adminEmail: '',
@@ -101,6 +102,17 @@ export const getFormFieldsCompanies = (includeAdmin = false) => [
     required: false,
     disabled: true,
     helperText: 'Se toma automáticamente del día de "Cliente desde".',
+    hideWhen: (fd) => fd.billingMode !== 'mensual',
+  },
+  {
+    // Solo MENSUAL y CALCULADO: próxima fecha de pago según el día de "Cliente
+    // desde" (o el "pago hasta" vigente si ya registró pagos). Es de verificación.
+    name: 'nextPaymentDate',
+    label: 'Próxima fecha de pago (calculada)',
+    type: 'date',
+    required: false,
+    disabled: true,
+    helperText: 'Se calcula desde "Cliente desde"; sirve para verificar el ciclo.',
     hideWhen: (fd) => fd.billingMode !== 'mensual',
   },
   {

@@ -110,6 +110,30 @@ export function monthsBetweenISO(startValue, endValue) {
   return months > 0 ? months : '';
 }
 
+// Próxima fecha de pago del cobro MENSUAL, calculada desde "Cliente desde"
+// (mismo día cada mes, anclado). Si ya hay un "pago hasta" vigente (registró
+// pagos), esa ES la próxima fecha; si no, se toma la siguiente ocurrencia del
+// día de cobro que caiga de hoy en adelante. Devuelve YYYY-MM-DD.
+export function nextMonthlyPaymentDate(startValue, paidUntil) {
+  const pad = (n) => String(n).padStart(2, '0');
+  const now = new Date();
+  const todayISO = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+
+  // Si "pago hasta" está vigente, esa es la próxima fecha de pago.
+  const paid = normalizeDateForInput(paidUntil);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(paid) && paid >= todayISO) return paid;
+
+  const start = normalizeDateForInput(startValue);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(start)) return '';
+
+  // Avanza mes a mes (anclado al día de inicio) hasta caer de hoy en adelante.
+  for (let k = 0; k <= 1200; k++) {
+    const d = k === 0 ? start : addMonthsToISO(start, k);
+    if (d && d >= todayISO) return d;
+  }
+  return '';
+}
+
 // Normaliza fecha + hora para inputs tipo <input type="datetime-local" />
 // Devuelve "YYYY-MM-DDTHH:mm" en la zona horaria de Colombia.
 export function normalizeDateTimeForInput(value) {
