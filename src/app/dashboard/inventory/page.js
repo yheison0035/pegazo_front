@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import useLiveRefresh from '@/hooks/useLiveRefresh';
 import {
   beginBackgroundRefresh,
@@ -29,7 +30,9 @@ import useTerms from '@/hooks/useTerms';
 export default function Inventory() {
   const auth = useAuth();
   const usuario = auth?.usuario;
-  const { getProducts, deleteProduct, loading } = useProducts();
+  const { getProducts, getProductById, deleteProduct, loading } = useProducts();
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const t = useTerms();
 
   const [products, setProducts] = useState([]);
@@ -82,6 +85,28 @@ export default function Inventory() {
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
+
+  // Deep-link desde el buscador global (⌘K): /dashboard/inventory?open=<id>
+  // abre el detalle del producto directamente y limpia el parámetro.
+  useEffect(() => {
+    const openId = searchParams.get('open');
+    if (!openId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await getProductById(Number(openId));
+        const prod = res?.data || res;
+        if (!cancelled && prod) setSelectedProduct(prod);
+      } catch {
+        /* si no existe, no pasa nada */
+      } finally {
+        router.replace('/dashboard/inventory');
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [searchParams, getProductById, router]);
 
   // Sondeo periódico (además del refresco por foco/evento de abajo).
   useLiveRefresh(fetchProducts);
