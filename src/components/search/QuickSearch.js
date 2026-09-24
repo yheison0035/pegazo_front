@@ -323,7 +323,7 @@ export default function QuickSearch() {
           )}
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block break-words text-sm font-medium leading-snug text-gray-800 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden">
+          <span className="block break-words text-sm font-medium leading-snug text-gray-800">
             {p.name}
           </span>
           <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500">
@@ -371,7 +371,7 @@ export default function QuickSearch() {
         <UserIcon className="h-5 w-5 text-gray-400" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block break-words text-sm font-medium leading-snug text-gray-800 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden">
+        <span className="block break-words text-sm font-medium leading-snug text-gray-800">
           {c.name}
         </span>
         <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500">
