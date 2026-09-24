@@ -1,7 +1,11 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import useLiveRefresh from '@/hooks/useLiveRefresh';
+import {
+  beginBackgroundRefresh,
+  endBackgroundRefresh,
+} from '@/lib/liveRefresh';
 import { useAuth } from '@/context/authContext';
 import useProducts from '@/lib/api/hooks/useProducts';
 import Table from '@/components/dashboard/tables/table';
@@ -50,15 +54,29 @@ export default function Inventory() {
 
   const debouncedFilters = useDebounce(filters, 400);
 
-  const fetchProducts = useCallback(async () => {
-    const res = await getProducts({
-      page,
-      limit,
-      ...debouncedFilters,
-    });
+  // Solo la PRIMERA carga muestra el overlay a pantalla completa. Los refetch
+  // por filtro/búsqueda/paginación se marcan como refresco en segundo plano:
+  // así el overlay (fixed inset-0) NO tapa ni le roba el foco a los inputs de
+  // filtro mientras el usuario escribe (antes: al teclear, el overlay aparecía
+  // y el buscador "no servía").
+  const initialLoad = useRef(true);
 
-    setProducts(res.data);
-    setMeta(res.meta);
+  const fetchProducts = useCallback(async () => {
+    const background = !initialLoad.current;
+    if (background) beginBackgroundRefresh();
+    try {
+      const res = await getProducts({
+        page,
+        limit,
+        ...debouncedFilters,
+      });
+
+      setProducts(res.data);
+      setMeta(res.meta);
+    } finally {
+      initialLoad.current = false;
+      if (background) setTimeout(endBackgroundRefresh, 300);
+    }
   }, [getProducts, page, limit, debouncedFilters]);
 
   useEffect(() => {
