@@ -10,8 +10,10 @@ import {
   CalendarDaysIcon,
   CubeIcon,
   UsersIcon,
+  MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/authContext';
+import usePermissions from '@/hooks/usePermissions';
 import useTerms from '@/hooks/useTerms';
 import Button from '@/components/ui/Button';
 import { getHomeSummary, getMyPerformance } from '@/lib/api/routes/statistics';
@@ -46,6 +48,10 @@ export default function DashboardHome() {
   const auth = useAuth();
   const usuario = auth?.usuario;
   const t = useTerms();
+  const { can } = usePermissions();
+  // La barra del buscador global solo se muestra en el Inicio (el atajo ⌘K y el
+  // escáner de código de barras siguen disponibles en todo el CRM).
+  const canQuickSearch = can('inventory', 'view') || can('customers', 'view');
   const isServices = isServicesBusiness(usuario);
   // Módulos efectivos del negocio: el Inicio muestra solo los widgets que
   // correspondan a lo que el negocio realmente maneja.
@@ -324,6 +330,24 @@ export default function DashboardHome() {
           {usuario?.company?.name || 'Tu negocio'} · Este es tu panel.
         </p>
       </div>
+
+      {/* Buscador global: barra de acceso (solo en el Inicio). El atajo ⌘K y el
+          escáner de código de barras funcionan en todo el CRM. */}
+      {canQuickSearch && (
+        <button
+          type="button"
+          onClick={() => window.dispatchEvent(new Event('pegazo-open-search'))}
+          className="mb-5 flex w-full items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-left text-sm text-gray-400 shadow-sm transition hover:border-orange-300 hover:text-gray-600"
+        >
+          <MagnifyingGlassIcon className="h-5 w-5 flex-none text-gray-400" />
+          <span className="flex-1 truncate">
+            Buscar productos, clientes, facturas o código…
+          </span>
+          <kbd className="hidden flex-none rounded-md border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-[11px] font-semibold text-gray-400 sm:inline">
+            ⌘K
+          </kbd>
+        </button>
+      )}
 
       {/* Checklist de primeros pasos (no aplica al barbero) */}
       {!isBarber && setupIncomplete && (

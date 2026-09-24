@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import useLiveRefresh from "@/hooks/useLiveRefresh";
+import { getSaleById } from '@/lib/api/routes/sales';
 import Table from '@/components/dashboard/tables/table';
 import Pagination from '@/components/dashboard/tables/segments/pagination';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
@@ -40,6 +42,8 @@ export default function Delivered_Sales() {
   const usuario = auth?.usuario;
   const { getDeliveredSales, deleteDeliveredSale, loading } =
     useDeliveredSales();
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const isServices = isServicesBusiness(usuario);
 
   const [sales, setSales] = useState([]);
@@ -48,6 +52,28 @@ export default function Delivered_Sales() {
   const [limit, setLimit] = useState(10);
 
   const [selectedSale, setSelectedSale] = useState(null);
+
+  // Deep-link desde el buscador global (⌘K): /dashboard/delivered_sales?open=<id>
+  // abre el detalle de la factura y limpia el parámetro.
+  useEffect(() => {
+    const openId = searchParams.get('open');
+    if (!openId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await getSaleById(Number(openId));
+        const sale = res?.data || res;
+        if (!cancelled && sale) setSelectedSale(sale);
+      } catch {
+        /* si no existe, no pasa nada */
+      } finally {
+        router.replace('/dashboard/delivered_sales');
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [searchParams, router]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDailyReport, setShowDailyReport] = useState(false);
   const [showRangeReport, setShowRangeReport] = useState(false);
