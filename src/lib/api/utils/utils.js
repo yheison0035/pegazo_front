@@ -62,6 +62,54 @@ export function normalizeDateForInput(value) {
   return iso || '';
 }
 
+// Día del mes (1-31) a partir de una fecha (YYYY-MM-DD o ISO del servidor).
+// Se usa para derivar el "día de pago" desde la fecha de "Cliente desde".
+export function dayOfMonthFromDate(value) {
+  const iso = normalizeDateForInput(value);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return '';
+  return Number(iso.slice(8, 10));
+}
+
+// Suma N meses a una fecha YYYY-MM-DD ANCLANDO al día original (si el mes
+// destino no tiene ese día, recorta al último día del mes). Devuelve YYYY-MM-DD.
+// Es la misma regla del backend (addMonthsAnchored) para que el "pago hasta"
+// que se muestra coincida con lo que se guarda.
+export function addMonthsToISO(value, months) {
+  const iso = normalizeDateForInput(value);
+  const n = Number(months);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso) || !Number.isFinite(n) || n <= 0) {
+    return '';
+  }
+  const y = Number(iso.slice(0, 4));
+  const m = Number(iso.slice(5, 7)); // 1-12
+  const d = Number(iso.slice(8, 10));
+
+  const totalMonths = m - 1 + Math.round(n); // base 0
+  const targetY = y + Math.floor(totalMonths / 12);
+  const targetM = (totalMonths % 12) + 1; // 1-12
+  const lastDay = new Date(Date.UTC(targetY, targetM, 0)).getUTCDate();
+  const targetD = Math.min(d, lastDay);
+
+  return `${String(targetY).padStart(4, '0')}-${String(targetM).padStart(2, '0')}-${String(targetD).padStart(2, '0')}`;
+}
+
+// Meses (redondeados) entre dos fechas YYYY-MM-DD. Sirve para, al editar una
+// empresa en modo paquete, mostrar los meses que representa su "pago hasta".
+export function monthsBetweenISO(startValue, endValue) {
+  const a = normalizeDateForInput(startValue);
+  const b = normalizeDateForInput(endValue);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(a) || !/^\d{4}-\d{2}-\d{2}$/.test(b)) return '';
+  const ay = Number(a.slice(0, 4));
+  const am = Number(a.slice(5, 7));
+  const ad = Number(a.slice(8, 10));
+  const by = Number(b.slice(0, 4));
+  const bm = Number(b.slice(5, 7));
+  const bd = Number(b.slice(8, 10));
+  let months = (by - ay) * 12 + (bm - am);
+  if (bd < ad) months -= 1; // aún no cumple el mes completo
+  return months > 0 ? months : '';
+}
+
 // Normaliza fecha + hora para inputs tipo <input type="datetime-local" />
 // Devuelve "YYYY-MM-DDTHH:mm" en la zona horaria de Colombia.
 export function normalizeDateTimeForInput(value) {

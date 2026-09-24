@@ -13,6 +13,9 @@ export const getEmptyCompany = () => ({
   paidUntil: '',
   startDate: '',
   billingMode: 'mensual',
+  monthlyPrice: '',
+  paymentDay: '',
+  packageMonths: '',
   adminName: '',
   adminEmail: '',
   adminPassword: '',
@@ -80,27 +83,44 @@ export const getFormFieldsCompanies = (includeAdmin = false) => [
       { id: 'paquete', name: 'Paquete (varios meses por adelantado)' },
     ],
     helperText:
-      'Mensual: registras el pago cada mes. Paquete: pagó varios meses; se muestra "pago hasta".',
+      'Mensual: paga cada mes (el día sale de "Cliente desde"). Paquete: paga varios meses por adelantado y el "pago hasta" se calcula solo.',
   },
   {
     name: 'monthlyPrice',
-    label: 'Valor / precio mensual (COP)',
-    type: 'number',
+    label: 'Valor / precio (COP)',
+    type: 'text',
     required: false,
+    helperText: 'En mensual, el valor por mes. En paquete, el valor pactado.',
   },
   {
+    // Día de pago DERIVADO del día de "Cliente desde": no se edita a mano.
+    // Solo aplica al cobro mensual.
     name: 'paymentDay',
-    label: 'Día de pago del mes (1-31, ej: paga cada 22)',
+    label: 'Día de pago del mes',
     type: 'number',
     required: false,
+    disabled: true,
+    helperText: 'Se toma automáticamente del día de "Cliente desde".',
+    hideWhen: (fd) => fd.billingMode !== 'mensual',
   },
   {
-    // Solo relevante para PAQUETE (pago adelantado). En mensual se maneja solo
-    // con "Registrar pago", por eso se oculta.
+    // Solo PAQUETE: el admin indica cuántos meses pagó por adelantado; con eso
+    // se calcula el "pago hasta".
+    name: 'packageMonths',
+    label: 'Cantidad de meses pagados',
+    type: 'number',
+    required: false,
+    helperText: 'El "pago hasta" se calcula solo con estos meses.',
+    hideWhen: (fd) => fd.billingMode !== 'paquete',
+  },
+  {
+    // Solo PAQUETE y CALCULADO (cliente desde + meses). No se edita a mano.
+    // En mensual va oculto (se maneja con "Registrar pago").
     name: 'paidUntil',
-    label: 'Pago hasta (solo paquete / adelantado)',
+    label: 'Pago hasta (se calcula por los meses)',
     type: 'date',
     required: false,
+    disabled: true,
     hideWhen: (fd) => fd.billingMode !== 'paquete',
   },
 

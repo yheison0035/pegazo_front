@@ -65,6 +65,20 @@ function buildPayload(dto, fields) {
       return;
     }
 
+    // El precio llega con formato COP ("50.000"): se envía como número entero.
+    if (field === 'monthlyPrice') {
+      const n = Number(String(value).replace(/[^\d]/g, ''));
+      if (Number.isFinite(n) && n > 0) payload[field] = n;
+      return;
+    }
+
+    // El día de pago es un entero (1-31).
+    if (field === 'paymentDay') {
+      const n = Number(String(value).replace(/[^\d]/g, ''));
+      if (Number.isFinite(n) && n >= 1 && n <= 31) payload[field] = n;
+      return;
+    }
+
     payload[field] = value;
   });
 
