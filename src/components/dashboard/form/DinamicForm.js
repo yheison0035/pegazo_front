@@ -14,6 +14,7 @@ import {
   toggleCase,
   dayOfMonthFromDate,
   addMonthsToISO,
+  nextMonthlyPaymentDate,
 } from '@/lib/api/utils/utils';
 import useLocals from '@/lib/api/hooks/useLocals';
 import { getProviders } from '@/lib/api/routes/providers';
@@ -163,9 +164,15 @@ export default function DinamicForm({
           // "Pago hasta" = cliente desde + meses (anclado al día). Si aún no hay
           // meses, se deja vacío hasta que se indiquen.
           next.paidUntil = addMonthsToISO(next.startDate, next.packageMonths);
+        } else {
+          // Mensual: NO se toca paidUntil (se maneja con "Registrar pago" y va
+          // oculto). Pero SÍ se muestra la "próxima fecha de pago" calculada
+          // desde "Cliente desde" para verificar que el ciclo cuadra.
+          next.nextPaymentDate = nextMonthlyPaymentDate(
+            next.startDate,
+            next.paidUntil,
+          );
         }
-        // En mensual NO se toca paidUntil: se maneja con "Registrar pago" y en el
-        // formulario va oculto.
       }
 
       return next;
