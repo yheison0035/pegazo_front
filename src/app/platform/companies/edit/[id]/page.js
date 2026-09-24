@@ -9,6 +9,10 @@ import MoneyInput from '@/components/ui/MoneyInput';
 import { useAuth } from '@/context/authContext';
 import useCompanies from '@/lib/api/hooks/useCompanies';
 import { getFormFieldsCompanies } from '@/lib/api/utils/companies.config';
+import {
+  dayOfMonthFromDate,
+  monthsBetweenISO,
+} from '@/lib/api/utils/utils';
 import { MODULE_GROUPS, MODULE_KEYS } from '@/config/modules';
 
 // Panel de la plataforma: control MANUAL de módulos + precio por empresa.
@@ -273,7 +277,21 @@ export default function EditCompany() {
     if (!id) return;
     try {
       const { data } = await getCompanyById(Number(id));
-      setFormData(data);
+      // Campos derivados para que se vean correctos al abrir:
+      //  - día de pago: del día de "Cliente desde" si no viene.
+      //  - meses del paquete: calculados desde "Cliente desde" → "Pago hasta".
+      const patched = { ...data };
+      const derivedDay = dayOfMonthFromDate(data.startDate);
+      if (
+        (patched.paymentDay === null || patched.paymentDay === undefined) &&
+        derivedDay !== ''
+      ) {
+        patched.paymentDay = derivedDay;
+      }
+      if (data.billingMode === 'paquete') {
+        patched.packageMonths = monthsBetweenISO(data.startDate, data.paidUntil);
+      }
+      setFormData(patched);
     } catch (err) {
       setAlert({
         type: 'warning',

@@ -12,6 +12,8 @@ import {
   normalizeDateTimeForInput,
   formatPrice,
   toggleCase,
+  dayOfMonthFromDate,
+  addMonthsToISO,
 } from '@/lib/api/utils/utils';
 import useLocals from '@/lib/api/hooks/useLocals';
 import { getProviders } from '@/lib/api/routes/providers';
@@ -47,6 +49,7 @@ const PRICE_FIELDS = new Set([
   'amount',
   'price',
   'totalAmount',
+  'monthlyPrice',
 ]);
 
 export default function DinamicForm({
@@ -140,6 +143,31 @@ export default function DinamicForm({
           if (unit) next.purchaseTotal = formatPrice(String(Math.round(unit * qty)));
         }
       }
+
+      // Empresas (plataforma): el "día de pago" y el "pago hasta" son DERIVADOS,
+      // no se editan a mano. Solo se recalculan cuando cambia una de sus fuentes
+      // (cliente desde / modo de cobro / meses), para no pisar el valor guardado
+      // al editar otros campos.
+      const isCompanyBilling =
+        Array.isArray(formFields) &&
+        formFields.some((f) => f.name === 'billingMode');
+      const billingTrigger =
+        name === 'startDate' ||
+        name === 'billingMode' ||
+        name === 'packageMonths';
+      if (isCompanyBilling && billingTrigger) {
+        const day = dayOfMonthFromDate(next.startDate);
+        // El día de pago siempre sale del día de "Cliente desde".
+        next.paymentDay = day === '' ? '' : day;
+        if (next.billingMode === 'paquete') {
+          // "Pago hasta" = cliente desde + meses (anclado al día). Si aún no hay
+          // meses, se deja vacío hasta que se indiquen.
+          next.paidUntil = addMonthsToISO(next.startDate, next.packageMonths);
+        }
+        // En mensual NO se toca paidUntil: se maneja con "Registrar pago" y en el
+        // formulario va oculto.
+      }
+
       return next;
     });
 
