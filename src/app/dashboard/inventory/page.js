@@ -52,6 +52,17 @@ export default function Inventory() {
     status: '',
   });
 
+  // Al cambiar cualquier filtro, volvemos a la página 1. Si no, estando en la
+  // página 2 y filtrando algo que cabe en 1 página, se pedía la página 2 (vacía)
+  // y salía "No se encontraron resultados" con la paginación en "2 / 1".
+  const onFilterChange = useCallback(
+    (e) => {
+      setPage(1);
+      handleFilterChange(e);
+    },
+    [handleFilterChange],
+  );
+
   const debouncedFilters = useDebounce(filters, 400);
 
   // Solo la PRIMERA carga muestra el overlay a pantalla completa. Los refetch
@@ -146,7 +157,7 @@ export default function Inventory() {
           setLimit={setLimit}
           loading={loading}
           filters={filters}
-          handleFilterChange={handleFilterChange}
+          handleFilterChange={onFilterChange}
           setSelected={setSelectedProduct}
           setSelectedVariants={setSelectedVariants}
           handleDeleteClick={handleDeleteClick}
