@@ -27,6 +27,11 @@ export async function searchProducts(term) {
   return apiFetch(`/inventory/search/${term}`);
 }
 
+// Detalle de una venta por id (para abrirla desde el buscador global).
+export async function getSaleById(id) {
+  return apiFetch(`/sales/${id}`);
+}
+
 // ---------- Cartera / fiado (abonos) ----------
 
 // Lista la cartera (ventas a crédito con saldo pendiente). Opcional por cliente.
