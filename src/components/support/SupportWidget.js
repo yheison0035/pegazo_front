@@ -39,6 +39,14 @@ export default function SupportWidget() {
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [zoomSrc, setZoomSrc] = useState(null);
+
+  // Permite abrir el chat desde otros componentes (avisos de vencimiento):
+  // window.dispatchEvent(new Event('pegazo-open-support')).
+  useEffect(() => {
+    const openIt = () => setOpen(true);
+    window.addEventListener('pegazo-open-support', openIt);
+    return () => window.removeEventListener('pegazo-open-support', openIt);
+  }, []);
   const endRef = useRef(null);
   const fileRef = useRef(null);
 
