@@ -140,7 +140,9 @@ const Table = ({
                   type="button"
                   onClick={() =>
                     searchableCols.forEach((f) =>
-                      handleFilterChange(f.name, ''),
+                      handleFilterChange({
+                        target: { name: f.name, value: '' },
+                      }),
                     )
                   }
                   className="text-xs font-medium text-orange-600"
