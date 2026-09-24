@@ -96,6 +96,15 @@ export default function SubscriptionDueModal() {
                   Aceptar
                 </button>
                 <button
+                  onClick={() => {
+                    accept();
+                    window.dispatchEvent(new Event('pegazo-open-support'));
+                  }}
+                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  Chat de soporte
+                </button>
+                <button
                   onClick={() => setShowPay(true)}
                   className="inline-flex items-center justify-center gap-2 rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600"
                 >

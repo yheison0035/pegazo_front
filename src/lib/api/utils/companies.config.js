@@ -12,6 +12,7 @@ export const getEmptyCompany = () => ({
   websiteEnabled: '',
   paidUntil: '',
   startDate: '',
+  billingMode: 'mensual',
   adminName: '',
   adminEmail: '',
   adminPassword: '',
@@ -70,14 +71,20 @@ export const getFormFieldsCompanies = (includeAdmin = false) => [
     required: false,
   },
   {
-    name: 'paidUntil',
-    label: 'Pago al día hasta (vencimiento)',
-    type: 'date',
+    name: 'billingMode',
+    label: 'Modo de cobro',
+    type: 'select',
     required: false,
+    options: [
+      { id: 'mensual', name: 'Mensual (mes a mes)' },
+      { id: 'paquete', name: 'Paquete (varios meses por adelantado)' },
+    ],
+    helperText:
+      'Mensual: registras el pago cada mes. Paquete: pagó varios meses; se muestra "pago hasta".',
   },
   {
     name: 'monthlyPrice',
-    label: 'Valor a pagar / precio mensual (COP)',
+    label: 'Valor / precio mensual (COP)',
     type: 'number',
     required: false,
   },
@@ -86,6 +93,15 @@ export const getFormFieldsCompanies = (includeAdmin = false) => [
     label: 'Día de pago del mes (1-31, ej: paga cada 22)',
     type: 'number',
     required: false,
+  },
+  {
+    // Solo relevante para PAQUETE (pago adelantado). En mensual se maneja solo
+    // con "Registrar pago", por eso se oculta.
+    name: 'paidUntil',
+    label: 'Pago hasta (solo paquete / adelantado)',
+    type: 'date',
+    required: false,
+    hideWhen: (fd) => fd.billingMode !== 'paquete',
   },
 
   // Solo al crear: credenciales del administrador inicial de la empresa, para

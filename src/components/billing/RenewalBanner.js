@@ -195,6 +195,15 @@ export default function RenewalBanner() {
           </svg>
           Renovar por WhatsApp
         </a>
+        <button
+          type="button"
+          onClick={() =>
+            window.dispatchEvent(new Event('pegazo-open-support'))
+          }
+          className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-current/20 px-4 py-2 text-sm font-semibold shadow-sm transition hover:bg-black/5"
+        >
+          Comunícate por el chat
+        </button>
         {isSoon && (
           <button
             type="button"

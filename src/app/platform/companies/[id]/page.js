@@ -301,14 +301,22 @@ export default function CompanyDetail() {
                     <b>{formatDateOnly(c.startDate || c.createdAt)}</b>
                   </span>
                 )}
-                <span>
-                  Vence: <b>{b?.paidUntil ? formatDateOnly(b.paidUntil) : '—'}</b>{' '}
-                  ({daysBadge()})
-                </span>
-                {c.paymentDay != null && (
+                {c.billingMode === 'paquete' ? (
                   <span>
-                    Día de cobro: <b>{c.paymentDay}</b> de cada mes
+                    Pago hasta:{' '}
+                    <b>{b?.paidUntil ? formatDateOnly(b.paidUntil) : '—'}</b>{' '}
+                    ({daysBadge()})
                   </span>
+                ) : (
+                  <>
+                    <span>
+                      Cobro:{' '}
+                      <b>
+                        Mensual{c.paymentDay ? ` · día ${c.paymentDay}` : ''}
+                      </b>
+                    </span>
+                    <span>Estado: {daysBadge()}</span>
+                  </>
                 )}
                 {c.monthlyPrice != null && (
                   <span>

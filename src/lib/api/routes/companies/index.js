@@ -40,8 +40,11 @@ const EDITABLE_FIELDS = [
   'type',
   'status',
   'plan',
+  'billingMode',
   'paidUntil',
   'startDate',
+  'monthlyPrice',
+  'paymentDay',
   'domain',
   'websiteEnabled',
 ];
