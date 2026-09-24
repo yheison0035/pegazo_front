@@ -8,6 +8,9 @@ import {
   CubeIcon,
   UserIcon,
   ArrowRightIcon,
+  PencilSquareIcon,
+  ShoppingCartIcon,
+  ClockIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/authContext';
 import usePermissions from '@/hooks/usePermissions';
@@ -15,30 +18,39 @@ import useTerms from '@/hooks/useTerms';
 import { quickSearch } from '@/lib/api/routes/search';
 import { formatCOP } from '@/lib/api/utils/utils';
 
+const MAX_RECENTS = 6;
+
 // Buscador global del CRM (command palette, ⌘K / Ctrl+K, o la tecla "/").
 // Muestra productos y clientes con su info clave (precio, stock que queda) sin
-// entrar al módulo; "Ir allá" abre el detalle en su módulo. Se abre también con
-// el evento 'pegazo-open-search' (lo dispara la barra fija del layout).
+// entrar al módulo; "Ir allá" abre el detalle, y trae acciones rápidas (Editar,
+// Vender) según permisos. Recuerda los últimos abiertos (recientes) por usuario.
+// Se abre también con el evento 'pegazo-open-search' (barra fija del layout).
 export default function QuickSearch() {
   const { usuario } = useAuth();
   const { can } = usePermissions();
   const t = useTerms();
   const router = useRouter();
 
-  const canProducts = can('inventory', 'read');
-  const canCustomers = can('customers', 'read');
+  const canProducts = can('inventory', 'view');
+  const canCustomers = can('customers', 'view');
+  const canEditProduct = can('inventory', 'edit');
+  const canEditCustomer = can('customers', 'edit');
+  const canSell = can('sales', 'create');
   const enabled = !!usuario?.id && (canProducts || canCustomers);
+
+  const recentsKey = `pegazo:qsearch:recents:${usuario?.company?.id || 0}:${usuario?.id || 0}`;
 
   const [open, setOpen] = useState(false);
   const [term, setTerm] = useState('');
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState({ products: [], customers: [] });
+  const [recents, setRecents] = useState([]);
   const [active, setActive] = useState(0);
 
   const inputRef = useRef(null);
   const reqId = useRef(0);
 
-  // Lista plana de resultados (para navegar con el teclado).
+  // Lista plana de resultados visible (para navegar con el teclado).
   const flat = useMemo(() => {
     const products = canProducts ? data.products || [] : [];
     const customers = canCustomers ? data.customers || [] : [];
@@ -48,6 +60,33 @@ export default function QuickSearch() {
     ];
   }, [data, canProducts, canCustomers]);
 
+  const loadRecents = useCallback(() => {
+    try {
+      const raw = localStorage.getItem(recentsKey);
+      setRecents(raw ? JSON.parse(raw) : []);
+    } catch {
+      setRecents([]);
+    }
+  }, [recentsKey]);
+
+  const remember = useCallback(
+    (entry) => {
+      try {
+        const next = [
+          entry,
+          ...recents.filter(
+            (r) => !(r.type === entry.type && r.item.id === entry.item.id),
+          ),
+        ].slice(0, MAX_RECENTS);
+        setRecents(next);
+        localStorage.setItem(recentsKey, JSON.stringify(next));
+      } catch {
+        /* almacenamiento no disponible */
+      }
+    },
+    [recents, recentsKey],
+  );
+
   const close = useCallback(() => {
     setOpen(false);
     setTerm('');
@@ -55,9 +94,10 @@ export default function QuickSearch() {
     setActive(0);
   }, []);
 
-  const goTo = useCallback(
+  const openDetail = useCallback(
     (entry) => {
       if (!entry) return;
+      remember(entry);
       if (entry.type === 'product') {
         router.push(`/dashboard/inventory?open=${entry.item.id}`);
       } else {
@@ -65,7 +105,29 @@ export default function QuickSearch() {
       }
       close();
     },
-    [router, close],
+    [router, close, remember],
+  );
+
+  const editEntry = useCallback(
+    (entry) => {
+      remember(entry);
+      const base =
+        entry.type === 'product'
+          ? '/dashboard/inventory/edit/'
+          : '/dashboard/customers/edit/';
+      router.push(`${base}${entry.item.id}`);
+      close();
+    },
+    [router, close, remember],
+  );
+
+  const sellProduct = useCallback(
+    (p) => {
+      remember({ type: 'product', item: p });
+      router.push(`/dashboard/sales?q=${encodeURIComponent(p.name)}`);
+      close();
+    },
+    [router, close, remember],
   );
 
   // Abrir con ⌘K / Ctrl+K o "/" (si no se está escribiendo en otro campo).
@@ -95,10 +157,13 @@ export default function QuickSearch() {
     };
   }, [enabled]);
 
-  // Foco al abrir.
+  // Al abrir: foco y cargar recientes.
   useEffect(() => {
-    if (open) setTimeout(() => inputRef.current?.focus(), 50);
-  }, [open]);
+    if (open) {
+      loadRecents();
+      setTimeout(() => inputRef.current?.focus(), 50);
+    }
+  }, [open, loadRecents]);
 
   // Búsqueda con debounce.
   useEffect(() => {
@@ -114,7 +179,7 @@ export default function QuickSearch() {
     const timer = setTimeout(async () => {
       try {
         const res = await quickSearch(q);
-        if (my !== reqId.current) return; // llegó una respuesta vieja
+        if (my !== reqId.current) return;
         setData({
           products: res?.products || [],
           customers: res?.customers || [],
@@ -129,7 +194,7 @@ export default function QuickSearch() {
     return () => clearTimeout(timer);
   }, [term, open]);
 
-  // Navegación con teclado dentro de la lista.
+  // Navegación con teclado dentro de la lista de resultados.
   const onKeyDown = (e) => {
     if (e.key === 'Escape') {
       close();
@@ -144,7 +209,7 @@ export default function QuickSearch() {
       setActive((i) => (i - 1 + flat.length) % flat.length);
     } else if (e.key === 'Enter') {
       e.preventDefault();
-      goTo(flat[active]);
+      openDetail(flat[active]);
     }
   };
 
@@ -154,17 +219,128 @@ export default function QuickSearch() {
   const showEmpty = q.length >= 1 && !loading && flat.length === 0;
 
   const stockBadge = (p) => {
-    if (p.stock <= 0)
-      return { text: 'Agotado', cls: 'bg-red-100 text-red-700' };
+    if (p.stock <= 0) return { text: 'Agotado', cls: 'bg-red-100 text-red-700' };
     if (p.stock <= (p.minStock || 0))
-      return {
-        text: `Quedan ${p.stock}`,
-        cls: 'bg-amber-100 text-amber-700',
-      };
+      return { text: `Quedan ${p.stock}`, cls: 'bg-amber-100 text-amber-700' };
     return { text: `${p.stock} disp.`, cls: 'bg-green-100 text-green-700' };
   };
 
   let idx = -1; // índice global para resaltar el activo
+
+  const ActionBtn = ({ onClick, title, children }) => (
+    <button
+      type="button"
+      title={title}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick();
+      }}
+      className="flex h-8 w-8 flex-none items-center justify-center rounded-lg text-gray-400 hover:bg-white hover:text-orange-600"
+    >
+      {children}
+    </button>
+  );
+
+  const ProductRow = ({ p, isActive }) => {
+    const badge = stockBadge(p);
+    return (
+      <div
+        onClick={() => openDetail({ type: 'product', item: p })}
+        className={`flex cursor-pointer items-center gap-3 px-4 py-2.5 ${
+          isActive ? 'bg-orange-50' : 'hover:bg-gray-50'
+        }`}
+      >
+        <span className="flex h-9 w-9 flex-none items-center justify-center overflow-hidden rounded-lg bg-gray-100">
+          {p.image ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={p.image} alt="" className="h-full w-full object-cover" />
+          ) : (
+            <CubeIcon className="h-5 w-5 text-gray-400" />
+          )}
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-sm font-medium text-gray-800">
+            {p.name}
+          </span>
+          <span className="mt-0.5 flex items-center gap-2 text-xs text-gray-500">
+            <span className="font-semibold text-gray-700">
+              {formatCOP(p.salePrice)}
+            </span>
+            <span
+              className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${badge.cls}`}
+            >
+              {badge.text}
+            </span>
+            {p.categoryName && (
+              <span className="truncate text-gray-400">{p.categoryName}</span>
+            )}
+          </span>
+        </span>
+        <span className="flex flex-none items-center gap-1">
+          {canSell && p.stock > 0 && (
+            <ActionBtn onClick={() => sellProduct(p)} title="Vender">
+              <ShoppingCartIcon className="h-4 w-4" />
+            </ActionBtn>
+          )}
+          {canEditProduct && (
+            <ActionBtn
+              onClick={() => editEntry({ type: 'product', item: p })}
+              title="Editar (precio / stock)"
+            >
+              <PencilSquareIcon className="h-4 w-4" />
+            </ActionBtn>
+          )}
+          <span
+            className={`flex flex-none items-center gap-1 pl-1 text-xs font-medium ${
+              isActive ? 'text-orange-600' : 'text-gray-300'
+            }`}
+          >
+            Ir allá <ArrowRightIcon className="h-3.5 w-3.5" />
+          </span>
+        </span>
+      </div>
+    );
+  };
+
+  const CustomerRow = ({ c, isActive }) => (
+    <div
+      onClick={() => openDetail({ type: 'customer', item: c })}
+      className={`flex cursor-pointer items-center gap-3 px-4 py-2.5 ${
+        isActive ? 'bg-orange-50' : 'hover:bg-gray-50'
+      }`}
+    >
+      <span className="flex h-9 w-9 flex-none items-center justify-center rounded-lg bg-gray-100">
+        <UserIcon className="h-5 w-5 text-gray-400" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-sm font-medium text-gray-800">
+          {c.name}
+        </span>
+        <span className="mt-0.5 flex items-center gap-2 text-xs text-gray-500">
+          {c.phone && <span>{c.phone}</span>}
+          {c.document && <span className="text-gray-400">{c.document}</span>}
+          {c.city && <span className="truncate text-gray-400">{c.city}</span>}
+        </span>
+      </span>
+      <span className="flex flex-none items-center gap-1">
+        {canEditCustomer && (
+          <ActionBtn
+            onClick={() => editEntry({ type: 'customer', item: c })}
+            title="Editar cliente"
+          >
+            <PencilSquareIcon className="h-4 w-4" />
+          </ActionBtn>
+        )}
+        <span
+          className={`flex flex-none items-center gap-1 pl-1 text-xs font-medium ${
+            isActive ? 'text-orange-600' : 'text-gray-300'
+          }`}
+        >
+          Ir allá <ArrowRightIcon className="h-3.5 w-3.5" />
+        </span>
+      </span>
+    </div>
+  );
 
   return (
     <div
@@ -199,7 +375,23 @@ export default function QuickSearch() {
 
         {/* Resultados */}
         <div className="max-h-[60vh] overflow-y-auto">
-          {q.length < 1 && (
+          {/* Sin término: recientes o ayuda */}
+          {q.length < 1 && recents.length > 0 && (
+            <div className="py-1">
+              <p className="flex items-center gap-1 px-4 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                <ClockIcon className="h-3.5 w-3.5" /> Recientes
+              </p>
+              {recents.map((r) =>
+                r.type === 'product' ? (
+                  <ProductRow key={`r-p-${r.item.id}`} p={r.item} isActive={false} />
+                ) : (
+                  <CustomerRow key={`r-c-${r.item.id}`} c={r.item} isActive={false} />
+                ),
+              )}
+            </div>
+          )}
+
+          {q.length < 1 && recents.length === 0 && (
             <div className="px-4 py-10 text-center text-sm text-gray-400">
               Escribe un nombre, código de barras o cliente.
               <div className="mt-2 text-xs text-gray-300">
@@ -222,56 +414,8 @@ export default function QuickSearch() {
               </p>
               {data.products.map((p) => {
                 idx++;
-                const isActive = idx === active;
-                const badge = stockBadge(p);
                 return (
-                  <button
-                    key={`p-${p.id}`}
-                    onClick={() => goTo({ type: 'product', item: p })}
-                    className={`flex w-full items-center gap-3 px-4 py-2.5 text-left ${
-                      isActive ? 'bg-orange-50' : 'hover:bg-gray-50'
-                    }`}
-                  >
-                    <span className="flex h-9 w-9 flex-none items-center justify-center overflow-hidden rounded-lg bg-gray-100">
-                      {p.image ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={p.image}
-                          alt=""
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <CubeIcon className="h-5 w-5 text-gray-400" />
-                      )}
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-medium text-gray-800">
-                        {p.name}
-                      </span>
-                      <span className="mt-0.5 flex items-center gap-2 text-xs text-gray-500">
-                        <span className="font-semibold text-gray-700">
-                          {formatCOP(p.salePrice)}
-                        </span>
-                        <span
-                          className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${badge.cls}`}
-                        >
-                          {badge.text}
-                        </span>
-                        {p.categoryName && (
-                          <span className="truncate text-gray-400">
-                            {p.categoryName}
-                          </span>
-                        )}
-                      </span>
-                    </span>
-                    <span
-                      className={`flex flex-none items-center gap-1 text-xs font-medium ${
-                        isActive ? 'text-orange-600' : 'text-gray-300'
-                      }`}
-                    >
-                      Ir allá <ArrowRightIcon className="h-3.5 w-3.5" />
-                    </span>
-                  </button>
+                  <ProductRow key={`p-${p.id}`} p={p} isActive={idx === active} />
                 );
               })}
             </div>
@@ -285,46 +429,18 @@ export default function QuickSearch() {
               </p>
               {data.customers.map((c) => {
                 idx++;
-                const isActive = idx === active;
                 return (
-                  <button
-                    key={`c-${c.id}`}
-                    onClick={() => goTo({ type: 'customer', item: c })}
-                    className={`flex w-full items-center gap-3 px-4 py-2.5 text-left ${
-                      isActive ? 'bg-orange-50' : 'hover:bg-gray-50'
-                    }`}
-                  >
-                    <span className="flex h-9 w-9 flex-none items-center justify-center rounded-lg bg-gray-100">
-                      <UserIcon className="h-5 w-5 text-gray-400" />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-medium text-gray-800">
-                        {c.name}
-                      </span>
-                      <span className="mt-0.5 flex items-center gap-2 text-xs text-gray-500">
-                        {c.phone && <span>{c.phone}</span>}
-                        {c.document && (
-                          <span className="text-gray-400">{c.document}</span>
-                        )}
-                        {c.city && (
-                          <span className="truncate text-gray-400">
-                            {c.city}
-                          </span>
-                        )}
-                      </span>
-                    </span>
-                    <span
-                      className={`flex flex-none items-center gap-1 text-xs font-medium ${
-                        isActive ? 'text-orange-600' : 'text-gray-300'
-                      }`}
-                    >
-                      Ir allá <ArrowRightIcon className="h-3.5 w-3.5" />
-                    </span>
-                  </button>
+                  <CustomerRow key={`c-${c.id}`} c={c} isActive={idx === active} />
                 );
               })}
             </div>
           )}
+        </div>
+
+        {/* Pie con atajos */}
+        <div className="hidden items-center justify-between border-t border-gray-100 px-4 py-2 text-[11px] text-gray-400 sm:flex">
+          <span>↑↓ moverse · Enter ir · Esc cerrar</span>
+          <span>Escanea un código para encontrarlo al instante</span>
         </div>
       </div>
     </div>

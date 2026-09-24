@@ -28,7 +28,7 @@ export default function Layout({ children }) {
   const { usuario } = useAuth();
   const { can } = usePermissions();
   // El buscador global (⌘K) solo aplica a quien pueda ver inventario o clientes.
-  const canQuickSearch = can('inventory', 'read') || can('customers', 'read');
+  const canQuickSearch = can('inventory', 'view') || can('customers', 'view');
   // El tema de diseño se aplica SOLO al panel (este contenedor), no al <html>,
   // para que el login y las páginas públicas queden siempre en el tema por
   // defecto. Los overrides de color en globals.css usan [data-crm-theme].
