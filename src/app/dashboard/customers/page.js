@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import useLiveRefresh from "@/hooks/useLiveRefresh";
 import { PlusIcon } from '@heroicons/react/24/outline';
 import ViewModal from '../../viewModal';
@@ -26,7 +27,10 @@ export default function Customers() {
   const auth = useAuth();
   const usuario = auth?.usuario;
   const t = useTerms();
-  const { getCustomers, deleteCustomer, loading } = useCustomers();
+  const { getCustomers, getCustomerById, deleteCustomer, loading } =
+    useCustomers();
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
   const [customers, setCustomers] = useState([]);
   const [meta, setMeta] = useState(null);
@@ -66,6 +70,28 @@ export default function Customers() {
   useEffect(() => {
     fetchCustomers();
   }, [fetchCustomers]);
+
+  // Deep-link desde el buscador global (⌘K): /dashboard/customers?open=<id>
+  // abre el detalle del cliente directamente y limpia el parámetro.
+  useEffect(() => {
+    const openId = searchParams.get('open');
+    if (!openId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await getCustomerById(Number(openId));
+        const cust = res?.data || res;
+        if (!cancelled && cust) setSelectedCustomer(cust);
+      } catch {
+        /* si no existe, no pasa nada */
+      } finally {
+        router.replace('/dashboard/customers');
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [searchParams, getCustomerById, router]);
 
   // Datos en vivo: refresca al volver a la pestana/foco y cada 20s.
   useLiveRefresh(fetchCustomers);
