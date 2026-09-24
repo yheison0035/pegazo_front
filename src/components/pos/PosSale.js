@@ -71,6 +71,7 @@ export default function PosSale({
   title = 'Realizar Factura',
   successMessage = 'Factura registrada correctamente.',
   successUrl = '/dashboard/delivered_sales',
+  initialQuery = '',
 }) {
   const { usuario } = useAuth();
   const t = useTerms();
@@ -87,8 +88,9 @@ export default function PosSale({
   const { getUsers } = useUsers();
   const { getLocals } = useLocals();
 
-  // Catálogo / búsqueda
-  const [query, setQuery] = useState('');
+  // Catálogo / búsqueda. Puede venir pre-llenado desde el buscador global
+  // (acción "Vender"): el cajero solo elige color/cantidad.
+  const [query, setQuery] = useState(initialQuery);
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const searchRef = useRef(null);
