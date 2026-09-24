@@ -36,6 +36,16 @@ const Table = ({
   // En móvil la fila de filtros se oculta (diseño de tarjetas); mostramos un
   // panel de búsqueda propio, colapsable.
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  // Cualquier cambio de filtro reinicia a la página 1. Si no, estando en una
+  // página > 1 y filtrando algo que cabe en menos páginas, se pedía una página
+  // fuera de rango (vacía) y salía "No se encontraron resultados" con la
+  // paginación en "2 / 1". Centralizado aquí para que aplique a TODAS las tablas.
+  const onFilterChange = (e) => {
+    setPage?.(1);
+    handleFilterChange?.(e);
+  };
+
   const searchableCols = (header || []).filter((f) => f.show && f.showInput);
   const activeFilters = searchableCols.filter((f) => filters?.[f.name]).length;
   const [shadowRight, setShadowRight] = useState(false);
@@ -129,7 +139,7 @@ const Table = ({
                       title={f.title}
                       value={filters?.[f.name] || ''}
                       showInput={f.showInput}
-                      handleFilterChange={handleFilterChange}
+                      handleFilterChange={onFilterChange}
                       className="w-full rounded-xl border border-gray-200 bg-white py-2 pl-9 pr-3 text-sm shadow-sm focus:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-500/15"
                     />
                   </div>
@@ -140,7 +150,7 @@ const Table = ({
                   type="button"
                   onClick={() =>
                     searchableCols.forEach((f) =>
-                      handleFilterChange({
+                      onFilterChange({
                         target: { name: f.name, value: '' },
                       }),
                     )
@@ -173,7 +183,7 @@ const Table = ({
               <InputFilters
                 allFilters={header}
                 filters={filters}
-                handleFilterChange={handleFilterChange}
+                handleFilterChange={onFilterChange}
               />
 
               {loading && info.length === 0 ? (
