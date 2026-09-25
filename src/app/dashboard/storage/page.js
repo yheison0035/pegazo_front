@@ -7,6 +7,7 @@ import {
   BanknotesIcon,
   Cog6ToothIcon,
   ClockIcon,
+  CalendarDaysIcon,
   SparklesIcon,
   CheckCircleIcon,
   UserIcon,
@@ -498,11 +499,11 @@ export default function StoragePage() {
   })();
   // Tarifas para mostrar (todas las de periodo + lavado), solo las que tienen valor.
   const tariffList = [
-    { label: 'Hora', value: settings?.hourRate || 0 },
-    { label: 'Día', value: settings?.dayRate || 0 },
-    { label: 'Semana', value: settings?.weekRate || 0 },
-    { label: 'Mes', value: settings?.monthRate || 0 },
-    { label: 'Lavado', value: settings?.washPrice || 0 },
+    { label: 'Hora', value: settings?.hourRate || 0, Icon: ClockIcon },
+    { label: 'Día', value: settings?.dayRate || 0, Icon: CalendarDaysIcon },
+    { label: 'Semana', value: settings?.weekRate || 0, Icon: CalendarDaysIcon },
+    { label: 'Mes', value: settings?.monthRate || 0, Icon: CalendarDaysIcon },
+    { label: 'Lavado', value: settings?.washPrice || 0, Icon: SparklesIcon },
   ].filter((x) => x.value > 0);
 
   // Filtro de la lista en custodia (buscador por # o nombre + solo lavados).
@@ -570,70 +571,72 @@ export default function StoragePage() {
           </div>
         )}
 
-        {/* Resumen (clicable: filtra la lista) */}
-        <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {/* Resumen: solo los dos contadores (clicables para filtrar). Las tarifas
+            viven en su propio panel, sin duplicarse. */}
+        <div className="mb-5 grid grid-cols-2 gap-3 sm:max-w-xl">
           <button
             type="button"
             onClick={() => { setWashOnly(false); setQ(''); }}
-            className={`rounded-2xl border p-4 text-left transition hover:shadow-md ${!washOnly ? 'border-orange-400 bg-orange-50 ring-2 ring-orange-500/20' : 'border-orange-200 bg-orange-50'}`}
+            className={`group flex items-center gap-3 rounded-2xl border p-4 text-left transition hover:shadow-md ${!washOnly ? 'border-orange-400 bg-orange-50 ring-2 ring-orange-500/15' : 'border-gray-200 bg-white hover:border-orange-200'}`}
           >
-            <p className="text-xs font-semibold uppercase text-orange-700">En custodia</p>
-            <p className="mt-1 text-2xl font-extrabold text-orange-700">{summary?.active || 0}</p>
-            <p className="text-[10px] text-orange-700/60">Ver lista</p>
+            <span className="grid h-10 w-10 flex-none place-items-center rounded-xl bg-orange-100 text-orange-600">
+              <ArchiveBoxIcon className="h-5 w-5" />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-2xl font-extrabold leading-none text-orange-700">{summary?.active || 0}</span>
+              <span className="mt-1 block text-xs font-semibold text-gray-500">En custodia</span>
+            </span>
           </button>
           <button
             type="button"
             onClick={() => setWashOnly(true)}
-            className={`rounded-2xl border p-4 text-left transition hover:shadow-md ${washOnly ? 'border-amber-400 bg-amber-50 ring-2 ring-amber-500/20' : 'border-amber-200 bg-amber-50'}`}
+            className={`group flex items-center gap-3 rounded-2xl border p-4 text-left transition hover:shadow-md ${washOnly ? 'border-amber-400 bg-amber-50 ring-2 ring-amber-500/15' : 'border-gray-200 bg-white hover:border-amber-200'}`}
           >
-            <p className="text-xs font-semibold uppercase text-amber-700">Lavados pendientes</p>
-            <p className="mt-1 text-2xl font-extrabold text-amber-900">{summary?.washPending || 0}</p>
-            <p className="text-[10px] text-amber-700/60">Ver solo estos</p>
-          </button>
-          <button
-            type="button"
-            onClick={() => isOwner && openSettings()}
-            className="rounded-2xl border border-gray-200 bg-white p-4 text-left transition hover:shadow-md"
-          >
-            <p className="text-xs font-semibold uppercase text-gray-500">Tarifa hora</p>
-            <p className="mt-1 text-xl font-extrabold text-gray-900">{formatCOP(settings?.hourRate || 0)}</p>
-            {isOwner && <p className="text-[10px] text-gray-400">Editar tarifas</p>}
-          </button>
-          <button
-            type="button"
-            onClick={() => isOwner && openSettings()}
-            className="rounded-2xl border border-gray-200 bg-white p-4 text-left transition hover:shadow-md"
-          >
-            <p className="text-xs font-semibold uppercase text-gray-500">Lavado</p>
-            <p className="mt-1 text-xl font-extrabold text-gray-900">{formatCOP(settings?.washPrice || 0)}</p>
-            {isOwner && <p className="text-[10px] text-gray-400">Editar tarifas</p>}
+            <span className="grid h-10 w-10 flex-none place-items-center rounded-xl bg-amber-100 text-amber-600">
+              <SparklesIcon className="h-5 w-5" />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-2xl font-extrabold leading-none text-amber-700">{summary?.washPending || 0}</span>
+              <span className="mt-1 block text-xs font-semibold text-gray-500">Lavados pendientes</span>
+            </span>
           </button>
         </div>
 
-        {/* Tarifas visibles: para que el cliente y el equipo sepan cuánto sale
+        {/* Tarifas (único lugar): para que el cliente y el equipo vean cuánto sale
             cada modalidad. Solo se muestran las configuradas. */}
         {tariffList.length > 0 && (
-          <div className="mb-5 overflow-hidden rounded-2xl border border-gray-200 bg-white">
-            <div className="flex items-center justify-between border-b border-gray-100 px-4 py-2.5">
-              <p className="text-sm font-bold text-gray-700">Tarifas</p>
+          <div className="mb-5 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+            <div className="flex items-center justify-between border-b border-gray-100 bg-gradient-to-r from-orange-50 to-amber-50 px-4 py-3">
+              <div className="flex items-center gap-2.5">
+                <span className="grid h-8 w-8 place-items-center rounded-xl bg-orange-100 text-orange-600">
+                  <BanknotesIcon className="h-4 w-4" />
+                </span>
+                <div>
+                  <p className="text-sm font-bold leading-tight text-gray-800">Tarifas</p>
+                  <p className="text-[11px] text-gray-500">Guardado por locker · lavado por casco</p>
+                </div>
+              </div>
               {isOwner && (
                 <button
                   type="button"
                   onClick={openSettings}
-                  className="text-xs font-semibold text-orange-600 hover:underline"
+                  className="rounded-lg border border-orange-200 bg-white px-3 py-1.5 text-xs font-semibold text-orange-600 transition hover:bg-orange-50"
                 >
                   Editar
                 </button>
               )}
             </div>
             <div className="grid grid-cols-2 divide-x divide-y divide-gray-100 sm:grid-cols-3 lg:grid-cols-5">
-              {tariffList.map((t) => (
-                <div key={t.label} className="px-4 py-3 text-center">
+              {tariffList.map(({ label, value, Icon }) => (
+                <div key={label} className="flex flex-col items-center gap-1.5 px-4 py-4 text-center">
+                  <span className="grid h-9 w-9 place-items-center rounded-full bg-gray-50 text-gray-400">
+                    <Icon className="h-5 w-5" />
+                  </span>
                   <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
-                    {t.label}
+                    {label}
                   </p>
-                  <p className="mt-0.5 text-lg font-extrabold text-gray-900">
-                    {formatCOP(t.value)}
+                  <p className="text-lg font-extrabold tabular-nums text-gray-900">
+                    {formatCOP(value)}
                   </p>
                 </div>
               ))}
