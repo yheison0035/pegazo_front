@@ -62,7 +62,7 @@ export function printCustodyTicket(ticket, usuario, settings) {
 
       <hr />
 
-      <div class="bold">Cliente: ${ticket.customerName || '-------'}</div>
+      <div class="bold">${ticket.customerName ? 'Cliente: ' + ticket.customerName : ticket.plate ? 'Placa: ' + ticket.plate : 'Cliente: -------'}</div>
       ${ticket.customerPhone ? `<div><span class="bold">Celular:</span> ${ticket.customerPhone}</div>` : ''}
       ${ticket.customerEmail ? `<div><span class="bold">Correo:</span> ${ticket.customerEmail}</div>` : ''}
       ${ticket.receivedByName ? `<div><span class="bold">Recibió:</span> ${ticket.receivedByName}</div>` : ''}
@@ -124,7 +124,9 @@ export function printCustodyTicket(ticket, usuario, settings) {
   doc.close();
 }
 
-export function printSaleInvoice(sale, usuario) {
+// `opts` permite forzar la identificación cuando la venta no tiene cliente
+// registrado (guarda cascos: se recibió por nombre o por placa).
+export function printSaleInvoice(sale, usuario, opts = {}) {
   if (!sale) return;
 
   // Dominio público fijo (pegazo.co), sin variable de entorno ni origen actual.
@@ -292,18 +294,23 @@ export function printSaleInvoice(sale, usuario) {
       <hr />
 
       <!-- CLIENTE -->
-      <div class="bold">Cliente: ${
-        sale?.customer?.name || 'NOMBRE DEL CLIENTE'
-      }</div>
-      <div><span class="bold">Documento:</span> ${
-        sale?.customer?.document || '-------'
-      }</div>
-      <div><span class="bold">Dirección:</span> ${
-        sale?.customer?.address || '-------'
-      }</div>
-      <div><span class="bold">Ciudad:</span> ${
-        sale?.customer?.city || '-------'
-      }</div>
+      ${(() => {
+        const c = sale?.customer;
+        const name = c?.name || opts.customerName;
+        if (name) {
+          return `<div class="bold">Cliente: ${name}</div>
+      <div><span class="bold">Documento:</span> ${c?.document || '-------'}</div>
+      <div><span class="bold">Dirección:</span> ${c?.address || '-------'}</div>
+      <div><span class="bold">Ciudad:</span> ${c?.city || '-------'}</div>`;
+        }
+        if (opts.plate) {
+          return `<div class="bold">Placa: ${opts.plate}</div>`;
+        }
+        return `<div class="bold">Cliente: NOMBRE DEL CLIENTE</div>
+      <div><span class="bold">Documento:</span> -------</div>
+      <div><span class="bold">Dirección:</span> -------</div>
+      <div><span class="bold">Ciudad:</span> -------</div>`;
+      })()}
 
       <hr />
 

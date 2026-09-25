@@ -1260,7 +1260,10 @@ export default function StoragePage() {
                     icon={PrinterIcon}
                     onClick={() => {
                       if (receipt.kind === 'factura' && receipt.sale) {
-                        printSaleInvoice(receipt.sale, usuario);
+                        printSaleInvoice(receipt.sale, usuario, {
+                          customerName: receipt.ticket?.customerName,
+                          plate: receipt.ticket?.plate,
+                        });
                       } else if (receipt.kind === 'ingreso') {
                         printCustodyTicket(receipt.ticket, usuario, settings);
                       } else {
