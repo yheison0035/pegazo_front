@@ -139,7 +139,7 @@ function ingresoBody(t, settings) {
     <div class="big">TICKET #${t.id}</div>
     <p class="center muted">Guarde este comprobante para reclamar su(s) casco(s)</p>
     <hr/>
-    <div class="row"><span>Cliente</span><span class="r">${t.customerName}</span></div>
+    <div class="row"><span>${t.customerName ? 'Cliente' : 'Placa'}</span><span class="r">${t.customerName || t.plate || '—'}</span></div>
     ${t.customerPhone ? `<div class="row"><span>Celular</span><span class="r">${t.customerPhone}</span></div>` : ''}
     ${t.customerEmail ? `<div class="row"><span>Correo</span><span class="r">${t.customerEmail}</span></div>` : ''}
     <div class="row"><span>Ingreso</span><span class="r">${new Date(t.checkInAt).toLocaleString('es-CO')}</span></div>
@@ -170,7 +170,7 @@ function facturaBody(t, tot, methodLabel) {
     <p class="sub">Factura de venta</p>
     <p class="center muted">${new Date().toLocaleString('es-CO')} · Ticket #${t.id}</p>
     <hr/>
-    <div class="row"><span>Cliente</span><span class="r">${t.customerName}</span></div>
+    <div class="row"><span>${t.customerName ? 'Cliente' : 'Placa'}</span><span class="r">${t.customerName || t.plate || '—'}</span></div>
     ${t.customerPhone ? `<div class="row"><span>Celular</span><span class="r">${t.customerPhone}</span></div>` : ''}
     <div class="row"><span>Cascos</span><span class="r">${t.helmetCount}</span></div>
     <hr/>
@@ -183,9 +183,11 @@ function facturaBody(t, tot, methodLabel) {
 }
 
 const EMPTY_CHECKIN = {
+  idMode: 'datos', // 'datos' (nombre + contacto) | 'placa' (solo placa)
   customerName: '',
   customerPhone: '',
   customerEmail: '',
+  plate: '',
   billingMode: 'HORA',
   washRequested: false,
   washCount: 1,
@@ -277,34 +279,48 @@ export default function StoragePage() {
     'w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20';
 
   const doCheckIn = async () => {
-    if (!ci.customerName.trim()) {
-      setAlert({ type: 'warning', message: 'Falta el nombre del cliente.' });
-      return;
-    }
-    const phone = ci.customerPhone.trim();
-    const email = ci.customerEmail.trim();
-    if (!phone && !email) {
-      setAlert({ type: 'warning', message: 'Indica celular o correo del cliente.' });
-      return;
-    }
-    if (phone && !/^3\d{9}$/.test(phone)) {
-      setAlert({
-        type: 'warning',
-        message: 'El celular debe tener 10 dígitos y empezar por 3 (ej: 3001234567).',
-      });
-      return;
-    }
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setAlert({ type: 'warning', message: 'El correo no es válido.' });
-      return;
+    const plate = (ci.plate || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+    const byPlate = ci.idMode === 'placa';
+
+    if (byPlate) {
+      if (plate.length < 5 || plate.length > 7) {
+        setAlert({
+          type: 'warning',
+          message: 'Escribe una placa válida (ej: ABC12D).',
+        });
+        return;
+      }
+    } else {
+      if (!ci.customerName.trim()) {
+        setAlert({ type: 'warning', message: 'Falta el nombre del cliente.' });
+        return;
+      }
+      const phone = ci.customerPhone.trim();
+      const email = ci.customerEmail.trim();
+      if (!phone && !email) {
+        setAlert({ type: 'warning', message: 'Indica celular o correo del cliente.' });
+        return;
+      }
+      if (phone && !/^3\d{9}$/.test(phone)) {
+        setAlert({
+          type: 'warning',
+          message: 'El celular debe tener 10 dígitos y empezar por 3 (ej: 3001234567).',
+        });
+        return;
+      }
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        setAlert({ type: 'warning', message: 'El correo no es válido.' });
+        return;
+      }
     }
     setBusy(true);
     try {
       const helmets = Math.max(1, Number(ci.helmetCount) || 1);
       const res = await checkInStorage({
-        customerName: ci.customerName.trim(),
-        customerPhone: ci.customerPhone.trim() || undefined,
-        customerEmail: ci.customerEmail.trim() || undefined,
+        customerName: byPlate ? undefined : ci.customerName.trim(),
+        customerPhone: byPlate ? undefined : ci.customerPhone.trim() || undefined,
+        customerEmail: byPlate ? undefined : ci.customerEmail.trim() || undefined,
+        plate: byPlate ? plate : undefined,
         billingMode: ci.billingMode,
         washRequested: ci.washRequested,
         washCount: ci.washRequested
@@ -341,7 +357,7 @@ export default function StoragePage() {
   };
 
   const cancelTicket = async (t) => {
-    if (!window.confirm(`¿Anular el ingreso de ${t.customerName}? No se cobra.`)) return;
+    if (!window.confirm(`¿Anular el ingreso de ${t.customerName || (t.plate ? 'la placa ' + t.plate : 'este casco')}? No se cobra.`)) return;
     setBusy(true);
     try {
       await cancelStorage(t.id);
@@ -450,6 +466,7 @@ export default function StoragePage() {
         (t) =>
           String(t.id).includes(s) ||
           (t.customerName || '').toLowerCase().includes(s) ||
+          (t.plate || '').toLowerCase().includes(s) ||
           (t.customerPhone || '').includes(s),
       );
     return list;
@@ -573,7 +590,15 @@ export default function StoragePage() {
                     <div className="min-w-0">
                       <p className="flex items-center gap-1.5 font-semibold text-gray-800">
                         <UserIcon className="h-4 w-4 flex-none text-gray-400" />
-                        {t.customerName}
+                        {t.customerName ? (
+                          t.customerName
+                        ) : t.plate ? (
+                          <span className="rounded-md border-2 border-black bg-[#F5C518] px-2 py-0.5 font-mono text-sm font-extrabold tracking-wider text-black">
+                            {t.plate}
+                          </span>
+                        ) : (
+                          'Sin datos'
+                        )}
                       </p>
                       <p className="text-[11px] text-gray-400">
                         {t.customerPhone || t.customerEmail || ''}
@@ -675,15 +700,83 @@ export default function StoragePage() {
                 </h2>
               </div>
               <div className="flex-1 space-y-3 overflow-y-auto px-6 py-5">
-                <div>
-                  <label className="mb-1 block text-xs font-semibold text-gray-600">Nombre completo del cliente</label>
-                  <input
-                    value={ci.customerName}
-                    onChange={(e) => setCi((c) => ({ ...c, customerName: e.target.value.toUpperCase() }))}
-                    placeholder="EJ: JUAN PÉREZ"
-                    className={`${inputCls} uppercase placeholder:normal-case`}
-                  />
+                {/* Modo de identificación: con datos o SOLO placa (para quien no
+                    quiere dar datos). */}
+                <div className="grid grid-cols-2 gap-1 rounded-xl bg-gray-100 p-1">
+                  <button
+                    type="button"
+                    onClick={() => setCi((c) => ({ ...c, idMode: 'datos' }))}
+                    className={`rounded-lg py-2 text-sm font-semibold transition ${
+                      ci.idMode === 'datos'
+                        ? 'bg-white text-gray-800 shadow-sm'
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    Con datos
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCi((c) => ({ ...c, idMode: 'placa' }))}
+                    className={`rounded-lg py-2 text-sm font-semibold transition ${
+                      ci.idMode === 'placa'
+                        ? 'bg-white text-gray-800 shadow-sm'
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    Solo placa
+                  </button>
                 </div>
+
+                {ci.idMode === 'datos' ? (
+                  <div>
+                    <label className="mb-1 block text-xs font-semibold text-gray-600">Nombre completo del cliente</label>
+                    <input
+                      value={ci.customerName}
+                      onChange={(e) => setCi((c) => ({ ...c, customerName: e.target.value.toUpperCase() }))}
+                      placeholder="EJ: JUAN PÉREZ"
+                      className={`${inputCls} uppercase placeholder:normal-case`}
+                    />
+                  </div>
+                ) : (
+                  <div>
+                    <label className="mb-1 block text-center text-xs font-semibold text-gray-600">
+                      Placa del vehículo
+                    </label>
+                    {/* Placa amarilla estilo Colombia */}
+                    <div className="mx-auto w-full max-w-[320px] select-none rounded-2xl border-[3px] border-black bg-[#F5C518] p-2 shadow-[0_5px_0_rgba(0,0,0,0.28)]">
+                      <div className="flex items-center justify-center gap-1.5 pb-0.5">
+                        <span className="flex overflow-hidden rounded-[2px] border border-black/40">
+                          <span className="h-2.5 w-2 bg-[#FCD116]" />
+                          <span className="h-2.5 w-2 bg-[#003893]" />
+                          <span className="h-2.5 w-2 bg-[#CE1126]" />
+                        </span>
+                        <span className="text-[11px] font-extrabold tracking-[0.35em] text-black">
+                          COLOMBIA
+                        </span>
+                      </div>
+                      <input
+                        autoFocus
+                        value={ci.plate}
+                        onChange={(e) =>
+                          setCi((c) => ({
+                            ...c,
+                            plate: e.target.value
+                              .toUpperCase()
+                              .replace(/[^A-Z0-9]/g, '')
+                              .slice(0, 7),
+                          }))
+                        }
+                        placeholder="ABC12D"
+                        inputMode="text"
+                        maxLength={7}
+                        className="w-full bg-transparent py-1 text-center font-mono text-3xl font-extrabold uppercase tracking-[0.18em] text-black placeholder:text-black/25 focus:outline-none sm:text-4xl"
+                      />
+                    </div>
+                    <p className="mt-1.5 text-center text-[11px] text-gray-500">
+                      Ideal para clientes que no quieren dar datos.
+                    </p>
+                  </div>
+                )}
                 <div>
                   <label className="mb-1 block text-xs font-semibold text-gray-600">Quién recibe (asesor a cargo)</label>
                   <select
@@ -700,38 +793,40 @@ export default function StoragePage() {
                     ))}
                   </select>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="mb-1 block text-xs font-semibold text-gray-600">Celular</label>
-                    <input
-                      type="tel"
-                      inputMode="numeric"
-                      maxLength={10}
-                      value={ci.customerPhone}
-                      onChange={(e) =>
-                        setCi((c) => ({
-                          ...c,
-                          customerPhone: e.target.value.replace(/\D/g, '').slice(0, 10),
-                        }))
-                      }
-                      placeholder="3001234567"
-                      className={`${inputCls} ${
-                        ci.customerPhone && !/^3\d{9}$/.test(ci.customerPhone)
-                          ? 'border-red-400 focus:border-red-500 focus:ring-red-500/20'
-                          : ''
-                      }`}
-                    />
-                    {ci.customerPhone && !/^3\d{9}$/.test(ci.customerPhone) && (
-                      <p className="mt-1 text-[11px] text-red-500">
-                        10 dígitos, empieza por 3.
-                      </p>
-                    )}
+                {ci.idMode === 'datos' && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="mb-1 block text-xs font-semibold text-gray-600">Celular</label>
+                      <input
+                        type="tel"
+                        inputMode="numeric"
+                        maxLength={10}
+                        value={ci.customerPhone}
+                        onChange={(e) =>
+                          setCi((c) => ({
+                            ...c,
+                            customerPhone: e.target.value.replace(/\D/g, '').slice(0, 10),
+                          }))
+                        }
+                        placeholder="3001234567"
+                        className={`${inputCls} ${
+                          ci.customerPhone && !/^3\d{9}$/.test(ci.customerPhone)
+                            ? 'border-red-400 focus:border-red-500 focus:ring-red-500/20'
+                            : ''
+                        }`}
+                      />
+                      {ci.customerPhone && !/^3\d{9}$/.test(ci.customerPhone) && (
+                        <p className="mt-1 text-[11px] text-red-500">
+                          10 dígitos, empieza por 3.
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-xs font-semibold text-gray-600">Correo (opcional)</label>
+                      <input value={ci.customerEmail} onChange={(e) => setCi((c) => ({ ...c, customerEmail: e.target.value }))} placeholder="correo@…" className={inputCls} />
+                    </div>
                   </div>
-                  <div>
-                    <label className="mb-1 block text-xs font-semibold text-gray-600">Correo (opcional)</label>
-                    <input value={ci.customerEmail} onChange={(e) => setCi((c) => ({ ...c, customerEmail: e.target.value }))} placeholder="correo@…" className={inputCls} />
-                  </div>
-                </div>
+                )}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="mb-1 block text-xs font-semibold text-gray-600">Cobro</label>
@@ -789,7 +884,7 @@ export default function StoragePage() {
                   <XMarkIcon className="h-5 w-5" />
                 </button>
                 <p className="text-[11px] font-semibold uppercase tracking-widest text-white/80">Cobrar y entregar</p>
-                <h2 className="mt-1 text-xl font-bold leading-tight">{checkoutTarget.customerName}</h2>
+                <h2 className="mt-1 text-xl font-bold leading-tight">{checkoutTarget.customerName || (checkoutTarget.plate ? `Placa ${checkoutTarget.plate}` : 'Sin datos')}</h2>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-semibold backdrop-blur">
                     <ClockIcon className="h-3.5 w-3.5" /> {checkoutTotals.charge.elapsedLabel}
@@ -999,7 +1094,11 @@ export default function StoragePage() {
                     {receipt.kind === 'ingreso' ? 'Comprobante de ingreso' : 'Factura de venta'}
                   </p>
                   <div className="space-y-1 border-t border-gray-100 pt-2">
-                    <Row l="Cliente" r={receipt.ticket.customerName} />
+                    {receipt.ticket.customerName ? (
+                      <Row l="Cliente" r={receipt.ticket.customerName} />
+                    ) : receipt.ticket.plate ? (
+                      <Row l="Placa" r={receipt.ticket.plate} />
+                    ) : null}
                     {receipt.ticket.customerPhone && <Row l="Celular" r={receipt.ticket.customerPhone} />}
                     {receipt.kind === 'ingreso' ? (
                       <>
