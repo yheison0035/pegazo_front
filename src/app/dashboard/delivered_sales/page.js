@@ -1,8 +1,12 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import useLiveRefresh from "@/hooks/useLiveRefresh";
+import {
+  beginBackgroundRefresh,
+  endBackgroundRefresh,
+} from '@/lib/liveRefresh';
 import { getSaleById } from '@/lib/api/routes/sales';
 import Table from '@/components/dashboard/tables/table';
 import Pagination from '@/components/dashboard/tables/segments/pagination';
@@ -108,15 +112,27 @@ export default function Delivered_Sales() {
 
   const debouncedFilters = useDebounce(filters, 400);
 
-  const fetchSales = useCallback(async () => {
-    const res = await getDeliveredSales({
-      page,
-      limit,
-      ...debouncedFilters,
-    });
+  // Solo la PRIMERA carga muestra el overlay a pantalla completa. Los refetch por
+  // filtro/búsqueda/paginación se marcan como refresco en segundo plano: la tabla
+  // se actualiza sola, sin el parpadeo del loader (antes: "cargue horrible").
+  const initialLoad = useRef(true);
 
-    setSales(res.data);
-    setMeta(res.meta);
+  const fetchSales = useCallback(async () => {
+    const background = !initialLoad.current;
+    if (background) beginBackgroundRefresh();
+    try {
+      const res = await getDeliveredSales({
+        page,
+        limit,
+        ...debouncedFilters,
+      });
+
+      setSales(res.data);
+      setMeta(res.meta);
+    } finally {
+      initialLoad.current = false;
+      if (background) setTimeout(endBackgroundRefresh, 300);
+    }
   }, [getDeliveredSales, page, limit, debouncedFilters]);
 
   useEffect(() => {
