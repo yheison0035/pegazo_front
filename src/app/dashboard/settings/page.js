@@ -7,6 +7,7 @@ import {
   GiftIcon,
   BuildingStorefrontIcon,
   ClockIcon,
+  SparklesIcon,
   SwatchIcon,
   CheckIcon,
   LockClosedIcon,
@@ -28,7 +29,7 @@ import Button from '@/components/ui/Button';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import LogoUploader from '@/components/ui/LogoUploader';
 import { useAuth } from '@/context/authContext';
-import { isServicesBusiness } from '@/lib/appointmentsAccess';
+import { isServicesBusiness, effectiveModules } from '@/lib/appointmentsAccess';
 import {
   getCompanySettings,
   updateLoyalty,
@@ -1675,6 +1676,11 @@ export default function Settings() {
   const usuario = auth?.usuario;
   const [settings, setSettings] = useState(null);
   const isServices = isServicesBusiness(usuario);
+  // ¿La empresa tiene el módulo de fidelización? (independiente de si maneja
+  // citas). Así verticales como Guarda cascos pueden activarla aunque no sean de
+  // servicios. Si es de servicios, la config va dentro de "Citas y fidelización".
+  const hasLoyalty = effectiveModules(usuario).includes('loyalty');
+  const showLoyaltyTab = hasLoyalty && !isServices;
   // La configuración del CRM solo la maneja el dueño o el administrador.
   const canConfig = ['SUPER_ADMIN', 'ADMIN'].includes(usuario?.role);
   const [tab, setTab] = useState('empresa');
@@ -1720,6 +1726,7 @@ export default function Settings() {
                 ['impuestos', 'Impuestos'],
                 ['contabilidad', 'Contabilidad'],
                 ...(isServices ? [['citas', 'Citas y fidelización']] : []),
+                ...(showLoyaltyTab ? [['fidelizacion', 'Fidelización']] : []),
               ].map(([id, label]) => (
                 <button
                   key={id}
@@ -1815,6 +1822,19 @@ export default function Settings() {
                   subtitle="Horario de atención y programa de fidelización."
                 >
                   <HoursCard initial={settings} />
+                  <LoyaltySettings />
+                </SettingsSection>
+              )}
+
+              {/* ── Fidelización (verticales con loyalty que NO manejan citas,
+                     p. ej. Guarda cascos) ── */}
+              {showLoyaltyTab && tab === 'fidelizacion' && (
+                <SettingsSection
+                  id="fidelizacion"
+                  icon={SparklesIcon}
+                  title="Fidelización"
+                  subtitle="Premia a tus clientes frecuentes con descuentos por visitas."
+                >
                   <LoyaltySettings />
                 </SettingsSection>
               )}
