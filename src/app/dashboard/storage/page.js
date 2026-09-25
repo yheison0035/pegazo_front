@@ -36,8 +36,27 @@ import {
 const MODES = [
   { id: 'HORA', label: 'Por hora' },
   { id: 'DIA', label: 'Por día' },
+  { id: 'SEMANA', label: 'Por semana' },
   { id: 'MENSUALIDAD', label: 'Mensualidad' },
 ];
+const MODE_LABEL = {
+  HORA: 'Por hora',
+  DIA: 'Por día',
+  SEMANA: 'Por semana',
+  MENSUALIDAD: 'Mensualidad',
+};
+const modeLabel = (m) => MODE_LABEL[m] || 'Por hora';
+// Tarifa (rate) y unidad de tiempo (min) por modo; espejo del backend.
+const RATE_OF = (s, m) =>
+  m === 'DIA'
+    ? s?.dayRate || 0
+    : m === 'SEMANA'
+      ? s?.weekRate || 0
+      : m === 'MENSUALIDAD'
+        ? s?.monthRate || 0
+        : s?.hourRate || 0;
+const UNIT_MIN_OF = (m) =>
+  m === 'DIA' ? 1440 : m === 'SEMANA' ? 10080 : m === 'MENSUALIDAD' ? 43200 : 60;
 const PAY_METHODS = [
   { id: 'EFECTIVO', label: 'Efectivo' },
   { id: 'TRANSFERENCIA', label: 'Transferencia' },
@@ -62,13 +81,10 @@ function computeCharge(settings, ticket, nowMs) {
   const mode = ticket.billingMode || settings?.defaultMode || 'HORA';
   const ms = nowMs - new Date(ticket.checkInAt).getTime();
   const label = elapsedLabel(ms);
-  if (mode === 'MENSUALIDAD') {
-    return { mode, storageCharge: 0, perHelmet: 0, helmets, rate: 0, unitMin: 0, elapsedLabel: label };
-  }
   const rawMin = Math.max(0, Math.floor(ms / 60000));
   const grace = settings?.graceMinutes || 0;
-  const rate = mode === 'DIA' ? settings?.dayRate || 0 : settings?.hourRate || 0;
-  const unitMin = mode === 'DIA' ? 1440 : 60;
+  const rate = RATE_OF(settings, mode);
+  const unitMin = UNIT_MIN_OF(mode);
   let perHelmet = 0;
   // Dentro del periodo de gracia que configure el dueño no se cobra. Superado
   // ese punto, desde el minuto 1 se cobra la primera unidad completa (primera
@@ -132,8 +148,14 @@ function printReceipt(title, company, bodyHTML) {
 }
 
 function ingresoBody(t, settings) {
-  const modeLabel =
-    t.billingMode === 'DIA' ? 'Por día' : t.billingMode === 'MENSUALIDAD' ? 'Mensualidad' : 'Por hora';
+  const modeTxt = modeLabel(t.billingMode);
+  const tarifas = [
+    settings?.hourRate ? `${money(settings.hourRate)}/hora` : '',
+    settings?.dayRate ? `${money(settings.dayRate)}/día` : '',
+    settings?.weekRate ? `${money(settings.weekRate)}/sem` : '',
+    settings?.monthRate ? `${money(settings.monthRate)}/mes` : '',
+    settings?.washPrice ? `lavado ${money(settings.washPrice)}` : '',
+  ].filter(Boolean).join(' · ');
   return `
     <p class="sub">Comprobante de ingreso</p>
     <div class="big">TICKET #${t.id}</div>
@@ -145,10 +167,10 @@ function ingresoBody(t, settings) {
     <div class="row"><span>Ingreso</span><span class="r">${new Date(t.checkInAt).toLocaleString('es-CO')}</span></div>
     <div class="row"><span>Cascos</span><span class="r">${t.helmetCount}</span></div>
     ${t.washRequested ? `<div class="row"><span>Lavado</span><span class="r">${t.washCount || t.helmetCount} casco(s)</span></div>` : ''}
-    <div class="row"><span>Cobro</span><span class="r">${modeLabel}</span></div>
+    <div class="row"><span>Cobro</span><span class="r">${modeTxt}</span></div>
     ${t.notes ? `<div class="row"><span>Nota</span><span class="r">${t.notes}</span></div>` : ''}
     <hr/>
-    <p class="center muted">Tarifa ${settings?.hourRate ? money(settings.hourRate) + '/hora' : ''}${settings?.washPrice ? ' · lavado ' + money(settings.washPrice) : ''}</p>`;
+    ${tarifas ? `<p class="center muted">Tarifas: ${tarifas}</p>` : ''}`;
 }
 
 function facturaBody(t, tot, methodLabel) {
@@ -428,6 +450,8 @@ export default function StoragePage() {
     setSForm({
       hourRate: settings?.hourRate ?? '',
       dayRate: settings?.dayRate ?? '',
+      weekRate: settings?.weekRate ?? '',
+      monthRate: settings?.monthRate ?? '',
       washPrice: settings?.washPrice ?? '',
       graceMinutes: settings?.graceMinutes ?? 0,
       defaultMode: settings?.defaultMode ?? 'HORA',
@@ -440,6 +464,8 @@ export default function StoragePage() {
       await updateStorageSettings({
         hourRate: Number(sForm.hourRate) || 0,
         dayRate: Number(sForm.dayRate) || 0,
+        weekRate: Number(sForm.weekRate) || 0,
+        monthRate: Number(sForm.monthRate) || 0,
         washPrice: Number(sForm.washPrice) || 0,
         graceMinutes: Number(sForm.graceMinutes) || 0,
         defaultMode: sForm.defaultMode,
@@ -454,7 +480,26 @@ export default function StoragePage() {
     }
   };
 
-  const ratesConfigured = (settings?.hourRate || 0) > 0 || (settings?.dayRate || 0) > 0;
+  const ratesConfigured =
+    (settings?.hourRate || 0) > 0 ||
+    (settings?.dayRate || 0) > 0 ||
+    (settings?.weekRate || 0) > 0 ||
+    (settings?.monthRate || 0) > 0;
+
+  // Modos de cobro OFRECIBLES: solo los que tienen tarifa configurada (si no hay
+  // ninguna aún, se muestran todos para no bloquear).
+  const availableModes = (() => {
+    const withRate = MODES.filter((m) => RATE_OF(settings, m.id) > 0);
+    return withRate.length ? withRate : MODES;
+  })();
+  // Tarifas para mostrar (todas las de periodo + lavado), solo las que tienen valor.
+  const tariffList = [
+    { label: 'Hora', value: settings?.hourRate || 0 },
+    { label: 'Día', value: settings?.dayRate || 0 },
+    { label: 'Semana', value: settings?.weekRate || 0 },
+    { label: 'Mes', value: settings?.monthRate || 0 },
+    { label: 'Lavado', value: settings?.washPrice || 0 },
+  ].filter((x) => x.value > 0);
 
   // Filtro de la lista en custodia (buscador por # o nombre + solo lavados).
   const filteredActive = useMemo(() => {
@@ -492,7 +537,17 @@ export default function StoragePage() {
               variant="add"
               icon={PlusIcon}
               onClick={() => {
-                setCi({ ...EMPTY_CHECKIN, receivedById: usuario?.id ? String(usuario.id) : '' });
+                const first =
+                  MODES.filter((m) => RATE_OF(settings, m.id) > 0)[0]?.id || 'HORA';
+                const dm =
+                  RATE_OF(settings, settings?.defaultMode) > 0
+                    ? settings.defaultMode
+                    : first;
+                setCi({
+                  ...EMPTY_CHECKIN,
+                  billingMode: dm,
+                  receivedById: usuario?.id ? String(usuario.id) : '',
+                });
                 setShowCheckIn(true);
               }}
             >
@@ -550,6 +605,37 @@ export default function StoragePage() {
             {isOwner && <p className="text-[10px] text-gray-400">Editar tarifas</p>}
           </button>
         </div>
+
+        {/* Tarifas visibles: para que el cliente y el equipo sepan cuánto sale
+            cada modalidad. Solo se muestran las configuradas. */}
+        {tariffList.length > 0 && (
+          <div className="mb-5 overflow-hidden rounded-2xl border border-gray-200 bg-white">
+            <div className="flex items-center justify-between border-b border-gray-100 px-4 py-2.5">
+              <p className="text-sm font-bold text-gray-700">Tarifas</p>
+              {isOwner && (
+                <button
+                  type="button"
+                  onClick={openSettings}
+                  className="text-xs font-semibold text-orange-600 hover:underline"
+                >
+                  Editar
+                </button>
+              )}
+            </div>
+            <div className="grid grid-cols-2 divide-x divide-y divide-gray-100 sm:grid-cols-3 lg:grid-cols-5">
+              {tariffList.map((t) => (
+                <div key={t.label} className="px-4 py-3 text-center">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                    {t.label}
+                  </p>
+                  <p className="mt-0.5 text-lg font-extrabold text-gray-900">
+                    {formatCOP(t.value)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Lista de cascos en custodia (los entregados están en Ventas realizadas) */}
         <>
@@ -613,7 +699,7 @@ export default function StoragePage() {
                           {charge.elapsedLabel}
                         </span>
                         <span className="rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-semibold text-gray-600">
-                          {t.billingMode === 'DIA' ? 'Por día' : t.billingMode === 'MENSUALIDAD' ? 'Mensualidad' : 'Por hora'}
+                          {modeLabel(t.billingMode)}
                         </span>
                         {t.washRequested && (
                           <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ${t.washDone ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'}`}>
@@ -626,7 +712,7 @@ export default function StoragePage() {
                     <div className="text-right">
                       <p className="text-[10px] uppercase tracking-wide text-gray-400">A cobrar (guardado)</p>
                       <p className="text-xl font-extrabold text-gray-900">{formatCOP(charge.storageCharge)}</p>
-                      {charge.mode !== 'MENSUALIDAD' && charge.perHelmet > 0 && (
+                      {charge.perHelmet > 0 && (
                         <p className="text-[10px] text-gray-400">
                           {charge.elapsedLabel}
                           {charge.helmets > 1 ? ` · ${formatCOP(charge.perHelmet)}/casco` : ''}
@@ -831,7 +917,14 @@ export default function StoragePage() {
                   <div>
                     <label className="mb-1 block text-xs font-semibold text-gray-600">Cobro</label>
                     <select value={ci.billingMode} onChange={(e) => setCi((c) => ({ ...c, billingMode: e.target.value }))} className={inputCls}>
-                      {MODES.map((m) => <option key={m.id} value={m.id}>{m.label}</option>)}
+                      {availableModes.map((m) => {
+                        const r = RATE_OF(settings, m.id);
+                        return (
+                          <option key={m.id} value={m.id}>
+                            {m.label}{r > 0 ? ` · ${formatCOP(r)}` : ''}
+                          </option>
+                        );
+                      })}
                     </select>
                   </div>
                   <div>
@@ -915,9 +1008,11 @@ export default function StoragePage() {
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold text-gray-800">Guardado</p>
                       <p className="text-[11px] text-gray-400">
-                        {checkoutTotals.charge.mode === 'MENSUALIDAD'
-                          ? 'Cubierto por mensualidad'
-                          : `${checkoutTotals.charge.elapsedLabel}${checkoutTotals.charge.helmets > 1 ? ` · ${formatCOP(checkoutTotals.charge.perHelmet)} × ${checkoutTotals.charge.helmets} cascos` : ''}`}
+                        {checkoutTotals.charge.perHelmet > 0
+                          ? `${modeLabel(checkoutTotals.charge.mode)} · ${checkoutTotals.charge.elapsedLabel}${checkoutTotals.charge.helmets > 1 ? ` · ${formatCOP(checkoutTotals.charge.perHelmet)} × ${checkoutTotals.charge.helmets} cascos` : ''}`
+                          : checkoutTotals.charge.mode === 'MENSUALIDAD'
+                            ? 'Cubierto por mensualidad'
+                            : checkoutTotals.charge.elapsedLabel}
                       </p>
                     </div>
                     <span className="font-bold tabular-nums text-gray-900">{formatCOP(checkoutTotals.charge.storageCharge)}</span>
@@ -1026,6 +1121,9 @@ export default function StoragePage() {
                 </button>
               </div>
               <div className="space-y-3">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                  Tarifas de guardado
+                </p>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="mb-1 block text-xs font-semibold text-gray-600">Valor por hora</label>
@@ -1035,7 +1133,18 @@ export default function StoragePage() {
                     <label className="mb-1 block text-xs font-semibold text-gray-600">Valor por día</label>
                     <MoneyInput value={sForm.dayRate} onChange={(v) => setSForm((f) => ({ ...f, dayRate: v }))} className={inputCls} />
                   </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-semibold text-gray-600">Valor por semana</label>
+                    <MoneyInput value={sForm.weekRate} onChange={(v) => setSForm((f) => ({ ...f, weekRate: v }))} className={inputCls} />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-semibold text-gray-600">Valor por mes (mensualidad)</label>
+                    <MoneyInput value={sForm.monthRate} onChange={(v) => setSForm((f) => ({ ...f, monthRate: v }))} className={inputCls} />
+                  </div>
                 </div>
+                <p className="text-[11px] text-gray-400">
+                  Deja en 0 las que no uses. Solo aparecerán como opción de cobro las que tengan valor.
+                </p>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="mb-1 block text-xs font-semibold text-gray-600">Valor del lavado</label>
@@ -1107,7 +1216,7 @@ export default function StoragePage() {
                         {receipt.ticket.washRequested && (
                           <Row l="Lavado" r={`${receipt.ticket.washCount || receipt.ticket.helmetCount} casco(s)`} />
                         )}
-                        <Row l="Cobro" r={receipt.ticket.billingMode === 'DIA' ? 'Por día' : receipt.ticket.billingMode === 'MENSUALIDAD' ? 'Mensualidad' : 'Por hora'} />
+                        <Row l="Cobro" r={modeLabel(receipt.ticket.billingMode)} />
                       </>
                     ) : (
                       <>
