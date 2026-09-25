@@ -70,7 +70,15 @@ export const getEmptyInventory = () => ({
 export const getFormFieldsInventory = (usuario) => {
   const canOldPrice = canSeeOldPrice(usuario);
   const fields = getProductFields(usuario?.company?.type, usuario?.company?.typeProductFields);
-  const showOldPrice = canOldPrice && fields.oldPrice;
+  // La empresa TIENE tienda online solo si está publicada (websiteEnabled) y con
+  // dominio cargado (mismo criterio del menú). Si no, no mostramos ningún campo
+  // de "tienda online" al crear/editar productos.
+  const hasOnlineStore = !!(
+    usuario?.company?.websiteEnabled && usuario?.company?.domain
+  );
+  // "Precio anterior" (tachado) es un concepto de la tienda online, así que solo
+  // aplica si además hay tienda.
+  const showOldPrice = canOldPrice && fields.oldPrice && hasOnlineStore;
 
   const vt = fields.variantType; // 'color' | 'weight' | 'simple'
 
@@ -183,22 +191,26 @@ export const getFormFieldsInventory = (usuario) => {
 
     {
       name: 'salePrice',
-      label: 'Precio de venta (tienda física)',
+      label: hasOnlineStore ? 'Precio de venta (tienda física)' : 'Precio de venta',
       type: 'text',
       required: true,
       disabled: false,
       helperText: 'Precio con el que se vende en el punto de venta (POS).',
     },
-    // Habilitar el producto en la tienda online: al activarlo aparecen los precios
-    // online (venta online + precio anterior tachado).
-    {
-      name: 'publishInEcommerce',
-      label: 'Habilitar en tienda online',
-      type: 'checkbox',
-      required: false,
-      helperText:
-        'Si lo activas, defines el precio para la tienda online (puede ser distinto al físico).',
-    },
+    // Habilitar el producto en la tienda online: SOLO si la empresa tiene tienda
+    // online (publicada + dominio). Al activarlo aparecen los precios online.
+    ...(hasOnlineStore
+      ? [
+          {
+            name: 'publishInEcommerce',
+            label: 'Habilitar en tienda online',
+            type: 'checkbox',
+            required: false,
+            helperText:
+              'Si lo activas, defines el precio para la tienda online (puede ser distinto al físico).',
+          },
+        ]
+      : []),
     ...(showOldPrice
       ? [
           {
@@ -312,7 +324,11 @@ export const getFormFieldsInventory = (usuario) => {
 export const getHeaderTableInventory = (usuario) => {
   const canOldPrice = canSeeOldPrice(usuario);
   const fields = getProductFields(usuario?.company?.type, usuario?.company?.typeProductFields);
-  const showOldPrice = canOldPrice && fields.oldPrice;
+  // "Precio anterior" (tachado) es de la tienda online: solo si la empresa la tiene.
+  const hasOnlineStore = !!(
+    usuario?.company?.websiteEnabled && usuario?.company?.domain
+  );
+  const showOldPrice = canOldPrice && fields.oldPrice && hasOnlineStore;
 
   return [
     { name: 'image', title: 'Imagen Principal', show: true, showInput: false },
@@ -379,7 +395,10 @@ export const getHeaderTableInventory = (usuario) => {
 };
 
 export const viewModalConfig = (usuario) => {
-  const showOldPrice = canSeeOldPrice(usuario);
+  const hasOnlineStore = !!(
+    usuario?.company?.websiteEnabled && usuario?.company?.domain
+  );
+  const showOldPrice = canSeeOldPrice(usuario) && hasOnlineStore;
 
   return {
     title: 'Detalles del Producto',

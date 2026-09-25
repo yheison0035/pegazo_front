@@ -64,6 +64,12 @@ export default function NewProduct() {
     if (isFoodBusiness(usuario)) {
       setFormData((prev) => ({ ...prev, trackStock: false }));
     }
+    // Si la empresa NO tiene tienda online (publicada + dominio), el producto no
+    // nace "publicado" (el campo ni se muestra); así queda todo consistente.
+    const hasOnlineStore = !!(
+      usuario?.company?.websiteEnabled && usuario?.company?.domain
+    );
+    setFormData((prev) => ({ ...prev, publishInEcommerce: hasOnlineStore }));
   }, [usuario]);
 
   const { createProduct, uploadProductImages, loading } = useProducts();
