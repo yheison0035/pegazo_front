@@ -78,6 +78,8 @@ function elapsedLabel(ms) {
 }
 function computeCharge(settings, ticket, nowMs) {
   const helmets = Math.max(1, ticket.helmetCount || 1);
+  // El guardado se cobra por LOCKER (casillero), no por casco.
+  const lockers = Math.max(1, ticket.lockerCount || 1);
   const mode = ticket.billingMode || settings?.defaultMode || 'HORA';
   const ms = nowMs - new Date(ticket.checkInAt).getTime();
   const label = elapsedLabel(ms);
@@ -85,18 +87,18 @@ function computeCharge(settings, ticket, nowMs) {
   const grace = settings?.graceMinutes || 0;
   const rate = RATE_OF(settings, mode);
   const unitMin = UNIT_MIN_OF(mode);
-  let perHelmet = 0;
+  let perLocker = 0;
   // Dentro del periodo de gracia que configure el dueño no se cobra. Superado
   // ese punto, desde el minuto 1 se cobra la primera unidad completa (primera
   // hora / primer día); al pasar la unidad, el cobro es proporcional.
   if (rawMin >= grace) {
     const billable = Math.max(1, rawMin - grace);
-    perHelmet =
+    perLocker =
       billable <= unitMin
         ? Math.round(rate) // 1 unidad completa (mínimo, desde el minuto 1)
         : Math.round((rate * billable) / unitMin); // proporcional (fracción)
   }
-  return { mode, perHelmet, helmets, storageCharge: perHelmet * helmets, rate, unitMin, elapsedLabel: label };
+  return { mode, perLocker, lockers, helmets, storageCharge: perLocker * lockers, rate, unitMin, elapsedLabel: label };
 }
 
 function Row({ l, r }) {
@@ -177,7 +179,7 @@ function facturaBody(t, tot, methodLabel) {
   const rows = [];
   if (tot.charge.storageCharge > 0)
     rows.push(
-      `<div class="row"><span>Guardado${tot.charge.elapsedLabel ? ' ' + tot.charge.elapsedLabel : ''}${tot.charge.helmets > 1 ? ' x' + tot.charge.helmets : ''}</span><span class="r">${money(tot.charge.storageCharge)}</span></div>`,
+      `<div class="row"><span>Guardado${tot.charge.elapsedLabel ? ' ' + tot.charge.elapsedLabel : ''}${tot.charge.lockers > 1 ? ' x' + tot.charge.lockers + ' lockers' : ''}</span><span class="r">${money(tot.charge.storageCharge)}</span></div>`,
     );
   if (tot.wash > 0)
     rows.push(
@@ -214,6 +216,7 @@ const EMPTY_CHECKIN = {
   washRequested: false,
   washCount: 1,
   helmetCount: 1,
+  lockerCount: 1,
   receivedById: '',
   notes: '',
 };
@@ -349,6 +352,7 @@ export default function StoragePage() {
           ? Math.min(Math.max(1, Number(ci.washCount) || helmets), helmets)
           : 0,
         helmetCount: helmets,
+        lockerCount: Math.max(1, Number(ci.lockerCount) || 1),
         receivedById: ci.receivedById ? Number(ci.receivedById) : undefined,
         notes: ci.notes.trim() || undefined,
       });
@@ -689,6 +693,7 @@ export default function StoragePage() {
                       <p className="text-[11px] text-gray-400">
                         {t.customerPhone || t.customerEmail || ''}
                         {t.helmetCount > 1 ? ` · ${t.helmetCount} cascos` : ''}
+                        {t.lockerCount > 1 ? ` · ${t.lockerCount} lockers` : ''}
                       </p>
                       {t.receivedByName && (
                         <p className="text-[10px] text-gray-400">Recibió: {t.receivedByName}</p>
@@ -712,10 +717,10 @@ export default function StoragePage() {
                     <div className="text-right">
                       <p className="text-[10px] uppercase tracking-wide text-gray-400">A cobrar (guardado)</p>
                       <p className="text-xl font-extrabold text-gray-900">{formatCOP(charge.storageCharge)}</p>
-                      {charge.perHelmet > 0 && (
+                      {charge.perLocker > 0 && (
                         <p className="text-[10px] text-gray-400">
                           {charge.elapsedLabel}
-                          {charge.helmets > 1 ? ` · ${formatCOP(charge.perHelmet)}/casco` : ''}
+                          {charge.lockers > 1 ? ` · ${formatCOP(charge.perLocker)}/locker` : ''}
                         </p>
                       )}
                     </div>
@@ -913,23 +918,29 @@ export default function StoragePage() {
                     </div>
                   </div>
                 )}
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-gray-600">Cobro (guardado)</label>
+                  <select value={ci.billingMode} onChange={(e) => setCi((c) => ({ ...c, billingMode: e.target.value }))} className={inputCls}>
+                    {availableModes.map((m) => {
+                      const r = RATE_OF(settings, m.id);
+                      return (
+                        <option key={m.id} value={m.id}>
+                          {m.label}{r > 0 ? ` · ${formatCOP(r)}` : ''}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="mb-1 block text-xs font-semibold text-gray-600">Cobro</label>
-                    <select value={ci.billingMode} onChange={(e) => setCi((c) => ({ ...c, billingMode: e.target.value }))} className={inputCls}>
-                      {availableModes.map((m) => {
-                        const r = RATE_OF(settings, m.id);
-                        return (
-                          <option key={m.id} value={m.id}>
-                            {m.label}{r > 0 ? ` · ${formatCOP(r)}` : ''}
-                          </option>
-                        );
-                      })}
-                    </select>
-                  </div>
                   <div>
                     <label className="mb-1 block text-xs font-semibold text-gray-600"># de cascos</label>
                     <input type="number" min="1" value={ci.helmetCount} onChange={(e) => setCi((c) => ({ ...c, helmetCount: e.target.value }))} className={inputCls} />
+                    <p className="mt-1 text-[10px] text-gray-400">Para el lavado (individual).</p>
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-semibold text-gray-600"># de lockers</label>
+                    <input type="number" min="1" value={ci.lockerCount} onChange={(e) => setCi((c) => ({ ...c, lockerCount: e.target.value }))} className={inputCls} />
+                    <p className="mt-1 text-[10px] text-gray-400">El guardado se cobra por locker.</p>
                   </div>
                 </div>
                 <div className="rounded-xl border border-gray-200 px-3 py-2.5">
@@ -1008,8 +1019,8 @@ export default function StoragePage() {
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold text-gray-800">Guardado</p>
                       <p className="text-[11px] text-gray-400">
-                        {checkoutTotals.charge.perHelmet > 0
-                          ? `${modeLabel(checkoutTotals.charge.mode)} · ${checkoutTotals.charge.elapsedLabel}${checkoutTotals.charge.helmets > 1 ? ` · ${formatCOP(checkoutTotals.charge.perHelmet)} × ${checkoutTotals.charge.helmets} cascos` : ''}`
+                        {checkoutTotals.charge.perLocker > 0
+                          ? `${modeLabel(checkoutTotals.charge.mode)} · ${checkoutTotals.charge.elapsedLabel}${checkoutTotals.charge.lockers > 1 ? ` · ${formatCOP(checkoutTotals.charge.perLocker)} × ${checkoutTotals.charge.lockers} lockers` : ''}`
                           : checkoutTotals.charge.mode === 'MENSUALIDAD'
                             ? 'Cubierto por mensualidad'
                             : checkoutTotals.charge.elapsedLabel}
@@ -1221,7 +1232,7 @@ export default function StoragePage() {
                     ) : (
                       <>
                         {receipt.tot.charge.storageCharge > 0 && (
-                          <Row l={`Guardado${receipt.tot.charge.helmets > 1 ? ' ×' + receipt.tot.charge.helmets : ''}`} r={formatCOP(receipt.tot.charge.storageCharge)} />
+                          <Row l={`Guardado${receipt.tot.charge.lockers > 1 ? ' ×' + receipt.tot.charge.lockers + ' lockers' : ''}`} r={formatCOP(receipt.tot.charge.storageCharge)} />
                         )}
                         {receipt.tot.wash > 0 && <Row l={`Lavado${receipt.tot.washUnits > 1 ? ' ×' + receipt.tot.washUnits : ''}`} r={formatCOP(receipt.tot.wash)} />}
                         {(receipt.tot.products || []).map((p) => (
