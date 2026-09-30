@@ -428,7 +428,7 @@ export const NAVIGATION = [
     section: 'Administración',
     items: [
       {
-        name: 'Usuarios / Roles',
+        name: 'Usuarios',
         href: '/dashboard/users',
         icon: UserGroupIcon,
         roles: ['SUPER_ADMIN'],
