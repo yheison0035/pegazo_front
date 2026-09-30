@@ -70,10 +70,19 @@ export default function Users() {
   };
 
   const confirmDelete = async () => {
-    await deleteUser(deleteTarget.id);
-    setShowDeleteModal(false);
-    setDeleteTarget(null);
-    fetchUsers();
+    try {
+      await deleteUser(deleteTarget.id);
+      setShowDeleteModal(false);
+      setDeleteTarget(null);
+      fetchUsers();
+      setAlert({ type: 'success', message: 'Usuario eliminado.' });
+    } catch (e) {
+      setShowDeleteModal(false);
+      setAlert({
+        type: 'error',
+        message: e?.message || 'No se pudo eliminar el usuario.',
+      });
+    }
   };
 
   return (
