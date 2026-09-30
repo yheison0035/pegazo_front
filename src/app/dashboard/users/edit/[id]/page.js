@@ -35,20 +35,32 @@ export default function EditUser() {
   // ocultan los campos administrativos (local y estado), que no son datos
   // personales y no puede cambiar por sí mismo. La comisión es solo-lectura
   // salvo para dueño/administrador.
+  // El dueño/administrador NO gana comisión: en SU propio perfil no tiene sentido
+  // mostrar esos campos. Al editar el perfil propio de un manager solo se ven sus
+  // datos y el cambio de contraseña.
+  const isManager = ['SUPER_ADMIN', 'ADMIN'].includes(usuario?.role);
+  const isCommissionField = (name) =>
+    name === 'commissionServiceRate' || name === 'commissionProductRate';
+
   const formFields = useMemo(() => {
     const withCommission = getFormFieldsUsers(usuario?.company?.type).map((f) =>
-      !canEditCommission &&
-      (f.name === 'commissionServiceRate' || f.name === 'commissionProductRate')
+      !canEditCommission && isCommissionField(f.name)
         ? { ...f, disabled: true }
         : f,
     );
     if (!isSelf) return withCommission;
     return withCommission
-      .filter((f) => f.name !== 'localId' && f.name !== 'status')
+      .filter(
+        (f) =>
+          f.name !== 'localId' &&
+          f.name !== 'status' &&
+          // En el perfil propio del dueño/admin se ocultan las comisiones.
+          !(isManager && isCommissionField(f.name)),
+      )
       .map((f) =>
         f.name === 'role' || f.name === 'email' ? { ...f, disabled: true } : f,
       );
-  }, [isSelf, canEditCommission, usuario?.company?.type]);
+  }, [isSelf, canEditCommission, isManager, usuario?.company?.type]);
 
   const fetchUser = useCallback(async () => {
     if (!id) return;
