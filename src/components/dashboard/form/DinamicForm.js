@@ -269,9 +269,16 @@ export default function DinamicForm({
         // Se ofrecen los roles de la vertical. El rol que ya trae el usuario
         // (al editar) se conserva aunque sea heredado, para no vaciar el select.
         const current = formData?.role;
-        return data
+        const list = data
           .filter((r) => allowed.includes(r.id) || r.id === current)
           .map((r) => ({ id: r.id, name: roleLabel(r.id, company) }));
+        // El rol ACTUAL siempre debe ser una opción para que el select lo muestre
+        // seleccionado, aunque no sea asignable (p. ej. SUPER_ADMIN/dueño, que el
+        // backend NO devuelve en getRoles).
+        if (current && !list.some((o) => o.id === current)) {
+          list.unshift({ id: current, name: roleLabel(current, company) });
+        }
+        return list;
       },
       status: getStatus,
       paymentMethod: getPaymentMethods,
@@ -395,6 +402,7 @@ export default function DinamicForm({
     formData.serviceId,
     formData.barberId,
     formData.date,
+    formData.role,
     getUsers,
     getLocals,
     getCustomers,
@@ -411,9 +419,6 @@ export default function DinamicForm({
     fetchDynamicOptions();
   }, [fetchDynamicOptions]);
 
-  const hasDepartaCiudad = Array.isArray(formFields)
-    ? formFields.some((f) => f.name === 'department' || f.name === 'city')
-    : false;
 
   const isObject = (value) =>
     typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -466,10 +471,38 @@ export default function DinamicForm({
               disabled,
             } = field;
 
-            if (name === 'department' || name === 'city') return null;
+            // La ciudad la pinta DepartaCiudad junto al departamento.
+            if (name === 'city') return null;
+            // Departamento + Ciudad se pintan EN SU LUGAR (no al final), para que
+            // respeten el orden del formulario y las secciones.
+            if (name === 'department') {
+              return (
+                <DepartaCiudad
+                  key="depart-ciudad"
+                  formData={formData}
+                  handleChange={handleChange}
+                  isLocked={isLocked}
+                />
+              );
+            }
 
             // Ocultar condicionalmente según el estado del formulario.
             if (field.hideWhen && field.hideWhen(formData)) return null;
+
+            // Encabezado de sección (agrupa campos visualmente). No es un input.
+            if (type === 'section') {
+              return (
+                <div key={name} className="col-span-full mt-2">
+                  <h3 className="text-sm font-bold text-gray-800">{label}</h3>
+                  {field.helperText && (
+                    <p className="mt-0.5 text-xs text-gray-500">
+                      {field.helperText}
+                    </p>
+                  )}
+                  <div className="mt-2 border-b border-gray-100" />
+                </div>
+              );
+            }
 
             const inputValue =
               type === 'datetime-local'
@@ -849,14 +882,6 @@ export default function DinamicForm({
               </div>
             );
           })}
-
-        {hasDepartaCiudad && (
-          <DepartaCiudad
-            formData={formData}
-            handleChange={handleChange}
-            isLocked={isLocked}
-          />
-        )}
 
         {module === 'inventory' && (
           <div className="col-span-full">

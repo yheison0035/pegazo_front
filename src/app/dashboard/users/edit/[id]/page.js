@@ -49,17 +49,37 @@ export default function EditUser() {
         : f,
     );
     if (!isSelf) return withCommission;
-    return withCommission
+    // Perfil propio: se agrupa en "Datos personales" y "Seguridad". Rol y correo
+    // quedan bloqueados; local/estado y (para managers) comisiones se ocultan.
+    const base = withCommission
       .filter(
         (f) =>
           f.name !== 'localId' &&
           f.name !== 'status' &&
-          // En el perfil propio del dueño/admin se ocultan las comisiones.
           !(isManager && isCommissionField(f.name)),
       )
       .map((f) =>
         f.name === 'role' || f.name === 'email' ? { ...f, disabled: true } : f,
       );
+    const personal = base.filter((f) => f.name !== 'password');
+    const security = base.filter((f) => f.name === 'password');
+    return [
+      {
+        type: 'section',
+        name: 'sec-datos',
+        label: 'Datos personales',
+        required: false,
+      },
+      ...personal,
+      {
+        type: 'section',
+        name: 'sec-seguridad',
+        label: 'Seguridad',
+        helperText: 'Cambia tu contraseña de acceso (déjala en blanco para no cambiarla).',
+        required: false,
+      },
+      ...security,
+    ];
   }, [isSelf, canEditCommission, isManager, usuario?.company?.type]);
 
   const fetchUser = useCallback(async () => {
