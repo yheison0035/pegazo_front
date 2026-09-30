@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import {
   Bars3Icon,
   XMarkIcon,
@@ -20,6 +21,10 @@ export default function SideNavigation() {
   const [dark, setDark] = useState(false);
   const auth = useAuth();
   const usuario = auth?.usuario;
+  const pathname = usePathname();
+  // ¿Estamos en "Editar mi perfil"? (para marcarlo como activo).
+  const onProfile =
+    !!usuario?.id && pathname === `/dashboard/users/edit/${usuario.id}`;
 
   useEffect(() => {
     const sync = () => setDark(isDark());
@@ -109,9 +114,9 @@ export default function SideNavigation() {
         {/* Perfil del usuario: solo visible con el menú desplegado. Colapsado
             se muestra únicamente el logo para mantener el rail limpio. */}
         <div
-          className={`items-center gap-3 px-4 py-3 border-b border-orange-500/10 ${
+          className={`items-center gap-3 px-4 py-3 border-b border-orange-500/10 transition ${
             expanded ? 'flex' : 'hidden'
-          }`}
+          } ${onProfile ? 'bg-white/10' : ''}`}
         >
           <div className="flex-none">
             <Avatar perfil={usuario} setPerfil={() => {}} size="w-11 h-11" />
@@ -121,9 +126,14 @@ export default function SideNavigation() {
             <span className="text-sm font-medium truncate">{usuario?.name}</span>
             <Link
               href={'/dashboard/users/edit/' + usuario?.id}
-              className="text-xs text-orange-400 hover:text-orange-300 whitespace-nowrap"
+              aria-current={onProfile ? 'page' : undefined}
+              className={`whitespace-nowrap text-xs transition ${
+                onProfile
+                  ? 'font-semibold text-orange-300'
+                  : 'text-orange-400 hover:text-orange-300'
+              }`}
             >
-              Editar perfil
+              {onProfile ? '● Editando tu perfil' : 'Editar perfil'}
             </Link>
           </div>
         </div>
