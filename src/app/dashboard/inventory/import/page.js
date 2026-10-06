@@ -58,7 +58,14 @@ export default function ImportInventory() {
 
   const company = usuario?.company || {};
   const pf = getProductFields(company.type, company.typeProductFields);
-  const hasOnlineStore = !!(company.websiteEnabled && company.domain);
+  // Cómo maneja el stock esta vertical:
+  //  - 'color'  → por color (y talla en ropa/calzado): varias filas con el mismo
+  //    producto se agrupan en un producto con varias variantes.
+  //  - 'weight' → por peso (cantidad decimal, con unidad kg/libra/arroba).
+  //  - 'simple' → una sola cantidad.
+  const variantType = pf.variantType || 'simple';
+  const isColor = variantType === 'color';
+  const isWeight = variantType === 'weight';
 
   // Campos del CRM a los que se pueden mapear columnas del Excel, según la vertical.
   const FIELDS = useMemo(() => {
@@ -84,9 +91,9 @@ export default function ImportInventory() {
       },
       {
         key: 'stock',
-        label: 'Cantidad / stock',
+        label: isWeight ? 'Cantidad (peso)' : 'Cantidad / stock',
         num: true,
-        syn: ['stock', 'cantidad', 'existencias', 'inventario', 'qty', 'quantity', 'unidades', 'cant', 'existencia'],
+        syn: ['stock', 'cantidad', 'existencias', 'inventario', 'qty', 'quantity', 'unidades', 'cant', 'existencia', 'peso'],
       },
       pf.category && {
         key: 'categoryName',
@@ -108,12 +115,17 @@ export default function ImportInventory() {
         label: 'Código de barras',
         syn: ['codigo', 'codigo de barras', 'barcode', 'ean', 'cod', 'referencia', 'ref', 'codigo barras'],
       },
-      pf.variantType === 'color' && {
+      isColor && {
         key: 'color',
         label: 'Color',
         syn: ['color', 'colour'],
       },
-      pf.variantType === 'weight' && {
+      isColor && pf.size && {
+        key: 'size',
+        label: 'Talla',
+        syn: ['talla', 'size', 'numero', 'num'],
+      },
+      isWeight && {
         key: 'unit',
         label: 'Unidad (KG/LIBRA/ARROBA)',
         syn: ['unidad', 'medida', 'unit', 'um'],
@@ -134,21 +146,9 @@ export default function ImportInventory() {
         label: 'Descripción',
         syn: ['descripcion', 'detalle', 'description', 'observacion', 'nota'],
       },
-      hasOnlineStore && {
-        key: 'onlinePrice',
-        label: 'Precio tienda online',
-        num: true,
-        syn: ['precio online', 'precio tienda online', 'online price', 'precio web'],
-      },
-      hasOnlineStore && pf.oldPrice && {
-        key: 'oldPrice',
-        label: 'Precio anterior (tachado)',
-        num: true,
-        syn: ['precio anterior', 'antes', 'precio tachado', 'old price', 'antiguo'],
-      },
     ].filter(Boolean);
     return list;
-  }, [pf, hasOnlineStore, t.product]);
+  }, [pf, isColor, isWeight, t.product]);
 
   const [step, setStep] = useState('upload'); // upload | map | importing | done
   const [fileName, setFileName] = useState('');
@@ -219,23 +219,81 @@ export default function ImportInventory() {
     }
   };
 
-  // Construye las filas normalizadas listas para el backend.
+  // Campos a nivel de PRODUCTO (los de variante —color/talla/stock— se manejan
+  // aparte según la vertical).
+  const PRODUCT_KEYS = [
+    'name',
+    'salePrice',
+    'purchasePrice',
+    'categoryName',
+    'brandName',
+    'providerName',
+    'barcode',
+    'localName',
+    'minStock',
+    'description',
+    'unit',
+  ];
+
+  // Construye los productos normalizados listos para el backend, ADAPTANDO el
+  // stock a la vertical: por color/talla (agrupa filas del mismo producto en
+  // varias variantes) o una sola cantidad (peso/simple).
   const buildItems = () => {
     const get = (row, key) => {
       const idx = mapping[key];
       if (idx === '' || idx === undefined || idx === null) return '';
       return row[idx] ?? '';
     };
-    return rows
+    // Fila → objeto con todos los campos mapeados.
+    const raw = rows
       .map((row, i) => {
-        const item = { row: i + 2 };
+        const o = { row: i + 2 };
         FIELDS.forEach((f) => {
-          const raw = get(row, f.key);
-          item[f.key] = f.num ? parseNumber(raw) : String(raw).trim();
+          const v = get(row, f.key);
+          o[f.key] = f.num ? parseNumber(v) : String(v).trim();
         });
-        return item;
+        return o;
       })
-      .filter((it) => it.name || it.salePrice); // descarta filas totalmente vacías
+      .filter((o) => o.name); // debe tener al menos nombre
+
+    const pick = (o) => {
+      const p = { row: o.row };
+      PRODUCT_KEYS.forEach((k) => {
+        if (o[k] !== undefined) p[k] = o[k];
+      });
+      return p;
+    };
+
+    if (!isColor) {
+      // Peso / simple: cada fila es un producto con UNA variante cantidad.
+      return raw.map((o) => {
+        const p = pick(o);
+        p.variants = [{ color: 'ÚNICO', stock: Number(o.stock) || 0 }];
+        return p;
+      });
+    }
+
+    // Color (y talla en ropa/calzado): se agrupan las filas con el MISMO nombre
+    // en un producto con varias variantes.
+    const groups = new Map();
+    for (const o of raw) {
+      const key = o.name.toLowerCase();
+      if (!groups.has(key)) {
+        const p = pick(o);
+        p.variants = [];
+        groups.set(key, p);
+      }
+      const p = groups.get(key);
+      const color = (o.color || '').trim() || 'ÚNICO';
+      const size = pf.size ? (o.size || '').trim() || null : null;
+      const stock = Number(o.stock) || 0;
+      const same = p.variants.find(
+        (v) => v.color === color && (v.size || null) === (size || null),
+      );
+      if (same) same.stock += stock;
+      else p.variants.push({ color, ...(size ? { size } : {}), stock });
+    }
+    return [...groups.values()];
   };
 
   const missingRequired = FIELDS.filter(
@@ -263,16 +321,17 @@ export default function ImportInventory() {
   // Descarga la plantilla ideal (xlsx) con las columnas de ESTA vertical + ejemplos.
   const downloadTemplate = () => {
     const cols = FIELDS.map((f) => f.label + (f.required ? ' *' : ''));
-    const example1 = FIELDS.map((f) => {
-      switch (f.key) {
+    // Valor de ejemplo por campo, pudiendo variar por "variante" (color/talla).
+    const val = (key, variant = {}) => {
+      switch (key) {
         case 'name':
-          return 'Ejemplo producto 1';
+          return variant.name ?? 'Ejemplo producto 1';
         case 'salePrice':
           return 50000;
         case 'purchasePrice':
           return 30000;
         case 'stock':
-          return 10;
+          return variant.stock ?? (isWeight ? 12.5 : 10);
         case 'categoryName':
           return 'General';
         case 'brandName':
@@ -282,36 +341,62 @@ export default function ImportInventory() {
         case 'barcode':
           return '7701234567890';
         case 'color':
-          return 'Negro';
+          return variant.color ?? 'Negro';
+        case 'size':
+          return variant.size ?? 'M';
         case 'unit':
           return 'KG';
-        case 'localName':
-          return '';
         case 'minStock':
           return 2;
         case 'description':
           return 'Descripción opcional';
-        case 'onlinePrice':
-          return 48000;
-        case 'oldPrice':
-          return 70000;
         default:
           return '';
       }
-    });
-    const example2 = FIELDS.map((f) =>
-      f.key === 'name'
-        ? 'Ejemplo producto 2'
-        : f.key === 'salePrice'
-          ? 25000
-          : f.key === 'stock'
-            ? 5
-            : '',
-    );
+    };
+    const rowFor = (variant) => FIELDS.map((f) => val(f.key, variant));
+
+    const exampleRows = isColor
+      ? [
+          // Mismo producto en 2 filas → se agrupa en 2 variantes (color/talla).
+          rowFor({ name: 'Camiseta ejemplo', color: 'Negro', size: 'M', stock: 10 }),
+          rowFor({ name: 'Camiseta ejemplo', color: 'Blanco', size: 'L', stock: 7 }),
+          rowFor({ name: 'Producto ejemplo 2', color: 'Rojo', size: 'S', stock: 5 }),
+        ]
+      : [
+          rowFor({ name: 'Ejemplo producto 1' }),
+          rowFor({ name: 'Ejemplo producto 2', stock: isWeight ? 8 : 5 }),
+        ];
+
     const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.aoa_to_sheet([cols, example1, example2]);
+    const ws = XLSX.utils.aoa_to_sheet([cols, ...exampleRows]);
     ws['!cols'] = cols.map(() => ({ wch: 22 }));
     XLSX.utils.book_append_sheet(wb, ws, 'Inventario');
+
+    // Hoja de instrucciones (no se importa).
+    const tips = [
+      ['Cómo llenar la plantilla'],
+      ['Los campos con * son obligatorios: nombre y precio de venta.'],
+      ['Puedes usar tus propios nombres de columna: el sistema los detecta.'],
+      [
+        'Categoría, marca y proveedor: si no existen, se crean automáticamente al importar.',
+      ],
+    ];
+    if (isColor) {
+      tips.push([
+        pf.size
+          ? 'Para varios colores/tallas de un mismo producto, repite el NOMBRE en varias filas y cambia Color/Talla y Cantidad.'
+          : 'Para varios colores de un mismo producto, repite el NOMBRE en varias filas y cambia Color y Cantidad.',
+      ]);
+    } else if (isWeight) {
+      tips.push([
+        'La Cantidad admite decimales (ej: 12.5) y la Unidad es kg/libra/arroba.',
+      ]);
+    }
+    const wsTips = XLSX.utils.aoa_to_sheet(tips);
+    wsTips['!cols'] = [{ wch: 90 }];
+    XLSX.utils.book_append_sheet(wb, wsTips, 'Instrucciones');
+
     XLSX.writeFile(wb, 'plantilla-inventario.xlsx');
   };
 
@@ -404,6 +489,16 @@ export default function ImportInventory() {
               Cambiar archivo
             </button>
           </div>
+
+          {isColor && (
+            <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+              Este negocio maneja stock por {pf.size ? 'color y talla' : 'color'}.
+              Para varias variantes de un mismo producto, <b>repite el nombre</b>{' '}
+              en varias filas y cambia{' '}
+              {pf.size ? 'el color/talla' : 'el color'} y la cantidad — se
+              agruparán en un solo producto.
+            </div>
+          )}
 
           <div className="rounded-2xl border border-gray-200 bg-white p-4">
             <p className="mb-1 text-sm font-bold text-gray-800">
