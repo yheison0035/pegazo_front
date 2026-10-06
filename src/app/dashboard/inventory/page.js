@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { ArrowUpTrayIcon } from '@heroicons/react/24/outline';
 import useLiveRefresh from '@/hooks/useLiveRefresh';
 import {
   beginBackgroundRefresh,
@@ -150,7 +152,16 @@ export default function Inventory() {
           Listado de {t.productPlural}
         </h1>
         {can('inventory', 'create') && (
-          <Header type={t.product.toLowerCase()} typeUrl="inventory" />
+          <div className="flex items-center gap-2">
+            <Link
+              href="/dashboard/inventory/import"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-orange-300 hover:text-orange-600"
+            >
+              <ArrowUpTrayIcon className="h-4 w-4" />
+              Importar Excel
+            </Link>
+            <Header type={t.product.toLowerCase()} typeUrl="inventory" />
+          </div>
         )}
       </div>
 

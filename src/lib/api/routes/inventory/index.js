@@ -23,6 +23,16 @@ export async function getProductById(id) {
   return apiFetch(`/inventory/${id}`);
 }
 
+// Carga masiva por Excel: envía las filas YA normalizadas (el front parsea y
+// mapea las columnas del cliente). Devuelve { data: { total, created, failed,
+// errors } }.
+export async function bulkImportProducts(items) {
+  return apiFetch('/inventory/bulk-import', {
+    method: 'POST',
+    body: JSON.stringify({ items }),
+  });
+}
+
 // Productos con stock bajo (stock total <= alerta de stock mínimo).
 export async function restockProduct(id, amount) {
   return apiFetch(`/inventory/${id}/restock`, {
