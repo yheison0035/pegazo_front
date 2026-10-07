@@ -88,6 +88,31 @@ export default function VerifyCodeSaleClient() {
   const c = sale.company || {};
   const local = sale.local || {};
 
+  // Estado legible (en vez del enum crudo).
+  const STATUS_LABEL = {
+    PAGADA: 'Pagada',
+    PLAN_SEPARE: 'Plan separe',
+    FIADO: 'Crédito (fiado)',
+    PENDIENTE: 'Pendiente',
+    EN_VALIDACION: 'En validación',
+    RECHAZADA: 'Rechazada',
+    VENCIDO: 'Vencido',
+    REEMBOLSADO: 'Reembolsado',
+    ANULADO: 'Anulado',
+  };
+  const statusLabel = STATUS_LABEL[sale.paymentStatus] || sale.paymentStatus;
+  const statusBadge =
+    sale.paymentStatus === 'PAGADA'
+      ? 'bg-emerald-50 text-emerald-700'
+      : sale.isLayaway
+        ? 'bg-orange-50 text-orange-700'
+        : 'bg-amber-50 text-amber-700';
+  // Progreso de pago del apartado.
+  const pct =
+    sale.isLayaway && sale.totalAmount > 0
+      ? Math.min(100, Math.round((Number(sale.paid) / Number(sale.totalAmount)) * 100))
+      : 0;
+
   return (
     <div className="min-h-screen bg-gray-100 px-4 py-8 print:bg-white print:p-0">
       <style>{`
@@ -109,16 +134,21 @@ export default function VerifyCodeSaleClient() {
       </div>
 
       <div className="mx-auto max-w-2xl overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-xl print:max-w-full print:rounded-none print:border-0 print:shadow-none">
-        {/* Sello de verificación */}
-        <div className="flex items-center gap-3 bg-emerald-600 px-6 py-4 text-white">
+        {/* Sello de verificación (verde para factura, ámbar para plan separe) */}
+        <div
+          className={`flex items-center gap-3 px-6 py-4 text-white ${
+            sale.isLayaway ? 'bg-amber-500' : 'bg-emerald-600'
+          }`}
+        >
           <ShieldCheckIcon className="h-8 w-8 flex-none" />
           <div>
             <p className="text-sm font-bold uppercase tracking-wide">
-              Factura verificada
+              {sale.isLayaway ? 'Plan separe verificado' : 'Factura verificada'}
             </p>
-            <p className="text-xs text-emerald-50">
-              Este comprobante es auténtico y está registrado en nuestro
-              sistema.
+            <p className="text-xs text-white/80">
+              {sale.isLayaway
+                ? 'Apartado en curso, registrado en nuestro sistema.'
+                : 'Este comprobante es auténtico y está registrado en nuestro sistema.'}
             </p>
           </div>
         </div>
@@ -173,15 +203,7 @@ export default function VerifyCodeSaleClient() {
             icon={CalendarDaysIcon}
             value={formatDateTime(sale.saleDate)}
           />
-          <Field
-            label="Estado"
-            value={sale.paymentStatus}
-            badge={
-              sale.paymentStatus === 'PAGADA'
-                ? 'bg-emerald-50 text-emerald-700'
-                : 'bg-amber-50 text-amber-700'
-            }
-          />
+          <Field label="Estado" value={statusLabel} badge={statusBadge} />
           <Field
             label="Cliente"
             icon={UserIcon}
@@ -198,50 +220,72 @@ export default function VerifyCodeSaleClient() {
           {sale.seller && <Field label="Atendido por" value={sale.seller} />}
         </div>
 
-        {/* Plan separe (apartado): abonado y saldo pendiente */}
+        {/* Plan separe (apartado): progreso, abonado y saldo pendiente */}
         {sale.isLayaway && (
-          <div className="mx-6 mb-2 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3">
-            <p className="text-xs font-bold uppercase tracking-wide text-orange-700">
-              Plan separe (apartado)
+          <div className="mx-6 mb-2 rounded-2xl border border-orange-200 bg-gradient-to-br from-orange-50 to-amber-50 px-5 py-4">
+            <p className="text-xs font-extrabold uppercase tracking-wide text-orange-700">
+              Plan separe · apartado en curso
             </p>
             <p className="mt-0.5 text-[11px] text-orange-700/80">
-              Este comprobante es de un apartado en curso; la factura final se
-              entrega al completar el pago.
+              La factura final se entrega al completar el pago.
             </p>
-            <div className="mt-2 grid grid-cols-3 gap-2 text-sm">
+
+            <div className="mt-3 grid grid-cols-3 gap-3">
               <div>
-                <p className="text-[10px] uppercase text-gray-500">Total</p>
-                <p className="font-bold text-gray-900">
+                <p className="text-[10px] uppercase tracking-wide text-gray-500">
+                  Total
+                </p>
+                <p className="text-lg font-extrabold text-gray-900">
                   {formatCOP(sale.totalAmount)}
                 </p>
               </div>
               <div>
-                <p className="text-[10px] uppercase text-gray-500">Abonado</p>
-                <p className="font-bold text-emerald-600">
+                <p className="text-[10px] uppercase tracking-wide text-gray-500">
+                  Abonado
+                </p>
+                <p className="text-lg font-extrabold text-emerald-600">
                   {formatCOP(sale.paid)}
                 </p>
               </div>
               <div>
-                <p className="text-[10px] uppercase text-gray-500">
-                  Saldo pendiente
+                <p className="text-[10px] uppercase tracking-wide text-gray-500">
+                  Saldo
                 </p>
-                <p className="font-bold text-orange-700">
+                <p className="text-lg font-extrabold text-orange-700">
                   {formatCOP(sale.saldo)}
                 </p>
               </div>
             </div>
 
+            {/* Barra de progreso de pago */}
+            <div className="mt-3">
+              <div className="mb-1 flex justify-between text-[11px] font-semibold text-gray-500">
+                <span>Pagado {pct}%</span>
+                {sale.saldo > 0 ? (
+                  <span>Faltan {formatCOP(sale.saldo)}</span>
+                ) : (
+                  <span className="text-emerald-600">Listo para entregar</span>
+                )}
+              </div>
+              <div className="h-2.5 w-full overflow-hidden rounded-full bg-orange-100">
+                <div
+                  className="h-full rounded-full bg-emerald-500 transition-all"
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
+            </div>
+
             {/* Abonos realizados (con fecha) */}
             {sale.payments?.length > 0 && (
-              <div className="mt-3 border-t border-orange-200 pt-2">
-                <p className="mb-1 text-[10px] font-semibold uppercase text-orange-700">
+              <div className="mt-4">
+                <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-orange-700">
                   Abonos realizados
                 </p>
-                <ul className="divide-y divide-orange-100">
+                <ul className="space-y-1">
                   {sale.payments.map((p, i) => (
                     <li
                       key={i}
-                      className="flex items-center justify-between py-1 text-xs"
+                      className="flex items-center justify-between rounded-lg bg-white/70 px-3 py-1.5 text-xs"
                     >
                       <span className="text-gray-600">
                         {formatDateTime(p.paidAt)}
@@ -249,7 +293,7 @@ export default function VerifyCodeSaleClient() {
                           <span className="text-gray-400"> · {p.method}</span>
                         ) : null}
                       </span>
-                      <span className="font-semibold text-emerald-600">
+                      <span className="font-bold text-emerald-600">
                         {formatCOP(p.amount)}
                       </span>
                     </li>
@@ -305,9 +349,9 @@ export default function VerifyCodeSaleClient() {
               <span>{formatCOP(sale.subtotal)}</span>
             </div>
             {sale.discount > 0 && (
-              <div className="flex justify-between text-gray-500">
+              <div className="my-1 flex items-center justify-between rounded-lg border border-dashed border-emerald-300 bg-emerald-50 px-3 py-1.5 font-bold text-emerald-700">
                 <span>Descuento</span>
-                <span>- {formatCOP(sale.discount)}</span>
+                <span>− {formatCOP(sale.discount)}</span>
               </div>
             )}
             {/* Desglose fiscal cuando la empresa cobra IVA */}
