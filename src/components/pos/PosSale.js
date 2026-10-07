@@ -140,6 +140,12 @@ export default function PosSale({
   const [dueDate, setDueDate] = useState(initial?.dueDate || '');
   // Efectivo recibido (para calcular el vuelto). Solo ayuda al cajero.
   const [cashReceived, setCashReceived] = useState('');
+  // Tipo de venta: 'contado' (normal) o 'layaway' (plan separe / apartado). En
+  // plan separe la venta NO descuenta stock hasta entregarse y el cliente abona;
+  // solo aplica a negocios con productos.
+  const [saleType, setSaleType] = useState('contado');
+  // Abono inicial que entrega el cliente al crear el apartado (opcional).
+  const [initialPayment, setInitialPayment] = useState('');
   const [saleDate, setSaleDate] = useState(
     initial?.saleDate || nowLocalDatetime()
   );
@@ -471,6 +477,13 @@ export default function PosSale({
     Number(String(cashReceived).replace(/[^\d]/g, '')) || 0;
   const change = cashReceivedNum - total;
 
+  const isLayaway = saleType === 'layaway';
+  // Abono inicial del plan separe (se topa al total).
+  const initialPaymentNum = Math.min(
+    Number(String(initialPayment).replace(/[^\d]/g, '')) || 0,
+    total
+  );
+
   const clearAll = () => {
     setCart([]);
     setCustomer(null);
@@ -519,18 +532,28 @@ export default function PosSale({
       const created = await onSubmit({
         paymentMethod,
         paymentMethodCatalogId: paymentMethodCatalogId || undefined,
-        paymentStatus: paymentMethod === 'CREDITO' ? 'FIADO' : 'PAGADA',
-        dueDate: paymentMethod === 'CREDITO' && dueDate ? dueDate : null,
+        // Plan separe: se guarda como PLAN_SEPARE (no descuenta stock ni entra a
+        // Ventas realizadas hasta entregarse). Contado/fiado como siempre.
+        paymentStatus: isLayaway
+          ? 'PLAN_SEPARE'
+          : paymentMethod === 'CREDITO'
+            ? 'FIADO'
+            : 'PAGADA',
+        dueDate:
+          !isLayaway && paymentMethod === 'CREDITO' && dueDate ? dueDate : null,
         localId: Number(localId),
         userId: Number(sellerId) || usuario?.id,
         customerId: customer?.id,
         saleDate,
         notes,
-        // Efectivo recibido (para el cambio/vuelto en la factura impresa).
+        // Efectivo recibido (para el cambio/vuelto en la factura impresa). En
+        // plan separe no aplica (lo que entrega es un abono).
         cashReceived:
-          paymentMethod === 'EFECTIVO' && cashReceivedNum > 0
+          !isLayaway && paymentMethod === 'EFECTIVO' && cashReceivedNum > 0
             ? cashReceivedNum
             : null,
+        // Abono inicial del plan separe (primer SalePayment, a caja si efectivo).
+        initialPayment: isLayaway ? initialPaymentNum : undefined,
         items: cart.map((i) =>
           i.type === 'service'
             ? {
@@ -564,11 +587,21 @@ export default function PosSale({
             message: `La venta se guardó, pero la factura electrónica no se emitió: ${e.message}. Puedes emitirla desde Ventas realizadas.`,
           });
         }
+      } else if (isLayaway) {
+        setAlert({
+          type: 'success',
+          message: 'Plan separe creado. Lo encuentras en Planes separe.',
+          url: '/dashboard/layaway',
+        });
       } else {
         setAlert({ type: 'success', message: successMessage, url: successUrl });
       }
 
-      if (mode === 'new') clearAll();
+      if (mode === 'new') {
+        clearAll();
+        setSaleType('contado');
+        setInitialPayment('');
+      }
     } catch (err) {
       setAlert({ type: 'error', message: err.message || 'Error al guardar' });
     } finally {
@@ -599,7 +632,9 @@ export default function PosSale({
         : `Guardar cambios · ${formatCOP(total)}`
       : submitting
         ? 'Procesando...'
-        : `Cobrar ${formatCOP(total)}${itemCount ? ` · ${itemCount} ít.` : ''}`;
+        : isLayaway
+          ? `Crear plan separe · ${formatCOP(total)}`
+          : `Cobrar ${formatCOP(total)}${itemCount ? ` · ${itemCount} ít.` : ''}`;
 
   // Bloqueo por política de caja (solo al crear; editar no se bloquea).
   if (mode === 'new' && requireCashOpen && dayState !== 'ok') {
@@ -1199,6 +1234,28 @@ export default function PosSale({
                   )}
                 </div>
 
+                {mode === 'new' && !isServiceVertical && (
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {[
+                      { id: 'contado', label: 'Contado' },
+                      { id: 'layaway', label: 'Plan separe' },
+                    ].map((st) => (
+                      <button
+                        key={st.id}
+                        type="button"
+                        onClick={() => setSaleType(st.id)}
+                        className={`rounded-lg px-2 py-1.5 text-xs font-semibold border transition ${
+                          saleType === st.id
+                            ? 'border-orange-400 bg-orange-50 text-orange-700'
+                            : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                        }`}
+                      >
+                        {st.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
                 <div className="grid grid-cols-3 gap-1.5">
                   {(methods.length ? methods : PAYMENT_METHODS).map((pm) => {
                     // Con catálogo: id = id del método, code = comportamiento.
@@ -1230,7 +1287,7 @@ export default function PosSale({
                   })}
                 </div>
 
-                {paymentMethod === 'EFECTIVO' && total > 0 && (
+                {paymentMethod === 'EFECTIVO' && total > 0 && !isLayaway && (
                   <div className="rounded-lg border border-gray-100 bg-gray-50/70 p-2">
                     <label className="text-[11px] font-medium text-gray-500">
                       Efectivo recibido (para el vuelto)
@@ -1276,7 +1333,7 @@ export default function PosSale({
                   </div>
                 )}
 
-                {paymentMethod === 'CREDITO' && (
+                {paymentMethod === 'CREDITO' && !isLayaway && (
                   <div>
                     <label className="text-[11px] font-medium text-gray-500">
                       Fecha de vencimiento (opcional)
@@ -1287,6 +1344,33 @@ export default function PosSale({
                       onChange={(e) => setDueDate(e.target.value)}
                       className="mt-0.5 w-full rounded-lg border border-gray-200 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                     />
+                  </div>
+                )}
+
+                {isLayaway && (
+                  <div className="rounded-lg border border-orange-100 bg-orange-50/60 p-2">
+                    <label className="text-[11px] font-medium text-orange-700">
+                      Abono inicial (opcional) · método: {paymentMethod}
+                    </label>
+                    <input
+                      inputMode="numeric"
+                      value={initialPaymentNum ? formatCOP(initialPaymentNum) : ''}
+                      onChange={(e) => setInitialPayment(e.target.value)}
+                      placeholder="$ 0"
+                      className="mt-0.5 w-full rounded-lg border border-orange-200 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                    />
+                    <div className="mt-1 flex justify-between text-[11px] text-gray-500">
+                      <span>Total del apartado</span>
+                      <span className="font-semibold text-gray-700">
+                        {formatCOP(total)}
+                      </span>
+                    </div>
+                    <div className="mt-0.5 flex justify-between text-[11px]">
+                      <span className="text-gray-500">Saldo tras el abono</span>
+                      <span className="font-semibold text-orange-700">
+                        {formatCOP(Math.max(0, total - initialPaymentNum))}
+                      </span>
+                    </div>
                   </div>
                 )}
 
