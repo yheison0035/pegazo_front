@@ -162,6 +162,12 @@ export const NAVIGATION = [
         roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA', 'VENTAS'],
       },
       {
+        name: 'Planes separe',
+        href: '/dashboard/layaway',
+        icon: ArchiveBoxIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA', 'CAJA'],
+      },
+      {
         name: 'Ventas Realizadas',
         href: '/dashboard/delivered_sales',
         icon: ClipboardDocumentCheckIcon,
@@ -203,12 +209,6 @@ export const NAVIGATION = [
         name: 'Cartera',
         href: '/dashboard/cartera',
         icon: CreditCardIcon,
-        roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA', 'CAJA'],
-      },
-      {
-        name: 'Planes separe',
-        href: '/dashboard/layaway',
-        icon: ArchiveBoxIcon,
         roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA', 'CAJA'],
       },
     ],
