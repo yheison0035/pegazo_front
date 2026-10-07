@@ -901,8 +901,9 @@ export const WIDGET_AUDIENCE = {
   'proximas-citas': 'owner',
   mes: 'owner',
   'por-cobrar': 'owner',
-  // Cumpleaños del equipo: es info de compañeros → NO para el barbero.
-  cumpleanos: 'owner',
+  // Cumpleaños del equipo: lo ve TODO el equipo (incluido el barbero), para
+  // celebrar juntos.
+  cumpleanos: 'all',
   calculadora: 'all',
   'lo-que-debo': 'all',
   'total-a-pagar': 'barber',
