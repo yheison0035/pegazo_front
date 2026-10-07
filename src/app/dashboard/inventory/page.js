@@ -147,12 +147,12 @@ export default function Inventory() {
 
   return (
     <div className="w-full p-4">
-      <div className="flex justify-between mb-4">
-        <h1 className="text-2xl font-semibold">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-xl font-semibold sm:text-2xl">
           Listado de {t.productPlural}
         </h1>
         {can('inventory', 'create') && (
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Link
               href="/dashboard/inventory/import"
               className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-orange-300 hover:text-orange-600"

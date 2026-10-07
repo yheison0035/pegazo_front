@@ -553,7 +553,7 @@ export default function ImportInventory() {
   const previewRows = rows.slice(0, 5);
 
   return (
-    <div className="mx-auto w-full max-w-5xl p-4">
+    <div className="mx-auto w-full max-w-5xl p-3 sm:p-6">
       <button
         onClick={() => router.push('/dashboard/inventory')}
         className="mb-3 inline-flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-gray-700"
@@ -562,7 +562,7 @@ export default function ImportInventory() {
       </button>
 
       <div className="mb-5">
-        <h1 className="text-2xl font-bold text-gray-800">
+        <h1 className="text-xl font-bold text-gray-800 sm:text-2xl">
           Importar {t.productPlural?.toLowerCase() || 'productos'} por Excel
         </h1>
         <p className="mt-1 text-sm text-gray-500">
@@ -700,10 +700,15 @@ export default function ImportInventory() {
 
           {/* Preview */}
           <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
-            <p className="border-b border-gray-100 px-4 py-2.5 text-sm font-bold text-gray-700">
-              Vista previa (primeras {previewRows.length} filas)
-            </p>
-            <div className="overflow-x-auto">
+            <div className="flex items-center justify-between border-b border-gray-100 px-4 py-2.5">
+              <p className="text-sm font-bold text-gray-700">
+                Vista previa (primeras {previewRows.length} filas)
+              </p>
+              <span className="text-[11px] text-gray-400 sm:hidden">
+                desliza →
+              </span>
+            </div>
+            <div className="overflow-x-auto [-webkit-overflow-scrolling:touch]">
               <table className="min-w-full text-sm">
                 <thead>
                   <tr className="bg-gray-50 text-left text-xs font-semibold uppercase text-gray-400">
@@ -748,17 +753,17 @@ export default function ImportInventory() {
             </div>
           )}
 
-          <div className="flex justify-end gap-2">
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <button
               onClick={() => router.push('/dashboard/inventory')}
-              className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50"
+              className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50 sm:w-auto"
             >
               Cancelar
             </button>
             <button
               onClick={doImport}
               disabled={missingRequired.length > 0}
-              className="inline-flex items-center gap-2 rounded-xl bg-orange-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-orange-700 disabled:opacity-50"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-orange-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-orange-700 disabled:opacity-50 sm:w-auto"
             >
               <ArrowUpTrayIcon className="h-5 w-5" />
               Importar {rows.length} filas
@@ -772,7 +777,7 @@ export default function ImportInventory() {
         <div className="flex flex-col items-center justify-center rounded-2xl border border-gray-200 bg-white py-20 text-center">
           <span className="h-14 w-14 animate-spin rounded-full border-4 border-orange-100 border-t-orange-500" />
           <p className="mt-5 text-base font-semibold text-gray-700">
-            Cargando e organizando tu inventario…
+            Cargando y organizando tu inventario…
           </p>
           <p className="mt-1 text-sm text-gray-400">
             No cierres esta ventana. Esto puede tardar según la cantidad de
@@ -826,9 +831,9 @@ export default function ImportInventory() {
                   Descargar errores (CSV)
                 </button>
               </div>
-              <div className="max-h-64 overflow-y-auto">
+              <div className="max-h-64 overflow-auto [-webkit-overflow-scrolling:touch]">
                 <table className="min-w-full text-sm">
-                  <thead className="bg-gray-50 text-left text-xs font-semibold uppercase text-gray-400">
+                  <thead className="sticky top-0 bg-gray-50 text-left text-xs font-semibold uppercase text-gray-400">
                     <tr>
                       <th className="px-3 py-2">Fila</th>
                       <th className="px-3 py-2">Producto</th>
@@ -838,8 +843,10 @@ export default function ImportInventory() {
                   <tbody className="divide-y divide-gray-100">
                     {result.errors.map((e, i) => (
                       <tr key={i}>
-                        <td className="px-3 py-2 text-gray-500">{e.row}</td>
-                        <td className="px-3 py-2 text-gray-700">
+                        <td className="whitespace-nowrap px-3 py-2 text-gray-500">
+                          {e.row}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-2 text-gray-700">
                           {e.name || '—'}
                         </td>
                         <td className="px-3 py-2 text-red-600">{e.message}</td>
@@ -851,7 +858,7 @@ export default function ImportInventory() {
             </div>
           )}
 
-          <div className="flex justify-end gap-2">
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <button
               onClick={() => {
                 setStep('upload');
@@ -859,13 +866,13 @@ export default function ImportInventory() {
                 setHeaders([]);
                 setResult(null);
               }}
-              className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50"
+              className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50 sm:w-auto"
             >
               Cargar otro archivo
             </button>
             <button
               onClick={() => router.push('/dashboard/inventory')}
-              className="rounded-xl bg-orange-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-orange-700"
+              className="w-full rounded-xl bg-orange-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-orange-700 sm:w-auto"
             >
               Ir al inventario
             </button>
