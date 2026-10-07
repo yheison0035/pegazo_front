@@ -447,7 +447,8 @@ export default function ImportInventory() {
         allowBlank: true,
         formulae: [`=Listas!$${ref.letter}$2:$${ref.letter}$${ref.lastRow}`],
         showErrorMessage: false, // permite escribir nombres nuevos
-        showDropDown: true,
+        // OJO: no poner showDropDown (en OOXML está invertido y ocultaría la
+        // flecha); por defecto el desplegable se muestra.
       });
     });
 
