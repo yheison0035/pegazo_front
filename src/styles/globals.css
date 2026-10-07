@@ -205,6 +205,14 @@ button:disabled {
   background: var(--sb-border);
 }
 
+/* Accesibilidad: si el usuario pide "reducir movimiento", el menú no anima. */
+@media (prefers-reduced-motion: reduce) {
+  .pos-sidenav,
+  .pos-sidenav * {
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* AZUL */
 [data-crm-theme='blue'] {
   --sidebar-from: #0b1322;

@@ -52,13 +52,15 @@ export default function SideNavigation() {
         <Bars3Icon className="w-6 h-6 text-[color:var(--color-orange-500)]" />
       </button>
 
-      {/* Fondo oscuro del drawer (solo móvil) */}
-      {isOpen && (
-        <div
-          onClick={() => setIsOpen(false)}
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
-        />
-      )}
+      {/* Fondo oscuro del drawer (solo móvil): siempre montado para poder
+          hacer FADE suave al abrir/cerrar (antes aparecía/desaparecía de golpe). */}
+      <div
+        onClick={() => setIsOpen(false)}
+        aria-hidden="true"
+        className={`fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] md:hidden ${
+          isOpen ? 'opacity-100' : 'pointer-events-none opacity-0'
+        }`}
+      />
 
       <aside
         onMouseEnter={() => setHovered(true)}
@@ -76,7 +78,8 @@ export default function SideNavigation() {
           text-[color:var(--sb-fg)] flex flex-col
           border-r border-[var(--sb-border)]
           shadow-xl
-          transition-[width,transform] duration-300 ease-in-out
+          transition-[width,transform] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]
+          [will-change:width,transform]
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
           md:translate-x-0
         `}
@@ -94,7 +97,7 @@ export default function SideNavigation() {
           />
 
           <div
-            className={`flex flex-col leading-tight min-w-0 transition-all duration-200 ${
+            className={`flex flex-col leading-tight min-w-0 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
               expanded ? 'opacity-100 max-w-[12rem]' : 'opacity-0 max-w-0'
             }`}
           >

@@ -17,7 +17,7 @@ import { PLAN_ORDER } from '@/lib/plans';
 // Clases de la etiqueta de texto: se colapsa (ancho 0 + transparente) cuando el
 // menú está plegado y aparece al expandirlo. Así la transición es suave.
 const labelCls = (expanded) =>
-  `whitespace-nowrap overflow-hidden transition-all duration-200 ${
+  `whitespace-nowrap overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
     expanded ? 'opacity-100 max-w-[12rem] ml-0' : 'opacity-0 max-w-0'
   }`;
 
@@ -116,7 +116,7 @@ export default function NavLinks({ expanded = true }) {
         {sections.map((section) => (
           <div key={section.section} className="mb-3">
             <p
-              className={`px-3 text-[11px] font-semibold uppercase tracking-wider text-[color:var(--sb-fg-faint)] overflow-hidden transition-all duration-200 ${
+              className={`px-3 text-[11px] font-semibold uppercase tracking-wider text-[color:var(--sb-fg-faint)] overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
                 expanded ? 'opacity-100 h-4 mb-2' : 'opacity-0 h-0 mb-0'
               }`}
             >
