@@ -21,6 +21,14 @@ export async function addLayawayPayment(id, dto) {
   });
 }
 
+// Edita los productos de un plan separe activo (no toca stock; recomputa total).
+export async function updateLayawayItems(id, dto) {
+  return apiFetch(`/sales/${id}/layaway-items`, {
+    method: 'PUT',
+    body: JSON.stringify(dto),
+  });
+}
+
 // Entrega manual (botón "Entregar ahora"). force=true entrega aún con saldo.
 export async function completeLayaway(id, dto = {}) {
   return apiFetch(`/sales/${id}/complete-layaway`, {
