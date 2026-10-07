@@ -66,14 +66,14 @@ export default function NavLinks({ expanded = true }) {
             })
           }
           title={link.name}
-          className={`${rowBase} ${pad} text-white/35 hover:text-white/70 hover:bg-white/5`}
+          className={`${rowBase} ${pad} text-[color:var(--sb-fg-faint)] hover:text-[color:var(--sb-fg-muted)] hover:bg-[var(--sb-hover)]`}
         >
-          <LinkIcon className="w-5 h-5 flex-none text-white/25" />
+          <LinkIcon className="w-5 h-5 flex-none text-[color:var(--sb-fg-faint)]" />
           <span className={`flex-1 text-left ${labelCls(expanded)}`}>
             {link.name}
           </span>
           {expanded && (
-            <LockClosedIcon className="w-4 h-4 flex-none text-amber-400/70" />
+            <LockClosedIcon className="w-4 h-4 flex-none text-[color:var(--color-amber-500)]" />
           )}
         </button>
       );
@@ -86,18 +86,18 @@ export default function NavLinks({ expanded = true }) {
         title={link.name}
         className={`${rowBase} ${pad} ${
           isActive
-            ? 'bg-gradient-to-r from-orange-500/25 to-amber-500/10 text-white shadow-inner'
-            : 'text-white/60 hover:text-white hover:bg-white/5'
+            ? 'bg-[var(--sb-active-bg)] text-[color:var(--sb-active-fg)] font-semibold'
+            : 'text-[color:var(--sb-fg-muted)] hover:text-[color:var(--sb-fg)] hover:bg-[var(--sb-hover)]'
         }`}
       >
         {isActive && (
-          <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] bg-orange-400 rounded-r-full" />
+          <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-r-full bg-[color:var(--color-orange-500)]" />
         )}
         <LinkIcon
           className={`${isChild ? 'w-4 h-4' : 'w-5 h-5'} flex-none transition ${
             isActive
-              ? 'text-orange-400'
-              : 'text-white/50 group-hover/link:text-white'
+              ? 'text-[color:var(--color-orange-500)]'
+              : 'text-[color:var(--sb-icon)] group-hover/link:text-[color:var(--sb-fg)]'
           }`}
         />
         <span className={labelCls(expanded)}>{link.name}</span>
@@ -109,13 +109,15 @@ export default function NavLinks({ expanded = true }) {
     <div className="flex flex-col w-full h-full">
       <nav className="flex flex-col">
         {sections.length === 0 && (
-          <p className="text-white/40 text-sm px-4">Sin módulos disponibles</p>
+          <p className="px-4 text-sm text-[color:var(--sb-fg-faint)]">
+            Sin módulos disponibles
+          </p>
         )}
 
         {sections.map((section) => (
           <div key={section.section} className="mb-3">
             <p
-              className={`text-[11px] uppercase text-white/30 px-3 tracking-wider overflow-hidden transition-all duration-200 ${
+              className={`px-3 text-[11px] font-semibold uppercase tracking-wider text-[color:var(--sb-fg-faint)] overflow-hidden transition-all duration-200 ${
                 expanded ? 'opacity-100 h-4 mb-2' : 'opacity-0 h-0 mb-0'
               }`}
             >
@@ -138,16 +140,16 @@ export default function NavLinks({ expanded = true }) {
 
                 const headerCls = `${rowBase} w-full ${
                   childActive
-                    ? 'text-white'
-                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                    ? 'text-[color:var(--sb-fg)] font-semibold'
+                    : 'text-[color:var(--sb-fg-muted)] hover:text-[color:var(--sb-fg)] hover:bg-[var(--sb-hover)]'
                 }`;
                 const headerInner = (
                   <>
                     <LinkIcon
                       className={`w-5 h-5 flex-none transition ${
                         childActive
-                          ? 'text-orange-400'
-                          : 'text-white/50 group-hover/link:text-white'
+                          ? 'text-[color:var(--color-orange-500)]'
+                          : 'text-[color:var(--sb-icon)] group-hover/link:text-[color:var(--sb-fg)]'
                       }`}
                     />
                     <span className={`flex-1 text-left ${labelCls(expanded)}`}>
@@ -155,7 +157,7 @@ export default function NavLinks({ expanded = true }) {
                     </span>
                     {expanded && (
                       <ChevronRightIcon
-                        className={`w-4 h-4 flex-none text-white/40 transition-transform ${
+                        className={`w-4 h-4 flex-none text-[color:var(--sb-fg-faint)] transition-transform ${
                           isOpen ? 'rotate-90' : ''
                         }`}
                       />
@@ -197,11 +199,11 @@ export default function NavLinks({ expanded = true }) {
       </nav>
 
       {showPlanLink && (
-        <div className="mt-4 border-t border-orange-500/10 pt-3 px-1">
+        <div className="mt-4 border-t border-[var(--sb-border)] pt-3 px-1">
           <Link
             href="/dashboard/upgrade"
             title={canUpgrade ? 'Mejorar mi plan' : 'Cambiar mi plan'}
-            className={`relative flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-amber-300 transition hover:bg-amber-500/10 ${
+            className={`relative flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-[color:var(--color-amber-500)] transition hover:bg-[var(--sb-hover)] ${
               expanded ? '' : 'md:justify-center'
             }`}
           >
@@ -221,7 +223,7 @@ export default function NavLinks({ expanded = true }) {
         <button
           onClick={logout}
           title="Cerrar Sesión"
-          className={`flex items-center w-full gap-3 rounded-xl px-3 py-3 transition text-white/60 hover:text-white hover:bg-red-500/10 cursor-pointer ${
+          className={`flex items-center w-full gap-3 rounded-xl px-3 py-3 transition cursor-pointer text-[color:var(--sb-fg-muted)] hover:bg-red-500/10 hover:text-[color:var(--color-red-600)] ${
             expanded ? '' : 'md:justify-center'
           }`}
         >

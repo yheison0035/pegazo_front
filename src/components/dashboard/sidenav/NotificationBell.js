@@ -67,23 +67,23 @@ export default function NotificationBell({ expanded }) {
   if (!enabled) return null;
 
   return (
-    <div className="border-t border-white/10 px-2 py-3">
+    <div className="border-t border-[var(--sb-border)] px-2 py-3">
       <button
         type="button"
         onClick={() => router.push('/dashboard/notifications')}
         title="Notificaciones"
         className={`relative flex w-full items-center gap-3 rounded-xl px-3 py-2 transition ${
           active
-            ? 'bg-gradient-to-r from-orange-500/25 to-amber-500/10 text-white shadow-inner'
-            : 'text-gray-300 hover:bg-white/10 hover:text-white'
+            ? 'bg-[var(--sb-active-bg)] font-semibold text-[color:var(--sb-active-fg)]'
+            : 'text-[color:var(--sb-fg-muted)] hover:bg-[var(--sb-hover)] hover:text-[color:var(--sb-fg)]'
         }`}
       >
         {active && (
-          <span className="absolute left-0 top-1/2 h-6 w-[3px] -translate-y-1/2 rounded-r-full bg-orange-400" />
+          <span className="absolute left-0 top-1/2 h-6 w-[3px] -translate-y-1/2 rounded-r-full bg-[color:var(--color-orange-500)]" />
         )}
         <span className="relative flex-none">
           <BellIcon
-            className={`h-6 w-6 ${unread > 0 ? 'text-orange-300' : 'text-gray-300'}`}
+            className={`h-6 w-6 ${unread > 0 ? 'text-[color:var(--color-orange-500)]' : 'text-[color:var(--sb-icon)]'}`}
           />
           {unread > 0 && (
             <span className="absolute -right-1.5 -top-1.5 flex min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold leading-[18px] text-white">

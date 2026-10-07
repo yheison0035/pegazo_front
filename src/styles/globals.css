@@ -170,6 +170,41 @@ button:disabled {
   --sidebar-to: #0a0805;
 }
 
+/* ============================================================
+   MENÚ LATERAL adaptable a CLARO / OSCURO.
+   Tokens propios del sidebar: por defecto (modo claro) es una superficie
+   CLARA con texto oscuro; en modo oscuro pasa a superficie oscura con texto
+   claro. El acento sigue el tema (--color-orange-* ya remapeado por tema).
+   ============================================================ */
+.pos-sidenav {
+  --sb-bg: #ffffff;
+  --sb-bg-2: #f6f6f9;
+  --sb-border: #ebedf1;
+  --sb-fg: #1f2430; /* texto principal */
+  --sb-fg-muted: #5b6372; /* texto inactivo */
+  --sb-fg-faint: #9aa1ad; /* etiquetas de sección / tenue */
+  --sb-icon: #8b93a1; /* icono inactivo */
+  --sb-hover: rgba(17, 20, 28, 0.05);
+  --sb-active-bg: color-mix(in oklab, var(--color-orange-500) 13%, transparent);
+  --sb-active-fg: var(--color-orange-700);
+}
+[data-theme='dark'] .pos-sidenav {
+  --sb-bg: #12161f;
+  --sb-bg-2: #0a0d14;
+  --sb-border: rgba(255, 255, 255, 0.07);
+  --sb-fg: #f3f5f8;
+  --sb-fg-muted: rgba(255, 255, 255, 0.62);
+  --sb-fg-faint: rgba(255, 255, 255, 0.32);
+  --sb-icon: rgba(255, 255, 255, 0.5);
+  --sb-hover: rgba(255, 255, 255, 0.06);
+  --sb-active-bg: color-mix(in oklab, var(--color-orange-500) 26%, transparent);
+  --sb-active-fg: #ffffff;
+}
+/* Scrollbar del menú acorde al tema. */
+.pos-sidenav .custom-scroll::-webkit-scrollbar-thumb {
+  background: var(--sb-border);
+}
+
 /* AZUL */
 [data-crm-theme='blue'] {
   --sidebar-from: #0b1322;
