@@ -193,6 +193,36 @@ export function printSaleInvoice(sale, usuario, opts = {}) {
     `
     : '';
 
+  // Detalle de abonos del plan separe (con fecha y método).
+  const abonos = isLayaway ? opts?.payments || [] : [];
+  const abonosHTML = abonos.length
+    ? `
+      <div class="section-title">Abonos</div>
+      <table>
+        <thead>
+          <tr>
+            <th style="text-align:left;">Fecha</th>
+            <th style="text-align:left;">Método</th>
+            <th style="text-align:right;">Valor</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${abonos
+            .map(
+              (p) => `
+          <tr>
+            <td style="text-align:left;">${formatDateTime(p?.paidAt)}</td>
+            <td style="text-align:left;">${p?.method || '-'}</td>
+            <td style="text-align:right;">${formatCOP(p?.amount)}</td>
+          </tr>`,
+            )
+            .join('')}
+        </tbody>
+      </table>
+      <hr />
+    `
+    : '';
+
   const totalsHTML =
     (showTax
       ? `
@@ -387,6 +417,8 @@ export function printSaleInvoice(sale, usuario, opts = {}) {
       ${totalsHTML}
 
       <hr />
+
+      ${abonosHTML}
 
       ${
         sale?.notes
