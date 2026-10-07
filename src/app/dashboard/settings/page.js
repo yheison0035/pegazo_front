@@ -648,6 +648,42 @@ const THEMES = [
     desc: 'Elegante y sofisticado.',
     colors: ['#9f1239', '#be123c', '#f59e0b'],
   },
+  {
+    id: 'midnight',
+    name: 'Azul noche',
+    desc: 'Azul oscuro elegante con dorado.',
+    colors: ['#2f5581', '#4f73a1', '#d4af61'],
+  },
+  {
+    id: 'teal',
+    name: 'Verde azulado',
+    desc: 'Sereno y profesional.',
+    colors: ['#14b8a6', '#2dd4bf', '#5eead4'],
+  },
+  {
+    id: 'gold',
+    name: 'Oro',
+    desc: 'Cálido y premium.',
+    colors: ['#d97706', '#f59e0b', '#fbbf24'],
+  },
+  {
+    id: 'forest',
+    name: 'Bosque',
+    desc: 'Verde profundo y sobrio.',
+    colors: ['#3a7d3a', '#5a9d5a', '#8fbf8f'],
+  },
+  {
+    id: 'coffee',
+    name: 'Café',
+    desc: 'Cálido y acogedor.',
+    colors: ['#8a5e38', '#a67c52', '#cfa06a'],
+  },
+  {
+    id: 'onyx',
+    name: 'Ónix',
+    desc: 'Negro elegante y minimalista.',
+    colors: ['#3f424c', '#6b6d77', '#a9aab1'],
+  },
 ];
 
 function FontSettings() {
