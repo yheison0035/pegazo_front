@@ -44,9 +44,10 @@ export default function SideNavigation() {
       {/* Botón hamburguesa (solo móvil) */}
       <button
         onClick={() => setIsOpen(true)}
-        className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-xl bg-[#0B0F19]/90 backdrop-blur border border-orange-500/20 shadow-lg"
+        aria-label="Abrir menú"
+        className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-xl bg-[var(--color-white)] backdrop-blur border border-[var(--color-gray-200)] shadow-lg"
       >
-        <Bars3Icon className="w-6 h-6 text-orange-400" />
+        <Bars3Icon className="w-6 h-6 text-[color:var(--color-orange-500)]" />
       </button>
 
       {/* Fondo oscuro del drawer (solo móvil) */}
@@ -69,17 +70,17 @@ export default function SideNavigation() {
           fixed top-0 left-0 z-50 h-full
           w-72 ${expanded ? 'md:w-72' : 'md:w-20'}
           overflow-hidden
-          bg-gradient-to-b from-[var(--sidebar-from)] to-[var(--sidebar-to)]
-          text-white flex flex-col
-          border-r border-orange-500/10
-          shadow-2xl
+          bg-gradient-to-b from-[var(--sb-bg)] to-[var(--sb-bg-2)]
+          text-[color:var(--sb-fg)] flex flex-col
+          border-r border-[var(--sb-border)]
+          shadow-xl
           transition-[width,transform] duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
           md:translate-x-0
         `}
       >
         {/* Cabecera: logo + nombre de la empresa */}
-        <div className="flex items-center gap-3 px-4 py-4 border-b border-orange-500/10 min-h-[72px]">
+        <div className="flex items-center gap-3 px-4 py-4 border-b border-[var(--sb-border)] min-h-[72px]">
           <img
             src={
               isPlatform
@@ -87,7 +88,7 @@ export default function SideNavigation() {
                 : usuario?.company?.logo || '/images/no-image.png'
             }
             alt={isPlatform ? 'Pegazo' : 'Company'}
-            className="w-12 h-12 rounded-xl object-contain border border-orange-400/20 shadow flex-none"
+            className="w-12 h-12 rounded-xl object-contain border border-[var(--sb-border)] bg-[var(--sb-bg)] shadow-sm flex-none"
           />
 
           <div
@@ -98,14 +99,15 @@ export default function SideNavigation() {
             <span className="text-sm font-semibold tracking-wide truncate">
               {isPlatform ? 'Pegazo' : usuario?.company?.name || 'Pegazo'}
             </span>
-            <span className="text-[11px] text-orange-400/60">
+            <span className="text-[11px] text-[color:var(--sb-fg-faint)]">
               {isPlatform ? 'Plataforma' : 'Workspace'}
             </span>
           </div>
 
           <button
             onClick={() => setIsOpen(false)}
-            className="md:hidden ml-auto text-white/60 hover:text-white transition"
+            aria-label="Cerrar menú"
+            className="md:hidden ml-auto text-[color:var(--sb-fg-muted)] hover:text-[color:var(--sb-fg)] transition"
           >
             <XMarkIcon className="w-6 h-6" />
           </button>
@@ -114,23 +116,23 @@ export default function SideNavigation() {
         {/* Perfil del usuario: solo visible con el menú desplegado. Colapsado
             se muestra únicamente el logo para mantener el rail limpio. */}
         <div
-          className={`items-center gap-3 px-4 py-3 border-b border-orange-500/10 transition ${
+          className={`items-center gap-3 px-4 py-3 border-b border-[var(--sb-border)] transition ${
             expanded ? 'flex' : 'hidden'
-          } ${onProfile ? 'bg-white/10' : ''}`}
+          } ${onProfile ? 'bg-[var(--sb-hover)]' : ''}`}
         >
           <div className="flex-none">
             <Avatar perfil={usuario} setPerfil={() => {}} size="w-11 h-11" />
           </div>
 
           <div className="flex flex-col min-w-0">
-            <span className="text-sm font-medium truncate">{usuario?.name}</span>
+            <span className="text-sm font-medium truncate text-[color:var(--sb-fg)]">
+              {usuario?.name}
+            </span>
             <Link
               href={'/dashboard/users/edit/' + usuario?.id}
               aria-current={onProfile ? 'page' : undefined}
-              className={`whitespace-nowrap text-xs transition ${
-                onProfile
-                  ? 'font-semibold text-orange-300'
-                  : 'text-orange-400 hover:text-orange-300'
+              className={`whitespace-nowrap text-xs transition text-[color:var(--sb-active-fg)] ${
+                onProfile ? 'font-semibold' : 'opacity-90 hover:opacity-100'
               }`}
             >
               {onProfile ? '● Editando tu perfil' : 'Editar perfil'}
@@ -147,16 +149,16 @@ export default function SideNavigation() {
         <NotificationBell expanded={expanded} />
 
         {/* Modo oscuro (preferencia personal) */}
-        <div className="border-t border-white/10 px-2 py-3">
+        <div className="border-t border-[var(--sb-border)] px-2 py-3">
           <button
             onClick={() => toggleDark()}
             title={dark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-gray-300 transition hover:bg-white/10"
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-[color:var(--sb-fg-muted)] transition hover:bg-[var(--sb-hover)] hover:text-[color:var(--sb-fg)]"
           >
             {dark ? (
-              <SunIcon className="h-6 w-6 flex-none text-amber-300" />
+              <SunIcon className="h-6 w-6 flex-none text-[color:var(--color-amber-500)]" />
             ) : (
-              <MoonIcon className="h-6 w-6 flex-none text-orange-300" />
+              <MoonIcon className="h-6 w-6 flex-none text-[color:var(--color-orange-500)]" />
             )}
             {expanded && (
               <span className="whitespace-nowrap text-sm font-medium">
