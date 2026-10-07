@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import * as XLSX from 'xlsx';
 import {
@@ -15,6 +15,10 @@ import { useAuth } from '@/context/authContext';
 import useTerms from '@/hooks/useTerms';
 import { getProductFields } from '@/config/verticalProfiles';
 import { bulkImportProducts } from '@/lib/api/routes/inventory';
+import { getLocals } from '@/lib/api/routes/locals';
+import { getCategories } from '@/lib/api/routes/categories';
+import { getBrands } from '@/lib/api/routes/brands';
+import { getProviders } from '@/lib/api/routes/providers';
 import { downloadCsv } from '@/utils/exportCsv';
 
 // Normaliza un encabezado para comparar (minúsculas, sin tildes ni símbolos).
@@ -149,6 +153,34 @@ export default function ImportInventory() {
     ].filter(Boolean);
     return list;
   }, [pf, isColor, isWeight, t.product]);
+
+  // Listas ya existentes en la empresa, para los desplegables de la plantilla.
+  const [lists, setLists] = useState({
+    localName: [],
+    categoryName: [],
+    brandName: [],
+    providerName: [],
+  });
+
+  useEffect(() => {
+    const names = (res) =>
+      (res?.data || [])
+        .map((x) => String(x?.name || '').trim())
+        .filter(Boolean);
+    Promise.allSettled([
+      getLocals({ all: true }),
+      getCategories({ all: true }),
+      getBrands({ all: true }),
+      getProviders({ all: true }),
+    ]).then(([lo, ca, br, pr]) => {
+      setLists({
+        localName: lo.status === 'fulfilled' ? names(lo.value) : [],
+        categoryName: ca.status === 'fulfilled' ? names(ca.value) : [],
+        brandName: br.status === 'fulfilled' ? names(br.value) : [],
+        providerName: pr.status === 'fulfilled' ? names(pr.value) : [],
+      });
+    });
+  }, []);
 
   const [step, setStep] = useState('upload'); // upload | map | importing | done
   const [fileName, setFileName] = useState('');
@@ -319,7 +351,18 @@ export default function ImportInventory() {
   };
 
   // Descarga la plantilla ideal (xlsx) con las columnas de ESTA vertical + ejemplos.
-  const downloadTemplate = () => {
+  // Letra de columna de Excel a partir de un índice 1-based (1->A, 27->AA).
+  const colLetter = (n) => {
+    let s = '';
+    while (n > 0) {
+      const m = (n - 1) % 26;
+      s = String.fromCharCode(65 + m) + s;
+      n = Math.floor((n - 1) / 26);
+    }
+    return s;
+  };
+
+  const downloadTemplate = async () => {
     const cols = FIELDS.map((f) => f.label + (f.required ? ' *' : ''));
     // Valor de ejemplo por campo, pudiendo variar por "variante" (color/talla).
     const val = (key, variant = {}) => {
@@ -333,11 +376,11 @@ export default function ImportInventory() {
         case 'stock':
           return variant.stock ?? (isWeight ? 12.5 : 10);
         case 'categoryName':
-          return 'General';
+          return lists.categoryName[0] || 'General';
         case 'brandName':
-          return 'Marca A';
+          return lists.brandName[0] || 'Marca A';
         case 'providerName':
-          return 'Proveedor A';
+          return lists.providerName[0] || 'Proveedor A';
         case 'barcode':
           return '7701234567890';
         case 'color':
@@ -368,19 +411,54 @@ export default function ImportInventory() {
           rowFor({ name: 'Ejemplo producto 2', stock: isWeight ? 8 : 5 }),
         ];
 
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.aoa_to_sheet([cols, ...exampleRows]);
-    ws['!cols'] = cols.map(() => ({ wch: 22 }));
-    XLSX.utils.book_append_sheet(wb, ws, 'Inventario');
+    // ExcelJS permite DESPLEGABLES (data validation) con los datos ya existentes,
+    // permitiendo además escribir valores nuevos (showErrorMessage: false).
+    const ExcelJS = (await import('exceljs')).default;
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('Inventario');
+    ws.addRow(cols);
+    exampleRows.forEach((r) => ws.addRow(r));
+    ws.getRow(1).font = { bold: true };
+    cols.forEach((_, i) => (ws.getColumn(i + 1).width = 22));
 
-    // Hoja de instrucciones (no se importa).
+    // Hoja oculta con las listas reales para alimentar los desplegables.
+    const LIST_FIELDS = ['localName', 'categoryName', 'brandName', 'providerName'];
+    const wsListas = wb.addWorksheet('Listas');
+    const listRef = {}; // fieldKey -> { letter, lastRow }
+    let lcol = 1;
+    for (const key of LIST_FIELDS) {
+      const vals = lists[key] || [];
+      const letter = colLetter(lcol);
+      wsListas.getCell(`${letter}1`).value = key;
+      vals.forEach((v, i) => (wsListas.getCell(`${letter}${i + 2}`).value = v));
+      listRef[key] = { letter, lastRow: vals.length + 1 };
+      lcol++;
+    }
+    wsListas.state = 'hidden';
+
+    // Aplica el desplegable a cada columna de lista presente en la plantilla.
+    LIST_FIELDS.forEach((key) => {
+      const idx = FIELDS.findIndex((f) => f.key === key);
+      const ref = listRef[key];
+      if (idx < 0 || !ref || ref.lastRow < 2) return; // sin datos → sin desplegable
+      const letter = colLetter(idx + 1);
+      ws.dataValidations.add(`${letter}2:${letter}1000`, {
+        type: 'list',
+        allowBlank: true,
+        formulae: [`=Listas!$${ref.letter}$2:$${ref.letter}$${ref.lastRow}`],
+        showErrorMessage: false, // permite escribir nombres nuevos
+        showDropDown: true,
+      });
+    });
+
+    // Hoja de instrucciones.
     const tips = [
       ['Cómo llenar la plantilla'],
       ['Los campos con * son obligatorios: nombre y precio de venta.'],
       ['Puedes usar tus propios nombres de columna: el sistema los detecta.'],
-      [
-        'Categoría, marca y proveedor: si no existen, se crean automáticamente al importar.',
-      ],
+      ['Local, categoría, marca y proveedor traen un DESPLEGABLE con lo que ya tienes registrado.'],
+      ['Puedes elegir del desplegable o escribir uno nuevo; si no existe, se crea al importar.'],
+      ['Ojo: escribe bien el nombre del LOCAL para no crear uno repetido por error.'],
     ];
     if (isColor) {
       tips.push([
@@ -393,11 +471,23 @@ export default function ImportInventory() {
         'La Cantidad admite decimales (ej: 12.5) y la Unidad es kg/libra/arroba.',
       ]);
     }
-    const wsTips = XLSX.utils.aoa_to_sheet(tips);
-    wsTips['!cols'] = [{ wch: 90 }];
-    XLSX.utils.book_append_sheet(wb, wsTips, 'Instrucciones');
+    const wsTips = wb.addWorksheet('Instrucciones');
+    tips.forEach((t2) => wsTips.addRow(t2));
+    wsTips.getColumn(1).width = 95;
+    wsTips.getRow(1).font = { bold: true };
 
-    XLSX.writeFile(wb, 'plantilla-inventario.xlsx');
+    const buf = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buf], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'plantilla-inventario.xlsx';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
   const previewRows = rows.slice(0, 5);
@@ -441,7 +531,11 @@ export default function ImportInventory() {
               </p>
             </div>
             <button
-              onClick={downloadTemplate}
+              onClick={() =>
+                downloadTemplate().catch(() =>
+                  setError('No se pudo generar la plantilla. Intenta de nuevo.'),
+                )
+              }
               className="inline-flex flex-none items-center gap-2 rounded-xl border border-orange-300 bg-white px-4 py-2 text-sm font-semibold text-orange-600 hover:bg-orange-50"
             >
               <ArrowDownTrayIcon className="h-5 w-5" /> Descargar plantilla
