@@ -27,7 +27,7 @@ export const TOGGLEABLE_MODULES = [
   { key: 'delivered_sales', label: 'Ventas realizadas', group: 'Ventas' },
   { key: 'cash', label: 'Caja (abrir/cerrar)', group: 'Ventas' },
   { key: 'cartera', label: 'Cartera y fiado', group: 'Ventas' },
-  { key: 'layaway', label: 'Planes separe (apartados)', group: 'Ventas' },
+  { key: 'layaway', label: 'Plan separe (apartados)', group: 'Ventas' },
   { key: 'returns', label: 'Devoluciones', group: 'Ventas' },
   { key: 'quotes', label: 'Cotizaciones', group: 'Ventas' },
 

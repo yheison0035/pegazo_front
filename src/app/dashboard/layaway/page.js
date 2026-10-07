@@ -354,7 +354,7 @@ export default function LayawayPage() {
       <div className="w-full p-4">
         <div className="mb-1 flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-xl font-semibold text-gray-800 sm:text-2xl">
-            Planes separe
+            Plan separe
           </h1>
           <Link
             href="/dashboard/sales"
@@ -448,7 +448,7 @@ export default function LayawayPage() {
           <div className="rounded-2xl border border-dashed border-gray-200 bg-white py-14 text-center">
             <ArchiveBoxIcon className="mx-auto h-8 w-8 text-gray-300" />
             <p className="mt-2 text-sm text-gray-500">
-              No hay planes separe activos.
+              No hay ningún plan separe activo.
             </p>
             <p className="mt-1 text-xs text-gray-400">
               Crea uno en Realizar factura (tipo: Plan separe).

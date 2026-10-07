@@ -590,7 +590,7 @@ export default function PosSale({
       } else if (isLayaway) {
         setAlert({
           type: 'success',
-          message: 'Plan separe creado. Lo encuentras en Planes separe.',
+          message: 'Plan separe creado. Lo encuentras en Plan separe.',
           url: '/dashboard/layaway',
         });
       } else {
