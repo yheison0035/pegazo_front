@@ -26,13 +26,10 @@ import { isServicesBusiness } from '@/lib/appointmentsAccess';
 import { downloadCsv } from '@/utils/exportCsv';
 import { formatCOP, formatDateSafe } from '@/lib/api/utils/utils';
 import useDeliveredSales from '@/lib/api/hooks/useDeliveredSales';
-import {
-  getHeaderTableDeliveredSales,
-  viewModalConfig,
-} from '@/lib/api/utils/deliveredSales.config';
+import { getHeaderTableDeliveredSales } from '@/lib/api/utils/deliveredSales.config';
 import ConfirmDeleteModal from '@/components/dashboard/tables/segments/confirmDeleteModal';
 import AlertModal from '@/components/dashboard/modals/alertModal';
-import ViewModal from '../../viewModal';
+import SaleDetailModal from '@/components/dashboard/sales/SaleDetailModal';
 import { printSaleInvoice } from '@/utils/printInvoice';
 import DailySalesReportModal from '@/components/dashboard/modals/dailySalesReportModal';
 import SalesRangeReModal from '@/components/dashboard/modals/salesRangeReModal';
@@ -289,11 +286,11 @@ export default function Delivered_Sales() {
       </div>
 
       {selectedSale && (
-        <ViewModal
-          data={selectedSale}
-          type="delivered_sales"
+        <SaleDetailModal
+          sale={selectedSale}
+          usuario={usuario}
           onClose={() => setSelectedSale(null)}
-          viewModalConfig={viewModalConfig}
+          onPrint={(s) => printSaleInvoice(s, usuario)}
         />
       )}
 
