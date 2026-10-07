@@ -58,6 +58,11 @@ export default function LayawayPage() {
   const [target, setTarget] = useState(null); // plan seleccionado (gestionar)
   const [abono, setAbono] = useState({ amount: '', method: 'EFECTIVO' });
 
+  // Valor del abono en número + saldo que quedaría tras aplicarlo (para el
+  // formato en pesos y la vista previa del modal).
+  const abonoNum = Number(String(abono.amount).replace(/[^\d]/g, '')) || 0;
+  const saldoAfter = target ? Math.max(0, target.saldo - abonoNum) : 0;
+
   const fetchList = useCallback(
     () =>
       getLayaways({
@@ -415,49 +420,126 @@ export default function LayawayPage() {
                   </ul>
                 </div>
 
-                {/* Abonos */}
+                {/* Registrar abono */}
                 {target.saldo > 0 && (
-                  <div className="rounded-2xl border border-gray-100 bg-gray-50/60 p-3">
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
-                      Registrar abono
-                    </p>
-                    <div className="flex flex-wrap items-end gap-2">
-                      <div className="flex-1">
-                        <input
-                          value={abono.amount}
-                          onChange={(e) =>
-                            setAbono((s) => ({
-                              ...s,
-                              amount: e.target.value.replace(/[^\d]/g, ''),
-                            }))
-                          }
-                          placeholder={`Saldo ${formatCOP(target.saldo)}`}
-                          inputMode="numeric"
-                          className={inputCls}
-                        />
-                      </div>
-                      <select
-                        value={abono.method}
-                        onChange={(e) =>
-                          setAbono((s) => ({ ...s, method: e.target.value }))
-                        }
-                        className={`${inputCls} w-auto`}
-                      >
-                        {PAY_METHODS.map((m) => (
-                          <option key={m.id} value={m.id}>
-                            {m.label}
-                          </option>
-                        ))}
-                      </select>
-                      <button
-                        onClick={doAbono}
-                        disabled={busy}
-                        className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-50"
-                      >
-                        <BanknotesIcon className="h-4 w-4" /> Abonar
-                      </button>
+                  <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+                    <div className="mb-3 flex items-center justify-between">
+                      <p className="flex items-center gap-1.5 text-sm font-bold text-gray-800">
+                        <BanknotesIcon className="h-4 w-4 text-emerald-600" />
+                        Registrar abono
+                      </p>
+                      <span className="text-[11px] text-gray-400">
+                        Saldo{' '}
+                        <b className="text-gray-700">
+                          {formatCOP(target.saldo)}
+                        </b>
+                      </span>
                     </div>
-                    <p className="mt-1.5 text-[11px] text-gray-400">
+
+                    {/* Monto (formato en pesos, como el resto de campos) */}
+                    <label className="mb-1 block text-[11px] font-medium text-gray-500">
+                      Monto del abono
+                    </label>
+                    <div className="relative">
+                      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-lg font-bold text-gray-300">
+                        $
+                      </span>
+                      <input
+                        value={
+                          abonoNum ? formatCOP(abonoNum).replace(/[^\d.,]/g, '') : ''
+                        }
+                        onChange={(e) =>
+                          setAbono((s) => ({
+                            ...s,
+                            amount: e.target.value.replace(/[^\d]/g, ''),
+                          }))
+                        }
+                        placeholder="0"
+                        inputMode="numeric"
+                        className="w-full rounded-xl border border-gray-200 py-2.5 pl-8 pr-3 text-lg font-bold tabular-nums text-gray-900 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                      />
+                    </div>
+
+                    {/* Atajos de monto */}
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setAbono((s) => ({
+                            ...s,
+                            amount: String(Math.round(target.saldo)),
+                          }))
+                        }
+                        className="rounded-lg bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-100"
+                      >
+                        Saldar todo · {formatCOP(target.saldo)}
+                      </button>
+                      {[20000, 50000, 100000]
+                        .filter((v) => v < target.saldo)
+                        .map((v) => (
+                          <button
+                            key={v}
+                            type="button"
+                            onClick={() =>
+                              setAbono((s) => ({ ...s, amount: String(v) }))
+                            }
+                            className="rounded-lg bg-gray-100 px-2.5 py-1 text-[11px] font-semibold text-gray-600 hover:bg-gray-200"
+                          >
+                            {formatCOP(v)}
+                          </button>
+                        ))}
+                    </div>
+
+                    {/* Método de pago (pills) */}
+                    <label className="mb-1 mt-3 block text-[11px] font-medium text-gray-500">
+                      Método de pago
+                    </label>
+                    <div className="grid grid-cols-4 gap-1.5">
+                      {PAY_METHODS.map((m) => (
+                        <button
+                          key={m.id}
+                          type="button"
+                          onClick={() =>
+                            setAbono((s) => ({ ...s, method: m.id }))
+                          }
+                          className={`rounded-lg border px-2 py-1.5 text-[11px] font-semibold transition ${
+                            abono.method === m.id
+                              ? 'border-emerald-400 bg-emerald-50 text-emerald-700'
+                              : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                          }`}
+                        >
+                          {m.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Vista previa del saldo tras el abono */}
+                    {abonoNum > 0 && (
+                      <div className="mt-3 flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2 text-sm">
+                        <span className="text-gray-500">Saldo tras el abono</span>
+                        <span
+                          className={`font-bold tabular-nums ${
+                            saldoAfter === 0
+                              ? 'text-emerald-600'
+                              : 'text-gray-900'
+                          }`}
+                        >
+                          {formatCOP(saldoAfter)}
+                        </span>
+                      </div>
+                    )}
+
+                    <button
+                      onClick={doAbono}
+                      disabled={busy || abonoNum <= 0}
+                      className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-50"
+                    >
+                      <BanknotesIcon className="h-4 w-4" />
+                      {saldoAfter === 0 && abonoNum > 0
+                        ? 'Abonar y entregar'
+                        : 'Registrar abono'}
+                    </button>
+                    <p className="mt-1.5 text-center text-[11px] text-gray-400">
                       Si el abono salda el total, se entrega automáticamente.
                     </p>
                   </div>
