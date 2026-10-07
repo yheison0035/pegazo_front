@@ -151,7 +151,7 @@ export function printSaleInvoice(sale, usuario, opts = {}) {
         <td style="width:52%;">
           <div class="it-name">${name}</div>
           ${color ? `<div class="muted sm">${color}</div>` : ''}
-          ${disc > 0 ? `<div class="muted sm">Desc. ${formatCOP(disc)}</div>` : ''}
+          ${disc > 0 ? `<div class="it-disc">Descuento ${formatCOP(disc)}</div>` : ''}
         </td>
         <td style="width:12%; text-align:center;" class="num">${item?.quantity}</td>
         <td style="width:18%; text-align:right;" class="num">${formatCOP(item?.price)}</td>
@@ -182,6 +182,19 @@ export function printSaleInvoice(sale, usuario, opts = {}) {
   // El pie legal (letra de cambio / centrales de riesgo) solo aplica a ventas a
   // crédito (fiado), no a las de contado.
   const isCredito = sale?.paymentStatus === 'FIADO';
+
+  // Descuento total de la venta (suma de descuentos por línea). Se muestra
+  // destacado para que el cliente no se pierda el ahorro.
+  const discountTotal = (sale?.items || []).reduce(
+    (a, i) => a + (Number(i?.discount) || 0),
+    0,
+  );
+  const discountHTML =
+    discountTotal > 0
+      ? `<div class="disc-total"><span>Descuento</span><span class="num">− ${formatCOP(
+          discountTotal,
+        )}</span></div>`
+      : '';
 
   // Plan separe (apartado): se marca el comprobante y se muestra abonado/saldo.
   const isLayaway = sale?.paymentStatus === 'PLAN_SEPARE';
@@ -246,6 +259,7 @@ export function printSaleInvoice(sale, usuario, opts = {}) {
         totalAmount
       )}</span></div>
     `) +
+    discountHTML +
     `<div class="total-box"><span>TOTAL</span><span class="num">${formatCOP(
       totalAmount
     )}</span></div>` +
@@ -331,11 +345,26 @@ export function printSaleInvoice(sale, usuario, opts = {}) {
         }
         tbody td { padding: 4px 0; vertical-align: top; border-bottom: 1px dotted #ececec; }
         .it-name { font-weight: 600; }
+        /* Descuento por ítem: visible, no se pierde */
+        .it-disc { font-size: 11px; font-weight: 700; color: #1b8a4b; margin-top: 1px; }
 
         /* Totales */
         .totals { margin-top: 4px; }
         .totline { display: flex; justify-content: space-between; margin: 2px 0; }
         .totline .k { color: #888; }
+        /* Descuento total: resaltado para que el cliente vea su ahorro */
+        .disc-total {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-top: 5px;
+          padding: 4px 9px;
+          border: 1.5px dashed #1b8a4b;
+          border-radius: 7px;
+          color: #1b8a4b;
+          font-weight: 800;
+          font-size: 12.5px;
+        }
         .total-box {
           display: flex;
           justify-content: space-between;
