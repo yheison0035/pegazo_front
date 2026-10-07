@@ -162,7 +162,7 @@ export const NAVIGATION = [
         roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA', 'VENTAS'],
       },
       {
-        name: 'Planes separe',
+        name: 'Plan separe',
         href: '/dashboard/layaway',
         icon: ArchiveBoxIcon,
         roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA', 'CAJA'],
