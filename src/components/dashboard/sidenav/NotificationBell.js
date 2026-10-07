@@ -15,7 +15,7 @@ import {
 // leídas. Al hacer clic abre el módulo /dashboard/notifications (lista completa
 // con estado leído/no leído). No renderiza panel propio para no quedar recortada
 // por el menú lateral (que usa transform).
-export default function NotificationBell({ expanded }) {
+export default function NotificationBell({ expanded, iconOnly = false }) {
   const { usuario } = useAuth();
   const toast = useToast();
   const router = useRouter();
@@ -65,6 +65,37 @@ export default function NotificationBell({ expanded }) {
   }, [enabled, poll]);
 
   if (!enabled) return null;
+
+  // Modo compacto para la barra fija del pie del menú: icono + mini etiqueta.
+  if (iconOnly) {
+    return (
+      <button
+        type="button"
+        onClick={() => router.push('/dashboard/notifications')}
+        title="Notificaciones"
+        aria-label="Notificaciones"
+        className={`flex flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-2 transition hover:bg-[var(--sb-hover)] ${
+          active
+            ? 'text-[color:var(--sb-active-fg)]'
+            : 'text-[color:var(--sb-fg-muted)] hover:text-[color:var(--sb-fg)]'
+        }`}
+      >
+        <span className="relative flex-none">
+          <BellIcon
+            className={`h-6 w-6 ${unread > 0 ? 'text-[color:var(--color-orange-500)]' : ''}`}
+          />
+          {unread > 0 && (
+            <span className="absolute -right-1.5 -top-1.5 flex min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold leading-[16px] text-white">
+              {unread > 99 ? '99+' : unread}
+            </span>
+          )}
+        </span>
+        {expanded && (
+          <span className="text-[10px] font-medium leading-none">Alertas</span>
+        )}
+      </button>
+    );
+  }
 
   return (
     <div className="border-t border-[var(--sb-border)] px-2 py-3">

@@ -8,6 +8,7 @@ import {
   XMarkIcon,
   MoonIcon,
   SunIcon,
+  ArrowRightOnRectangleIcon,
 } from '@heroicons/react/24/outline';
 import NavLinks from './nav-links';
 import { useAuth } from '@/context/authContext';
@@ -21,6 +22,7 @@ export default function SideNavigation() {
   const [dark, setDark] = useState(false);
   const auth = useAuth();
   const usuario = auth?.usuario;
+  const logout = auth?.logout;
   const pathname = usePathname();
   // ¿Estamos en "Editar mi perfil"? (para marcarlo como activo).
   const onProfile =
@@ -145,27 +147,52 @@ export default function SideNavigation() {
           <NavLinks expanded={expanded} />
         </div>
 
-        {/* Notificaciones in-app (todos los usuarios) */}
-        <NotificationBell expanded={expanded} />
-
-        {/* Modo oscuro (preferencia personal) */}
-        <div className="border-t border-[var(--sb-border)] px-2 py-3">
-          <button
-            onClick={() => toggleDark()}
-            title={dark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-[color:var(--sb-fg-muted)] transition hover:bg-[var(--sb-hover)] hover:text-[color:var(--sb-fg)]"
+        {/* Barra FIJA del pie: Alertas · Tema · Salir. Siempre visible (no entra
+            en el scroll) y compacta, para no quitarle espacio al menú. */}
+        <div className="flex-none border-t border-[var(--sb-border)] px-2 py-2">
+          <div
+            className={
+              expanded
+                ? 'grid grid-cols-3 gap-1'
+                : 'flex flex-col items-center gap-1'
+            }
           >
-            {dark ? (
-              <SunIcon className="h-6 w-6 flex-none text-[color:var(--color-amber-500)]" />
-            ) : (
-              <MoonIcon className="h-6 w-6 flex-none text-[color:var(--color-orange-500)]" />
-            )}
-            {expanded && (
-              <span className="whitespace-nowrap text-sm font-medium">
-                {dark ? 'Modo claro' : 'Modo oscuro'}
-              </span>
-            )}
-          </button>
+            <NotificationBell iconOnly expanded={expanded} />
+
+            <button
+              type="button"
+              onClick={() => toggleDark()}
+              title={dark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+              aria-label={dark ? 'Modo claro' : 'Modo oscuro'}
+              className="flex flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-2 text-[color:var(--sb-fg-muted)] transition hover:bg-[var(--sb-hover)] hover:text-[color:var(--sb-fg)]"
+            >
+              {dark ? (
+                <SunIcon className="h-6 w-6 flex-none text-[color:var(--color-amber-500)]" />
+              ) : (
+                <MoonIcon className="h-6 w-6 flex-none text-[color:var(--color-orange-500)]" />
+              )}
+              {expanded && (
+                <span className="text-[10px] font-medium leading-none">
+                  {dark ? 'Claro' : 'Oscuro'}
+                </span>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => logout?.()}
+              title="Cerrar sesión"
+              aria-label="Cerrar sesión"
+              className="flex flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-2 text-[color:var(--sb-fg-muted)] transition hover:bg-red-500/10 hover:text-[color:var(--color-red-600)]"
+            >
+              <ArrowRightOnRectangleIcon className="h-6 w-6 flex-none" />
+              {expanded && (
+                <span className="text-[10px] font-medium leading-none">
+                  Salir
+                </span>
+              )}
+            </button>
+          </div>
         </div>
       </aside>
     </>

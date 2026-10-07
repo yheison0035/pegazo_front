@@ -4,7 +4,6 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  ArrowLeftOnRectangleIcon,
   LockClosedIcon,
   RocketLaunchIcon,
   ArrowsRightLeftIcon,
@@ -23,7 +22,7 @@ const labelCls = (expanded) =>
   }`;
 
 export default function NavLinks({ expanded = true }) {
-  const { usuario, loading, logout } = useAuth();
+  const { usuario, loading } = useAuth();
   const pathname = usePathname();
 
   // El acceso al plan es del DUEÑO del negocio (SUPER_ADMIN): solo él gestiona
@@ -219,18 +218,9 @@ export default function NavLinks({ expanded = true }) {
         </div>
       )}
 
-      <div className="pb-9 pt-2 px-1">
-        <button
-          onClick={logout}
-          title="Cerrar Sesión"
-          className={`flex items-center w-full gap-3 rounded-xl px-3 py-3 transition cursor-pointer text-[color:var(--sb-fg-muted)] hover:bg-red-500/10 hover:text-[color:var(--color-red-600)] ${
-            expanded ? '' : 'md:justify-center'
-          }`}
-        >
-          <ArrowLeftOnRectangleIcon className="w-5 h-5 flex-none" />
-          <span className={labelCls(expanded)}>Cerrar Sesión</span>
-        </button>
-      </div>
+      {/* "Cerrar sesión" se movió a la barra FIJA del pie del menú (sidenav),
+          para que siempre esté visible y no se pierda al hacer scroll. */}
+      <div className="pb-2" />
     </div>
   );
 }
