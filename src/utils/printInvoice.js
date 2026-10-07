@@ -136,27 +136,29 @@ export function printSaleInvoice(sale, usuario, opts = {}) {
     verifyUrl
   )}`;
 
+  const hidePlaceholder = (c) =>
+    c && !['ÚNICO', 'UNICO', 'GENERAL'].includes(String(c).toUpperCase())
+      ? c
+      : null;
   const itemsHTML = sale.items
-    .map(
-      (item, index) => `
+    .map((item) => {
+      const name =
+        item?.variant?.inventory?.name || item?.service?.name || 'Ítem';
+      const color = hidePlaceholder(item?.variant?.color);
+      const disc = Number(item?.discount) || 0;
+      return `
       <tr>
-        <td style="width:5%;">${index + 1}</td>
-        <td style="width:55%;">
-          ${item?.variant?.inventory?.name || item?.service?.name}
-          <br />
-          <span style="font-size:10px; color:#555;">${item?.variant?.color || '-'}</span>
+        <td style="width:52%;">
+          <div class="it-name">${name}</div>
+          ${color ? `<div class="muted sm">${color}</div>` : ''}
+          ${disc > 0 ? `<div class="muted sm">Desc. ${formatCOP(disc)}</div>` : ''}
         </td>
-        <td style="width:10%; text-align:center;">${item?.quantity}</td>
-        <td style="width:15%; text-align:right;">${formatCOP(item?.price)}</td>
-        <td style="width:15%; text-align:right;">${formatCOP(
-          item?.discount
-        )}</td>
-        <td style="width:15%; text-align:right;">${formatCOP(
-          item?.subtotal
-        )}</td>
+        <td style="width:12%; text-align:center;" class="num">${item?.quantity}</td>
+        <td style="width:18%; text-align:right;" class="num">${formatCOP(item?.price)}</td>
+        <td style="width:18%; text-align:right;" class="num bold">${formatCOP(item?.subtotal)}</td>
       </tr>
-    `
-    )
+    `;
+    })
     .join('');
 
   // Config fiscal de la venta (respeta el IVA que calculó el POS/backend).
@@ -188,8 +190,14 @@ export function printSaleInvoice(sale, usuario, opts = {}) {
     opts?.saldo != null ? Number(opts.saldo) : Math.max(0, totalAmount - paid);
   const layawayTotalsHTML = isLayaway
     ? `
-      <div class="right">Abonado: ${formatCOP(paid)}</div>
-      <div class="right bold">Saldo pendiente: ${formatCOP(saldo)}</div>
+      <div class="totline" style="margin-top:5px;">
+        <span class="k">Abonado</span>
+        <span class="num" style="color:#1b8a4b; font-weight:700;">${formatCOP(paid)}</span>
+      </div>
+      <div class="saldo-box">
+        <span>Saldo pendiente</span>
+        <span class="num">${formatCOP(saldo)}</span>
+      </div>
     `
     : '';
 
@@ -197,12 +205,12 @@ export function printSaleInvoice(sale, usuario, opts = {}) {
   const abonos = isLayaway ? opts?.payments || [] : [];
   const abonosHTML = abonos.length
     ? `
-      <div class="section-title">Abonos</div>
+      <div class="eyebrow">Abonos</div>
       <table>
         <thead>
           <tr>
-            <th style="text-align:left;">Fecha</th>
-            <th style="text-align:left;">Método</th>
+            <th>Fecha</th>
+            <th>Método</th>
             <th style="text-align:right;">Valor</th>
           </tr>
         </thead>
@@ -226,93 +234,142 @@ export function printSaleInvoice(sale, usuario, opts = {}) {
   const totalsHTML =
     (showTax
       ? `
-      <div class="right">Base gravable: ${formatCOP(baseGravable)}</div>
-      <div class="right">IVA: ${formatCOP(taxTotal)}</div>
-      <div class="right bold">Total: ${formatCOP(totalAmount)}</div>
+      <div class="totline"><span class="k">Base gravable</span><span class="num">${formatCOP(
+        baseGravable
+      )}</span></div>
+      <div class="totline"><span class="k">IVA</span><span class="num">${formatCOP(
+        taxTotal
+      )}</span></div>
     `
       : `
-      <div class="right bold">Subtotal: ${formatCOP(totalAmount)}</div>
-      <div class="right bold">Total: ${formatCOP(totalAmount)}</div>
-    `) + layawayTotalsHTML;
+      <div class="totline"><span class="k">Subtotal</span><span class="num">${formatCOP(
+        totalAmount
+      )}</span></div>
+    `) +
+    `<div class="total-box"><span>TOTAL</span><span class="num">${formatCOP(
+      totalAmount
+    )}</span></div>` +
+    layawayTotalsHTML;
 
   const html = `
   <html>
     <head>
       <title>Factura ${sale?.code}</title>
       <style>
-        * {
-          font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-          font-size: 11.5px;
-          line-height: 1.4;
-        }
+        * { box-sizing: border-box; }
 
         body {
+          font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
           margin: 0;
-          padding: 10px;
+          padding: 12px;
           width: 80mm;
-          color: #000;
+          color: #1b1b1b;
+          font-size: 11.5px;
+          line-height: 1.45;
+          -webkit-font-smoothing: antialiased;
         }
 
         .center { text-align: center; }
         .right { text-align: right; }
         .bold { font-weight: 700; }
+        .muted { color: #888; }
+        .sm { font-size: 10px; }
+        .num { font-variant-numeric: tabular-nums; }
 
-        .logo {
-          display: flex;
-          justify-content: center;
-          margin-bottom: 6px;
+        .logo { display: flex; justify-content: center; margin-bottom: 8px; }
+        .logo img { max-width: 110px; height: auto; }
+
+        .biz-name {
+          font-size: 14px;
+          font-weight: 800;
+          letter-spacing: 0.3px;
+          margin-bottom: 1px;
         }
 
-        .logo img {
-          max-width: 120px;
-          height: auto;
-        }
-
-        .qr {
-          display: flex;
-          justify-content: center;
-          margin-top: 6px;
-        }
-
-        .qr img {
-          width: 100px;
-          height: 100px;
-        }
-
+        /* Separador punteado, discreto */
         hr {
           border: none;
-          border-top: 1px solid #000;
-          margin: 6px 0;
+          border-top: 1px dashed #c4c4c4;
+          margin: 9px 0;
         }
 
-        table {
-          width: 100%;
-          border-collapse: collapse;
-        }
-
-        td {
-          padding: 2px 0;
-          vertical-align: top;
-        }
-
-        .section-title {
-          text-align: center;
+        /* Etiqueta de sección (eyebrow) */
+        .eyebrow {
+          font-size: 9px;
           font-weight: 700;
-          margin: 4px 0;
+          letter-spacing: 1.3px;
+          text-transform: uppercase;
+          color: #9a9a9a;
+          margin-bottom: 4px;
         }
 
-        .footer {
-          font-size: 10px;
-          text-align: center;
-          margin-top: 8px;
-          color: #333;
+        /* Sello (Plan separe / Factura) */
+        .stamp {
+          display: inline-block;
+          border: 1.5px solid #1b1b1b;
+          border-radius: 7px;
+          padding: 4px 12px;
+          font-weight: 800;
+          letter-spacing: 0.5px;
+          font-size: 12px;
         }
 
-        @media print {
-          body {
-            width: 80mm;
-          }
+        /* Filas clave:valor */
+        .kv { display: flex; justify-content: space-between; gap: 10px; margin: 2px 0; }
+        .kv .k { color: #888; }
+        .kv .v { font-weight: 600; text-align: right; }
+
+        table { width: 100%; border-collapse: collapse; }
+        thead th {
+          font-size: 9px;
+          text-transform: uppercase;
+          letter-spacing: 0.4px;
+          color: #9a9a9a;
+          font-weight: 700;
+          padding: 0 0 5px;
+          border-bottom: 1px solid #e0e0e0;
         }
+        tbody td { padding: 4px 0; vertical-align: top; border-bottom: 1px dotted #ececec; }
+        .it-name { font-weight: 600; }
+
+        /* Totales */
+        .totals { margin-top: 4px; }
+        .totline { display: flex; justify-content: space-between; margin: 2px 0; }
+        .totline .k { color: #888; }
+        .total-box {
+          display: flex;
+          justify-content: space-between;
+          align-items: baseline;
+          margin-top: 6px;
+          padding-top: 6px;
+          border-top: 2px solid #1b1b1b;
+          font-weight: 800;
+          font-size: 13.5px;
+        }
+        .saldo-box {
+          display: flex;
+          justify-content: space-between;
+          margin-top: 7px;
+          padding: 6px 9px;
+          border: 1.5px solid #1b1b1b;
+          border-radius: 7px;
+          font-weight: 800;
+        }
+
+        .qr { display: flex; justify-content: center; margin-top: 4px; }
+        .qr img { width: 94px; height: 94px; }
+
+        .note-box {
+          border: 1px dashed #d0d0d0;
+          border-radius: 6px;
+          padding: 7px 9px;
+          font-size: 10.5px;
+          text-align: left;
+        }
+
+        .footer { font-size: 9px; text-align: center; margin-top: 10px; color: #9a9a9a; }
+
+        @media print { body { width: 80mm; } }
       </style>
     </head>
     <body>
@@ -327,84 +384,83 @@ export function printSaleInvoice(sale, usuario, opts = {}) {
       </div>
 
       <!-- ENCABEZADO -->
-      <div class="center bold">${usuario?.company?.name || ''}</div>
-      ${usuario?.company?.nit ? `<div class="center">NIT ${usuario.company.nit}</div>` : ''}
-      <div class="center">${sale?.local?.address || ''}</div>
-      ${usuario?.company?.phone ? `<div class="center">+57 ${usuario.company.phone}</div>` : ''}
-      <div class="center">${usuario?.company?.email || ''}</div>
-      <div class="center">Régimen: ${regimenText}</div>
+      <div class="center biz-name">${usuario?.company?.name || ''}</div>
+      ${usuario?.company?.nit ? `<div class="center muted sm">NIT ${usuario.company.nit}</div>` : ''}
+      ${sale?.local?.address ? `<div class="center muted sm">${sale.local.address}</div>` : ''}
+      ${usuario?.company?.phone ? `<div class="center muted sm">+57 ${usuario.company.phone}</div>` : ''}
+      ${usuario?.company?.email ? `<div class="center muted sm">${usuario.company.email}</div>` : ''}
+      <div class="center muted sm">${regimenText}</div>
 
       <hr />
 
       <!-- CLIENTE -->
+      <div class="eyebrow">Cliente</div>
       ${(() => {
         const c = sale?.customer;
         const name = c?.name || opts.customerName;
         if (name) {
-          return `<div class="bold">Cliente: ${name}</div>
-      <div><span class="bold">Documento:</span> ${c?.document || '-------'}</div>
-      <div><span class="bold">Dirección:</span> ${c?.address || '-------'}</div>
-      <div><span class="bold">Ciudad:</span> ${c?.city || '-------'}</div>`;
+          return `<div class="kv"><span class="k">Nombre</span><span class="v">${name}</span></div>
+      <div class="kv"><span class="k">Documento</span><span class="v">${c?.document || '—'}</span></div>
+      ${c?.address ? `<div class="kv"><span class="k">Dirección</span><span class="v">${c.address}</span></div>` : ''}
+      ${c?.city ? `<div class="kv"><span class="k">Ciudad</span><span class="v">${c.city}</span></div>` : ''}`;
         }
         if (opts.plate) {
-          return `<div class="bold">Placa: ${opts.plate}</div>`;
+          return `<div class="kv"><span class="k">Placa</span><span class="v">${opts.plate}</span></div>`;
         }
-        return `<div class="bold">Cliente: NOMBRE DEL CLIENTE</div>
-      <div><span class="bold">Documento:</span> -------</div>
-      <div><span class="bold">Dirección:</span> -------</div>
-      <div><span class="bold">Ciudad:</span> -------</div>`;
+        return `<div class="kv"><span class="k">Nombre</span><span class="v muted">Consumidor final</span></div>`;
       })()}
 
       <hr />
 
       <!-- FACTURA -->
-      <div class="section-title">${
-        isLayaway ? 'PLAN SEPARE (APARTADO)' : 'Factura de venta'
-      }</div>
+      <div class="center" style="margin: 2px 0 5px;">
+        <span class="stamp">${isLayaway ? 'PLAN SEPARE' : 'FACTURA DE VENTA'}</span>
+      </div>
       <div class="center bold">N° ${sale?.code || '000000'}</div>
       ${
         isLayaway
-          ? '<div class="center" style="font-size:10px;color:#555;">Comprobante de apartado — no es la factura final de entrega</div>'
+          ? '<div class="center muted sm">Comprobante de apartado — no es la factura final de entrega</div>'
           : ''
       }
 
       <hr />
 
-      <div><span class="bold">Fecha:</span> ${formatDateTime(
+      <div class="kv"><span class="k">Fecha</span><span class="v">${formatDateTime(
         sale?.saleDate || sale?.createdAt
-      )}</div>
-      <div><span class="bold">Forma de pago:</span> ${
+      )}</span></div>
+      <div class="kv"><span class="k">Forma de pago</span><span class="v">${
         isLayaway
           ? 'Plan separe'
           : sale?.paymentStatus === 'FIADO'
             ? 'Crédito'
             : 'Contado'
-      }</div>
-      <div><span class="bold">Método de pago:</span> ${
-        sale?.paymentMethod || '---'
-      }</div>
+      }</span></div>
+      <div class="kv"><span class="k">Método de pago</span><span class="v">${
+        sale?.paymentMethod || '—'
+      }</span></div>
       ${
         showCash
-          ? `<div><span class="bold">Efectivo recibido:</span> ${formatCOP(
+          ? `<div class="kv"><span class="k">Efectivo recibido</span><span class="v num">${formatCOP(
               cashReceived
-            )}</div>
-      <div><span class="bold">Cambio:</span> ${formatCOP(changeDue)}</div>`
+            )}</span></div>
+      <div class="kv"><span class="k">Cambio</span><span class="v num">${formatCOP(
+        changeDue
+      )}</span></div>`
           : ''
       }
-      <div><span class="bold">Vendedor:</span> ${sale?.user?.name || '---'}</div>
+      <div class="kv"><span class="k">Vendedor</span><span class="v">${sale?.user?.name || '—'}</span></div>
 
       <hr />
 
       <!-- PRODUCTOS -->
+      <div class="eyebrow">Detalle</div>
       <table>
         <thead>
-          <tr class="bold">
-            <td>#</td>
-            <td>Producto</td>
-            <td style="text-align:center;">Cant</td>
-            <td style="text-align:right;">Precio</td>
-            <td style="text-align:right;">Desc.</td>
-            <td style="text-align:right;">Total</td>
+          <tr>
+            <th>Producto</th>
+            <th style="text-align:center;">Cant</th>
+            <th style="text-align:right;">Precio</th>
+            <th style="text-align:right;">Total</th>
           </tr>
         </thead>
         <tbody>
@@ -414,7 +470,7 @@ export function printSaleInvoice(sale, usuario, opts = {}) {
 
       <hr />
 
-      ${totalsHTML}
+      <div class="totals">${totalsHTML}</div>
 
       <hr />
 
@@ -424,34 +480,29 @@ export function printSaleInvoice(sale, usuario, opts = {}) {
         sale?.notes
           ? `
       <!-- OBSERVACIONES -->
-      <div style="
-        border: 1px solid #f2f4f8;
-        padding: 6px;
-        font-size: 11px;
-        text-align: left;
-      ">
-        <div style="font-weight:700; margin-bottom:4px;">
-          Observaciones:
-        </div>
-        <div>
-          ${sale?.notes}
-        </div>
+      <div class="note-box">
+        <div class="eyebrow" style="margin-bottom:3px;">Observaciones</div>
+        <div>${sale?.notes}</div>
       </div>
+
+      <hr />
     `
           : ''
       }
 
       <!-- QR -->
-      <div class="center bold">Verifique su factura</div>
+      <div class="center muted sm">${
+        isLayaway ? 'Consulte su plan separe' : 'Verifique su factura'
+      }</div>
       <div class="qr">
-        <img 
-          src="${qrUrl}" 
-          alt="QR de verificación" 
+        <img
+          src="${qrUrl}"
+          alt="QR de verificación"
           referrerpolicy="no-referrer"
         />
       </div>
-      <div class="center" style="font-size:10px;">
-        Escanee para validar su compra
+      <div class="center muted" style="font-size:9px;">
+        Escanee el código para validar en línea
       </div>
 
       <hr />
