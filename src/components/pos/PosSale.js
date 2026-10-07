@@ -143,7 +143,7 @@ export default function PosSale({
   // Tipo de venta: 'contado' (normal) o 'layaway' (plan separe / apartado). En
   // plan separe la venta NO descuenta stock hasta entregarse y el cliente abona;
   // solo aplica a negocios con productos.
-  const [saleType, setSaleType] = useState('contado');
+  const [saleType, setSaleType] = useState(initial?.saleType || 'contado');
   // Abono inicial que entrega el cliente al crear el apartado (opcional).
   const [initialPayment, setInitialPayment] = useState('');
   const [saleDate, setSaleDate] = useState(
@@ -384,6 +384,11 @@ export default function PosSale({
     setCart((prev) =>
       prev.map((i) => (i.key === key ? { ...i, discount: Math.max(0, d) } : i))
     );
+  // Precio por línea (solo plan separe: precio congelado editable).
+  const setLinePrice = (key, p) =>
+    setCart((prev) =>
+      prev.map((i) => (i.key === key ? { ...i, price: Math.max(0, p) } : i))
+    );
   const removeItem = (key) =>
     setCart((prev) => prev.filter((i) => i.key !== key));
 
@@ -560,11 +565,14 @@ export default function PosSale({
                 serviceId: i.refId,
                 quantity: Number(i.quantity) || 0,
                 discount: Math.round(i.discount) || 0,
+                // En plan separe el precio es editable por línea (congelado).
+                ...(isLayaway ? { priceOverride: Number(i.price) || 0 } : {}),
               }
             : {
                 inventoryVariantId: i.refId,
                 quantity: Number(i.quantity) || 0,
                 discount: Math.round(i.discount) || 0,
+                ...(isLayaway ? { priceOverride: Number(i.price) || 0 } : {}),
               }
         ),
       });
@@ -587,7 +595,7 @@ export default function PosSale({
             message: `La venta se guardó, pero la factura electrónica no se emitió: ${e.message}. Puedes emitirla desde Ventas realizadas.`,
           });
         }
-      } else if (isLayaway) {
+      } else if (isLayaway && mode === 'new') {
         setAlert({
           type: 'success',
           message: 'Plan separe creado. Lo encuentras en Plan separe.',
@@ -1042,9 +1050,26 @@ export default function PosSale({
                               por peso
                             </span>
                           )}
-                          <span className="text-xs text-gray-400">
-                            {formatCOP(i.price)} c/u
-                          </span>
+                          {isLayaway ? (
+                            <span className="flex items-center gap-1 text-xs text-gray-400">
+                              <input
+                                value={i.price ? formatCOP(i.price) : ''}
+                                onChange={(e) =>
+                                  setLinePrice(
+                                    i.key,
+                                    Number(e.target.value.replace(/[^\d]/g, '')) ||
+                                      0
+                                  )
+                                }
+                                className="w-24 rounded border border-gray-200 px-2 py-0.5 text-xs focus:outline-none"
+                              />
+                              c/u
+                            </span>
+                          ) : (
+                            <span className="text-xs text-gray-400">
+                              {formatCOP(i.price)} c/u
+                            </span>
+                          )}
                           <span className="text-sm font-semibold text-gray-800">
                             {formatCOP(line)}
                           </span>
@@ -1364,7 +1389,7 @@ export default function PosSale({
                   </div>
                 )}
 
-                {isLayaway && (
+                {isLayaway && mode === 'new' && (
                   <div className="rounded-lg border border-orange-100 bg-orange-50/60 p-2">
                     <label className="text-[11px] font-medium text-orange-700">
                       Abono inicial (opcional) · método: {paymentMethod}

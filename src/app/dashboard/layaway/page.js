@@ -12,17 +12,19 @@ import {
   UserIcon,
   PlusIcon,
   PencilSquareIcon,
+  PrinterIcon,
 } from '@heroicons/react/24/outline';
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
 import { useAuth } from '@/context/authContext';
 import { formatCOP, formatDateSafe } from '@/lib/api/utils/utils';
 import AlertModal from '@/components/dashboard/modals/alertModal';
-import { searchProducts } from '@/lib/api/routes/sales';
+import useLiveRefresh from '@/hooks/useLiveRefresh';
+import useDeliveredSales from '@/lib/api/hooks/useDeliveredSales';
+import { printSaleInvoice } from '@/utils/printInvoice';
 import {
   getLayaways,
   addLayawayPayment,
-  updateLayawayItems,
   completeLayaway,
   cancelLayaway,
 } from '@/lib/api/routes/layaway';
@@ -37,163 +39,9 @@ const PAY_METHODS = [
 const inputCls =
   'w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20';
 
-// Buscador de productos para editar los ítems del apartado. Agrega filas
-// {inventoryVariantId, name, color, size, quantity, price}.
-function ProductPicker({ items, setItems }) {
-  const [q, setQ] = useState('');
-  const [results, setResults] = useState([]);
-  const [searching, setSearching] = useState(false);
-
-  useEffect(() => {
-    const term = q.trim();
-    if (term.length < 2) {
-      setResults([]);
-      return;
-    }
-    setSearching(true);
-    const t = setTimeout(async () => {
-      try {
-        const res = await searchProducts(term);
-        const list = (res?.data || res || []).filter((r) => r.type !== 'service');
-        setResults(list);
-      } catch {
-        setResults([]);
-      } finally {
-        setSearching(false);
-      }
-    }, 300);
-    return () => clearTimeout(t);
-  }, [q]);
-
-  const add = (r) => {
-    setItems((prev) => {
-      const found = prev.find((i) => i.inventoryVariantId === r.id);
-      if (found)
-        return prev.map((i) =>
-          i.inventoryVariantId === r.id
-            ? { ...i, quantity: i.quantity + 1 }
-            : i,
-        );
-      return [
-        ...prev,
-        {
-          inventoryVariantId: r.id,
-          name: r.name,
-          color: r.color,
-          quantity: 1,
-          price: r.price || 0,
-        },
-      ];
-    });
-    setQ('');
-    setResults([]);
-  };
-
-  const setQty = (id, qty) =>
-    setItems((prev) =>
-      prev.map((i) =>
-        i.inventoryVariantId === id
-          ? { ...i, quantity: Math.max(1, Number(qty) || 1) }
-          : i,
-      ),
-    );
-  const setPrice = (id, price) =>
-    setItems((prev) =>
-      prev.map((i) =>
-        i.inventoryVariantId === id
-          ? { ...i, price: Number(String(price).replace(/[^\d]/g, '')) || 0 }
-          : i,
-      ),
-    );
-  const remove = (id) =>
-    setItems((prev) => prev.filter((i) => i.inventoryVariantId !== id));
-
-  return (
-    <div className="space-y-2">
-      <div className="relative">
-        <MagnifyingGlassIcon className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Buscar producto para agregar…"
-          className={`${inputCls} pl-9`}
-        />
-        {q.trim().length >= 2 && (
-          <div className="absolute z-10 mt-1 max-h-56 w-full overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg">
-            {searching ? (
-              <p className="px-3 py-2 text-xs text-gray-400">Buscando…</p>
-            ) : results.length === 0 ? (
-              <p className="px-3 py-2 text-xs text-gray-400">Sin resultados.</p>
-            ) : (
-              results.map((r) => (
-                <button
-                  key={r.id}
-                  type="button"
-                  onClick={() => add(r)}
-                  className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm hover:bg-orange-50"
-                >
-                  <span className="min-w-0 truncate">
-                    {r.name}
-                    {r.color && r.color !== 'ÚNICO' ? (
-                      <span className="text-gray-400"> · {r.color}</span>
-                    ) : null}
-                  </span>
-                  <span className="flex-none font-semibold text-gray-700">
-                    {formatCOP(r.price)}
-                  </span>
-                </button>
-              ))
-            )}
-          </div>
-        )}
-      </div>
-
-      {items.map((it) => (
-        <div
-          key={it.inventoryVariantId}
-          className="flex flex-wrap items-center gap-2 rounded-xl border border-gray-100 bg-gray-50/60 px-3 py-2"
-        >
-          <span className="min-w-0 flex-1 truncate text-sm font-medium text-gray-800">
-            {it.name}
-            {it.color && it.color !== 'ÚNICO' ? (
-              <span className="text-gray-400"> · {it.color}</span>
-            ) : null}
-          </span>
-          <div className="flex items-center gap-1">
-            <span className="text-[11px] text-gray-400">Cant.</span>
-            <input
-              type="number"
-              min="1"
-              value={it.quantity}
-              onChange={(e) => setQty(it.inventoryVariantId, e.target.value)}
-              className="w-16 rounded-lg border border-gray-200 px-2 py-1 text-sm"
-            />
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="text-[11px] text-gray-400">Precio</span>
-            <input
-              value={formatCOP(it.price)}
-              onChange={(e) => setPrice(it.inventoryVariantId, e.target.value)}
-              className="w-24 rounded-lg border border-gray-200 px-2 py-1 text-sm"
-            />
-          </div>
-          <span className="w-24 text-right text-sm font-bold tabular-nums text-gray-900">
-            {formatCOP(it.price * it.quantity)}
-          </span>
-          <button
-            onClick={() => remove(it.inventoryVariantId)}
-            className="text-gray-300 hover:text-red-500"
-          >
-            <XMarkIcon className="h-4 w-4" />
-          </button>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 export default function LayawayPage() {
   const { usuario } = useAuth();
+  const { getDeliveredSaleById } = useDeliveredSales();
   const isOwner = ['SUPER_ADMIN', 'ADMIN'].includes(usuario?.role);
 
   const [list, setList] = useState([]);
@@ -209,7 +57,6 @@ export default function LayawayPage() {
 
   const [target, setTarget] = useState(null); // plan seleccionado (gestionar)
   const [abono, setAbono] = useState({ amount: '', method: 'EFECTIVO' });
-  const [editItems, setEditItems] = useState(null); // null = no editando
 
   const fetchList = useCallback(
     () =>
@@ -222,11 +69,14 @@ export default function LayawayPage() {
   );
 
   const load = useCallback(async () => {
-    setLoading(true);
     try {
       const res = await fetchList();
       setList(res?.data || []);
       setSummary(res?.summary || null);
+      // Si hay un plan abierto, refresca su contenido en vivo.
+      setTarget((t) =>
+        t ? (res?.data || []).find((l) => l.id === t.id) || null : t,
+      );
     } catch {
       setList([]);
     } finally {
@@ -234,10 +84,14 @@ export default function LayawayPage() {
     }
   }, [fetchList]);
 
+  // Carga con debounce al cambiar filtros.
   useEffect(() => {
     const t = setTimeout(load, 250);
     return () => clearTimeout(t);
   }, [load]);
+
+  // Datos en vivo: se refresca por eventos del backend y al volver el foco.
+  useLiveRefresh(load);
 
   const doAbono = async () => {
     const amount = Number(String(abono.amount).replace(/[^\d]/g, '')) || 0;
@@ -252,10 +106,8 @@ export default function LayawayPage() {
         method: abono.method,
       });
       const settled = !!res?.data?.pagada;
-      const fresh = await fetchList();
-      setList(fresh?.data || []);
-      setSummary(fresh?.summary || null);
       setAbono({ amount: '', method: 'EFECTIVO' });
+      await load();
       if (settled) {
         setTarget(null);
         setAlert({
@@ -263,40 +115,9 @@ export default function LayawayPage() {
           message:
             'Saldado y entregado. Stock descontado y pasó a Ventas realizadas.',
         });
-      } else {
-        const updated = (fresh?.data || []).find((l) => l.id === target.id);
-        setTarget(updated || null);
       }
     } catch (e) {
       setAlert({ type: 'error', message: e?.message || 'No se pudo abonar.' });
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const saveItems = async () => {
-    if (!editItems?.length) {
-      setAlert({ type: 'warning', message: 'Debe quedar al menos un producto.' });
-      return;
-    }
-    setBusy(true);
-    try {
-      await updateLayawayItems(target.id, {
-        items: editItems.map((i) => ({
-          inventoryVariantId: i.inventoryVariantId,
-          quantity: i.quantity,
-          priceOverride: i.price,
-        })),
-      });
-      const fresh = await fetchList();
-      setList(fresh?.data || []);
-      setSummary(fresh?.summary || null);
-      const updated = (fresh?.data || []).find((l) => l.id === target.id);
-      setTarget(updated || null);
-      setEditItems(null);
-      setAlert({ type: 'success', message: 'Productos actualizados.' });
-    } catch (e) {
-      setAlert({ type: 'error', message: e?.message || 'No se pudo guardar.' });
     } finally {
       setBusy(false);
     }
@@ -341,6 +162,16 @@ export default function LayawayPage() {
     }
   };
 
+  // Imprime la factura del plan separe (marcada PLAN SEPARE, con abonado/saldo).
+  const printPlan = async (l) => {
+    try {
+      const { data } = await getDeliveredSaleById(l.id);
+      printSaleInvoice(data, usuario, { paid: l.paid, saldo: l.saldo });
+    } catch (e) {
+      setAlert({ type: 'error', message: e?.message || 'No se pudo imprimir.' });
+    }
+  };
+
   return (
     <RoleGuard
       allowedRoles={[
@@ -371,8 +202,9 @@ export default function LayawayPage() {
           >
             Realizar factura
           </Link>{' '}
-          eligiendo el tipo <b>Plan separe</b>. Aquí se abonan y, al saldar, se
-          entregan (descuentan stock) y pasan a Ventas realizadas.
+          eligiendo el tipo <b>Plan separe</b>. Aquí se abonan, se editan, se
+          imprimen y, al saldar, se entregan (descuentan stock) pasando a Ventas
+          realizadas.
         </p>
 
         {/* Resumen */}
@@ -463,7 +295,6 @@ export default function LayawayPage() {
                 onClick={() => {
                   setTarget(l);
                   setAbono({ amount: '', method: 'EFECTIVO' });
-                  setEditItems(null);
                 }}
                 className="rounded-2xl border border-gray-200 bg-white p-4 text-left shadow-sm transition hover:shadow-md"
               >
@@ -507,10 +338,7 @@ export default function LayawayPage() {
         {target && (
           <div
             className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 p-3 pt-[6vh] backdrop-blur-sm"
-            onClick={() => {
-              setTarget(null);
-              setEditItems(null);
-            }}
+            onClick={() => setTarget(null)}
           >
             <div
               className="flex max-h-[88vh] w-full max-w-lg flex-col overflow-hidden rounded-3xl bg-white shadow-2xl"
@@ -521,12 +349,7 @@ export default function LayawayPage() {
                   <h2 className="text-lg font-bold">
                     {target.customer?.name || 'Sin cliente'}
                   </h2>
-                  <button
-                    onClick={() => {
-                      setTarget(null);
-                      setEditItems(null);
-                    }}
-                  >
+                  <button onClick={() => setTarget(null)}>
                     <XMarkIcon className="h-5 w-5" />
                   </button>
                 </div>
@@ -547,86 +370,53 @@ export default function LayawayPage() {
               </div>
 
               <div className="flex-1 space-y-4 overflow-y-auto px-6 py-5">
-                {/* Productos */}
+                {/* Productos + acciones */}
                 <div>
                   <div className="mb-1 flex items-center justify-between">
                     <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
                       Productos
                     </p>
-                    {editItems === null ? (
-                      (target.items || []).every((i) => i.inventoryVariantId) && (
-                        <button
-                          onClick={() =>
-                            setEditItems(
-                              (target.items || []).map((i) => ({
-                                inventoryVariantId: i.inventoryVariantId,
-                                name: i.name,
-                                color: i.color,
-                                quantity: i.quantity,
-                                price: i.price,
-                              })),
-                            )
-                          }
-                          className="inline-flex items-center gap-1 text-xs font-semibold text-orange-600 hover:underline"
-                        >
-                          <PencilSquareIcon className="h-3.5 w-3.5" /> Editar
-                        </button>
-                      )
-                    ) : (
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => setEditItems(null)}
-                          className="text-xs font-semibold text-gray-500"
-                        >
-                          Cancelar
-                        </button>
-                        <button
-                          onClick={saveItems}
-                          disabled={busy}
-                          className="text-xs font-semibold text-orange-600 disabled:opacity-50"
-                        >
-                          Guardar
-                        </button>
-                      </div>
-                    )}
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => printPlan(target)}
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-gray-500 hover:text-gray-800"
+                      >
+                        <PrinterIcon className="h-3.5 w-3.5" /> Imprimir
+                      </button>
+                      <Link
+                        href={`/dashboard/layaway/edit/${target.id}`}
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-orange-600 hover:underline"
+                      >
+                        <PencilSquareIcon className="h-3.5 w-3.5" /> Editar
+                      </Link>
+                    </div>
                   </div>
-
-                  {editItems === null ? (
-                    <ul className="space-y-1">
-                      {(target.items || []).map((i) => (
-                        <li
-                          key={i.id}
-                          className="flex items-center justify-between gap-2 text-sm"
-                        >
-                          <span className="min-w-0 truncate text-gray-700">
-                            {i.name}
-                            {i.color && i.color !== 'ÚNICO' ? (
-                              <span className="text-gray-400"> · {i.color}</span>
-                            ) : null}
-                            {i.size ? (
-                              <span className="text-gray-400"> · {i.size}</span>
-                            ) : null}{' '}
-                            <span className="text-gray-400">×{i.quantity}</span>
-                          </span>
-                          <span className="flex-none font-semibold tabular-nums text-gray-900">
-                            {formatCOP(i.subtotal)}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <>
-                      <ProductPicker items={editItems} setItems={setEditItems} />
-                      <p className="mt-1.5 text-[11px] text-gray-400">
-                        No puede quedar por debajo de lo ya abonado (
-                        {formatCOP(target.paid)}).
-                      </p>
-                    </>
-                  )}
+                  <ul className="space-y-1">
+                    {(target.items || []).map((i) => (
+                      <li
+                        key={i.id}
+                        className="flex items-center justify-between gap-2 text-sm"
+                      >
+                        <span className="min-w-0 truncate text-gray-700">
+                          {i.name}
+                          {i.color && i.color !== 'ÚNICO' ? (
+                            <span className="text-gray-400"> · {i.color}</span>
+                          ) : null}
+                          {i.size ? (
+                            <span className="text-gray-400"> · {i.size}</span>
+                          ) : null}{' '}
+                          <span className="text-gray-400">×{i.quantity}</span>
+                        </span>
+                        <span className="flex-none font-semibold tabular-nums text-gray-900">
+                          {formatCOP(i.subtotal)}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
 
                 {/* Abonos */}
-                {editItems === null && target.saldo > 0 && (
+                {target.saldo > 0 && (
                   <div className="rounded-2xl border border-gray-100 bg-gray-50/60 p-3">
                     <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
                       Registrar abono
@@ -711,7 +501,7 @@ export default function LayawayPage() {
                 )}
                 <button
                   onClick={doComplete}
-                  disabled={busy || editItems !== null}
+                  disabled={busy}
                   title="Entregar y descontar stock"
                   className="ml-auto inline-flex items-center gap-2 rounded-xl bg-orange-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-orange-700 disabled:opacity-50"
                 >
