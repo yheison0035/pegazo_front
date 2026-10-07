@@ -1243,7 +1243,16 @@ export default function PosSale({
                       <button
                         key={st.id}
                         type="button"
-                        onClick={() => setSaleType(st.id)}
+                        onClick={() => {
+                          setSaleType(st.id);
+                          // Plan separe no admite crédito: si estaba elegido,
+                          // vuelve a Efectivo (del catálogo si lo hay).
+                          if (st.id === 'layaway' && paymentMethod === 'CREDITO') {
+                            const efec = methods.find((m) => m.code === 'EFECTIVO');
+                            setPaymentMethod('EFECTIVO');
+                            setPaymentMethodCatalogId(efec ? efec.id : null);
+                          }
+                        }}
                         className={`rounded-lg px-2 py-1.5 text-xs font-semibold border transition ${
                           saleType === st.id
                             ? 'border-orange-400 bg-orange-50 text-orange-700'
@@ -1257,7 +1266,15 @@ export default function PosSale({
                 )}
 
                 <div className="grid grid-cols-3 gap-1.5">
-                  {(methods.length ? methods : PAYMENT_METHODS).map((pm) => {
+                  {(methods.length ? methods : PAYMENT_METHODS)
+                    // En plan separe no tiene sentido el pago a crédito (fiado):
+                    // el abono es de contado (efectivo/transferencia/etc.).
+                    .filter(
+                      (pm) =>
+                        !isLayaway ||
+                        (methods.length ? pm.code : pm.id) !== 'CREDITO',
+                    )
+                    .map((pm) => {
                     // Con catálogo: id = id del método, code = comportamiento.
                     // Fallback (sin catálogo): id === code (enum).
                     const isCatalog = methods.length > 0;
