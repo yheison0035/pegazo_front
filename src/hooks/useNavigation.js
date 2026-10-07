@@ -60,6 +60,17 @@ export default function useNavigation() {
     'bank',
   ];
 
+  // Planes separe (apartados): aplica a negocios que venden PRODUCTOS por POS
+  // (tienen 'sales' + 'inventory'). No aplica a servicios puros ni a guarda
+  // cascos (que no usa 'sales').
+  if (
+    baseModules.includes('sales') &&
+    baseModules.includes('inventory') &&
+    !modules.includes('layaway')
+  ) {
+    modules.push('layaway');
+  }
+
   // La Tienda online (y Pedidos) SOLO aparecen cuando la plataforma ya montó el
   // sitio del cliente: requiere `websiteEnabled` Y un `domain` cargado. Mientras
   // superplatform no le adquiera/asigne el dominio y cargue el sitio, el dueño

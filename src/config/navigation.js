@@ -205,6 +205,12 @@ export const NAVIGATION = [
         icon: CreditCardIcon,
         roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA', 'CAJA'],
       },
+      {
+        name: 'Planes separe',
+        href: '/dashboard/layaway',
+        icon: ArchiveBoxIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA', 'CAJA'],
+      },
     ],
   },
 
