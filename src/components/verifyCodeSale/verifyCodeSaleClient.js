@@ -198,6 +198,41 @@ export default function VerifyCodeSaleClient() {
           {sale.seller && <Field label="Atendido por" value={sale.seller} />}
         </div>
 
+        {/* Plan separe (apartado): abonado y saldo pendiente */}
+        {sale.isLayaway && (
+          <div className="mx-6 mb-2 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3">
+            <p className="text-xs font-bold uppercase tracking-wide text-orange-700">
+              Plan separe (apartado)
+            </p>
+            <p className="mt-0.5 text-[11px] text-orange-700/80">
+              Este comprobante es de un apartado en curso; la factura final se
+              entrega al completar el pago.
+            </p>
+            <div className="mt-2 grid grid-cols-3 gap-2 text-sm">
+              <div>
+                <p className="text-[10px] uppercase text-gray-500">Total</p>
+                <p className="font-bold text-gray-900">
+                  {formatCOP(sale.totalAmount)}
+                </p>
+              </div>
+              <div>
+                <p className="text-[10px] uppercase text-gray-500">Abonado</p>
+                <p className="font-bold text-emerald-600">
+                  {formatCOP(sale.paid)}
+                </p>
+              </div>
+              <div>
+                <p className="text-[10px] uppercase text-gray-500">
+                  Saldo pendiente
+                </p>
+                <p className="font-bold text-orange-700">
+                  {formatCOP(sale.saldo)}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Ítems */}
         <div className="px-6 pb-4">
           <div className="overflow-x-auto rounded-xl border border-gray-200">

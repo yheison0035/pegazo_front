@@ -181,16 +181,29 @@ export function printSaleInvoice(sale, usuario, opts = {}) {
   // crédito (fiado), no a las de contado.
   const isCredito = sale?.paymentStatus === 'FIADO';
 
-  const totalsHTML = showTax
+  // Plan separe (apartado): se marca el comprobante y se muestra abonado/saldo.
+  const isLayaway = sale?.paymentStatus === 'PLAN_SEPARE';
+  const paid = Number(opts?.paid) || 0;
+  const saldo =
+    opts?.saldo != null ? Number(opts.saldo) : Math.max(0, totalAmount - paid);
+  const layawayTotalsHTML = isLayaway
     ? `
+      <div class="right">Abonado: ${formatCOP(paid)}</div>
+      <div class="right bold">Saldo pendiente: ${formatCOP(saldo)}</div>
+    `
+    : '';
+
+  const totalsHTML =
+    (showTax
+      ? `
       <div class="right">Base gravable: ${formatCOP(baseGravable)}</div>
       <div class="right">IVA: ${formatCOP(taxTotal)}</div>
       <div class="right bold">Total: ${formatCOP(totalAmount)}</div>
     `
-    : `
+      : `
       <div class="right bold">Subtotal: ${formatCOP(totalAmount)}</div>
       <div class="right bold">Total: ${formatCOP(totalAmount)}</div>
-    `;
+    `) + layawayTotalsHTML;
 
   const html = `
   <html>
@@ -315,8 +328,15 @@ export function printSaleInvoice(sale, usuario, opts = {}) {
       <hr />
 
       <!-- FACTURA -->
-      <div class="section-title">Factura de venta</div>
+      <div class="section-title">${
+        isLayaway ? 'PLAN SEPARE (APARTADO)' : 'Factura de venta'
+      }</div>
       <div class="center bold">N° ${sale?.code || '000000'}</div>
+      ${
+        isLayaway
+          ? '<div class="center" style="font-size:10px;color:#555;">Comprobante de apartado — no es la factura final de entrega</div>'
+          : ''
+      }
 
       <hr />
 
@@ -324,7 +344,11 @@ export function printSaleInvoice(sale, usuario, opts = {}) {
         sale?.saleDate || sale?.createdAt
       )}</div>
       <div><span class="bold">Forma de pago:</span> ${
-        sale?.paymentStatus === 'FIADO' ? 'Crédito' : 'Contado'
+        isLayaway
+          ? 'Plan separe'
+          : sale?.paymentStatus === 'FIADO'
+            ? 'Crédito'
+            : 'Contado'
       }</div>
       <div><span class="bold">Método de pago:</span> ${
         sale?.paymentMethod || '---'
