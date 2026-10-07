@@ -14,6 +14,7 @@ import {
 import { useAuth } from '@/context/authContext';
 import useTerms from '@/hooks/useTerms';
 import { getProductFields } from '@/config/verticalProfiles';
+import { colorOptions } from '@/lib/api/utils/getColors';
 import { bulkImportProducts } from '@/lib/api/routes/inventory';
 import { getLocals } from '@/lib/api/routes/locals';
 import { getCategories } from '@/lib/api/routes/categories';
@@ -418,16 +419,74 @@ export default function ImportInventory() {
     const ws = wb.addWorksheet('Inventario');
     ws.addRow(cols);
     exampleRows.forEach((r) => ws.addRow(r));
-    ws.getRow(1).font = { bold: true };
-    cols.forEach((_, i) => (ws.getColumn(i + 1).width = 22));
 
-    // Hoja oculta con las listas reales para alimentar los desplegables.
-    const LIST_FIELDS = ['localName', 'categoryName', 'brandName', 'providerName'];
+    // Encabezado fijo (se queda visible al desplazarse) y bonito.
+    ws.views = [{ state: 'frozen', ySplit: 1 }];
+    const headerRow = ws.getRow(1);
+    headerRow.height = 22;
+    cols.forEach((_, i) => {
+      const f = FIELDS[i];
+      const cell = headerRow.getCell(i + 1);
+      cell.font = { bold: true, color: { argb: 'FF374151' } };
+      cell.alignment = { vertical: 'middle' };
+      // Obligatorios en naranja suave; opcionales en gris claro.
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: f?.required ? 'FFFDE8D5' : 'FFF3F4F6' },
+      };
+      ws.getColumn(i + 1).width = f?.key === 'name' ? 28 : 20;
+    });
+
+    // Filas de ejemplo en gris/itálica, para que el cliente sepa que las puede
+    // reemplazar.
+    for (let r = 2; r <= 1 + exampleRows.length; r++) {
+      ws.getRow(r).font = { italic: true, color: { argb: 'FF9CA3AF' } };
+    }
+
+    // Formato de número en las columnas de dinero/cantidad (se ve como 50.000).
+    FIELDS.forEach((f, i) => {
+      if (['salePrice', 'purchasePrice', 'minStock'].includes(f.key))
+        ws.getColumn(i + 1).numFmt = '#,##0';
+      if (f.key === 'stock') ws.getColumn(i + 1).numFmt = isWeight ? '#,##0.###' : '#,##0';
+    });
+
+    // Notas de ayuda al pasar el mouse por el encabezado.
+    const NOTES = {
+      name: 'Obligatorio. Nombre del producto tal como lo quieres ver.',
+      salePrice: 'Obligatorio. Solo números, sin puntos ni $ (ej: 50000).',
+      purchasePrice: 'Costo de compra. Solo números (ej: 30000).',
+      stock: isWeight
+        ? 'Cantidad disponible (admite decimales, ej: 12.5).'
+        : 'Cantidad disponible.',
+      color: 'Elige del desplegable o escribe el color. Para varios colores, repite el nombre del producto en varias filas.',
+      size: 'Talla. Para varias tallas, repite el nombre del producto en varias filas.',
+      localName: 'Elige el local del desplegable. Si lo escribes mal, se crea uno repetido.',
+      categoryName: 'Elige o escribe. Si no existe, se crea al importar.',
+      brandName: 'Elige o escribe. Si no existe, se crea al importar.',
+      providerName: 'Elige o escribe. Si no existe, se crea al importar.',
+      unit: 'Unidad de venta: KG, LIBRA o ARROBA.',
+    };
+    FIELDS.forEach((f, i) => {
+      if (NOTES[f.key]) headerRow.getCell(i + 1).note = NOTES[f.key];
+    });
+
+    // Hoja oculta con las listas para alimentar los desplegables: las de la
+    // empresa (local/categoría/marca/proveedor) y las fijas (color/unidad).
+    const listData = {
+      localName: lists.localName,
+      categoryName: lists.categoryName,
+      brandName: lists.brandName,
+      providerName: lists.providerName,
+      ...(isColor ? { color: colorOptions.map((c) => c.name) } : {}),
+      ...(isWeight ? { unit: ['KG', 'LIBRA', 'ARROBA'] } : {}),
+    };
     const wsListas = wb.addWorksheet('Listas');
     const listRef = {}; // fieldKey -> { letter, lastRow }
     let lcol = 1;
-    for (const key of LIST_FIELDS) {
-      const vals = lists[key] || [];
+    for (const key of Object.keys(listData)) {
+      const vals = (listData[key] || []).filter(Boolean);
+      if (!vals.length) continue;
       const letter = colLetter(lcol);
       wsListas.getCell(`${letter}1`).value = key;
       vals.forEach((v, i) => (wsListas.getCell(`${letter}${i + 2}`).value = v));
@@ -436,30 +495,30 @@ export default function ImportInventory() {
     }
     wsListas.state = 'hidden';
 
-    // Aplica el desplegable a cada columna de lista presente en la plantilla.
-    LIST_FIELDS.forEach((key) => {
+    // Aplica el desplegable a cada columna con lista presente en la plantilla.
+    Object.keys(listRef).forEach((key) => {
       const idx = FIELDS.findIndex((f) => f.key === key);
       const ref = listRef[key];
-      if (idx < 0 || !ref || ref.lastRow < 2) return; // sin datos → sin desplegable
+      if (idx < 0 || !ref || ref.lastRow < 2) return;
       const letter = colLetter(idx + 1);
       ws.dataValidations.add(`${letter}2:${letter}1000`, {
         type: 'list',
         allowBlank: true,
         formulae: [`=Listas!$${ref.letter}$2:$${ref.letter}$${ref.lastRow}`],
-        showErrorMessage: false, // permite escribir nombres nuevos
-        // OJO: no poner showDropDown (en OOXML está invertido y ocultaría la
-        // flecha); por defecto el desplegable se muestra.
+        showErrorMessage: false, // permite escribir valores nuevos
+        // OJO: no poner showDropDown (en OOXML está invertido y ocultaría la flecha).
       });
     });
 
     // Hoja de instrucciones.
     const tips = [
       ['Cómo llenar la plantilla'],
-      ['Los campos con * son obligatorios: nombre y precio de venta.'],
-      ['Puedes usar tus propios nombres de columna: el sistema los detecta.'],
-      ['Local, categoría, marca y proveedor traen un DESPLEGABLE con lo que ya tienes registrado.'],
-      ['Puedes elegir del desplegable o escribir uno nuevo; si no existe, se crea al importar.'],
-      ['Ojo: escribe bien el nombre del LOCAL para no crear uno repetido por error.'],
+      ['1) Reemplaza las filas de EJEMPLO (en gris) por tus productos.'],
+      ['2) Las columnas con * son obligatorias: nombre y precio de venta.'],
+      ['3) En Local, Categoría, Marca y Proveedor usa el DESPLEGABLE (la flechita) con lo que ya tienes; también puedes escribir uno nuevo y se crea al importar.'],
+      ['4) Escribe bien el nombre del LOCAL para no crear uno repetido por error.'],
+      ['5) Los precios van en números, sin puntos ni $ (ej: 50000).'],
+      ['Puedes usar tus propios nombres de columna: el sistema los detecta al importar.'],
     ];
     if (isColor) {
       tips.push([
