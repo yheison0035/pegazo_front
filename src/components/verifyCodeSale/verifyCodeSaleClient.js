@@ -230,6 +230,33 @@ export default function VerifyCodeSaleClient() {
                 </p>
               </div>
             </div>
+
+            {/* Abonos realizados (con fecha) */}
+            {sale.payments?.length > 0 && (
+              <div className="mt-3 border-t border-orange-200 pt-2">
+                <p className="mb-1 text-[10px] font-semibold uppercase text-orange-700">
+                  Abonos realizados
+                </p>
+                <ul className="divide-y divide-orange-100">
+                  {sale.payments.map((p, i) => (
+                    <li
+                      key={i}
+                      className="flex items-center justify-between py-1 text-xs"
+                    >
+                      <span className="text-gray-600">
+                        {formatDateTime(p.paidAt)}
+                        {p.method ? (
+                          <span className="text-gray-400"> · {p.method}</span>
+                        ) : null}
+                      </span>
+                      <span className="font-semibold text-emerald-600">
+                        {formatCOP(p.amount)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         )}
 
