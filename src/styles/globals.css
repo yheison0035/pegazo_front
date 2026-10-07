@@ -346,6 +346,108 @@ button:disabled {
   --color-amber-500: #f59e0b;
 }
 
+/* AZUL NOCHE — azul oscuro elegante con acento dorado (premium). */
+[data-crm-theme='midnight'] {
+  --sidebar-from: #0b1424;
+  --sidebar-to: #060b16;
+  --color-orange-50: #eef2f8;
+  --color-orange-100: #d7e0ee;
+  --color-orange-200: #b0c2db;
+  --color-orange-300: #7f9cc2;
+  --color-orange-400: #4f73a1;
+  --color-orange-500: #2f5581;
+  --color-orange-600: #234262;
+  --color-orange-700: #1a3250;
+  --color-amber-300: #e7cb8a;
+  --color-amber-400: #d4af61;
+  --color-amber-500: #bf9134;
+}
+
+/* VERDE AZULADO (teal) — sereno y profesional. */
+[data-crm-theme='teal'] {
+  --sidebar-from: #06201d;
+  --sidebar-to: #030e0c;
+  --color-orange-50: #f0fdfa;
+  --color-orange-100: #ccfbf1;
+  --color-orange-200: #99f6e4;
+  --color-orange-300: #5eead4;
+  --color-orange-400: #2dd4bf;
+  --color-orange-500: #14b8a6;
+  --color-orange-600: #0d9488;
+  --color-orange-700: #0f766e;
+  --color-amber-300: #99f6e4;
+  --color-amber-400: #2dd4bf;
+  --color-amber-500: #14b8a6;
+}
+
+/* ORO — cálido y premium (ámbar/dorado). */
+[data-crm-theme='gold'] {
+  --sidebar-from: #211604;
+  --sidebar-to: #120c02;
+  --color-orange-50: #fffbeb;
+  --color-orange-100: #fef3c7;
+  --color-orange-200: #fde68a;
+  --color-orange-300: #fcd34d;
+  --color-orange-400: #f59e0b;
+  --color-orange-500: #d97706;
+  --color-orange-600: #b45309;
+  --color-orange-700: #92400e;
+  --color-amber-300: #fde68a;
+  --color-amber-400: #fcd34d;
+  --color-amber-500: #fbbf24;
+}
+
+/* BOSQUE — verde profundo y sobrio. */
+[data-crm-theme='forest'] {
+  --sidebar-from: #0a160a;
+  --sidebar-to: #050b05;
+  --color-orange-50: #f1f7f1;
+  --color-orange-100: #ddecdd;
+  --color-orange-200: #bcd9bc;
+  --color-orange-300: #8fbf8f;
+  --color-orange-400: #5a9d5a;
+  --color-orange-500: #3a7d3a;
+  --color-orange-600: #2c612c;
+  --color-orange-700: #204a20;
+  --color-amber-300: #8fbf8f;
+  --color-amber-400: #5a9d5a;
+  --color-amber-500: #3a7d3a;
+}
+
+/* CAFÉ — cálido y acogedor (marrón). */
+[data-crm-theme='coffee'] {
+  --sidebar-from: #1a0f07;
+  --sidebar-to: #0d0803;
+  --color-orange-50: #f7f3ef;
+  --color-orange-100: #ece1d6;
+  --color-orange-200: #d9c3ad;
+  --color-orange-300: #c0a07f;
+  --color-orange-400: #a67c52;
+  --color-orange-500: #8a5e38;
+  --color-orange-600: #6f4a2b;
+  --color-orange-700: #573820;
+  --color-amber-300: #e3c39a;
+  --color-amber-400: #cfa06a;
+  --color-amber-500: #b4813f;
+}
+
+/* ÓNIX — negro elegante y minimalista (monocromo). */
+[data-crm-theme='onyx'] {
+  --sidebar-from: #0a0a0c;
+  --sidebar-to: #050506;
+  --color-orange-50: #f6f6f7;
+  --color-orange-100: #ececee;
+  --color-orange-200: #d6d6da;
+  --color-orange-300: #a9aab1;
+  --color-orange-400: #6b6d77;
+  --color-orange-500: #3f424c;
+  --color-orange-600: #2a2c34;
+  --color-orange-700: #1a1c22;
+  --color-amber-300: #a9aab1;
+  --color-amber-400: #6b6d77;
+  --color-amber-500: #3f424c;
+}
+
 /* ===================== MODO OSCURO =====================
    Se remapea la escala de grises + blanco: las superficies (white, gray-50/100)
    pasan a tonos oscuros y los textos (gray-500..900) a tonos claros. Así todo el
