@@ -171,7 +171,11 @@ export default function LayawayPage() {
   const printPlan = async (l) => {
     try {
       const { data } = await getDeliveredSaleById(l.id);
-      printSaleInvoice(data, usuario, { paid: l.paid, saldo: l.saldo });
+      printSaleInvoice(data, usuario, {
+        paid: l.paid,
+        saldo: l.saldo,
+        payments: l.payments || [],
+      });
     } catch (e) {
       setAlert({ type: 'error', message: e?.message || 'No se pudo imprimir.' });
     }
