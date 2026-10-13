@@ -133,14 +133,7 @@ export const NAVIGATION = [
         name: 'Realizar Factura',
         href: '/dashboard/sales',
         icon: BanknotesIcon,
-        roles: [
-          'SUPER_ADMIN',
-          'ADMIN',
-          'ASESOR',
-          'RECEPCIONISTA',
-          'VENTAS',
-          'CAJA',
-        ],
+        roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA', 'VENTAS', 'CAJA'],
       },
       {
         name: 'Pedidos',
@@ -184,7 +177,7 @@ export const NAVIGATION = [
         name: 'Devoluciones',
         href: '/dashboard/returns',
         icon: ArrowUturnLeftIcon,
-        roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA'],
+        roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA', 'CAJA'],
       },
       {
         name: 'Caja',
@@ -373,7 +366,7 @@ export const NAVIGATION = [
         name: 'Facturación electrónica',
         href: '/dashboard/facturacion-electronica',
         icon: DocumentTextIcon,
-        roles: ['SUPER_ADMIN', 'ADMIN'],
+        roles: ['SUPER_ADMIN', 'ADMIN', 'CONTADOR'],
       },
       {
         name: 'Nómina electrónica',
