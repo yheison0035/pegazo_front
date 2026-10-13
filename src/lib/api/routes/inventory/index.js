@@ -143,6 +143,13 @@ export async function getMenuAvailability() {
   return apiFetch('/inventory/menu', { cache: 'no-store' });
 }
 
+// Catálogo público (solo lectura) de un negocio por slug, para /booking/:slug.
+export async function getPublicCatalog(slug) {
+  return apiFetch(`/public/catalog/${encodeURIComponent(slug)}`, {
+    cache: 'no-store',
+  });
+}
+
 // Marca un plato disponible / no disponible (cocina/admin/dueño).
 export async function setProductAvailability(id, available) {
   return apiFetch(`/inventory/${id}/availability`, {

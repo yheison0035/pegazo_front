@@ -1,5 +1,6 @@
 import { Cinzel } from 'next/font/google';
 import PublicBooking from '@/components/dashboard/appointments/publicBooking';
+import PublicCatalog from '@/components/public/PublicCatalog';
 
 // Fuente display para el skin "guerrero" (grabada tipo Norse). Se expone como
 // variable CSS; solo el skin oscuro la usa.
@@ -76,6 +77,31 @@ export async function generateMetadata({ params }) {
 
 export default async function Page({ params }) {
   const { slug } = await params;
+  const cfg = await fetchConfig(slug);
+
+  // Página apagada por super platform (o sin config): aviso neutro.
+  if (cfg && cfg.enabled === false) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 text-center">
+        <div className="max-w-sm">
+          <h1 className="text-lg font-bold text-gray-800">
+            Página no disponible
+          </h1>
+          <p className="mt-1 text-sm text-gray-500">
+            Este negocio no tiene su página pública activa por el momento.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Negocio de PRODUCTOS → catálogo/menú solo lectura (tema claro, sin la
+  // portada negra de citas).
+  if (cfg && cfg.mode === 'catalog') {
+    return <PublicCatalog slug={slug} config={cfg} />;
+  }
+
+  // Negocio de SERVICIOS → agenda de citas (igual que RAGNOR, sin cambios).
   return (
     <div className={`${display.variable} min-h-screen w-full bg-black`}>
       {/* El documento en negro: evita el fondo blanco del overscroll en móvil. */}
