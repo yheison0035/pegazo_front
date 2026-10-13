@@ -932,6 +932,137 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* PÁGINA PÚBLICA / DEMOS EN VIVO */}
+      <section id="demos" data-reveal className="mx-auto max-w-6xl px-5 py-20">
+        <div className="mx-auto max-w-2xl text-center">
+          <span className="inline-block rounded-full bg-orange-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-orange-700">
+            Nuevo
+          </span>
+          <h2 className="mt-3 text-3xl font-bold text-neutral-900">
+            Tu propia página para mostrar o vender
+          </h2>
+          <p className="mx-auto mt-3 max-w-2xl text-neutral-500">
+            Cada negocio recibe una página web pública, lista para compartir por
+            WhatsApp o redes. Se adapta sola a tu tipo de negocio. Míralas en
+            vivo:
+          </p>
+        </div>
+
+        <div className="mt-12 grid gap-6 md:grid-cols-3">
+          {[
+            {
+              emoji: '🍽️',
+              title: 'Menú digital',
+              desc: 'Restaurantes y comida: tu carta por categorías, con fotos, precios y descripción. Solo para ver, sin pedidos.',
+              cta: 'Ver menú demo',
+              href: 'https://pegazo.co/menu/demorestaurante',
+            },
+            {
+              emoji: '🛍️',
+              title: 'Catálogo web',
+              desc: 'Tiendas y productos: catálogo por categorías con fotos y zoom. Compártelo con tus clientes al instante.',
+              cta: 'Ver catálogo demo',
+              href: 'https://pegazo.co/catalog/europeatvstore',
+            },
+            {
+              emoji: '📅',
+              title: 'Agenda de citas',
+              desc: 'Servicios (barbería, odontología, spa…): tus clientes agendan solos y te llega la cita por WhatsApp.',
+              cta: 'Ver citas demo',
+              href: 'https://pegazo.co/booking/ragnorbarber',
+            },
+          ].map((d) => (
+            <div
+              key={d.title}
+              className="flex flex-col rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-orange-300 hover:shadow-md"
+            >
+              <div className="text-4xl">{d.emoji}</div>
+              <h3 className="mt-3 text-lg font-bold text-neutral-900">
+                {d.title}
+              </h3>
+              <p className="mt-1.5 flex-1 text-sm text-neutral-500">{d.desc}</p>
+              <a
+                href={d.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 inline-flex items-center justify-center gap-1.5 rounded-xl bg-neutral-900 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-neutral-800"
+              >
+                {d.cta} →
+              </a>
+            </div>
+          ))}
+        </div>
+
+        {/* Tienda online */}
+        <div className="mt-8 flex flex-col items-center gap-4 rounded-3xl border border-neutral-200 bg-gradient-to-br from-neutral-50 to-white p-8 text-center sm:flex-row sm:text-left">
+          <div className="text-5xl">🛒</div>
+          <div className="flex-1">
+            <h3 className="text-xl font-bold text-neutral-900">
+              ¿Quieres vender en línea? Tienda online incluida
+            </h3>
+            <p className="mt-1.5 text-sm text-neutral-500">
+              Da el siguiente paso: tu tienda con carrito, pagos y pedidos — con
+              tu propio dominio. Disponible para cualquier tipo de negocio que
+              venda productos (supermercado, ropa, calzado, droguería,
+              restaurante y más). La activas cuando quieras.
+            </p>
+          </div>
+          <a
+            href="#contacto"
+            className="inline-flex flex-none items-center justify-center rounded-xl bg-orange-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-orange-700"
+          >
+            Quiero mi tienda
+          </a>
+        </div>
+      </section>
+
+      {/* TODOS LOS TIPOS DE NEGOCIO */}
+      <section data-reveal className="bg-neutral-50 py-20">
+        <div className="mx-auto max-w-6xl px-5">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="text-3xl font-bold text-neutral-900">
+              Funciona para tu negocio, sea cual sea
+            </h2>
+            <p className="mx-auto mt-3 max-w-2xl text-neutral-500">
+              Más de 20 tipos de negocio, cada uno con sus funciones y su página
+              pública adaptada. ¿No ves el tuyo? Lo configuramos.
+            </p>
+          </div>
+          <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            {[
+              ['🏪', 'Comercio'],
+              ['🛒', 'Supermercado'],
+              ['💊', 'Droguería'],
+              ['👕', 'Tienda de ropa'],
+              ['👟', 'Calzado'],
+              ['🥦', 'Fruver'],
+              ['🥩', 'Carnicería'],
+              ['☕', 'Cafetería'],
+              ['🌸', 'Floristería'],
+              ['🎪', 'Feria / eventos'],
+              ['🍽️', 'Restaurante'],
+              ['🍔', 'Comida rápida'],
+              ['💈', 'Barbería / servicios'],
+              ['🦷', 'Odontología'],
+              ['📞', 'Televentas'],
+              ['🛍️', 'E-commerce'],
+              ['🚚', 'Distribución'],
+              ['🚗', 'Lavado de autos'],
+              ['⚽', 'Canchas sintéticas'],
+              ['🪖', 'Guarda cascos'],
+            ].map(([emoji, label]) => (
+              <div
+                key={label}
+                className="flex items-center gap-2.5 rounded-xl border border-neutral-200 bg-white px-3 py-2.5 text-sm transition hover:border-orange-300 hover:shadow-sm"
+              >
+                <span className="text-xl">{emoji}</span>
+                <span className="font-semibold text-neutral-700">{label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* BENEFICIOS */}
       <section data-reveal className="mx-auto max-w-6xl px-5 py-20">
         <div className="mx-auto max-w-2xl text-center">
