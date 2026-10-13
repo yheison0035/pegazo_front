@@ -39,6 +39,7 @@ export const TOGGLEABLE_MODULES = [
   // ── Catálogo (lo que vende + con qué se surte) ──
   { key: 'services', label: 'Servicios', group: 'Catálogo' },
   { key: 'inventory', label: 'Inventario', group: 'Catálogo' },
+  { key: 'catalog-web', label: 'Catálogo web (página pública)', group: 'Catálogo' },
   { key: 'categories', label: 'Categorías', group: 'Catálogo' },
   { key: 'brands', label: 'Marcas', group: 'Catálogo' },
   { key: 'supplies', label: 'Insumos', group: 'Catálogo' },
