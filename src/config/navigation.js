@@ -269,6 +269,12 @@ export const NAVIGATION = [
         ],
       },
       {
+        name: 'Catálogo web',
+        href: '/dashboard/catalog-web',
+        icon: GlobeAltIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN'],
+      },
+      {
         name: 'Unidades de medida',
         href: '/dashboard/units-of-measure',
         icon: TagIcon,

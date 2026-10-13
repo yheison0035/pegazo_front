@@ -71,6 +71,17 @@ export default function useNavigation() {
     modules.push('layaway');
   }
 
+  // Catálogo web: página pública view-only para negocios de PRODUCTOS (tienen
+  // inventario y NO usan agenda de citas). Los de servicios editan su página
+  // pública desde Citas → Diseño.
+  if (
+    baseModules.includes('inventory') &&
+    !baseModules.includes('appointments') &&
+    !modules.includes('catalog-web')
+  ) {
+    modules.push('catalog-web');
+  }
+
   // La Tienda online (y Pedidos) SOLO aparecen cuando la plataforma ya montó el
   // sitio del cliente: requiere `websiteEnabled` Y un `domain` cargado. Mientras
   // superplatform no le adquiera/asigne el dominio y cargue el sitio, el dueño
