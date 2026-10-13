@@ -25,6 +25,7 @@ import { useDebounce } from '@/components/dashboard/tables/hooks/useDebounce';
 import usePermissions from '@/hooks/usePermissions';
 import LowStockBanner from '@/components/dashboard/inventory/LowStockBanner';
 import ExpiringBanner from '@/components/dashboard/inventory/ExpiringBanner';
+import ProductImagesModal from '@/components/dashboard/inventory/productImagesModal';
 import useTerms from '@/hooks/useTerms';
 import ExcelMenu from '@/components/dashboard/inventory/ExcelMenu';
 import { exportInventory } from '@/lib/api/routes/inventory';
@@ -43,6 +44,8 @@ export default function Inventory() {
   const [meta, setMeta] = useState(null);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  // Producto cuyo modal de imágenes está abierto (editar foto desde la lista).
+  const [imagesTarget, setImagesTarget] = useState(null);
 
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedVariants, setSelectedVariants] = useState(null);
@@ -213,6 +216,7 @@ export default function Inventory() {
           setSelected={setSelectedProduct}
           setSelectedVariants={setSelectedVariants}
           handleDeleteClick={handleDeleteClick}
+          onEditImages={setImagesTarget}
         />
 
         {meta && (
@@ -250,6 +254,14 @@ export default function Inventory() {
           name={deleteTarget?.name}
           onConfirm={confirmDelete}
           loading={loading}
+        />
+      )}
+
+      {imagesTarget && (
+        <ProductImagesModal
+          product={imagesTarget}
+          onClose={() => setImagesTarget(null)}
+          onSaved={fetchProducts}
         />
       )}
 
