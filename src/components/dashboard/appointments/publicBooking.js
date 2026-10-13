@@ -263,7 +263,8 @@ export default function PublicBooking({ slug = '' }) {
   }
 
   const ornate = skin.ornaments;
-  const showHero = ornate && !started && !success;
+  // Portada de bienvenida para TODOS los tipos (no solo el skin oscuro).
+  const showHero = !started && !success;
   // Servicios agrupados en categorías (estilo menú) si el negocio define reglas.
   const grouped = groupServices(services, config?.serviceGroups);
   // Panel del paso: se omite en Servicio cuando hay categorías (cada categoría
@@ -292,11 +293,15 @@ export default function PublicBooking({ slug = '' }) {
       {ornate && !config.heroImage && <WarriorBackdrop logo={config.logo} />}
 
       {showHero ? (
-        <Hero
-          config={config}
-          displayStyle={displayStyle}
-          onEnter={() => setStarted(true)}
-        />
+        ornate ? (
+          <Hero
+            config={config}
+            displayStyle={displayStyle}
+            onEnter={() => setStarted(true)}
+          />
+        ) : (
+          <GenericWelcome config={config} onEnter={() => setStarted(true)} />
+        )
       ) : (
       <>
       {/* Encabezado */}
@@ -779,6 +784,45 @@ function SoundToggle({ src }) {
         )}
       </button>
     </>
+  );
+}
+
+// Bienvenida genérica para skins NO oscuros (servicios que no usan el estilo
+// "guerrero"). Usa los tokens del skin para mantener la marca.
+function GenericWelcome({ config, onEnter }) {
+  return (
+    <div className="relative z-10 flex min-h-[100svh] flex-col items-center justify-center gap-5 px-6 text-center">
+      {config.logo ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={config.logo}
+          alt={config.name}
+          className="h-24 w-24 rounded-3xl object-contain ring-1 ring-[var(--bk-border)]"
+        />
+      ) : null}
+      <div>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-[var(--bk-text-muted)]">
+          Bienvenido a
+        </p>
+        <h1 className="mt-1 text-3xl font-extrabold text-[var(--bk-text)] sm:text-4xl">
+          {config.name}
+        </h1>
+        {config.subtitle && (
+          <p className="mt-2 text-sm text-[var(--bk-text-muted)]">
+            {config.subtitle}
+          </p>
+        )}
+      </div>
+      <button
+        onClick={onEnter}
+        className="rounded-full bg-[var(--bk-accent)] px-8 py-3 text-sm font-bold text-white shadow-lg transition hover:brightness-110"
+      >
+        {config.intro?.cta || 'Agendar cita'}
+      </button>
+      <p className="text-[11px] text-[var(--bk-text-muted)]">
+        Reserva en 60 segundos
+      </p>
+    </div>
   );
 }
 
