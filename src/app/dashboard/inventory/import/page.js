@@ -21,6 +21,7 @@ import { getCategories } from '@/lib/api/routes/categories';
 import { getBrands } from '@/lib/api/routes/brands';
 import { getProviders } from '@/lib/api/routes/providers';
 import { downloadCsv } from '@/utils/exportCsv';
+import { getInventoryExcelFields } from '@/utils/inventoryExcel';
 
 // Normaliza un encabezado para comparar (minúsculas, sin tildes ni símbolos).
 const norm = (s) =>
@@ -72,88 +73,10 @@ export default function ImportInventory() {
   const isColor = variantType === 'color';
   const isWeight = variantType === 'weight';
 
-  // Campos del CRM a los que se pueden mapear columnas del Excel, según la vertical.
-  const FIELDS = useMemo(() => {
-    const list = [
-      {
-        key: 'name',
-        label: `Nombre del ${t.product?.toLowerCase() || 'producto'}`,
-        required: true,
-        syn: ['nombre', 'producto', 'articulo', 'item', 'descripcion', 'name', 'title', 'detalle'],
-      },
-      {
-        key: 'salePrice',
-        label: 'Precio de venta',
-        required: true,
-        num: true,
-        syn: ['precio', 'precio venta', 'venta', 'precio de venta', 'pvp', 'price', 'valor', 'precio publico', 'publico'],
-      },
-      {
-        key: 'purchasePrice',
-        label: 'Precio de compra / costo',
-        num: true,
-        syn: ['costo', 'compra', 'precio compra', 'precio de compra', 'costo unitario', 'cost', 'purchase'],
-      },
-      {
-        key: 'stock',
-        label: isWeight ? 'Cantidad (peso)' : 'Cantidad / stock',
-        num: true,
-        syn: ['stock', 'cantidad', 'existencias', 'inventario', 'qty', 'quantity', 'unidades', 'cant', 'existencia', 'peso'],
-      },
-      pf.category && {
-        key: 'categoryName',
-        label: 'Categoría',
-        syn: ['categoria', 'category', 'rubro', 'linea', 'familia', 'grupo'],
-      },
-      pf.brand && {
-        key: 'brandName',
-        label: 'Marca',
-        syn: ['marca', 'brand', 'laboratorio', 'fabricante'],
-      },
-      pf.provider && {
-        key: 'providerName',
-        label: 'Proveedor',
-        syn: ['proveedor', 'provider', 'supplier', 'distribuidor'],
-      },
-      pf.barcode && {
-        key: 'barcode',
-        label: 'Código de barras',
-        syn: ['codigo', 'codigo de barras', 'barcode', 'ean', 'cod', 'referencia', 'ref', 'codigo barras'],
-      },
-      isColor && {
-        key: 'color',
-        label: 'Color',
-        syn: ['color', 'colour'],
-      },
-      isColor && pf.size && {
-        key: 'size',
-        label: 'Talla',
-        syn: ['talla', 'size', 'numero', 'num'],
-      },
-      isWeight && {
-        key: 'unit',
-        label: 'Unidad (KG/LIBRA/ARROBA)',
-        syn: ['unidad', 'medida', 'unit', 'um'],
-      },
-      {
-        key: 'localName',
-        label: 'Local / punto de venta',
-        syn: ['local', 'sede', 'punto de venta', 'bodega', 'almacen', 'store', 'sucursal'],
-      },
-      {
-        key: 'minStock',
-        label: 'Stock mínimo (alerta)',
-        num: true,
-        syn: ['stock minimo', 'minimo', 'min stock', 'alerta stock', 'alerta'],
-      },
-      {
-        key: 'description',
-        label: 'Descripción',
-        syn: ['descripcion', 'detalle', 'description', 'observacion', 'nota'],
-      },
-    ].filter(Boolean);
-    return list;
-  }, [pf, isColor, isWeight, t.product]);
+  // Campos del CRM a los que se pueden mapear columnas del Excel, según la
+  // vertical (compartidos con la exportación para que el Excel exportado se
+  // pueda volver a importar tal cual).
+  const FIELDS = useMemo(() => getInventoryExcelFields(pf, t.product), [pf, t.product]);
 
   // Listas ya existentes en la empresa, para los desplegables de la plantilla.
   const [lists, setLists] = useState({
