@@ -10,13 +10,107 @@ import {
 import { getPublicCatalog } from '@/lib/api/routes/inventory';
 import { formatCOP } from '@/lib/api/utils/utils';
 
+// Temas visuales del catálogo/menú público (como los "skins" de la página de
+// citas). Cada tema define las variables de color de la página. El color de
+// acento del negocio (config.accent) manda sobre el acento del tema.
+export const CATALOG_THEMES = {
+  clean: {
+    key: 'clean',
+    label: 'Claro profesional',
+    desc: 'Blanco y aireado. Sirve para cualquier negocio.',
+    accent: '#ea580c',
+    bg: '#f7f7f8',
+    surface: '#ffffff',
+    text: '#111827',
+    muted: '#6b7280',
+    border: '#ececef',
+    dark: false,
+    heroBg: '#0b0b0f',
+  },
+  dark: {
+    key: 'dark',
+    label: 'Elegante oscuro',
+    desc: 'Negro premium. Ideal joyería, tecnología, moda.',
+    accent: '#d4af37',
+    bg: '#0d0d12',
+    surface: '#16161d',
+    text: '#f5f5f7',
+    muted: '#9aa0ab',
+    border: '#272733',
+    dark: true,
+    heroBg: '#050507',
+  },
+  warm: {
+    key: 'warm',
+    label: 'Cálido gourmet',
+    desc: 'Crema y terracota. Ideal restaurante, cafetería.',
+    accent: '#b45309',
+    bg: '#fbf7f1',
+    surface: '#ffffff',
+    text: '#2a1f1a',
+    muted: '#8a7566',
+    border: '#efe4d8',
+    dark: false,
+    heroBg: '#1c140e',
+  },
+  fresh: {
+    key: 'fresh',
+    label: 'Fresco natural',
+    desc: 'Verde suave. Ideal supermercado, saludable.',
+    accent: '#16a34a',
+    bg: '#f3f8f4',
+    surface: '#ffffff',
+    text: '#14291d',
+    muted: '#5e7a67',
+    border: '#dcebe1',
+    dark: false,
+    heroBg: '#0a1a12',
+  },
+  bold: {
+    key: 'bold',
+    label: 'Moderno vibrante',
+    desc: 'Azul profundo y contraste. Ideal tecnología, deporte.',
+    accent: '#6366f1',
+    bg: '#0f172a',
+    surface: '#1e293b',
+    text: '#f1f5f9',
+    muted: '#94a3b8',
+    border: '#334155',
+    dark: true,
+    heroBg: '#070b17',
+  },
+};
+
 // Página pública SOLO LECTURA del catálogo/menú de un negocio de productos
 // (restaurante, supermercado, zapatería, etc.). Sin carrito ni pedidos: es una
 // carta para mostrar o enviar al cliente. Se monta desde /booking/[slug] cuando
 // el negocio es de productos (mode === 'catalog').
 export default function PublicCatalog({ slug, config = {} }) {
-  const accent = config.accent || '#ea580c';
+  const theme = CATALOG_THEMES[config.catalogTheme] || CATALOG_THEMES.clean;
+  const accent = config.accent || theme.accent;
   const name = config.name || 'Catálogo';
+  // Variables de color del tema (se aplican en el contenedor raíz).
+  const vars = {
+    '--c-bg': theme.bg,
+    '--c-surface': theme.surface,
+    '--c-text': theme.text,
+    '--c-muted': theme.muted,
+    '--c-border': theme.border,
+    '--c-accent': accent,
+  };
+  // Portada: imagen de fondo del negocio si existe; si no, degradado con acento.
+  const heroImg = config.heroImage || '';
+  const heroStyle = heroImg
+    ? {
+        backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,.55), rgba(5,5,8,.82)), url(${heroImg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }
+    : {
+        background: `radial-gradient(1200px 600px at 50% -10%, ${accent}${
+          theme.dark ? '40' : '26'
+        }, ${theme.heroBg} 58%)`,
+      };
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [active, setActive] = useState(null);
@@ -147,9 +241,7 @@ export default function PublicCatalog({ slug, config = {} }) {
     return (
       <div
         className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 text-center"
-        style={{
-          background: `radial-gradient(1200px 600px at 50% -10%, ${accent}22, #0b0b0f 55%)`,
-        }}
+        style={heroStyle}
       >
         <div className="flex flex-col items-center gap-5 text-white">
           {config.logo ? (
@@ -186,23 +278,26 @@ export default function PublicCatalog({ slug, config = {} }) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
+    <div
+      className="min-h-screen bg-[var(--c-bg)] text-[var(--c-text)]"
+      style={vars}
+    >
       {/* Encabezado de marca */}
-      <header className="border-b border-gray-200 bg-white">
+      <header className="border-b border-[var(--c-border)] bg-[var(--c-surface)]">
         <div className="mx-auto flex max-w-5xl flex-col items-center gap-2 px-4 py-6 text-center">
           {config.logo ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={config.logo}
               alt={name}
-              className="h-16 w-16 rounded-2xl object-contain ring-1 ring-gray-900/10"
+              className="h-16 w-16 rounded-2xl object-contain ring-1 ring-black/10"
             />
           ) : null}
-          <h1 className="text-xl font-extrabold tracking-tight sm:text-2xl">
+          <h1 className="text-xl font-extrabold tracking-tight text-[var(--c-text)] sm:text-2xl">
             {name}
           </h1>
           {config.tagline && (
-            <p className="text-sm text-gray-500">{config.tagline}</p>
+            <p className="text-sm text-[var(--c-muted)]">{config.tagline}</p>
           )}
           <span
             className="mt-1 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white"
@@ -210,7 +305,7 @@ export default function PublicCatalog({ slug, config = {} }) {
           >
             {isFood ? 'Carta' : 'Catálogo'}
           </span>
-          <p className="text-[11px] text-gray-400">
+          <p className="text-[11px] text-[var(--c-muted)]">
             {isFood ? 'Carta' : 'Catálogo'} informativo · consulta
             disponibilidad y precios con el negocio.
           </p>
@@ -218,21 +313,21 @@ export default function PublicCatalog({ slug, config = {} }) {
       </header>
 
       {/* Barra FIJA: buscador + categorías (queda pegada arriba al desplazar) */}
-      <div className="sticky top-0 z-30 border-b border-gray-200 bg-white/95 shadow-sm backdrop-blur">
+      <div className="sticky top-0 z-30 border-b border-[var(--c-border)] bg-[var(--c-surface)]/95 shadow-sm backdrop-blur">
         <div className="mx-auto max-w-5xl space-y-2 px-4 py-2.5">
           {/* Buscador */}
           <div className="relative">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--c-muted)]" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={`Buscar en ${isFood ? 'la carta' : 'el catálogo'}…`}
-              className="w-full rounded-full border border-gray-200 py-2 pl-9 pr-9 text-sm focus:border-gray-300 focus:outline-none focus:ring-2 focus:ring-black/5"
+              className="w-full rounded-full border border-[var(--c-border)] bg-[var(--c-bg)] py-2 pl-9 pr-9 text-sm text-[var(--c-text)] placeholder:text-[var(--c-muted)] focus:outline-none focus:ring-2 focus:ring-black/5"
             />
             {query && (
               <button
                 onClick={() => setQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--c-muted)] hover:opacity-70"
               >
                 <XMarkIcon className="h-4 w-4" />
               </button>
@@ -255,7 +350,7 @@ export default function PublicCatalog({ slug, config = {} }) {
                     className={`flex-none whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
                       active === g.id
                         ? 'border-transparent text-white'
-                        : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                        : 'border-[var(--c-border)] bg-[var(--c-surface)] text-[var(--c-muted)] hover:opacity-80'
                     }`}
                     style={
                       active === g.id ? { backgroundColor: accent } : undefined
@@ -270,8 +365,8 @@ export default function PublicCatalog({ slug, config = {} }) {
                     onClick={() => setCatMenuOpen((o) => !o)}
                     className={`flex-none inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
                       catMenuOpen
-                        ? 'border-gray-300 bg-gray-100 text-gray-800'
-                        : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                        ? 'border-[var(--c-accent)] text-[var(--c-text)]'
+                        : 'border-[var(--c-border)] bg-[var(--c-surface)] text-[var(--c-muted)] hover:opacity-80'
                     }`}
                   >
                     Más categorías ({visibleGroups.length - visibleCats})
@@ -307,7 +402,7 @@ export default function PublicCatalog({ slug, config = {} }) {
                     className="fixed inset-0 z-30 cursor-default"
                     onClick={() => setCatMenuOpen(false)}
                   />
-                  <div className="absolute right-0 top-full z-40 mt-2 max-h-72 w-56 overflow-y-auto rounded-xl border border-gray-200 bg-white p-1.5 shadow-xl">
+                  <div className="absolute right-0 top-full z-40 mt-2 max-h-72 w-56 overflow-y-auto rounded-xl border border-[var(--c-border)] bg-[var(--c-surface)] p-1.5 shadow-xl">
                     {visibleGroups.slice(visibleCats).map((g) => (
                       <a
                         key={g.id}
@@ -319,7 +414,7 @@ export default function PublicCatalog({ slug, config = {} }) {
                         className={`block rounded-lg px-3 py-2 text-sm transition ${
                           active === g.id
                             ? 'font-semibold text-white'
-                            : 'text-gray-700 hover:bg-gray-50'
+                            : 'text-[var(--c-text)] hover:opacity-70'
                         }`}
                         style={
                           active === g.id
@@ -340,18 +435,18 @@ export default function PublicCatalog({ slug, config = {} }) {
 
       <main className="mx-auto max-w-5xl px-4 py-6">
         {loading ? (
-          <p className="py-16 text-center text-sm text-gray-400">
+          <p className="py-16 text-center text-sm text-[var(--c-muted)]">
             Cargando catálogo…
           </p>
         ) : total === 0 ? (
-          <div className="rounded-2xl border border-dashed border-gray-200 bg-white py-16 text-center">
-            <p className="text-sm text-gray-500">
+          <div className="rounded-2xl border border-dashed border-[var(--c-border)] bg-[var(--c-surface)] py-16 text-center">
+            <p className="text-sm text-[var(--c-muted)]">
               Este negocio aún no tiene productos publicados.
             </p>
           </div>
         ) : visibleGroups.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-gray-200 bg-white py-16 text-center">
-            <p className="text-sm text-gray-500">
+          <div className="rounded-2xl border border-dashed border-[var(--c-border)] bg-[var(--c-surface)] py-16 text-center">
+            <p className="text-sm text-[var(--c-muted)]">
               No encontramos resultados para “{query}”.
             </p>
           </div>
@@ -364,8 +459,10 @@ export default function PublicCatalog({ slug, config = {} }) {
                     className="h-5 w-1.5 rounded-full"
                     style={{ backgroundColor: accent }}
                   />
-                  <h2 className="text-lg font-bold text-gray-800">{g.title}</h2>
-                  <span className="text-xs font-semibold text-gray-400">
+                  <h2 className="text-lg font-bold text-[var(--c-text)]">
+                    {g.title}
+                  </h2>
+                  <span className="text-xs font-semibold text-[var(--c-muted)]">
                     {g.products.length}
                   </span>
                 </div>
@@ -376,9 +473,9 @@ export default function PublicCatalog({ slug, config = {} }) {
                       key={p.id}
                       type="button"
                       onClick={() => openDetail(p)}
-                      className="flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white text-left shadow-sm transition hover:shadow-md"
+                      className="flex flex-col overflow-hidden rounded-2xl border border-[var(--c-border)] bg-[var(--c-surface)] text-left shadow-sm transition hover:shadow-md"
                     >
-                      <div className="relative aspect-square w-full bg-gray-50">
+                      <div className="relative aspect-square w-full bg-[var(--c-bg)]">
                         {p.image ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
@@ -390,7 +487,7 @@ export default function PublicCatalog({ slug, config = {} }) {
                             }`}
                           />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center text-gray-300">
+                          <div className="flex h-full w-full items-center justify-center text-[var(--c-muted)] opacity-50">
                             <span className="text-3xl">🛍️</span>
                           </div>
                         )}
@@ -413,7 +510,7 @@ export default function PublicCatalog({ slug, config = {} }) {
                         )}
                       </div>
                       <div className="flex flex-1 flex-col gap-1 p-3">
-                        <h3 className="line-clamp-2 text-sm font-semibold text-gray-800">
+                        <h3 className="line-clamp-2 text-sm font-semibold text-[var(--c-text)]">
                           {p.name}
                         </h3>
                         {/* Etiquetas (features) */}
@@ -422,7 +519,7 @@ export default function PublicCatalog({ slug, config = {} }) {
                             {p.tags.slice(0, 3).map((tg, i) => (
                               <span
                                 key={i}
-                                className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-600"
+                                className="rounded-full bg-[var(--c-bg)] px-2 py-0.5 text-[10px] font-medium text-[var(--c-muted)]"
                               >
                                 {tg}
                               </span>
@@ -430,7 +527,7 @@ export default function PublicCatalog({ slug, config = {} }) {
                           </div>
                         )}
                         {p.description && (
-                          <p className="line-clamp-2 text-xs text-gray-400">
+                          <p className="line-clamp-2 text-xs text-[var(--c-muted)]">
                             {p.description}
                           </p>
                         )}
@@ -450,7 +547,7 @@ export default function PublicCatalog({ slug, config = {} }) {
         )}
       </main>
 
-      <footer className="pb-24 pt-4 text-center text-[11px] text-gray-300">
+      <footer className="pb-24 pt-4 text-center text-[11px] text-[var(--c-muted)] opacity-70">
         Hecho con Pegazo
       </footer>
 
@@ -461,12 +558,13 @@ export default function PublicCatalog({ slug, config = {} }) {
           onClick={() => setDetail(null)}
         >
           <div
-            className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl"
+            className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl bg-[var(--c-surface)] text-[var(--c-text)] shadow-2xl"
+            style={vars}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="grid grid-cols-1 overflow-y-auto md:grid-cols-2">
               {/* Galería */}
-              <div className="bg-gray-50 p-4">
+              <div className="bg-[var(--c-bg)] p-4">
                 <button
                   type="button"
                   onClick={() => {
@@ -517,7 +615,7 @@ export default function PublicCatalog({ slug, config = {} }) {
                   </div>
                 )}
                 {currentImg && (
-                  <p className="mt-2 text-center text-[11px] text-gray-400">
+                  <p className="mt-2 text-center text-[11px] text-[var(--c-muted)]">
                     Toca la imagen para ampliar y hacer zoom
                   </p>
                 )}
@@ -526,12 +624,12 @@ export default function PublicCatalog({ slug, config = {} }) {
               {/* Info */}
               <div className="flex flex-col gap-3 p-5">
                 <div className="flex items-start justify-between gap-3">
-                  <h2 className="text-xl font-bold text-gray-900">
+                  <h2 className="text-xl font-bold text-[var(--c-text)]">
                     {detail.name}
                   </h2>
                   <button
                     onClick={() => setDetail(null)}
-                    className="flex-none text-gray-400 hover:text-gray-700"
+                    className="flex-none text-[var(--c-muted)] hover:opacity-70"
                   >
                     <XMarkIcon className="h-6 w-6" />
                   </button>
@@ -560,7 +658,7 @@ export default function PublicCatalog({ slug, config = {} }) {
                     {detail.tags.map((tg, i) => (
                       <span
                         key={i}
-                        className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-600"
+                        className="rounded-full bg-[var(--c-bg)] px-2.5 py-1 text-xs font-medium text-[var(--c-muted)]"
                       >
                         {tg}
                       </span>
@@ -568,23 +666,23 @@ export default function PublicCatalog({ slug, config = {} }) {
                   </div>
                 )}
                 {detail.description && (
-                  <p className="whitespace-pre-line text-sm leading-relaxed text-gray-600">
+                  <p className="whitespace-pre-line text-sm leading-relaxed text-[var(--c-text)] opacity-90">
                     {detail.description}
                   </p>
                 )}
                 {detail.specs?.length > 0 && (
                   <div className="mt-1">
-                    <p className="mb-1 text-[11px] font-bold uppercase tracking-wide text-gray-400">
+                    <p className="mb-1 text-[11px] font-bold uppercase tracking-wide text-[var(--c-muted)]">
                       Especificaciones
                     </p>
-                    <dl className="divide-y divide-gray-100 rounded-xl border border-gray-100">
+                    <dl className="divide-y divide-[var(--c-border)] rounded-xl border border-[var(--c-border)]">
                       {detail.specs.map((s, i) => (
                         <div
                           key={i}
                           className="flex justify-between gap-3 px-3 py-1.5 text-sm"
                         >
-                          <dt className="text-gray-500">{s.key}</dt>
-                          <dd className="text-right font-medium text-gray-800">
+                          <dt className="text-[var(--c-muted)]">{s.key}</dt>
+                          <dd className="text-right font-medium text-[var(--c-text)]">
                             {s.value}
                           </dd>
                         </div>
@@ -592,7 +690,7 @@ export default function PublicCatalog({ slug, config = {} }) {
                     </dl>
                   </div>
                 )}
-                <p className="mt-auto pt-2 text-[11px] text-gray-400">
+                <p className="mt-auto pt-2 text-[11px] text-[var(--c-muted)]">
                   Catálogo informativo · consulta disponibilidad con el negocio.
                 </p>
               </div>
