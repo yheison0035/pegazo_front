@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   XMarkIcon,
   MagnifyingGlassIcon,
   MagnifyingGlassPlusIcon,
+  ChevronDownIcon,
 } from '@heroicons/react/24/outline';
 import { getPublicCatalog } from '@/lib/api/routes/inventory';
 import { formatCOP } from '@/lib/api/utils/utils';
@@ -98,6 +99,50 @@ export default function PublicCatalog({ slug, config = {} }) {
 
   // Bienvenida (portada) al cargar, estilo RAGNOR, adaptada al tipo.
   const [entered, setEntered] = useState(false);
+
+  // Barra de categorías: se imprimen las que CABEN y el resto va en un menú
+  // "Más categorías" (como la tienda online). Se mide el ancho real.
+  const catBarRef = useRef(null);
+  const catMeasureRef = useRef(null);
+  const [visibleCats, setVisibleCats] = useState(999);
+  const [catMenuOpen, setCatMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const compute = () => {
+      const bar = catBarRef.current;
+      const measure = catMeasureRef.current;
+      if (!bar || !measure) return;
+      const avail = bar.clientWidth;
+      const chips = Array.from(measure.children);
+      const GAP = 8;
+      const totalW = chips.reduce((a, c) => a + c.offsetWidth + GAP, 0);
+      if (totalW <= avail) {
+        setVisibleCats(chips.length);
+        return;
+      }
+      const RESERVE = 150; // deja espacio para el botón "Más categorías"
+      let used = 0;
+      let count = 0;
+      for (const c of chips) {
+        used += c.offsetWidth + GAP;
+        if (used > avail - RESERVE) break;
+        count++;
+      }
+      setVisibleCats(Math.max(1, count));
+    };
+    compute();
+    let ro;
+    if (typeof ResizeObserver !== 'undefined' && catBarRef.current) {
+      ro = new ResizeObserver(compute);
+      ro.observe(catBarRef.current);
+    }
+    window.addEventListener('resize', compute);
+    return () => {
+      if (ro) ro.disconnect();
+      window.removeEventListener('resize', compute);
+    };
+  }, [visibleGroups, entered]);
+
   if (!entered) {
     return (
       <div
@@ -193,26 +238,101 @@ export default function PublicCatalog({ slug, config = {} }) {
               </button>
             )}
           </div>
-          {/* Categorías: scroll suave en móvil, centradas en desktop */}
+          {/* Categorías: se imprimen las que CABEN según el ancho real;
+              el resto se agrupa en un menú "Más categorías". */}
           {visibleGroups.length > 1 && (
-            <div className="-mb-1 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] md:flex-wrap md:justify-center md:overflow-visible [&::-webkit-scrollbar]:hidden">
-              {visibleGroups.map((g) => (
-                <a
-                  key={g.id}
-                  href={`#cat-${g.id}`}
-                  onClick={() => setActive(g.id)}
-                  className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
-                    active === g.id
-                      ? 'border-transparent text-white'
-                      : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
-                  }`}
-                  style={
-                    active === g.id ? { backgroundColor: accent } : undefined
-                  }
-                >
-                  {g.title}
-                </a>
-              ))}
+            <div className="relative">
+              {/* fila visible (medida): recorta a las que caben */}
+              <div
+                ref={catBarRef}
+                className="flex items-center gap-2 overflow-hidden"
+              >
+                {visibleGroups.slice(0, visibleCats).map((g) => (
+                  <a
+                    key={g.id}
+                    href={`#cat-${g.id}`}
+                    onClick={() => setActive(g.id)}
+                    className={`flex-none whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                      active === g.id
+                        ? 'border-transparent text-white'
+                        : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                    }`}
+                    style={
+                      active === g.id ? { backgroundColor: accent } : undefined
+                    }
+                  >
+                    {g.title}
+                  </a>
+                ))}
+                {visibleCats < visibleGroups.length && (
+                  <button
+                    type="button"
+                    onClick={() => setCatMenuOpen((o) => !o)}
+                    className={`flex-none inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                      catMenuOpen
+                        ? 'border-gray-300 bg-gray-100 text-gray-800'
+                        : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    Más categorías ({visibleGroups.length - visibleCats})
+                    <ChevronDownIcon
+                      className={`h-3.5 w-3.5 transition ${catMenuOpen ? 'rotate-180' : ''}`}
+                    />
+                  </button>
+                )}
+              </div>
+
+              {/* fila oculta solo para medir el ancho de cada chip */}
+              <div
+                ref={catMeasureRef}
+                aria-hidden
+                className="pointer-events-none absolute left-0 top-0 -z-10 flex gap-2 opacity-0"
+              >
+                {visibleGroups.map((g) => (
+                  <span
+                    key={g.id}
+                    className="flex-none whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-semibold"
+                  >
+                    {g.title}
+                  </span>
+                ))}
+              </div>
+
+              {/* menú desplegable con las categorías restantes */}
+              {catMenuOpen && visibleCats < visibleGroups.length && (
+                <>
+                  <button
+                    type="button"
+                    aria-label="Cerrar"
+                    className="fixed inset-0 z-30 cursor-default"
+                    onClick={() => setCatMenuOpen(false)}
+                  />
+                  <div className="absolute right-0 top-full z-40 mt-2 max-h-72 w-56 overflow-y-auto rounded-xl border border-gray-200 bg-white p-1.5 shadow-xl">
+                    {visibleGroups.slice(visibleCats).map((g) => (
+                      <a
+                        key={g.id}
+                        href={`#cat-${g.id}`}
+                        onClick={() => {
+                          setActive(g.id);
+                          setCatMenuOpen(false);
+                        }}
+                        className={`block rounded-lg px-3 py-2 text-sm transition ${
+                          active === g.id
+                            ? 'font-semibold text-white'
+                            : 'text-gray-700 hover:bg-gray-50'
+                        }`}
+                        style={
+                          active === g.id
+                            ? { backgroundColor: accent }
+                            : undefined
+                        }
+                      >
+                        {g.title}
+                      </a>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           )}
         </div>
