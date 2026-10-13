@@ -62,6 +62,56 @@ export default function PublicCatalog({ slug, config = {} }) {
   );
   const whatsapp = (config.whatsapp || '').replace(/\D/g, '');
 
+  // Palabra según la vertical: comida = "carta/menú", resto = "catálogo".
+  const isFood = ['RESTAURANTE', 'COMIDA_RAPIDA', 'CAFETERIA'].includes(
+    String(config.type || '').toUpperCase(),
+  );
+  const word = isFood ? 'carta' : 'catálogo';
+
+  // Bienvenida (portada) al cargar, estilo RAGNOR, adaptada al tipo.
+  const [entered, setEntered] = useState(false);
+  if (!entered) {
+    return (
+      <div
+        className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 text-center"
+        style={{
+          background: `radial-gradient(1200px 600px at 50% -10%, ${accent}22, #0b0b0f 55%)`,
+        }}
+      >
+        <div className="flex flex-col items-center gap-5 text-white">
+          {config.logo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={config.logo}
+              alt={name}
+              className="h-24 w-24 rounded-3xl object-contain bg-white/5 p-1 ring-1 ring-white/15"
+            />
+          ) : null}
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-white/50">
+              Bienvenido a
+            </p>
+            <h1 className="mt-1 text-3xl font-extrabold sm:text-4xl">{name}</h1>
+            {config.tagline && (
+              <p className="mt-2 text-sm text-white/70">{config.tagline}</p>
+            )}
+          </div>
+          <button
+            onClick={() => setEntered(true)}
+            className="rounded-full px-8 py-3 text-sm font-bold text-white shadow-xl transition hover:brightness-110"
+            style={{ backgroundColor: accent }}
+          >
+            Ver {isFood ? 'la carta' : 'el catálogo'}
+          </button>
+          <p className="text-[11px] text-white/40">
+            {word === 'carta' ? 'Nuestra carta' : 'Nuestro catálogo'} · solo
+            visualización
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
       {/* Encabezado de marca */}
@@ -85,17 +135,19 @@ export default function PublicCatalog({ slug, config = {} }) {
             className="mt-1 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white"
             style={{ backgroundColor: accent }}
           >
-            Catálogo
+            {isFood ? 'Carta' : 'Catálogo'}
           </span>
           <p className="text-[11px] text-gray-400">
-            Catálogo informativo · consulta disponibilidad y precios con el
-            negocio.
+            {isFood ? 'Carta' : 'Catálogo'} informativo · consulta
+            disponibilidad y precios con el negocio.
           </p>
         </div>
+      </header>
 
-        {/* Navegación rápida de categorías */}
-        {groups.length > 1 && (
-          <nav className="mx-auto max-w-5xl overflow-x-auto px-4 pb-3">
+      {/* Barra de categorías FIJA (queda pegada arriba al hacer scroll) */}
+      {groups.length > 1 && (
+        <nav className="sticky top-0 z-30 border-b border-gray-200 bg-white/95 shadow-sm backdrop-blur">
+          <div className="mx-auto max-w-5xl overflow-x-auto px-4 py-2.5">
             <div className="flex gap-2">
               {groups.map((g) => (
                 <a
@@ -115,9 +167,9 @@ export default function PublicCatalog({ slug, config = {} }) {
                 </a>
               ))}
             </div>
-          </nav>
-        )}
-      </header>
+          </div>
+        </nav>
+      )}
 
       <main className="mx-auto max-w-5xl px-4 py-6">
         {loading ? (
