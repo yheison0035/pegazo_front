@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { CameraIcon } from '@heroicons/react/24/outline';
 import { canSeeOldPrice } from '@/hooks/inventory.permissions';
 import { getProductFields } from '@/config/verticalProfiles';
 import { roleLabel } from '@/config/roleLabels';
@@ -50,6 +51,7 @@ export default function ContentData({
   handleToggleStatus,
   setPrinterInvoice,
   setShowModalChangeAdvisor,
+  onEditImages,
 }) {
   const auth = useAuth();
   const usuario = auth?.usuario;
@@ -131,13 +133,22 @@ export default function ContentData({
             {view === 'inventory' && (
               <>
                 <td className="px-5 py-4">
-                  <div className="w-[60px] h-[70px] rounded-xl overflow-hidden bg-gray-50 border border-gray-100 flex items-center justify-center">
+                  <button
+                    type="button"
+                    onClick={() => onEditImages?.(info)}
+                    title="Cambiar / ordenar imágenes"
+                    className="group relative w-[60px] h-[70px] rounded-xl overflow-hidden bg-gray-50 border border-gray-100 flex items-center justify-center cursor-pointer transition hover:border-orange-300 hover:ring-2 hover:ring-orange-500/20"
+                  >
                     <img
                       src={info?.images?.[0]?.url || '/images/no-image.png'}
                       alt={info.name}
                       className="w-full h-full object-contain"
                     />
-                  </div>
+                    {/* Afordancia: al pasar el mouse invita a editar la foto. */}
+                    <span className="absolute inset-0 flex items-center justify-center bg-black/45 opacity-0 transition group-hover:opacity-100">
+                      <CameraIcon className="h-5 w-5 text-white" />
+                    </span>
+                  </button>
                 </td>
 
                 <td className="px-5 py-4 whitespace-nowrap">

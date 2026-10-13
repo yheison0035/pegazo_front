@@ -24,6 +24,7 @@ const Table = ({
   setSelected,
   setSelectedVariants,
   handleDeleteClick,
+  onEditImages,
   handleToggleStatus,
   setPrinterInvoice,
   meta,
@@ -215,6 +216,7 @@ const Table = ({
                   handleDeleteClick={handleDeleteClick}
                   handleToggleStatus={handleToggleStatus}
                   setPrinterInvoice={setPrinterInvoice}
+                  onEditImages={onEditImages}
                 />
               )}
             </tbody>
