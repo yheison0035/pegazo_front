@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   XMarkIcon,
+  MagnifyingGlassIcon,
   MagnifyingGlassPlusIcon,
 } from '@heroicons/react/24/outline';
 import { getPublicCatalog } from '@/lib/api/routes/inventory';
@@ -67,6 +68,33 @@ export default function PublicCatalog({ slug, config = {} }) {
     String(config.type || '').toUpperCase(),
   );
   const word = isFood ? 'carta' : 'catálogo';
+
+  // Buscador del catálogo.
+  const [query, setQuery] = useState('');
+  const q = query.trim().toLowerCase();
+  const visibleGroups = useMemo(() => {
+    if (!q) return groups;
+    return groups
+      .map((g) => ({
+        ...g,
+        products: g.products.filter((p) =>
+          `${p.name} ${p.description || ''}`.toLowerCase().includes(q),
+        ),
+      }))
+      .filter((g) => g.products.length > 0);
+  }, [groups, q]);
+
+  // Estado de un producto: menú usa "disponible"; productos (con control de
+  // stock) usan "en stock / agotado". Elaborados sin stock no muestran etiqueta.
+  const soldOut = (p) =>
+    isFood
+      ? p.available === false
+      : p.available === false || (p.trackStock && (p.stock ?? 0) <= 0);
+  const stateLabel = (p) => {
+    if (isFood) return p.available === false ? 'No disponible' : 'Disponible';
+    if (!p.trackStock) return null;
+    return (p.stock ?? 0) <= 0 ? 'Agotado' : 'Disponible';
+  };
 
   // Bienvenida (portada) al cargar, estilo RAGNOR, adaptada al tipo.
   const [entered, setEntered] = useState(false);
@@ -144,12 +172,31 @@ export default function PublicCatalog({ slug, config = {} }) {
         </div>
       </header>
 
-      {/* Barra de categorías FIJA (queda pegada arriba al hacer scroll) */}
-      {groups.length > 1 && (
-        <nav className="sticky top-0 z-30 border-b border-gray-200 bg-white/95 shadow-sm backdrop-blur">
-          <div className="mx-auto max-w-5xl overflow-x-auto px-4 py-2.5">
-            <div className="flex gap-2">
-              {groups.map((g) => (
+      {/* Barra FIJA: buscador + categorías (queda pegada arriba al desplazar) */}
+      <div className="sticky top-0 z-30 border-b border-gray-200 bg-white/95 shadow-sm backdrop-blur">
+        <div className="mx-auto max-w-5xl space-y-2 px-4 py-2.5">
+          {/* Buscador */}
+          <div className="relative">
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={`Buscar en ${isFood ? 'la carta' : 'el catálogo'}…`}
+              className="w-full rounded-full border border-gray-200 py-2 pl-9 pr-9 text-sm focus:border-gray-300 focus:outline-none focus:ring-2 focus:ring-black/5"
+            />
+            {query && (
+              <button
+                onClick={() => setQuery('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                <XMarkIcon className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+          {/* Categorías: scroll suave en móvil, centradas en desktop */}
+          {visibleGroups.length > 1 && (
+            <div className="-mb-1 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] md:flex-wrap md:justify-center md:overflow-visible [&::-webkit-scrollbar]:hidden">
+              {visibleGroups.map((g) => (
                 <a
                   key={g.id}
                   href={`#cat-${g.id}`}
@@ -167,9 +214,9 @@ export default function PublicCatalog({ slug, config = {} }) {
                 </a>
               ))}
             </div>
-          </div>
-        </nav>
-      )}
+          )}
+        </div>
+      </div>
 
       <main className="mx-auto max-w-5xl px-4 py-6">
         {loading ? (
@@ -182,9 +229,15 @@ export default function PublicCatalog({ slug, config = {} }) {
               Este negocio aún no tiene productos publicados.
             </p>
           </div>
+        ) : visibleGroups.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-gray-200 bg-white py-16 text-center">
+            <p className="text-sm text-gray-500">
+              No encontramos resultados para “{query}”.
+            </p>
+          </div>
         ) : (
           <div className="space-y-8">
-            {groups.map((g) => (
+            {visibleGroups.map((g) => (
               <section key={g.id} id={`cat-${g.id}`} className="scroll-mt-24">
                 <div className="mb-3 flex items-center gap-2">
                   <span
@@ -212,12 +265,26 @@ export default function PublicCatalog({ slug, config = {} }) {
                             src={p.image}
                             alt={p.name}
                             loading="lazy"
-                            className="h-full w-full object-cover"
+                            className={`h-full w-full object-cover ${
+                              soldOut(p) ? 'opacity-50 grayscale' : ''
+                            }`}
                           />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center text-gray-300">
                             <span className="text-3xl">🛍️</span>
                           </div>
+                        )}
+                        {/* Disponibilidad: stock (productos) o disponible (menú) */}
+                        {stateLabel(p) && (
+                          <span
+                            className={`absolute left-1.5 top-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                              soldOut(p)
+                                ? 'bg-red-100 text-red-700'
+                                : 'bg-emerald-100 text-emerald-700'
+                            }`}
+                          >
+                            {stateLabel(p)}
+                          </span>
                         )}
                         {p.images?.length > 1 && (
                           <span className="absolute bottom-1.5 right-1.5 rounded-full bg-black/55 px-1.5 py-0.5 text-[10px] font-semibold text-white">
@@ -349,12 +416,25 @@ export default function PublicCatalog({ slug, config = {} }) {
                     <XMarkIcon className="h-6 w-6" />
                   </button>
                 </div>
-                <p
-                  className="text-2xl font-extrabold tabular-nums"
-                  style={{ color: accent }}
-                >
-                  {formatCOP(detail.price)}
-                </p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <p
+                    className="text-2xl font-extrabold tabular-nums"
+                    style={{ color: accent }}
+                  >
+                    {formatCOP(detail.price)}
+                  </p>
+                  {stateLabel(detail) && (
+                    <span
+                      className={`rounded-full px-2.5 py-1 text-xs font-bold ${
+                        soldOut(detail)
+                          ? 'bg-red-100 text-red-700'
+                          : 'bg-emerald-100 text-emerald-700'
+                      }`}
+                    >
+                      {stateLabel(detail)}
+                    </span>
+                  )}
+                </div>
                 {detail.tags?.length > 0 && (
                   <div className="flex flex-wrap gap-1.5">
                     {detail.tags.map((tg, i) => (
