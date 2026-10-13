@@ -138,6 +138,19 @@ export async function deleteProduct(id) {
   return apiFetch(`/inventory/${id}`, { method: 'DELETE' });
 }
 
+// Carta ligera (nombre + disponible) para gestionar disponibilidad en cocina.
+export async function getMenuAvailability() {
+  return apiFetch('/inventory/menu', { cache: 'no-store' });
+}
+
+// Marca un plato disponible / no disponible (cocina/admin/dueño).
+export async function setProductAvailability(id, available) {
+  return apiFetch(`/inventory/${id}/availability`, {
+    method: 'PATCH',
+    body: JSON.stringify({ available }),
+  });
+}
+
 export async function uploadProductImages(productId, images) {
   if (!Array.isArray(images)) return;
 

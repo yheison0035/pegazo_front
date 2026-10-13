@@ -73,6 +73,15 @@ export default function ProductSelector({
     // Plato elaborado (sin control de stock): se puede vender siempre.
     const isPrepared = product.trackStock === false;
 
+    // No disponible (apagado temporal de la carta por cocina/admin): no se pide.
+    if (product.available === false) {
+      setAlert({
+        type: 'info',
+        message: 'Este producto no está disponible en este momento.',
+      });
+      return;
+    }
+
     if (!isService && !isPrepared && (!product.stock || product.stock <= 0)) {
       setAlert({
         type: 'info',
@@ -275,12 +284,14 @@ export default function ProductSelector({
                     product.type !== 'service' &&
                     product.trackStock !== false &&
                     product.stock <= 0;
+                  const notAvailable = product.available === false;
+                  const blocked = noStock || notAvailable;
 
                   return (
                     <div
                       key={`${product.type}-${product.id}`}
                       onClick={() => {
-                        if (noStock) return;
+                        if (blocked) return;
                         handleSelectProduct(product);
                       }}
                       className={`
@@ -289,7 +300,7 @@ export default function ProductSelector({
                         border-b border-gray-100
                         transition
                         ${
-                          noStock
+                          blocked
                             ? 'opacity-50 cursor-not-allowed'
                             : 'cursor-pointer hover:bg-gray-50'
                         }
@@ -326,6 +337,11 @@ export default function ProductSelector({
                             {noStock && (
                               <span className="text-red-500 font-medium">
                                 Sin stock
+                              </span>
+                            )}
+                            {notAvailable && (
+                              <span className="text-red-500 font-medium">
+                                No disponible
                               </span>
                             )}
                           </div>
