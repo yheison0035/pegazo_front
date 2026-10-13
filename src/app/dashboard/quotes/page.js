@@ -8,7 +8,9 @@ import {
   MagnifyingGlassIcon,
   XMarkIcon,
   ArrowRightCircleIcon,
+  PrinterIcon,
 } from '@heroicons/react/24/outline';
+import { printQuote } from '@/utils/printQuote';
 import RoleGuard from '@/auth/roleGuard';
 import StatusBadge from '@/components/ui/StatusBadge';
 import MoneyInput from '@/components/ui/MoneyInput';
@@ -566,8 +568,15 @@ export default function QuotesPage() {
                   </p>
                 )}
               </div>
-              {detail.status !== 'CONVERTIDA' && (
-                <div className="border-t border-gray-100 p-4 flex flex-wrap justify-end gap-2">
+              <div className="border-t border-gray-100 p-4 flex flex-wrap justify-end gap-2">
+                <button
+                  onClick={() => printQuote(detail, usuario)}
+                  className="rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 inline-flex items-center gap-1.5"
+                >
+                  <PrinterIcon className="w-4 h-4" /> Imprimir
+                </button>
+                {detail.status !== 'CONVERTIDA' && (
+                  <>
                   <button
                     onClick={() => doAction(deleteQuote, detail.id, 'Cotización eliminada.')}
                     disabled={loading}
@@ -600,8 +609,9 @@ export default function QuotesPage() {
                   >
                     <ArrowRightCircleIcon className="w-5 h-5" /> Convertir en venta
                   </button>
-                </div>
-              )}
+                  </>
+                )}
+              </div>
             </div>
           </div>
         )}
