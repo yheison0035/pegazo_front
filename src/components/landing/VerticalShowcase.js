@@ -169,51 +169,103 @@ function genPreset(label, mode) {
   };
 }
 
-// Serie de 7 días estable por tipo (para que cada vertical muestre una gráfica
-// distinta pero consistente). No son datos reales: es el mockup del Inicio.
+// Serie de 7 días (en miles de $) con una forma agradable + variación estable
+// por tipo. No son datos reales: es el mockup del Inicio.
 function weekData(seed) {
   let h = 2166136261;
   for (let i = 0; i < seed.length; i++) {
     h ^= seed.charCodeAt(i);
     h = Math.imul(h, 16777619) >>> 0;
   }
-  const out = [];
-  for (let i = 0; i < 7; i++) {
+  const base = [30, 300, 345, 300, 465, 185, 45];
+  return base.map((b) => {
     h = (Math.imul(h, 1103515245) + 12345) >>> 0;
-    out.push(35 + (h % 65));
+    const jitter = (h % 110) - 55;
+    return Math.max(10, Math.min(580, b + jitter));
+  });
+}
+
+// Path suave (spline tipo Catmull-Rom → Bézier) a partir de puntos [x,y].
+function smoothPath(pts) {
+  if (pts.length < 2) return '';
+  const d = [`M${pts[0][0]},${pts[0][1]}`];
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] || pts[i];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[i + 2] || p2;
+    const c1x = p1[0] + (p2[0] - p0[0]) / 6;
+    const c1y = p1[1] + (p2[1] - p0[1]) / 6;
+    const c2x = p2[0] - (p3[0] - p1[0]) / 6;
+    const c2y = p2[1] - (p3[1] - p1[1]) / 6;
+    d.push(
+      `C${c1x.toFixed(1)},${c1y.toFixed(1)} ${c2x.toFixed(1)},${c2y.toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`,
+    );
+  }
+  return d.join(' ');
+}
+
+// Fechas dd/MM de los últimos 7 días (termina hoy).
+function last7Dates() {
+  const out = [];
+  const now = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(now.getDate() - i);
+    out.push(
+      `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`,
+    );
   }
   return out;
 }
 
-// Mini-gráfica de "Ventas" igual a la del Inicio (área con degradado naranja).
+// Gráfica de "Ventas" igual a la del Inicio (curva suave, ejes con valores,
+// fechas y línea azul marino con relleno sutil).
 function MiniTrend({ seed }) {
   const data = weekData(seed);
-  const W = 300;
-  const H = 104;
-  const P = 6;
-  const max = Math.max(...data);
-  const min = Math.min(...data);
-  const span = max - min || 1;
-  const xs = data.map((_, i) => P + (i * (W - 2 * P)) / (data.length - 1));
-  const ys = data.map((v) => H - P - ((v - min) / span) * (H - 2 * P));
-  const line = xs
-    .map((x, i) => `${i ? 'L' : 'M'}${x.toFixed(1)},${ys[i].toFixed(1)}`)
-    .join(' ');
-  const area = `${line} L${xs[xs.length - 1].toFixed(1)},${H} L${xs[0].toFixed(1)},${H} Z`;
-  const days = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+  const dates = last7Dates();
+  const total = data.reduce((a, b) => a + b, 0) * 1000;
+  const fmtTotal =
+    total >= 1_000_000
+      ? `$${(total / 1_000_000).toFixed(1)}M`
+      : `$${Math.round(total / 1000)}k`;
+
+  const W = 328;
+  const H = 150;
+  const padL = 34;
+  const padR = 8;
+  const padT = 10;
+  const padB = 20;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
+  const ticks = [0, 150, 300, 450, 600];
+  const maxV = 600;
+  const x = (i) => padL + (i * plotW) / (data.length - 1);
+  const y = (v) => padT + (1 - v / maxV) * plotH;
+  const pts = data.map((v, i) => [x(i), y(v)]);
+  const line = smoothPath(pts);
+  const area = `${line} L${x(data.length - 1).toFixed(1)},${padT + plotH} L${x(0).toFixed(1)},${padT + plotH} Z`;
+
   return (
     <div className="mt-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-      <div className="mb-2 flex items-center justify-between">
-        <div>
-          <p className="text-sm font-bold text-gray-700">Ventas</p>
-          <p className="text-[11px] text-gray-400">Últimos 7 días</p>
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1">
+          <span className="text-gray-300">‹</span>
+          <div>
+            <p className="text-sm font-bold text-gray-700">Ventas</p>
+            <p className="text-[11px] text-gray-400">
+              {dates[0]} – {dates[6]} ·{' '}
+              <span className="font-semibold text-gray-600">{fmtTotal}</span>
+            </p>
+          </div>
+          <span className="text-gray-300">›</span>
         </div>
         <div className="inline-flex rounded-lg border border-gray-200 p-0.5">
           {['Semana', 'Mes', 'Año'].map((p, i) => (
             <span
               key={p}
               className={`rounded-md px-2.5 py-0.5 text-[10px] font-medium ${
-                i === 0 ? 'bg-orange-500 text-white shadow-sm' : 'text-gray-400'
+                i === 0 ? 'bg-slate-800 text-white shadow-sm' : 'text-gray-400'
               }`}
             >
               {p}
@@ -221,30 +273,58 @@ function MiniTrend({ seed }) {
           ))}
         </div>
       </div>
-      <svg viewBox={`0 0 ${W} ${H + 16}`} className="w-full" role="img" aria-label="Tendencia de ventas">
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        className="w-full"
+        role="img"
+        aria-label="Tendencia de ventas"
+      >
         <defs>
           <linearGradient id="demoTrend" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#f97316" stopOpacity="0.28" />
-            <stop offset="100%" stopColor="#f97316" stopOpacity="0" />
+            <stop offset="0%" stopColor="#334155" stopOpacity="0.16" />
+            <stop offset="100%" stopColor="#334155" stopOpacity="0" />
           </linearGradient>
         </defs>
+        {/* Rejilla + eje Y */}
+        {ticks.map((t) => (
+          <g key={t}>
+            <line
+              x1={padL}
+              x2={W - padR}
+              y1={y(t)}
+              y2={y(t)}
+              stroke="#f1f5f9"
+              strokeWidth="1"
+            />
+            <text x={padL - 6} y={y(t) + 3} textAnchor="end" fontSize="9" fill="#9ca3af">
+              {t === 0 ? '$0' : `$${t}k`}
+            </text>
+          </g>
+        ))}
+        {/* Área + línea */}
         <path d={area} fill="url(#demoTrend)" />
         <path
           d={line}
           fill="none"
-          stroke="#f97316"
+          stroke="#334155"
           strokeWidth="2.5"
           strokeLinejoin="round"
           strokeLinecap="round"
         />
-        <circle cx={xs[xs.length - 1]} cy={ys[ys.length - 1]} r="3.5" fill="#f97316" />
-        {days.map((d, i) => (
+        <circle
+          cx={pts[pts.length - 1][0]}
+          cy={pts[pts.length - 1][1]}
+          r="3.5"
+          fill="#334155"
+        />
+        {/* Eje X (fechas) */}
+        {dates.map((d, i) => (
           <text
             key={i}
-            x={xs[i]}
-            y={H + 12}
+            x={x(i)}
+            y={H - 5}
             textAnchor="middle"
-            fontSize="9"
+            fontSize="8.5"
             fill="#9ca3af"
           >
             {d}
