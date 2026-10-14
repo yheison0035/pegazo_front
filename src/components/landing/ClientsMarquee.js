@@ -22,23 +22,23 @@ function initials(name) {
 
 function ClientCircle({ c }) {
   return (
-    <div className="flex w-24 flex-none flex-col items-center gap-2">
-      <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border border-neutral-200 bg-white shadow-sm">
+    <div className="flex w-32 flex-none flex-col items-center gap-2.5">
+      <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-full border border-neutral-200 bg-white shadow-sm">
         {c.logo ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={c.logo}
             alt={c.name}
             loading="lazy"
-            className="h-full w-full object-contain p-1.5"
+            className="h-full w-full object-contain p-2"
           />
         ) : (
-          <span className="text-lg font-bold text-neutral-400">
+          <span className="text-2xl font-bold text-neutral-400">
             {initials(c.name)}
           </span>
         )}
       </div>
-      <span className="line-clamp-1 w-full text-center text-[11px] font-medium text-neutral-500">
+      <span className="line-clamp-2 w-full text-center text-xs font-semibold uppercase tracking-wide text-neutral-600">
         {c.name}
       </span>
     </div>
@@ -73,7 +73,7 @@ export default function ClientsMarquee() {
   // Para que la tira SIEMPRE llene el ancho y el bucle sea continuo (sale por la
   // izquierda y reaparece por la derecha), se repite la lista hasta cubrir un
   // ancho mínimo; ese "grupo" se duplica y la animación lo corre -50%.
-  const ITEM_W = 136; // ancho aprox. de cada cliente + separación (px)
+  const ITEM_W = 170; // ancho aprox. de cada cliente + separación (px)
   const reps = Math.max(2, Math.ceil(1600 / (clients.length * ITEM_W)));
   const group = Array.from({ length: reps }).flatMap(() => clients);
   const loop = [...group, ...group];
