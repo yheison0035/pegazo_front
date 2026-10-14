@@ -167,4 +167,12 @@ export const BUSINESS_TYPES = {
     'delivered_sales', 'cash', 'expenses', 'payables', 'statistics',
   ],
 
+  // Parqueadero: TODO se cobra desde 'parking' (ingreso/salida/factura), como
+  // guarda cascos. 'parking' es EXCLUSIVO de este tipo.
+  PARQUEADERO: [
+    'locals', 'users', 'parking', 'customers', 'memberships', 'categories',
+    'inventory', 'providers', 'purchases', 'impuestos', 'loyalty',
+    'delivered_sales', 'cash', 'expenses', 'payables', 'statistics',
+  ],
+
 };

@@ -147,6 +147,14 @@ const TERMS_BY_TYPE = {
     // Clientes queda como "Clientes" (NO "Usuarios", para no confundir con
     // Usuarios/Roles del negocio).
   },
+  PARQUEADERO: {
+    attendant: 'Operario',
+    attendantPlural: 'Operarios',
+    service: 'Parqueo',
+    servicePlural: 'Parqueos',
+    sale: 'Factura',
+    salePlural: 'Ventas realizadas',
+  },
 };
 
 // Devuelve los términos para una empresa: DEFAULT + por tipo + overrides propios.
