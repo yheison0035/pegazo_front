@@ -70,9 +70,14 @@ export default function ClientsMarquee() {
 
   if (!clients.length) return null;
 
-  // Se duplica la lista para que el bucle sea continuo (sin salto).
-  const loop = [...clients, ...clients];
-  const speed = Math.max(20, clients.length * 4); // segundos por vuelta
+  // Para que la tira SIEMPRE llene el ancho y el bucle sea continuo (sale por la
+  // izquierda y reaparece por la derecha), se repite la lista hasta cubrir un
+  // ancho mínimo; ese "grupo" se duplica y la animación lo corre -50%.
+  const ITEM_W = 136; // ancho aprox. de cada cliente + separación (px)
+  const reps = Math.max(2, Math.ceil(1600 / (clients.length * ITEM_W)));
+  const group = Array.from({ length: reps }).flatMap(() => clients);
+  const loop = [...group, ...group];
+  const speed = Math.max(18, group.length * 3); // segundos por vuelta
 
   return (
     <section className="border-y border-neutral-100 bg-white py-14">
