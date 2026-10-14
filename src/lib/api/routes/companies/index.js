@@ -138,12 +138,21 @@ export async function getCompanyDetail(id) {
 // Renovar/marcar pagado (+N días, default 30).
 // Registrar pago / renovar. Preferir `months` (anclado al día de cobro, apto
 // para pago adelantado). Si se pasan `days`, va por días (legado).
-export async function renewCompany(id, { months, days } = {}) {
-  const body = months != null ? { months } : { days: days ?? 30 };
+export async function renewCompany(id, payload = {}) {
+  const { months, days, ...rest } = payload;
+  // `rest` lleva los datos del pago (unitPrice, discountType, discountValue,
+  // amount, method, note, paidAt) para dejar historial.
+  const body =
+    months != null ? { months, ...rest } : { days: days ?? 30, ...rest };
   return apiFetch(`/companies/platform/${id}/renew`, {
     method: 'PATCH',
     body: JSON.stringify(body),
   });
+}
+
+// Historial de pagos de suscripción de una empresa (solo plataforma).
+export async function getCompanyPayments(id) {
+  return apiFetch(`/companies/platform/${id}/payments`);
 }
 
 // Activar / desactivar empresa (suspensión por impago)

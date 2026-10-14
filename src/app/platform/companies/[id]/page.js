@@ -102,33 +102,19 @@ export default function CompanyDetail() {
   };
 
   const [userModal, setUserModal] = useState(null); // null | {} (nuevo) | user
-  const [payMonths, setPayMonths] = useState(1); // meses a registrar
+  const [payOpen, setPayOpen] = useState(false); // modal de registrar pago
 
   const c = data?.company;
   const b = data?.billing;
   const isActive = c?.status === 'ACTIVO';
 
-  const doRegisterPayment = async () => {
-    const months = Number(payMonths) || 1;
-    if (
-      !confirm(
-        `¿Registrar pago de ${months} mes(es) para ${c?.name}? Se extenderá la fecha de pago anclada al día de cobro.`,
-      )
-    )
-      return;
-    setBusy('renew');
-    try {
-      await renewCompany(Number(id), { months });
-      await fetchData();
-      flash(
-        'success',
-        `Pago registrado: +${months} mes(es). Si estaba suspendida, se reactivó.`,
-      );
-    } catch (e) {
-      flash('error', e?.message || 'No se pudo registrar el pago.');
-    } finally {
-      setBusy('');
-    }
+  // Registra el pago (con sus datos) y refresca. El modal muestra errores
+  // propios; aquí solo avisamos el éxito y cerramos.
+  const submitPayment = async (payload) => {
+    await renewCompany(Number(id), payload);
+    await fetchData();
+    setPayOpen(false);
+    flash('success', `Pago registrado: +${payload.months} mes(es).`);
   };
 
   const doToggle = async () => {
@@ -245,27 +231,13 @@ export default function CompanyDetail() {
 
                 {/* Acciones rápidas */}
                 <div className="flex flex-wrap gap-2">
-                  <div className="inline-flex items-center overflow-hidden rounded-lg border border-gray-300">
-                    <select
-                      value={payMonths}
-                      onChange={(e) => setPayMonths(Number(e.target.value))}
-                      className="h-9 border-0 bg-white px-2 text-sm text-gray-700 focus:outline-none"
-                    >
-                      <option value={1}>1 mes</option>
-                      <option value={3}>3 meses</option>
-                      <option value={6}>6 meses</option>
-                      <option value={12}>12 meses</option>
-                    </select>
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      loading={busy === 'renew'}
-                      onClick={doRegisterPayment}
-                      className="rounded-none"
-                    >
-                      <ArrowPathIcon className="mr-1 h-4 w-4" /> Registrar pago
-                    </Button>
-                  </div>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => setPayOpen(true)}
+                  >
+                    <ArrowPathIcon className="mr-1 h-4 w-4" /> Registrar pago
+                  </Button>
                   {isActive && (
                     <Button
                       variant="secondary"
@@ -460,7 +432,104 @@ export default function CompanyDetail() {
                 </div>
               </div>
             </div>
+
+            {/* Historial de pagos de suscripción */}
+            <div className="mt-5 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+                <h2 className="text-sm font-semibold text-gray-800">
+                  Historial de pagos ({data.paymentsSummary?.count || 0})
+                </h2>
+                {data.paymentsSummary?.totalPaid > 0 && (
+                  <span className="text-sm text-gray-500">
+                    Total cobrado:{' '}
+                    <b className="text-gray-800">
+                      {cop(data.paymentsSummary.totalPaid)}
+                    </b>
+                    {data.paymentsSummary.lastPaidAt && (
+                      <>
+                        {' '}· Último:{' '}
+                        {formatDateOnly(data.paymentsSummary.lastPaidAt)}
+                      </>
+                    )}
+                  </span>
+                )}
+              </div>
+              {data.payments?.length ? (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-sm">
+                    <thead className="text-left text-xs uppercase tracking-wide text-gray-500">
+                      <tr className="border-b border-gray-100">
+                        <th className="py-2 pr-4">Fecha</th>
+                        <th className="py-2 pr-4">Meses</th>
+                        <th className="py-2 pr-4">Período cubierto</th>
+                        <th className="py-2 pr-4 text-right">Precio/mes</th>
+                        <th className="py-2 pr-4 text-right">Descuento</th>
+                        <th className="py-2 pr-4 text-right">Cobrado</th>
+                        <th className="py-2 pr-4">Medio</th>
+                        <th className="py-2 pr-4">Nota</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50">
+                      {data.payments.map((p) => {
+                        const desc =
+                          p.discountType === 'PERCENT'
+                            ? `${p.discountValue}%`
+                            : p.discountType === 'AMOUNT'
+                              ? cop(p.discountValue)
+                              : '—';
+                        return (
+                          <tr key={p.id} className="text-gray-700">
+                            <td className="py-2 pr-4 font-medium">
+                              {formatDateOnly(p.paidAt)}
+                            </td>
+                            <td className="py-2 pr-4">{p.months}</td>
+                            <td className="py-2 pr-4 text-gray-500">
+                              {p.periodFrom
+                                ? `${formatDateOnly(p.periodFrom)} → `
+                                : '→ '}
+                              {formatDateOnly(p.periodTo)}
+                            </td>
+                            <td className="py-2 pr-4 text-right tabular-nums">
+                              {cop(p.unitPrice)}
+                            </td>
+                            <td className="py-2 pr-4 text-right tabular-nums">
+                              {desc}
+                            </td>
+                            <td className="py-2 pr-4 text-right font-semibold tabular-nums text-gray-900">
+                              {cop(p.amount)}
+                            </td>
+                            <td className="py-2 pr-4">
+                              <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs">
+                                {p.method === 'EFECTIVO'
+                                  ? 'Efectivo'
+                                  : 'Transferencia'}
+                              </span>
+                            </td>
+                            <td className="py-2 pr-4 text-gray-500">
+                              {p.note || '—'}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p className="py-6 text-center text-sm text-gray-400">
+                  Aún no hay pagos registrados. Usa{' '}
+                  <b className="text-gray-600">Registrar pago</b> arriba.
+                </p>
+              )}
+            </div>
           </>
+        )}
+
+        {payOpen && c && (
+          <PaymentModal
+            company={c}
+            onClose={() => setPayOpen(false)}
+            onSubmit={submitPayment}
+          />
         )}
 
         {userModal && c && (
@@ -647,6 +716,186 @@ function UserEditor({ initial, companyId, locals, onClose, onSaved }) {
           </Button>
           <Button variant="primary" size="sm" loading={saving} onClick={save}>
             {isEdit ? 'Guardar' : 'Crear usuario'}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PaymentModal({ company, onClose, onSubmit }) {
+  const pad = (n) => String(n).padStart(2, '0');
+  const now = new Date();
+  const todayISO = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+
+  const [f, setF] = useState({
+    months: 1,
+    unitPrice: company?.monthlyPrice ? String(company.monthlyPrice) : '',
+    discountType: '', // '' (sin desc.) | 'AMOUNT' | 'PERCENT'
+    discountValue: '',
+    method: 'TRANSFERENCIA',
+    note: '',
+    paidAt: todayISO,
+  });
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState('');
+  const set = (k, v) => setF((p) => ({ ...p, [k]: v }));
+
+  const int = (v) => Number(String(v ?? '').replace(/[^\d]/g, '')) || 0;
+  const months = Math.max(0, int(f.months));
+  const unitPrice = int(f.unitPrice);
+  const gross = unitPrice * months;
+  const dv = int(f.discountValue);
+  const discountAmount =
+    f.discountType === 'PERCENT'
+      ? Math.round((gross * dv) / 100)
+      : f.discountType === 'AMOUNT'
+        ? dv
+        : 0;
+  const amountFinal = Math.max(0, gross - discountAmount);
+
+  const save = async () => {
+    setErr('');
+    if (months < 1) {
+      setErr('Indica cuántos meses cubre el pago (mínimo 1).');
+      return;
+    }
+    setSaving(true);
+    try {
+      await onSubmit({
+        months,
+        unitPrice,
+        discountType: f.discountType || null,
+        discountValue: dv,
+        method: f.method,
+        note: f.note.trim(),
+        paidAt: f.paidAt,
+      });
+    } catch (e) {
+      setErr(e?.message || 'No se pudo registrar el pago.');
+      setSaving(false);
+    }
+  };
+
+  const inp =
+    'w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20';
+  const lbl = 'mb-1 block text-xs font-semibold text-gray-600';
+
+  return (
+    <div className="fixed inset-0 z-[70] flex items-start justify-center overflow-y-auto bg-black/40 p-4">
+      <div className="my-8 w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
+        <h2 className="text-lg font-semibold text-gray-800">Registrar pago</h2>
+        <p className="mt-0.5 text-sm text-gray-500">
+          {company?.name} · se extiende la fecha de pago anclada al día de cobro.
+        </p>
+
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label className={lbl}>Meses que cubre</label>
+            <input
+              type="number"
+              min={1}
+              className={inp}
+              value={f.months}
+              onChange={(e) => set('months', e.target.value)}
+            />
+          </div>
+          <div>
+            <label className={lbl}>Fecha del pago</label>
+            <input
+              type="date"
+              className={inp}
+              value={f.paidAt}
+              onChange={(e) => set('paidAt', e.target.value)}
+            />
+          </div>
+          <div>
+            <label className={lbl}>Precio por mes (COP)</label>
+            <input
+              type="number"
+              min={0}
+              className={inp}
+              value={f.unitPrice}
+              onChange={(e) => set('unitPrice', e.target.value)}
+              placeholder="Ej: 150000"
+            />
+          </div>
+          <div>
+            <label className={lbl}>Medio de pago</label>
+            <select
+              className={inp}
+              value={f.method}
+              onChange={(e) => set('method', e.target.value)}
+            >
+              <option value="TRANSFERENCIA">Transferencia / Bancolombia</option>
+              <option value="EFECTIVO">Efectivo</option>
+            </select>
+          </div>
+          <div>
+            <label className={lbl}>Descuento</label>
+            <select
+              className={inp}
+              value={f.discountType}
+              onChange={(e) => set('discountType', e.target.value)}
+            >
+              <option value="">Sin descuento</option>
+              <option value="AMOUNT">Monto ($)</option>
+              <option value="PERCENT">Porcentaje (%)</option>
+            </select>
+          </div>
+          <div>
+            <label className={lbl}>
+              Valor del descuento {f.discountType === 'PERCENT' ? '(%)' : '($)'}
+            </label>
+            <input
+              type="number"
+              min={0}
+              className={inp}
+              value={f.discountValue}
+              onChange={(e) => set('discountValue', e.target.value)}
+              disabled={!f.discountType}
+              placeholder={f.discountType ? '0' : '—'}
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <label className={lbl}>Nota (opcional)</label>
+            <input
+              className={inp}
+              value={f.note}
+              onChange={(e) => set('note', e.target.value)}
+              placeholder="Ej: pago 4 meses con descuento acordado"
+            />
+          </div>
+        </div>
+
+        {/* Resumen */}
+        <div className="mt-4 rounded-xl bg-gray-50 p-3 text-sm">
+          <div className="flex justify-between text-gray-500">
+            <span>
+              Bruto ({months} mes{months === 1 ? '' : 'es'} × {cop(unitPrice)})
+            </span>
+            <span className="tabular-nums">{cop(gross)}</span>
+          </div>
+          {discountAmount > 0 && (
+            <div className="flex justify-between text-gray-500">
+              <span>Descuento</span>
+              <span className="tabular-nums">− {cop(discountAmount)}</span>
+            </div>
+          )}
+          <div className="mt-1 flex justify-between border-t border-gray-200 pt-1 font-semibold text-gray-900">
+            <span>Total a cobrar</span>
+            <span className="tabular-nums">{cop(amountFinal)}</span>
+          </div>
+        </div>
+
+        {err && <p className="mt-3 text-sm text-red-600">{err}</p>}
+
+        <div className="mt-6 flex justify-end gap-2">
+          <Button variant="secondary" size="sm" onClick={onClose}>
+            Cancelar
+          </Button>
+          <Button variant="primary" size="sm" loading={saving} onClick={save}>
+            Registrar pago
           </Button>
         </div>
       </div>
