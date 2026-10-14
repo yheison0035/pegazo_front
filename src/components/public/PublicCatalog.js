@@ -159,7 +159,13 @@ export default function PublicCatalog({ slug, config = {} }) {
   const whatsapp = (config.whatsapp || '').replace(/\D/g, '');
 
   // Palabra según la vertical: comida = "carta/menú", resto = "catálogo".
-  const isFood = ['RESTAURANTE', 'COMIDA_RAPIDA', 'CAFETERIA'].includes(
+  const isFood = [
+    'RESTAURANTE',
+    'COMIDA_RAPIDA',
+    'CAFETERIA',
+    'BAR',
+    'PIZZERIA',
+  ].includes(
     String(config.type || '').toUpperCase(),
   );
   const word = isFood ? 'carta' : 'catálogo';
