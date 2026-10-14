@@ -231,11 +231,11 @@ function MiniTrend({ seed }) {
       : `$${Math.round(total / 1000)}k`;
 
   const W = 328;
-  const H = 150;
+  const H = 116;
   const padL = 34;
   const padR = 8;
-  const padT = 10;
-  const padB = 20;
+  const padT = 8;
+  const padB = 18;
   const plotW = W - padL - padR;
   const plotH = H - padT - padB;
   const ticks = [0, 150, 300, 450, 600];
