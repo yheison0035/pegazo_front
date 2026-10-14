@@ -38,9 +38,16 @@ function ClientCircle({ c }) {
           </span>
         )}
       </div>
-      <span className="line-clamp-2 w-full text-center text-xs font-semibold uppercase tracking-wide text-neutral-600">
-        {c.name}
-      </span>
+      <div className="w-full text-center">
+        <p className="line-clamp-1 text-xs font-bold uppercase tracking-wide text-neutral-800">
+          {c.name}
+        </p>
+        {c.typeLabel && (
+          <p className="mt-0.5 line-clamp-1 text-[10px] font-semibold uppercase tracking-wider text-orange-500">
+            {c.typeLabel}
+          </p>
+        )}
+      </div>
     </div>
   );
 }
