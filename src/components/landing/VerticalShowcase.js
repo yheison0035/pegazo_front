@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   HomeIcon,
   CalendarDaysIcon,
@@ -21,7 +21,6 @@ import {
   TagIcon,
   Squares2X2Icon,
   GlobeAltIcon,
-  BuildingStorefrontIcon,
   ReceiptPercentIcon,
   ArrowUturnLeftIcon,
   WrenchScrewdriverIcon,
@@ -33,8 +32,16 @@ import {
 } from '@heroicons/react/24/outline';
 import { BUSINESS_TYPES } from '@/config/businessTypes';
 
+function apiBase() {
+  let url = process.env.NEXT_PUBLIC_API_URL || '';
+  if (!url || url.includes('localhost')) {
+    url = 'https://admineuropeatvstoreback-production.up.railway.app';
+  }
+  return url.replace(/\/$/, '');
+}
+
 // Etiqueta + ícono REAL de cada módulo del CRM (para mostrar el menú tal cual
-// lo verá el dueño). La clave es la del módulo (último segmento de la ruta).
+// lo verá el dueño). La clave es la del módulo.
 const MODULE_META = {
   dashboard: ['Inicio', HomeIcon],
   sales: ['Facturar (POS)', ShoppingBagIcon],
@@ -72,132 +79,152 @@ const MODULE_META = {
   settings: ['Configuración', WrenchScrewdriverIcon],
 };
 
-// Módulos reales que verá el dueño de cada tipo (Inicio primero, Configuración
-// al final). Toma la lista curada por vertical del CRM (businessTypes.js).
-function realModules(type) {
-  const base = BUSINESS_TYPES[type] || [];
-  return ['dashboard', ...base, 'settings'];
+// Módulos reales a mostrar en el menú. Preferimos los que trae el backend por
+// tipo; si no llegan, caemos a la lista curada del CRM (businessTypes.js).
+function menuModules(type, modules) {
+  const base =
+    Array.isArray(modules) && modules.length
+      ? modules
+      : BUSINESS_TYPES[type] || [];
+  const all = ['dashboard', ...base, 'settings'];
+  // Únicos, en orden, y solo los que sabemos pintar.
+  return all.filter((k, i) => MODULE_META[k] && all.indexOf(k) === i);
 }
 
-// Íconos por nombre de módulo (mismos que el menú real del CRM).
-const ICONS = {
-  Inicio: HomeIcon,
-  Citas: CalendarDaysIcon,
-  Servicios: ScissorsIcon,
-  Clientes: UsersIcon,
-  Pacientes: UsersIcon,
-  Historia: ClipboardDocumentListIcon,
-  Caja: BanknotesIcon,
-  Gastos: BanknotesIcon,
-  Fidelización: GiftIcon,
-  Estadísticas: ChartBarIcon,
-  Mesas: TableCellsIcon,
-  Cocina: FireIcon,
-  Menú: ClipboardDocumentListIcon,
-  Insumos: BeakerIcon,
-  Inventario: ArchiveBoxIcon,
-  Compras: ShoppingCartIcon,
-  Ventas: ShoppingBagIcon,
-  Cartera: CreditCardIcon,
-  Proveedores: TruckIcon,
-  Turnos: CalendarDaysIcon,
-  Reservas: CalendarDaysIcon,
-  Lavados: ScissorsIcon,
-  Guardados: ArchiveBoxIcon,
+const TYPE_EMOJI = {
+  SERVICIOS: '💈', VETERINARIA: '🐾', ODONTOLOGIA: '🦷', GIMNASIO: '🏋️',
+  LAVADO_VEHICULOS: '🚗', LAVANDERIA: '🧺', TALLER_MECANICO: '🔩',
+  CANCHAS_SINTETICAS: '⚽', GUARDA_CASCOS: '🪖', RESTAURANTE: '🍽️',
+  COMIDA_RAPIDA: '🍔', CAFETERIA: '☕', PIZZERIA: '🍕', BAR: '🍻',
+  PANADERIA: '🥐', CARNICERIA: '🥩', PESCADERIA: '🐟', FRUVER: '🥦',
+  SUPERMERCADO: '🛒', DROGUERIA: '💊', LICORERA: '🍷', ROPA: '👗',
+  CALZADO: '👟', FERRETERIA: '🔧', FLORISTERIA: '🌸', PAPELERIA: '📎',
+  PETSHOP: '🐶', TECNOLOGIA: '💻', TELEVENTAS: '📞', ECOMMERCE: '📦',
+  COMERCIO: '🏪', DISTRIBUCION: '🚚', FERIA: '🎪',
 };
 
-// El visitante elige un tipo de negocio y ve el panel de Pegazo adaptado
-// (menú, vocabulario y catálogo). Datos ilustrativos.
-const VERTICALS = [
-  {
-    id: 'barberia', type: 'SERVICIOS', emoji: '💈', name: 'Barbería', biz: 'RAGNOR Barber',
-    accent: 'Se agenda por barbero, con comisiones y fidelización.',
-    catalog: 'Servicios',
-    items: [['Corte clásico', '$18.000'], ['Corte + barba', '$28.000'], ['Perfilado de cejas', '$8.000']],
-    kpis: [['Ventas de hoy', '$486.000', 'bg-emerald-400'], ['Citas hoy', '14', 'bg-orange-400']],
-  },
-  {
-    id: 'restaurante', type: 'RESTAURANTE', emoji: '🍽️', name: 'Restaurante', biz: 'La Parrilla',
-    accent: 'Mesas, comandas y pantalla de cocina (KDS).',
-    catalog: 'Menú',
-    items: [['Bandeja paisa', '$26.000'], ['Limonada de coco', '$9.000'], ['Postre del día', '$7.000']],
-    kpis: [['Ventas de hoy', '$1.240.000', 'bg-emerald-400'], ['Mesas activas', '6', 'bg-orange-400']],
-  },
-  {
-    id: 'ferreteria', type: 'COMERCIO', emoji: '🔧', name: 'Ferretería', biz: 'El Tornillo',
-    accent: 'Inventario, compras, cartera y fiado a la mano.',
-    catalog: 'Inventario',
-    items: [['Tornillo 1/4" (100u)', '$12.000'], ['Pintura vinilo 1gl', '$62.000'], ['Cinta aislante', '$4.500']],
-    kpis: [['Ventas de hoy', '$2.150.000', 'bg-emerald-400'], ['Por cobrar', '$1.8M', 'bg-orange-400']],
-  },
-  {
-    id: 'veterinaria', type: 'SERVICIOS', emoji: '🐾', name: 'Veterinaria', biz: 'Huellitas',
-    accent: 'Citas por especialista y ficha de cada mascota.',
-    catalog: 'Servicios',
-    items: [['Consulta general', '$45.000'], ['Vacuna múltiple', '$55.000'], ['Baño y peluquería', '$35.000']],
-    kpis: [['Ventas de hoy', '$620.000', 'bg-emerald-400'], ['Citas hoy', '9', 'bg-orange-400']],
-  },
-  {
-    id: 'odontologia', type: 'ODONTOLOGIA', emoji: '🦷', name: 'Odontología', biz: 'Clínica Sonríe',
-    accent: 'Historia clínica por paciente, odontograma y consentimientos firmados.',
-    catalog: 'Tratamientos',
-    items: [['Consulta + diagnóstico', '$60.000'], ['Limpieza dental', '$90.000'], ['Resina (por diente)', '$130.000']],
-    kpis: [['Ventas de hoy', '$1.180.000', 'bg-emerald-400'], ['Citas hoy', '11', 'bg-orange-400']],
-  },
-  {
-    id: 'ropa', type: 'ROPA', emoji: '👗', name: 'Tienda de ropa', biz: 'Moda Urbana',
-    accent: 'Variantes por talla y color, con multi-sede.',
-    catalog: 'Inventario',
-    items: [['Camiseta oversize · M', '$49.900'], ['Jean slim · 32', '$89.900'], ['Chaqueta · L', '$139.900']],
-    kpis: [['Ventas de hoy', '$980.000', 'bg-emerald-400'], ['Referencias', '860', 'bg-orange-400']],
-  },
-  {
-    id: 'calzado', type: 'CALZADO', emoji: '👟', name: 'Tienda de calzado', biz: 'Pasos',
-    accent: 'Inventario por talla y color, con cambios y devoluciones.',
-    catalog: 'Inventario',
-    items: [['Tenis running · 40', '$189.900'], ['Botín cuero · 38', '$249.900'], ['Sandalia dama · 37', '$79.900']],
-    kpis: [['Ventas de hoy', '$1.120.000', 'bg-emerald-400'], ['Pares en stock', '540', 'bg-orange-400']],
-  },
-  {
-    id: 'supermercado', type: 'SUPERMERCADO', emoji: '🛒', name: 'Minimercado', biz: 'La Esquina',
-    accent: 'Venta rápida, proveedores y control de stock.',
-    catalog: 'Inventario',
-    items: [['Arroz 500g', '$2.400'], ['Leche entera 1L', '$4.300'], ['Huevos x30', '$16.500']],
-    kpis: [['Ventas de hoy', '$3.420.000', 'bg-emerald-400'], ['Productos', '2.100', 'bg-orange-400']],
-  },
-  {
-    id: 'lavado', type: 'LAVADO_VEHICULOS', emoji: '🚗', name: 'Lavado de vehículos', biz: 'Aqua Wash',
-    accent: 'Turnos por lavador, comisiones y fidelización (el lavado #10 gratis).',
-    catalog: 'Lavados',
-    items: [['Lavado básico', '$15.000'], ['Lavado + encerado', '$28.000'], ['Polichado completo', '$120.000']],
-    kpis: [['Ventas de hoy', '$540.000', 'bg-emerald-400'], ['Turnos hoy', '18', 'bg-orange-400']],
-  },
-  {
-    id: 'canchas', type: 'CANCHAS_SINTETICAS', emoji: '⚽', name: 'Canchas sintéticas', biz: 'Gol Center',
-    accent: 'Cada cancha se reserva por hora, con venta de bebidas e implementos.',
-    catalog: 'Alquiler de cancha',
-    items: [['Cancha 1 · hora', '$90.000'], ['Cancha 2 · hora', '$90.000'], ['Alquiler de peto', '$3.000']],
-    kpis: [['Ventas de hoy', '$1.080.000', 'bg-emerald-400'], ['Reservas hoy', '12', 'bg-orange-400']],
-  },
-  {
-    id: 'guardacascos', type: 'GUARDA_CASCOS', emoji: '🪖', name: 'Guarda cascos', biz: 'Casco Seguro',
-    accent: 'Guardado por uso o mensualidad, con venta de candados y forros.',
-    catalog: 'Guardados',
-    items: [['Guardado por día', '$2.000'], ['Mensualidad', '$25.000'], ['Candado', '$18.000']],
-    kpis: [['Ventas de hoy', '$180.000', 'bg-emerald-400'], ['Usuarios activos', '64', 'bg-orange-400']],
-  },
-];
+// Ejemplos ilustrativos por tipo (nombre de negocio + catálogo + ítems + KPIs).
+// Si entra un tipo NUEVO sin preset, se genera uno coherente por su modo.
+const E = 'bg-emerald-400';
+const O = 'bg-orange-400';
+const PRESETS = {
+  SERVICIOS: { biz: 'RAGNOR Barber', catalog: 'Servicios', accent: 'Se agenda por profesional, con comisiones y fidelización.', items: [['Corte clásico', '$18.000'], ['Corte + barba', '$28.000'], ['Perfilado de cejas', '$8.000']], kpis: [['Ventas de hoy', '$486.000', E], ['Citas hoy', '14', O]] },
+  VETERINARIA: { biz: 'Huellitas', catalog: 'Servicios', accent: 'Citas por especialista y ficha de cada mascota.', items: [['Consulta general', '$45.000'], ['Vacuna múltiple', '$55.000'], ['Baño y peluquería', '$35.000']], kpis: [['Ventas de hoy', '$620.000', E], ['Citas hoy', '9', O]] },
+  ODONTOLOGIA: { biz: 'Clínica Sonríe', catalog: 'Tratamientos', accent: 'Historia clínica por paciente, odontograma y consentimientos.', items: [['Consulta + diagnóstico', '$60.000'], ['Limpieza dental', '$90.000'], ['Resina (por diente)', '$130.000']], kpis: [['Ventas de hoy', '$1.180.000', E], ['Citas hoy', '11', O]] },
+  GIMNASIO: { biz: 'PowerFit', catalog: 'Planes', accent: 'Membresías, reservas de clases y control de acceso.', items: [['Mensualidad', '$80.000'], ['Clase personalizada', '$35.000'], ['Pase por día', '$12.000']], kpis: [['Ventas de hoy', '$740.000', E], ['Reservas hoy', '22', O]] },
+  LAVADO_VEHICULOS: { biz: 'Aqua Wash', catalog: 'Lavados', accent: 'Turnos por lavador, comisiones y fidelización.', items: [['Lavado básico', '$15.000'], ['Lavado + encerado', '$28.000'], ['Polichado completo', '$120.000']], kpis: [['Ventas de hoy', '$540.000', E], ['Turnos hoy', '18', O]] },
+  LAVANDERIA: { biz: 'Burbujas', catalog: 'Servicios', accent: 'Órdenes por cliente, estados y avisos por WhatsApp.', items: [['Lavado x kilo', '$6.000'], ['Lavado en seco', '$18.000'], ['Planchado (prenda)', '$2.500']], kpis: [['Ventas de hoy', '$380.000', E], ['Órdenes hoy', '27', O]] },
+  TALLER_MECANICO: { biz: 'MotorPro', catalog: 'Servicios', accent: 'Órdenes de trabajo por vehículo, repuestos y mano de obra.', items: [['Cambio de aceite', '$90.000'], ['Alineación y balanceo', '$70.000'], ['Revisión general', '$120.000']], kpis: [['Ventas de hoy', '$1.350.000', E], ['Órdenes hoy', '7', O]] },
+  CANCHAS_SINTETICAS: { biz: 'Gol Center', catalog: 'Alquiler de cancha', accent: 'Cada cancha se reserva por hora, con venta de bebidas.', items: [['Cancha 1 · hora', '$90.000'], ['Cancha 2 · hora', '$90.000'], ['Alquiler de peto', '$3.000']], kpis: [['Ventas de hoy', '$1.080.000', E], ['Reservas hoy', '12', O]] },
+  GUARDA_CASCOS: { biz: 'Casco Seguro', catalog: 'Guardados', accent: 'Guardado por uso o mensualidad, con venta de accesorios.', items: [['Guardado por día', '$2.000'], ['Mensualidad', '$25.000'], ['Candado', '$18.000']], kpis: [['Ventas de hoy', '$180.000', E], ['Usuarios activos', '64', O]] },
+  RESTAURANTE: { biz: 'La Parrilla', catalog: 'Menú', accent: 'Mesas, comandas y pantalla de cocina (KDS).', items: [['Bandeja paisa', '$26.000'], ['Limonada de coco', '$9.000'], ['Postre del día', '$7.000']], kpis: [['Ventas de hoy', '$1.240.000', E], ['Mesas activas', '6', O]] },
+  COMIDA_RAPIDA: { biz: 'Burger Town', catalog: 'Menú', accent: 'Pedidos rápidos, domicilios y pantalla de cocina.', items: [['Hamburguesa clásica', '$16.000'], ['Perro especial', '$12.000'], ['Papas + gaseosa', '$8.000']], kpis: [['Ventas de hoy', '$820.000', E], ['Pedidos hoy', '54', O]] },
+  CAFETERIA: { biz: 'Café Aroma', catalog: 'Menú', accent: 'Carta por categorías, mesas y venta rápida.', items: [['Capuchino', '$6.500'], ['Croissant', '$5.000'], ['Sándwich', '$12.000']], kpis: [['Ventas de hoy', '$430.000', E], ['Mesas activas', '5', O]] },
+  PIZZERIA: { biz: 'Napoli', catalog: 'Menú', accent: 'Menú, domicilios y cocina en pantalla.', items: [['Pizza margarita', '$32.000'], ['Pizza pepperoni', '$38.000'], ['Gaseosa 1.5L', '$7.000']], kpis: [['Ventas de hoy', '$960.000', E], ['Pedidos hoy', '31', O]] },
+  BAR: { biz: 'La Terraza', catalog: 'Carta', accent: 'Mesas, comandas y cierre de caja por turno.', items: [['Cerveza nacional', '$6.000'], ['Cóctel de la casa', '$22.000'], ['Picada x2', '$38.000']], kpis: [['Ventas de hoy', '$1.560.000', E], ['Mesas activas', '9', O]] },
+  PANADERIA: { biz: 'El Trigal', catalog: 'Inventario', accent: 'Venta rápida, producción e inventario.', items: [['Pan francés (u)', '$600'], ['Torta por porción', '$4.500'], ['Pan de bono (u)', '$1.500']], kpis: [['Ventas de hoy', '$680.000', E], ['Productos', '180', O]] },
+  CARNICERIA: { biz: 'El Novillo', catalog: 'Inventario', accent: 'Venta por peso, proveedores y control de stock.', items: [['Lomo fino (kg)', '$32.000'], ['Pechuga (kg)', '$14.000'], ['Costilla (kg)', '$18.000']], kpis: [['Ventas de hoy', '$1.420.000', E], ['Productos', '90', O]] },
+  PESCADERIA: { biz: 'Mar Azul', catalog: 'Inventario', accent: 'Venta por peso, cadena de frío e inventario.', items: [['Filete de tilapia (kg)', '$24.000'], ['Camarón (kg)', '$46.000'], ['Salmón (kg)', '$58.000']], kpis: [['Ventas de hoy', '$990.000', E], ['Productos', '60', O]] },
+  FRUVER: { biz: 'La Huerta', catalog: 'Inventario', accent: 'Venta por peso, mermas y rotación.', items: [['Tomate (kg)', '$3.500'], ['Banano (kg)', '$2.800'], ['Aguacate (u)', '$2.500']], kpis: [['Ventas de hoy', '$760.000', E], ['Productos', '210', O]] },
+  SUPERMERCADO: { biz: 'La Esquina', catalog: 'Inventario', accent: 'Venta rápida, proveedores y control de stock.', items: [['Arroz 500g', '$2.400'], ['Leche entera 1L', '$4.300'], ['Huevos x30', '$16.500']], kpis: [['Ventas de hoy', '$3.420.000', E], ['Productos', '2.100', O]] },
+  DROGUERIA: { biz: 'Salud Total', catalog: 'Inventario', accent: 'Inventario, vencimientos y venta por unidad.', items: [['Acetaminofén x20', '$6.500'], ['Alcohol 700ml', '$5.000'], ['Vitamina C x30', '$18.000']], kpis: [['Ventas de hoy', '$1.120.000', E], ['Productos', '1.400', O]] },
+  LICORERA: { biz: 'El Barril', catalog: 'Inventario', accent: 'Inventario, proveedores y venta rápida.', items: [['Aguardiente 750ml', '$42.000'], ['Ron 750ml', '$58.000'], ['Cerveza six-pack', '$18.000']], kpis: [['Ventas de hoy', '$2.260.000', E], ['Productos', '320', O]] },
+  ROPA: { biz: 'Moda Urbana', catalog: 'Inventario', accent: 'Variantes por talla y color, con multi-sede.', items: [['Camiseta oversize · M', '$49.900'], ['Jean slim · 32', '$89.900'], ['Chaqueta · L', '$139.900']], kpis: [['Ventas de hoy', '$980.000', E], ['Referencias', '860', O]] },
+  CALZADO: { biz: 'Pasos', catalog: 'Inventario', accent: 'Inventario por talla y color, con cambios y devoluciones.', items: [['Tenis running · 40', '$189.900'], ['Botín cuero · 38', '$249.900'], ['Sandalia dama · 37', '$79.900']], kpis: [['Ventas de hoy', '$1.120.000', E], ['Pares en stock', '540', O]] },
+  FERRETERIA: { biz: 'El Tornillo', catalog: 'Inventario', accent: 'Inventario, compras, cartera y fiado a la mano.', items: [['Tornillo 1/4" (100u)', '$12.000'], ['Pintura vinilo 1gl', '$62.000'], ['Cinta aislante', '$4.500']], kpis: [['Ventas de hoy', '$2.150.000', E], ['Por cobrar', '$1.8M', O]] },
+  FLORISTERIA: { biz: 'Pétalos', catalog: 'Inventario', accent: 'Pedidos, domicilios y fechas especiales.', items: [['Ramo de rosas x12', '$55.000'], ['Girasoles x6', '$38.000'], ['Arreglo especial', '$90.000']], kpis: [['Ventas de hoy', '$520.000', E], ['Pedidos hoy', '14', O]] },
+  PAPELERIA: { biz: 'El Lápiz', catalog: 'Inventario', accent: 'Venta rápida, inventario y servicios de impresión.', items: [['Resma carta', '$14.000'], ['Cuaderno 100h', '$4.500'], ['Impresión (hoja)', '$300']], kpis: [['Ventas de hoy', '$340.000', E], ['Productos', '900', O]] },
+  PETSHOP: { biz: 'Mundo Mascota', catalog: 'Inventario', accent: 'Inventario, marcas y fidelización.', items: [['Concentrado 10kg', '$78.000'], ['Arena sanitaria', '$22.000'], ['Juguete mordedor', '$15.000']], kpis: [['Ventas de hoy', '$640.000', E], ['Productos', '480', O]] },
+  TECNOLOGIA: { biz: 'TechStore', catalog: 'Inventario', accent: 'Inventario con series, garantías y variantes.', items: [['Audífonos BT', '$89.000'], ['Cargador USB-C', '$35.000'], ['Mouse inalámbrico', '$45.000']], kpis: [['Ventas de hoy', '$1.780.000', E], ['Referencias', '620', O]] },
+  TELEVENTAS: { biz: 'EuropeaTV', catalog: 'Inventario', accent: 'Ventas por teléfono/online, despacho y cartera.', items: [['Smart TV 50"', '$1.450.000'], ['Parlante bafle', '$320.000'], ['Soporte TV', '$55.000']], kpis: [['Ventas de hoy', '$5.200.000', E], ['Pedidos hoy', '23', O]] },
+  ECOMMERCE: { biz: 'ShopNow', catalog: 'Inventario', accent: 'Tienda online, pedidos y despachos integrados.', items: [['Producto estrella', '$79.000'], ['Combo del mes', '$120.000'], ['Accesorio', '$29.000']], kpis: [['Ventas de hoy', '$2.980.000', E], ['Pedidos hoy', '61', O]] },
+  COMERCIO: { biz: 'Tienda La 15', catalog: 'Inventario', accent: 'Inventario, ventas, cartera y proveedores.', items: [['Producto A', '$12.000'], ['Producto B', '$25.000'], ['Producto C', '$8.000']], kpis: [['Ventas de hoy', '$1.240.000', E], ['Productos', '740', O]] },
+  DISTRIBUCION: { biz: 'Distrimax', catalog: 'Inventario', accent: 'Ventas al por mayor, rutas, cartera y despachos.', items: [['Caja x24', '$96.000'], ['Pallet (unidad)', '$1.200.000'], ['Producto mayorista', '$18.000']], kpis: [['Ventas de hoy', '$8.600.000', E], ['Clientes', '320', O]] },
+  FERIA: { biz: 'Puesto 12', catalog: 'Inventario', accent: 'Venta rápida con caja y reportes diarios.', items: [['Artesanía', '$25.000'], ['Snack', '$5.000'], ['Souvenir', '$12.000']], kpis: [['Ventas de hoy', '$280.000', E], ['Productos', '60', O]] },
+};
+
+// Genera un preset coherente para un tipo NUEVO sin ejemplo curado.
+function genPreset(label, mode) {
+  if (mode === 'booking') {
+    return {
+      biz: label, catalog: 'Servicios',
+      accent: 'Agenda por profesional, con comisiones y fidelización.',
+      items: [['Servicio 1', '$30.000'], ['Servicio 2', '$45.000'], ['Servicio 3', '$20.000']],
+      kpis: [['Ventas de hoy', '$620.000', E], ['Citas hoy', '9', O]],
+    };
+  }
+  if (mode === 'menu') {
+    return {
+      biz: label, catalog: 'Menú',
+      accent: 'Carta por categorías, mesas y pantalla de cocina.',
+      items: [['Plato del día', '$22.000'], ['Bebida', '$8.000'], ['Postre', '$7.000']],
+      kpis: [['Ventas de hoy', '$1.240.000', E], ['Mesas activas', '6', O]],
+    };
+  }
+  return {
+    biz: label, catalog: 'Inventario',
+    accent: 'Inventario, ventas, cartera y proveedores.',
+    items: [['Producto 1', '$25.000'], ['Producto 2', '$48.000'], ['Producto 3', '$12.000']],
+    kpis: [['Ventas de hoy', '$980.000', E], ['Productos', '860', O]],
+  };
+}
 
 export default function VerticalShowcase() {
-  const [active, setActive] = useState(VERTICALS[0].id);
-  const [menuOpen, setMenuOpen] = useState(false); // drawer del demo móvil
-  const v = VERTICALS.find((x) => x.id === active) || VERTICALS[0];
-  const mods = realModules(v.type);
+  const [types, setTypes] = useState([]);
+  const [active, setActive] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  // Cuerpo del panel (KPIs + catálogo + nota), reutilizado en escritorio y móvil.
+  useEffect(() => {
+    let cancel = false;
+    (async () => {
+      try {
+        const res = await fetch(`${apiBase()}/public/business-types`, {
+          cache: 'no-store',
+        });
+        const json = await res.json();
+        if (!cancel) setTypes(json?.data || []);
+      } catch {
+        if (!cancel) setTypes([]);
+      }
+    })();
+    return () => {
+      cancel = true;
+    };
+  }, []);
+
+  // Construye las verticales a partir de los tipos del backend + presets.
+  const verticals = useMemo(() => {
+    return (types || []).map((t) => {
+      const preset = PRESETS[t.type] || genPreset(t.label, t.mode);
+      return {
+        type: t.type,
+        name: t.label,
+        emoji: TYPE_EMOJI[t.type] || (t.mode === 'menu' ? '🍽️' : t.mode === 'booking' ? '📅' : '🛍️'),
+        mods: menuModules(t.type, t.modules),
+        ...preset,
+      };
+    });
+  }, [types]);
+
+  useEffect(() => {
+    if (verticals.length && !verticals.some((x) => x.type === active)) {
+      setActive(verticals[0].type);
+    }
+  }, [verticals, active]);
+
+  const v = verticals.find((x) => x.type === active) || verticals[0];
+
+  if (!v) {
+    return (
+      <p className="mt-8 text-center text-sm text-neutral-400">
+        Cargando negocios…
+      </p>
+    );
+  }
+  const mods = v.mods;
+
   const panelBody = (
     <>
-      {/* KPIs (tarjetas reales) */}
       <div className="grid grid-cols-2 gap-3">
         {v.kpis.map(([label, val, dot]) => (
           <div
@@ -215,7 +242,6 @@ export default function VerticalShowcase() {
         ))}
       </div>
 
-      {/* Catálogo adaptado (tarjeta real) */}
       <div className="mt-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
         <div className="mb-2 flex items-center justify-between">
           <p className="text-xs font-semibold text-gray-800">{v.catalog}</p>
@@ -242,16 +268,16 @@ export default function VerticalShowcase() {
 
   return (
     <div>
-      {/* Selector de vertical */}
+      {/* Selector de vertical (TODOS los tipos, dinámico desde el backend) */}
       <div className="flex flex-wrap justify-center gap-2">
-        {VERTICALS.map((x) => (
+        {verticals.map((x) => (
           <button
-            key={x.id}
+            key={x.type}
             type="button"
-            onClick={() => setActive(x.id)}
-            aria-pressed={x.id === active}
+            onClick={() => setActive(x.type)}
+            aria-pressed={x.type === active}
             className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ${
-              x.id === active
+              x.type === active
                 ? 'border-orange-400 bg-gradient-to-r from-orange-600 to-amber-500 text-white shadow'
                 : 'border-neutral-200 bg-white text-neutral-600 hover:border-orange-300'
             }`}
@@ -261,9 +287,8 @@ export default function VerticalShowcase() {
         ))}
       </div>
 
-      {/* ESCRITORIO: ventana de navegador con sidebar (como el CRM en PC) */}
+      {/* ESCRITORIO */}
       <div className="mx-auto mt-8 hidden max-w-4xl overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-2xl sm:block">
-        {/* barra superior del navegador */}
         <div className="flex items-center gap-2 border-b border-neutral-200 bg-neutral-100 px-4 py-2.5">
           <span className="h-3 w-3 rounded-full bg-red-400" />
           <span className="h-3 w-3 rounded-full bg-amber-400" />
@@ -273,9 +298,7 @@ export default function VerticalShowcase() {
           </span>
         </div>
 
-        {/* cuerpo: sidebar oscuro + contenido claro (como el CRM real) */}
         <div className="grid grid-cols-[188px_1fr]">
-          {/* SIDEBAR */}
           <aside className="border-r border-orange-500/10 bg-gradient-to-b from-[#0b0f19] to-[#05070d] p-3">
             <div className="mb-4 flex items-center gap-2 px-1">
               <span className="grid h-8 w-8 flex-none place-items-center rounded-lg bg-gradient-to-br from-orange-500 to-amber-400 text-sm font-black text-white shadow">
@@ -321,7 +344,6 @@ export default function VerticalShowcase() {
             </p>
           </aside>
 
-          {/* CONTENIDO (bg-gray-50 como el panel real) */}
           <div className="bg-gray-50 p-6">
             <div className="flex items-center justify-between gap-2">
               <div className="min-w-0">
@@ -341,12 +363,10 @@ export default function VerticalShowcase() {
         </div>
       </div>
 
-      {/* MÓVIL: réplica del diseño real del CRM en el teléfono → hamburguesa
-          flotante que abre el menú lateral (drawer) sobre el Inicio. */}
+      {/* MÓVIL */}
       <div className="mx-auto mt-8 w-full max-w-[330px] sm:hidden">
         <div className="rounded-[2.2rem] border-4 border-neutral-800 bg-neutral-950 p-1.5 shadow-2xl">
           <div className="relative h-[560px] overflow-hidden rounded-[1.8rem] bg-gray-50">
-            {/* Botón hamburguesa flotante (idéntico al real) */}
             <button
               type="button"
               onClick={() => setMenuOpen(true)}
@@ -355,7 +375,6 @@ export default function VerticalShowcase() {
               <Bars3Icon className="h-5 w-5 text-orange-400" />
             </button>
 
-            {/* Inicio (contenido del panel), con espacio arriba para la hamburguesa */}
             <div className="h-full overflow-y-auto px-3 pb-5 pt-14">
               <div className="mb-3 flex items-center justify-between gap-2">
                 <div className="min-w-0">
@@ -373,7 +392,6 @@ export default function VerticalShowcase() {
               {panelBody}
             </div>
 
-            {/* Fondo oscuro del drawer (dentro del teléfono) */}
             {menuOpen && (
               <div
                 onClick={() => setMenuOpen(false)}
@@ -381,13 +399,11 @@ export default function VerticalShowcase() {
               />
             )}
 
-            {/* Drawer: menú lateral oscuro (igual al del CRM) */}
             <aside
               className={`absolute inset-y-0 left-0 z-40 flex w-[82%] max-w-[268px] flex-col border-r border-orange-500/10 bg-gradient-to-b from-[#0b0f19] to-[#05070d] text-white shadow-2xl transition-transform duration-300 ${
                 menuOpen ? 'translate-x-0' : '-translate-x-full'
               }`}
             >
-              {/* Cabecera: logo + nombre de la empresa + cerrar */}
               <div className="flex min-h-[60px] items-center gap-3 border-b border-orange-500/10 px-3 py-3">
                 <span className="grid h-10 w-10 flex-none place-items-center rounded-xl bg-gradient-to-br from-orange-500 to-amber-400 text-sm font-black text-white shadow">
                   P
@@ -407,7 +423,6 @@ export default function VerticalShowcase() {
                 </button>
               </div>
 
-              {/* Navegación (módulos reales de la vertical) */}
               <div className="flex-1 overflow-y-auto px-2 py-3 [scrollbar-color:rgba(249,115,22,.5)_transparent] [scrollbar-width:thin]">
                 <ul className="space-y-1">
                   {mods.map((key, i) => {
@@ -439,7 +454,6 @@ export default function VerticalShowcase() {
                 </ul>
               </div>
 
-              {/* Pie: modo oscuro (como el real) */}
               <div className="border-t border-white/10 px-2 py-3">
                 <div className="flex items-center gap-3 rounded-xl px-3 py-2 text-gray-300">
                   <MoonIcon className="h-5 w-5 flex-none text-orange-300" />
