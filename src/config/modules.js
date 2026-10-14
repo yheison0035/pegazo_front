@@ -21,6 +21,7 @@ export const TOGGLEABLE_MODULES = [
   { key: 'mesas', label: 'Mesas (restaurante)', group: 'Atención' },
   { key: 'kitchen', label: 'Cocina (KDS)', group: 'Atención' },
   { key: 'storage', label: 'Guarda cascos', group: 'Atención' },
+  { key: 'parking', label: 'Parqueadero', group: 'Atención' },
 
   // ── Ventas ──
   { key: 'sales', label: 'Realizar factura (POS)', group: 'Ventas' },

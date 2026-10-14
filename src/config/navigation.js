@@ -122,6 +122,12 @@ export const NAVIGATION = [
         icon: ArchiveBoxIcon,
         roles: ['SUPER_ADMIN', 'ADMIN', 'RECEPCIONISTA', 'ASESOR', 'CAJA'],
       },
+      {
+        name: 'Parqueadero',
+        href: '/dashboard/parking',
+        icon: TruckIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN', 'RECEPCIONISTA', 'ASESOR', 'CAJA'],
+      },
     ],
   },
 
