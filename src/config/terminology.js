@@ -44,8 +44,8 @@ const TERMS_BY_TYPE = {
   TELEVENTAS: {
     attendant: 'Asesor',
     attendantPlural: 'Asesores',
-    sale: 'Pedido',
-    salePlural: 'Pedidos',
+    sale: 'Venta realizada',
+    salePlural: 'Ventas realizadas',
   },
   ECOMMERCE: {
     attendant: 'Asesor',
