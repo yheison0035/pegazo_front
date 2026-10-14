@@ -93,7 +93,7 @@ function menuModules(type, modules) {
 }
 
 const TYPE_EMOJI = {
-  SERVICIOS: '💈', VETERINARIA: '🐾', ODONTOLOGIA: '🦷', GIMNASIO: '🏋️',
+  SERVICIOS: '🧰', BARBERIA: '💈', VETERINARIA: '🐾', ODONTOLOGIA: '🦷', GIMNASIO: '🏋️',
   LAVADO_VEHICULOS: '🚗', LAVANDERIA: '🧺', TALLER_MECANICO: '🔩',
   CANCHAS_SINTETICAS: '⚽', GUARDA_CASCOS: '🪖', PARQUEADERO: '🅿️', RESTAURANTE: '🍽️',
   COMIDA_RAPIDA: '🍔', CAFETERIA: '☕', PIZZERIA: '🍕', BAR: '🍻',
@@ -109,7 +109,8 @@ const TYPE_EMOJI = {
 const E = 'bg-emerald-400';
 const O = 'bg-orange-400';
 const PRESETS = {
-  SERVICIOS: { biz: 'RAGNOR Barber', catalog: 'Servicios', accent: 'Se agenda por profesional, con comisiones y fidelización.', items: [['Corte clásico', '$18.000'], ['Corte + barba', '$28.000'], ['Perfilado de cejas', '$8.000']], kpis: [['Ventas de hoy', '$486.000', E], ['Citas hoy', '14', O]] },
+  SERVICIOS: { biz: 'Multiservicios', catalog: 'Servicios', accent: 'Agenda por profesional, con comisiones y fidelización.', items: [['Servicio general', '$40.000'], ['Mantenimiento', '$60.000'], ['Diagnóstico', '$20.000']], kpis: [['Ventas de hoy', '$520.000', E], ['Citas hoy', '10', O]] },
+  BARBERIA: { biz: 'RAGNOR Barber', catalog: 'Servicios', accent: 'Se agenda por barbero, con comisiones y fidelización.', items: [['Corte clásico', '$18.000'], ['Corte + barba', '$28.000'], ['Perfilado de cejas', '$8.000']], kpis: [['Ventas de hoy', '$486.000', E], ['Citas hoy', '14', O]] },
   VETERINARIA: { biz: 'Huellitas', catalog: 'Servicios', accent: 'Citas por especialista y ficha de cada mascota.', items: [['Consulta general', '$45.000'], ['Vacuna múltiple', '$55.000'], ['Baño y peluquería', '$35.000']], kpis: [['Ventas de hoy', '$620.000', E], ['Citas hoy', '9', O]] },
   ODONTOLOGIA: { biz: 'Clínica Sonríe', catalog: 'Tratamientos', accent: 'Historia clínica por paciente, odontograma y consentimientos.', items: [['Consulta + diagnóstico', '$60.000'], ['Limpieza dental', '$90.000'], ['Resina (por diente)', '$130.000']], kpis: [['Ventas de hoy', '$1.180.000', E], ['Citas hoy', '11', O]] },
   GIMNASIO: { biz: 'PowerFit', catalog: 'Planes', accent: 'Membresías, reservas de clases y control de acceso.', items: [['Mensualidad', '$80.000'], ['Clase personalizada', '$35.000'], ['Pase por día', '$12.000']], kpis: [['Ventas de hoy', '$740.000', E], ['Reservas hoy', '22', O]] },

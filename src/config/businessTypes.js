@@ -120,6 +120,13 @@ export const BUSINESS_TYPES = {
     'sales', 'delivered_sales', 'cash', 'expenses', 'payables', 'employee-charges', 'statistics',
   ],
 
+  // Barbería: idéntica a SERVICIOS (tipo propio para identificarse como Barbería).
+  BARBERIA: [
+    'locals', 'users', 'categories', 'brands', 'providers', 'inventory',
+    'purchases', 'customers', 'cartera', 'impuestos', 'loyalty', 'services', 'appointments',
+    'sales', 'delivered_sales', 'cash', 'expenses', 'payables', 'employee-charges', 'statistics',
+  ],
+
   // Odontología: presupuestos de tratamiento (quotes) + agenda de pacientes.
   ODONTOLOGIA: [
     'locals', 'users', 'categories', 'providers', 'inventory', 'purchases',
