@@ -59,6 +59,14 @@ export const BUSINESS_TYPES = {
     'returns', 'cash', 'expenses', 'payables', 'statistics',
   ],
 
+  // Pañalería: todo para bebés (pañales por etapa, ropa por talla, fórmulas,
+  // accesorios). Retail con variantes + marcas + devoluciones + fidelización.
+  PANALERIA: [
+    'locals', 'users', 'categories', 'brands', 'providers', 'inventory',
+    'purchases', 'customers', 'cartera', 'impuestos', 'loyalty', 'sales',
+    'delivered_sales', 'returns', 'cash', 'expenses', 'payables', 'statistics',
+  ],
+
   // Perecederos por peso: sin marcas, sin devoluciones (producto perecedero).
   FRUVER: [
     'locals', 'users', 'categories', 'providers', 'inventory', 'purchases',
