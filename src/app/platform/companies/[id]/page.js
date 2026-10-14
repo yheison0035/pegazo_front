@@ -19,6 +19,7 @@ import {
 import RoleGuard from '@/auth/roleGuard';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import Button from '@/components/ui/Button';
+import MoneyInput from '@/components/ui/MoneyInput';
 import TableActionButton from '@/components/ui/TableActionButton';
 import { formatDateOnly } from '@/lib/api/utils/utils';
 import { enterAsCompany } from '@/lib/impersonation';
@@ -730,7 +731,7 @@ function PaymentModal({ company, onClose, onSubmit }) {
 
   const [f, setF] = useState({
     months: 1,
-    unitPrice: company?.monthlyPrice ? String(company.monthlyPrice) : '',
+    unitPrice: company?.monthlyPrice ?? '', // número (MoneyInput)
     discountType: '', // '' (sin desc.) | 'AMOUNT' | 'PERCENT'
     discountValue: '',
     method: 'TRANSFERENCIA',
@@ -811,13 +812,11 @@ function PaymentModal({ company, onClose, onSubmit }) {
           </div>
           <div>
             <label className={lbl}>Precio por mes (COP)</label>
-            <input
-              type="number"
-              min={0}
+            <MoneyInput
               className={inp}
               value={f.unitPrice}
-              onChange={(e) => set('unitPrice', e.target.value)}
-              placeholder="Ej: 150000"
+              onChange={(v) => set('unitPrice', v)}
+              placeholder="$ 150.000"
             />
           </div>
           <div>
@@ -836,7 +835,13 @@ function PaymentModal({ company, onClose, onSubmit }) {
             <select
               className={inp}
               value={f.discountType}
-              onChange={(e) => set('discountType', e.target.value)}
+              onChange={(e) =>
+                setF((p) => ({
+                  ...p,
+                  discountType: e.target.value,
+                  discountValue: '',
+                }))
+              }
             >
               <option value="">Sin descuento</option>
               <option value="AMOUNT">Monto ($)</option>
@@ -847,15 +852,25 @@ function PaymentModal({ company, onClose, onSubmit }) {
             <label className={lbl}>
               Valor del descuento {f.discountType === 'PERCENT' ? '(%)' : '($)'}
             </label>
-            <input
-              type="number"
-              min={0}
-              className={inp}
-              value={f.discountValue}
-              onChange={(e) => set('discountValue', e.target.value)}
-              disabled={!f.discountType}
-              placeholder={f.discountType ? '0' : '—'}
-            />
+            {f.discountType === 'AMOUNT' ? (
+              <MoneyInput
+                className={inp}
+                value={f.discountValue}
+                onChange={(v) => set('discountValue', v)}
+                placeholder="$ 0"
+              />
+            ) : (
+              <input
+                type="number"
+                min={0}
+                max={f.discountType === 'PERCENT' ? 100 : undefined}
+                className={inp}
+                value={f.discountValue}
+                onChange={(e) => set('discountValue', e.target.value)}
+                disabled={!f.discountType}
+                placeholder={f.discountType ? '0' : '—'}
+              />
+            )}
           </div>
           <div className="sm:col-span-2">
             <label className={lbl}>Nota (opcional)</label>
