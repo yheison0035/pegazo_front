@@ -451,6 +451,12 @@ export const NAVIGATION = [
         roles: ['SUPER_ADMIN'],
       },
       {
+        name: 'Mi suscripción',
+        href: '/dashboard/billing',
+        icon: CreditCardIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN'],
+      },
+      {
         name: 'Configuración',
         href: '/dashboard/settings',
         icon: Cog6ToothIcon,
