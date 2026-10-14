@@ -35,6 +35,7 @@ import {
   Bars3Icon,
 } from '@heroicons/react/24/outline';
 import VerticalShowcase from '@/components/landing/VerticalShowcase';
+import ClientsMarquee from '@/components/landing/ClientsMarquee';
 import ScrollReveal from '@/components/landing/ScrollReveal';
 
 // Cotización directa por WhatsApp (venta punto a punto; los precios se acuerdan
@@ -794,6 +795,9 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      {/* CLIENTES — slider automático con los negocios registrados */}
+      <ClientsMarquee />
 
       {/* SHOWCASE / MÍRALO POR DENTRO */}
       <section className="bg-neutral-950 py-20 text-white">
