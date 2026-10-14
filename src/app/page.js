@@ -36,6 +36,7 @@ import {
 } from '@heroicons/react/24/outline';
 import VerticalShowcase from '@/components/landing/VerticalShowcase';
 import ScrollReveal from '@/components/landing/ScrollReveal';
+import DemoTypesGrid from '@/components/landing/DemoTypesGrid';
 
 // Cotización directa por WhatsApp (venta punto a punto; los precios se acuerdan
 // con cada cliente). Los planes y sus límites siguen aplicados en el CRM.
@@ -992,6 +993,10 @@ export default function Landing() {
             </div>
           ))}
         </div>
+
+        {/* Todos los tipos de negocio (dinámico: se alimenta del backend, así
+            que al activar un tipo nuevo aparece aquí solo). */}
+        <DemoTypesGrid />
 
         {/* Tienda online */}
         <div className="mt-8 flex flex-col items-center gap-4 rounded-3xl border border-neutral-200 bg-gradient-to-br from-neutral-50 to-white p-8 text-center sm:flex-row sm:text-left">
