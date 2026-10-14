@@ -282,11 +282,11 @@ export default function EditCompany() {
       //  - día de pago: del día de "Cliente desde" si no viene.
       //  - meses del paquete: calculados desde "Cliente desde" → "Pago hasta".
       const patched = { ...data };
+      // El día de pago SIEMPRE sale del día de "Cliente desde" (campo bloqueado
+      // y derivado). Se recalcula aunque ya venga un valor guardado, para corregir
+      // datos viejos que quedaron desincronizados (p. ej. day distinto al inicio).
       const derivedDay = dayOfMonthFromDate(data.startDate);
-      if (
-        (patched.paymentDay === null || patched.paymentDay === undefined) &&
-        derivedDay !== ''
-      ) {
+      if (derivedDay !== '') {
         patched.paymentDay = derivedDay;
       }
       if (data.billingMode === 'paquete') {
