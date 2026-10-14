@@ -97,22 +97,24 @@ export default function ClientsMarquee() {
         </h2>
       </div>
 
-      <div
-        className="group mt-10 overflow-hidden"
-        style={{
-          maskImage:
-            'linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent)',
-          WebkitMaskImage:
-            'linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent)',
-        }}
-      >
+      <div className="mx-auto mt-10 max-w-5xl px-5">
         <div
-          className="pg-marquee flex w-max gap-10"
-          style={{ animationDuration: `${speed}s` }}
+          className="group overflow-hidden rounded-3xl border border-neutral-100 bg-neutral-50/60 py-8"
+          style={{
+            maskImage:
+              'linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent)',
+            WebkitMaskImage:
+              'linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent)',
+          }}
         >
-          {loop.map((c, i) => (
-            <ClientCircle key={`${c.id}-${i}`} c={c} />
-          ))}
+          <div
+            className="pg-marquee flex w-max gap-10"
+            style={{ animationDuration: `${speed}s` }}
+          >
+            {loop.map((c, i) => (
+              <ClientCircle key={`${c.id}-${i}`} c={c} />
+            ))}
+          </div>
         </div>
       </div>
 
