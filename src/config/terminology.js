@@ -91,6 +91,10 @@ const TERMS_BY_TYPE = {
     product: 'Par',
     productPlural: 'Pares',
   },
+  PANALERIA: {
+    attendant: 'Vendedor',
+    attendantPlural: 'Vendedores',
+  },
   FRUVER: {
     attendant: 'Cajero',
     attendantPlural: 'Cajeros',
