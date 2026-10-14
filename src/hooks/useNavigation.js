@@ -30,7 +30,7 @@ export default function useNavigation() {
   // (según su tipo de negocio). 'dashboard' y 'settings' siempre disponibles.
   const manual = usuario.company?.enabledModules;
   const useManual = Array.isArray(manual) && manual.length > 0;
-  const CORE = new Set(['dashboard', 'settings']);
+  const CORE = new Set(['dashboard', 'settings', 'billing']);
 
   // Etiquetas del menú según la vertical (Clientes→Pacientes, etc.).
   const t = getTerms(usuario.company);

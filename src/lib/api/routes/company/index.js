@@ -5,6 +5,11 @@ export async function getCompanySettings() {
   return apiFetch('/company/settings');
 }
 
+// Facturación del dueño: estado de la suscripción + historial de pagos.
+export async function getOwnSubscription() {
+  return apiFetch('/company/subscription');
+}
+
 // Diseño de la página pública de citas (/booking/:slug).
 export async function getBookingPageConfig() {
   return apiFetch('/company/booking-config');
