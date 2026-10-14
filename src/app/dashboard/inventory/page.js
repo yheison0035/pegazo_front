@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { ArrowUpTrayIcon } from '@heroicons/react/24/outline';
 import useLiveRefresh from '@/hooks/useLiveRefresh';
 import {
   beginBackgroundRefresh,
@@ -27,10 +29,6 @@ import LowStockBanner from '@/components/dashboard/inventory/LowStockBanner';
 import ExpiringBanner from '@/components/dashboard/inventory/ExpiringBanner';
 import ProductImagesModal from '@/components/dashboard/inventory/productImagesModal';
 import useTerms from '@/hooks/useTerms';
-import ExcelMenu from '@/components/dashboard/inventory/ExcelMenu';
-import { exportInventory } from '@/lib/api/routes/inventory';
-import { getProductFields } from '@/config/verticalProfiles';
-import { getInventoryExcelFields, downloadInventoryXlsx } from '@/utils/inventoryExcel';
 
 export default function Inventory() {
   const auth = useAuth();
@@ -150,37 +148,6 @@ export default function Inventory() {
 
   const { can } = usePermissions();
 
-  // Exportar Excel: descarga TODO el inventario de la empresa con las mismas
-  // columnas de la plantilla de importación (se puede volver a importar).
-  const [exporting, setExporting] = useState(false);
-  const handleExport = async () => {
-    if (exporting) return;
-    setExporting(true);
-    try {
-      const res = await exportInventory();
-      const items = res?.data || [];
-      if (!items.length) {
-        setAlert({ type: 'warning', message: 'No hay productos para exportar.' });
-        return;
-      }
-      const company = usuario?.company || {};
-      const pf = getProductFields(company.type, company.typeProductFields);
-      const fields = getInventoryExcelFields(pf, t.product);
-      const n = await downloadInventoryXlsx({ products: items, fields, pf });
-      setAlert({
-        type: 'success',
-        message: `Inventario exportado: ${n} fila${n === 1 ? '' : 's'}.`,
-      });
-    } catch (err) {
-      setAlert({
-        type: 'error',
-        message: err?.message || 'No se pudo exportar el inventario.',
-      });
-    } finally {
-      setExporting(false);
-    }
-  };
-
   return (
     <div className="w-full p-4">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -189,7 +156,13 @@ export default function Inventory() {
         </h1>
         {can('inventory', 'create') && (
           <div className="flex flex-wrap items-center gap-2">
-            <ExcelMenu onExport={handleExport} exporting={exporting} />
+            <Link
+              href="/dashboard/inventory/import"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-orange-300 hover:text-orange-600"
+            >
+              <ArrowUpTrayIcon className="h-4 w-4" />
+              Importar Excel
+            </Link>
             <Header type={t.product.toLowerCase()} typeUrl="inventory" />
           </div>
         )}

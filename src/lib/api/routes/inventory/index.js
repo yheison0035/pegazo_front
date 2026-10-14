@@ -33,11 +33,6 @@ export async function bulkImportProducts(items) {
   });
 }
 
-// Exportar TODO el inventario (sin paginar) para armar el Excel en el front.
-export async function exportInventory() {
-  return apiFetch('/inventory/export', { cache: 'no-store' });
-}
-
 // Productos con stock bajo (stock total <= alerta de stock mínimo).
 export async function restockProduct(id, amount) {
   return apiFetch(`/inventory/${id}/restock`, {
