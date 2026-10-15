@@ -18,7 +18,6 @@ export const getEmptyCompany = () => ({
   nextPaymentDate: '',
   packageMonths: '',
   electronicInvoicingEnabled: 'false',
-  isTestCompany: 'false',
   adminName: '',
   adminEmail: '',
   adminPassword: '',
@@ -155,22 +154,7 @@ export const getFormFieldsCompanies = (includeAdmin = false) => [
             { id: 'true', name: 'Sí, habilitar módulo DIAN' },
           ],
           helperText:
-            'Muestra el módulo de factura/nómina electrónica y el asistente de conexión a la DIAN.',
-        },
-        {
-          name: 'isTestCompany',
-          label: 'Entorno DIAN',
-          type: 'select',
-          required: false,
-          options: [
-            { id: 'false', name: 'Producción (facturas reales)' },
-            { id: 'true', name: 'Pruebas / sandbox (habilitación)' },
-          ],
-          helperText:
-            'Pruebas = entorno de habilitación DIAN; Producción = facturas reales.',
-          hideWhen: (fd) =>
-            fd.electronicInvoicingEnabled !== 'true' &&
-            fd.electronicInvoicingEnabled !== true,
+            'Muestra el módulo de factura/nómina electrónica y el asistente de conexión a la DIAN. El entorno (pruebas/producción) se define después en el asistente.',
         },
         {
           name: 'adminName',

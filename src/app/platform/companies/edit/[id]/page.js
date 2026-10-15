@@ -62,7 +62,6 @@ function ModulesPricePanel({ company, updateCompany, onSaved }) {
   const [feats, setFeats] = useState({
     bank: false,
     einvoice: false,
-    test: false,
   });
 
   useEffect(() => {
@@ -75,7 +74,6 @@ function ModulesPricePanel({ company, updateCompany, onSaved }) {
     setFeats({
       bank: !!company.bankNotifyEnabled,
       einvoice: !!company.electronicInvoicingEnabled,
-      test: !!company.isTestCompany,
     });
     setPrice({
       discountedPrice: company.discountedPrice ?? '',
@@ -107,7 +105,6 @@ function ModulesPricePanel({ company, updateCompany, onSaved }) {
         enabledModules: manual ? enabled : [],
         bankNotifyEnabled: feats.bank,
         electronicInvoicingEnabled: feats.einvoice,
-        isTestCompany: feats.test,
         discountedPrice:
           price.discountedPrice === '' ? null : Number(price.discountedPrice),
         discountUntil: price.discountUntil
@@ -183,15 +180,9 @@ function ModulesPricePanel({ company, updateCompany, onSaved }) {
           />
           <FeatureToggle
             title="Facturación electrónica DIAN"
-            desc="Muestra el módulo de factura electrónica (integración propia)."
+            desc="Muestra el módulo de factura/nómina electrónica y el asistente de conexión a la DIAN."
             on={feats.einvoice}
             onToggle={() => setFeats((f) => ({ ...f, einvoice: !f.einvoice }))}
-          />
-          <FeatureToggle
-            title="Empresa de pruebas (sandbox)"
-            desc="Solo estas empresas ven funciones aún no liberadas (DIAN: factura y nómina electrónica). Los negocios reales no la ven hasta el release."
-            on={feats.test}
-            onToggle={() => setFeats((f) => ({ ...f, test: !f.test }))}
           />
         </div>
       </div>
@@ -324,6 +315,18 @@ export default function EditCompany() {
       monthlyPrice: toIntOrNull(formData.monthlyPrice),
       paymentDay: toIntOrNull(formData.paymentDay),
     };
+    // El panel "Módulos, funciones y descuento" (ModulesPricePanel) es el ÚNICO
+    // dueño de estos campos y tiene su propio botón de guardar. Se quitan del
+    // submit de este formulario para no PISAR cambios no guardados del panel
+    // (el formulario envía los valores cargados al abrir, no los del panel).
+    [
+      'enabledModules',
+      'bankNotifyEnabled',
+      'electronicInvoicingEnabled',
+      'isTestCompany',
+      'discountedPrice',
+      'discountUntil',
+    ].forEach((k) => delete payload[k]);
     try {
       await updateCompany(id, payload);
       setAlert({
