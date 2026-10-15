@@ -10,6 +10,7 @@ import {
   updateBookingPageConfig,
 } from '@/lib/api/routes/company';
 import { uploadCompanyLogo } from '@/lib/api/routes/companies';
+import BrandFields from '@/components/public-page/BrandFields';
 import {
   PaintBrushIcon,
   ArrowTopRightOnSquareIcon,
@@ -173,65 +174,15 @@ function DesignInner() {
             </div>
           </div>
 
-          {/* Color de acento */}
-          <div>
-            <label className={labelCls}>Color de acento</label>
-            <div className="flex items-center gap-3">
-              <input
-                type="color"
-                value={form.accent || defaultAccent}
-                onChange={set('accent')}
-                className="h-10 w-14 cursor-pointer rounded-lg border border-gray-300"
-              />
-              <input
-                type="text"
-                value={form.accent}
-                onChange={set('accent')}
-                placeholder={`${defaultAccent} (color de tu marca)`}
-                className={inputCls}
-              />
-              {form.accent && (
-                <button
-                  type="button"
-                  onClick={() => setForm((f) => ({ ...f, accent: '' }))}
-                  className="text-xs text-gray-400 hover:text-gray-600"
-                >
-                  Reset
-                </button>
-              )}
-            </div>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label className={labelCls}>Título (tagline)</label>
-              <input
-                value={form.tagline}
-                onChange={set('tagline')}
-                placeholder="Agenda tu cita"
-                className={inputCls}
-              />
-            </div>
-            <div>
-              <label className={labelCls}>Subtítulo</label>
-              <input
-                value={form.subtitle}
-                onChange={set('subtitle')}
-                placeholder="Más que un corte, es actitud"
-                className={inputCls}
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className={labelCls}>WhatsApp para reservas</label>
-            <input
-              value={form.whatsapp}
-              onChange={set('whatsapp')}
-              placeholder="573001234567 (con indicativo del país)"
-              className={inputCls}
-            />
-          </div>
+          {/* Marca y datos (compartidos con el catálogo web) */}
+          <BrandFields
+            form={form}
+            setForm={setForm}
+            showSubtitle
+            accentFallback={defaultAccent}
+            taglinePlaceholder="Agenda tu cita"
+            whatsappPlaceholder="573001234567 (con indicativo del país)"
+          />
 
           <div>
             <label className={labelCls}>Música de fondo (URL de un MP3, opcional)</label>

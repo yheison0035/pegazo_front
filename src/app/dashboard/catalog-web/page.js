@@ -19,9 +19,7 @@ import {
   updateBookingPageConfig,
 } from '@/lib/api/routes/company';
 import { uploadCompanyLogo } from '@/lib/api/routes/companies';
-
-const inputCls =
-  'w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20';
+import BrandFields from '@/components/public-page/BrandFields';
 
 // Temas visuales del catálogo/menú público. Deben coincidir con las claves de
 // CATALOG_THEMES de PublicCatalog.js (el backend valida este mismo conjunto).
@@ -405,58 +403,14 @@ export default function CatalogWebPage() {
                   con tu color principal.
                 </p>
 
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <div className="sm:col-span-2">
-                    <label className="mb-1 block text-xs font-medium text-gray-500">
-                      Eslogan / frase (opcional)
-                    </label>
-                    <input
-                      value={form.tagline}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, tagline: e.target.value }))
-                      }
-                      placeholder="Ej: Los mejores precios de la ciudad"
-                      className={inputCls}
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-1 block text-xs font-medium text-gray-500">
-                      Color principal
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="color"
-                        value={previewAccent}
-                        onChange={(e) =>
-                          setForm((f) => ({ ...f, accent: e.target.value }))
-                        }
-                        className="h-10 w-12 cursor-pointer rounded-lg border border-gray-200"
-                      />
-                      <input
-                        value={form.accent}
-                        onChange={(e) =>
-                          setForm((f) => ({ ...f, accent: e.target.value }))
-                        }
-                        placeholder={theme.accent}
-                        className={inputCls}
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="mb-1 block text-xs font-medium text-gray-500">
-                      WhatsApp de contacto
-                    </label>
-                    <input
-                      value={form.whatsapp}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, whatsapp: e.target.value }))
-                      }
-                      placeholder="573001112233"
-                      inputMode="numeric"
-                      className={inputCls}
-                    />
-                  </div>
-                </div>
+                {/* Marca y datos (mismo componente que la página de citas) */}
+                <BrandFields
+                  form={form}
+                  setForm={setForm}
+                  accentFallback={theme.accent}
+                  taglinePlaceholder="Ej: Los mejores precios de la ciudad"
+                  whatsappPlaceholder="573001112233"
+                />
                 <p className="mt-3 text-[11px] text-gray-400">
                   El logo es el de tu negocio (Configuración). Las fotos, precios
                   y categorías de los productos se gestionan en Inventario.
