@@ -119,6 +119,8 @@ function PlanEditor({ platform, onSaved, setAlert }) {
     includedDocs: platform.includedDocs || '',
     price: platform.price || '',
     overagePrice: platform.overagePrice || '',
+    contactEmail: platform.contactEmail || '',
+    contactPhone: platform.contactPhone || '',
   });
   const [saving, setSaving] = useState(false);
   const set = (k, v) => setF((p) => ({ ...p, [k]: v }));
@@ -132,6 +134,8 @@ function PlanEditor({ platform, onSaved, setAlert }) {
         includedDocs: onlyDigits(f.includedDocs),
         price: onlyDigits(f.price),
         overagePrice: onlyDigits(f.overagePrice),
+        contactEmail: f.contactEmail.trim(),
+        contactPhone: f.contactPhone.trim(),
       });
       await onSaved();
       setAlert({ type: 'success', message: 'Plan guardado.' });
@@ -217,6 +221,25 @@ function PlanEditor({ platform, onSaved, setAlert }) {
             value={f.overagePrice}
             onChange={(v) => set('overagePrice', v)}
             placeholder={sug.over}
+            className={inp}
+          />
+        </div>
+        <div>
+          <label className={lbl}>Correo del cliente (avisos)</label>
+          <input
+            type="email"
+            value={f.contactEmail}
+            onChange={(e) => set('contactEmail', e.target.value)}
+            placeholder="cliente@empresa.com"
+            className={inp}
+          />
+        </div>
+        <div>
+          <label className={lbl}>WhatsApp del cliente (opcional)</label>
+          <input
+            value={f.contactPhone}
+            onChange={(e) => set('contactPhone', e.target.value)}
+            placeholder="573001112233"
             className={inp}
           />
         </div>
