@@ -199,7 +199,7 @@ export const NAVIGATION = [
         ],
       },
       {
-        name: 'Métodos de pago',
+        name: 'Medios de pago (caja)',
         href: '/dashboard/payment-methods',
         icon: CreditCardIcon,
         roles: ['SUPER_ADMIN', 'ADMIN'],
