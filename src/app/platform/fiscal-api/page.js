@@ -13,11 +13,14 @@ import {
 } from '@heroicons/react/24/outline';
 import RoleGuard from '@/auth/roleGuard';
 import Button from '@/components/ui/Button';
+import MoneyInput from '@/components/ui/MoneyInput';
 import AlertModal from '@/components/dashboard/modals/alertModal';
+import { formatCOP } from '@/lib/api/utils/utils';
 import {
   getFiscalConsumers,
   createFiscalConsumer,
   toggleFiscalConsumer,
+  updateFiscalConsumerPlan,
   getFiscalConsumerKeys,
   createFiscalConsumerKey,
   revokeFiscalConsumerKey,
@@ -73,6 +76,131 @@ function CopyBtn({ text }) {
       )}
       {ok ? 'Copiado' : 'Copiar'}
     </button>
+  );
+}
+
+const PERIODS = [
+  { id: 'MENSUAL', label: 'Mensual' },
+  { id: 'ANUAL', label: 'Anual' },
+  { id: 'BOLSA', label: 'Bolsa (prepago)' },
+];
+
+const onlyDigits = (v) => Number(String(v ?? '').replace(/[^\d]/g, '')) || 0;
+
+// Editor del plan de cobro de un consumidor (como Factus/Siigo): documentos
+// incluidos + precio EDITABLE + cobro por documento adicional. Muestra el
+// consumo real y cuánto cobrar.
+function PlanEditor({ platform, onSaved, setAlert }) {
+  const [f, setF] = useState({
+    planName: platform.planName || '',
+    period: platform.period || 'MENSUAL',
+    includedDocs: platform.includedDocs || '',
+    price: platform.price || '',
+    overagePrice: platform.overagePrice || '',
+  });
+  const [saving, setSaving] = useState(false);
+  const set = (k, v) => setF((p) => ({ ...p, [k]: v }));
+
+  const save = async () => {
+    setSaving(true);
+    try {
+      await updateFiscalConsumerPlan(platform.id, {
+        planName: f.planName,
+        period: f.period,
+        includedDocs: onlyDigits(f.includedDocs),
+        price: onlyDigits(f.price),
+        overagePrice: onlyDigits(f.overagePrice),
+      });
+      await onSaved();
+      setAlert({ type: 'success', message: 'Plan guardado.' });
+    } catch (e) {
+      setAlert({ type: 'error', message: e?.message || 'No se pudo guardar.' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const inp =
+    'w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm focus:border-orange-400 focus:outline-none';
+  const lbl = 'mb-1 block text-[11px] font-medium text-gray-500';
+  const per = platform.period;
+  const suf = per === 'BOLSA' ? '' : per === 'ANUAL' ? '/año' : '/mes';
+
+  return (
+    <div className="mb-4 rounded-xl border border-orange-100 bg-orange-50/40 p-3">
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+        <p className="text-xs font-bold text-gray-700">Plan de cobro</p>
+        <span className="text-xs text-gray-500">
+          Consumo: <b className="text-gray-800">{platform.used ?? 0}</b> doc
+          {(platform.used ?? 0) === 1 ? '' : 's'}
+          {platform.extra > 0 && (
+            <>
+              {' '}
+              · {platform.extra} adicional{platform.extra === 1 ? '' : 'es'}
+            </>
+          )}
+          {' · a cobrar '}
+          <b className="text-emerald-600">{formatCOP(platform.cost || 0)}</b>
+          {suf}
+        </span>
+      </div>
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        <div>
+          <label className={lbl}>Nombre del plan</label>
+          <input
+            value={f.planName}
+            onChange={(e) => set('planName', e.target.value)}
+            placeholder="Bolsa 500 / Plan mensual"
+            className={inp}
+          />
+        </div>
+        <div>
+          <label className={lbl}>Modalidad</label>
+          <select
+            value={f.period}
+            onChange={(e) => set('period', e.target.value)}
+            className={inp}
+          >
+            {PERIODS.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className={lbl}>Documentos incluidos</label>
+          <input
+            type="number"
+            min={0}
+            value={f.includedDocs}
+            onChange={(e) => set('includedDocs', e.target.value)}
+            className={inp}
+          />
+        </div>
+        <div>
+          <label className={lbl}>Precio del plan (COP)</label>
+          <MoneyInput
+            value={f.price}
+            onChange={(v) => set('price', v)}
+            className={inp}
+          />
+        </div>
+        <div>
+          <label className={lbl}>Precio por documento adicional (COP)</label>
+          <MoneyInput
+            value={f.overagePrice}
+            onChange={(v) => set('overagePrice', v)}
+            className={inp}
+          />
+        </div>
+      </div>
+      <div className="mt-2 flex justify-end">
+        <Button variant="primary" size="sm" loading={saving} onClick={save}>
+          Guardar plan
+        </Button>
+      </div>
+    </div>
   );
 }
 
@@ -264,8 +392,17 @@ function Inner() {
                       {p.name}
                     </p>
                     <p className="text-xs text-gray-400">
-                      {p.apiKeys} key{p.apiKeys === 1 ? '' : 's'} ·{' '}
-                      {p.companies} empresa{p.companies === 1 ? '' : 's'}
+                      {p.planName ? `${p.planName} · ` : ''}
+                      {p.used ?? 0} doc{(p.used ?? 0) === 1 ? '' : 's'} ·{' '}
+                      <span className="font-semibold text-emerald-600">
+                        {formatCOP(p.cost || 0)}
+                        {p.period === 'ANUAL'
+                          ? '/año'
+                          : p.period === 'BOLSA'
+                            ? ''
+                            : '/mes'}
+                      </span>{' '}
+                      · {p.apiKeys} key{p.apiKeys === 1 ? '' : 's'}
                     </p>
                   </div>
                 </button>
@@ -282,6 +419,13 @@ function Inner() {
 
               {open === p.id && (
                 <div className="border-t border-gray-100 p-4">
+                  {/* Plan de cobro (documentos + precio editable) */}
+                  <PlanEditor
+                    platform={p}
+                    onSaved={load}
+                    setAlert={setAlert}
+                  />
+
                   {/* Datos de conexión listos para enviar al cliente */}
                   <div className="mb-4 rounded-xl border border-gray-100 bg-gray-50 p-3">
                     <div className="mb-1.5 flex items-center justify-between gap-2">
