@@ -175,6 +175,7 @@ function PlanEditor({ platform, onSaved, setAlert }) {
             min={0}
             value={f.includedDocs}
             onChange={(e) => set('includedDocs', e.target.value)}
+            placeholder="500"
             className={inp}
           />
         </div>
@@ -183,6 +184,7 @@ function PlanEditor({ platform, onSaved, setAlert }) {
           <MoneyInput
             value={f.price}
             onChange={(v) => set('price', v)}
+            placeholder="$ 120.000"
             className={inp}
           />
         </div>
@@ -191,10 +193,21 @@ function PlanEditor({ platform, onSaved, setAlert }) {
           <MoneyInput
             value={f.overagePrice}
             onChange={(v) => set('overagePrice', v)}
+            placeholder="$ 200"
             className={inp}
           />
         </div>
       </div>
+
+      {/* Sugerencia de precio para tu pitch de ventas */}
+      <p className="mt-2 rounded-lg bg-white/70 px-2.5 py-2 text-[11px] leading-relaxed text-gray-500">
+        💡 <b>Sugerido (más barato que la competencia):</b> bolsa de 500 docs ≈{' '}
+        <b>$120.000</b> · adicional ≈ <b>$200/doc</b>. Para tu pitch —{' '}
+        <b>competencia</b>: MATIAS 500/año $196.000 · GridPOS ~$9.900/mes (100
+        docs) · Facturo 50 folios $219.990. Ajusta el precio y ve siempre por
+        debajo.
+      </p>
+
       <div className="mt-2 flex justify-end">
         <Button variant="primary" size="sm" loading={saving} onClick={save}>
           Guardar plan
