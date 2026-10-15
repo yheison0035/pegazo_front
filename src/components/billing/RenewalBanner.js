@@ -14,6 +14,20 @@ const OWNER_ROLES = new Set(['SUPER_ADMIN', 'ADMIN']);
 // Días de anticipación con los que empezamos a avisar que el plan va a vencer.
 const WARN_DAYS = 7;
 
+// Prefijo del descarte en localStorage. El descarte es POR DÍA: al cerrar con la
+// X se oculta solo ese día y vuelve a aparecer al día siguiente (así el dueño
+// siempre se entera de renovar). Fecha en zona Colombia (YYYY-MM-DD).
+const DISMISS_PREFIX = 'pegazo_renewal_dismissed_';
+function todayColStr() {
+  try {
+    return new Date().toLocaleDateString('en-CA', {
+      timeZone: 'America/Bogota',
+    });
+  } catch {
+    return new Date().toISOString().slice(0, 10);
+  }
+}
+
 // Diferencia en días (redondeada hacia arriba) entre hoy y una fecha.
 function daysUntil(dateStr) {
   const target = new Date(dateStr);
@@ -63,13 +77,19 @@ export default function RenewalBanner() {
   const paidUntil = company?.paidUntil;
   const role = usuario?.role;
 
-  // Clave de descarte por fecha de vencimiento: si el dueño cierra el aviso, no
-  // se vuelve a mostrar por ESA misma fecha (al renovar cambia y reaparece).
-  const dismissKey = paidUntil ? `pegazo_renewal_dismissed_${paidUntil}` : '';
+  // Clave de descarte POR DÍA: si el dueño cierra el aviso, se oculta solo hoy y
+  // reaparece al día siguiente (la clave lleva la fecha de hoy).
+  const dismissKey = `${DISMISS_PREFIX}${todayColStr()}`;
 
   useEffect(() => {
-    if (!dismissKey) return;
     try {
+      // Limpia los descartes de días anteriores (deja solo el de hoy).
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith(DISMISS_PREFIX) && k !== dismissKey) {
+          localStorage.removeItem(k);
+        }
+      }
       setDismissed(localStorage.getItem(dismissKey) === '1');
     } catch {
       setDismissed(false);
