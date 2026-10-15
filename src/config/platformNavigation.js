@@ -9,6 +9,7 @@ import {
   BanknotesIcon,
   ChatBubbleLeftRightIcon,
   CalendarDaysIcon,
+  CodeBracketIcon,
 } from '@heroicons/react/24/outline';
 
 export const PLATFORM_NAVIGATION = [
@@ -44,6 +45,11 @@ export const PLATFORM_NAVIGATION = [
         name: 'Cuentas de pago',
         href: '/platform/payment-accounts',
         icon: BanknotesIcon,
+      },
+      {
+        name: 'API Facturación DIAN',
+        href: '/platform/fiscal-api',
+        icon: CodeBracketIcon,
       },
       {
         name: 'Soporte',

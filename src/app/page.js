@@ -258,7 +258,7 @@ const VERTICALS = [
     tag: 'B2B',
     perks: [
       'Multi-sede con inventario propio',
-      'Listas de precios y cartera',
+      'Cartera y fiado por cliente',
       'Reportes por sede',
       'Clientes y cotizaciones',
     ],
