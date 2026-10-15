@@ -6,10 +6,30 @@ export default function SearchFilter({
   showInput,
   title = '',
   type = 'text',
+  options,
   handleFilterChange,
 }) {
   if (name === 'image') return null;
   if (!showInput) return null;
+
+  // Columnas con valores fijos (p. ej. Tipo: Normal/Electrónica) se filtran con
+  // un desplegable en vez de texto libre.
+  if (Array.isArray(options) && options.length) {
+    return (
+      <select
+        name={name}
+        value={value}
+        onChange={handleFilterChange}
+        className={className}
+      >
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+    );
+  }
 
   // Los filtros de fecha usan un selector de fecha nativo (envía YYYY-MM-DD),
   // evitando formatos ambiguos escritos a mano.

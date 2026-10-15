@@ -11,7 +11,7 @@ export default function InputFilters({
       <th className="sticky left-0 z-[5] bg-gray-50 shadow-[inset_-10px_0_8px_-8px_rgba(0,0,0,0.05)]"></th>
       {allFilters
         .filter((f) => f.show)
-        .map(({ name, title, showInput }) => (
+        .map(({ name, title, showInput, type, options }) => (
           <th key={name} className="px-4 py-2.5">
             {showInput && (
               <div className="relative">
@@ -19,6 +19,8 @@ export default function InputFilters({
                 <SearchFilter
                   name={name}
                   title={title}
+                  type={type}
+                  options={options}
                   value={filters[name] || ''}
                   showInput={showInput}
                   handleFilterChange={handleFilterChange}

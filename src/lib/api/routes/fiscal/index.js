@@ -17,6 +17,22 @@ export async function addFiscalResolution(dto) {
   });
 }
 
+// Sube el certificado digital (.p12 en base64 + clave).
+export async function uploadFiscalCertificate(dto) {
+  return apiFetch('/fiscal/certificate', {
+    method: 'POST',
+    body: JSON.stringify(dto),
+  });
+}
+
+// Guarda datos de habilitación DIAN (softwareId, PIN, testSetId) y entorno.
+export async function updateFiscalConfig(dto) {
+  return apiFetch('/fiscal/config', {
+    method: 'POST',
+    body: JSON.stringify(dto),
+  });
+}
+
 export async function getFiscalDocuments(params = {}) {
   const q = new URLSearchParams();
   const { page = 1, limit = 20, ...filters } = params;

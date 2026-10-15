@@ -537,6 +537,11 @@ export default function PosSale({
       const created = await onSubmit({
         paymentMethod,
         paymentMethodCatalogId: paymentMethodCatalogId || undefined,
+        // Tipo de documento: queda guardado en la venta para separarla en
+        // "Ventas realizadas" (Normal vs Electrónica), aunque la emisión DIAN
+        // falle luego (la venta ya nace marcada como electrónica).
+        invoiceType:
+          docType === 'ELECTRONIC' && fiscalReady ? 'ELECTRONICA' : 'NORMAL',
         // Plan separe: se guarda como PLAN_SEPARE (no descuenta stock ni entra a
         // Ventas realizadas hasta entregarse). Contado/fiado como siempre.
         paymentStatus: isLayaway
@@ -1421,7 +1426,7 @@ export default function PosSale({
                 {fiscalReady && mode === 'new' && (
                   <div className="mb-2">
                     <p className="mb-1 text-xs font-medium text-gray-500">
-                      Tipo de comprobante
+                      Tipo de factura
                     </p>
                     <div className="inline-flex w-full rounded-xl border border-gray-200 bg-gray-50 p-0.5">
                       <button
@@ -1433,7 +1438,7 @@ export default function PosSale({
                             : 'text-gray-500'
                         }`}
                       >
-                        Tiquete POS
+                        Factura normal
                       </button>
                       <button
                         type="button"

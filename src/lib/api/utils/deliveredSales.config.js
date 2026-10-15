@@ -1,6 +1,24 @@
-export const getHeaderTableDeliveredSales = () => {
+// `electronic` = la empresa tiene facturación electrónica activa. Solo entonces
+// se muestra la columna/filtro "Tipo" (Normal vs Electrónica); si no, ni aparece.
+export const getHeaderTableDeliveredSales = ({ electronic = false } = {}) => {
   return [
     { name: 'code', title: 'Factura / Venta #', show: true, showInput: true },
+    ...(electronic
+      ? [
+          {
+            name: 'invoiceType',
+            title: 'Tipo',
+            show: true,
+            showInput: true,
+            type: 'select',
+            options: [
+              { value: '', label: 'Todas' },
+              { value: 'NORMAL', label: 'Normal' },
+              { value: 'ELECTRONICA', label: 'Electrónica' },
+            ],
+          },
+        ]
+      : []),
     { name: 'customer', title: 'Cliente', show: true, showInput: true },
     { name: 'totalAmount', title: 'Total Venta', show: true, showInput: true },
     {
