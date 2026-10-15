@@ -49,7 +49,6 @@ const EDITABLE_FIELDS = [
   'websiteEnabled',
   // Funciones/flags que activa la plataforma por empresa.
   'electronicInvoicingEnabled',
-  'isTestCompany',
   'bankNotifyEnabled',
   'enabledModules',
   'discountedPrice',
@@ -60,7 +59,6 @@ const EDITABLE_FIELDS = [
 const BOOLEAN_FIELDS = [
   'websiteEnabled',
   'electronicInvoicingEnabled',
-  'isTestCompany',
   'bankNotifyEnabled',
 ];
 
