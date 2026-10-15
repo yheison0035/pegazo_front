@@ -340,30 +340,68 @@ function Inner() {
       )}
 
       {/* Modal: API key recién creada (se muestra una sola vez) */}
-      {newKey && (
-        <div className="fixed inset-0 z-[70] flex items-start justify-center overflow-y-auto bg-black/40 p-4">
-          <div className="my-10 w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
-            <h2 className="text-lg font-semibold text-gray-800">
-              API key de {newKey.name}
-            </h2>
-            <p className="mt-1 text-sm text-amber-600">
-              Cópiala ahora: <b>no se vuelve a mostrar</b>. Entrégala al cliente
-              para que consuma la API.
-            </p>
-            <div className="mt-4 flex items-center gap-2 rounded-xl bg-gray-900 p-3">
-              <code className="flex-1 break-all text-xs text-emerald-300">
-                {newKey.apiKey}
-              </code>
-              <CopyBtn text={newKey.apiKey} />
+      {newKey &&
+        (() => {
+          const handover = `Pegazo · API de Facturación y Nómina Electrónica DIAN
+Credenciales de acceso — ${newKey.name}
+
+API Key: ${newKey.apiKey}
+Base URL: ${API_BASE}
+
+Autenticación: enviar en CADA petición el header
+  Authorization: Bearer ${newKey.apiKey}
+
+Endpoints principales:
+- POST ${API_BASE}/invoices       → emitir factura electrónica
+- POST ${API_BASE}/credit-notes   → nota crédito
+- POST ${API_BASE}/debit-notes    → nota débito
+- POST ${API_BASE}/payroll        → nómina electrónica
+- GET  ${API_BASE}/documents      → consultar documentos emitidos
+
+Importante: guarda esta API key en un lugar seguro, no se vuelve a mostrar.
+Cada empresa (NIT) debe estar habilitada ante la DIAN con su certificado para que los documentos tengan validez fiscal.`;
+          return (
+            <div className="fixed inset-0 z-[70] flex items-start justify-center overflow-y-auto bg-black/40 p-4">
+              <div className="my-10 w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
+                <h2 className="text-lg font-semibold text-gray-800">
+                  API key de {newKey.name}
+                </h2>
+                <p className="mt-1 text-sm text-amber-600">
+                  Cópiala ahora: <b>no se vuelve a mostrar</b>.
+                </p>
+                <div className="mt-4 flex items-center gap-2 rounded-xl bg-gray-900 p-3">
+                  <code className="flex-1 break-all text-xs text-emerald-300">
+                    {newKey.apiKey}
+                  </code>
+                  <CopyBtn text={newKey.apiKey} />
+                </div>
+
+                {/* Listo para enviar al cliente */}
+                <div className="mt-5">
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="text-sm font-bold text-gray-800">
+                      Para enviar al cliente
+                    </p>
+                    <CopyBtn text={handover} />
+                  </div>
+                  <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded-xl border border-gray-200 bg-gray-50 p-3 text-[11px] leading-relaxed text-gray-700">
+{handover}
+                  </pre>
+                  <p className="mt-1 text-[11px] text-gray-400">
+                    Toca <b>Copiar</b> y pégalo directo en el correo/WhatsApp del
+                    cliente.
+                  </p>
+                </div>
+
+                <div className="mt-6 flex justify-end">
+                  <Button variant="primary" onClick={() => setNewKey(null)}>
+                    Listo, ya la copié
+                  </Button>
+                </div>
+              </div>
             </div>
-            <div className="mt-6 flex justify-end">
-              <Button variant="primary" onClick={() => setNewKey(null)}>
-                Listo, ya la copié
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+          );
+        })()}
 
       <AlertModal
         type={alert.type}
