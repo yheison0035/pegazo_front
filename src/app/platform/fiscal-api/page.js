@@ -85,6 +85,28 @@ const PERIODS = [
   { id: 'BOLSA', label: 'Bolsa (prepago)' },
 ];
 
+// Sugerencias de precio + referencia de competencia POR MODALIDAD (para el pitch).
+const SUGGEST = {
+  MENSUAL: {
+    docs: '100',
+    price: '$ 9.000',
+    over: '$ 150',
+    note: '100 docs/mes ≈ $9.000 · adicional ≈ $150/doc. Competencia: GridPOS ~$9.900/mes (100 docs).',
+  },
+  ANUAL: {
+    docs: '500',
+    price: '$ 120.000',
+    over: '$ 200',
+    note: '500 docs/año ≈ $120.000 · adicional ≈ $200/doc. Competencia: MATIAS 500/año $196.000 · Facturo anual desde $125.000.',
+  },
+  BOLSA: {
+    docs: '500',
+    price: '$ 120.000',
+    over: '$ 200',
+    note: 'bolsa de 500 docs ≈ $120.000 · adicional ≈ $200/doc. Competencia: Facturo 50 folios $219.990 · bolsas prepago.',
+  },
+};
+
 const onlyDigits = (v) => Number(String(v ?? '').replace(/[^\d]/g, '')) || 0;
 
 // Editor del plan de cobro de un consumidor (como Factus/Siigo): documentos
@@ -125,6 +147,7 @@ function PlanEditor({ platform, onSaved, setAlert }) {
   const lbl = 'mb-1 block text-[11px] font-medium text-gray-500';
   const per = platform.period;
   const suf = per === 'BOLSA' ? '' : per === 'ANUAL' ? '/año' : '/mes';
+  const sug = SUGGEST[f.period] || SUGGEST.MENSUAL; // sugerencia según modalidad elegida
 
   return (
     <div className="mb-4 rounded-xl border border-orange-100 bg-orange-50/40 p-3">
@@ -175,7 +198,7 @@ function PlanEditor({ platform, onSaved, setAlert }) {
             min={0}
             value={f.includedDocs}
             onChange={(e) => set('includedDocs', e.target.value)}
-            placeholder="500"
+            placeholder={sug.docs}
             className={inp}
           />
         </div>
@@ -184,7 +207,7 @@ function PlanEditor({ platform, onSaved, setAlert }) {
           <MoneyInput
             value={f.price}
             onChange={(v) => set('price', v)}
-            placeholder="$ 120.000"
+            placeholder={sug.price}
             className={inp}
           />
         </div>
@@ -193,7 +216,7 @@ function PlanEditor({ platform, onSaved, setAlert }) {
           <MoneyInput
             value={f.overagePrice}
             onChange={(v) => set('overagePrice', v)}
-            placeholder="$ 200"
+            placeholder={sug.over}
             className={inp}
           />
         </div>
@@ -201,11 +224,8 @@ function PlanEditor({ platform, onSaved, setAlert }) {
 
       {/* Sugerencia de precio para tu pitch de ventas */}
       <p className="mt-2 rounded-lg bg-white/70 px-2.5 py-2 text-[11px] leading-relaxed text-gray-500">
-        💡 <b>Sugerido (más barato que la competencia):</b> bolsa de 500 docs ≈{' '}
-        <b>$120.000</b> · adicional ≈ <b>$200/doc</b>. Para tu pitch —{' '}
-        <b>competencia</b>: MATIAS 500/año $196.000 · GridPOS ~$9.900/mes (100
-        docs) · Facturo 50 folios $219.990. Ajusta el precio y ve siempre por
-        debajo.
+        💡 <b>Sugerido ({PERIODS.find((x) => x.id === f.period)?.label}):</b>{' '}
+        {sug.note} Ajusta el precio y ve siempre por debajo de la competencia.
       </p>
 
       <div className="mt-2 flex justify-end">
