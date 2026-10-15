@@ -47,6 +47,21 @@ const EDITABLE_FIELDS = [
   'paymentDay',
   'domain',
   'websiteEnabled',
+  // Funciones/flags que activa la plataforma por empresa.
+  'electronicInvoicingEnabled',
+  'isTestCompany',
+  'bankNotifyEnabled',
+  'enabledModules',
+  'discountedPrice',
+  'discountUntil',
+];
+
+// Campos booleanos que el formulario puede mandar como texto ('true'/'false').
+const BOOLEAN_FIELDS = [
+  'websiteEnabled',
+  'electronicInvoicingEnabled',
+  'isTestCompany',
+  'bankNotifyEnabled',
 ];
 
 const ADMIN_FIELDS = ['adminName', 'adminEmail', 'adminPassword'];
@@ -57,16 +72,23 @@ function buildPayload(dto, fields) {
   fields.forEach((field) => {
     const value = dto[field];
 
+    // Los módulos manuales sí se envían vacíos ([]): significa "volver a
+    // automático". El resto se omite cuando no trae valor.
+    if (field === 'enabledModules') {
+      if (Array.isArray(value)) payload[field] = value;
+      return;
+    }
+
     if (value === undefined || value === null || value === '') return;
 
-    // El formulario maneja la publicación como texto ('true' / 'false').
-    if (field === 'websiteEnabled') {
+    // Los flags booleanos del formulario llegan como texto ('true'/'false').
+    if (BOOLEAN_FIELDS.includes(field)) {
       payload[field] = value === true || value === 'true';
       return;
     }
 
     // El precio llega con formato COP ("50.000"): se envía como número entero.
-    if (field === 'monthlyPrice') {
+    if (field === 'monthlyPrice' || field === 'discountedPrice') {
       const n = Number(String(value).replace(/[^\d]/g, ''));
       if (Number.isFinite(n) && n > 0) payload[field] = n;
       return;

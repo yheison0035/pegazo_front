@@ -17,6 +17,8 @@ export const getEmptyCompany = () => ({
   paymentDay: '',
   nextPaymentDate: '',
   packageMonths: '',
+  electronicInvoicingEnabled: 'false',
+  isTestCompany: 'false',
   adminName: '',
   adminEmail: '',
   adminPassword: '',
@@ -136,10 +138,40 @@ export const getFormFieldsCompanies = (includeAdmin = false) => [
     hideWhen: (fd) => fd.billingMode !== 'paquete',
   },
 
-  // Solo al crear: credenciales del administrador inicial de la empresa, para
-  // que pueda iniciar sesión y de ahí en adelante gestione todo por su cuenta.
+  // Solo al crear (includeAdmin): facturación electrónica DIAN + entorno, y las
+  // credenciales del administrador inicial. En EDITAR estos flags se manejan en
+  // el panel de plataforma (ModulesPricePanel), por eso aquí van solo al alta.
   ...(includeAdmin
     ? [
+        {
+          // Si queda en "No", la empresa NO ve nada relacionado con la DIAN; el
+          // que solo quiere finanzas lo deja apagado. Se puede cambiar luego.
+          name: 'electronicInvoicingEnabled',
+          label: 'Facturación electrónica DIAN',
+          type: 'select',
+          required: false,
+          options: [
+            { id: 'false', name: 'No (no la verá)' },
+            { id: 'true', name: 'Sí, habilitar módulo DIAN' },
+          ],
+          helperText:
+            'Muestra el módulo de factura/nómina electrónica y el asistente de conexión a la DIAN.',
+        },
+        {
+          name: 'isTestCompany',
+          label: 'Entorno DIAN',
+          type: 'select',
+          required: false,
+          options: [
+            { id: 'false', name: 'Producción (facturas reales)' },
+            { id: 'true', name: 'Pruebas / sandbox (habilitación)' },
+          ],
+          helperText:
+            'Pruebas = entorno de habilitación DIAN; Producción = facturas reales.',
+          hideWhen: (fd) =>
+            fd.electronicInvoicingEnabled !== 'true' &&
+            fd.electronicInvoicingEnabled !== true,
+        },
         {
           name: 'adminName',
           label: 'Nombre del administrador',

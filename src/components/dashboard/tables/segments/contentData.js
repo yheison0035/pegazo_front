@@ -350,6 +350,42 @@ export default function ContentData({
                 <td className="px-5 py-4 whitespace-nowrap">
                   {info.code || '---'}
                 </td>
+                {usuario?.company?.electronicInvoicingEnabled && (
+                  <td className="px-5 py-4 whitespace-nowrap">
+                    {info.invoiceType === 'ELECTRONICA' ? (
+                      <span className="inline-flex flex-col gap-0.5">
+                        <span className="inline-flex w-fit items-center gap-1 rounded-full bg-blue-500/10 px-2.5 py-0.5 text-xs font-semibold text-blue-600">
+                          <span className="inline-block h-1.5 w-1.5 rounded-full bg-blue-500" />
+                          Electrónica
+                        </span>
+                        {info.eInvoiceNumber && (
+                          <span className="text-[11px] text-gray-500">
+                            {info.eInvoiceNumber}
+                          </span>
+                        )}
+                        {info.eInvoiceStatus && (
+                          <span
+                            className={`text-[11px] font-medium ${
+                              info.eInvoiceStatus === 'ACEPTADO'
+                                ? 'text-emerald-600'
+                                : info.eInvoiceStatus === 'RECHAZADO' ||
+                                    info.eInvoiceStatus === 'ERROR'
+                                  ? 'text-red-600'
+                                  : 'text-amber-600'
+                            }`}
+                          >
+                            {info.eInvoiceStatus}
+                          </span>
+                        )}
+                      </span>
+                    ) : (
+                      <span className="inline-flex w-fit items-center gap-1 rounded-full bg-gray-500/10 px-2.5 py-0.5 text-xs font-semibold text-gray-600">
+                        <span className="inline-block h-1.5 w-1.5 rounded-full bg-gray-400" />
+                        Normal
+                      </span>
+                    )}
+                  </td>
+                )}
                 <td className="px-5 py-4 whitespace-nowrap">
                   {info.customer?.id &&
                   info.customer?.document !== '222222222222' ? (

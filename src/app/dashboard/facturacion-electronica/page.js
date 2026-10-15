@@ -29,6 +29,8 @@ import {
   getFiscalStats,
   getFiscalRepresentation,
   addFiscalResolution,
+  uploadFiscalCertificate,
+  updateFiscalConfig,
   emitFiscalTestInvoice,
   sendFiscalEmail,
   getFiscalWhatsapp,
@@ -95,6 +97,8 @@ function FacturacionElectronica() {
   const [repLoading, setRepLoading] = useState(false);
   const [repDocId, setRepDocId] = useState(null);
   const [showResModal, setShowResModal] = useState(false);
+  const [showCertModal, setShowCertModal] = useState(false);
+  const [showConfigModal, setShowConfigModal] = useState(false);
   const [noteModal, setNoteModal] = useState(null); // { doc, kind: 'CREDIT'|'DEBIT' }
 
   const linked = status?.linked;
@@ -330,6 +334,15 @@ function FacturacionElectronica() {
           <HabilitacionStrip
             status={status}
             onConfig={() => setShowResModal(true)}
+          />
+
+          {/* PASO A PASO DE CONEXIÓN: se muestra hasta que la empresa quede
+              lista en producción (certificado + resolución + ambiente). */}
+          <ConnectionSteps
+            status={status}
+            onCert={() => setShowCertModal(true)}
+            onResolution={() => setShowResModal(true)}
+            onConfig={() => setShowConfigModal(true)}
           />
 
           {/* KPIs */}
@@ -625,6 +638,31 @@ function FacturacionElectronica() {
           onSaved={async () => {
             setShowResModal(false);
             setAlert({ type: 'success', message: 'Resolución registrada.' });
+            await loadStatus();
+          }}
+          onError={(m) => setAlert({ type: 'error', message: m })}
+        />
+      )}
+
+      {showCertModal && (
+        <CertModal
+          onClose={() => setShowCertModal(false)}
+          onSaved={async () => {
+            setShowCertModal(false);
+            setAlert({ type: 'success', message: 'Certificado cargado y cifrado.' });
+            await loadStatus();
+          }}
+          onError={(m) => setAlert({ type: 'error', message: m })}
+        />
+      )}
+
+      {showConfigModal && (
+        <ConfigModal
+          status={status}
+          onClose={() => setShowConfigModal(false)}
+          onSaved={async () => {
+            setShowConfigModal(false);
+            setAlert({ type: 'success', message: 'Datos de la DIAN guardados.' });
             await loadStatus();
           }}
           onError={(m) => setAlert({ type: 'error', message: m })}
@@ -1089,6 +1127,330 @@ function ResField({ form, set, k, label, ...rest }) {
         {...rest}
       />
     </label>
+  );
+}
+
+// Paso a paso para dejar la empresa conectada a la DIAN. Cada paso muestra si
+// ya está hecho y un botón para completarlo. El último (pasar a producción) se
+// hace desde "Datos de la DIAN".
+function ConnectionSteps({ status, onCert, onResolution, onConfig }) {
+  const hasCert = !!status?.hasCertificate;
+  const resCount = status?.resolutions?.length || 0;
+  const hasSoftware = !!status?.softwareId;
+  const isProd = status?.env === 'PRODUCCION';
+  const allReady = hasCert && resCount > 0 && hasSoftware && isProd;
+
+  if (allReady) {
+    return (
+      <div className="mt-4 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+        <CheckBadgeIcon className="h-6 w-6 flex-none text-emerald-600" />
+        <div>
+          <p className="text-sm font-semibold text-emerald-800">
+            Conectado a la DIAN en producción
+          </p>
+          <p className="text-xs text-emerald-700">
+            Ya puedes emitir facturas y nómina electrónica reales desde el punto
+            de venta.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const steps = [
+    {
+      n: 1,
+      title: 'Certificado digital',
+      desc: 'Sube tu archivo .p12 y su clave (lo entrega tu entidad certificadora).',
+      done: hasCert,
+      cta: hasCert ? 'Reemplazar' : 'Subir certificado',
+      onClick: onCert,
+    },
+    {
+      n: 2,
+      title: 'Resolución de numeración',
+      desc: 'Los rangos autorizados por la DIAN para tus documentos.',
+      done: resCount > 0,
+      cta: resCount > 0 ? 'Agregar otra' : 'Registrar resolución',
+      onClick: onResolution,
+    },
+    {
+      n: 3,
+      title: 'Datos de la DIAN y ambiente',
+      desc: 'ID de software, PIN y TestSetId. Aquí pasas de pruebas a producción.',
+      done: hasSoftware && isProd,
+      cta: 'Configurar',
+      onClick: onConfig,
+    },
+  ];
+
+  return (
+    <div className="mt-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+      <h3 className="text-sm font-semibold text-gray-800">
+        Pasos para conectar con la DIAN
+      </h3>
+      <p className="mt-0.5 text-xs text-gray-500">
+        Completa estos pasos una sola vez. Al terminar quedarás emitiendo
+        facturas reales.
+      </p>
+      <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
+        {steps.map((s) => (
+          <div
+            key={s.n}
+            className={`flex flex-col justify-between rounded-xl border p-4 ${
+              s.done
+                ? 'border-emerald-200 bg-emerald-50/50'
+                : 'border-gray-200 bg-gray-50'
+            }`}
+          >
+            <div>
+              <div className="flex items-center gap-2">
+                <span
+                  className={`grid h-6 w-6 place-items-center rounded-full text-xs font-bold ${
+                    s.done
+                      ? 'bg-emerald-500 text-white'
+                      : 'bg-gray-300 text-white'
+                  }`}
+                >
+                  {s.done ? '✓' : s.n}
+                </span>
+                <p className="text-sm font-semibold text-gray-800">{s.title}</p>
+              </div>
+              <p className="mt-1.5 text-xs text-gray-500">{s.desc}</p>
+            </div>
+            <Button
+              variant={s.done ? 'outline' : 'primary'}
+              size="sm"
+              className="mt-3"
+              onClick={s.onClick}
+            >
+              {s.cta}
+            </Button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Lee un archivo como base64 (sin el prefijo data:...;base64,).
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const res = String(reader.result || '');
+      resolve(res.includes(',') ? res.split(',')[1] : res);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function CertModal({ onClose, onSaved, onError }) {
+  const [file, setFile] = useState(null);
+  const [password, setPassword] = useState('');
+  const [expiresAt, setExpiresAt] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const submit = async () => {
+    if (!file) return onError('Selecciona el archivo .p12.');
+    if (!password) return onError('Escribe la clave del certificado.');
+    setSaving(true);
+    try {
+      const p12Base64 = await fileToBase64(file);
+      await uploadFiscalCertificate({
+        p12Base64,
+        password,
+        expiresAt: expiresAt || undefined,
+      });
+      onSaved();
+    } catch (e) {
+      onError(e.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+          <div>
+            <h3 className="text-sm font-semibold text-gray-800">
+              Certificado digital (.p12)
+            </h3>
+            <p className="text-xs text-gray-500">
+              Se guarda cifrado; nunca se expone ni se descarga.
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="grid h-8 w-8 place-items-center rounded-lg text-gray-400 hover:bg-gray-100"
+          >
+            <XMarkIcon className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="flex flex-col gap-3 p-5">
+          <label className="flex flex-col text-sm">
+            <span className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
+              Archivo .p12 / .pfx
+            </span>
+            <input
+              type="file"
+              accept=".p12,.pfx"
+              onChange={(e) => setFile(e.target.files?.[0] || null)}
+              className="rounded-lg border border-gray-200 px-3 py-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-orange-50 file:px-3 file:py-1 file:text-orange-600"
+            />
+          </label>
+          <label className="flex flex-col text-sm">
+            <span className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
+              Clave del certificado
+            </span>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="rounded-lg border border-gray-200 px-3 py-2 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+            />
+          </label>
+          <label className="flex flex-col text-sm">
+            <span className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
+              Vence el (opcional)
+            </span>
+            <input
+              type="date"
+              value={expiresAt}
+              onChange={(e) => setExpiresAt(e.target.value)}
+              className="rounded-lg border border-gray-200 px-3 py-2 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+            />
+          </label>
+        </div>
+        <div className="flex justify-end gap-2 border-t border-gray-100 px-5 py-4">
+          <Button variant="clear" onClick={onClose}>
+            Cancelar
+          </Button>
+          <Button variant="primary" loading={saving} onClick={submit}>
+            Guardar certificado
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ConfigModal({ status, onClose, onSaved, onError }) {
+  const [form, setForm] = useState({
+    softwareId: status?.softwareId || '',
+    softwarePin: '',
+    testSetId: '',
+    env: status?.env || 'HABILITACION',
+  });
+  const [saving, setSaving] = useState(false);
+  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+
+  const submit = async () => {
+    setSaving(true);
+    try {
+      await updateFiscalConfig({
+        softwareId: form.softwareId || undefined,
+        softwarePin: form.softwarePin || undefined,
+        testSetId: form.testSetId || undefined,
+        env: form.env,
+        habilitacion: form.env === 'PRODUCCION' ? 'HABILITADO' : undefined,
+      });
+      onSaved();
+    } catch (e) {
+      onError(e.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const field =
+    'rounded-lg border border-gray-200 px-3 py-2 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20';
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+          <div>
+            <h3 className="text-sm font-semibold text-gray-800">
+              Datos de la DIAN
+            </h3>
+            <p className="text-xs text-gray-500">
+              Los entrega el portal DIAN al registrar tu software.
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="grid h-8 w-8 place-items-center rounded-lg text-gray-400 hover:bg-gray-100"
+          >
+            <XMarkIcon className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="flex flex-col gap-3 p-5">
+          <label className="flex flex-col text-sm">
+            <span className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
+              ID de software
+            </span>
+            <input
+              value={form.softwareId}
+              onChange={(e) => set('softwareId', e.target.value)}
+              className={field}
+            />
+          </label>
+          <label className="flex flex-col text-sm">
+            <span className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
+              PIN del software
+            </span>
+            <input
+              value={form.softwarePin}
+              onChange={(e) => set('softwarePin', e.target.value)}
+              placeholder="(se guarda cifrado)"
+              className={field}
+            />
+          </label>
+          <label className="flex flex-col text-sm">
+            <span className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
+              TestSetId (set de pruebas)
+            </span>
+            <input
+              value={form.testSetId}
+              onChange={(e) => set('testSetId', e.target.value)}
+              placeholder="(solo en habilitación)"
+              className={field}
+            />
+          </label>
+          <label className="flex flex-col text-sm">
+            <span className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
+              Ambiente
+            </span>
+            <select
+              value={form.env}
+              onChange={(e) => set('env', e.target.value)}
+              className={field}
+            >
+              <option value="HABILITACION">Pruebas (habilitación)</option>
+              <option value="PRODUCCION">Producción (facturas reales)</option>
+            </select>
+          </label>
+          {form.env === 'PRODUCCION' && (
+            <p className="rounded-lg bg-amber-50 p-2.5 text-[11px] text-amber-700 ring-1 ring-amber-200">
+              En producción las facturas son reales y se reportan a la DIAN.
+              Actívalo solo cuando la DIAN ya te haya habilitado.
+            </p>
+          )}
+        </div>
+        <div className="flex justify-end gap-2 border-t border-gray-100 px-5 py-4">
+          <Button variant="clear" onClick={onClose}>
+            Cancelar
+          </Button>
+          <Button variant="primary" loading={saving} onClick={submit}>
+            Guardar
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }
 

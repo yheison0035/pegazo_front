@@ -138,6 +138,8 @@ const Table = ({
                     <SearchFilter
                       name={f.name}
                       title={f.title}
+                      type={f.type}
+                      options={f.options}
                       value={filters?.[f.name] || ''}
                       showInput={f.showInput}
                       handleFilterChange={onFilterChange}

@@ -84,6 +84,8 @@ export default function Delivered_Sales() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [alert, setAlert] = useState({});
 
+  const electronicEnabled = !!usuario?.company?.electronicInvoicingEnabled;
+
   const { filters, handleFilterChange, setFilters } = useColumnFilters({
     code: '',
     customer: '',
@@ -93,6 +95,7 @@ export default function Delivered_Sales() {
     userId: '',
     paymentStatus: '',
     saleDate: '',
+    invoiceType: '',
   });
 
   // Si llega ?date=YYYY-MM-DD (p. ej. desde el widget "Hoy" del inicio),
@@ -163,6 +166,11 @@ export default function Delivered_Sales() {
       const rows = (res.data || []).map((s) => ({
         Fecha: formatDateSafe(s.saleDate),
         Codigo: s.code,
+        ...(electronicEnabled && {
+          Tipo: s.invoiceType === 'ELECTRONICA' ? 'Electrónica' : 'Normal',
+          'N° electrónica': s.eInvoiceNumber || '',
+          'Estado DIAN': s.eInvoiceStatus || '',
+        }),
         Cliente: s.customer?.name || 'Consumidor final',
         Total: s.totalAmount,
         Metodo: s.paymentMethod,
@@ -258,7 +266,7 @@ export default function Delivered_Sales() {
         <LoadingOverlay show={loading} text="Cargando ventas o servicios..." />
 
         <Table
-          header={getHeaderTableDeliveredSales()}
+          header={getHeaderTableDeliveredSales({ electronic: electronicEnabled })}
           info={sales}
           view="delivered_sales"
           rol={usuario?.role}
