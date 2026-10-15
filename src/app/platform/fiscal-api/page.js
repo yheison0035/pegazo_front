@@ -106,6 +106,14 @@ const SUGGEST = {
 
 const onlyDigits = (v) => Number(String(v ?? '').replace(/[^\d]/g, '')) || 0;
 
+// Paquetes predefinidos (un clic). Editables antes de guardar.
+const PACKAGES = [
+  { label: 'Emprende', planName: 'Emprende (300/año)', period: 'ANUAL', docs: 300, price: 120000 },
+  { label: 'Pro', planName: 'Pro (600/año)', period: 'ANUAL', docs: 600, price: 180000 },
+  { label: 'Prepago 500', planName: 'Prepago 500', period: 'BOLSA', docs: 500, price: 150000 },
+  { label: 'Volumen', planName: 'Volumen (1.000/mes)', period: 'MENSUAL', docs: 1000, price: 60000 },
+];
+
 // Editor del plan de cobro de un consumidor (como Factus/Siigo): documentos
 // incluidos + precio EDITABLE + cobro por documento adicional. Muestra el
 // consumo real y cuánto cobrar.
@@ -161,6 +169,30 @@ function PlanEditor({ platform, onSaved, setAlert }) {
           {suf}
         </span>
       </div>
+
+      {/* Paquetes predefinidos (un clic) */}
+      <div className="mb-2 flex flex-wrap items-center gap-1.5">
+        <span className="text-[11px] font-medium text-gray-400">Paquetes:</span>
+        {PACKAGES.map((pk) => (
+          <button
+            key={pk.label}
+            type="button"
+            onClick={() =>
+              setF((prev) => ({
+                ...prev,
+                planName: pk.planName,
+                period: pk.period,
+                includedDocs: pk.docs,
+                price: pk.price,
+              }))
+            }
+            className="rounded-full border border-gray-200 px-2.5 py-0.5 text-[11px] font-semibold text-gray-600 transition hover:border-orange-300 hover:bg-orange-50"
+          >
+            {pk.label}
+          </button>
+        ))}
+      </div>
+
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
         <div>
           <label className={lbl}>Nombre del paquete</label>
@@ -515,9 +547,12 @@ function Inner() {
                           <tr key={k.id} className="text-gray-700">
                             <td className="py-2 pr-3 font-medium">{k.label}</td>
                             <td className="py-2 pr-3">
-                              <code className="text-xs text-gray-500">
-                                {k.prefix}…
-                              </code>
+                              <div className="flex items-center gap-1.5">
+                                <code className="text-xs text-gray-500">
+                                  {k.prefix}…
+                                </code>
+                                <CopyBtn text={k.prefix} />
+                              </div>
                             </td>
                             <td className="py-2 pr-3 text-xs text-gray-400">
                               {k.lastUsedAt
