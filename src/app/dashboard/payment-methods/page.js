@@ -100,11 +100,12 @@ export default function PaymentMethodsPage() {
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl font-semibold text-gray-800">
-              Métodos de pago
+              Medios de pago en caja
             </h1>
             <p className="text-sm text-gray-500">
-              Los métodos que aparecen al cobrar. Puedes agregar los tuyos (Nequi,
-              Daviplata…) eligiendo cómo se comportan.
+              Los medios que aparecen al cobrar una venta (efectivo, tarjeta,
+              Nequi, Daviplata…). No son los de la tienda online, que se
+              configuran en Tienda online → Pagos.
             </p>
           </div>
           <Button
