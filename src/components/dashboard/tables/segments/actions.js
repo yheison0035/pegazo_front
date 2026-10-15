@@ -35,13 +35,12 @@ export default function Actions({
   const toast = useToast();
   const companyName = auth?.usuario?.company?.name;
   const companyModules = effectiveModules(auth?.usuario);
-  // La DIAN (factura electrónica) aún NO está liberada al 100%, así que SOLO se
-  // muestra en empresas de prueba (isTestCompany). Además debe estar habilitada o
-  // vinculada al servicio fiscal. Los negocios reales no la ven hasta el release.
+  // La factura electrónica DIAN se habilita por empresa desde Super Platform
+  // (electronicInvoicingEnabled) o cuando ya está vinculada al servicio fiscal
+  // (fiscalCompanyId). Si está apagada, no se ofrece emitir desde la lista.
   const fiscalEnabled =
-    !!auth?.usuario?.company?.isTestCompany &&
-    (!!auth?.usuario?.company?.electronicInvoicingEnabled ||
-      !!auth?.usuario?.company?.fiscalCompanyId);
+    !!auth?.usuario?.company?.electronicInvoicingEnabled ||
+    !!auth?.usuario?.company?.fiscalCompanyId;
   const [emitting, setEmitting] = useState(false);
 
   // Emite (o reutiliza, es idempotente por venta) la factura electrónica DIAN
