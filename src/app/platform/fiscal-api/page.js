@@ -27,6 +27,29 @@ const API_BASE =
   (process.env.NEXT_PUBLIC_FISCAL_API_URL ||
     'https://pegazo-fiscal-api-production.up.railway.app') + '/v1';
 
+// Texto listo para enviar al cliente. `apiKey` es la key completa (solo al
+// crearla) o un marcador como "<TU_API_KEY>" cuando ya existe (no se re-muestra).
+function buildHandover(name, apiKey) {
+  return `Pegazo · API de Facturación y Nómina Electrónica DIAN
+Credenciales de acceso — ${name}
+
+API Key: ${apiKey}
+Base URL: ${API_BASE}
+
+Autenticación: enviar en CADA petición el header
+  Authorization: Bearer ${apiKey}
+
+Endpoints principales:
+- POST ${API_BASE}/invoices       → emitir factura electrónica
+- POST ${API_BASE}/credit-notes   → nota crédito
+- POST ${API_BASE}/debit-notes    → nota débito
+- POST ${API_BASE}/payroll        → nómina electrónica
+- GET  ${API_BASE}/documents      → consultar documentos emitidos
+
+Importante: guarda esta API key en un lugar seguro, no se vuelve a mostrar.
+Cada empresa (NIT) debe estar habilitada ante la DIAN con su certificado para que los documentos tengan validez fiscal.`;
+}
+
 function CopyBtn({ text }) {
   const [ok, setOk] = useState(false);
   return (
@@ -259,6 +282,23 @@ function Inner() {
 
               {open === p.id && (
                 <div className="border-t border-gray-100 p-4">
+                  {/* Datos de conexión listos para enviar al cliente */}
+                  <div className="mb-4 rounded-xl border border-gray-100 bg-gray-50 p-3">
+                    <div className="mb-1.5 flex items-center justify-between gap-2">
+                      <p className="text-xs font-bold text-gray-700">
+                        Datos de conexión (para el cliente)
+                      </p>
+                      <CopyBtn text={buildHandover(p.name, '<TU_API_KEY>')} />
+                    </div>
+                    <pre className="max-h-48 overflow-auto whitespace-pre-wrap text-[11px] leading-relaxed text-gray-600">
+{buildHandover(p.name, '<TU_API_KEY>')}
+                    </pre>
+                    <p className="mt-1 text-[11px] text-gray-400">
+                      La API key completa solo se muestra al crearla. Si el
+                      cliente la perdió, emite una nueva abajo.
+                    </p>
+                  </div>
+
                   <div className="mb-3 flex flex-col gap-2 sm:flex-row">
                     <input
                       value={keyLabel}
@@ -342,24 +382,7 @@ function Inner() {
       {/* Modal: API key recién creada (se muestra una sola vez) */}
       {newKey &&
         (() => {
-          const handover = `Pegazo · API de Facturación y Nómina Electrónica DIAN
-Credenciales de acceso — ${newKey.name}
-
-API Key: ${newKey.apiKey}
-Base URL: ${API_BASE}
-
-Autenticación: enviar en CADA petición el header
-  Authorization: Bearer ${newKey.apiKey}
-
-Endpoints principales:
-- POST ${API_BASE}/invoices       → emitir factura electrónica
-- POST ${API_BASE}/credit-notes   → nota crédito
-- POST ${API_BASE}/debit-notes    → nota débito
-- POST ${API_BASE}/payroll        → nómina electrónica
-- GET  ${API_BASE}/documents      → consultar documentos emitidos
-
-Importante: guarda esta API key en un lugar seguro, no se vuelve a mostrar.
-Cada empresa (NIT) debe estar habilitada ante la DIAN con su certificado para que los documentos tengan validez fiscal.`;
+          const handover = buildHandover(newKey.name, newKey.apiKey);
           return (
             <div className="fixed inset-0 z-[70] flex items-start justify-center overflow-y-auto bg-black/40 p-4">
               <div className="my-10 w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
