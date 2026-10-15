@@ -28,24 +28,29 @@ function todayColStr() {
   }
 }
 
-// Diferencia en días (redondeada hacia arriba) entre hoy y una fecha.
+// Diferencia en días entre HOY y la fecha de vencimiento. `paidUntil` se guarda
+// a medianoche UTC del día de vencimiento → se interpreta en UTC (igual que en
+// el resto del sistema); "hoy" se toma en zona Colombia. Así el día de
+// vencimiento cuenta como "vence hoy" y solo pasa a vencido al día siguiente.
 function daysUntil(dateStr) {
   const target = new Date(dateStr);
   if (Number.isNaN(target.getTime())) return null;
-  const today = new Date();
-  // Comparamos por día calendario (ignorando la hora).
-  const a = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const b = new Date(
-    target.getFullYear(),
-    target.getMonth(),
-    target.getDate(),
+  const b = Date.UTC(
+    target.getUTCFullYear(),
+    target.getUTCMonth(),
+    target.getUTCDate(),
   );
+  const [ty, tm, td] = todayColStr().split('-').map(Number);
+  const a = Date.UTC(ty, tm - 1, td);
   return Math.round((b - a) / (1000 * 60 * 60 * 24));
 }
 
 function formatDate(dateStr) {
   try {
+    // UTC: paidUntil es una fecha "solo día" a medianoche UTC; sin esto se
+    // corre un día hacia atrás en zona Colombia.
     return new Date(dateStr).toLocaleDateString('es-CO', {
+      timeZone: 'UTC',
       day: '2-digit',
       month: 'long',
       year: 'numeric',

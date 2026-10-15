@@ -14,7 +14,10 @@ import { formatCOP } from '@/lib/api/utils/utils';
 function fmtDate(d) {
   if (!d) return '—';
   try {
+    // UTC: paidUntil es fecha "solo día" a medianoche UTC; sin esto se corre un
+    // día hacia atrás en zona Colombia.
     return new Date(d).toLocaleDateString('es-CO', {
+      timeZone: 'UTC',
       year: 'numeric',
       month: 'long',
       day: 'numeric',

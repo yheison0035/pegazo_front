@@ -11,9 +11,26 @@ const DAY = 86400000;
 
 function daysUntil(dateStr) {
   if (!dateStr) return null;
-  const t = new Date(dateStr).getTime();
-  if (Number.isNaN(t)) return null;
-  return Math.ceil((t - Date.now()) / DAY);
+  const target = new Date(dateStr);
+  if (Number.isNaN(target.getTime())) return null;
+  // paidUntil es fecha "solo día" (medianoche UTC) → se interpreta en UTC; hoy
+  // en zona Colombia. Así el día de vencimiento cuenta como 0 (vence hoy).
+  const b = Date.UTC(
+    target.getUTCFullYear(),
+    target.getUTCMonth(),
+    target.getUTCDate(),
+  );
+  let todayStr;
+  try {
+    todayStr = new Date().toLocaleDateString('en-CA', {
+      timeZone: 'America/Bogota',
+    });
+  } catch {
+    todayStr = new Date().toISOString().slice(0, 10);
+  }
+  const [ty, tm, td] = todayStr.split('-').map(Number);
+  const a = Date.UTC(ty, tm - 1, td);
+  return Math.round((b - a) / DAY);
 }
 
 // Aviso de vencimiento del plan. Solo dueño/admin. Al iniciar sesión, si faltan
