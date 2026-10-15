@@ -85,25 +85,22 @@ const PERIODS = [
   { id: 'BOLSA', label: 'Bolsa (prepago)' },
 ];
 
-// Sugerencias de precio + referencia de competencia POR MODALIDAD (para el pitch).
+// Sugerencias de PAQUETE + referencia de competencia POR MODALIDAD (para el pitch).
 const SUGGEST = {
   MENSUAL: {
     docs: '100',
     price: '$ 9.000',
-    over: '$ 150',
-    note: '100 docs/mes ≈ $9.000 · adicional ≈ $150/doc. Competencia: GridPOS ~$9.900/mes (100 docs).',
+    note: 'paquete de 100 docs/mes ≈ $9.000. Competencia: GridPOS ~$9.900/mes (100 docs).',
   },
   ANUAL: {
     docs: '500',
     price: '$ 120.000',
-    over: '$ 200',
-    note: '500 docs/año ≈ $120.000 · adicional ≈ $200/doc. Competencia: MATIAS 500/año $196.000 · Facturo anual desde $125.000.',
+    note: 'paquete de 500 docs/año ≈ $120.000. Competencia: MATIAS 500/año $196.000 · Facturo anual desde $125.000.',
   },
   BOLSA: {
     docs: '500',
     price: '$ 120.000',
-    over: '$ 200',
-    note: 'bolsa de 500 docs ≈ $120.000 · adicional ≈ $200/doc. Competencia: Facturo 50 folios $219.990 · bolsas prepago.',
+    note: 'paquete prepago de 500 docs ≈ $120.000 (recarga al agotarse). Competencia: Facturo 50 folios $219.990.',
   },
 };
 
@@ -118,7 +115,6 @@ function PlanEditor({ platform, onSaved, setAlert }) {
     period: platform.period || 'MENSUAL',
     includedDocs: platform.includedDocs || '',
     price: platform.price || '',
-    overagePrice: platform.overagePrice || '',
     contactEmail: platform.contactEmail || '',
     contactPhone: platform.contactPhone || '',
   });
@@ -133,7 +129,6 @@ function PlanEditor({ platform, onSaved, setAlert }) {
         period: f.period,
         includedDocs: onlyDigits(f.includedDocs),
         price: onlyDigits(f.price),
-        overagePrice: onlyDigits(f.overagePrice),
         contactEmail: f.contactEmail.trim(),
         contactPhone: f.contactPhone.trim(),
       });
@@ -156,28 +151,23 @@ function PlanEditor({ platform, onSaved, setAlert }) {
   return (
     <div className="mb-4 rounded-xl border border-orange-100 bg-orange-50/40 p-3">
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-        <p className="text-xs font-bold text-gray-700">Plan de cobro</p>
+        <p className="text-xs font-bold text-gray-700">Paquete de facturación</p>
         <span className="text-xs text-gray-500">
-          Consumo: <b className="text-gray-800">{platform.used ?? 0}</b> doc
-          {(platform.used ?? 0) === 1 ? '' : 's'}
-          {platform.extra > 0 && (
-            <>
-              {' '}
-              · {platform.extra} adicional{platform.extra === 1 ? '' : 'es'}
-            </>
-          )}
-          {' · a cobrar '}
+          Consumo: <b className="text-gray-800">{platform.used ?? 0}</b>
+          {' / '}
+          {platform.includedDocs || 0} docs
+          {' · precio '}
           <b className="text-emerald-600">{formatCOP(platform.cost || 0)}</b>
           {suf}
         </span>
       </div>
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
         <div>
-          <label className={lbl}>Nombre del plan</label>
+          <label className={lbl}>Nombre del paquete</label>
           <input
             value={f.planName}
             onChange={(e) => set('planName', e.target.value)}
-            placeholder="Bolsa 500 / Plan mensual"
+            placeholder="Paquete 500 / Plan mensual"
             className={inp}
           />
         </div>
@@ -196,7 +186,7 @@ function PlanEditor({ platform, onSaved, setAlert }) {
           </select>
         </div>
         <div>
-          <label className={lbl}>Documentos incluidos</label>
+          <label className={lbl}>Documentos del paquete</label>
           <input
             type="number"
             min={0}
@@ -207,20 +197,11 @@ function PlanEditor({ platform, onSaved, setAlert }) {
           />
         </div>
         <div>
-          <label className={lbl}>Precio del plan (COP)</label>
+          <label className={lbl}>Precio del paquete (COP)</label>
           <MoneyInput
             value={f.price}
             onChange={(v) => set('price', v)}
             placeholder={sug.price}
-            className={inp}
-          />
-        </div>
-        <div>
-          <label className={lbl}>Precio por documento adicional (COP)</label>
-          <MoneyInput
-            value={f.overagePrice}
-            onChange={(v) => set('overagePrice', v)}
-            placeholder={sug.over}
             className={inp}
           />
         </div>
