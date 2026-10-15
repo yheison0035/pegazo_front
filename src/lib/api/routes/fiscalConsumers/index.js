@@ -16,6 +16,12 @@ export const toggleFiscalConsumer = (id, active) =>
     body: JSON.stringify({ active }),
   });
 
+export const updateFiscalConsumerPlan = (id, plan) =>
+  apiFetch(`/fiscal-consumers/${id}/plan`, {
+    method: 'PATCH',
+    body: JSON.stringify(plan),
+  });
+
 export const getFiscalConsumerKeys = (id) =>
   apiFetch(`/fiscal-consumers/${id}/keys`);
 
