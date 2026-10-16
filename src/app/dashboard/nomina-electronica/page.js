@@ -10,7 +10,7 @@ import {
 } from '@heroicons/react/24/outline';
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
-import { EINVOICING_ENABLED } from '@/config/features';
+import { useAuth } from '@/context/authContext';
 import Button from '@/components/ui/Button';
 import StatusBadge from '@/components/ui/StatusBadge';
 import MoneyInput from '@/components/ui/MoneyInput';
@@ -27,9 +27,11 @@ import {
 import { getUsers } from '@/lib/api/routes/users';
 
 export default function NominaElectronicaPage() {
+  const auth = useAuth();
+  const released = !!auth?.usuario?.company?.einvoicingReleased;
   return (
     <RoleGuard allowedRoles={[Roles.SUPER_ADMIN, Roles.ADMIN]}>
-      {EINVOICING_ENABLED ? (
+      {released ? (
         <NominaElectronica />
       ) : (
         <div className="mx-auto mt-10 max-w-md rounded-2xl border border-gray-200 bg-white p-6 text-center shadow-sm">

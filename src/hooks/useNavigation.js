@@ -1,7 +1,6 @@
 'use client';
 
 import { BUSINESS_TYPES, HIDDEN_MODULES } from '@/config/businessTypes';
-import { EINVOICING_ENABLED } from '@/config/features';
 import { NAVIGATION } from '@/config/navigation';
 import { PLATFORM_NAVIGATION } from '@/config/platformNavigation';
 import {
@@ -112,16 +111,11 @@ export default function useNavigation() {
     }
   }
 
-  // Facturación electrónica DIAN: se habilita POR EMPRESA desde Super Platform
-  // (electronicInvoicingEnabled) o cuando ya está vinculada al servicio fiscal
-  // (fiscalCompanyId). Además hay un interruptor GLOBAL (EINVOICING_ENABLED): si
-  // está apagado (mientras no tengamos el certificado como PT), NADIE la ve, para
-  // que los clientes actuales no se confundan. El acceso además es por rol.
-  if (
-    EINVOICING_ENABLED &&
-    (usuario.company?.electronicInvoicingEnabled ||
-      usuario.company?.fiscalCompanyId)
-  ) {
+  // Facturación/nómina electrónica DIAN: `einvoicingReleased` (del backend) ya
+  // combina las 2 condiciones — que Pegazo (Proveedor Tecnológico) tenga su
+  // certificado cargado Y que la empresa la tenga activada. Mientras no haya
+  // certificado del PT, NADIE la ve (para que los clientes no se confundan).
+  if (usuario.company?.einvoicingReleased) {
     modules.push('facturacion-electronica');
     // Nómina electrónica: mismo enlace DIAN; el candado de plan (Órbita) decide.
     modules.push('nomina-electronica');

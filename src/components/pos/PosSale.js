@@ -21,7 +21,6 @@ import { getCurrentCash, CASH_CHANGED_EVENT } from '@/lib/api/routes/cash';
 import { dayStateFromRegister } from '@/lib/dayStatus';
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
-import { EINVOICING_ENABLED } from '@/config/features';
 import { useAuth } from '@/context/authContext';
 import useTerms from '@/hooks/useTerms';
 import useSales from '@/lib/api/hooks/useSales';
@@ -195,10 +194,8 @@ export default function PosSale({
   // ¿La empresa ya tiene facturación electrónica DIAN activa? Solo entonces se
   // ofrece el selector "Tiquete POS / Factura electrónica" al vender. No se
   // consulta siquiera si la empresa no la tiene habilitada (negocios reales).
-  const fiscalEnabled =
-    EINVOICING_ENABLED &&
-    (!!usuario?.company?.electronicInvoicingEnabled ||
-      !!usuario?.company?.fiscalCompanyId);
+  // `einvoicingReleased` = certificado del PT cargado + empresa activada.
+  const fiscalEnabled = !!usuario?.company?.einvoicingReleased;
   useEffect(() => {
     if (!fiscalEnabled) return;
     (async () => {
