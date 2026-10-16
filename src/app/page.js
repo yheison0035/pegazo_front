@@ -47,47 +47,54 @@ const WHATSAPP =
 // Todo lo que incluye la plataforma (para el plan a la medida).
 const INCLUDED = [
   'Punto de venta y facturación',
-  'Facturación electrónica DIAN ilimitada',
-  'Certificado y firma digital incluidos',
   'Control de inventario en tiempo real',
   'Variantes (color, talla) y código de barras',
   'Productos por agotarse y agotados',
   'Varios locales, cada uno con su inventario',
+  'Traslados de stock entre sedes',
   'Clientes (CRM), historial y notas',
   'Cartera y fiado',
   'Apertura y cierre de caja',
-  'Gastos y utilidad',
+  'Gastos, cuentas por pagar y utilidad',
   'IVA e impuestos (Colombia)',
-  'Cotizaciones',
+  'Contabilidad: plan de cuentas, libros y estados financieros',
+  'Calendario tributario',
+  'Cotizaciones y devoluciones',
+  'Plan separe (apartados) y membresías',
   'Citas y agenda de servicios',
-  'Comisiones por empleado',
+  'Reservas online desde tu propio enlace',
+  'Comisiones y descansos por empleado',
   'Fidelización de clientes',
   'Reportes de ventas y estadísticas',
   'Roles, permisos y auditoría',
   'WhatsApp a tus clientes',
-  'Mesas e insumos (restaurantes)',
+  'Mesas, insumos y recetas (restaurantes)',
   'Aviso de consignaciones en tiempo real',
+  'Catálogo web para mostrar o enviar tus productos',
   'Tu tienda online conectada al inventario',
+  'Cobros en línea (Wompi) y login con Google',
+  'Buscador global (⌘K) e importación por Excel',
   'App instalable en el celular',
-  'Personalización de panel y tienda',
+  'Personalización de panel, tienda y catálogo',
+  'Facturación y nómina electrónica DIAN (muy pronto)',
 ];
 
 // ── Lo que nos diferencia de la competencia (Siigo, Treinta, Alegra…) ──
 const DIFFERENTIATORS = [
   {
-    icon: ReceiptPercentIcon,
-    title: 'Facturación electrónica DIAN, ilimitada e incluida',
-    desc: 'Emite factura electrónica directo ante la DIAN —sin costo por documento y con el certificado incluido—. Lo que en otros es una suscripción aparte, en Pegazo va dentro de tu plan: notas crédito, envío por correo y WhatsApp, y tiquete con QR.',
-  },
-  {
     icon: SparklesIcon,
     title: 'Se adapta a CUALQUIER negocio',
-    desc: 'Un mismo sistema que cambia según lo que vendes: barbería, consultorio, restaurante, supermercado, moda… La plataforma se ajusta a ti, no al revés.',
+    desc: 'Un mismo sistema que cambia según lo que vendes: barbería, consultorio, restaurante, supermercado, moda, parqueadero… La plataforma se ajusta a ti, no al revés.',
   },
   {
     icon: ShoppingBagIcon,
     title: 'Tu tienda online, conectada al inventario',
-    desc: 'Vende por internet con tu propia tienda y tu marca, sincronizada con tu stock en tiempo real. Tú eliges qué productos publicar.',
+    desc: 'Vende por internet con tu propia tienda y tu marca, sincronizada con tu stock en tiempo real, con cobros en línea (Wompi). O usa el catálogo web para mostrar y enviar tus productos sin montar una tienda.',
+  },
+  {
+    icon: ReceiptPercentIcon,
+    title: 'Facturación electrónica DIAN — muy pronto',
+    desc: 'Estamos integrando la factura y nómina electrónica directo ante la DIAN, sin costo por documento. Al vender podrás elegir tiquete o factura electrónica, con notas crédito y envío por correo/WhatsApp con QR. En camino.',
   },
   {
     icon: BellAlertIcon,
@@ -108,21 +115,21 @@ const FEATURE_GROUPS = [
     title: 'Ventas, caja e impuestos',
     items: [
       'Punto de venta rápido e impresión de factura',
-      'Medios de pago: efectivo, transferencia, datáfono, Addi y fiado',
+      'Medios de pago: efectivo, transferencia, datáfono y fiado',
       'Apertura y cierre de caja con arqueo por día',
       'IVA y precios configurados para Colombia',
-      'Cotizaciones para tus clientes',
+      'Cotizaciones, devoluciones y plan separe (apartados)',
     ],
   },
   {
-    icon: ShieldCheckIcon,
-    title: 'Facturación electrónica DIAN',
+    icon: DocumentChartBarIcon,
+    title: 'Contabilidad y control financiero',
     items: [
-      'Emisión directa ante la DIAN, ilimitada y sin costo por documento',
-      'Certificado y firma digital incluidos',
-      'Elige al vender: tiquete POS o factura electrónica',
-      'Notas crédito (totales y parciales) y anulación',
-      'Envío al cliente por correo y WhatsApp, con QR',
+      'Plan de cuentas, libros y estados financieros',
+      'Calendario tributario',
+      'Gastos, cuentas por pagar y cargos a empleados',
+      'Activos (equipos y bienes del negocio)',
+      'Resumen contable simple para el dueño',
     ],
   },
   {
@@ -138,13 +145,13 @@ const FEATURE_GROUPS = [
   },
   {
     icon: UsersIcon,
-    title: 'Clientes y fidelización',
+    title: 'Clientes, fidelización y citas',
     items: [
       'Ficha, historial, notas y cumpleaños de cada cliente',
       'Cartera y fiado: controla lo que te deben y los abonos',
-      'Fidelización con sellos y premios',
+      'Fidelización con sellos y premios, y membresías',
+      'Citas y reservas online desde tu propio enlace',
       'WhatsApp con un clic: cobros, promos y recordatorios',
-      'Clientes de tu tienda online unificados con el CRM',
     ],
   },
   {
@@ -170,11 +177,12 @@ const FEATURE_GROUPS = [
   },
   {
     icon: ShoppingBagIcon,
-    title: 'Tienda online y app',
+    title: 'Tienda online, catálogo y app',
     items: [
       'Tu tienda con tu marca, conectada al inventario',
+      'Catálogo web para mostrar o enviar tus productos (sin pedidos)',
       'Cuentas de clientes (incluso con Google) y sus pedidos',
-      'Cobros en línea integrados',
+      'Cobros en línea integrados (Wompi)',
       'Instalable en el celular como app (PWA)',
       'Avisos de consignaciones del banco en tiempo real',
     ],
@@ -268,10 +276,21 @@ const VERTICALS = [
     name: 'Servicios y profesionales',
     tag: 'Servicios',
     perks: [
-      'Agenda de citas',
+      'Agenda de citas y reservas online',
       'Clientes con historial',
       'Cotizaciones y cartera',
       'Cobros y recordatorios',
+    ],
+  },
+  {
+    icon: ClockIcon,
+    name: 'Parqueaderos, guarda cascos y canchas',
+    tag: 'Servicios por tiempo',
+    perks: [
+      'Cobro por tiempo (entrada y salida)',
+      'Guarda cascos y objetos',
+      'Reserva de canchas por horas',
+      'Caja y reportes por sede',
     ],
   },
 ];
@@ -322,14 +341,14 @@ const HOW_STEPS = [
 // ── Roadmap ──
 const ROADMAP = [
   {
+    icon: ReceiptPercentIcon,
+    title: 'Factura y nómina electrónica DIAN',
+    desc: 'Emisión directa ante la DIAN, sin costo por documento, con el certificado incluido. En integración, muy pronto.',
+  },
+  {
     icon: SparklesIcon,
     title: 'Editor de tu tienda in-situ',
     desc: 'Personaliza tu tienda online desde el propio sitio, sin saber de tecnología.',
-  },
-  {
-    icon: BoltIcon,
-    title: 'Turnos y reservas online',
-    desc: 'Tus clientes reservan su cita o mesa desde tu propio enlace.',
   },
   {
     icon: RocketLaunchIcon,
@@ -369,7 +388,7 @@ const FAQ = [
   },
   {
     q: '¿Pegazo factura electrónicamente ante la DIAN?',
-    a: 'Sí. Emites factura electrónica directo ante la DIAN desde el mismo sistema, de forma ilimitada y sin costo por documento, con el certificado y la firma digital incluidos. Al vender eliges tiquete POS o factura electrónica, generas notas crédito y se la envías a tu cliente por correo o WhatsApp con su código QR.',
+    a: 'Muy pronto. Estamos integrando la factura y la nómina electrónica directo ante la DIAN, sin costo por documento y con el certificado incluido: al vender podrás elegir tiquete o factura electrónica, generar notas crédito y enviarla por correo o WhatsApp con su QR. Mientras tanto, facturas y gestionas todo tu negocio con normalidad.',
   },
 ];
 
@@ -408,11 +427,12 @@ const JSON_LD = {
         'Punto de venta y facturación',
         'Control de inventario en tiempo real con multi-local',
         'Clientes (CRM), cartera y fiado',
-        'Citas y agenda de servicios',
+        'Citas, agenda y reservas online',
         'Cierre de caja y control de gastos',
+        'Contabilidad: plan de cuentas, libros y calendario tributario',
         'Reportes de ventas y estadísticas',
-        'Fidelización de clientes',
-        'Tienda online conectada al inventario',
+        'Fidelización y membresías de clientes',
+        'Catálogo web y tienda online conectada al inventario',
         'Roles, permisos y auditoría',
         'Comisiones por empleado',
         'Aviso de consignaciones en tiempo real',
@@ -676,10 +696,10 @@ export default function Landing() {
               </span>
             </h1>
             <p className="pz-hero-in pz-hero-in-2 mx-auto mt-5 max-w-xl text-lg text-neutral-300 lg:mx-0">
-              Ventas, inventario, clientes, citas, cartera, reportes, tu propia
-              tienda online y <span className="font-semibold text-white">facturación
-              electrónica DIAN ilimitada</span>. Pegazo se adapta a lo que vendes y
-              hace despegar tu negocio, todo desde la nube.
+              Ventas, inventario, clientes, citas, cartera, contabilidad,
+              reportes y tu propia <span className="font-semibold text-white">tienda
+              online</span>. Pegazo se adapta a lo que vendes y hace despegar tu
+              negocio, todo desde la nube.
             </p>
 
             <div className="pz-hero-in pz-hero-in-3 mt-8 flex flex-col items-center gap-3 sm:flex-row lg:justify-start">
@@ -1203,8 +1223,8 @@ export default function Landing() {
                 ['Multi-sede con inventario por local', ['Sí', 'Sí', 'Sí', 'Limitado']],
                 ['Pagos en línea a tu propio banco', ['Sí', false, false, false]],
                 ['App en el celular (PWA)', ['Sí', 'Sí', 'Sí', 'Sí']],
-                ['Facturación electrónica DIAN', ['Ilimitada', 'Sí', 'Sí', false]],
-                ['Certificado digital incluido', ['Sí', 'Sí', false, false]],
+                ['Contabilidad y calendario tributario', ['Sí', 'Sí', false, false]],
+                ['Catálogo web para mostrar/enviar productos', ['Sí', false, false, false]],
                 ['Todo en un solo plan (sin módulos aparte)', ['Sí', false, false, 'Básico']],
               ].map(([label, cells], i) => (
                 <tr key={label} className={i % 2 ? 'bg-neutral-50' : ''}>
@@ -1238,8 +1258,9 @@ export default function Landing() {
           </table>
         </div>
         <p className="mt-4 text-center text-xs text-neutral-400">
-          Facturación y nómina electrónica DIAN, POS por vertical, tienda online y
-          más — todo incluido y disponible hoy.
+          POS por vertical, inventario, contabilidad, citas, catálogo y tienda
+          online — todo en un solo plan. Facturación y nómina electrónica DIAN,
+          muy pronto.
         </p>
       </section>
 
@@ -1298,8 +1319,9 @@ export default function Landing() {
               </ul>
               <p className="mt-4 text-xs text-neutral-400">
                 Algunas funciones avanzadas (tienda online, avisos de banco,
-                historia clínica, nómina electrónica) se activan según el plan.
-                Te asesoramos cuál te conviene.
+                historia clínica, contabilidad) se activan según el plan. Te
+                asesoramos cuál te conviene. La facturación y nómina electrónica
+                DIAN llegan muy pronto.
               </p>
             </div>
           </div>
