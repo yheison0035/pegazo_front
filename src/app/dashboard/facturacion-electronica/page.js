@@ -335,54 +335,26 @@ function FacturacionElectronica() {
         )}
       </div>
 
-      {/* AVISO CONTUNDENTE: mientras NO esté conectada en producción, el cliente
-          NO puede facturar electrónicamente. Se deja clarísimo para que no crea
-          que ya puede. Incluye acceso directo al chat de soporte. */}
+      {/* ONBOARDING guiado (modelo Proveedor Tecnológico): pasos bloqueados, se
+          desbloquea el siguiente al terminar el anterior. Sin certificado del
+          cliente — ese lo pone Pegazo como PT. Mientras no quede listo en
+          producción, el cliente NO puede facturar. */}
       {!readyProd && (
-        <div className="mb-5 rounded-2xl border-2 border-amber-300 bg-amber-50 p-5">
-          <div className="flex items-start gap-3">
-            <ExclamationTriangleIcon className="mt-0.5 h-7 w-7 flex-none text-amber-600" />
-            <div className="flex-1">
-              <h3 className="text-base font-bold text-amber-900">
-                Aún NO estás conectado a la DIAN — no puedes emitir facturas
-                electrónicas todavía
-              </h3>
-              <p className="mt-1 text-sm text-amber-800">
-                Esta función se activa solo cuando la conexión con la DIAN queda
-                lista en producción (certificado, resolución y habilitación).
-                Mientras tanto, sigue facturando con tu factura normal. Nosotros
-                hacemos la conexión por ti.
-              </p>
-              <button
-                type="button"
-                onClick={openSupport}
-                className="mt-3 inline-flex items-center gap-2 rounded-xl bg-amber-600 px-4 py-2 text-sm font-bold text-white hover:bg-amber-700"
-              >
-                ¿Tienes dudas? Escríbenos por el chat
-              </button>
-            </div>
-          </div>
-        </div>
+        <OnboardingWizard
+          status={status}
+          working={working}
+          onSetup={handleSetup}
+          onResolution={() => setShowResModal(true)}
+          openSupport={openSupport}
+        />
       )}
 
-      {/* NO VINCULADA -> activación */}
-      {!linked && <SetupCard status={status} working={working} onSetup={handleSetup} />}
-
-      {linked && (
+      {readyProd && (
         <>
           {/* ESTADO DE HABILITACIÓN */}
           <HabilitacionStrip
             status={status}
             onConfig={() => setShowResModal(true)}
-          />
-
-          {/* PASO A PASO DE CONEXIÓN: se muestra hasta que la empresa quede
-              lista en producción (certificado + resolución + ambiente). */}
-          <ConnectionSteps
-            status={status}
-            onCert={() => setShowCertModal(true)}
-            onResolution={() => setShowResModal(true)}
-            onConfig={() => setShowConfigModal(true)}
           />
 
           {/* KPIs */}
@@ -734,58 +706,6 @@ function LiveIndicator({ lastSync, active }) {
       </span>
       En vivo{secs != null ? ` · hace ${secs}s` : ''}
     </span>
-  );
-}
-
-function SetupCard({ status, working, onSetup }) {
-  const noNit = status && status.hasNit === false;
-  return (
-    <div className="mx-auto max-w-2xl rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-sm">
-      <span className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-orange-500 to-amber-400 text-white shadow-lg">
-        <BoltIcon className="h-7 w-7" />
-      </span>
-      <h2 className="text-xl font-semibold text-gray-800">
-        Activa tu facturación electrónica
-      </h2>
-      <p className="mx-auto mt-2 max-w-md text-sm text-gray-500">
-        Emite facturas y notas directo ante la DIAN, sin intermediarios ni costo
-        por documento. Al activar, vinculamos tu empresa al sistema fiscal de
-        Pegazo.
-      </p>
-
-      {noNit ? (
-        <div className="mx-auto mt-5 flex max-w-md items-start gap-2 rounded-xl bg-amber-50 p-3 text-left text-sm text-amber-800 ring-1 ring-amber-200">
-          <ExclamationTriangleIcon className="h-5 w-5 flex-none" />
-          <span>
-            Primero configura el <b>NIT</b> de tu empresa en los datos del
-            negocio. Es obligatorio para facturar ante la DIAN.
-          </span>
-        </div>
-      ) : (
-        <Button
-          variant="primary"
-          size="lg"
-          className="mt-6"
-          loading={working}
-          onClick={onSetup}
-        >
-          Activar facturación electrónica
-        </Button>
-      )}
-
-      <div className="mt-6 grid grid-cols-1 gap-3 text-left sm:grid-cols-3">
-        {[
-          ['UBL 2.1 + CUFE', 'Formato oficial DIAN'],
-          ['Firma digital', 'XAdES-EPES segura'],
-          ['$0 por factura', 'Sin costo por documento'],
-        ].map(([t, s]) => (
-          <div key={t} className="rounded-xl bg-gray-50 p-3">
-            <p className="text-sm font-semibold text-gray-800">{t}</p>
-            <p className="text-xs text-gray-500">{s}</p>
-          </div>
-        ))}
-      </div>
-    </div>
   );
 }
 
@@ -1173,101 +1093,192 @@ function ResField({ form, set, k, label, ...rest }) {
 // Paso a paso para dejar la empresa conectada a la DIAN. Cada paso muestra si
 // ya está hecho y un botón para completarlo. El último (pasar a producción) se
 // hace desde "Datos de la DIAN".
-function ConnectionSteps({ status, onCert, onResolution, onConfig }) {
-  const hasCert = !!status?.hasCertificate;
-  const resCount = status?.resolutions?.length || 0;
-  const hasSoftware = !!status?.softwareId;
-  const isProd = status?.env === 'PRODUCCION';
-  const allReady = hasCert && resCount > 0 && hasSoftware && isProd;
+// Enlaces oficiales de la DIAN para el trámite (portal de habilitación).
+const DIAN_HABILITACION_URL =
+  'https://micrositios.dian.gov.co/sistema-de-facturacion-electronica/proceso-de-registro-y-habilitacion-como-facturador-electronico/';
+const DIAN_PORTAL_URL = 'https://www.dian.gov.co/';
 
-  if (allReady) {
-    return (
-      <div className="mt-4 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-        <CheckBadgeIcon className="h-6 w-6 flex-none text-emerald-600" />
-        <div>
-          <p className="text-sm font-semibold text-emerald-800">
-            Conectado a la DIAN en producción
-          </p>
-          <p className="text-xs text-emerald-700">
-            Ya puedes emitir facturas y nómina electrónica reales desde el punto
-            de venta.
-          </p>
-        </div>
-      </div>
-    );
-  }
+// Asistente guiado (modelo Proveedor Tecnológico): pasos BLOQUEADOS en orden.
+// El cliente NO sube certificado (lo pone Pegazo como PT). Solo hace su trámite
+// en la DIAN (firma + asociarse a Pegazo + resolución) y nosotros validamos.
+function OnboardingWizard({ status, working, onSetup, onResolution, openSupport }) {
+  const linked = !!status?.linked;
+  const hasRes = (status?.resolutions?.length || 0) > 0;
+  const isProd = status?.env === 'PRODUCCION';
+
+  // Pasos que el cliente ATESTIGUA (no verificables por API): se recuerdan por
+  // navegador para no repetir, sin bloquear la verdad (lo real lo valida la DIAN).
+  const key = `pegazo-fe-onb-${status?.nit || 'co'}`;
+  const [ack, setAck] = useState({ ife: false, assoc: false });
+  useEffect(() => {
+    try {
+      const r = JSON.parse(localStorage.getItem(key) || '{}');
+      setAck({ ife: !!r.ife, assoc: !!r.assoc });
+    } catch {
+      /* noop */
+    }
+  }, [key]);
+  const mark = (k) =>
+    setAck((p) => {
+      const n = { ...p, [k]: true };
+      try {
+        localStorage.setItem(key, JSON.stringify(n));
+      } catch {
+        /* noop */
+      }
+      return n;
+    });
+
+  const d1 = linked;
+  const d2 = d1 && ack.ife;
+  const d3 = d2 && ack.assoc;
+  const d4 = d3 && hasRes;
+  const d5 = d4 && isProd;
+  const done = [d1, d2, d3, d4, d5];
+  const current = done.findIndex((x) => !x); // índice del paso activo
 
   const steps = [
     {
-      n: 1,
-      title: 'Certificado digital',
-      desc: 'Sube tu archivo .p12 y su clave (lo entrega tu entidad certificadora).',
-      done: hasCert,
-      cta: hasCert ? 'Reemplazar' : 'Subir certificado',
-      onClick: onCert,
+      title: 'Activa el servicio',
+      desc: 'Enlazamos tu empresa con el sistema fiscal de Pegazo. Un solo clic.',
+      body: (
+        <Button variant="primary" size="sm" loading={working} onClick={onSetup}>
+          Activar
+        </Button>
+      ),
     },
     {
-      n: 2,
-      title: 'Resolución de numeración',
-      desc: 'Los rangos autorizados por la DIAN para tus documentos.',
-      done: resCount > 0,
-      cta: resCount > 0 ? 'Agregar otra' : 'Registrar resolución',
-      onClick: onResolution,
+      title: 'Saca tu firma electrónica (IFE) en la DIAN',
+      desc: 'Es gratis y la necesitas para firmar tus trámites en la DIAN. Si ya la tienes, continúa.',
+      body: (
+        <div className="flex flex-wrap gap-2">
+          <a
+            href={DIAN_PORTAL_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+          >
+            Abrir portal DIAN
+          </a>
+          <Button variant="primary" size="sm" onClick={() => mark('ife')}>
+            Ya tengo mi firma electrónica
+          </Button>
+        </div>
+      ),
     },
     {
-      n: 3,
-      title: 'Datos de la DIAN y ambiente',
-      desc: 'ID de software, PIN y TestSetId. Aquí pasas de pruebas a producción.',
-      done: hasSoftware && isProd,
-      cta: 'Configurar',
-      onClick: onConfig,
+      title: 'Inscríbete y asóciate a Pegazo como tu proveedor',
+      desc: 'En la DIAN: Habilitación → Configurar modo de operación → "Proveedor tecnológico" → selecciona Pegazo. Te damos el NIT y el software exactos a asociar.',
+      body: (
+        <div className="space-y-2">
+          <div className="rounded-xl bg-orange-50 px-3 py-2 text-[11px] text-orange-700 ring-1 ring-orange-200">
+            ¿No ves los datos de Pegazo (NIT y software) para asociar? Escríbenos
+            por el chat y te los pasamos al instante.
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <a
+              href={DIAN_HABILITACION_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+            >
+              Guía / portal de habilitación
+            </a>
+            <Button variant="primary" size="sm" onClick={() => mark('assoc')}>
+              Ya me asocié a Pegazo
+            </Button>
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: 'Registra tu resolución de numeración',
+      desc: 'Es gratis. La DIAN te da un prefijo y un rango autorizado; regístralo aquí.',
+      body: (
+        <Button variant="primary" size="sm" onClick={onResolution}>
+          Registrar resolución
+        </Button>
+      ),
+    },
+    {
+      title: 'Validación con la DIAN',
+      desc: 'Nosotros enviamos el set de pruebas y validamos tu habilitación. Cuando quede lista, te activamos la facturación en producción.',
+      body: (
+        <div className="flex items-center gap-2 rounded-xl bg-indigo-50 px-3 py-2 text-xs font-medium text-indigo-700 ring-1 ring-indigo-200">
+          <BoltIcon className="h-4 w-4 flex-none" />
+          Estamos validando… te avisamos cuando puedas facturar.
+        </div>
+      ),
     },
   ];
 
   return (
-    <div className="mt-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-      <h3 className="text-sm font-semibold text-gray-800">
-        Pasos para conectar con la DIAN
+    <div className="mt-2 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm md:p-6">
+      <h3 className="text-base font-bold text-gray-800">
+        Conecta tu facturación electrónica
       </h3>
-      <p className="mt-0.5 text-xs text-gray-500">
-        Completa estos pasos una sola vez. Al terminar quedarás emitiendo
-        facturas reales.
+      <p className="mt-0.5 text-sm text-gray-500">
+        Sigue estos pasos — se desbloquea el siguiente al terminar el anterior.
+        Nosotros hacemos lo técnico (firma y envío); tú no necesitas certificado.
       </p>
-      <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
-        {steps.map((s) => (
-          <div
-            key={s.n}
-            className={`flex flex-col justify-between rounded-xl border p-4 ${
-              s.done
-                ? 'border-emerald-200 bg-emerald-50/50'
-                : 'border-gray-200 bg-gray-50'
-            }`}
-          >
-            <div>
-              <div className="flex items-center gap-2">
+
+      <ol className="mt-5">
+        {steps.map((s, i) => {
+          const isDone = done[i];
+          const isCurrent = i === current;
+          const isLast = i === steps.length - 1;
+          return (
+            <li key={i} className="relative flex gap-4 pb-6 last:pb-0">
+              {!isLast && (
                 <span
-                  className={`grid h-6 w-6 place-items-center rounded-full text-xs font-bold ${
-                    s.done
-                      ? 'bg-emerald-500 text-white'
-                      : 'bg-gray-300 text-white'
+                  className={`absolute left-[15px] top-9 h-[calc(100%-1.5rem)] w-px ${
+                    isDone ? 'bg-emerald-300' : 'bg-gray-200'
+                  }`}
+                />
+              )}
+              <span
+                className={`z-10 grid h-8 w-8 flex-none place-items-center rounded-full text-sm font-bold ${
+                  isDone
+                    ? 'bg-emerald-500 text-white'
+                    : isCurrent
+                      ? 'bg-orange-500 text-white ring-4 ring-orange-100'
+                      : 'bg-gray-200 text-gray-400'
+                }`}
+              >
+                {isDone ? '✓' : i + 1}
+              </span>
+              <div className={`flex-1 ${isCurrent ? '' : 'opacity-70'}`}>
+                <p
+                  className={`text-sm font-semibold ${
+                    isDone ? 'text-emerald-700' : 'text-gray-800'
                   }`}
                 >
-                  {s.done ? '✓' : s.n}
-                </span>
-                <p className="text-sm font-semibold text-gray-800">{s.title}</p>
+                  {s.title}
+                  {isDone && (
+                    <span className="ml-2 text-[11px] font-medium text-emerald-600">
+                      listo
+                    </span>
+                  )}
+                </p>
+                {!isDone && <p className="mt-0.5 text-xs text-gray-500">{s.desc}</p>}
+                {isCurrent && <div className="mt-2.5">{s.body}</div>}
               </div>
-              <p className="mt-1.5 text-xs text-gray-500">{s.desc}</p>
-            </div>
-            <Button
-              variant={s.done ? 'outline' : 'primary'}
-              size="sm"
-              className="mt-3"
-              onClick={s.onClick}
-            >
-              {s.cta}
-            </Button>
-          </div>
-        ))}
+            </li>
+          );
+        })}
+      </ol>
+
+      <div className="mt-2 flex items-center justify-between gap-2 border-t border-gray-100 pt-4">
+        <p className="text-xs text-gray-400">
+          ¿Te trabas en algún paso? Te ayudamos a configurarlo.
+        </p>
+        <button
+          type="button"
+          onClick={openSupport}
+          className="inline-flex flex-none items-center gap-1.5 rounded-xl bg-orange-600 px-3 py-2 text-xs font-bold text-white hover:bg-orange-700"
+        >
+          Escríbenos por el chat
+        </button>
       </div>
     </div>
   );
