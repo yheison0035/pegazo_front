@@ -1168,7 +1168,7 @@ function OnboardingWizard({ status, working, onSetup, onResolution, openSupport 
         : 'Saca tu firma electrónica (IFE) en la DIAN',
       desc: migra
         ? 'Como ya facturabas con otro proveedor, YA tienes firma electrónica. Solo confírmalo para continuar.'
-        : 'Es gratis y la necesitas para firmar tus trámites en la DIAN.',
+        : 'Es gratis. En dian.gov.co baja a “Temas de interés” → “Firma Electrónica” → “Generar Firma Electrónica”.',
       body: migra ? (
         <Button variant="primary" size="sm" onClick={() => mark('ife')}>
           Sí, ya la tengo — continuar
@@ -1189,9 +1189,9 @@ function OnboardingWizard({ status, working, onSetup, onResolution, openSupport 
                 proveedor), ya la tienes.
               </p>
               <p>
-                • Para verificar: entra al portal DIAN con tu usuario y busca{' '}
-                <b>“Instrumento de Firma Electrónica (IFE)”</b>. Si aparece
-                activa, la tienes.
+                • Para verificar: en <b>dian.gov.co</b> → “Temas de interés” →{' '}
+                <b>“Firma Electrónica”</b> → “Cuenta de Usuario y Firma
+                Electrónica”. Si aparece activa, ya la tienes.
               </p>
               <p>
                 • Si nunca has facturado electrónica, genérala ahí mismo (es
@@ -1220,8 +1220,8 @@ function OnboardingWizard({ status, working, onSetup, onResolution, openSupport 
         ? 'Cambia tu proveedor a Pegazo'
         : 'Inscríbete y asóciate a Pegazo como tu proveedor',
       desc: migra
-        ? 'En la DIAN: quita la asociación con tu proveedor anterior y asocia a Pegazo con estos datos. Tu numeración actual sigue sirviendo.'
-        : 'En la DIAN: Habilitación → Configurar modo de operación → “Proveedor tecnológico” → selecciona Pegazo con estos datos.',
+        ? 'En dian.gov.co → “Temas de interés” → “Factura Electrónica” → “Habilitación”. Ahí quita la asociación con tu proveedor anterior y asocia a Pegazo con estos datos. Tu numeración actual sigue sirviendo.'
+        : 'En dian.gov.co → “Temas de interés” → “Factura Electrónica” → “Habilitación”. Ahí: Configurar modo de operación → “Proveedor tecnológico” → asocia Pegazo con estos datos.',
       body: (
         <div className="space-y-2">
           {status?.pt?.nit || status?.pt?.softwareId ? (
