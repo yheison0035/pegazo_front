@@ -169,6 +169,16 @@ function FacturacionElectronica() {
   }, [linked, loadData]);
 
   const hasResolution = (status?.resolutions?.length || 0) > 0;
+  const hasCert = !!status?.hasCertificate;
+  const isProd = status?.env === 'PRODUCCION';
+  // Puede PROBAR (habilitación) con certificado + resolución.
+  const readyToTest = linked && hasCert && hasResolution;
+  // Puede facturar REAL solo en producción.
+  const readyProd = readyToTest && isProd;
+
+  const openSupport = () =>
+    typeof window !== 'undefined' &&
+    window.dispatchEvent(new Event('pegazo-open-support'));
 
   const handleEmitTest = async () => {
     setWorking(true);
@@ -310,7 +320,7 @@ function FacturacionElectronica() {
             >
               Actualizar
             </Button>
-            {hasResolution && (
+            {readyToTest && (
               <Button
                 variant="primary"
                 size="sm"
@@ -324,6 +334,36 @@ function FacturacionElectronica() {
           </div>
         )}
       </div>
+
+      {/* AVISO CONTUNDENTE: mientras NO esté conectada en producción, el cliente
+          NO puede facturar electrónicamente. Se deja clarísimo para que no crea
+          que ya puede. Incluye acceso directo al chat de soporte. */}
+      {!readyProd && (
+        <div className="mb-5 rounded-2xl border-2 border-amber-300 bg-amber-50 p-5">
+          <div className="flex items-start gap-3">
+            <ExclamationTriangleIcon className="mt-0.5 h-7 w-7 flex-none text-amber-600" />
+            <div className="flex-1">
+              <h3 className="text-base font-bold text-amber-900">
+                Aún NO estás conectado a la DIAN — no puedes emitir facturas
+                electrónicas todavía
+              </h3>
+              <p className="mt-1 text-sm text-amber-800">
+                Esta función se activa solo cuando la conexión con la DIAN queda
+                lista en producción (certificado, resolución y habilitación).
+                Mientras tanto, sigue facturando con tu factura normal. Nosotros
+                hacemos la conexión por ti.
+              </p>
+              <button
+                type="button"
+                onClick={openSupport}
+                className="mt-3 inline-flex items-center gap-2 rounded-xl bg-amber-600 px-4 py-2 text-sm font-bold text-white hover:bg-amber-700"
+              >
+                ¿Tienes dudas? Escríbenos por el chat
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* NO VINCULADA -> activación */}
       {!linked && <SetupCard status={status} working={working} onSetup={handleSetup} />}
