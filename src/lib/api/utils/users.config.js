@@ -12,6 +12,8 @@ export const getEmptyUser = () => {
     localId: '',
     status: '',
     password: '',
+    position: '',
+    salary: '',
     commissionServiceRate: '',
     commissionProductRate: '',
   };
@@ -102,6 +104,20 @@ export const getFormFieldsUsers = (type) => {
     ],
     source: 'status',
     disabled: false,
+  },
+  {
+    name: 'position',
+    label: 'Cargo (para nómina electrónica) — opcional',
+    type: 'text',
+    source: null,
+    required: false,
+  },
+  {
+    name: 'salary',
+    label: 'Salario mensual base (COP) — opcional',
+    type: 'number',
+    source: null,
+    required: false,
   },
   {
     name: 'commissionServiceRate',
