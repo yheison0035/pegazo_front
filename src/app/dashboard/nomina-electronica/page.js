@@ -291,7 +291,19 @@ function PayrollModal({ onClose, onSaved, onError, replaceId }) {
       ...e,
       name: u.name || '',
       identification: u.document || '',
+      position: u.position || e.position,
+      salary: u.salary || e.salary,
     }));
+    // Si el empleado tiene salario y el "Sueldo" aún está vacío, lo precarga.
+    if (u.salary) {
+      setEarnings((prev) =>
+        prev.map((l, i) =>
+          i === 0 && /sueldo/i.test(l.concept) && !l.amount
+            ? { ...l, amount: u.salary }
+            : l,
+        ),
+      );
+    }
     setEmpSearch('');
   };
   const [period, setPeriod] = useState({ startDate: '', endDate: today });

@@ -106,6 +106,13 @@ export async function platformUpdateUser(id, dto) {
   });
 }
 
+// Salario a entero (COP). Acepta formatos con puntos/espacios; vacío = null.
+function salaryToInt(v) {
+  if (v == null || v === '') return null;
+  const n = Number(String(v).replace(/[^\d]/g, ''));
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
 export async function createUser(dto) {
   const body = {
     ...dto,
@@ -113,6 +120,7 @@ export async function createUser(dto) {
     role: dto.role || 'ASESOR',
     status: dto.status || 'ACTIVO',
     birthdate: new Date(dto.birthdate),
+    salary: salaryToInt(dto.salary),
   };
   return apiFetch('/users', { method: 'POST', body: JSON.stringify(body) });
 }
@@ -135,6 +143,7 @@ export async function updateUser(id, dto) {
     ...cleanDto,
     localId: cleanDto.localId ? Number(cleanDto.localId) : null,
     birthdate: new Date(cleanDto.birthdate),
+    salary: salaryToInt(cleanDto.salary),
     ...(password ? { password } : {}),
   };
 
