@@ -2,7 +2,16 @@
 
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { XMarkIcon, PlusIcon } from '@heroicons/react/24/outline';
+import {
+  XMarkIcon,
+  PlusIcon,
+  UserPlusIcon,
+  IdentificationIcon,
+  UserIcon,
+  EnvelopeIcon,
+  PhoneIcon,
+  CheckCircleIcon,
+} from '@heroicons/react/24/outline';
 import Button from '@/components/ui/Button';
 import useCustomers from '@/lib/api/hooks/useCustomers';
 import { validateField } from '@/lib/api/utils/validators';
@@ -23,6 +32,11 @@ const DOC_TYPES = [
   { value: 'PP', label: 'Pasaporte (PP)' },
   { value: 'RC', label: 'Registro civil (RC)' },
 ];
+
+const labelCls =
+  'mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500';
+const inputCls =
+  'w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-10 pr-3 text-sm text-gray-800 shadow-sm transition placeholder:text-gray-400 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20';
 
 export default function NewCustomerModal({ localId, onClose, onCreated }) {
   const { createCustomer, loading } = useCustomers();
@@ -111,82 +125,165 @@ export default function NewCustomerModal({ localId, onClose, onCreated }) {
   if (typeof document === 'undefined') return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
-      <div className="flex max-h-[92vh] w-full max-w-md flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
-        <div className="flex flex-none items-center justify-between border-b border-gray-200 px-6 py-4">
-          <h3 className="text-lg font-semibold text-gray-800">Nuevo cliente</h3>
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-[2px]">
+      <div className="flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/5">
+        {/* Encabezado */}
+        <div className="flex flex-none items-start justify-between gap-3 border-b border-gray-100 px-6 py-5">
+          <div className="flex items-center gap-3">
+            <span className="grid h-11 w-11 flex-none place-items-center rounded-xl bg-gradient-to-br from-orange-500 to-amber-400 text-white shadow-sm">
+              <UserPlusIcon className="h-6 w-6" />
+            </span>
+            <div>
+              <h3 className="text-lg font-bold text-gray-800">Nuevo cliente</h3>
+              <p className="text-xs text-gray-500">
+                Guárdalo para facturar y fidelizarlo.
+              </p>
+            </div>
+          </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-gray-400 transition hover:text-gray-600"
+            className="grid h-8 w-8 flex-none place-items-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
           >
-            <XMarkIcon className="h-6 w-6" />
+            <XMarkIcon className="h-5 w-5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col space-y-4 overflow-y-auto px-6 py-5">
-          {/* Tipo de documento (catálogo DIAN) */}
-          <div className="flex flex-col">
-            <label className="mb-1 text-sm font-medium text-gray-700">
-              Tipo de documento
-            </label>
-            <select
-              name="type_document"
-              value={data.type_document}
-              onChange={handleChange}
-              className="w-full rounded-xl border border-gray-200 px-4 py-2 text-sm shadow-sm transition focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            >
-              {DOC_TYPES.map((d) => (
-                <option key={d.value} value={d.value}>
-                  {d.label}
-                </option>
-              ))}
-            </select>
+        <form
+          onSubmit={handleSubmit}
+          className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-6 py-5"
+        >
+          {/* Identificación: tipo + número en una fila */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label className={labelCls}>Tipo de documento</label>
+              <div className="relative">
+                <IdentificationIcon className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                <select
+                  name="type_document"
+                  value={data.type_document}
+                  onChange={handleChange}
+                  className={`${inputCls} appearance-none pr-8`}
+                >
+                  {DOC_TYPES.map((d) => (
+                    <option key={d.value} value={d.value}>
+                      {d.label}
+                    </option>
+                  ))}
+                </select>
+                <svg
+                  className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+            </div>
+
+            <div>
+              <label className={labelCls}>Documento / NIT</label>
+              <div className="relative">
+                <IdentificationIcon className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  name="document"
+                  value={data.document}
+                  onChange={handleChange}
+                  onBlur={handleDocumentBlur}
+                  placeholder="Escribe para buscar…"
+                  className={inputCls}
+                />
+              </div>
+              {lookingUp && (
+                <p className="mt-1 text-xs text-gray-400">Buscando…</p>
+              )}
+            </div>
           </div>
 
-          {/* Documento con autocompletado */}
-          <div className="flex flex-col">
-            <label className="mb-1 text-sm font-medium text-gray-700">
-              Documento / NIT
-            </label>
-            <input
-              type="text"
-              name="document"
-              value={data.document}
-              onChange={handleChange}
-              onBlur={handleDocumentBlur}
-              placeholder="Escribe el documento para buscar..."
-              className="w-full rounded-xl border border-gray-200 px-4 py-2 text-sm shadow-sm transition focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
-            {lookingUp && (
-              <p className="mt-1 text-xs text-gray-400">Buscando...</p>
-            )}
-            {existing && (
-              <p className="mt-1 text-xs font-medium text-emerald-600">
-                Cliente existente encontrado — se usarán sus datos.
+          {/* Cliente existente encontrado */}
+          {existing && (
+            <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2.5">
+              <CheckCircleIcon className="h-5 w-5 flex-none text-emerald-600" />
+              <p className="text-xs font-medium text-emerald-800">
+                Ya existe un cliente con ese documento — se usarán sus datos.
+              </p>
+            </div>
+          )}
+
+          {/* Nombre completo */}
+          <div>
+            <label className={labelCls}>Nombre completo</label>
+            <div className="relative">
+              <UserIcon className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                name="name"
+                value={data.name}
+                onChange={handleChange}
+                placeholder="Nombre o razón social"
+                className={inputCls}
+              />
+            </div>
+            {errors.name && (
+              <p className="mt-1 text-xs font-medium text-red-600">
+                {errors.name}
               </p>
             )}
           </div>
 
-          {FIELDS.map((field) => (
-            <div key={field.name} className="flex flex-col">
-              <label className="mb-1 text-sm font-medium text-gray-700">
-                {field.label}
-              </label>
-              <input
-                type={field.type}
-                name={field.name}
-                value={data[field.name]}
-                onChange={handleChange}
-                className="w-full rounded-xl border border-gray-200 px-4 py-2 text-sm shadow-sm transition focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
-              />
-              {errors[field.name] && (
-                <p className="mt-1 text-sm font-medium text-red-600">
-                  {errors[field.name]}
+          {/* Contacto: correo + celular */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label className={labelCls}>Correo electrónico</label>
+              <div className="relative">
+                <EnvelopeIcon className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="email"
+                  name="email"
+                  value={data.email}
+                  onChange={handleChange}
+                  placeholder="correo@ejemplo.com"
+                  className={inputCls}
+                />
+              </div>
+              {errors.email && (
+                <p className="mt-1 text-xs font-medium text-red-600">
+                  {errors.email}
                 </p>
               )}
             </div>
-          ))}
+
+            <div>
+              <label className={labelCls}>Celular</label>
+              <div className="relative">
+                <PhoneIcon className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  name="phone"
+                  value={data.phone}
+                  onChange={handleChange}
+                  placeholder="300 123 4567"
+                  inputMode="numeric"
+                  className={inputCls}
+                />
+              </div>
+              {errors.phone && (
+                <p className="mt-1 text-xs font-medium text-red-600">
+                  {errors.phone}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <p className="text-[11px] text-gray-400">
+            Para factura electrónica, el correo y el documento son
+            obligatorios: con ellos la DIAN le envía su factura.
+          </p>
 
           {apiError && (
             <p className="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600">
@@ -194,22 +291,17 @@ export default function NewCustomerModal({ localId, onClose, onCreated }) {
             </p>
           )}
 
-          <div className="sticky bottom-0 -mx-6 -mb-5 mt-auto flex justify-end gap-3 border-t border-gray-200 bg-white px-6 py-3">
+          <div className="sticky bottom-0 -mx-6 -mb-5 mt-auto flex justify-end gap-3 border-t border-gray-100 bg-white px-6 py-4">
             <Button type="button" variant="secondary" onClick={onClose}>
               Cancelar
             </Button>
-            <Button
-              type="submit"
-              variant="add"
-              icon={PlusIcon}
-              loading={loading}
-            >
-              Crear cliente
+            <Button type="submit" variant="add" icon={PlusIcon} loading={loading}>
+              {existing ? 'Usar este cliente' : 'Crear cliente'}
             </Button>
           </div>
         </form>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }
