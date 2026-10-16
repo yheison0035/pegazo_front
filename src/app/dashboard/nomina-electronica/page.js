@@ -23,6 +23,7 @@ import {
   replaceFiscalPayroll,
   eliminateFiscalPayroll,
 } from '@/lib/api/routes/fiscal';
+import { getUsers } from '@/lib/api/routes/users';
 
 export default function NominaElectronicaPage() {
   return (
@@ -261,6 +262,38 @@ function PayrollModal({ onClose, onSaved, onError, replaceId }) {
     position: '',
     salary: '',
   });
+  // Empleados = usuarios del CRM (única fuente de control). Se cargan para
+  // seleccionar/buscar y autollenar nombre + documento.
+  const [employees, setEmployees] = useState([]);
+  const [empSearch, setEmpSearch] = useState('');
+  useEffect(() => {
+    (async () => {
+      try {
+        const r = await getUsers({ page: 1, limit: 200 });
+        setEmployees(r?.data || []);
+      } catch {
+        setEmployees([]);
+      }
+    })();
+  }, []);
+  const empMatches =
+    empSearch.trim().length >= 1
+      ? employees
+          .filter((u) =>
+            `${u.name || ''} ${u.document || ''}`
+              .toLowerCase()
+              .includes(empSearch.trim().toLowerCase()),
+          )
+          .slice(0, 8)
+      : [];
+  const pickEmployee = (u) => {
+    setEmp((e) => ({
+      ...e,
+      name: u.name || '',
+      identification: u.document || '',
+    }));
+    setEmpSearch('');
+  };
   const [period, setPeriod] = useState({ startDate: '', endDate: today });
   const [earnings, setEarnings] = useState([{ concept: 'Sueldo', amount: '' }]);
   const [deductions, setDeductions] = useState([
@@ -324,6 +357,37 @@ function PayrollModal({ onClose, onSaved, onError, replaceId }) {
         <div className="flex-1 space-y-4 overflow-y-auto p-5">
           {/* Empleado */}
           <div className="grid grid-cols-2 gap-3">
+            <Field label="Seleccionar empleado (de tus usuarios)" className="col-span-2">
+              <div className="relative">
+                <input
+                  value={empSearch}
+                  onChange={(e) => setEmpSearch(e.target.value)}
+                  placeholder="Busca por nombre o documento…"
+                  className={inputCls}
+                />
+                {empMatches.length > 0 && (
+                  <div className="absolute z-20 mt-1 max-h-56 w-full overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg">
+                    {empMatches.map((u) => (
+                      <button
+                        key={u.id}
+                        type="button"
+                        onClick={() => pickEmployee(u)}
+                        className="block w-full px-3 py-2 text-left text-sm hover:bg-orange-50"
+                      >
+                        {u.name}{' '}
+                        <span className="text-gray-400">
+                          {u.document || 'sin documento'}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <span className="mt-1 text-[11px] text-gray-400">
+                El nombre y el documento salen de tus usuarios. También puedes
+                ajustarlos abajo si hace falta.
+              </span>
+            </Field>
             <Field label="Nombre del empleado" className="col-span-2">
               <input
                 value={emp.name}
