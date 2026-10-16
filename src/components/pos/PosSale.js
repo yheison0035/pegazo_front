@@ -202,7 +202,15 @@ export default function PosSale({
     (async () => {
       try {
         const res = await getFiscalStatus();
-        setFiscalReady(!!res?.data?.linked);
+        const d = res?.data;
+        // "Lista para facturar electrónicamente" NO es solo estar vinculada:
+        // exige certificado cargado + al menos una resolución de numeración.
+        // Si falta algo, el POS no ofrece la opción de factura electrónica.
+        const ready =
+          !!d?.linked &&
+          !!d?.hasCertificate &&
+          (d?.resolutions?.length || 0) > 0;
+        setFiscalReady(ready);
       } catch (_) {
         setFiscalReady(false);
       }
@@ -523,14 +531,30 @@ export default function PosSale({
       });
       return;
     }
-    // La factura electrónica necesita un cliente con datos (no Consumidor Final).
-    if (docType === 'ELECTRONIC' && fiscalReady && !customer?.id) {
-      setAlert({
-        type: 'warning',
-        message:
-          'La factura electrónica requiere seleccionar un cliente con sus datos DIAN.',
-      });
-      return;
+    // La factura electrónica necesita un cliente IDENTIFICADO y con los datos
+    // que exige la DIAN (tipo y número de documento, nombre y correo). Si falta
+    // alguno, se bloquea con un mensaje concreto para que lo completen.
+    if (docType === 'ELECTRONIC' && fiscalReady) {
+      if (!customer?.id) {
+        setAlert({
+          type: 'warning',
+          message:
+            'La factura electrónica requiere seleccionar un cliente identificado (no Consumidor Final).',
+        });
+        return;
+      }
+      const faltan = [
+        !customer.document && 'número de documento',
+        !customer.name && 'nombre / razón social',
+        !customer.email && 'correo electrónico',
+      ].filter(Boolean);
+      if (faltan.length) {
+        setAlert({
+          type: 'warning',
+          message: `Al cliente le faltan datos para la DIAN: ${faltan.join(', ')}. Edita el cliente y vuelve a intentar.`,
+        });
+        return;
+      }
     }
     setSubmitting(true);
     try {
@@ -912,6 +936,47 @@ export default function PosSale({
           {/* ================= DERECHA: FACTURA ================= */}
           <div className="w-full min-w-0 lg:w-[400px] lg:flex-none">
             <div className="flex flex-col rounded-2xl border border-gray-100 bg-white shadow-sm lg:sticky lg:top-4">
+              {/* Tipo de factura: va ANTES del cliente. Solo si la empresa está
+                  LISTA (vinculada + certificado + resolución). Al elegir
+                  electrónica, el cliente pasa a ser obligatorio (datos DIAN). */}
+              {fiscalReady && mode === 'new' && (
+                <div className="p-3 border-b border-gray-100">
+                  <p className="mb-1 text-xs font-medium text-gray-500">
+                    Tipo de factura
+                  </p>
+                  <div className="inline-flex w-full rounded-xl border border-gray-200 bg-gray-50 p-0.5">
+                    <button
+                      type="button"
+                      onClick={() => setDocType('POS')}
+                      className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                        docType === 'POS'
+                          ? 'bg-white text-gray-800 shadow-sm'
+                          : 'text-gray-500'
+                      }`}
+                    >
+                      Factura normal
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDocType('ELECTRONIC')}
+                      className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                        docType === 'ELECTRONIC'
+                          ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow'
+                          : 'text-gray-500'
+                      }`}
+                    >
+                      Factura electrónica
+                    </button>
+                  </div>
+                  {docType === 'ELECTRONIC' && (
+                    <p className="mt-1 text-[11px] text-orange-600">
+                      Se emitirá ante la DIAN (CUFE + QR). El cliente es
+                      obligatorio y debe tener sus datos fiscales completos.
+                    </p>
+                  )}
+                </div>
+              )}
+
               {/* Cliente */}
               <div className="p-3 border-b border-gray-100">
                 {customer ? (
@@ -939,7 +1004,11 @@ export default function PosSale({
                       <input
                         value={custSearch}
                         onChange={(e) => setCustSearch(e.target.value)}
-                        placeholder="Cliente (opcional) — Consumidor Final"
+                        placeholder={
+                          docType === 'ELECTRONIC'
+                            ? 'Cliente OBLIGATORIO — busca o crea'
+                            : 'Cliente (opcional) — Consumidor Final'
+                        }
                         className="flex-1 text-sm focus:outline-none"
                       />
                       <button
@@ -979,6 +1048,23 @@ export default function PosSale({
                     </span>
                   </div>
                 )}
+
+                {/* Requisitos DIAN del cliente cuando es factura electrónica. */}
+                {docType === 'ELECTRONIC' && !customer && (
+                  <p className="mt-2 text-[11px] font-medium text-red-600">
+                    La factura electrónica exige un cliente identificado (no
+                    “Consumidor Final”).
+                  </p>
+                )}
+                {docType === 'ELECTRONIC' &&
+                  customer &&
+                  (!customer.document || !customer.email) && (
+                    <p className="mt-2 rounded-lg bg-amber-50 px-2.5 py-1.5 text-[11px] font-medium text-amber-700 ring-1 ring-amber-200">
+                      A este cliente le faltan datos para la DIAN (número de
+                      documento y correo). Edítalo para completarlos antes de
+                      facturar.
+                    </p>
+                  )}
               </div>
 
               {/* Ítems: alto natural (se ven completos, sin scroll diminuto).
@@ -1418,45 +1504,6 @@ export default function PosSale({
                         {formatCOP(Math.max(0, total - initialPaymentNum))}
                       </span>
                     </div>
-                  </div>
-                )}
-
-                {/* Tipo de comprobante: solo si la empresa tiene facturación
-                    electrónica DIAN activa. */}
-                {fiscalReady && mode === 'new' && (
-                  <div className="mb-2">
-                    <p className="mb-1 text-xs font-medium text-gray-500">
-                      Tipo de factura
-                    </p>
-                    <div className="inline-flex w-full rounded-xl border border-gray-200 bg-gray-50 p-0.5">
-                      <button
-                        type="button"
-                        onClick={() => setDocType('POS')}
-                        className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-                          docType === 'POS'
-                            ? 'bg-white text-gray-800 shadow-sm'
-                            : 'text-gray-500'
-                        }`}
-                      >
-                        Factura normal
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setDocType('ELECTRONIC')}
-                        className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-                          docType === 'ELECTRONIC'
-                            ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow'
-                            : 'text-gray-500'
-                        }`}
-                      >
-                        Factura electrónica
-                      </button>
-                    </div>
-                    {docType === 'ELECTRONIC' && (
-                      <p className="mt-1 text-[11px] text-orange-600">
-                        Se emitirá ante la DIAN y se imprimirá con CUFE + QR.
-                      </p>
-                    )}
                   </div>
                 )}
 
