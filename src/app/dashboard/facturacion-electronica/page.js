@@ -16,7 +16,7 @@ import {
 } from '@heroicons/react/24/outline';
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
-import { EINVOICING_ENABLED } from '@/config/features';
+import { useAuth } from '@/context/authContext';
 import Button from '@/components/ui/Button';
 import MoneyInput from '@/components/ui/MoneyInput';
 import StatusBadge from '@/components/ui/StatusBadge';
@@ -67,9 +67,11 @@ const TYPE_LABELS = {
 const POLL_MS = 20000;
 
 export default function FacturacionElectronicaPage() {
+  const auth = useAuth();
+  const released = !!auth?.usuario?.company?.einvoicingReleased;
   return (
     <RoleGuard allowedRoles={[Roles.SUPER_ADMIN, Roles.ADMIN]}>
-      {EINVOICING_ENABLED ? <FacturacionElectronica /> : <ComingSoon />}
+      {released ? <FacturacionElectronica /> : <ComingSoon />}
     </RoleGuard>
   );
 }

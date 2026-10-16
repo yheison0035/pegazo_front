@@ -18,7 +18,6 @@ import { sendInvoiceWhatsapp } from '@/utils/invoiceWhatsapp';
 import { emitFiscalInvoice, reissueFiscalInvoice } from '@/lib/api/routes/fiscal';
 import { printFiscalInvoice } from '@/utils/printFiscalInvoice';
 import { effectiveModules } from '@/lib/appointmentsAccess';
-import { EINVOICING_ENABLED } from '@/config/features';
 import { enterAsCompany } from '@/lib/impersonation';
 
 export default function Actions({
@@ -36,13 +35,9 @@ export default function Actions({
   const toast = useToast();
   const companyName = auth?.usuario?.company?.name;
   const companyModules = effectiveModules(auth?.usuario);
-  // La factura electrónica DIAN se habilita por empresa (electronicInvoicingEnabled
-  // / fiscalCompanyId) y por el interruptor GLOBAL EINVOICING_ENABLED (apagado
-  // mientras no tengamos el certificado como PT). Si no, no se ofrece emitir.
-  const fiscalEnabled =
-    EINVOICING_ENABLED &&
-    (!!auth?.usuario?.company?.electronicInvoicingEnabled ||
-      !!auth?.usuario?.company?.fiscalCompanyId);
+  // `einvoicingReleased` = certificado del PT cargado + empresa activada. Si no,
+  // no se ofrece emitir factura electrónica desde la lista.
+  const fiscalEnabled = !!auth?.usuario?.company?.einvoicingReleased;
   const [emitting, setEmitting] = useState(false);
 
   // Emite (o reutiliza, es idempotente por venta) la factura electrónica DIAN
