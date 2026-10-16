@@ -1110,24 +1110,39 @@ function OnboardingWizard({ status, working, onSetup, onResolution, openSupport 
   // navegador para no repetir, sin bloquear la verdad (lo real lo valida la DIAN).
   const key = `pegazo-fe-onb-${status?.nit || 'co'}`;
   const [ack, setAck] = useState({ ife: false, assoc: false });
+  const [mode, setMode] = useState(''); // '' | 'nuevo' | 'migra'
+  const [showIfeHelp, setShowIfeHelp] = useState(false);
   useEffect(() => {
     try {
       const r = JSON.parse(localStorage.getItem(key) || '{}');
       setAck({ ife: !!r.ife, assoc: !!r.assoc });
+      if (r.mode) setMode(r.mode);
     } catch {
       /* noop */
     }
   }, [key]);
+  const persist = (patch) => {
+    try {
+      const cur = JSON.parse(localStorage.getItem(key) || '{}');
+      localStorage.setItem(key, JSON.stringify({ ...cur, ...patch }));
+    } catch {
+      /* noop */
+    }
+  };
   const mark = (k) =>
     setAck((p) => {
-      const n = { ...p, [k]: true };
-      try {
-        localStorage.setItem(key, JSON.stringify(n));
-      } catch {
-        /* noop */
-      }
-      return n;
+      persist({ [k]: true });
+      return { ...p, [k]: true };
     });
+  const chooseMode = (m) => {
+    setMode(m);
+    persist({ mode: m });
+  };
+
+  // ¿El cliente ya facturaba electrónicamente con otro proveedor (Alegra, Siigo,
+  // Treinta…)? Entonces YA tiene firma electrónica y resolución: solo cambia el
+  // proveedor a Pegazo. Simplifica el paso a paso.
+  const migra = mode === 'migra';
 
   const d1 = linked;
   const d2 = d1 && ack.ife;
@@ -1148,27 +1163,65 @@ function OnboardingWizard({ status, working, onSetup, onResolution, openSupport 
       ),
     },
     {
-      title: 'Saca tu firma electrónica (IFE) en la DIAN',
-      desc: 'Es gratis y la necesitas para firmar tus trámites en la DIAN. Si ya la tienes, continúa.',
-      body: (
-        <div className="flex flex-wrap gap-2">
-          <a
-            href={DIAN_PORTAL_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+      title: migra
+        ? 'Confirma tu firma electrónica'
+        : 'Saca tu firma electrónica (IFE) en la DIAN',
+      desc: migra
+        ? 'Como ya facturabas con otro proveedor, YA tienes firma electrónica. Solo confírmalo para continuar.'
+        : 'Es gratis y la necesitas para firmar tus trámites en la DIAN.',
+      body: migra ? (
+        <Button variant="primary" size="sm" onClick={() => mark('ife')}>
+          Sí, ya la tengo — continuar
+        </Button>
+      ) : (
+        <div className="space-y-2">
+          <button
+            type="button"
+            onClick={() => setShowIfeHelp((v) => !v)}
+            className="text-xs font-semibold text-orange-600 underline"
           >
-            Abrir portal DIAN
-          </a>
-          <Button variant="primary" size="sm" onClick={() => mark('ife')}>
-            Ya tengo mi firma electrónica
-          </Button>
+            ¿Cómo sé si ya tengo mi firma electrónica?
+          </button>
+          {showIfeHelp && (
+            <div className="space-y-1 rounded-xl bg-gray-50 p-3 text-xs text-gray-600 ring-1 ring-gray-200">
+              <p>
+                • Si <b>alguna vez facturaste electrónicamente</b> (con cualquier
+                proveedor), ya la tienes.
+              </p>
+              <p>
+                • Para verificar: entra al portal DIAN con tu usuario y busca{' '}
+                <b>“Instrumento de Firma Electrónica (IFE)”</b>. Si aparece
+                activa, la tienes.
+              </p>
+              <p>
+                • Si nunca has facturado electrónica, genérala ahí mismo (es
+                gratis). ¿Te enredas? Escríbenos por el chat y te guiamos.
+              </p>
+            </div>
+          )}
+          <div className="flex flex-wrap gap-2">
+            <a
+              href={DIAN_PORTAL_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+            >
+              Abrir portal DIAN
+            </a>
+            <Button variant="primary" size="sm" onClick={() => mark('ife')}>
+              Ya tengo mi firma electrónica
+            </Button>
+          </div>
         </div>
       ),
     },
     {
-      title: 'Inscríbete y asóciate a Pegazo como tu proveedor',
-      desc: 'En la DIAN: Habilitación → Configurar modo de operación → "Proveedor tecnológico" → selecciona Pegazo con estos datos.',
+      title: migra
+        ? 'Cambia tu proveedor a Pegazo'
+        : 'Inscríbete y asóciate a Pegazo como tu proveedor',
+      desc: migra
+        ? 'En la DIAN: quita la asociación con tu proveedor anterior y asocia a Pegazo con estos datos. Tu numeración actual sigue sirviendo.'
+        : 'En la DIAN: Habilitación → Configurar modo de operación → “Proveedor tecnológico” → selecciona Pegazo con estos datos.',
       body: (
         <div className="space-y-2">
           {status?.pt?.nit || status?.pt?.softwareId ? (
@@ -1218,7 +1271,9 @@ function OnboardingWizard({ status, working, onSetup, onResolution, openSupport 
     },
     {
       title: 'Registra tu resolución de numeración',
-      desc: 'Es gratis. La DIAN te da un prefijo y un rango autorizado; regístralo aquí.',
+      desc: migra
+        ? 'Usa la MISMA resolución que ya tenías (no pidas una nueva); regístrala aquí.'
+        : 'Es gratis. La DIAN te da un prefijo y un rango autorizado; regístralo aquí.',
       body: (
         <Button variant="primary" size="sm" onClick={onResolution}>
           Registrar resolución
@@ -1246,6 +1301,44 @@ function OnboardingWizard({ status, working, onSetup, onResolution, openSupport 
         Sigue estos pasos — se desbloquea el siguiente al terminar el anterior.
         Nosotros hacemos lo técnico (firma y envío); tú no necesitas certificado.
       </p>
+
+      {/* Pregunta inicial: adapta el paso a paso según si es la primera vez o
+          si ya facturaba con otro proveedor (Alegra/Siigo/Treinta). */}
+      <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-3">
+        <p className="mb-2 text-xs font-semibold text-gray-700">
+          Para guiarte mejor: ¿ya facturabas electrónicamente antes?
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => chooseMode('nuevo')}
+            className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
+              mode === 'nuevo'
+                ? 'border-orange-500 bg-orange-50 text-orange-700'
+                : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+            }`}
+          >
+            Es mi primera vez
+          </button>
+          <button
+            type="button"
+            onClick={() => chooseMode('migra')}
+            className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
+              mode === 'migra'
+                ? 'border-orange-500 bg-orange-50 text-orange-700'
+                : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+            }`}
+          >
+            Ya lo hacía con otro proveedor (Alegra, Siigo, Treinta…)
+          </button>
+        </div>
+        {mode === 'migra' && (
+          <p className="mt-2 text-[11px] text-emerald-700">
+            ✓ Entonces ya tienes firma electrónica y resolución. Solo tienes que
+            cambiar tu proveedor a Pegazo — te guiamos abajo.
+          </p>
+        )}
+      </div>
 
       <ol className="mt-5">
         {steps.map((s, i) => {
