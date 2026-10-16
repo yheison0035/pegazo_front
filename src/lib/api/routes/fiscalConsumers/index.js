@@ -33,3 +33,18 @@ export const createFiscalConsumerKey = (id, label) =>
 
 export const revokeFiscalConsumerKey = (keyId) =>
   apiFetch(`/fiscal-consumers/keys/${keyId}/revoke`, { method: 'PATCH' });
+
+// Configuración del Proveedor Tecnológico (Pegazo).
+export const getPtConfig = () => apiFetch('/fiscal-consumers/pt-config');
+
+export const savePtConfig = (dto) =>
+  apiFetch('/fiscal-consumers/pt-config', {
+    method: 'PATCH',
+    body: JSON.stringify(dto),
+  });
+
+export const uploadPtCertificate = (dto) =>
+  apiFetch('/fiscal-consumers/pt-config/certificate', {
+    method: 'POST',
+    body: JSON.stringify(dto),
+  });

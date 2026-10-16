@@ -10,6 +10,7 @@ import {
   ChatBubbleLeftRightIcon,
   CalendarDaysIcon,
   CodeBracketIcon,
+  ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
 
 export const PLATFORM_NAVIGATION = [
@@ -50,6 +51,11 @@ export const PLATFORM_NAVIGATION = [
         name: 'API Facturación DIAN',
         href: '/platform/fiscal-api',
         icon: CodeBracketIcon,
+      },
+      {
+        name: 'Proveedor Tecnológico',
+        href: '/platform/fiscal-pt',
+        icon: ShieldCheckIcon,
       },
       {
         name: 'Soporte',
