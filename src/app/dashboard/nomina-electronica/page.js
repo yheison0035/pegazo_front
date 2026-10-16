@@ -6,6 +6,7 @@ import {
   PlusIcon,
   XMarkIcon,
   ArrowPathIcon,
+  ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
@@ -33,8 +34,14 @@ export default function NominaElectronicaPage() {
 
 function NominaElectronica() {
   const [loading, setLoading] = useState(true);
-  const [linked, setLinked] = useState(false);
+  // "ready" = conectada a la DIAN en PRODUCCIÓN (certificado + resolución +
+  // ambiente). Solo entonces se puede emitir nómina electrónica real.
+  const [ready, setReady] = useState(false);
   const [docs, setDocs] = useState([]);
+
+  const openSupport = () =>
+    typeof window !== 'undefined' &&
+    window.dispatchEvent(new Event('pegazo-open-support'));
   const [alert, setAlert] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [replaceId, setReplaceId] = useState(null);
@@ -61,7 +68,13 @@ function NominaElectronica() {
         getFiscalStatus().catch(() => null),
         getFiscalDocuments({ type: 'NOMINA', limit: 20 }).catch(() => null),
       ]);
-      setLinked(!!st?.data?.linked);
+      const sd = st?.data;
+      setReady(
+        !!sd?.linked &&
+          !!sd?.hasCertificate &&
+          (sd?.resolutions?.length || 0) > 0 &&
+          sd?.env === 'PRODUCCION',
+      );
       setDocs(d?.data || []);
     } catch (e) {
       setAlert({ type: 'error', message: e.message });
@@ -98,7 +111,7 @@ function NominaElectronica() {
             Documento Soporte de Pago de Nómina ante la DIAN, por empleado
           </p>
         </div>
-        {linked && (
+        {ready && (
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" icon={ArrowPathIcon} onClick={load}>
               Actualizar
@@ -118,15 +131,25 @@ function NominaElectronica() {
         )}
       </div>
 
-      {!linked ? (
-        <div className="mx-auto max-w-xl rounded-2xl border border-amber-200 bg-amber-50 p-6 text-center">
-          <p className="font-semibold text-amber-800">
-            Primero activa la facturación electrónica
+      {!ready ? (
+        <div className="mx-auto max-w-xl rounded-2xl border-2 border-amber-300 bg-amber-50 p-6 text-center">
+          <ExclamationTriangleIcon className="mx-auto mb-2 h-8 w-8 text-amber-600" />
+          <p className="text-base font-bold text-amber-900">
+            Aún NO puedes emitir nómina electrónica
           </p>
-          <p className="mt-1 text-sm text-amber-700">
-            La nómina electrónica usa el mismo enlace con la DIAN. Ve a
-            "Facturación electrónica" y actívala; luego podrás emitir la nómina.
+          <p className="mt-1 text-sm text-amber-800">
+            La nómina electrónica se habilita solo cuando tu empresa queda
+            conectada a la DIAN en producción (certificado, resolución y
+            habilitación). Nosotros hacemos la conexión por ti; mientras tanto,
+            esta función no está disponible.
           </p>
+          <button
+            type="button"
+            onClick={openSupport}
+            className="mt-3 inline-flex items-center gap-2 rounded-xl bg-amber-600 px-4 py-2 text-sm font-bold text-white hover:bg-amber-700"
+          >
+            ¿Tienes dudas? Escríbenos por el chat
+          </button>
         </div>
       ) : (
         <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">

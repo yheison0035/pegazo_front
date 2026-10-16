@@ -203,13 +203,14 @@ export default function PosSale({
       try {
         const res = await getFiscalStatus();
         const d = res?.data;
-        // "Lista para facturar electrónicamente" NO es solo estar vinculada:
-        // exige certificado cargado + al menos una resolución de numeración.
-        // Si falta algo, el POS no ofrece la opción de factura electrónica.
+        // "Lista para facturar REAL" = vinculada + certificado + resolución +
+        // entorno PRODUCCIÓN. En pruebas (habilitación) NO se ofrece la factura
+        // electrónica en el POS, para que el cliente no crea que ya factura real.
         const ready =
           !!d?.linked &&
           !!d?.hasCertificate &&
-          (d?.resolutions?.length || 0) > 0;
+          (d?.resolutions?.length || 0) > 0 &&
+          d?.env === 'PRODUCCION';
         setFiscalReady(ready);
       } catch (_) {
         setFiscalReady(false);
