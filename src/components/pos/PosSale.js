@@ -21,6 +21,7 @@ import { getCurrentCash, CASH_CHANGED_EVENT } from '@/lib/api/routes/cash';
 import { dayStateFromRegister } from '@/lib/dayStatus';
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
+import { EINVOICING_ENABLED } from '@/config/features';
 import { useAuth } from '@/context/authContext';
 import useTerms from '@/hooks/useTerms';
 import useSales from '@/lib/api/hooks/useSales';
@@ -195,8 +196,9 @@ export default function PosSale({
   // ofrece el selector "Tiquete POS / Factura electrónica" al vender. No se
   // consulta siquiera si la empresa no la tiene habilitada (negocios reales).
   const fiscalEnabled =
-    !!usuario?.company?.electronicInvoicingEnabled ||
-    !!usuario?.company?.fiscalCompanyId;
+    EINVOICING_ENABLED &&
+    (!!usuario?.company?.electronicInvoicingEnabled ||
+      !!usuario?.company?.fiscalCompanyId);
   useEffect(() => {
     if (!fiscalEnabled) return;
     (async () => {

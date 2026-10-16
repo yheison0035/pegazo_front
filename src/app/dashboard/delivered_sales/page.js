@@ -27,6 +27,7 @@ import { downloadCsv } from '@/utils/exportCsv';
 import { formatCOP, formatDateSafe } from '@/lib/api/utils/utils';
 import useDeliveredSales from '@/lib/api/hooks/useDeliveredSales';
 import { getHeaderTableDeliveredSales } from '@/lib/api/utils/deliveredSales.config';
+import { EINVOICING_ENABLED } from '@/config/features';
 import ConfirmDeleteModal from '@/components/dashboard/tables/segments/confirmDeleteModal';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import SaleDetailModal from '@/components/dashboard/sales/SaleDetailModal';
@@ -84,7 +85,8 @@ export default function Delivered_Sales() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [alert, setAlert] = useState({});
 
-  const electronicEnabled = !!usuario?.company?.electronicInvoicingEnabled;
+  const electronicEnabled =
+    EINVOICING_ENABLED && !!usuario?.company?.electronicInvoicingEnabled;
 
   const { filters, handleFilterChange, setFilters } = useColumnFilters({
     code: '',

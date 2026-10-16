@@ -10,6 +10,7 @@ import {
 } from '@heroicons/react/24/outline';
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
+import { EINVOICING_ENABLED } from '@/config/features';
 import Button from '@/components/ui/Button';
 import StatusBadge from '@/components/ui/StatusBadge';
 import MoneyInput from '@/components/ui/MoneyInput';
@@ -28,7 +29,16 @@ import { getUsers } from '@/lib/api/routes/users';
 export default function NominaElectronicaPage() {
   return (
     <RoleGuard allowedRoles={[Roles.SUPER_ADMIN, Roles.ADMIN]}>
-      <NominaElectronica />
+      {EINVOICING_ENABLED ? (
+        <NominaElectronica />
+      ) : (
+        <div className="mx-auto mt-10 max-w-md rounded-2xl border border-gray-200 bg-white p-6 text-center shadow-sm">
+          <p className="text-base font-bold text-gray-800">Próximamente</p>
+          <p className="mt-1 text-sm text-gray-500">
+            La nómina electrónica estará disponible muy pronto.
+          </p>
+        </div>
+      )}
     </RoleGuard>
   );
 }

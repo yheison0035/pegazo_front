@@ -1,6 +1,7 @@
 'use client';
 
 import { BUSINESS_TYPES, HIDDEN_MODULES } from '@/config/businessTypes';
+import { EINVOICING_ENABLED } from '@/config/features';
 import { NAVIGATION } from '@/config/navigation';
 import { PLATFORM_NAVIGATION } from '@/config/platformNavigation';
 import {
@@ -113,12 +114,13 @@ export default function useNavigation() {
 
   // Facturación electrónica DIAN: se habilita POR EMPRESA desde Super Platform
   // (electronicInvoicingEnabled) o cuando ya está vinculada al servicio fiscal
-  // (fiscalCompanyId). Si está apagada, la empresa NO ve nada relacionado con la
-  // DIAN. El que solo quiere finanzas no la enciende y no le aparece.
-  // El acceso además está limitado por rol (SUPER_ADMIN/ADMIN).
+  // (fiscalCompanyId). Además hay un interruptor GLOBAL (EINVOICING_ENABLED): si
+  // está apagado (mientras no tengamos el certificado como PT), NADIE la ve, para
+  // que los clientes actuales no se confundan. El acceso además es por rol.
   if (
-    usuario.company?.electronicInvoicingEnabled ||
-    usuario.company?.fiscalCompanyId
+    EINVOICING_ENABLED &&
+    (usuario.company?.electronicInvoicingEnabled ||
+      usuario.company?.fiscalCompanyId)
   ) {
     modules.push('facturacion-electronica');
     // Nómina electrónica: mismo enlace DIAN; el candado de plan (Órbita) decide.
