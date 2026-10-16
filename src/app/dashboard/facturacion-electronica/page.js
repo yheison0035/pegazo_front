@@ -1111,7 +1111,6 @@ function OnboardingWizard({ status, working, onSetup, onResolution, openSupport 
   const key = `pegazo-fe-onb-${status?.nit || 'co'}`;
   const [ack, setAck] = useState({ ife: false, assoc: false });
   const [mode, setMode] = useState(''); // '' | 'nuevo' | 'migra'
-  const [showIfeHelp, setShowIfeHelp] = useState(false);
   useEffect(() => {
     try {
       const r = JSON.parse(localStorage.getItem(key) || '{}');
@@ -1163,42 +1162,34 @@ function OnboardingWizard({ status, working, onSetup, onResolution, openSupport 
       ),
     },
     {
-      title: migra
-        ? 'Confirma tu firma electrónica'
-        : 'Saca tu firma electrónica (IFE) en la DIAN',
-      desc: migra
-        ? 'Como ya facturabas con otro proveedor, YA tienes firma electrónica. Solo confírmalo para continuar.'
-        : 'Es gratis. En dian.gov.co baja a “Temas de interés” → “Firma Electrónica” → “Generar Firma Electrónica”.',
-      body: migra ? (
-        <Button variant="primary" size="sm" onClick={() => mark('ife')}>
-          Sí, ya la tengo — continuar
-        </Button>
-      ) : (
+      title: 'Verifica tu habilitación (firma) en la DIAN',
+      desc: 'Entra a dian.gov.co → “Factura Electrónica” → “Habilitación” e inicia sesión con tu documento (opción Persona o Empresa).',
+      body: (
         <div className="space-y-2">
-          <button
-            type="button"
-            onClick={() => setShowIfeHelp((v) => !v)}
-            className="text-xs font-semibold text-orange-600 underline"
-          >
-            ¿Cómo sé si ya tengo mi firma electrónica?
-          </button>
-          {showIfeHelp && (
-            <div className="space-y-1 rounded-xl bg-gray-50 p-3 text-xs text-gray-600 ring-1 ring-gray-200">
-              <p>
-                • Si <b>alguna vez facturaste electrónicamente</b> (con cualquier
-                proveedor), ya la tienes.
-              </p>
-              <p>
-                • Para verificar: en <b>dian.gov.co</b> → “Temas de interés” →{' '}
-                <b>“Firma Electrónica”</b> → “Cuenta de Usuario y Firma
-                Electrónica”. Si aparece activa, ya la tienes.
-              </p>
-              <p>
-                • Si nunca has facturado electrónica, genérala ahí mismo (es
-                gratis). ¿Te enredas? Escríbenos por el chat y te guiamos.
-              </p>
-            </div>
-          )}
+          <div className="space-y-1 rounded-xl bg-gray-50 p-3 text-xs text-gray-600 ring-1 ring-gray-200">
+            <p className="font-semibold text-gray-700">
+              ¿Cómo saber si ya estás listo?
+            </p>
+            <p>
+              1. Menú <b>“Registro y habilitación” → “Documentos electrónicos”</b>.
+            </p>
+            <p>
+              2. Elige <b>“Factura electrónica”</b>.
+            </p>
+            <p>
+              3. En la pantalla <b>“Facturador electrónico”</b> mira el campo{' '}
+              <b>“Estado de aprobación”</b>:
+            </p>
+            <p className="pl-3">
+              • Si dice <b className="text-emerald-700">“Habilitado”</b> → ✅ ya
+              tienes todo (firma incluida). Continúa.
+            </p>
+            <p className="pl-3">
+              • Si no → genera tu <b>Firma Electrónica</b> (en dian.gov.co →
+              “Temas de interés” → “Firma Electrónica” → “Generar”) y vuelve.
+              ¿Te enredas? Escríbenos por el chat.
+            </p>
+          </div>
           <div className="flex flex-wrap gap-2">
             <a
               href={DIAN_PORTAL_URL}
@@ -1209,19 +1200,17 @@ function OnboardingWizard({ status, working, onSetup, onResolution, openSupport 
               Abrir portal DIAN
             </a>
             <Button variant="primary" size="sm" onClick={() => mark('ife')}>
-              Ya tengo mi firma electrónica
+              Ya estoy habilitado — continuar
             </Button>
           </div>
         </div>
       ),
     },
     {
-      title: migra
-        ? 'Cambia tu proveedor a Pegazo'
-        : 'Inscríbete y asóciate a Pegazo como tu proveedor',
+      title: 'Asocia a Pegazo como tu proveedor',
       desc: migra
-        ? 'En dian.gov.co → “Temas de interés” → “Factura Electrónica” → “Habilitación”. Ahí quita la asociación con tu proveedor anterior y asocia a Pegazo con estos datos. Tu numeración actual sigue sirviendo.'
-        : 'En dian.gov.co → “Temas de interés” → “Factura Electrónica” → “Habilitación”. Ahí: Configurar modo de operación → “Proveedor tecnológico” → asocia Pegazo con estos datos.',
+        ? 'En la misma pantalla “Facturador electrónico”, botón verde “Configurar modos de operación”. Quita tu proveedor anterior y asocia a Pegazo con estos datos; tu numeración actual sigue sirviendo.'
+        : 'En la pantalla “Facturador electrónico”, botón verde “Configurar modos de operación” → elige “Proveedor tecnológico” → asocia Pegazo con estos datos.',
       body: (
         <div className="space-y-2">
           {status?.pt?.nit || status?.pt?.softwareId ? (
