@@ -14,9 +14,20 @@ const FIELDS = [
   { name: 'phone', label: 'Celular', type: 'text', required: true },
 ];
 
+// Tipos de documento del catálogo DIAN (identificación del adquiriente).
+const DOC_TYPES = [
+  { value: 'CC', label: 'Cédula de ciudadanía (CC)' },
+  { value: 'NIT', label: 'NIT' },
+  { value: 'CE', label: 'Cédula de extranjería (CE)' },
+  { value: 'TI', label: 'Tarjeta de identidad (TI)' },
+  { value: 'PP', label: 'Pasaporte (PP)' },
+  { value: 'RC', label: 'Registro civil (RC)' },
+];
+
 export default function NewCustomerModal({ localId, onClose, onCreated }) {
   const { createCustomer, loading } = useCustomers();
   const [data, setData] = useState({
+    type_document: 'CC',
     document: '',
     name: '',
     email: '',
@@ -114,6 +125,25 @@ export default function NewCustomerModal({ localId, onClose, onCreated }) {
         </div>
 
         <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col space-y-4 overflow-y-auto px-6 py-5">
+          {/* Tipo de documento (catálogo DIAN) */}
+          <div className="flex flex-col">
+            <label className="mb-1 text-sm font-medium text-gray-700">
+              Tipo de documento
+            </label>
+            <select
+              name="type_document"
+              value={data.type_document}
+              onChange={handleChange}
+              className="w-full rounded-xl border border-gray-200 px-4 py-2 text-sm shadow-sm transition focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            >
+              {DOC_TYPES.map((d) => (
+                <option key={d.value} value={d.value}>
+                  {d.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Documento con autocompletado */}
           <div className="flex flex-col">
             <label className="mb-1 text-sm font-medium text-gray-700">
