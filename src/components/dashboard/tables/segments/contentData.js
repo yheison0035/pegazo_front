@@ -5,6 +5,7 @@ import { CameraIcon } from '@heroicons/react/24/outline';
 import { canSeeOldPrice } from '@/hooks/inventory.permissions';
 import { getProductFields } from '@/config/verticalProfiles';
 import { roleLabel } from '@/config/roleLabels';
+import { EINVOICING_ENABLED } from '@/config/features';
 import Actions from './actions';
 import PhoneContentData from './contentData/phone';
 import { customerWhatsappMessage } from '@/lib/loyaltyMessage';
@@ -350,7 +351,8 @@ export default function ContentData({
                 <td className="px-5 py-4 whitespace-nowrap">
                   {info.code || '---'}
                 </td>
-                {usuario?.company?.electronicInvoicingEnabled && (
+                {EINVOICING_ENABLED &&
+                  usuario?.company?.electronicInvoicingEnabled && (
                   <td className="px-5 py-4 whitespace-nowrap">
                     {info.invoiceType === 'ELECTRONICA' ? (
                       <span className="inline-flex flex-col gap-0.5">
