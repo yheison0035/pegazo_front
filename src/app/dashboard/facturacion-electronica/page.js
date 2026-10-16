@@ -1168,13 +1168,38 @@ function OnboardingWizard({ status, working, onSetup, onResolution, openSupport 
     },
     {
       title: 'Inscríbete y asóciate a Pegazo como tu proveedor',
-      desc: 'En la DIAN: Habilitación → Configurar modo de operación → "Proveedor tecnológico" → selecciona Pegazo. Te damos el NIT y el software exactos a asociar.',
+      desc: 'En la DIAN: Habilitación → Configurar modo de operación → "Proveedor tecnológico" → selecciona Pegazo con estos datos.',
       body: (
         <div className="space-y-2">
-          <div className="rounded-xl bg-orange-50 px-3 py-2 text-[11px] text-orange-700 ring-1 ring-orange-200">
-            ¿No ves los datos de Pegazo (NIT y software) para asociar? Escríbenos
-            por el chat y te los pasamos al instante.
-          </div>
+          {status?.pt?.nit || status?.pt?.softwareId ? (
+            <div className="rounded-xl bg-gray-50 p-3 ring-1 ring-gray-200">
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                Datos de Pegazo (Proveedor Tecnológico)
+              </p>
+              <div className="mt-1 space-y-0.5 text-xs text-gray-700">
+                {status.pt.legalName && (
+                  <p>
+                    Razón social: <b>{status.pt.legalName}</b>
+                  </p>
+                )}
+                {status.pt.nit && (
+                  <p>
+                    NIT: <b>{status.pt.nit}</b>
+                  </p>
+                )}
+                {status.pt.softwareId && (
+                  <p>
+                    ID de software: <b>{status.pt.softwareId}</b>
+                  </p>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-xl bg-orange-50 px-3 py-2 text-[11px] text-orange-700 ring-1 ring-orange-200">
+              ¿No ves los datos de Pegazo (NIT y software) para asociar?
+              Escríbenos por el chat y te los pasamos al instante.
+            </div>
+          )}
           <div className="flex flex-wrap gap-2">
             <a
               href={DIAN_HABILITACION_URL}
