@@ -140,3 +140,11 @@ export async function getBookingConfig(slug) {
     return null;
   }
 }
+
+// Reserva de punta a punta desde la página pública (crea la cita en el sistema).
+export async function createPublicBooking(slug, dto) {
+  return apiFetch(`/appointments/booking/${encodeURIComponent(slug)}`, {
+    method: 'POST',
+    body: JSON.stringify(dto),
+  });
+}

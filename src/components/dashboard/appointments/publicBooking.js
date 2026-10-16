@@ -6,7 +6,10 @@ import useAppointments from '@/lib/api/hooks/useAppointments';
 import useLocals from '@/lib/api/hooks/useLocals';
 import useServices from '@/lib/api/hooks/useServices';
 import { getPublicProfessionals } from '@/lib/api/routes/users';
-import { getBookingConfig } from '@/lib/api/routes/appointments';
+import {
+  getBookingConfig,
+  createPublicBooking,
+} from '@/lib/api/routes/appointments';
 import { formatPrice } from '@/lib/api/utils/utils';
 import { resolveSkin } from './bookingSkins';
 import {
@@ -96,6 +99,10 @@ export default function PublicBooking({ slug = '' }) {
   const [restOff, setRestOff] = useState(false);
   const [restReason, setRestReason] = useState('');
   const [time, setTime] = useState('');
+  const [custName, setCustName] = useState('');
+  const [custPhone, setCustPhone] = useState('');
+  const [booking, setBooking] = useState(false);
+  const [bookError, setBookError] = useState('');
   const [success, setSuccess] = useState(false);
   const [started, setStarted] = useState(false); // portada (intro) del skin oscuro
 
@@ -220,24 +227,51 @@ export default function PublicBooking({ slug = '' }) {
     setLocal(locals.length === 1 ? locals[0] : null);
     setService(null); setBarber(null); setDate(''); setTime(''); setSlots([]);
     setStep(locals.length === 1 ? 1 : 0);
+    setCustName(''); setCustPhone(''); setBookError('');
     setSuccess(false);
   };
 
-  const confirmar = () => {
+  const confirmar = async () => {
     if (!local || !service || !barber || !date || !time) return;
-    const [y, m, d] = date.split('-');
-    const fechaTxt = `${d}/${m}/${y}`;
-    const negocio = config?.name || 'la barbería';
-    const msg = `Hola, quiero agendar una cita en ${negocio}:\n\n📍 Sede: ${local.name}\n💈 Servicio: ${service.name}\n👤 Profesional: ${barber.name}\n📅 Fecha: ${fechaTxt}\n🕐 Hora: ${time}`;
-    const wa = config?.whatsapp;
-    if (wa) {
-      window.open(
-        `https://wa.me/${wa}?text=${encodeURIComponent(msg)}`,
-        '_blank',
-        'noopener,noreferrer',
+    setBookError('');
+    if (custName.trim().length < 2) return setBookError('Escribe tu nombre.');
+    if (custPhone.replace(/\D/g, '').length < 7)
+      return setBookError('Escribe un celular válido.');
+
+    setBooking(true);
+    try {
+      // Crea la reserva DIRECTO en el sistema (queda pendiente por confirmar).
+      await createPublicBooking(slug, {
+        date,
+        startTime: time,
+        serviceId: service.id,
+        barberId: barber.id,
+        localId: local.id,
+        customerName: custName.trim(),
+        customerPhone: custPhone.replace(/\D/g, ''),
+      });
+
+      // Además, si el negocio tiene WhatsApp, abre el mensaje (confirmación rápida).
+      const wa = config?.whatsapp;
+      if (wa) {
+        const [y, m, d] = date.split('-');
+        const fechaTxt = `${d}/${m}/${y}`;
+        const negocio = config?.name || 'el negocio';
+        const msg = `Hola, acabo de reservar una cita en ${negocio}:\n\n📍 Sede: ${local.name}\n💈 Servicio: ${service.name}\n👤 Profesional: ${barber.name}\n📅 Fecha: ${fechaTxt}\n🕐 Hora: ${time}\n🙋 ${custName.trim()}`;
+        window.open(
+          `https://wa.me/${wa}?text=${encodeURIComponent(msg)}`,
+          '_blank',
+          'noopener,noreferrer',
+        );
+      }
+      setSuccess(true);
+    } catch (e) {
+      setBookError(
+        e?.message || 'No se pudo crear la reserva. Intenta con otro horario.',
       );
+    } finally {
+      setBooking(false);
     }
-    setSuccess(true);
   };
 
   const selectedDay = days.find((d) => d.value === date);
@@ -712,6 +746,33 @@ export default function PublicBooking({ slug = '' }) {
                       <Row icon={ClockIcon} label="Hora" value={time} last />
                     </div>
                   </div>
+
+                  {/* Tus datos (para crear la reserva) */}
+                  <div className="rounded-2xl border border-[var(--bk-border-strong)] bg-[var(--bk-accent-soft)] p-5">
+                    <p className="mb-3 text-[11px] uppercase tracking-widest text-[var(--bk-accent)]">
+                      Tus datos
+                    </p>
+                    <div className="space-y-3">
+                      <input
+                        value={custName}
+                        onChange={(e) => setCustName(e.target.value)}
+                        placeholder="Tu nombre"
+                        className="w-full rounded-xl border border-[var(--bk-border)] bg-[var(--bk-bg)]/60 px-4 py-3 text-sm text-[var(--bk-text)] outline-none placeholder:text-[var(--bk-text-muted)] focus:border-[var(--bk-accent)]"
+                      />
+                      <input
+                        value={custPhone}
+                        onChange={(e) => setCustPhone(e.target.value)}
+                        placeholder="Tu celular (WhatsApp)"
+                        inputMode="numeric"
+                        className="w-full rounded-xl border border-[var(--bk-border)] bg-[var(--bk-bg)]/60 px-4 py-3 text-sm text-[var(--bk-text)] outline-none placeholder:text-[var(--bk-text-muted)] focus:border-[var(--bk-accent)]"
+                      />
+                      {bookError && (
+                        <p className="text-xs font-medium text-red-400">
+                          {bookError}
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
               </div>
@@ -728,9 +789,10 @@ export default function PublicBooking({ slug = '' }) {
           <div className="mx-auto flex max-w-2xl items-center gap-3">
             <button
               onClick={confirmar}
-              className="bk-cta flex flex-1 items-center justify-center gap-2 rounded-2xl bg-[var(--bk-accent)] px-6 py-4 text-base font-bold uppercase tracking-wide text-[var(--bk-accent-contrast)] shadow-lg transition hover:brightness-110"
+              disabled={booking}
+              className="bk-cta flex flex-1 items-center justify-center gap-2 rounded-2xl bg-[var(--bk-accent)] px-6 py-4 text-base font-bold uppercase tracking-wide text-[var(--bk-accent-contrast)] shadow-lg transition hover:brightness-110 disabled:opacity-60"
             >
-              {config.whatsapp ? 'Reservar por WhatsApp' : 'Reservar cita'}
+              {booking ? 'Reservando…' : 'Reservar cita'}
               {config.ravenImage ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={config.ravenImage} alt="" className="bk-btn-raven" />
@@ -1023,12 +1085,13 @@ function SuccessScreen({ onReset, summary }) {
       <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-green-500/15 text-green-400">
         <CheckIcon className="h-8 w-8" strokeWidth={2.5} />
       </div>
-      <h2 className="text-xl font-bold">¡Casi listo!</h2>
+      <h2 className="text-xl font-bold">¡Reserva creada!</h2>
       <p className="mt-1 text-sm text-[var(--bk-text-muted)]">
-        Te llevamos a WhatsApp para confirmar tu cita con{' '}
+        Tu cita con{' '}
         <span className="text-[var(--bk-accent)]">{summary.barber?.name}</span>
         {summary.date ? ` el ${summary.date.dow} ${summary.date.day} ${summary.date.month}` : ''}
-        {summary.time ? ` a las ${summary.time}` : ''}.
+        {summary.time ? ` a las ${summary.time}` : ''} quedó registrada. Te
+        confirmaremos pronto.
       </p>
       <button
         onClick={onReset}
