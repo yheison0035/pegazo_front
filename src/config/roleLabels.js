@@ -35,6 +35,9 @@ export const LEGACY_ROLES = new Set(['BARBERO', 'VENTAS']);
 const ROLES_BY_TYPE = {
   // Servicios con agenda: el "Profesional" atiende (Barbero/Doctor/Estilista…)
   SERVICIOS: ['ADMIN', 'RECEPCIONISTA', 'PROFESIONAL', 'CAJA', 'AUXILIAR'],
+  // Barbería: el "Profesional" es el Barbero (recibe comisión). Su etiqueta sale
+  // de la terminología del negocio ("Barbero").
+  BARBERIA: ['ADMIN', 'RECEPCIONISTA', 'PROFESIONAL', 'CAJA', 'AUXILIAR'],
   ODONTOLOGIA: ['ADMIN', 'RECEPCIONISTA', 'PROFESIONAL', 'CAJA', 'AUXILIAR'],
 
   // Comida: salón y cocina
@@ -54,6 +57,8 @@ const ROLES_BY_TYPE = {
   CANCHAS_SINTETICAS: ['ADMIN', 'RECEPCIONISTA', 'PROFESIONAL', 'CAJA'],
   // Guarda cascos: el ASESOR recibe/entrega cascos y cobra; recepción y caja.
   GUARDA_CASCOS: ['ADMIN', 'RECEPCIONISTA', 'ASESOR', 'CAJA', 'AUXILIAR'],
+  // Parqueadero: cobro por tiempo; el ASESOR/recepción recibe y cobra.
+  PARQUEADERO: ['ADMIN', 'RECEPCIONISTA', 'ASESOR', 'CAJA', 'AUXILIAR'],
 };
 
 // Retail de mostrador: comparten el mismo set.
@@ -69,6 +74,7 @@ const RETAIL_ROLES = ['ADMIN', 'CAJA', 'ASESOR', 'BODEGUERO', 'RECEPCIONISTA'];
   'ROPA',
   'CALZADO',
   'FERIA',
+  'PANALERIA',
 ].forEach((t) => {
   ROLES_BY_TYPE[t] = RETAIL_ROLES;
 });
