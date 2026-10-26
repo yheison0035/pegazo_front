@@ -1211,21 +1211,42 @@ export default function ImportInventory() {
                 </div>
               </div>
 
-              <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-                <button
-                  onClick={() => setStep('map')}
-                  className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50 sm:w-auto"
-                >
-                  Volver
-                </button>
-                <button
-                  onClick={doImport}
-                  disabled={importable === 0}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-orange-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-orange-700 disabled:opacity-50 sm:w-auto"
-                >
-                  <CheckCircleIcon className="h-5 w-5" />
-                  Confirmar e importar ({importable})
-                </button>
+              {/* Barra fija: siempre visible, sin tener que bajar hasta el final. */}
+              <div className="sticky bottom-0 z-20 -mx-3 border-t border-gray-200 bg-white/95 px-3 py-3 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] backdrop-blur sm:-mx-6 sm:px-6">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-semibold">
+                    <span className="text-emerald-700">
+                      🟢 {counts.create} crear
+                    </span>
+                    <span className="text-blue-700">
+                      🔵 {counts.update} actualizar
+                    </span>
+                    <span className="text-amber-700">
+                      🟡 {counts.delete} eliminar
+                    </span>
+                    {counts.error > 0 && (
+                      <span className="text-red-700">
+                        🔴 {counts.error} con error (no se importan)
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setStep('map')}
+                      className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50"
+                    >
+                      Volver
+                    </button>
+                    <button
+                      onClick={doImport}
+                      disabled={importable === 0}
+                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-orange-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-orange-700 disabled:opacity-50"
+                    >
+                      <CheckCircleIcon className="h-5 w-5" />
+                      Confirmar e importar ({importable})
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           );
