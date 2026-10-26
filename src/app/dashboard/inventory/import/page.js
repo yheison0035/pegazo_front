@@ -254,26 +254,35 @@ export default function ImportInventory() {
   const [reviewFilter, setReviewFilter] = useState('all');
   const [reviewLoading, setReviewLoading] = useState(false);
 
+  // Auto-mapeo en DOS FASES para evitar colisiones por sinónimos genéricos.
+  // IMPORTANTE: la fase EXACTA va primero. Antes, el sinónimo genérico 'precio'
+  // de salePrice hacía match por inclusión con "Precio compra" (que aparece antes
+  // en el export) y se INTERCAMBIABAN precio de venta y de compra. Con la fase
+  // exacta, "Precio venta"→salePrice y "Precio compra"→purchasePrice sin ambigüedad.
   const autoMap = (hdrs) => {
     const map = {};
     const used = new Set();
     FIELDS.forEach((f) => {
-      const hit = hdrs.find(
-        (h) =>
-          !used.has(h.index) &&
-          f.syn.some((s) => {
-            const n = norm(h.label);
-            const ns = norm(s);
-            return n === ns || n.includes(ns) || ns.includes(n);
-          }),
-      );
-      if (hit) {
-        map[f.key] = hit.index;
-        used.add(hit.index);
-      } else {
-        map[f.key] = '';
-      }
+      map[f.key] = '';
     });
+    const pass = (match) => {
+      FIELDS.forEach((f) => {
+        if (map[f.key] !== '') return; // ya asignado en una fase anterior
+        const hit = hdrs.find(
+          (h) =>
+            !used.has(h.index) &&
+            f.syn.some((s) => match(norm(h.label), norm(s))),
+        );
+        if (hit) {
+          map[f.key] = hit.index;
+          used.add(hit.index);
+        }
+      });
+    };
+    // Fase 1: coincidencia EXACTA (la más confiable).
+    pass((n, ns) => n === ns);
+    // Fase 2: por inclusión (una contiene a la otra), solo para lo que falte.
+    pass((n, ns) => n.includes(ns) || ns.includes(n));
     return map;
   };
 
@@ -523,6 +532,16 @@ export default function ImportInventory() {
   const missingRequired = FIELDS.filter(
     (f) => f.required && (mapping[f.key] === '' || mapping[f.key] == null),
   );
+
+  // Red de seguridad: avisa si los precios quedaron cruzados (venta↔compra).
+  const mappedHeader = (key) => {
+    const idx = mapping[key];
+    return idx === '' || idx == null ? '' : norm(headers[idx]?.label || '');
+  };
+  const priceSwapWarn =
+    mappedHeader('salePrice').includes('compra') ||
+    (mappedHeader('purchasePrice').includes('venta') &&
+      !mappedHeader('purchasePrice').includes('compra'));
 
   const doImport = async () => {
     // Importa las filas YA revisadas/editadas (sin las marcadas como error).
@@ -952,6 +971,14 @@ export default function ImportInventory() {
           {missingRequired.length > 0 && (
             <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
               Falta asignar: {missingRequired.map((f) => f.label).join(', ')}.
+            </div>
+          )}
+
+          {priceSwapWarn && (
+            <div className="rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">
+              ⚠️ <b>Revisa los precios:</b> parece que “Precio de venta” y “Precio
+              de compra” quedaron cruzados. Confírmalos en los desplegables de
+              arriba antes de continuar — un cruce cambia los precios al importar.
             </div>
           )}
 
