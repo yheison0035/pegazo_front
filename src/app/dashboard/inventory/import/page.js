@@ -93,6 +93,11 @@ export default function ImportInventory() {
         syn: ['estado', 'status', 'activo'],
       },
       {
+        key: 'delete',
+        label: 'Eliminar',
+        syn: ['eliminar', 'borrar', 'quitar', 'delete', 'dar de baja', 'baja'],
+      },
+      {
         key: 'name',
         label: `Nombre del ${t.product?.toLowerCase() || 'producto'}`,
         required: true,
@@ -277,6 +282,7 @@ export default function ImportInventory() {
     'id',
     'sku',
     'status',
+    'delete',
     'name',
     'salePrice',
     'purchasePrice',
@@ -691,6 +697,14 @@ export default function ImportInventory() {
             </div>
           )}
 
+          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            ¿Vienes de <b>Exportar Excel</b>? Las filas con <b>ID</b> o{' '}
+            <b>SKU</b> <b>actualizan</b> el producto (no duplican). Para{' '}
+            <b>sacar</b> un producto del inventario, escribe <b>SÍ</b> en la
+            columna <b>Eliminar</b> de esa fila — el historial de ventas se
+            conserva. Borrar la fila del Excel no elimina nada.
+          </div>
+
           <div className="rounded-2xl border border-gray-200 bg-white p-4">
             <p className="mb-1 text-sm font-bold text-gray-800">
               Relaciona tus columnas
@@ -838,6 +852,11 @@ export default function ImportInventory() {
               {result.updated > 0 && (
                 <span className="rounded-full bg-blue-50 px-4 py-1.5 text-sm font-semibold text-blue-700">
                   {result.updated} actualizados
+                </span>
+              )}
+              {result.deleted > 0 && (
+                <span className="rounded-full bg-amber-50 px-4 py-1.5 text-sm font-semibold text-amber-700">
+                  {result.deleted} eliminados
                 </span>
               )}
               {result.failed > 0 && (
