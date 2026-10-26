@@ -85,6 +85,10 @@ export default function Inventory() {
         Unidad: r.unit,
         Estado: r.status,
         Descripción: r.description,
+        // Columna vacía: marca SÍ en los productos que ya no vendes y al
+        // reimportar se eliminan del inventario (el historial de ventas se
+        // conserva). Dejar en blanco = no se toca.
+        Eliminar: '',
       }));
       const XLSX = await import('xlsx');
       const ws = XLSX.utils.json_to_sheet(data);
