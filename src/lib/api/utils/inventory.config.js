@@ -339,7 +339,7 @@ export const getHeaderTableInventory = (usuario) => {
       show: fields.barcode,
       showInput: fields.barcode,
     },
-    { name: 'stock', title: 'Cantidad', show: true, showInput: false },
+    { name: 'stock', title: 'Cantidad', show: true, showInput: true },
     {
       name: 'localId',
       title: 'Local / Punto de Venta',
@@ -370,7 +370,7 @@ export const getHeaderTableInventory = (usuario) => {
       show: showOldPrice,
       showInput: true,
     },
-    { name: 'categoryId', title: 'Categoría', show: false, showInput: false },
+    { name: 'categoryId', title: 'Categoría', show: true, showInput: true },
     { name: 'brandId', title: 'Marca', show: false, showInput: false },
     { name: 'status', title: 'Estado', show: true, showInput: true },
     {
