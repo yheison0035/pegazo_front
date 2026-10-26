@@ -75,6 +75,23 @@ export default function ImportInventory() {
   // Campos del CRM a los que se pueden mapear columnas del Excel, según la vertical.
   const FIELDS = useMemo(() => {
     const list = [
+      // Llaves para ACTUALIZAR (vienen del Excel exportado). Si se dejan vacías,
+      // la fila crea un producto nuevo. No tocar al exportar y reimportar.
+      {
+        key: 'id',
+        label: 'ID',
+        syn: ['id', 'id producto', 'idproducto', 'id_producto'],
+      },
+      {
+        key: 'sku',
+        label: 'SKU',
+        syn: ['sku', 'codigo sku', 'codigo interno', 'cod sku'],
+      },
+      {
+        key: 'status',
+        label: 'Estado',
+        syn: ['estado', 'status', 'activo'],
+      },
       {
         key: 'name',
         label: `Nombre del ${t.product?.toLowerCase() || 'producto'}`,
@@ -255,6 +272,11 @@ export default function ImportInventory() {
   // Campos a nivel de PRODUCTO (los de variante —color/talla/stock— se manejan
   // aparte según la vertical).
   const PRODUCT_KEYS = [
+    // Llaves de ACTUALIZACIÓN (vienen del Excel exportado): si traen valor, la
+    // fila actualiza ese producto/variante en vez de crear uno nuevo.
+    'id',
+    'sku',
+    'status',
     'name',
     'salePrice',
     'purchasePrice',
@@ -297,19 +319,34 @@ export default function ImportInventory() {
       return p;
     };
 
+    // Filas con SKU o ID = ACTUALIZAR (vienen del Excel exportado). Cada fila va
+    // SOLA (no se agrupa) para que el backend actualice esa variante por su SKU.
+    const hasKey = (o) =>
+      String(o.sku || '').trim() !== '' || String(o.id || '').trim() !== '';
+    const updateRows = raw.filter(hasKey);
+    const createRows = raw.filter((o) => !hasKey(o));
+    const updateItems = updateRows.map((o) => {
+      const p = pick(o);
+      // El stock de la variante se pasa a nivel de fila; el backend lo aplica a
+      // la variante encontrada por SKU.
+      p.stock = Number(o.stock) || 0;
+      return p;
+    });
+
     if (!isColor) {
-      // Peso / simple: cada fila es un producto con UNA variante cantidad.
-      return raw.map((o) => {
+      // Peso / simple: cada fila nueva es un producto con UNA variante cantidad.
+      const creates = createRows.map((o) => {
         const p = pick(o);
         p.variants = [{ color: 'ÚNICO', stock: Number(o.stock) || 0 }];
         return p;
       });
+      return [...updateItems, ...creates];
     }
 
-    // Color (y talla en ropa/calzado): se agrupan las filas con el MISMO nombre
-    // en un producto con varias variantes.
+    // Color (y talla en ropa/calzado): se agrupan las filas NUEVAS con el MISMO
+    // nombre en un producto con varias variantes.
     const groups = new Map();
-    for (const o of raw) {
+    for (const o of createRows) {
       const key = o.name.toLowerCase();
       if (!groups.has(key)) {
         const p = pick(o);
@@ -326,7 +363,7 @@ export default function ImportInventory() {
       if (same) same.stock += stock;
       else p.variants.push({ color, ...(size ? { size } : {}), stock });
     }
-    return [...groups.values()];
+    return [...updateItems, ...groups.values()];
   };
 
   const missingRequired = FIELDS.filter(
@@ -798,6 +835,11 @@ export default function ImportInventory() {
               <span className="rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-semibold text-emerald-700">
                 {result.created} creados
               </span>
+              {result.updated > 0 && (
+                <span className="rounded-full bg-blue-50 px-4 py-1.5 text-sm font-semibold text-blue-700">
+                  {result.updated} actualizados
+                </span>
+              )}
               {result.failed > 0 && (
                 <span className="rounded-full bg-red-50 px-4 py-1.5 text-sm font-semibold text-red-700">
                   {result.failed} con error

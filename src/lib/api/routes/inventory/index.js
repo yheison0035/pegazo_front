@@ -33,6 +33,11 @@ export async function bulkImportProducts(items) {
   });
 }
 
+// Exporta todo el inventario a filas planas (para editar y reimportar).
+export async function exportInventory() {
+  return apiFetch('/inventory/export');
+}
+
 // Productos con stock bajo (stock total <= alerta de stock mínimo).
 export async function restockProduct(id, amount) {
   return apiFetch(`/inventory/${id}/restock`, {
