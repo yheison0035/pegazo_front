@@ -392,7 +392,13 @@ export default function ImportInventory() {
     const createRows = objs.filter((o) => !hasKey(o) && o.name);
     const updateItems = updateRows.map((o) => {
       const p = pick(o);
-      p.stock = Number(o.stock) || 0;
+      // SOLO enviar stock si la fila trae un valor real. Si la columna Stock no
+      // se mapeó (o va vacía), NO se toca el stock del producto. Antes aquí se
+      // forzaba `|| 0`, lo que ponía TODO en 0 al dejar Stock en "No importar".
+      const sv = o.stock;
+      if (sv !== '' && sv != null && Number.isFinite(Number(sv))) {
+        p.stock = Number(sv);
+      }
       return p;
     });
 
