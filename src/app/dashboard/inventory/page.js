@@ -3,7 +3,11 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowUpTrayIcon } from '@heroicons/react/24/outline';
+import {
+  ArrowUpTrayIcon,
+  ArrowDownTrayIcon,
+} from '@heroicons/react/24/outline';
+import { exportInventory } from '@/lib/api/routes/inventory';
 import useLiveRefresh from '@/hooks/useLiveRefresh';
 import {
   beginBackgroundRefresh,
@@ -50,6 +54,55 @@ export default function Inventory() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [alert, setAlert] = useState({});
+  const [exporting, setExporting] = useState(false);
+
+  // Exporta TODO el inventario a Excel (una fila por variante) con ID y SKU como
+  // llave, para editar masivamente y reimportar (y que se ACTUALICE, no duplique).
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      const res = await exportInventory();
+      const rows = res?.data || res || [];
+      if (!rows.length) {
+        setAlert({ type: 'warning', message: 'No hay productos para exportar.' });
+        return;
+      }
+      const data = rows.map((r) => ({
+        ID: r.id,
+        SKU: r.sku,
+        Nombre: r.name,
+        Categoría: r.categoryName,
+        Marca: r.brandName,
+        Proveedor: r.providerName,
+        Local: r.localName,
+        'Código de barras': r.barcode,
+        Color: r.color,
+        Talla: r.size,
+        'Precio compra': r.purchasePrice,
+        'Precio venta': r.salePrice,
+        Stock: r.stock,
+        'Stock mínimo': r.minStock,
+        Unidad: r.unit,
+        Estado: r.status,
+        Descripción: r.description,
+      }));
+      const XLSX = await import('xlsx');
+      const ws = XLSX.utils.json_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Inventario');
+      XLSX.writeFile(
+        wb,
+        `inventario-${new Date().toISOString().slice(0, 10)}.xlsx`,
+      );
+    } catch (e) {
+      setAlert({
+        type: 'error',
+        message: e?.message || 'No se pudo exportar el inventario.',
+      });
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const { filters, handleFilterChange } = useColumnFilters({
     name: '',
@@ -156,6 +209,15 @@ export default function Inventory() {
         </h1>
         {can('inventory', 'create') && (
           <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={handleExport}
+              disabled={exporting}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-orange-300 hover:text-orange-600 disabled:opacity-60"
+            >
+              <ArrowDownTrayIcon className="h-4 w-4" />
+              {exporting ? 'Exportando…' : 'Exportar Excel'}
+            </button>
             <Link
               href="/dashboard/inventory/import"
               className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-orange-300 hover:text-orange-600"
