@@ -10,12 +10,15 @@ import {
   ExclamationTriangleIcon,
   ArrowLeftIcon,
   DocumentArrowUpIcon,
+  PlusCircleIcon,
+  PencilSquareIcon,
+  TrashIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/authContext';
 import useTerms from '@/hooks/useTerms';
 import { getProductFields } from '@/config/verticalProfiles';
 import { colorOptions } from '@/lib/api/utils/getColors';
-import { bulkImportProducts } from '@/lib/api/routes/inventory';
+import { bulkImportProducts, exportInventory } from '@/lib/api/routes/inventory';
 import { getLocals } from '@/lib/api/routes/locals';
 import { getCategories } from '@/lib/api/routes/categories';
 import { getBrands } from '@/lib/api/routes/brands';
@@ -55,11 +58,43 @@ function parseNumber(v) {
   return Number.isFinite(n) ? n : '';
 }
 
+// "Eliminar" = SÍ/SI/X/1/TRUE/VERDADERO (mismo criterio que el backend).
+const normStr = (v) =>
+  String(v ?? '')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '');
+const isDeleteFlag = (v) =>
+  ['si', 'x', '1', 'true', 'verdadero', 'eliminar', 'borrar'].includes(
+    normStr(v),
+  );
+
+// Campos comparables (antes→después) al ACTUALIZAR, con su regla de cambio
+// (igual que la lógica del backend: una referencia solo cambia si trae valor).
+const DIFF_FIELDS = [
+  { key: 'name', label: 'Nombre', type: 'str' },
+  { key: 'salePrice', label: 'P. venta', type: 'num' },
+  { key: 'purchasePrice', label: 'P. compra', type: 'num' },
+  { key: 'stock', label: 'Stock', type: 'num' },
+  { key: 'minStock', label: 'Stock mín.', type: 'num' },
+  { key: 'barcode', label: 'Código', type: 'strClear' },
+  { key: 'unit', label: 'Unidad', type: 'upper' },
+  { key: 'status', label: 'Estado', type: 'status' },
+  { key: 'categoryName', label: 'Categoría', type: 'ref' },
+  { key: 'brandName', label: 'Marca', type: 'ref' },
+  { key: 'providerName', label: 'Proveedor', type: 'ref' },
+  { key: 'localName', label: 'Local', type: 'ref' },
+  { key: 'description', label: 'Descripción', type: 'strClear' },
+];
+
 export default function ImportInventory() {
   const router = useRouter();
   const { usuario } = useAuth();
   const t = useTerms();
   const fileRef = useRef(null);
+  // Índice del inventario actual (bySku/byId) para recomputar diffs al editar.
+  const reviewMapsRef = useRef(null);
 
   const company = usuario?.company || {};
   const pf = getProductFields(company.type, company.typeProductFields);
@@ -205,13 +240,19 @@ export default function ImportInventory() {
     });
   }, []);
 
-  const [step, setStep] = useState('upload'); // upload | map | importing | done
+  // upload | map | review | importing | done
+  const [step, setStep] = useState('upload');
   const [fileName, setFileName] = useState('');
   const [headers, setHeaders] = useState([]); // [{index, label}]
   const [rows, setRows] = useState([]); // array de arrays (sin encabezado)
   const [mapping, setMapping] = useState({}); // { fieldKey: columnIndex|'' }
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
+  // Revisión de cambios (antes de importar): filas-objeto con su acción/diff,
+  // editables en línea. `reviewLoading` mientras se trae el inventario actual.
+  const [reviewItems, setReviewItems] = useState([]);
+  const [reviewFilter, setReviewFilter] = useState('all');
+  const [reviewLoading, setReviewLoading] = useState(false);
 
   const autoMap = (hdrs) => {
     const map = {};
@@ -296,17 +337,19 @@ export default function ImportInventory() {
     'unit',
   ];
 
-  // Construye los productos normalizados listos para el backend, ADAPTANDO el
-  // stock a la vertical: por color/talla (agrupa filas del mismo producto en
-  // varias variantes) o una sola cantidad (peso/simple).
-  const buildItems = () => {
+  const hasKey = (o) =>
+    String(o.sku || '').trim() !== '' || String(o.id || '').trim() !== '';
+
+  // Cada fila del Excel → objeto con todos los campos mapeados (parseados).
+  // Conserva filas con nombre O con llave (ID/SKU), para no perder las de
+  // actualizar/eliminar aunque se edite el nombre.
+  const rowsToObjects = () => {
     const get = (row, key) => {
       const idx = mapping[key];
       if (idx === '' || idx === undefined || idx === null) return '';
       return row[idx] ?? '';
     };
-    // Fila → objeto con todos los campos mapeados.
-    const raw = rows
+    return rows
       .map((row, i) => {
         const o = { row: i + 2 };
         FIELDS.forEach((f) => {
@@ -315,8 +358,18 @@ export default function ImportInventory() {
         });
         return o;
       })
-      .filter((o) => o.name); // debe tener al menos nombre
+      .filter(
+        (o) =>
+          String(o.name || '').trim() !== '' ||
+          String(o.sku || '').trim() !== '' ||
+          String(o.id || '').trim() !== '',
+      );
+  };
 
+  // Construye los productos normalizados listos para el backend A PARTIR de una
+  // lista de filas-objeto (las de la revisión, ya editadas), ADAPTANDO el stock
+  // a la vertical: por color/talla (agrupa) o una sola cantidad (peso/simple).
+  const buildItemsFrom = (objs) => {
     const pick = (o) => {
       const p = { row: o.row };
       PRODUCT_KEYS.forEach((k) => {
@@ -325,22 +378,16 @@ export default function ImportInventory() {
       return p;
     };
 
-    // Filas con SKU o ID = ACTUALIZAR (vienen del Excel exportado). Cada fila va
-    // SOLA (no se agrupa) para que el backend actualice esa variante por su SKU.
-    const hasKey = (o) =>
-      String(o.sku || '').trim() !== '' || String(o.id || '').trim() !== '';
-    const updateRows = raw.filter(hasKey);
-    const createRows = raw.filter((o) => !hasKey(o));
+    // Filas con SKU o ID = ACTUALIZAR/ELIMINAR (van solas, no se agrupan).
+    const updateRows = objs.filter(hasKey);
+    const createRows = objs.filter((o) => !hasKey(o) && o.name);
     const updateItems = updateRows.map((o) => {
       const p = pick(o);
-      // El stock de la variante se pasa a nivel de fila; el backend lo aplica a
-      // la variante encontrada por SKU.
       p.stock = Number(o.stock) || 0;
       return p;
     });
 
     if (!isColor) {
-      // Peso / simple: cada fila nueva es un producto con UNA variante cantidad.
       const creates = createRows.map((o) => {
         const p = pick(o);
         p.variants = [{ color: 'ÚNICO', stock: Number(o.stock) || 0 }];
@@ -349,8 +396,6 @@ export default function ImportInventory() {
       return [...updateItems, ...creates];
     }
 
-    // Color (y talla en ropa/calzado): se agrupan las filas NUEVAS con el MISMO
-    // nombre en un producto con varias variantes.
     const groups = new Map();
     for (const o of createRows) {
       const key = o.name.toLowerCase();
@@ -372,14 +417,119 @@ export default function ImportInventory() {
     return [...updateItems, ...groups.values()];
   };
 
+  // Clasifica una fila contra el inventario actual: crear | actualizar |
+  // eliminar | error, y calcula el diff (antes→después) de las actualizaciones.
+  const classify = (o, maps) => {
+    if (hasKey(o)) {
+      const sku = String(o.sku || '').trim();
+      const idk = String(o.id || '').trim();
+      const cur = sku ? maps.bySku[sku.toLowerCase()] : maps.byId[idk];
+      if (!cur) {
+        return {
+          action: 'error',
+          error: 'No se encontró el producto (ID/SKU) en el inventario',
+        };
+      }
+      if (isDeleteFlag(o.delete)) return { action: 'delete', cur };
+      return { action: 'update', cur, diff: diffRow(o, cur) };
+    }
+    if (!String(o.name || '').trim()) {
+      return { action: 'error', error: 'Falta el nombre del producto' };
+    }
+    if (!(Number(o.salePrice) > 0)) {
+      return { action: 'error', error: 'Falta el precio de venta (o es 0)' };
+    }
+    return { action: 'create' };
+  };
+
+  // Lista de campos cambiados (solo los mapeados y que pasan la regla del
+  // backend) de una fila de actualización respecto al producto actual.
+  const diffRow = (o, cur) => {
+    const out = [];
+    const hasSku = String(o.sku || '').trim() !== '';
+    for (const f of DIFF_FIELDS) {
+      if (mapping[f.key] === '' || mapping[f.key] == null) continue;
+      // El stock solo se actualiza por SKU (variante); por ID no aplica.
+      if (f.key === 'stock' && !hasSku) continue;
+      const nv = o[f.key];
+      const ov = cur[f.key];
+      const sNew = String(nv ?? '').trim();
+      const sOld = String(ov ?? '').trim();
+      let changed = false;
+      if (f.type === 'num') {
+        if (sNew !== '' && Number(nv) !== Number(ov || 0)) changed = true;
+      } else if (f.type === 'str') {
+        if (sNew !== '' && sNew !== sOld) changed = true;
+      } else if (f.type === 'strClear') {
+        if (sNew !== sOld) changed = true; // vacío = borra
+      } else if (f.type === 'upper') {
+        if (sNew !== '' && sNew.toUpperCase() !== sOld.toUpperCase())
+          changed = true;
+      } else if (f.type === 'status') {
+        const up = sNew.toUpperCase();
+        if (
+          (up === 'ACTIVO' || up === 'INACTIVO') &&
+          up !== sOld.toUpperCase()
+        )
+          changed = true;
+      } else if (f.type === 'ref') {
+        if (sNew !== '' && sNew.toLowerCase() !== sOld.toLowerCase())
+          changed = true;
+      }
+      if (changed) out.push({ label: f.label, old: sOld || '—', next: sNew || '—' });
+    }
+    return out;
+  };
+
+  // Entra al paso de revisión: trae el inventario actual, clasifica cada fila.
+  const enterReview = async () => {
+    setError('');
+    setReviewLoading(true);
+    try {
+      const res = await exportInventory();
+      const current = res?.data || res || [];
+      const maps = { bySku: {}, byId: {} };
+      for (const c of current) {
+        if (c.sku) maps.bySku[String(c.sku).toLowerCase()] = c;
+        if (c.id != null) maps.byId[String(c.id)] = c;
+      }
+      const objs = rowsToObjects().map((o) => ({ ...o, _meta: classify(o, maps) }));
+      // Guardamos los mapas en el primer item para recomputar al editar.
+      setReviewItems(objs);
+      reviewMapsRef.current = maps;
+      setReviewFilter('all');
+      setStep('review');
+    } catch (e) {
+      setError(
+        'No se pudo cargar el inventario actual para comparar. Intenta de nuevo.',
+      );
+    } finally {
+      setReviewLoading(false);
+    }
+  };
+
+  // Edita un campo de una fila en la revisión y recalcula su acción/diff.
+  const editReview = (idx, key, value) => {
+    setReviewItems((items) =>
+      items.map((it, i) => {
+        if (i !== idx) return it;
+        const next = { ...it, [key]: value };
+        next._meta = classify(next, reviewMapsRef.current || { bySku: {}, byId: {} });
+        return next;
+      }),
+    );
+  };
+
   const missingRequired = FIELDS.filter(
     (f) => f.required && (mapping[f.key] === '' || mapping[f.key] == null),
   );
 
   const doImport = async () => {
-    const items = buildItems();
+    // Importa las filas YA revisadas/editadas (sin las marcadas como error).
+    const source = reviewItems.filter((o) => o._meta?.action !== 'error');
+    const items = buildItemsFrom(source);
     if (!items.length) {
-      setError('No hay filas para importar.');
+      setError('No hay filas válidas para importar.');
       return;
     }
     setError('');
@@ -390,7 +540,7 @@ export default function ImportInventory() {
       setStep('done');
     } catch (e) {
       setError(e?.message || 'No se pudo completar la carga.');
-      setStep('map');
+      setStep('review');
     }
   };
 
@@ -680,6 +830,7 @@ export default function ImportInventory() {
                 setStep('upload');
                 setRows([]);
                 setHeaders([]);
+                setReviewItems([]);
               }}
               className="text-xs font-semibold text-orange-600 hover:underline"
             >
@@ -812,16 +963,273 @@ export default function ImportInventory() {
               Cancelar
             </button>
             <button
-              onClick={doImport}
-              disabled={missingRequired.length > 0}
+              onClick={enterReview}
+              disabled={missingRequired.length > 0 || reviewLoading}
               className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-orange-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-orange-700 disabled:opacity-50 sm:w-auto"
             >
               <ArrowUpTrayIcon className="h-5 w-5" />
-              Importar {rows.length} filas
+              {reviewLoading ? 'Analizando…' : `Revisar cambios (${rows.length})`}
             </button>
           </div>
         </div>
       )}
+
+      {/* PASO 2.5: revisar cambios (validar y editar antes de importar) */}
+      {step === 'review' &&
+        (() => {
+          const counts = reviewItems.reduce(
+            (a, it) => {
+              a[it._meta?.action] = (a[it._meta?.action] || 0) + 1;
+              return a;
+            },
+            { create: 0, update: 0, delete: 0, error: 0 },
+          );
+          const importable =
+            counts.create + counts.update + counts.delete;
+          const chips = [
+            { id: 'all', label: `Todos (${reviewItems.length})`, cls: 'text-gray-700' },
+            { id: 'create', label: `Crear (${counts.create})`, cls: 'text-emerald-700' },
+            { id: 'update', label: `Actualizar (${counts.update})`, cls: 'text-blue-700' },
+            { id: 'delete', label: `Eliminar (${counts.delete})`, cls: 'text-amber-700' },
+            { id: 'error', label: `Con error (${counts.error})`, cls: 'text-red-700' },
+          ];
+          const ACTION = {
+            create: { label: 'Crear', cls: 'bg-emerald-50 text-emerald-700 ring-emerald-200', Icon: PlusCircleIcon },
+            update: { label: 'Actualizar', cls: 'bg-blue-50 text-blue-700 ring-blue-200', Icon: PencilSquareIcon },
+            delete: { label: 'Eliminar', cls: 'bg-amber-50 text-amber-700 ring-amber-200', Icon: TrashIcon },
+            error: { label: 'Error', cls: 'bg-red-50 text-red-700 ring-red-200', Icon: ExclamationTriangleIcon },
+          };
+          return (
+            <div className="space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3">
+                <p className="text-sm text-gray-600">
+                  Revisa los cambios antes de aplicar. Puedes <b>editar</b> aquí
+                  mismo si algo quedó mal; no necesitas volver al Excel.
+                </p>
+                <button
+                  onClick={() => setStep('map')}
+                  className="text-xs font-semibold text-orange-600 hover:underline"
+                >
+                  ← Volver a columnas
+                </button>
+              </div>
+
+              {/* Filtros por tipo de cambio */}
+              <div className="flex flex-wrap gap-2">
+                {chips.map((c) => (
+                  <button
+                    key={c.id}
+                    onClick={() => setReviewFilter(c.id)}
+                    className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${
+                      reviewFilter === c.id
+                        ? 'border-orange-400 bg-orange-50 text-orange-700'
+                        : `border-gray-200 bg-white ${c.cls} hover:bg-gray-50`
+                    }`}
+                  >
+                    {c.label}
+                  </button>
+                ))}
+              </div>
+
+              {counts.error > 0 && (
+                <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  Hay <b>{counts.error}</b> fila(s) con error: no se importarán.
+                  Corrígelas abajo (nombre, precio o la llave ID/SKU) y
+                  desaparecerá el error.
+                </div>
+              )}
+
+              <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
+                <div className="overflow-x-auto [-webkit-overflow-scrolling:touch]">
+                  <table className="min-w-full text-sm">
+                    <thead className="bg-gray-50 text-left text-[11px] font-semibold uppercase text-gray-400">
+                      <tr>
+                        <th className="px-3 py-2">Acción</th>
+                        <th className="px-3 py-2">Nombre</th>
+                        <th className="px-3 py-2">ID/SKU</th>
+                        <th className="px-3 py-2 text-right">P. venta</th>
+                        <th className="px-3 py-2 text-right">P. compra</th>
+                        <th className="px-3 py-2 text-right">Stock</th>
+                        <th className="px-3 py-2">Estado</th>
+                        <th className="px-3 py-2 text-center">Eliminar</th>
+                        <th className="px-3 py-2">Cambios</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {reviewItems.map((it, idx) => {
+                        const action = it._meta?.action;
+                        if (reviewFilter !== 'all' && action !== reviewFilter)
+                          return null;
+                        const a = ACTION[action] || ACTION.error;
+                        const key =
+                          String(it.sku || '').trim() ||
+                          (it.id != null && String(it.id).trim()) ||
+                          '';
+                        const rowKey = hasKey(it);
+                        const num = (v) =>
+                          v === '' || v == null ? '' : String(v);
+                        return (
+                          <tr
+                            key={idx}
+                            className={
+                              action === 'error'
+                                ? 'bg-red-50/40'
+                                : action === 'delete'
+                                  ? 'bg-amber-50/30'
+                                  : ''
+                            }
+                          >
+                            <td className="whitespace-nowrap px-3 py-2">
+                              <span
+                                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold ring-1 ${a.cls}`}
+                              >
+                                <a.Icon className="h-3.5 w-3.5" />
+                                {a.label}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2">
+                              <input
+                                value={it.name ?? ''}
+                                onChange={(e) =>
+                                  editReview(idx, 'name', e.target.value)
+                                }
+                                className="w-40 rounded-lg border border-gray-200 px-2 py-1 text-sm focus:border-orange-400 focus:outline-none"
+                              />
+                            </td>
+                            <td className="whitespace-nowrap px-3 py-2 text-xs text-gray-400">
+                              {key || '—'}
+                            </td>
+                            <td className="px-3 py-2 text-right">
+                              <input
+                                value={num(it.salePrice)}
+                                onChange={(e) =>
+                                  editReview(
+                                    idx,
+                                    'salePrice',
+                                    parseNumber(e.target.value),
+                                  )
+                                }
+                                className="w-24 rounded-lg border border-gray-200 px-2 py-1 text-right text-sm focus:border-orange-400 focus:outline-none"
+                              />
+                            </td>
+                            <td className="px-3 py-2 text-right">
+                              <input
+                                value={num(it.purchasePrice)}
+                                onChange={(e) =>
+                                  editReview(
+                                    idx,
+                                    'purchasePrice',
+                                    parseNumber(e.target.value),
+                                  )
+                                }
+                                className="w-24 rounded-lg border border-gray-200 px-2 py-1 text-right text-sm focus:border-orange-400 focus:outline-none"
+                              />
+                            </td>
+                            <td className="px-3 py-2 text-right">
+                              <input
+                                value={num(it.stock)}
+                                onChange={(e) =>
+                                  editReview(
+                                    idx,
+                                    'stock',
+                                    parseNumber(e.target.value),
+                                  )
+                                }
+                                className="w-20 rounded-lg border border-gray-200 px-2 py-1 text-right text-sm focus:border-orange-400 focus:outline-none"
+                              />
+                            </td>
+                            <td className="px-3 py-2">
+                              <select
+                                value={String(it.status || '').toUpperCase()}
+                                onChange={(e) =>
+                                  editReview(idx, 'status', e.target.value)
+                                }
+                                className="rounded-lg border border-gray-200 px-2 py-1 text-sm focus:border-orange-400 focus:outline-none"
+                              >
+                                <option value="">—</option>
+                                <option value="ACTIVO">Activo</option>
+                                <option value="INACTIVO">Inactivo</option>
+                              </select>
+                            </td>
+                            <td className="px-3 py-2 text-center">
+                              <input
+                                type="checkbox"
+                                disabled={!rowKey}
+                                checked={isDeleteFlag(it.delete)}
+                                onChange={(e) =>
+                                  editReview(
+                                    idx,
+                                    'delete',
+                                    e.target.checked ? 'SÍ' : '',
+                                  )
+                                }
+                                className="h-4 w-4 accent-amber-600 disabled:opacity-30"
+                                title={
+                                  rowKey
+                                    ? 'Sacar del inventario'
+                                    : 'Solo para productos existentes (ID/SKU)'
+                                }
+                              />
+                            </td>
+                            <td className="px-3 py-2">
+                              {action === 'error' ? (
+                                <span className="text-xs font-medium text-red-600">
+                                  {it._meta?.error}
+                                </span>
+                              ) : action === 'update' ? (
+                                it._meta?.diff?.length ? (
+                                  <div className="flex flex-wrap gap-1">
+                                    {it._meta.diff.map((d, i) => (
+                                      <span
+                                        key={i}
+                                        className="rounded bg-blue-50 px-1.5 py-0.5 text-[10px] font-medium text-blue-700"
+                                      >
+                                        {d.label}: {d.old} → {d.next}
+                                      </span>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <span className="text-xs text-gray-400">
+                                    Sin cambios
+                                  </span>
+                                )
+                              ) : action === 'delete' ? (
+                                <span className="text-xs font-medium text-amber-700">
+                                  Se sacará del inventario
+                                </span>
+                              ) : (
+                                <span className="text-xs text-emerald-600">
+                                  Producto nuevo
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                <button
+                  onClick={() => setStep('map')}
+                  className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50 sm:w-auto"
+                >
+                  Volver
+                </button>
+                <button
+                  onClick={doImport}
+                  disabled={importable === 0}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-orange-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-orange-700 disabled:opacity-50 sm:w-auto"
+                >
+                  <CheckCircleIcon className="h-5 w-5" />
+                  Confirmar e importar ({importable})
+                </button>
+              </div>
+            </div>
+          );
+        })()}
 
       {/* PASO 3: cargando (loading hasta terminar) */}
       {step === 'importing' && (
@@ -926,6 +1334,7 @@ export default function ImportInventory() {
                 setRows([]);
                 setHeaders([]);
                 setResult(null);
+                setReviewItems([]);
               }}
               className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50 sm:w-auto"
             >
