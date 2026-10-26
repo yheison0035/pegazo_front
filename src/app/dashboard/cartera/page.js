@@ -13,14 +13,20 @@ import {
   getReceivables,
   getPaymentsHistory,
   getCreditsHistory,
+  getSaleById,
+  getSalePayments,
+  deleteSale,
   SALES_CHANGED_EVENT,
 } from '@/lib/api/routes/sales';
+import { useAuth } from '@/context/authContext';
 import { formatCOP, formatDateOnly, formatDateTime } from '@/lib/api/utils/utils';
 import Button from '@/components/ui/Button';
 import StatusBadge from '@/components/ui/StatusBadge';
 import EmptyState from '@/components/ui/EmptyState';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import AbonoModal from '@/components/cartera/AbonoModal';
+import SaleDetailModal from '@/components/dashboard/sales/SaleDetailModal';
+import ConfirmDeleteModal from '@/components/dashboard/tables/segments/confirmDeleteModal';
 
 // Semáforo de mora por días de vencimiento.
 function OverdueBadge({ days, dueDate }) {
@@ -47,6 +53,8 @@ function OverdueBadge({ days, dueDate }) {
 }
 
 export default function CarteraPage() {
+  const auth = useAuth();
+  const usuario = auth?.usuario;
   const [tab, setTab] = useState('por_cobrar');
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState({ totalSaldo: 0, count: 0, rows: [] });
@@ -59,6 +67,55 @@ export default function CarteraPage() {
   const [history, setHistory] = useState({ total: 0, count: 0, rows: [] });
   const [search, setSearch] = useState('');
   const [abonoSale, setAbonoSale] = useState(null);
+  // Detalle completo de la venta (ver toda la compra + abonos + acciones).
+  const [detail, setDetail] = useState(null); // { ...sale, _credit }
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [confirmDel, setConfirmDel] = useState(null); // venta a eliminar
+  const [deleting, setDeleting] = useState(false);
+
+  // Abre el detalle de una venta: trae la compra completa + sus abonos/saldo.
+  const openDetail = useCallback(async (row) => {
+    setDetailLoading(true);
+    try {
+      const [sRes, pRes] = await Promise.all([
+        getSaleById(row.id),
+        getSalePayments(row.id),
+      ]);
+      const sale = sRes?.data || sRes;
+      const pay = pRes?.data || {};
+      setDetail({
+        ...sale,
+        _credit: {
+          total: pay.total ?? row.total,
+          paid: pay.paid ?? row.paid ?? 0,
+          saldo: pay.saldo ?? row.saldo ?? 0,
+          dueDate: pay.dueDate ?? row.dueDate,
+          overdueDays: row.overdueDays || 0,
+          payments: pay.payments || [],
+        },
+      });
+    } catch (_) {
+      // Si falla el detalle, al menos abre el abono para no bloquear.
+      setAbonoSale(row);
+    } finally {
+      setDetailLoading(false);
+    }
+  }, []);
+
+  const handleDelete = async () => {
+    if (!confirmDel) return;
+    setDeleting(true);
+    try {
+      await deleteSale(confirmDel.id);
+      setConfirmDel(null);
+      setDetail(null);
+      await load();
+    } catch (_) {
+      /* el backend ya responde el error; se mantiene abierto */
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -219,7 +276,11 @@ export default function CarteraPage() {
                   </tr>
                 )}
                 {rows.map((r) => (
-                  <tr key={r.id} className="hover:bg-orange-50">
+                  <tr
+                    key={r.id}
+                    onClick={() => openDetail(r)}
+                    className="cursor-pointer hover:bg-orange-50"
+                  >
                     <td className="px-5 py-3 font-medium text-gray-700 whitespace-nowrap">
                       {r.code}
                     </td>
@@ -248,7 +309,10 @@ export default function CarteraPage() {
                       <Button
                         size="sm"
                         variant="primary"
-                        onClick={() => setAbonoSale(r)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setAbonoSale(r);
+                        }}
                       >
                         Abonar
                       </Button>
@@ -320,7 +384,11 @@ export default function CarteraPage() {
                       </tr>
                     )}
                     {credits.rows.map((r) => (
-                      <tr key={r.id} className="hover:bg-orange-50">
+                      <tr
+                        key={r.id}
+                        onClick={() => openDetail(r)}
+                        className="cursor-pointer hover:bg-orange-50"
+                      >
                         <td className="px-5 py-3 font-medium text-gray-700 whitespace-nowrap">
                           {r.code}
                         </td>
@@ -358,7 +426,11 @@ export default function CarteraPage() {
                           <Button
                             size="sm"
                             variant={r.status === 'PAGADA' ? 'secondary' : 'primary'}
-                            onClick={() => setAbonoSale(r)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (r.status === 'PAGADA') openDetail(r);
+                              else setAbonoSale(r);
+                            }}
                           >
                             {r.status === 'PAGADA' ? 'Ver' : 'Abonar'}
                           </Button>
@@ -436,11 +508,43 @@ export default function CarteraPage() {
           </>
         )}
 
+        {detailLoading && <LoadingOverlay />}
+
+        {detail && (
+          <SaleDetailModal
+            sale={detail}
+            usuario={usuario}
+            credit={detail._credit}
+            onClose={() => setDetail(null)}
+            onAbonar={(s) => {
+              setDetail(null);
+              setAbonoSale(s);
+            }}
+            // Eliminar solo para SUPER_ADMIN (igual que el backend).
+            onDelete={
+              usuario?.role === 'SUPER_ADMIN'
+                ? (s) => setConfirmDel(s)
+                : undefined
+            }
+          />
+        )}
+
         {abonoSale && (
           <AbonoModal
             sale={abonoSale}
             onClose={() => setAbonoSale(null)}
             onSaved={() => load()}
+          />
+        )}
+
+        {confirmDel && (
+          <ConfirmDeleteModal
+            show={!!confirmDel}
+            setShow={(v) => !v && setConfirmDel(null)}
+            type="venta"
+            name={confirmDel.code}
+            onConfirm={handleDelete}
+            loading={deleting}
           />
         )}
       </div>

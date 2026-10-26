@@ -4,6 +4,8 @@ import {
   XMarkIcon,
   PrinterIcon,
   PencilSquareIcon,
+  TrashIcon,
+  BanknotesIcon,
   UserIcon,
   CalendarDaysIcon,
   CreditCardIcon,
@@ -33,7 +35,17 @@ const itemColor = (it) => {
     : null;
 };
 
-export default function SaleDetailModal({ sale, usuario, onClose, onPrint }) {
+export default function SaleDetailModal({
+  sale,
+  usuario,
+  onClose,
+  onPrint,
+  // Opcionales: solo se usan desde Cartera. Si no vienen, el modal se comporta
+  // igual que siempre (delivered_sales no se ve afectado).
+  credit, // { total, paid, saldo, dueDate, overdueDays, payments: [...] }
+  onAbonar,
+  onDelete,
+}) {
   if (!sale) return null;
 
   const items = Array.isArray(sale.items) ? sale.items : [];
@@ -189,10 +201,92 @@ export default function SaleDetailModal({ sale, usuario, onClose, onPrint }) {
               {sale.notes}
             </div>
           )}
+
+          {/* Crédito (solo desde Cartera): resumen del saldo + abonos */}
+          {credit && (
+            <div className="mt-5">
+              <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                Crédito
+              </p>
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div className="rounded-xl bg-gray-50 px-2 py-2">
+                  <p className="text-[10px] uppercase text-gray-400">Total</p>
+                  <p className="text-sm font-semibold text-gray-800 tabular-nums">
+                    {formatCOP(credit.total)}
+                  </p>
+                </div>
+                <div className="rounded-xl bg-emerald-50 px-2 py-2">
+                  <p className="text-[10px] uppercase text-emerald-500">
+                    Abonado
+                  </p>
+                  <p className="text-sm font-semibold text-emerald-700 tabular-nums">
+                    {formatCOP(credit.paid)}
+                  </p>
+                </div>
+                <div className="rounded-xl bg-orange-50 px-2 py-2">
+                  <p className="text-[10px] uppercase text-orange-500">Saldo</p>
+                  <p className="text-sm font-bold text-orange-700 tabular-nums">
+                    {formatCOP(credit.saldo)}
+                  </p>
+                </div>
+              </div>
+              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500">
+                {credit.dueDate && (
+                  <span>
+                    Vence:{' '}
+                    <span className="font-medium text-gray-700">
+                      {formatDateTime(credit.dueDate)}
+                    </span>
+                  </span>
+                )}
+                {credit.overdueDays > 0 && (
+                  <span className="font-semibold text-red-600">
+                    {credit.overdueDays}{' '}
+                    {credit.overdueDays === 1 ? 'día' : 'días'} de mora
+                  </span>
+                )}
+                {credit.saldo <= 0.01 && (
+                  <span className="font-semibold text-emerald-600">
+                    Crédito pagado
+                  </span>
+                )}
+              </div>
+
+              {Array.isArray(credit.payments) && credit.payments.length > 0 && (
+                <ul className="mt-3 space-y-1.5">
+                  {credit.payments.map((p) => (
+                    <li
+                      key={p.id}
+                      className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50/60 px-3 py-1.5 text-sm"
+                    >
+                      <span className="text-gray-700 tabular-nums">
+                        {formatCOP(p.amount)}
+                        <span className="ml-1 text-xs text-gray-400">
+                          {p.method}
+                        </span>
+                      </span>
+                      <span className="text-xs text-gray-400">
+                        {formatDateTime(p.paidAt)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Acciones */}
-        <div className="flex items-center justify-end gap-2 border-t border-gray-100 px-6 py-4">
+        <div className="flex flex-wrap items-center justify-end gap-2 border-t border-gray-100 px-6 py-4">
+          {/* Eliminar: solo SUPER_ADMIN (el padre decide si pasa onDelete). */}
+          {onDelete && (
+            <button
+              onClick={() => onDelete(sale)}
+              className="mr-auto inline-flex items-center gap-1.5 rounded-xl border border-red-200 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
+            >
+              <TrashIcon className="h-4 w-4" /> Eliminar
+            </button>
+          )}
           {canEdit && (
             <Link
               href={`/dashboard/delivered_sales/edit/${sale.id}`}
@@ -201,12 +295,23 @@ export default function SaleDetailModal({ sale, usuario, onClose, onPrint }) {
               <PencilSquareIcon className="h-4 w-4" /> Editar
             </Link>
           )}
-          <button
-            onClick={() => onPrint?.(sale)}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-orange-600 px-4 py-2 text-sm font-bold text-white hover:bg-orange-700"
-          >
-            <PrinterIcon className="h-4 w-4" /> Imprimir
-          </button>
+          {/* Abonar: solo si hay saldo pendiente (desde Cartera). */}
+          {onAbonar && credit && credit.saldo > 0.01 && (
+            <button
+              onClick={() => onAbonar(sale)}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-700"
+            >
+              <BanknotesIcon className="h-4 w-4" /> Registrar abono
+            </button>
+          )}
+          {onPrint && (
+            <button
+              onClick={() => onPrint?.(sale)}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-orange-600 px-4 py-2 text-sm font-bold text-white hover:bg-orange-700"
+            >
+              <PrinterIcon className="h-4 w-4" /> Imprimir
+            </button>
+          )}
         </div>
       </div>
     </div>
