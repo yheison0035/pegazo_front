@@ -79,6 +79,14 @@ export async function addSalePayment(saleId, dto) {
   return res;
 }
 
+// Elimina una venta (solo SUPER_ADMIN). El backend restaura el stock, borra los
+// abonos y baja los ingresos de caja asociados. Irreversible.
+export async function deleteSale(id) {
+  const res = await apiFetch(`/sales/${id}`, { method: 'DELETE' });
+  notifySalesChanged();
+  return res;
+}
+
 export async function createSale(dto) {
   const body = {
     ...dto,
