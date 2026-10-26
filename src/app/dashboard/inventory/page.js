@@ -111,8 +111,10 @@ export default function Inventory() {
   const { filters, handleFilterChange } = useColumnFilters({
     name: '',
     barcode: '',
+    stock: '',
     localId: '',
     providerId: '',
+    categoryId: '',
     salePrice: '',
     status: '',
   });

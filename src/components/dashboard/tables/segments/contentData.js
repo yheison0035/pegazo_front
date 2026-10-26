@@ -219,6 +219,10 @@ export default function ContentData({
                 )}
 
                 <td className="px-5 py-4 whitespace-nowrap">
+                  {info.category?.name || '---'}
+                </td>
+
+                <td className="px-5 py-4 whitespace-nowrap">
                   <StatusBadge status={info.status} />
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
