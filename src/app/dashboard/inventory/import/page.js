@@ -1040,9 +1040,9 @@ export default function ImportInventory() {
               )}
 
               <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
-                <div className="overflow-x-auto [-webkit-overflow-scrolling:touch]">
+                <div className="max-h-[60vh] overflow-auto [-webkit-overflow-scrolling:touch]">
                   <table className="min-w-full text-sm">
-                    <thead className="bg-gray-50 text-left text-[11px] font-semibold uppercase text-gray-400">
+                    <thead className="sticky top-0 z-10 bg-gray-50 text-left text-[11px] font-semibold uppercase text-gray-400 shadow-[0_1px_0_rgba(0,0,0,0.06)]">
                       <tr>
                         <th className="px-3 py-2">Acción</th>
                         <th className="px-3 py-2">Nombre</th>
