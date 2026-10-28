@@ -13,6 +13,7 @@ import Button from '@/components/ui/Button';
 import useLocals from '@/lib/api/hooks/useLocals';
 import useDeliveredSales from '@/lib/api/hooks/useDeliveredSales';
 import { formatCOP } from '@/lib/api/utils/utils';
+import useTerms from '@/hooks/useTerms';
 
 const PAYMENT_LABELS = {
   EFECTIVO: 'Efectivo',
@@ -23,6 +24,7 @@ const PAYMENT_LABELS = {
 };
 
 export default function ServicePerformanceModal({ onClose }) {
+  const t = useTerms();
   const [locals, setLocals] = useState([]);
   const [localId, setLocalId] = useState('');
   const [startDate, setStartDate] = useState('');
@@ -204,7 +206,7 @@ export default function ServicePerformanceModal({ onClose }) {
 
               {changeDate && (
                 <p className="px-1 text-xs text-gray-500">
-                  Comisión de barberos:{' '}
+                  Comisión de {(t.attendantPlural || 'profesionales').toLowerCase()}:{' '}
                   <span className="font-semibold">
                     {Math.round(commissionRate * 100)}%
                   </span>{' '}

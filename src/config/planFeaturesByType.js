@@ -34,6 +34,25 @@ const GROUP_BY_TYPE = {
   TELEVENTAS: 'retail',
   DISTRIBUCION: 'retail',
   ECOMMERCE: 'retail',
+  // Faltaban (caían al grupo por defecto)
+  BARBERIA: 'servicios',
+  PANALERIA: 'retail',
+  PARQUEADERO: 'servicios',
+  // Verticales completadas 28/10/2026
+  GIMNASIO: 'servicios',
+  TALLER_MECANICO: 'servicios',
+  LAVANDERIA: 'servicios',
+  VETERINARIA: 'salud',
+  ASADERO: 'comida',
+  BAR: 'comida',
+  PIZZERIA: 'comida',
+  PANADERIA: 'retail',
+  PESCADERIA: 'retail',
+  LICORERA: 'retail',
+  PAPELERIA: 'retail',
+  PETSHOP: 'retail',
+  FERRETERIA: 'retail',
+  TECNOLOGIA: 'retail',
 };
 
 const DEFAULT_GROUP = 'retail';

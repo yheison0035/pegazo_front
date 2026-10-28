@@ -1,5 +1,6 @@
 'use client';
 
+import { stockLabel } from '@/lib/pos/weight';
 import Link from 'next/link';
 import { CameraIcon } from '@heroicons/react/24/outline';
 import { canSeeOldPrice } from '@/hooks/inventory.permissions';
@@ -188,7 +189,7 @@ export default function ContentData({
                         <span
                           className={`px-2.5 py-1 text-xs rounded-full font-medium ${cls}`}
                         >
-                          {info.stock ?? '---'}
+                          {stockLabel(info.stock, info.unit)}
                         </span>
                         {low && (
                           <span className="mt-0.5 text-[10px] font-semibold text-red-500">

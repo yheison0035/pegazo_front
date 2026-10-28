@@ -190,4 +190,84 @@ export const BUSINESS_TYPES = {
     'delivered_sales', 'cash', 'expenses', 'payables', 'statistics',
   ],
 
+  // ---------- VERTICALES COMPLETADAS 28/10/2026 (antes solo etiqueta) ----------
+  // Panadería: proveedores, marcas, insumos/recetas y venta por unidad o peso.
+  PANADERIA: [
+    'locals', 'users', 'categories', 'brands', 'providers', 'inventory', 'supplies',
+    'purchases', 'customers', 'cartera', 'impuestos', 'loyalty', 'sales', 'delivered_sales',
+    'returns', 'cash', 'expenses', 'payables', 'statistics',
+  ],
+  // Pescadería: perecedero por peso (como carnicería).
+  PESCADERIA: [
+    'locals', 'users', 'categories', 'providers', 'inventory', 'purchases',
+    'customers', 'cartera', 'impuestos', 'sales', 'delivered_sales', 'cash',
+    'expenses', 'payables', 'statistics',
+  ],
+  LICORERA: [
+    'locals', 'users', 'categories', 'brands', 'providers', 'inventory',
+    'purchases', 'customers', 'cartera', 'impuestos', 'sales', 'delivered_sales',
+    'returns', 'cash', 'expenses', 'payables', 'statistics',
+  ],
+  PAPELERIA: [
+    'locals', 'users', 'categories', 'brands', 'providers', 'inventory',
+    'purchases', 'customers', 'cartera', 'impuestos', 'sales', 'delivered_sales',
+    'returns', 'cash', 'expenses', 'payables', 'statistics',
+  ],
+  PETSHOP: [
+    'locals', 'users', 'categories', 'brands', 'providers', 'inventory',
+    'purchases', 'customers', 'cartera', 'impuestos', 'loyalty', 'sales', 'delivered_sales',
+    'returns', 'cash', 'expenses', 'payables', 'statistics',
+  ],
+  FERRETERIA: [
+    'locals', 'users', 'categories', 'brands', 'providers', 'inventory',
+    'purchases', 'customers', 'cartera', 'impuestos', 'quotes', 'sales', 'delivered_sales',
+    'returns', 'cash', 'expenses', 'payables', 'statistics',
+  ],
+  // Tecnología / celulares: cotizaciones y devoluciones (garantía).
+  TECNOLOGIA: [
+    'locals', 'users', 'categories', 'brands', 'providers', 'inventory',
+    'purchases', 'customers', 'cartera', 'impuestos', 'quotes', 'sales', 'delivered_sales',
+    'returns', 'cash', 'expenses', 'payables', 'statistics',
+  ],
+  // Comida: salón + cocina (asadero vende por porción/peso vía perfil de producto).
+  ASADERO: [
+    'locals', 'users', 'categories', 'providers', 'inventory', 'supplies', 'purchases',
+    'customers', 'cartera', 'impuestos', 'mesas', 'kitchen', 'sales', 'delivered_sales',
+    'cash', 'expenses', 'payables', 'statistics',
+  ],
+  BAR: [
+    'locals', 'users', 'categories', 'providers', 'inventory', 'supplies', 'purchases',
+    'customers', 'cartera', 'impuestos', 'mesas', 'kitchen', 'sales', 'delivered_sales',
+    'cash', 'expenses', 'payables', 'statistics',
+  ],
+  PIZZERIA: [
+    'locals', 'users', 'categories', 'providers', 'inventory', 'supplies', 'purchases',
+    'customers', 'cartera', 'impuestos', 'mesas', 'kitchen', 'sales', 'delivered_sales',
+    'cash', 'expenses', 'payables', 'statistics',
+  ],
+  // Servicios con agenda: entrenador / mecánico / veterinario.
+  GIMNASIO: [
+    'locals', 'users', 'categories', 'brands', 'providers', 'inventory',
+    'purchases', 'customers', 'cartera', 'impuestos', 'loyalty', 'memberships',
+    'services', 'appointments', 'sales', 'delivered_sales', 'cash', 'expenses',
+    'payables', 'employee-charges', 'statistics',
+  ],
+  TALLER_MECANICO: [
+    'locals', 'users', 'categories', 'brands', 'providers', 'inventory',
+    'purchases', 'customers', 'cartera', 'impuestos', 'quotes', 'services',
+    'appointments', 'sales', 'delivered_sales', 'cash', 'expenses', 'payables',
+    'employee-charges', 'statistics',
+  ],
+  VETERINARIA: [
+    'locals', 'users', 'categories', 'brands', 'providers', 'inventory',
+    'purchases', 'customers', 'cartera', 'impuestos', 'loyalty', 'services',
+    'appointments', 'quotes', 'clinical', 'sales', 'delivered_sales', 'cash',
+    'expenses', 'payables', 'employee-charges', 'statistics',
+  ],
+  // Lavandería: órdenes como servicios + productos, sin agenda.
+  LAVANDERIA: [
+    'locals', 'users', 'categories', 'providers', 'inventory', 'purchases',
+    'customers', 'cartera', 'impuestos', 'loyalty', 'services', 'sales',
+    'delivered_sales', 'cash', 'expenses', 'payables', 'statistics',
+  ],
 };
