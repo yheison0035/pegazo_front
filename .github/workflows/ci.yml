@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      # Turbopack a veces falla de forma intermitente con next/font/google
+      # ("queries have exactly one entry"); un segundo intento limpio lo resuelve.
+      - name: Build (con reintento)
+        run: |
+          for i in 1 2; do
+            npm run build && exit 0
+            echo "build falló (intento $i), reintentando limpio…"; rm -rf .next
+          done
+          exit 1

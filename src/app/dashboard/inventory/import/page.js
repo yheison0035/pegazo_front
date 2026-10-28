@@ -25,68 +25,17 @@ import { getBrands } from '@/lib/api/routes/brands';
 import { getProviders } from '@/lib/api/routes/providers';
 import { downloadCsv } from '@/utils/exportCsv';
 
-// Normaliza un encabezado para comparar (minúsculas, sin tildes ni símbolos).
-const norm = (s) =>
-  String(s || '')
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-z0-9]+/g, ' ')
-    .trim();
-
-// Parser de números tolerante a formatos ($ 1.500, 1.500,50, 1,500.50, 1500).
-function parseNumber(v) {
-  if (v === null || v === undefined || v === '') return '';
-  let s = String(v).trim().replace(/[^\d.,-]/g, '');
-  if (!s) return '';
-  const lastComma = s.lastIndexOf(',');
-  const lastDot = s.lastIndexOf('.');
-  if (lastComma > -1 && lastDot > -1) {
-    if (lastComma > lastDot) s = s.replace(/\./g, '').replace(',', '.');
-    else s = s.replace(/,/g, '');
-  } else if (lastComma > -1) {
-    const parts = s.split(',');
-    if (parts.length > 1 && parts[parts.length - 1].length === 3)
-      s = s.replace(/,/g, '');
-    else s = s.replace(',', '.');
-  } else if (lastDot > -1) {
-    const parts = s.split('.');
-    if (parts.length > 1 && parts[parts.length - 1].length === 3)
-      s = s.replace(/\./g, '');
-  }
-  const n = Number(s);
-  return Number.isFinite(n) ? n : '';
-}
-
-// "Eliminar" = SÍ/SI/X/1/TRUE/VERDADERO (mismo criterio que el backend).
-const normStr = (v) =>
-  String(v ?? '')
-    .trim()
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '');
-const isDeleteFlag = (v) =>
-  ['si', 'x', '1', 'true', 'verdadero', 'eliminar', 'borrar'].includes(
-    normStr(v),
-  );
-
-// Campos comparables (antes→después) al ACTUALIZAR, con su regla de cambio
-// (igual que la lógica del backend: una referencia solo cambia si trae valor).
-const DIFF_FIELDS = [
-  { key: 'name', label: 'Nombre', type: 'str' },
-  { key: 'salePrice', label: 'P. venta', type: 'num' },
-  { key: 'purchasePrice', label: 'P. compra', type: 'num' },
-  { key: 'stock', label: 'Stock', type: 'num' },
-  { key: 'minStock', label: 'Stock mín.', type: 'num' },
-  { key: 'barcode', label: 'Código', type: 'strClear' },
-  { key: 'unit', label: 'Unidad', type: 'upper' },
-  { key: 'status', label: 'Estado', type: 'status' },
-  { key: 'categoryName', label: 'Categoría', type: 'ref' },
-  { key: 'brandName', label: 'Marca', type: 'ref' },
-  { key: 'providerName', label: 'Proveedor', type: 'ref' },
-  { key: 'localName', label: 'Local', type: 'ref' },
-  { key: 'description', label: 'Descripción', type: 'strClear' },
-];
+import {
+  norm,
+  parseNumber,
+  isDeleteFlag,
+  hasKey,
+  autoMapColumns,
+  rowsToObjects as rowsToObjectsPure,
+  buildImportItems,
+  indexCurrentInventory,
+  classifyRow,
+} from '@/lib/inventory/importUtils';
 
 export default function ImportInventory() {
   const router = useRouter();
@@ -259,32 +208,8 @@ export default function ImportInventory() {
   // de salePrice hacía match por inclusión con "Precio compra" (que aparece antes
   // en el export) y se INTERCAMBIABAN precio de venta y de compra. Con la fase
   // exacta, "Precio venta"→salePrice y "Precio compra"→purchasePrice sin ambigüedad.
-  const autoMap = (hdrs) => {
-    const map = {};
-    const used = new Set();
-    FIELDS.forEach((f) => {
-      map[f.key] = '';
-    });
-    const pass = (match) => {
-      FIELDS.forEach((f) => {
-        if (map[f.key] !== '') return; // ya asignado en una fase anterior
-        const hit = hdrs.find(
-          (h) =>
-            !used.has(h.index) &&
-            f.syn.some((s) => match(norm(h.label), norm(s))),
-        );
-        if (hit) {
-          map[f.key] = hit.index;
-          used.add(hit.index);
-        }
-      });
-    };
-    // Fase 1: coincidencia EXACTA (la más confiable).
-    pass((n, ns) => n === ns);
-    // Fase 2: por inclusión (una contiene a la otra), solo para lo que falte.
-    pass((n, ns) => n.includes(ns) || ns.includes(n));
-    return map;
-  };
+  // Auto-mapeo en dos fases (exacta primero): ver importUtils.autoMapColumns.
+  const autoMap = (hdrs) => autoMapColumns(FIELDS, hdrs);
 
   const onFile = async (file) => {
     if (!file) return;
@@ -346,156 +271,15 @@ export default function ImportInventory() {
     'unit',
   ];
 
-  const hasKey = (o) =>
-    String(o.sku || '').trim() !== '' || String(o.id || '').trim() !== '';
+  // La lógica pura (parseo, clasificación, diff, construcción de ítems) vive en
+  // src/lib/inventory/importUtils.js y está cubierta por tests; aquí solo se
+  // enlaza con el estado de la página.
+  const rowsToObjects = () => rowsToObjectsPure(rows, mapping, FIELDS);
+  const buildItemsFrom = (objs) =>
+    buildImportItems(objs, { productKeys: PRODUCT_KEYS, isColor, hasSize: !!pf.size });
+  const classify = (o, maps) => classifyRow(o, maps, mapping);
 
-  // Cada fila del Excel → objeto con todos los campos mapeados (parseados).
-  // Conserva filas con nombre O con llave (ID/SKU), para no perder las de
-  // actualizar/eliminar aunque se edite el nombre.
-  const rowsToObjects = () => {
-    const get = (row, key) => {
-      const idx = mapping[key];
-      if (idx === '' || idx === undefined || idx === null) return '';
-      return row[idx] ?? '';
-    };
-    return rows
-      .map((row, i) => {
-        const o = { row: i + 2 };
-        FIELDS.forEach((f) => {
-          const v = get(row, f.key);
-          o[f.key] = f.num ? parseNumber(v) : String(v).trim();
-        });
-        return o;
-      })
-      .filter(
-        (o) =>
-          String(o.name || '').trim() !== '' ||
-          String(o.sku || '').trim() !== '' ||
-          String(o.id || '').trim() !== '',
-      );
-  };
-
-  // Construye los productos normalizados listos para el backend A PARTIR de una
-  // lista de filas-objeto (las de la revisión, ya editadas), ADAPTANDO el stock
-  // a la vertical: por color/talla (agrupa) o una sola cantidad (peso/simple).
-  const buildItemsFrom = (objs) => {
-    const pick = (o) => {
-      const p = { row: o.row };
-      PRODUCT_KEYS.forEach((k) => {
-        if (o[k] !== undefined) p[k] = o[k];
-      });
-      return p;
-    };
-
-    // Filas con SKU o ID = ACTUALIZAR/ELIMINAR (van solas, no se agrupan).
-    const updateRows = objs.filter(hasKey);
-    const createRows = objs.filter((o) => !hasKey(o) && o.name);
-    const updateItems = updateRows.map((o) => {
-      const p = pick(o);
-      // SOLO enviar stock si la fila trae un valor real. Si la columna Stock no
-      // se mapeó (o va vacía), NO se toca el stock del producto. Antes aquí se
-      // forzaba `|| 0`, lo que ponía TODO en 0 al dejar Stock en "No importar".
-      const sv = o.stock;
-      if (sv !== '' && sv != null && Number.isFinite(Number(sv))) {
-        p.stock = Number(sv);
-      }
-      return p;
-    });
-
-    if (!isColor) {
-      const creates = createRows.map((o) => {
-        const p = pick(o);
-        p.variants = [{ color: 'ÚNICO', stock: Number(o.stock) || 0 }];
-        return p;
-      });
-      return [...updateItems, ...creates];
-    }
-
-    const groups = new Map();
-    for (const o of createRows) {
-      const key = o.name.toLowerCase();
-      if (!groups.has(key)) {
-        const p = pick(o);
-        p.variants = [];
-        groups.set(key, p);
-      }
-      const p = groups.get(key);
-      const color = (o.color || '').trim() || 'ÚNICO';
-      const size = pf.size ? (o.size || '').trim() || null : null;
-      const stock = Number(o.stock) || 0;
-      const same = p.variants.find(
-        (v) => v.color === color && (v.size || null) === (size || null),
-      );
-      if (same) same.stock += stock;
-      else p.variants.push({ color, ...(size ? { size } : {}), stock });
-    }
-    return [...updateItems, ...groups.values()];
-  };
-
-  // Clasifica una fila contra el inventario actual: crear | actualizar |
-  // eliminar | error, y calcula el diff (antes→después) de las actualizaciones.
-  const classify = (o, maps) => {
-    if (hasKey(o)) {
-      const sku = String(o.sku || '').trim();
-      const idk = String(o.id || '').trim();
-      const cur = sku ? maps.bySku[sku.toLowerCase()] : maps.byId[idk];
-      if (!cur) {
-        return {
-          action: 'error',
-          error: 'No se encontró el producto (ID/SKU) en el inventario',
-        };
-      }
-      if (isDeleteFlag(o.delete)) return { action: 'delete', cur };
-      return { action: 'update', cur, diff: diffRow(o, cur) };
-    }
-    if (!String(o.name || '').trim()) {
-      return { action: 'error', error: 'Falta el nombre del producto' };
-    }
-    if (!(Number(o.salePrice) > 0)) {
-      return { action: 'error', error: 'Falta el precio de venta (o es 0)' };
-    }
-    return { action: 'create' };
-  };
-
-  // Lista de campos cambiados (solo los mapeados y que pasan la regla del
-  // backend) de una fila de actualización respecto al producto actual.
-  const diffRow = (o, cur) => {
-    const out = [];
-    const hasSku = String(o.sku || '').trim() !== '';
-    for (const f of DIFF_FIELDS) {
-      if (mapping[f.key] === '' || mapping[f.key] == null) continue;
-      // El stock solo se actualiza por SKU (variante); por ID no aplica.
-      if (f.key === 'stock' && !hasSku) continue;
-      const nv = o[f.key];
-      const ov = cur[f.key];
-      const sNew = String(nv ?? '').trim();
-      const sOld = String(ov ?? '').trim();
-      let changed = false;
-      if (f.type === 'num') {
-        if (sNew !== '' && Number(nv) !== Number(ov || 0)) changed = true;
-      } else if (f.type === 'str') {
-        if (sNew !== '' && sNew !== sOld) changed = true;
-      } else if (f.type === 'strClear') {
-        if (sNew !== sOld) changed = true; // vacío = borra
-      } else if (f.type === 'upper') {
-        if (sNew !== '' && sNew.toUpperCase() !== sOld.toUpperCase())
-          changed = true;
-      } else if (f.type === 'status') {
-        const up = sNew.toUpperCase();
-        if (
-          (up === 'ACTIVO' || up === 'INACTIVO') &&
-          up !== sOld.toUpperCase()
-        )
-          changed = true;
-      } else if (f.type === 'ref') {
-        if (sNew !== '' && sNew.toLowerCase() !== sOld.toLowerCase())
-          changed = true;
-      }
-      if (changed) out.push({ label: f.label, old: sOld || '—', next: sNew || '—' });
-    }
-    return out;
-  };
-
+  // Entra al paso de revisión: trae el inventario actual, clasifica cada fila.
   // Entra al paso de revisión: trae el inventario actual, clasifica cada fila.
   const enterReview = async () => {
     setError('');
@@ -503,13 +287,8 @@ export default function ImportInventory() {
     try {
       const res = await exportInventory();
       const current = res?.data || res || [];
-      const maps = { bySku: {}, byId: {} };
-      for (const c of current) {
-        if (c.sku) maps.bySku[String(c.sku).toLowerCase()] = c;
-        if (c.id != null) maps.byId[String(c.id)] = c;
-      }
+      const maps = indexCurrentInventory(current);
       const objs = rowsToObjects().map((o) => ({ ...o, _meta: classify(o, maps) }));
-      // Guardamos los mapas en el primer item para recomputar al editar.
       setReviewItems(objs);
       reviewMapsRef.current = maps;
       setReviewFilter('all');
