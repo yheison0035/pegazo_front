@@ -23,6 +23,7 @@ import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
 import { useAuth } from '@/context/authContext';
 import useTerms from '@/hooks/useTerms';
+import { isByWeightItem } from '@/lib/pos/weight';
 import useSales from '@/lib/api/hooks/useSales';
 import useUsers from '@/lib/api/hooks/useUsers';
 import useLocals from '@/lib/api/hooks/useLocals';
@@ -81,9 +82,9 @@ export default function PosSale({
   // debe aceptar cantidades decimales (1,5 kg) en vez de solo enteros.
   const isWeightVertical =
     getProductFields(usuario?.company?.type, usuario?.company?.typeProductFields).variantType === 'weight';
-  // Un ítem se cobra por peso si su producto es de unidad PESO; si el producto
-  // no trae `unit`, se usa el default del vertical.
-  const isByWeight = (i) => (i.unit ? i.unit === 'PESO' : isWeightVertical);
+  // Un ítem se cobra por peso si su unidad es de peso (PESO del catálogo o
+  // KG/LIBRA/ARROBA del formulario); si no trae `unit`, manda el vertical.
+  const isByWeight = (i) => isByWeightItem(i, isWeightVertical);
   const { searchProducts } = useSales();
   const { getUsers } = useUsers();
   const { getLocals } = useLocals();

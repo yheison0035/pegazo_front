@@ -60,6 +60,9 @@ const PRODUCT_FIELDS_BY_TYPE = {
 
   // Servicios: insumos simples sin marca
   SERVICIOS: { brand: false, provider: false, barcode: false, oldPrice: false },
+  // Barbería: idéntica a SERVICIOS (antes caía al DEFAULT y mostraba marca,
+  // proveedor, código y precio anterior que SERVICIOS oculta).
+  BARBERIA: { brand: false, provider: false, barcode: false, oldPrice: false },
   ODONTOLOGIA: { oldPrice: false },
 
   // Comida: cantidad simple, sin marca/código
