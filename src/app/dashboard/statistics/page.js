@@ -343,7 +343,11 @@ export default function Statistics() {
         {/* Pestañas + exportar */}
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div className="inline-flex rounded-xl border border-gray-200 bg-white p-0.5 shadow-sm print:hidden">
-            {TABS.map((tb) => (
+            {TABS.map((tb) =>
+              tb.id === 'inventario'
+                ? { ...tb, label: t.catalogLabel || (t.productPlural !== 'Productos' ? t.productPlural : null) || tb.label }
+                : tb,
+            ).map((tb) => (
               <button
                 key={tb.id}
                 type="button"

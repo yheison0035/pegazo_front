@@ -73,6 +73,29 @@ const PRODUCT_FIELDS_BY_TYPE = {
   LAVADO_VEHICULOS: { brand: false, barcode: false, oldPrice: false },
   CANCHAS_SINTETICAS: { brand: false, barcode: false, oldPrice: false },
   GUARDA_CASCOS: { brand: false, barcode: false, oldPrice: false },
+
+  // Pañalería: variantes por talla/etapa (RN, P, M, G, XG). Usa el mecanismo de
+  // color + talla; los productos existentes (variante ÚNICO) siguen funcionando.
+  PANALERIA: { variantType: 'color', size: true },
+
+  // ---- Verticales completadas 28/10/2026 ----
+  // Panadería: por unidad o por peso (pan por libra); con proveedores y marcas.
+  PANADERIA: { variantType: 'weight' },
+  // Pescadería: por peso, perecedero, sin marca ni código.
+  PESCADERIA: { brand: false, barcode: false, variantType: 'weight', expiry: true },
+  LICORERA: {},
+  PAPELERIA: {},
+  PETSHOP: { expiry: true },
+  FERRETERIA: {},
+  TECNOLOGIA: {},
+  // Asadero: comida vendida por porción/peso (pollo por libra, por presa).
+  ASADERO: { brand: false, barcode: false, oldPrice: false, variantType: 'weight' },
+  BAR: { oldPrice: false },
+  PIZZERIA: { brand: false, barcode: false, oldPrice: false },
+  GIMNASIO: { oldPrice: false },
+  TALLER_MECANICO: { oldPrice: false },
+  VETERINARIA: { expiry: true, oldPrice: false },
+  LAVANDERIA: { brand: false, barcode: false, oldPrice: false },
 };
 
 // `override` opcional: los campos configurados en BD para el tipo

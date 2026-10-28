@@ -97,3 +97,36 @@ describe('Roles por tipo de negocio', () => {
     }
   });
 });
+
+describe('Verticales completadas 28/10/2026', () => {
+  const NUEVOS = ['PANADERIA', 'PESCADERIA', 'LICORERA', 'PAPELERIA', 'PETSHOP', 'FERRETERIA', 'TECNOLOGIA',
+    'ASADERO', 'BAR', 'PIZZERIA', 'GIMNASIO', 'TALLER_MECANICO', 'VETERINARIA', 'LAVANDERIA'];
+  it('todos existen con módulos', () => {
+    for (const t of NUEVOS) expect({ tipo: t, ok: (BUSINESS_TYPES[t] || []).length > 0 }).toEqual({ tipo: t, ok: true });
+  });
+  it('panadería, pescadería y asadero venden por peso; pañalería por talla/etapa', () => {
+    for (const t of ['PANADERIA', 'PESCADERIA', 'ASADERO']) {
+      expect({ tipo: t, vt: getProductFields(t).variantType }).toEqual({ tipo: t, vt: 'weight' });
+    }
+    expect(getProductFields('PANALERIA')).toMatchObject({ variantType: 'color', size: true });
+  });
+  it('panadería tiene proveedores, marcas e insumos (producción básica)', () => {
+    expect(getProductFields('PANADERIA')).toMatchObject({ provider: true, brand: true });
+    expect(BUSINESS_TYPES.PANADERIA).toEqual(expect.arrayContaining(['providers', 'brands', 'supplies']));
+  });
+  it('gimnasio tiene membresías y agenda; veterinaria tiene historia clínica y agenda', () => {
+    expect(BUSINESS_TYPES.GIMNASIO).toEqual(expect.arrayContaining(['memberships', 'appointments', 'services']));
+    expect(BUSINESS_TYPES.VETERINARIA).toEqual(expect.arrayContaining(['clinical', 'appointments', 'services']));
+  });
+  it('quien atiende tiene nombre propio en los nuevos de agenda', () => {
+    expect(getTerms(company('GIMNASIO')).attendant).toBe('Entrenador');
+    expect(getTerms(company('TALLER_MECANICO')).attendant).toBe('Mecánico');
+    expect(getTerms(company('VETERINARIA')).attendant).toBe('Veterinario');
+  });
+  it('los de comida nuevos tienen mesas y cocina, y su catálogo se llama Menú/Carta', () => {
+    for (const t of ['ASADERO', 'BAR', 'PIZZERIA']) {
+      expect(BUSINESS_TYPES[t]).toEqual(expect.arrayContaining(['mesas', 'kitchen']));
+      expect(['Menú', 'Carta']).toContain(getTerms(company(t)).catalogLabel);
+    }
+  });
+});

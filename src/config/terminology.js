@@ -164,6 +164,48 @@ const TERMS_BY_TYPE = {
     sale: 'Factura',
     salePlural: 'Ventas realizadas',
   },
+
+  // ---- Verticales completadas 28/10/2026 ----
+  PANADERIA: { attendant: 'Cajero', attendantPlural: 'Cajeros' },
+  PESCADERIA: { attendant: 'Cajero', attendantPlural: 'Cajeros' },
+  LICORERA: { attendant: 'Cajero', attendantPlural: 'Cajeros' },
+  PAPELERIA: { attendant: 'Cajero', attendantPlural: 'Cajeros' },
+  FERRETERIA: { attendant: 'Vendedor', attendantPlural: 'Vendedores' },
+  PETSHOP: { attendant: 'Vendedor', attendantPlural: 'Vendedores' },
+  TECNOLOGIA: { attendant: 'Asesor', attendantPlural: 'Asesores' },
+  ASADERO: {
+    attendant: 'Cajero', attendantPlural: 'Cajeros',
+    product: 'Plato', productPlural: 'Platos', catalogLabel: 'Menú',
+    sale: 'Pedido', salePlural: 'Pedidos',
+  },
+  PIZZERIA: {
+    attendant: 'Cajero', attendantPlural: 'Cajeros',
+    product: 'Plato', productPlural: 'Platos', catalogLabel: 'Menú',
+    sale: 'Pedido', salePlural: 'Pedidos',
+  },
+  BAR: {
+    attendant: 'Mesero', attendantPlural: 'Meseros',
+    product: 'Bebida', productPlural: 'Bebidas', catalogLabel: 'Carta',
+    sale: 'Pedido', salePlural: 'Pedidos',
+  },
+  GIMNASIO: {
+    attendant: 'Entrenador', attendantPlural: 'Entrenadores',
+    service: 'Plan', servicePlural: 'Planes',
+    appointment: 'Clase', appointmentPlural: 'Clases',
+  },
+  TALLER_MECANICO: {
+    attendant: 'Mecánico', attendantPlural: 'Mecánicos',
+    service: 'Servicio', servicePlural: 'Servicios',
+  },
+  VETERINARIA: {
+    attendant: 'Veterinario', attendantPlural: 'Veterinarios',
+    service: 'Consulta', servicePlural: 'Consultas',
+  },
+  LAVANDERIA: {
+    attendant: 'Operario', attendantPlural: 'Operarios',
+    service: 'Servicio', servicePlural: 'Servicios',
+    sale: 'Orden', salePlural: 'Órdenes',
+  },
 };
 
 // Devuelve los términos para una empresa: DEFAULT + por tipo + overrides propios.

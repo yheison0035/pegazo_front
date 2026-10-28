@@ -18,6 +18,8 @@ import { useAuth } from '@/context/authContext';
 import { getProductFields } from '@/config/verticalProfiles';
 import usePurchases from '@/lib/api/hooks/usePurchases';
 import useSales from '@/lib/api/hooks/useSales';
+import { isWeightUnit } from '@/lib/pos/weight';
+import { unitShortLabel } from '@/config/verticalProfiles';
 import useLocals from '@/lib/api/hooks/useLocals';
 import { getProviders } from '@/lib/api/routes/providers';
 import { getFiscalConfig } from '@/lib/api/routes/company';
@@ -135,6 +137,7 @@ export default function PurchasesPage() {
         name: r.name,
         color: r.color,
         size: r.size,
+        unit: r.unit, // PESO/KG/LIBRA/ARROBA → cantidades decimales
         quantity: 1,
         unitCost: '',
       },
@@ -352,6 +355,8 @@ export default function PurchasesPage() {
                         <td className="px-3 py-2">
                           <input
                             type="number"
+                            step={isWeightUnit(i.unit) ? 0.001 : 1}
+                            inputMode={isWeightUnit(i.unit) ? 'decimal' : 'numeric'}
                             min="0"
                             value={i.quantity}
                             onChange={(e) =>
@@ -359,6 +364,9 @@ export default function PurchasesPage() {
                             }
                             className="w-20 rounded border border-gray-200 px-2 py-1 text-sm"
                           />
+                          {isWeightUnit(i.unit) && (
+                            <span className="ml-1 text-xs text-gray-400">{unitShortLabel(String(i.unit).toUpperCase())}</span>
+                          )}
                         </td>
                         <td className="px-3 py-2">
                           <MoneyInput

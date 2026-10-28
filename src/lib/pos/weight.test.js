@@ -23,3 +23,14 @@ describe('isByWeightItem', () => {
     expect(isByWeightItem(null, true)).toBe(true);
   });
 });
+
+import { stockLabel } from './weight';
+describe('stockLabel', () => {
+  it('muestra la unidad en productos por peso y el número solo en unidades', () => {
+    expect(stockLabel(12, 'KG')).toBe('12 kg');
+    expect(stockLabel(3, 'libra')).toBe('3 lb');
+    expect(stockLabel(2.5, 'ARROBA')).toBe('2.5 @');
+    expect(stockLabel(7, 'UNIDAD')).toBe(7);
+    expect(stockLabel(undefined, 'KG')).toBe('--- kg');
+  });
+});

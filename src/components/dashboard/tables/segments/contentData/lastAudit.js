@@ -51,7 +51,7 @@ export const FIELD_LABELS = {
   startTime: 'Hora',
   notes: 'Notas',
   serviceId: 'Servicio',
-  barberId: 'Barbero',
+  barberId: 'Profesional',
   customerId: 'Cliente',
   userId: 'Vendedor',
   paymentStatus: 'Estado de pago',

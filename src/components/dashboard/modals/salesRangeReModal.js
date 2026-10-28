@@ -13,8 +13,10 @@ import useLocals from '@/lib/api/hooks/useLocals';
 import useUsers from '@/lib/api/hooks/useUsers';
 import useDeliveredSales from '@/lib/api/hooks/useDeliveredSales';
 import { formatCOP, toggleCase } from '@/lib/api/utils/utils';
+import useTerms from '@/hooks/useTerms';
 
 export default function SalesRangeReModal({ onClose }) {
+  const t = useTerms();
   const [locals, setLocals] = useState([]);
   const [users, setUsers] = useState([]);
   const [showMethods, setShowMethods] = useState(false);
@@ -188,7 +190,7 @@ export default function SalesRangeReModal({ onClose }) {
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="text-left text-xs uppercase text-gray-500 border-b border-gray-200">
-                          <th className="py-2 pr-3">Barbero / Asesor</th>
+                          <th className="py-2 pr-3">{t.attendant || 'Profesional'} / Asesor</th>
                           <th className="py-2 px-3 text-right">Vendido</th>
                           <th className="py-2 px-3 text-right">Servicios</th>
                           <th className="py-2 px-3 text-right">Productos</th>
