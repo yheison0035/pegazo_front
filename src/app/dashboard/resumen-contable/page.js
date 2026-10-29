@@ -1,5 +1,6 @@
 'use client';
 
+import ExportCsvButton from '@/components/ui/ExportCsvButton';
 import { useCallback, useEffect, useState } from 'react';
 import useLiveRefresh from '@/hooks/useLiveRefresh';
 import {
@@ -98,6 +99,7 @@ export default function ResumenContablePage() {
           <h1 className="flex items-center gap-2 text-2xl font-semibold text-gray-800">
             <ChartPieIcon className="h-6 w-6 text-orange-500" /> Resumen contable
           </h1>
+        <ExportCsvButton data={fin} filename="resumen-contable.csv" />
           <p className="text-sm text-gray-500">
             Lo esencial de tus números. El detalle (libros, plan de cuentas,
             declaraciones) lo lleva tu contador.

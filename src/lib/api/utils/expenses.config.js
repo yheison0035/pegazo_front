@@ -36,6 +36,24 @@ export const getFormFieldsExpenses = () => [
     source: null,
     disabled: false,
   },
+  // Retenciones practicadas al tercero (opcionales): quedan por pagar a la DIAN
+  // y el tercero recibe el valor menos la retención.
+  {
+    name: 'retefuente',
+    label: 'Retención en la fuente (opcional)',
+    type: 'number',
+    required: false,
+    source: null,
+    disabled: false,
+  },
+  {
+    name: 'reteica',
+    label: 'Retención de ICA (opcional)',
+    type: 'number',
+    required: false,
+    source: null,
+    disabled: false,
+  },
   {
     name: 'paymentMethod',
     label: 'Método de Pago',

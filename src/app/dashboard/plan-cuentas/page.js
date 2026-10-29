@@ -1,5 +1,6 @@
 'use client';
 
+import ExportCsvButton from '@/components/ui/ExportCsvButton';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import useLiveRefresh from '@/hooks/useLiveRefresh';
 import {
@@ -131,6 +132,7 @@ export default function PlanCuentasPage() {
               <ListBulletIcon className="h-6 w-6 text-orange-500" /> Plan de
               cuentas
             </h1>
+        <ExportCsvButton data={rows} filename="plan-de-cuentas.csv" />
             <p className="text-sm text-gray-500">
               Las cuentas contables de tu negocio (PUC). Ya vienen las básicas;
               puedes agregar o ajustar las que necesites. Serán la base de tus

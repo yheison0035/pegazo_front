@@ -35,6 +35,9 @@ const MAGNITUDES = [
   ['consumosTarjeta', 'Consumos con tarjeta de crédito'],
   ['compras', 'Compras y consumos'],
   ['consignaciones', 'Consignaciones / depósitos / inversiones'],
+  // Se descuentan del impuesto de renta estimado (saldo a pagar / a favor).
+  ['retencionesAFavor', 'Retenciones que te practicaron (a favor)'],
+  ['anticipoRenta', 'Anticipo de renta pagado'],
 ];
 
 const FREQ_LABEL = {
@@ -110,6 +113,8 @@ export default function TaxObligationsPanel({
         consumosTarjeta: mag.consumosTarjeta ?? 0,
         compras: mag.compras ?? 0,
         consignaciones: mag.consignaciones ?? 0,
+        retencionesAFavor: mag.retencionesAFavor ?? 0,
+        anticipoRenta: mag.anticipoRenta ?? 0,
       });
       setEditing(true);
     } catch {

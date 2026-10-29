@@ -1,5 +1,6 @@
 'use client';
 
+import ExportCsvButton from '@/components/ui/ExportCsvButton';
 import { useCallback, useEffect, useState } from 'react';
 import useLiveRefresh from '@/hooks/useLiveRefresh';
 import {
@@ -166,6 +167,7 @@ export default function CalendarioTributarioPage() {
               <CalendarDaysIcon className="h-6 w-6 text-orange-500" /> Calendario
               tributario
             </h1>
+        <ExportCsvButton data={data} filename="calendario-tributario.csv" />
             <p className="text-sm text-gray-500">
               Tus vencimientos según el último dígito de tu NIT
               {data?.nitDigit ? ` (${data.nitDigit})` : ''} y tu régimen. Te
