@@ -15,7 +15,20 @@ Un módulo **no está terminado** hasta que:
 
 Importa con alias `@/...` (mapeado en `vitest.config.mjs`). Entorno `jsdom` + `jest-dom` ya configurados.
 
-## Pruebas de humo de pantallas (obligatorias por módulo)
+## Pruebas de humo de TODAS las pantallas por tipo de negocio
+
+`src/app/dashboard/__tests__/todas-las-pantallas.test.jsx` descubre con
+`import.meta.glob` todas las `page.js` del dashboard y las renderiza con el
+arnés `src/test/pageHarness.jsx`: dueño de cada tipo de negocio (COMERCIO,
+BARBERIA, RESTAURANTE, PARQUEADERO, PANADERIA, ODONTOLOGIA, TECNOLOGIA,
+LAVADO_VEHICULOS) + roles acotados (BARBERO, PROFESIONAL, ADMIN, MESERO, CAJA),
+con `fetch` simulado por ruta (`FIXTURES` con la forma real de las respuestas;
+lo demás recibe lista o detalle genérico). Lo mismo para `src/app/platform` y
+el portal del contador. Una pantalla nueva entra sola (glob). Si el backend
+cambia la forma de una respuesta, se actualiza `FIXTURES`. Para correr un solo
+tipo: `SMOKE_TYPES=COMERCIO npx vitest run src/app/dashboard/__tests__/todas-las-pantallas.test.jsx`.
+
+## Pruebas de humo de pantallas contables (con mocks específicos)
 
 Cada pantalla del dashboard y del portal del contador tiene una prueba de humo
 que la renderiza con el usuario simulado y las rutas de API simuladas con la
