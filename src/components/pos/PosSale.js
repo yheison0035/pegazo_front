@@ -73,6 +73,8 @@ export default function PosSale({
   successMessage = 'Factura registrada correctamente.',
   successUrl = '/dashboard/delivered_sales',
   initialQuery = '',
+  // Cita que se está cobrando (agenda → POS); viaja en la venta.
+  appointmentId = null,
 }) {
   const { usuario } = useAuth();
   const t = useTerms();
@@ -579,6 +581,7 @@ export default function PosSale({
         localId: Number(localId),
         userId: Number(sellerId) || usuario?.id,
         customerId: customer?.id,
+        ...(appointmentId ? { appointmentId: Number(appointmentId) } : {}),
         saleDate,
         notes,
         // Efectivo recibido (para el cambio/vuelto en la factura impresa). En
