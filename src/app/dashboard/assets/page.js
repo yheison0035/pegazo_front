@@ -223,13 +223,13 @@ export default function AssetsPage() {
             <h1 className="flex items-center gap-2 text-2xl font-semibold text-gray-800">
               <BuildingLibraryIcon className="h-6 w-6 text-orange-500" /> Activos
             </h1>
-        <ExportCsvButton data={rows} filename="activos-fijos.csv" />
             <p className="text-sm text-gray-500">
               Los bienes de tu negocio (equipos, muebles, vehículos…). Pegazo
               calcula su depreciación y su valor en libros automáticamente.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            <ExportCsvButton data={rows} filename="activos-fijos.csv" />
             <ImportSheetButtons
               templateName="plantilla-activos.xlsx"
               templateSheets={assetsTemplateSheets}

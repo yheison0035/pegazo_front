@@ -13,7 +13,7 @@ export default function ExportCsvButton({ data, filename, label = 'Exportar Exce
     <button
       type="button"
       onClick={() => downloadCsv(filename, rows)}
-      className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-orange-300 hover:text-orange-600"
+      className="inline-flex items-center gap-1 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-600 transition hover:bg-gray-50 hover:text-orange-600"
     >
       <ArrowDownTrayIcon className="h-4 w-4" /> {label}
     </button>
