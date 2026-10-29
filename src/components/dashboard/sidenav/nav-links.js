@@ -1,5 +1,6 @@
 'use client';
 
+import { canChangePlan } from '@/config/planChange';
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -31,7 +32,8 @@ export default function NavLinks({ expanded = true }) {
   // se ofrece "Cambiar mi plan".
   const plan = usuario?.company?.plan;
   const topPlan = PLAN_ORDER[PLAN_ORDER.length - 1];
-  const showPlanLink = usuario?.role === 'SUPER_ADMIN';
+  // Oculto para todos mientras se maneje un solo plan (ver config/planChange.js).
+  const showPlanLink = canChangePlan(usuario?.role);
   const canUpgrade = plan !== topPlan;
   const sections = useNavigation();
   // Grupos (acordeón) abiertos/cerrados manualmente por el usuario.
