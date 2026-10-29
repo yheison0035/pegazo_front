@@ -14,3 +14,14 @@ Un módulo **no está terminado** hasta que:
 - `npm run test:watch` — en desarrollo.
 
 Importa con alias `@/...` (mapeado en `vitest.config.mjs`). Entorno `jsdom` + `jest-dom` ya configurados.
+
+## Pruebas de humo de pantallas (obligatorias por módulo)
+
+Cada pantalla del dashboard y del portal del contador tiene una prueba de humo
+que la renderiza con el usuario simulado y las rutas de API simuladas con la
+forma REAL de respuesta (`src/app/dashboard/__tests__/*.pages.test.jsx`,
+`src/app/contador/__tests__/*.test.jsx`). La prueba falla si la página lanza un
+error de render (por ejemplo leer un campo de `null` antes de cargar) o si una
+pestaña ya no está coordinada con un componente compartido. Regla: **toda
+pantalla nueva o modificada se agrega a la lista de su archivo de humo** y, si
+cambia la forma de una respuesta del backend, se actualiza el dato simulado.
