@@ -30,3 +30,11 @@ export async function disposeAsset(id, data) {
 export async function deleteAsset(id) {
   return apiFetch(`/assets/${id}`, { method: 'DELETE' });
 }
+
+// Importar activos desde Excel/CSV (una fila = un activo).
+export async function importAssets(rows) {
+  return apiFetch('/assets/import', {
+    method: 'POST',
+    body: JSON.stringify({ rows }),
+  });
+}

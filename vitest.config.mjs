@@ -5,6 +5,10 @@ import path from 'node:path';
 export default defineConfig({
   plugins: [react()],
   resolve: { alias: { '@': path.resolve(process.cwd(), 'src') } },
+  // Los componentes del proyecto son .js con JSX (convención de Next); para
+  // que los tests de componentes los importen, esbuild los trata como JSX.
+  esbuild: { loader: 'jsx', include: /src\/.*\.jsx?$/, exclude: [] },
+  optimizeDeps: { esbuildOptions: { loader: { '.js': 'jsx' } } },
   test: {
     environment: 'jsdom',
     globals: true,

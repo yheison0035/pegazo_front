@@ -113,6 +113,7 @@ export const MODULE_MIN_PLAN = {
   clinical: 'ALTURA', // historia clínica (salud)
   assets: 'ALTURA', // Contabilidad · activos fijos
   'plan-cuentas': 'ALTURA', // Contabilidad · plan de cuentas
+  asientos: 'ALTURA', // Contabilidad · asientos manuales, importar/exportar
   libros: 'ALTURA', // Contabilidad · libro diario y mayor
   'estados-financieros': 'ALTURA', // Contabilidad · estados financieros
   'calendario-tributario': 'ALTURA', // Contabilidad · calendario tributario
