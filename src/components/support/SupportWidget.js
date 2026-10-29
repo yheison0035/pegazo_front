@@ -8,6 +8,7 @@ import {
   PhotoIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/authContext';
+import { canUseSupportChat } from '@/lib/support/access';
 import ImageLightbox from '@/components/ui/ImageLightbox';
 import {
   getSupportThread,
@@ -64,7 +65,8 @@ export default function SupportWidget() {
 
   const enabled =
     !!usuario?.id &&
-    usuario?.role !== 'SUPER_PLATFORM_ADMIN' &&
+    // Solo dueño y administrador (en todos los tipos de negocio).
+    canUseSupportChat(usuario?.role) &&
     !!usuario?.company?.id;
 
   const pollUnread = useCallback(async () => {
