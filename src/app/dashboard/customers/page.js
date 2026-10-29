@@ -101,11 +101,20 @@ export default function Customers() {
     setShowDeleteModal(true);
   };
 
+  // Si el backend rechaza el borrado (p. ej. registro con ventas asociadas),
+  // se cierra la confirmación y se avisa el motivo; antes la promesa quedaba
+  // sin capturar y el usuario no veía nada.
   const confirmDelete = async () => {
-    await deleteCustomer(deleteTarget.id);
-    setShowDeleteModal(false);
-    setDeleteTarget(null);
-    fetchCustomers();
+    try {
+      await deleteCustomer(deleteTarget.id);
+      setShowDeleteModal(false);
+      setDeleteTarget(null);
+      fetchCustomers();
+    } catch (err) {
+      setShowDeleteModal(false);
+      setDeleteTarget(null);
+      setAlert({ type: 'error', message: err?.message || 'No se pudo eliminar.' });
+    }
   };
 
   return (

@@ -83,7 +83,7 @@ export default function ContentData({
                 setSelectedVariants={setSelectedVariants}
                 setPrinterInvoice={setPrinterInvoice}
                 handleDelete={() =>
-                  handleDeleteClick(info.id, info.name || info.code)
+                  handleDeleteClick(info.id, info.name || info.code || info.concept)
                 }
                 handleToggle={() => handleToggleStatus?.(info)}
                 setShowModalChangeAdvisor={setShowModalChangeAdvisor}

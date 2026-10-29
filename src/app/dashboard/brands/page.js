@@ -70,11 +70,20 @@ export default function Brands() {
     setShowDeleteModal(true);
   };
 
+  // Si el backend rechaza el borrado (p. ej. registro con ventas asociadas),
+  // se cierra la confirmación y se avisa el motivo; antes la promesa quedaba
+  // sin capturar y el usuario no veía nada.
   const confirmDelete = async () => {
-    await deleteBrand(deleteTarget.id);
-    setShowDeleteModal(false);
-    setDeleteTarget(null);
-    fetchBrands();
+    try {
+      await deleteBrand(deleteTarget.id);
+      setShowDeleteModal(false);
+      setDeleteTarget(null);
+      fetchBrands();
+    } catch (err) {
+      setShowDeleteModal(false);
+      setDeleteTarget(null);
+      setAlert({ type: 'error', message: err?.message || 'No se pudo eliminar.' });
+    }
   };
 
   const { can } = usePermissions();
