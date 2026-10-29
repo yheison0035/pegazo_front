@@ -22,7 +22,10 @@ import {
   createLedgerAccount,
   updateLedgerAccount,
   deleteLedgerAccount,
+  importLedgerAccounts,
 } from '@/lib/api/routes/ledgerAccounts';
+import ImportSheetButtons from '@/components/accounting/ImportSheetButtons';
+import { accountsTemplateSheets, toAccountRows } from '@/lib/accounting/importSheets';
 
 // Orden y etiqueta de los grupos (como se leen los estados financieros).
 const TYPES = [
@@ -139,9 +142,21 @@ export default function PlanCuentasPage() {
               libros y estados financieros.
             </p>
           </div>
-          <Button variant="primary" icon={PlusIcon} onClick={openNew}>
-            Nueva cuenta
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <ImportSheetButtons
+              templateName="plantilla-plan-de-cuentas.xlsx"
+              templateSheets={() => accountsTemplateSheets(rows)}
+              preferredSheets={['Cuentas']}
+              toRows={toAccountRows}
+              importRows={importLedgerAccounts}
+              onDone={load}
+              onError={(message) => setAlert({ type: 'error', message })}
+              hint="Columnas: Codigo, Nombre, Grupo (Activo, Pasivo, Patrimonio, Ingresos, Costos, Gastos) y Naturaleza (Débito/Crédito). Si el código ya existe se actualiza el nombre."
+            />
+            <Button variant="primary" icon={PlusIcon} onClick={openNew}>
+              Nueva cuenta
+            </Button>
+          </div>
         </div>
 
         <div className="space-y-5">

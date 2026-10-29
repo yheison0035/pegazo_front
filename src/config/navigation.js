@@ -21,6 +21,7 @@ import {
   BuildingLibraryIcon,
   ListBulletIcon,
   BookOpenIcon,
+  PencilSquareIcon,
   ChartPieIcon,
   CalculatorIcon,
   InboxArrowDownIcon,
@@ -411,6 +412,12 @@ export const NAVIGATION = [
         name: 'Plan de cuentas',
         href: '/dashboard/plan-cuentas',
         icon: ListBulletIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN', 'CONTADOR'],
+      },
+      {
+        name: 'Asientos',
+        href: '/dashboard/asientos',
+        icon: PencilSquareIcon,
         roles: ['SUPER_ADMIN', 'ADMIN', 'CONTADOR'],
       },
       {

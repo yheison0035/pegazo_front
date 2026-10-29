@@ -19,3 +19,10 @@ export async function updateLedgerAccount(id, data) {
 export async function deleteLedgerAccount(id) {
   return apiFetch(`/ledger-accounts/${id}`, { method: 'DELETE' });
 }
+// Importar plan de cuentas desde Excel/CSV (crea nuevas, renombra existentes).
+export async function importLedgerAccounts(rows) {
+  return apiFetch('/ledger-accounts/import', {
+    method: 'POST',
+    body: JSON.stringify({ rows }),
+  });
+}

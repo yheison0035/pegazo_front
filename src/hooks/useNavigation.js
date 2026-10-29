@@ -105,6 +105,7 @@ export default function useNavigation() {
     } else {
       modules.push('assets');
       modules.push('plan-cuentas');
+      modules.push('asientos');
       modules.push('libros');
       modules.push('estados-financieros');
       modules.push('calendario-tributario');

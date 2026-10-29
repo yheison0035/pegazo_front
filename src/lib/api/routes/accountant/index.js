@@ -89,6 +89,18 @@ export async function createAccCompanyEntry(companyId, payload) {
     body: JSON.stringify(payload),
   });
 }
+export async function updateAccCompanyEntry(companyId, entryId, payload) {
+  return apiFetch(`/accountant/companies/${companyId}/entries/${entryId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  });
+}
+export async function importAccCompanyLedgerAccounts(companyId, rows) {
+  return apiFetch(`/accountant/companies/${companyId}/ledger-accounts/import`, {
+    method: 'POST',
+    body: JSON.stringify({ rows }),
+  });
+}
 export async function deleteAccCompanyEntry(companyId, entryId) {
   return apiFetch(`/accountant/companies/${companyId}/entries/${entryId}`, {
     method: 'DELETE',

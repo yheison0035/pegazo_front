@@ -25,7 +25,10 @@ import {
   updateAsset,
   disposeAsset,
   deleteAsset,
+  importAssets,
 } from '@/lib/api/routes/assets';
+import ImportSheetButtons from '@/components/accounting/ImportSheetButtons';
+import { assetsTemplateSheets, toAssetRows } from '@/lib/accounting/importSheets';
 
 function cop(n) {
   return new Intl.NumberFormat('es-CO', {
@@ -226,9 +229,21 @@ export default function AssetsPage() {
               calcula su depreciación y su valor en libros automáticamente.
             </p>
           </div>
-          <Button variant="primary" icon={PlusIcon} onClick={openNew}>
-            Nuevo activo
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <ImportSheetButtons
+              templateName="plantilla-activos.xlsx"
+              templateSheets={assetsTemplateSheets}
+              preferredSheets={['Activos']}
+              toRows={toAssetRows}
+              importRows={importAssets}
+              onDone={load}
+              onError={(message) => setAlert({ type: 'error', message })}
+              hint="Columnas: Nombre, Categoria, Referencia, FechaCompra, Cantidad, ValorUnitario (o Costo), ValorSalvamento, VidaUtilMeses (vacío = no se deprecia), Notas."
+            />
+            <Button variant="primary" icon={PlusIcon} onClick={openNew}>
+              Nuevo activo
+            </Button>
+          </div>
         </div>
 
         {/* Tarjetas de resumen */}
