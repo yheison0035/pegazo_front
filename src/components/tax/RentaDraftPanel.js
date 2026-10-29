@@ -64,9 +64,9 @@ export default function RentaDraftPanel({ load, className = '' }) {
     ['Renta líquida (utilidad)', c.rentaLiquida],
     ['Patrimonio bruto', c.patrimonioBruto],
     ['Patrimonio líquido', c.patrimonioLiquido],
-    ['Retenciones a favor (te las practicaron)', data.retencionesAFavor ?? 0],
-    ['Anticipo de renta pagado', data.anticipoRenta ?? 0],
-    ...(data.saldoAPagarEstimado != null
+    ['Retenciones a favor (te las practicaron)', data?.retencionesAFavor ?? 0],
+    ['Anticipo de renta pagado', data?.anticipoRenta ?? 0],
+    ...(data?.saldoAPagarEstimado != null
       ? [
           ['Saldo a PAGAR estimado', data.saldoAPagarEstimado],
           ['Saldo a FAVOR estimado', data.saldoAFavorEstimado ?? 0],
