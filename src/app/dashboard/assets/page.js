@@ -1,5 +1,6 @@
 'use client';
 
+import ExportCsvButton from '@/components/ui/ExportCsvButton';
 import { useCallback, useEffect, useState } from 'react';
 import useLiveRefresh from '@/hooks/useLiveRefresh';
 import {
@@ -219,6 +220,7 @@ export default function AssetsPage() {
             <h1 className="flex items-center gap-2 text-2xl font-semibold text-gray-800">
               <BuildingLibraryIcon className="h-6 w-6 text-orange-500" /> Activos
             </h1>
+        <ExportCsvButton data={rows} filename="activos-fijos.csv" />
             <p className="text-sm text-gray-500">
               Los bienes de tu negocio (equipos, muebles, vehículos…). Pegazo
               calcula su depreciación y su valor en libros automáticamente.

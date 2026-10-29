@@ -12,6 +12,20 @@ export const getEmptyProvider = () => ({
 
 export const getFormFieldsProviders = () => [
   { name: 'name', label: 'Empresa', type: 'text', required: true },
+  // Identificación tributaria: necesaria para soportes y para la exógena.
+  {
+    name: 'docType',
+    label: 'Tipo de documento',
+    type: 'select',
+    required: false,
+    options: [
+      { id: 'NIT', name: 'NIT' },
+      { id: 'CC', name: 'Cédula de ciudadanía' },
+      { id: 'CE', name: 'Cédula de extranjería' },
+      { id: 'PASAPORTE', name: 'Pasaporte' },
+    ],
+  },
+  { name: 'docNumber', label: 'NIT / Número de documento', type: 'text', required: false },
   {
     name: 'contactName',
     label: 'Nombre de Contacto',
@@ -48,6 +62,7 @@ export const getFormFieldsProviders = () => [
 
 export const getHeaderTableProviders = () => [
   { name: 'name', title: 'Empresa', show: true, showInput: true },
+  { name: 'docNumber', title: 'NIT / Documento', show: true, showInput: true },
   {
     name: 'contactName',
     title: 'Nombre de Contacto',

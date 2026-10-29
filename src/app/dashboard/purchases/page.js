@@ -66,6 +66,9 @@ export default function PurchasesPage() {
   const [localId, setLocalId] = useState(usuario?.localId || '');
   const [providerId, setProviderId] = useState('');
   const [notes, setNotes] = useState('');
+  // Retenciones que le practicas al proveedor en esta compra (opcional).
+  const [retefuente, setRetefuente] = useState('');
+  const [reteica, setReteica] = useState('');
   const [items, setItems] = useState([]);
   const [search, setSearch] = useState('');
   const [results, setResults] = useState([]);
@@ -171,6 +174,8 @@ export default function PurchasesPage() {
     setItems([]);
     setProviderId('');
     setNotes('');
+    setRetefuente('');
+    setReteica('');
     setSearch('');
     setResults([]);
     setShowForm(false);
@@ -186,6 +191,8 @@ export default function PurchasesPage() {
         localId: Number(localId),
         providerId: providerId ? Number(providerId) : undefined,
         notes,
+        retefuente: Number(String(retefuente).replace(/[^\d.]/g, '')) || 0,
+        reteica: Number(String(reteica).replace(/[^\d.]/g, '')) || 0,
         items: items.map((i) => ({
           inventoryVariantId: i.inventoryVariantId,
           quantity: Number(i.quantity) || 0,
@@ -294,6 +301,30 @@ export default function PurchasesPage() {
                     </option>
                   ))}
                 </select>
+              </div>
+            </div>
+
+            {/* Retenciones practicadas (quedan por pagar a la DIAN; el proveedor recibe menos) */}
+            <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <label className="text-xs font-medium text-gray-600">Retención en la fuente (opcional)</label>
+                <input
+                  inputMode="numeric"
+                  value={retefuente}
+                  onChange={(e) => setRetefuente(e.target.value)}
+                  placeholder="$ 0"
+                  className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-gray-600">Retención de ICA (opcional)</label>
+                <input
+                  inputMode="numeric"
+                  value={reteica}
+                  onChange={(e) => setReteica(e.target.value)}
+                  placeholder="$ 0"
+                  className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                />
               </div>
             </div>
 

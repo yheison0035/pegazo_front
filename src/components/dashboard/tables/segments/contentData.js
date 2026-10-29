@@ -109,6 +109,9 @@ export default function ContentData({
             {view === 'providers' && (
               <>
                 <td className="px-5 py-4 whitespace-nowrap">{info.name}</td>
+                <td className="px-5 py-4 whitespace-nowrap text-gray-600">
+                  {info.docNumber ? `${info.docType ? info.docType + ' ' : ''}${info.docNumber}` : '---'}
+                </td>
                 <td className="px-5 py-4 whitespace-nowrap">
                   {info.contactName}
                 </td>

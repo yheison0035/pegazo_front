@@ -1,5 +1,6 @@
 'use client';
 
+import ExportCsvButton from '@/components/ui/ExportCsvButton';
 import { useCallback, useEffect, useState } from 'react';
 import {
   ReceiptPercentIcon,
@@ -59,6 +60,7 @@ export default function ImpuestosPage() {
             <ReceiptPercentIcon className="h-7 w-7 text-orange-500" />
             Reporte de IVA
           </h1>
+        <ExportCsvButton data={data} filename="impuestos-iva.csv" />
           <p className="text-sm text-gray-500">
             IVA generado en tus ventas vs. IVA descontable de tus compras. Esta
             es la base para tu declaración de IVA.
