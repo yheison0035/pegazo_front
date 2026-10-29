@@ -359,6 +359,16 @@ export default function AppointmentsCalendar() {
                         {a.service?.name}
                         {!isBarber && a.barber ? ` · ${a.barber.name}` : ''}
                       </p>
+                      {!isBarber &&
+                        !['CANCELADA', 'NO_ASISTIO'].includes(a.status) &&
+                        !(Array.isArray(a.sales) && a.sales.length) && (
+                          <Link
+                            href={`/dashboard/sales?appointment=${a.id}`}
+                            className="mt-2 inline-flex rounded-lg bg-orange-600 px-2.5 py-1 text-xs font-bold text-white hover:bg-orange-700"
+                          >
+                            Cobrar
+                          </Link>
+                        )}
                     </li>
                   ))}
                 </ul>

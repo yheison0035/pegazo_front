@@ -657,11 +657,25 @@ export default function ContentData({
                   {['BARBERO', 'PROFESIONAL'].includes(rol) ? (
                     // El barbero no contacta al cliente: solo ve el estado.
                     <StatusBadge status={info.status} />
-                  ) : info.customer?.document !== '222222222222' &&
-                    info.customer?.phone ? (
-                    <ConfirmClientButton appt={info} />
                   ) : (
-                    '---'
+                    <span className="inline-flex flex-wrap items-center gap-2">
+                      {info.customer?.document !== '222222222222' &&
+                      info.customer?.phone ? (
+                        <ConfirmClientButton appt={info} />
+                      ) : null}
+                      {Array.isArray(info.sales) && info.sales.length ? (
+                        <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
+                          Cobrada
+                        </span>
+                      ) : !['CANCELADA', 'NO_ASISTIO'].includes(info.status) ? (
+                        <Link
+                          href={`/dashboard/sales?appointment=${info.id}`}
+                          className="rounded-lg bg-orange-600 px-2.5 py-1 text-xs font-bold text-white hover:bg-orange-700"
+                        >
+                          Cobrar
+                        </Link>
+                      ) : null}
+                    </span>
                   )}
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap">
