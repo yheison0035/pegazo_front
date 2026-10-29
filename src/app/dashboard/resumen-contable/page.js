@@ -95,15 +95,17 @@ export default function ResumenContablePage() {
       <div className="relative mx-auto w-full max-w-3xl p-4">
         <LoadingOverlay show={loading} text="Cargando resumen..." />
 
-        <div className="mb-4">
-          <h1 className="flex items-center gap-2 text-2xl font-semibold text-gray-800">
-            <ChartPieIcon className="h-6 w-6 text-orange-500" /> Resumen contable
-          </h1>
-        <ExportCsvButton data={fin} filename="resumen-contable.csv" />
-          <p className="text-sm text-gray-500">
-            Lo esencial de tus números. El detalle (libros, plan de cuentas,
-            declaraciones) lo lleva tu contador.
-          </p>
+        <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h1 className="flex items-center gap-2 text-2xl font-semibold text-gray-800">
+              <ChartPieIcon className="h-6 w-6 text-orange-500" /> Resumen contable
+            </h1>
+            <p className="text-sm text-gray-500">
+              Lo esencial de tus números. El detalle (libros, plan de cuentas,
+              declaraciones) lo lleva tu contador.
+            </p>
+          </div>
+          <ExportCsvButton data={fin} filename="resumen-contable.csv" />
         </div>
 
         {/* Tarjetas */}

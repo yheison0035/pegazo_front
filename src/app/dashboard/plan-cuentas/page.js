@@ -135,7 +135,6 @@ export default function PlanCuentasPage() {
               <ListBulletIcon className="h-6 w-6 text-orange-500" /> Plan de
               cuentas
             </h1>
-        <ExportCsvButton data={rows} filename="plan-de-cuentas.csv" />
             <p className="text-sm text-gray-500">
               Las cuentas contables de tu negocio (PUC). Ya vienen las básicas;
               puedes agregar o ajustar las que necesites. Serán la base de tus
@@ -143,6 +142,7 @@ export default function PlanCuentasPage() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            <ExportCsvButton data={rows} filename="plan-de-cuentas.csv" />
             <ImportSheetButtons
               templateName="plantilla-plan-de-cuentas.xlsx"
               templateSheets={() => accountsTemplateSheets(rows)}

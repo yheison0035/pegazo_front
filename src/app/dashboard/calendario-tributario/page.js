@@ -167,20 +167,22 @@ export default function CalendarioTributarioPage() {
               <CalendarDaysIcon className="h-6 w-6 text-orange-500" /> Calendario
               tributario
             </h1>
-        <ExportCsvButton data={data} filename="calendario-tributario.csv" />
             <p className="text-sm text-gray-500">
               Tus vencimientos según el último dígito de tu NIT
               {data?.nitDigit ? ` (${data.nitDigit})` : ''} y tu régimen. Te
               avisamos en la campana cuando se acercan.
             </p>
           </div>
-          <button
-            onClick={checkNow}
-            disabled={checking}
-            className="flex-none rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-60"
-          >
-            {checking ? 'Revisando...' : 'Revisar ahora'}
-          </button>
+          <div className="flex flex-none flex-wrap items-center gap-2">
+            <ExportCsvButton data={data} filename="calendario-tributario.csv" />
+            <button
+              onClick={checkNow}
+              disabled={checking}
+              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50 disabled:opacity-60"
+            >
+              {checking ? 'Revisando...' : 'Revisar ahora'}
+            </button>
+          </div>
         </div>
         {checkMsg && (
           <div className="mb-4 rounded-xl border border-gray-100 bg-gray-50 px-3 py-2 text-xs text-gray-600">
