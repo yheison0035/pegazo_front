@@ -1,5 +1,6 @@
 'use client';
 
+import { PLAN_CHANGE_ENABLED } from '@/config/planChange';
 import { useEffect, useState } from 'react';
 import {
   XMarkIcon,
@@ -89,14 +90,17 @@ export default function PlanUpgradeModal() {
             <Button variant="ghost" className="flex-1" onClick={close}>
               Ahora no
             </Button>
-            <Button
-              variant="primary"
-              className="flex-1"
-              href="/dashboard/upgrade"
-              onClick={close}
-            >
-              Ver planes
-            </Button>
+            {/* Oculto mientras se maneje un solo plan (config/planChange.js). */}
+            {PLAN_CHANGE_ENABLED && (
+              <Button
+                variant="primary"
+                className="flex-1"
+                href="/dashboard/upgrade"
+                onClick={close}
+              >
+                Ver planes
+              </Button>
+            )}
           </div>
         </div>
       </div>

@@ -1,5 +1,7 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
+import { PLAN_CHANGE_ENABLED } from '@/config/planChange';
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/authContext';
@@ -57,7 +59,7 @@ function ReturnBanner({ payment }) {
   );
 }
 
-export default function UpgradePage() {
+function UpgradePage() {
   return (
     <Suspense fallback={null}>
       <UpgradeInner />
@@ -296,4 +298,16 @@ function UpgradeInner() {
       </div>
     </RoleGuard>
   );
+}
+
+// Módulo "Cambiar mi plan" apagado para todos (un solo plan por ahora): si
+// alguien entra por URL, va a "Mi suscripción". Para reactivar, ver
+// src/config/planChange.js.
+export default function UpgradeGate() {
+  const router = useRouter();
+  useEffect(() => {
+    if (!PLAN_CHANGE_ENABLED) router.replace('/dashboard/billing');
+  }, [router]);
+  if (!PLAN_CHANGE_ENABLED) return null;
+  return <UpgradePage />;
 }
