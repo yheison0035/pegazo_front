@@ -73,11 +73,20 @@ export default function Expenses() {
     setShowDeleteModal(true);
   };
 
+  // Si el backend rechaza el borrado (p. ej. registro con ventas asociadas),
+  // se cierra la confirmación y se avisa el motivo; antes la promesa quedaba
+  // sin capturar y el usuario no veía nada.
   const confirmDelete = async () => {
-    await deleteExpenses(deleteTarget.id);
-    setShowDeleteModal(false);
-    setDeleteTarget(null);
-    fetchExpenses();
+    try {
+      await deleteExpenses(deleteTarget.id);
+      setShowDeleteModal(false);
+      setDeleteTarget(null);
+      fetchExpenses();
+    } catch (err) {
+      setShowDeleteModal(false);
+      setDeleteTarget(null);
+      setAlert({ type: 'error', message: err?.message || 'No se pudo eliminar.' });
+    }
   };
 
   const { can } = usePermissions();

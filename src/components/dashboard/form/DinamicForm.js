@@ -482,6 +482,7 @@ export default function DinamicForm({
                   formData={formData}
                   handleChange={handleChange}
                   isLocked={isLocked}
+                  required={required}
                 />
               );
             }

@@ -38,3 +38,32 @@ error de render (por ejemplo leer un campo de `null` antes de cargar) o si una
 pestaña ya no está coordinada con un componente compartido. Regla: **toda
 pantalla nueva o modificada se agrega a la lista de su archivo de humo** y, si
 cambia la forma de una respuesta del backend, se actualiza el dato simulado.
+
+## Pruebas de COMPORTAMIENTO por módulo (cada acción tiene un test)
+
+Carpeta `src/app/dashboard/<modulo>/__tests__/<modulo>.behavior.test.jsx`,
+con el arnés `src/test/behaviorHarness.jsx`. A diferencia del humo, aquí se
+usa la pantalla como un usuario (Testing Library): buscar, filtrar, paginar,
+abrir el detalle, crear, editar, eliminar, exportar, importar, cambiar de
+pestaña… y se verifica la **petición exacta** que sale al backend (método,
+ruta, query y cuerpo) y el **aviso** que ve el usuario (toast).
+
+Reglas:
+
+1. **Toda acción visible tiene un test**: cada botón, selector, buscador y
+   formulario del módulo. Incluye el camino feliz, el error del backend
+   (`fail(400, 'motivo')` → debe salir un aviso, nunca una promesa sin capturar)
+   y los permisos por rol (qué acciones NO se ven con ASESOR/ADMIN/CAJA…).
+2. El backend se simula con `installApi([on('GET', /^\/ruta$/, list([...])), …])`;
+   lo que no se declare recibe la forma genérica de `pageHarness`. Las
+   respuestas usan la **forma real** del backend (`list`, `detail`, `ok`).
+3. Se afirma sobre lo que viaja al backend (`api.last('POST', /^\/customers$/).body`)
+   y sobre lo que se le dice al usuario (`expectToast('success', 'Cliente creado')`).
+4. Dinero: en textos de pantalla usa `money(n)`; en valores de inputs y
+   mensajes usa `formatCOP(n)` (espacio duro).
+5. Los selects nativos de Departamento/Ciudad son obligatorios solo si el
+   formulario lo declara (`required` del campo); `pickDepartmentAndCity()` los
+   llena. Si un submit "no sale", `invalidFields()` dice qué campo lo bloquea.
+6. Módulos cubiertos (fase 1): clientes, gastos, inventario (lista, crear,
+   editar, importar Excel), compras, caja y ventas (POS). Un módulo nuevo o
+   una acción nueva en uno existente **no se da por terminada sin su test**.

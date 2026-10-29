@@ -147,11 +147,20 @@ export default function Delivered_Sales() {
     setShowDeleteModal(true);
   };
 
+  // Si el backend rechaza el borrado (p. ej. registro con ventas asociadas),
+  // se cierra la confirmación y se avisa el motivo; antes la promesa quedaba
+  // sin capturar y el usuario no veía nada.
   const confirmDelete = async () => {
-    await deleteDeliveredSale(deleteTarget.id);
-    setShowDeleteModal(false);
-    setDeleteTarget(null);
-    fetchSales();
+    try {
+      await deleteDeliveredSale(deleteTarget.id);
+      setShowDeleteModal(false);
+      setDeleteTarget(null);
+      fetchSales();
+    } catch (err) {
+      setShowDeleteModal(false);
+      setDeleteTarget(null);
+      setAlert({ type: 'error', message: err?.message || 'No se pudo eliminar.' });
+    }
   };
 
   const [exporting, setExporting] = useState(false);

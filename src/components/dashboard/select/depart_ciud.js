@@ -6,6 +6,10 @@ export default function DepartaCiudad({
   formData,
   handleChange,
   isLocked = false,
+  // Obligatoriedad según el formulario (clientes/proveedores: opcional;
+  // sedes/usuarios: obligatorio). Antes era siempre obligatorio y un cliente
+  // creado rápido desde el POS no se podía editar sin elegir departamento.
+  required = true,
 }) {
   const [availableCities, setAvailableCities] = useState([]);
 
@@ -42,7 +46,7 @@ export default function DepartaCiudad({
             focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition ${
               isLocked ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''
             }`}
-          required
+          required={required}
         >
           <option value="">Seleccione un departamento</option>
 
@@ -72,7 +76,7 @@ export default function DepartaCiudad({
             focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition ${
               isLocked ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''
             }`}
-          required
+          required={required}
         >
           <option value="">
             {formData.department
