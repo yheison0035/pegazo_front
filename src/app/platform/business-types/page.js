@@ -574,6 +574,8 @@ export default function PlatformBusinessTypes() {
     try {
       const res = await getBusinessTypes();
       setItems(res?.data || []);
+    } catch (e) {
+      alert(e?.message || 'No se pudieron cargar los tipos de negocio.');
     } finally {
       setLoading(false);
     }

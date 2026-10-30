@@ -86,9 +86,11 @@ export default function PlatformStatistics() {
   const [audit, setAudit] = useState([]);
   const [activity, setActivity] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   const fetchData = useCallback(async () => {
     setLoading(true);
+    setError('');
     try {
       const [ov, au, act] = await Promise.all([
         getPlatformOverview(),
@@ -98,6 +100,8 @@ export default function PlatformStatistics() {
       setData(ov?.data || null);
       setAudit(au?.data || []);
       setActivity(act?.data || []);
+    } catch (e) {
+      setError(e?.message || 'No se pudo cargar el resumen.');
     } finally {
       setLoading(false);
     }
@@ -120,6 +124,12 @@ export default function PlatformStatistics() {
         <p className="mb-6 text-sm text-gray-500">
           Visión general de toda la plataforma.
         </p>
+
+        {error && (
+          <div className="mb-6 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">
+            {error}
+          </div>
+        )}
 
         {/* Ingresos */}
         <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">

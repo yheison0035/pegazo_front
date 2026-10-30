@@ -824,11 +824,11 @@ export default function DinamicForm({
                     onChange={handleChange}
                     disabled={isLocked || disabled}
                     placeholder={
-                      mode === 'create'
+                      mode !== 'edit'
                         ? 'Ingrese la contraseña'
                         : 'Dejar en blanco si no desea cambiarla'
                     }
-                    required={mode === 'create'}
+                    required={mode !== 'edit'}
                     className={`w-full border border-gray-200 rounded-xl px-4 py-2 pr-10 text-sm shadow-sm focus:outline-none transition ${
                       isLocked || disabled
                         ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
