@@ -17,7 +17,7 @@ export default function AvatarUploader({
   preset = 'avatar',
   shape = 'circle',
   upload = defaultUpload,
-  size = 'h-24 w-24',
+  size,
 }) {
   const inputRef = useRef(null);
   const [preview, setPreview] = useState(value || '');
@@ -35,7 +35,12 @@ export default function AvatarUploader({
     if (localUrl.current) URL.revokeObjectURL(localUrl.current);
   }, []);
 
-  const rounded = shape === 'circle' ? 'rounded-full' : 'rounded-xl';
+  // El recuadro imita cómo se verá la foto en la página de citas (tarjeta
+  // vertical 4:5, esquinas redondeadas) sin su tema visual.
+  const isCard = shape === 'card';
+  const rounded = shape === 'circle' ? 'rounded-full' : 'rounded-2xl';
+  const frameSize = size || (isCard ? 'w-36 aspect-[4/5]' : 'h-24 w-24');
+  const objectPos = isCard ? 'object-top' : 'object-center';
 
   const pick = async (e) => {
     const file = e.target.files?.[0];
@@ -80,7 +85,7 @@ export default function AvatarUploader({
     <div className="flex flex-col">
       {label && <span className="mb-1 text-sm font-medium text-gray-700">{label}</span>}
       <div className="flex items-center gap-4">
-        <div className={`relative ${size} flex-none`}>
+        <div className={`relative ${frameSize} flex-none`}>
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
@@ -89,7 +94,7 @@ export default function AvatarUploader({
           >
             {preview ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={preview} alt="Foto" className="h-full w-full object-cover" />
+              <img src={preview} alt="Foto" className={`h-full w-full object-cover ${objectPos}`} />
             ) : (
               <span className="flex h-full w-full flex-col items-center justify-center text-gray-400">
                 <CameraIcon className="h-6 w-6" />
@@ -111,7 +116,7 @@ export default function AvatarUploader({
             </button>
           )}
         </div>
-        <p className="text-[11px] text-gray-400">{hint}</p>
+        {hint ? <p className="text-[11px] text-gray-400">{hint}</p> : null}
       </div>
       <input
         ref={inputRef}
