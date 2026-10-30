@@ -85,9 +85,14 @@ Reglas:
    segmentos de cliente, tipos de cargo, tipos de gasto, medios de pago,
    unidades de medida; además días de descanso (semanales, calendario,
    puntuales), fidelización (acumulando/antiguos, buscar, sincronizar) y
-   notificaciones (sin leer, abrir, marcar todas, ir al detalle). Un módulo
-   nuevo o una acción nueva en uno existente **no se da por terminada sin su
-   test**.
+   notificaciones (sin leer, abrir, marcar todas, ir al detalle); **tanda 7**
+   solicitudes de stock (aprobar, rechazar con motivo, pestañas), mi
+   suscripción (estado, historial, cómo pagar), mejora de plan (interruptor
+   apagado → redirige; con el interruptor encendido vía mock: planes, pago,
+   retorno de la pasarela), estadísticas (indicadores, filtros, atajos,
+   exportar Excel/libro, pestañas) y diseño de la página de citas (estilos,
+   textos, guardar). Un módulo nuevo o una acción nueva en uno existente **no
+   se da por terminada sin su test**.
 7. Los listados tipo catálogo (tabla genérica + filtros + ver + eliminar)
    reutilizan `describeCatalogList` de `src/test/catalogBehavior.jsx`; cada
    módulo solo añade sus pruebas de crear/editar y acciones propias.
