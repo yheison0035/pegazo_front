@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import useUsers from '@/lib/api/hooks/useUsers';
+import { formatImageFile } from '@/lib/imaging/formatImage';
 
 export default function Avatar({
   perfil = {},
@@ -84,7 +85,8 @@ export default function Avatar({
       const tempUrl = URL.createObjectURL(file);
       setAvatarPreview(tempUrl);
 
-      const resp = await uploadUserAvatar(file);
+      const optimized = await formatImageFile(file, 'avatar');
+      const resp = await uploadUserAvatar(optimized);
       const updatedUser = resp?.data ?? resp;
 
       if (updatedUser) {

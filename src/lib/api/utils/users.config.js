@@ -1,5 +1,6 @@
 export const getEmptyUser = () => {
   return {
+    avatar: '',
     role: '',
     name: '',
     email: '',
@@ -21,6 +22,12 @@ export const getEmptyUser = () => {
 
 export const getFormFieldsUsers = (type) => {
   const fields = [
+  {
+    name: 'avatar',
+    label: 'Foto del usuario (opcional)',
+    type: 'avatar',
+    required: false,
+  },
   {
     name: 'role',
     label: 'Rol',

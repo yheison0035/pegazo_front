@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { uploadCompanyLogo } from '@/lib/api/routes/companies';
+import { formatImageFile } from '@/lib/imaging/formatImage';
 import Button from '@/components/ui/Button';
 
 // Subidor de logo reutilizable (panel de empresa y registro). Sube a Cloudinary
@@ -27,7 +28,8 @@ export default function LogoUploader({ value, onChange, label = 'Logo' }) {
 
     setUploading(true);
     try {
-      const res = await uploadCompanyLogo(file);
+      const optimized = await formatImageFile(file, 'logo');
+      const res = await uploadCompanyLogo(optimized);
       const url = res?.data?.url;
       if (!url) throw new Error('No se recibió la URL del logo.');
       onChange(url);

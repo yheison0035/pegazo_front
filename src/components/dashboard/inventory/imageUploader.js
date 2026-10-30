@@ -8,6 +8,7 @@ import {
   CameraIcon,
 } from '@heroicons/react/24/outline';
 import PhotoStudioModal from './photoStudioModal';
+import { formatImageFile } from '@/lib/imaging/formatImage';
 
 export default function ImageUploader({
   images,
@@ -25,14 +26,22 @@ export default function ImageUploader({
     setImages((prev) => [...prev, { id: null, file, url }]);
   };
 
-  const handleFileSelect = (e) => {
+  const handleFileSelect = async (e) => {
     const files = Array.from(e.target.files);
+    if (inputRef.current) inputRef.current.value = '';
 
-    const newImages = files.map((file) => ({
-      id: null,
-      file,
-      url: URL.createObjectURL(file),
-    }));
+    // Optimiza cada imagen (redimensiona + WebP) antes de previsualizar/subir.
+    const newImages = await Promise.all(
+      files.map(async (file) => {
+        let out = file;
+        try {
+          out = await formatImageFile(file, 'product');
+        } catch {
+          out = file; // si no se puede optimizar, sube el original
+        }
+        return { id: null, file: out, url: URL.createObjectURL(out) };
+      }),
+    );
 
     setImages((prev) => [...prev, ...newImages]);
   };

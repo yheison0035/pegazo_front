@@ -8,6 +8,7 @@ import {
   PhotoIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
+import { formatImageFile } from '@/lib/imaging/formatImage';
 import ImageLightbox from '@/components/ui/ImageLightbox';
 import {
   getSupportThreads,
@@ -126,7 +127,7 @@ function SupportInbox() {
     try {
       let imageUrl;
       if (file) {
-        const { data } = await uploadSupportImage(file);
+        const { data } = await uploadSupportImage(await formatImageFile(file, 'support'));
         imageUrl = data?.url;
       }
       await sendPlatformSupport(active, body, imageUrl);

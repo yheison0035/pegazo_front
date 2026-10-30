@@ -9,6 +9,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/authContext';
 import { canUseSupportChat } from '@/lib/support/access';
+import { formatImageFile } from '@/lib/imaging/formatImage';
 import ImageLightbox from '@/components/ui/ImageLightbox';
 import {
   getSupportThread,
@@ -132,7 +133,7 @@ export default function SupportWidget() {
     try {
       let imageUrl;
       if (file) {
-        const { data } = await uploadSupportImage(file);
+        const { data } = await uploadSupportImage(await formatImageFile(file, 'support'));
         imageUrl = data?.url;
       }
       await sendSupportMessage(body, imageUrl);

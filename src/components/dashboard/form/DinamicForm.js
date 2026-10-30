@@ -26,6 +26,7 @@ import { getUnitsOfMeasure } from '@/lib/api/routes/unitsOfMeasure';
 import { getCustomerSegments } from '@/lib/api/routes/customerSegments';
 import ImageUploader from '../inventory/imageUploader';
 import LogoUploader from '@/components/ui/LogoUploader';
+import AvatarUploader from '@/components/ui/AvatarUploader';
 import { colorOptions } from '@/lib/api/utils/getColors';
 import useEnums from '@/lib/api/hooks/useEnums';
 import SearchableSelect from './fields/SearchSelectField/searchableSelect';
@@ -551,6 +552,20 @@ export default function DinamicForm({
               return (
                 <div key={name} className="flex flex-col col-span-full">
                   <LogoUploader
+                    label={label}
+                    value={formData[name] || ''}
+                    onChange={(url) =>
+                      setFormData((prev) => ({ ...prev, [name]: url }))
+                    }
+                  />
+                </div>
+              );
+            }
+
+            if (type === 'avatar') {
+              return (
+                <div key={name} className="flex flex-col col-span-full">
+                  <AvatarUploader
                     label={label}
                     value={formData[name] || ''}
                     onChange={(url) =>
