@@ -18,6 +18,7 @@ export default function AvatarUploader({
   shape = 'circle',
   upload = defaultUpload,
   size,
+  showButton = false,
 }) {
   const inputRef = useRef(null);
   const [preview, setPreview] = useState(value || '');
@@ -116,7 +117,20 @@ export default function AvatarUploader({
             </button>
           )}
         </div>
-        {hint ? <p className="text-[11px] text-gray-400">{hint}</p> : null}
+        <div className="flex flex-col items-start gap-2">
+          {showButton && (
+            <button
+              type="button"
+              onClick={() => inputRef.current?.click()}
+              disabled={busy}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-orange-500 px-3 py-2 text-sm font-semibold text-white transition hover:bg-orange-600 disabled:opacity-50"
+            >
+              <CameraIcon className="h-4 w-4" />
+              {busy ? 'Subiendo…' : preview ? 'Cambiar foto' : 'Cargar foto'}
+            </button>
+          )}
+          {hint ? <p className="text-[11px] text-gray-400">{hint}</p> : null}
+        </div>
       </div>
       <input
         ref={inputRef}

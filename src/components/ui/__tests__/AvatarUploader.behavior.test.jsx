@@ -77,6 +77,16 @@ describe('AvatarUploader', () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 
+  it('showButton muestra un botón visible para cargar la foto', async () => {
+    const upload = vi.fn(async () => ({ data: { url: 'https://cdn/x.webp' } }));
+    render(<AvatarUploader value="" onChange={() => {}} upload={upload} showButton />);
+    const btn = screen.getByRole('button', { name: /Cargar foto/ });
+    expect(btn).toBeInTheDocument();
+    // El botón abre el mismo selector de archivo.
+    pickFile();
+    await waitFor(() => expect(upload).toHaveBeenCalledTimes(1));
+  });
+
   it('shape="card" muestra el recuadro vertical de la página de citas', () => {
     render(<AvatarUploader value="https://cdn/previa.webp" onChange={() => {}} upload={vi.fn()} shape="card" />);
     const img = screen.getByAltText('Foto');
