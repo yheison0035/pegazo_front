@@ -133,11 +133,12 @@ export async function updateUser(id, dto) {
     password,
     managedLocals,
     local,
-    avatar,
     company,
     companyId,
     ...cleanDto
   } = dto;
+  // `avatar` (URL de la foto) SÍ se envía: así editar la foto de un usuario
+  // persiste. Si el backend no lo maneja, lo ignora sin romper.
 
   const body = {
     ...cleanDto,
