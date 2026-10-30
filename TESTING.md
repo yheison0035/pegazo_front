@@ -91,8 +91,17 @@ Reglas:
    apagado → redirige; con el interruptor encendido vía mock: planes, pago,
    retorno de la pasarela), estadísticas (indicadores, filtros, atajos,
    exportar Excel/libro, pestañas) y diseño de la página de citas (estilos,
-   textos, guardar). Un módulo nuevo o una acción nueva en uno existente **no
-   se da por terminada sin su test**.
+   textos, guardar); **tanda 8** ajustes (empresa, horario, apariencia,
+   caja, fiscal, contabilidad, contador, cierre, fidelización), tienda online
+   (configuración, banners, pagos, Wompi, envíos), guarda cascos (ingreso,
+   lavado, cobro, anular, tarifas), catálogo web, facturación electrónica
+   (listado, filtros, representación, notas, anular, eliminar, asistente de
+   activación, resolución) y nómina electrónica (emitir, corregir, eliminar).
+   Un módulo nuevo o una acción nueva en uno existente **no se da por
+   terminada sin su test**.
+8. `vitest.config.mjs` fija `testTimeout: 20000`: con la suite completa en
+   paralelo, las pantallas pesadas superan los 5 s por defecto aunque solas
+   tarden menos de 2 s.
 7. Los listados tipo catálogo (tabla genérica + filtros + ver + eliminar)
    reutilizan `describeCatalogList` de `src/test/catalogBehavior.jsx`; cada
    módulo solo añade sus pruebas de crear/editar y acciones propias.

@@ -13,6 +13,9 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./vitest.setup.js'],
+    // Las pantallas con gráficas o muchos efectos superan los 5 s por defecto cuando
+    // la suite completa corre en paralelo (en solitario tardan < 2 s).
+    testTimeout: 20000,
     include: ['src/**/*.test.{js,jsx}'],
   },
 });
