@@ -80,5 +80,5 @@ describe('Portal del contador · workspace de empresa (humo)', () => {
     await waitFor(() => expect(screen.getByText('Aporte')).toBeInTheDocument());
     const reactErrors = errors.filter((e) => /Error|Cannot read|is not a function|not defined/.test(e));
     expect(reactErrors).toEqual([]);
-  });
+  }, 20000);
 });

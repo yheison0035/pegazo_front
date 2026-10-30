@@ -44,6 +44,8 @@ export default function OrderDetailModal({ orderId, onClose, onUpdated }) {
   const [failReason, setFailReason] = useState('');
   const [reschedule, setReschedule] = useState('');
   const [saving, setSaving] = useState(false);
+  // Motivo del último error al guardar/confirmar (antes se tragaba en silencio).
+  const [error, setError] = useState('');
   // Diálogo de confirmación con el diseño del sitio (reemplaza window.confirm).
   const [confirmDialog, setConfirmDialog] = useState(null);
 
@@ -111,7 +113,7 @@ export default function OrderDetailModal({ orderId, onClose, onUpdated }) {
       applyOrder(res.data);
       onUpdated?.();
     } catch (e) {
-      /* deja abierto */
+      setError(e?.message || 'No se pudo confirmar el pedido.');
     } finally {
       setSaving(false);
     }
@@ -120,12 +122,14 @@ export default function OrderDetailModal({ orderId, onClose, onUpdated }) {
   // Paso 2: guardar el estado del envío (avisa al cliente por correo automático).
   const save = async () => {
     setSaving(true);
+    setError('');
     try {
       await updateOrderFulfillment(orderId, buildPayload());
       onUpdated?.();
       onClose();
     } catch (e) {
-      /* deja abierto para reintentar */
+      // Deja el modal abierto para reintentar y muestra el motivo.
+      setError(e?.message || 'No se pudo guardar el envío.');
     } finally {
       setSaving(false);
     }
@@ -480,6 +484,12 @@ export default function OrderDetailModal({ orderId, onClose, onUpdated }) {
                   </div>
                 </fieldset>
               </div>
+
+              {error && (
+                <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
+                  {error}
+                </p>
+              )}
 
               {/* Cancelar / eliminar */}
               {order.saleStatus !== 'CANCELADA' && (
