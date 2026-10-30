@@ -5,8 +5,12 @@ import {
   rowsToObjects,
   indexCurrentInventory,
   classifyRow,
+  buildImportItems,
   parseNumber,
 } from './importUtils';
+
+// Claves a nivel de producto que viajan al backend (mismas que import/page.js).
+const PRODUCT_KEYS = ['id', 'sku', 'status', 'delete', 'name', 'salePrice', 'purchasePrice', 'categoryName', 'brandName', 'providerName', 'barcode', 'localName', 'minStock', 'description', 'unit'];
 
 // ---------------------------------------------------------------------------
 // CICLO COMPLETO exportar → reabrir el Excel → importar, con la librería de
@@ -224,6 +228,128 @@ describe('Inventario · ciclo exportar→importar (fidelidad de datos)', () => {
     // El resto: sin cambios.
     const resto = metas.filter((x) => x.sku !== inv[0].sku && x.sku !== inv[1].sku);
     expect(resto.every((x) => x.meta.action === 'update' && x.meta.diff.length === 0)).toBe(true);
+  });
+});
+
+describe('Inventario · ningún campo NO modificado se altera', () => {
+  // Round-trip comparando TODOS los campos de cada producto (no solo precio y
+  // stock): nombre, categoría, marca, proveedor, local, código, unidad, estado,
+  // descripción y stock mínimo.
+  it('reimportar conserva TODOS los campos de cada producto, exactos', () => {
+    const inv = makeInventory(120);
+    const { headers, dataRows } = exportThenReopen(inv);
+    const mapping = autoMapColumns(FIELDS, headers);
+    const objs = rowsToObjects(dataRows, mapping, FIELDS);
+    const bySku = new Map(inv.map((p) => [p.sku, p]));
+    const CAMPOS_TEXTO = ['name', 'categoryName', 'brandName', 'providerName', 'localName', 'barcode', 'unit', 'status', 'description'];
+    const CAMPOS_NUM = ['salePrice', 'purchasePrice', 'stock', 'minStock'];
+    for (const o of objs) {
+      const orig = bySku.get(o.sku);
+      for (const k of CAMPOS_TEXTO) expect(String(o[k])).toBe(String(orig[k] ?? ''));
+      for (const k of CAMPOS_NUM) expect(o[k]).toBe(orig[k]);
+    }
+  });
+
+  // Edita UN campo distinto en cada fila y verifica que el diff de esa fila es
+  // EXACTAMENTE ese campo, y que ninguna otra fila cambia.
+  it('editar un solo campo en una fila no toca los demás campos ni las demás filas', () => {
+    const inv = makeInventory(30);
+    const data = inv.map(toExportRow);
+    // fila → [columna de Excel, nuevo valor, etiqueta esperada en el diff]
+    const edits = [
+      [0, 'Nombre', 'PRODUCTO EDITADO', 'Nombre'],
+      [1, 'Precio venta', inv[1].salePrice + 10000, 'P. venta'],
+      [2, 'Precio compra', inv[2].purchasePrice + 5000, 'P. compra'],
+      [3, 'Stock', inv[3].stock + 7, 'Stock'],
+      [4, 'Stock mínimo', inv[4].minStock + 3, 'Stock mín.'],
+      [5, 'Código de barras', '7700000000001', 'Código'],
+      [6, 'Unidad', 'KG', 'Unidad'],
+      [7, 'Estado', 'INACTIVO', 'Estado'],
+      [8, 'Categoría', 'Juguetería', 'Categoría'],
+      [9, 'Marca', 'Marca Nueva', 'Marca'],
+      [10, 'Proveedor', 'Proveedor Nuevo', 'Proveedor'],
+      [11, 'Local', 'Sede Norte', 'Local'],
+      [12, 'Descripción', 'Descripción nueva', 'Descripción'],
+    ];
+    for (const [rowIdx, col, val] of edits) data[rowIdx][col] = val;
+
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Inventario');
+    const buf = XLSX.write(wb, { type: 'array', bookType: 'xlsx' });
+    const wb2 = XLSX.read(buf, { type: 'array' });
+    const aoa = XLSX.utils.sheet_to_json(wb2.Sheets[wb2.SheetNames[0]], { header: 1, defval: '', raw: false, blankrows: false });
+    const headers = aoa[0].map((label, index) => ({ index, label: String(label) }));
+    const dataRows = aoa.slice(1);
+    const mapping = autoMapColumns(FIELDS, headers);
+    const objs = rowsToObjects(dataRows, mapping, FIELDS);
+    const maps = indexCurrentInventory(inv);
+
+    const editadaPorSku = new Map(edits.map(([rowIdx, , , label]) => [inv[rowIdx].sku, label]));
+    for (const o of objs) {
+      const meta = classifyRow(o, maps, mapping);
+      expect(meta.action).toBe('update');
+      const esperado = editadaPorSku.get(o.sku);
+      if (esperado) {
+        // La fila editada cambia EXACTAMENTE un campo: el editado.
+        expect(meta.diff).toHaveLength(1);
+        expect(meta.diff[0].label).toBe(esperado);
+      } else {
+        // Ninguna otra fila cambia en ningún campo.
+        expect(meta.diff).toEqual([]);
+      }
+    }
+  });
+
+  // Si una columna NO viene en el Excel, ese campo no se marca como cambio en
+  // ninguna fila y NO viaja al backend (así no se desajusta lo que no tocaste).
+  it('una columna ausente (Stock) no cambia ni envía stock en ninguna fila', () => {
+    const inv = makeInventory(40);
+    const data = inv.map(toExportRow).map((r) => {
+      const { Stock, ...rest } = r; // el usuario borró la columna Stock del Excel
+      return rest;
+    });
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Inventario');
+    const buf = XLSX.write(wb, { type: 'array', bookType: 'xlsx' });
+    const wb2 = XLSX.read(buf, { type: 'array' });
+    const aoa = XLSX.utils.sheet_to_json(wb2.Sheets[wb2.SheetNames[0]], { header: 1, defval: '', raw: false, blankrows: false });
+    const headers = aoa[0].map((label, index) => ({ index, label: String(label) }));
+    const dataRows = aoa.slice(1);
+    const mapping = autoMapColumns(FIELDS, headers);
+    expect(mapping.stock).toBe(''); // la columna Stock no existe → no mapeada
+    const objs = rowsToObjects(dataRows, mapping, FIELDS);
+    const maps = indexCurrentInventory(inv);
+    for (const o of objs) {
+      const meta = classifyRow(o, maps, mapping);
+      expect(meta.diff.find((d) => d.label === 'Stock')).toBeUndefined();
+    }
+    // El payload al backend NO incluye stock (antes se forzaba a 0).
+    const items = buildImportItems(objs, { productKeys: PRODUCT_KEYS, isColor: false, hasSize: false });
+    expect(items.every((it) => it.stock === undefined)).toBe(true);
+  });
+
+  // El payload de un update sin ediciones lleva la llave (SKU) y refleja los
+  // mismos valores: no inventa ni pierde campos.
+  it('el payload de actualización refleja exactamente la fila (sin inventar datos)', () => {
+    const inv = makeInventory(10);
+    const { headers, dataRows } = exportThenReopen(inv);
+    const mapping = autoMapColumns(FIELDS, headers);
+    const objs = rowsToObjects(dataRows, mapping, FIELDS);
+    const items = buildImportItems(objs, { productKeys: PRODUCT_KEYS, isColor: false, hasSize: false });
+    expect(items).toHaveLength(inv.length);
+    const bySku = new Map(inv.map((p) => [p.sku, p]));
+    for (const it of items) {
+      const orig = bySku.get(it.sku);
+      expect(orig).toBeTruthy();
+      expect(it.name).toBe(orig.name);
+      expect(it.salePrice).toBe(orig.salePrice);
+      expect(it.purchasePrice).toBe(orig.purchasePrice);
+      expect(it.stock).toBe(orig.stock);
+      // No aparecen claves que no existan en el producto.
+      expect(it).not.toHaveProperty('variants'); // es update, no create
+    }
   });
 });
 
