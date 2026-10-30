@@ -109,7 +109,9 @@ export default function LibrosPage() {
         const res = await getLedger(params);
         setLedger(res?.data || null);
       }
-    } catch {
+    } catch (e) {
+      // Antes el error se tragaba en silencio y el libro quedaba vacío sin aviso.
+      setAlert({ type: 'error', message: e?.message || 'No se pudieron cargar los libros.' });
       /* noop */
     } finally {
       setLoading(false);
