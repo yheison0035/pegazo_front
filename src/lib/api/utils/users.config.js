@@ -193,8 +193,8 @@ export const getHeaderTableUsers = () => {
 };
 
 export const viewModalConfig = {
-  title: 'Detalles del Local',
-  subtitle: 'Información completa del punto de venta',
+  title: 'Detalles del Usuario',
+  subtitle: 'Información completa del usuario',
   columns: 3,
   sections: [
     {

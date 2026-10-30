@@ -24,7 +24,8 @@ export async function getLocalById(id) {
 export async function createLocal(dto) {
   const body = {
     ...dto,
-    managerId: Number(dto.managerId),
+    // Sin encargado se manda null (antes Number('')=0 rompía la FK en el backend).
+    managerId: Number(dto.managerId) || null,
   };
   return apiFetch('/locals', { method: 'POST', body: JSON.stringify(body) });
 }

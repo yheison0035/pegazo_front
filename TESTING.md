@@ -64,6 +64,13 @@ Reglas:
 5. Los selects nativos de Departamento/Ciudad son obligatorios solo si el
    formulario lo declara (`required` del campo); `pickDepartmentAndCity()` los
    llena. Si un submit "no sale", `invalidFields()` dice qué campo lo bloquea.
-6. Módulos cubiertos (fase 1): clientes, gastos, inventario (lista, crear,
-   editar, importar Excel), compras, caja y ventas (POS). Un módulo nuevo o
-   una acción nueva en uno existente **no se da por terminada sin su test**.
+6. Módulos cubiertos: **tanda 1** clientes, gastos, inventario (lista, crear,
+   editar, importar Excel), compras, caja y ventas (POS); **tanda 2** ventas
+   realizadas (detalle, imprimir, WhatsApp, CSV, reportes, reactivar, editar),
+   cartera (abonos, detalle, eliminar), citas (calendario, lista, cobrar,
+   confirmar, agendar con disponibilidad, editar), servicios, proveedores,
+   categorías, marcas, sedes y usuarios. Un módulo nuevo o una acción nueva
+   en uno existente **no se da por terminada sin su test**.
+7. Los listados tipo catálogo (tabla genérica + filtros + ver + eliminar)
+   reutilizan `describeCatalogList` de `src/test/catalogBehavior.jsx`; cada
+   módulo solo añade sus pruebas de crear/editar y acciones propias.
