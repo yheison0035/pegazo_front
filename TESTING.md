@@ -114,7 +114,15 @@ Reglas:
    soporte (bandeja + chat), estadísticas globales, proveedor tecnológico,
    API de facturación DIAN (consumidores + keys) y calendario tributario
    (fechas + UVT); cada pantalla verifica además que solo el rol de plataforma
-   entra.
+   entra;
+   **tanda 11** portal del contador (`/contador`, sesión `accountant`): portada
+   (portafolio, buscador por nombre/NIT, llave + QR, crear empresa externa),
+   layout (guard de sesión: sin token o sin `sessionType=accountant` redirige a
+   `/login`, "Salir" limpia la sesión) y workspace de empresa
+   (`/contador/empresa/[companyId]`) con estados financieros (pestañas
+   resultados/balance/flujo, rango de fechas, exportar), libros (diario, mayor,
+   auxiliar), plan de cuentas, calendario, impuestos, terceros (crear/editar/
+   eliminar) y el panel de asientos manuales.
    Un módulo nuevo o una acción nueva en uno existente **no se da por
    terminada sin su test**.
 8. `vitest.config.mjs` fija `testTimeout: 20000`: con la suite completa en
