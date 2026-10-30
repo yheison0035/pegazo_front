@@ -53,6 +53,7 @@ export default function ContentData({
   setPrinterInvoice,
   setShowModalChangeAdvisor,
   onEditImages,
+  onEditAvatar,
 }) {
   const auth = useAuth();
   const usuario = auth?.usuario;
@@ -276,6 +277,30 @@ export default function ContentData({
 
             {view === 'users' && (
               <>
+                <td className="px-5 py-4">
+                  <button
+                    type="button"
+                    onClick={() => onEditAvatar?.(info)}
+                    title="Cambiar foto"
+                    className="group relative h-[62px] w-[50px] flex-none overflow-hidden rounded-xl border border-gray-100 bg-gray-50 transition hover:border-orange-300 hover:ring-2 hover:ring-orange-500/20"
+                  >
+                    {info.avatar ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={info.avatar}
+                        alt={info.name || 'Foto'}
+                        className="h-full w-full object-cover object-top"
+                      />
+                    ) : (
+                      <span className="flex h-full w-full items-center justify-center text-sm font-bold text-gray-400">
+                        {(info.name || '?').charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                    <span className="absolute inset-0 flex items-center justify-center bg-black/45 opacity-0 transition group-hover:opacity-100">
+                      <CameraIcon className="h-5 w-5 text-white" />
+                    </span>
+                  </button>
+                </td>
                 <td className="px-5 py-4 whitespace-nowrap">
                   {info.role ? roleLabel(info.role, usuario?.company) : '---'}
                 </td>

@@ -25,6 +25,7 @@ const Table = ({
   setSelectedVariants,
   handleDeleteClick,
   onEditImages,
+  onEditAvatar,
   handleToggleStatus,
   setPrinterInvoice,
   meta,
@@ -219,6 +220,7 @@ const Table = ({
                   handleToggleStatus={handleToggleStatus}
                   setPrinterInvoice={setPrinterInvoice}
                   onEditImages={onEditImages}
+                  onEditAvatar={onEditAvatar}
                 />
               )}
             </tbody>

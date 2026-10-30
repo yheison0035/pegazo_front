@@ -17,6 +17,8 @@ import {
 import ConfirmDeleteModal from '@/components/dashboard/tables/segments/confirmDeleteModal';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
+import AvatarUploader from '@/components/ui/AvatarUploader';
+import { setUserAvatar } from '@/lib/api/routes/users';
 import useColumnFilters from '@/components/dashboard/tables/hooks/useColumnFilters';
 import { useDebounce } from '@/components/dashboard/tables/hooks/useDebounce';
 
@@ -34,6 +36,21 @@ export default function Users() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [alert, setAlert] = useState({});
+  const [avatarTarget, setAvatarTarget] = useState(null); // usuario cuya foto se cambia
+
+  // Guarda la foto del usuario (sin abrir el editor). La subida/optimización la
+  // hace AvatarUploader; aquí solo persistimos la URL y refrescamos la lista.
+  const handleAvatarChange = async (url) => {
+    if (!avatarTarget) return;
+    const id = avatarTarget.id;
+    try {
+      await setUserAvatar(id, url);
+      setUsers((list) => list.map((u) => (u.id === id ? { ...u, avatar: url || null } : u)));
+      setAvatarTarget((t) => (t ? { ...t, avatar: url || null } : t));
+    } catch (e) {
+      setAlert({ type: 'error', message: e?.message || 'No se pudo cambiar la foto.' });
+    }
+  };
 
   const { filters, handleFilterChange } = useColumnFilters({
     role: '',
@@ -113,6 +130,7 @@ export default function Users() {
             handleFilterChange={handleFilterChange}
             setSelected={setSelectedUser}
             handleDeleteClick={handleDeleteClick}
+            onEditAvatar={setAvatarTarget}
           />
 
           {meta && (
@@ -144,6 +162,32 @@ export default function Users() {
             onConfirm={confirmDelete}
             loading={loading}
           />
+        )}
+
+        {avatarTarget && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+            onClick={() => setAvatarTarget(null)}
+          >
+            <div
+              className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h2 className="mb-1 text-lg font-bold text-gray-800">Foto del usuario</h2>
+              <p className="mb-4 text-sm text-gray-500">{avatarTarget.name}</p>
+              <AvatarUploader
+                value={avatarTarget.avatar || ''}
+                shape="card"
+                hint=""
+                onChange={handleAvatarChange}
+              />
+              <div className="mt-6 flex justify-end">
+                <Button variant="secondary" onClick={() => setAvatarTarget(null)}>
+                  Cerrar
+                </Button>
+              </div>
+            </div>
+          </div>
         )}
 
         <AlertModal

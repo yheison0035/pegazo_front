@@ -205,3 +205,12 @@ export async function getPublicProfessionals(params = {}) {
   });
   return res?.data ?? res ?? [];
 }
+
+// Cambiar SOLO la foto de un usuario desde la tabla (sin abrir el editor).
+// `avatar` null o '' = quitar la foto.
+export async function setUserAvatar(id, avatar) {
+  return apiFetch(`/users/${id}/avatar`, {
+    method: 'PATCH',
+    body: JSON.stringify({ avatar: avatar || null }),
+  });
+}

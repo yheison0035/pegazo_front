@@ -1,16 +1,22 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { within } from '@testing-library/react';
 import {
   installApi,
   on,
   list,
   detail,
   ok,
+  fail,
   baseRoutes,
   resetBehavior,
   renderPage,
   settle,
   screen,
   waitFor,
+  fireEvent,
+  act,
+  click,
+  rowWith,
   setField,
   pickDepartmentAndCity,
   waitForCall,
@@ -29,6 +35,10 @@ vi.mock('next/navigation', async () => (await import('@/test/behaviorHarness')).
 vi.mock('next/link', async () => (await import('@/test/behaviorHarness')).mocks.link());
 vi.mock('@/hooks/useLiveRefresh', () => ({ default: () => {} }));
 vi.mock('@/lib/realtime', () => ({ subscribeRealtime: () => () => {} }));
+vi.mock('@/lib/imaging/formatImage', async () => {
+  const actual = await vi.importActual('@/lib/imaging/formatImage');
+  return { ...actual, formatImageFile: vi.fn(async (f) => f) };
+});
 
 const USERS = [
   { id: 2, name: 'CARLA VENDEDORA', email: 'carla@prueba.test', phone: '3001112233', address: 'Calle 1', birthdate: '1995-05-10T00:00:00.000Z', document: '1002', department: 'cundinamarca', city: 'bogota', role: 'ASESOR', localId: 1, local: { id: 1, name: 'Sede Centro' }, status: 'ACTIVO', position: '', salary: null, createdAt: '2026-01-01T10:00:00.000Z' },
@@ -126,5 +136,60 @@ describe('Usuarios · crear y editar', () => {
     expect('local' in call.body).toBe(false);
     expect('id' in call.body).toBe(false);
     await expectToast('success', /actualizad/i);
+  });
+});
+
+describe('Usuarios · foto desde la tabla (sin entrar a editar)', () => {
+  let api;
+  beforeEach(() => {
+    resetBehavior();
+    api = installApi([
+      on('GET', /^\/users$/, list(USERS)),
+      on('POST', /^\/companies\/logo-upload$/, ok({ url: 'https://cdn/carla.webp' })),
+      on('PATCH', /^\/users\/\d+\/avatar$/, ok({ id: 2 })),
+      ...baseRoutes(),
+    ]);
+    globalThis.URL.createObjectURL = vi.fn(() => 'blob:preview');
+    globalThis.URL.revokeObjectURL = vi.fn();
+  });
+  afterEach(() => vi.restoreAllMocks());
+
+  it('cada fila muestra la miniatura de foto (inicial si no hay)', async () => {
+    api.set('GET', /^\/users$/, list([{ ...USERS[0], avatar: 'https://cdn/ya.webp' }, USERS[1]]));
+    await renderPage(<UsersPage />);
+    await screen.findByText('CARLA VENDEDORA');
+    // Con foto: muestra la imagen; sin foto: la inicial del nombre.
+    expect(within(rowWith('CARLA VENDEDORA')).getByAltText('CARLA VENDEDORA')).toHaveAttribute('src', 'https://cdn/ya.webp');
+    expect(within(rowWith('PEDRO CAJA')).getByText('P')).toBeInTheDocument();
+  });
+
+  it('cambiar la foto desde la tabla la sube y la persiste sin abrir el editor', async () => {
+    await renderPage(<UsersPage />);
+    await screen.findByText('CARLA VENDEDORA');
+    await click(within(rowWith('CARLA VENDEDORA')).getByTitle('Cambiar foto'));
+    expect(await screen.findByText('Foto del usuario')).toBeInTheDocument();
+    const fileInput = document.querySelector('.fixed input[type="file"]');
+    await act(async () => {
+      fireEvent.change(fileInput, { target: { files: [new File([new Uint8Array([1, 2, 3])], 'f.png', { type: 'image/png' })] } });
+    });
+    await waitForCall(api, 'POST', /^\/companies\/logo-upload$/);
+    const call = await waitForCall(api, 'PATCH', /^\/users\/2\/avatar$/);
+    expect(call.body).toEqual({ avatar: 'https://cdn/carla.webp' });
+    // La miniatura de la fila se actualiza al instante.
+    await waitFor(() => expect(within(rowWith('CARLA VENDEDORA')).getByAltText('CARLA VENDEDORA')).toHaveAttribute('src', 'https://cdn/carla.webp'));
+  });
+
+  it('si falla el guardado de la foto, avisa', async () => {
+    api.set('PATCH', /^\/users\/\d+\/avatar$/, fail(400, 'No se pudo cambiar la foto.'));
+    await renderPage(<UsersPage />);
+    await screen.findByText('CARLA VENDEDORA');
+    await click(within(rowWith('CARLA VENDEDORA')).getByTitle('Cambiar foto'));
+    await screen.findByText('Foto del usuario');
+    const fileInput = document.querySelector('.fixed input[type="file"]');
+    await act(async () => {
+      fireEvent.change(fileInput, { target: { files: [new File([new Uint8Array([1])], 'f.png', { type: 'image/png' })] } });
+    });
+    await waitForCall(api, 'PATCH', /^\/users\/2\/avatar$/);
+    await expectToast('error', 'No se pudo cambiar la foto.');
   });
 });
