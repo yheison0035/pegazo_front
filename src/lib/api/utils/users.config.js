@@ -157,6 +157,7 @@ export const getFormFieldsUsers = (type) => {
 
 export const getHeaderTableUsers = () => {
   return [
+    { name: 'avatar', title: 'Foto', show: true, showInput: false },
     { name: 'role', title: 'Rol', show: true, showInput: true },
     { name: 'name', title: 'Nombre Completo', show: true, showInput: true },
     {
