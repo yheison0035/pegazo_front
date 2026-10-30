@@ -96,7 +96,15 @@ Reglas:
    (configuración, banners, pagos, Wompi, envíos), guarda cascos (ingreso,
    lavado, cobro, anular, tarifas), catálogo web, facturación electrónica
    (listado, filtros, representación, notas, anular, eliminar, asistente de
-   activación, resolución) y nómina electrónica (emitir, corregir, eliminar).
+   activación, resolución) y nómina electrónica (emitir, corregir, eliminar);
+   **tanda 9** contabilidad: activos fijos (crear, editar, dar de baja),
+   plan de cuentas (crear, editar, eliminar; cuentas base no borrables),
+   libros (diario, mayor, balance de prueba, auxiliar, fechas, exportar,
+   error de carga), impuestos (consultar IVA, saldo a favor, CSV), estados
+   financieros (resultados, balance, flujo, fechas, exportar), calendario
+   tributario (vencimientos, revisar alertas, CSV, obligaciones + perfil
+   fiscal, avisos, borrador de renta por año + Excel) y resumen contable
+   (tarjetas, vencimientos, CSV), con sus roles.
    Un módulo nuevo o una acción nueva en uno existente **no se da por
    terminada sin su test**.
 8. `vitest.config.mjs` fija `testTimeout: 20000`: con la suite completa en
