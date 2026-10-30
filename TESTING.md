@@ -104,7 +104,17 @@ Reglas:
    financieros (resultados, balance, flujo, fechas, exportar), calendario
    tributario (vencimientos, revisar alertas, CSV, obligaciones + perfil
    fiscal, avisos, borrador de renta por año + Excel) y resumen contable
-   (tarjetas, vencimientos, CSV), con sus roles.
+   (tarjetas, vencimientos, CSV), con sus roles;
+   **tanda 10** plataforma (SUPER_PLATFORM_ADMIN): empresas (listar, filtrar,
+   paginar, activar/desactivar, impersonar, eliminar; crear con administrador;
+   editar + panel de módulos/funciones/descuento; panel 360° con pago,
+   suspensión, usuarios), usuarios globales (reset de clave, estado), cuentas
+   de pago, configuración, planes y funciones (precios, límites, puertas por
+   plan), cupones, comunicados, IA (proveedor, key, prueba), tipos de negocio,
+   soporte (bandeja + chat), estadísticas globales, proveedor tecnológico,
+   API de facturación DIAN (consumidores + keys) y calendario tributario
+   (fechas + UVT); cada pantalla verifica además que solo el rol de plataforma
+   entra.
    Un módulo nuevo o una acción nueva en uno existente **no se da por
    terminada sin su test**.
 8. `vitest.config.mjs` fija `testTimeout: 20000`: con la suite completa en

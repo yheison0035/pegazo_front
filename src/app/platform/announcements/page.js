@@ -305,6 +305,8 @@ export default function PlatformAnnouncements() {
     try {
       const res = await getAnnouncements();
       setItems(res?.data || []);
+    } catch (e) {
+      alert(e?.message || 'No se pudieron cargar los comunicados.');
     } finally {
       setLoading(false);
     }
@@ -316,8 +318,12 @@ export default function PlatformAnnouncements() {
 
   const remove = async (a) => {
     if (!confirm(`¿Eliminar el comunicado "${a.title}"?`)) return;
-    await deleteAnnouncement(a.id);
-    setItems((l) => l.filter((x) => x.id !== a.id));
+    try {
+      await deleteAnnouncement(a.id);
+      setItems((l) => l.filter((x) => x.id !== a.id));
+    } catch (e) {
+      alert(e?.message || 'No se pudo eliminar el comunicado.');
+    }
   };
 
   const audienceLabel = (a) => {
