@@ -76,8 +76,13 @@ Reglas:
    parqueadero (entrada, mensualidad, salida/cobro, anular, tarifas y
    configuración), mesas (crear, pedidos a cocina, estados, cobrar mesa,
    eliminar, roles) y cotizaciones (crear, aceptar, rechazar, convertir,
-   eliminar). Un módulo nuevo o una acción nueva en uno existente **no se da
-   por terminada sin su test**.
+   eliminar); **tanda 5** cocina (tablero por estado, avanzar, menú del día),
+   pedidos online (filtros, confirmar, envío, fallido, WhatsApp, cancelar,
+   eliminar), cargos a empleados (registrar, saldar efectivo/comisión,
+   reabrir, eliminar, vista del empleado) y banco (activar/desactivar,
+   configuración, enlace compartido, regenerar, copiar, historial). Un módulo
+   nuevo o una acción nueva en uno existente **no se da por terminada sin su
+   test**.
 7. Los listados tipo catálogo (tabla genérica + filtros + ver + eliminar)
    reutilizan `describeCatalogList` de `src/test/catalogBehavior.jsx`; cada
    módulo solo añade sus pruebas de crear/editar y acciones propias.
