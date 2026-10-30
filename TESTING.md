@@ -123,6 +123,15 @@ Reglas:
    resultados/balance/flujo, rango de fechas, exportar), libros (diario, mayor,
    auxiliar), plan de cuentas, calendario, impuestos, terceros (crear/editar/
    eliminar) y el panel de asientos manuales.
+
+   **Imágenes (formateador único).** `src/lib/imaging/formatImage.js` redimensiona
+   y convierte a WebP toda imagen antes de subir (logo, avatar de perfil,
+   productos, soporte) y el módulo usuario permite foto opcional al crear/editar
+   con vista previa (`src/components/ui/AvatarUploader.js`). Pruebas: la lógica
+   pura del formateador (medidas, recorte, nombre, presets) y el comportamiento
+   del subidor (preview, subida, error, quitar). La conversión en canvas corre
+   en el navegador; en jsdom el formateador devuelve el archivo original.
+
    Un módulo nuevo o una acción nueva en uno existente **no se da por
    terminada sin su test**.
 8. `vitest.config.mjs` fija `testTimeout: 20000`: con la suite completa en
