@@ -179,6 +179,7 @@ export default function Users() {
                 value={avatarTarget.avatar || ''}
                 shape="card"
                 hint=""
+                showButton
                 onChange={handleAvatarChange}
               />
               <div className="mt-6 flex justify-end">

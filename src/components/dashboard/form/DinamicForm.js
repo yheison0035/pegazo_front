@@ -570,6 +570,7 @@ export default function DinamicForm({
                     value={formData[name] || ''}
                     shape="card"
                     hint=""
+                    showButton
                     onChange={(url) =>
                       setFormData((prev) => ({ ...prev, [name]: url }))
                     }

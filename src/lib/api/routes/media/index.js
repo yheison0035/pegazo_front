@@ -1,10 +1,10 @@
 import apiFetch from '../../auth/client';
 
-// Subida genérica de imágenes a Cloudinary vía el backend. Reutiliza el
-// endpoint de imágenes ya existente y devuelve { data: { url } }. Sirve para
-// fotos de usuario y cualquier otra imagen suelta que necesite una URL.
+// Subida de imágenes de usuario a Cloudinary. Usa el endpoint de usuarios
+// (accesible a admins de empresa), NO el de logo de empresa que está reservado
+// al admin de plataforma. Devuelve { data: { url } }.
 export async function uploadImage(file) {
   const fd = new FormData();
   fd.append('file', file);
-  return apiFetch('/companies/logo-upload', { method: 'POST', body: fd });
+  return apiFetch('/users/image-upload', { method: 'POST', body: fd });
 }

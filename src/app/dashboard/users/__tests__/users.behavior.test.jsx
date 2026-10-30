@@ -145,7 +145,7 @@ describe('Usuarios · foto desde la tabla (sin entrar a editar)', () => {
     resetBehavior();
     api = installApi([
       on('GET', /^\/users$/, list(USERS)),
-      on('POST', /^\/companies\/logo-upload$/, ok({ url: 'https://cdn/carla.webp' })),
+      on('POST', /^\/users\/image-upload$/, ok({ url: 'https://cdn/carla.webp' })),
       on('PATCH', /^\/users\/\d+\/avatar$/, ok({ id: 2 })),
       ...baseRoutes(),
     ]);
@@ -172,7 +172,7 @@ describe('Usuarios · foto desde la tabla (sin entrar a editar)', () => {
     await act(async () => {
       fireEvent.change(fileInput, { target: { files: [new File([new Uint8Array([1, 2, 3])], 'f.png', { type: 'image/png' })] } });
     });
-    await waitForCall(api, 'POST', /^\/companies\/logo-upload$/);
+    await waitForCall(api, 'POST', /^\/users\/image-upload$/);
     const call = await waitForCall(api, 'PATCH', /^\/users\/2\/avatar$/);
     expect(call.body).toEqual({ avatar: 'https://cdn/carla.webp' });
     // La miniatura de la fila se actualiza al instante.
