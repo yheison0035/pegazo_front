@@ -69,8 +69,11 @@ Reglas:
    realizadas (detalle, imprimir, WhatsApp, CSV, reportes, reactivar, editar),
    cartera (abonos, detalle, eliminar), citas (calendario, lista, cobrar,
    confirmar, agendar con disponibilidad, editar), servicios, proveedores,
-   categorías, marcas, sedes y usuarios. Un módulo nuevo o una acción nueva
-   en uno existente **no se da por terminada sin su test**.
+   categorías, marcas, sedes y usuarios; **tanda 3** devoluciones, plan separe
+   (abonos, entregar, anular), cuentas por pagar (crear, pagar, deshacer,
+   editar, eliminar) y membresías (crear, cobrar, deshacer, editar, eliminar).
+   Un módulo nuevo o una acción nueva en uno existente **no se da por
+   terminada sin su test**.
 7. Los listados tipo catálogo (tabla genérica + filtros + ver + eliminar)
    reutilizan `describeCatalogList` de `src/test/catalogBehavior.jsx`; cada
    módulo solo añade sus pruebas de crear/editar y acciones propias.
