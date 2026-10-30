@@ -77,6 +77,16 @@ describe('AvatarUploader', () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 
+  it('shape="card" muestra el recuadro vertical de la página de citas', () => {
+    render(<AvatarUploader value="https://cdn/previa.webp" onChange={() => {}} upload={vi.fn()} shape="card" />);
+    const img = screen.getByAltText('Foto');
+    // Mismo encuadre que la tarjeta de profesional en citas: vertical 4:5 y
+    // alineado arriba (muestra la cara), esquinas redondeadas.
+    expect(img.className).toContain('object-top');
+    const frame = img.closest('div');
+    expect(frame.className).toContain('aspect-[4/5]');
+  });
+
   it('con foto cargada, "Quitar" la borra', async () => {
     const onChange = vi.fn();
     render(<AvatarUploader value="https://cdn/previa.webp" onChange={onChange} upload={vi.fn()} />);

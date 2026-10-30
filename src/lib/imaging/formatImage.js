@@ -9,7 +9,10 @@ import { loadImage, canvasToBlob } from './photoStudio';
 // Presets por tipo de cargue. `square:true` recorta a cuadrado (centrado) para
 // fotos de personas/avatares. El resto respeta la proporción original.
 export const IMAGE_PRESETS = {
-  avatar: { maxWidth: 512, maxHeight: 512, quality: 0.85, square: true },
+  // Foto de persona: vertical (sirve igual para el círculo del sidebar y para
+  // la tarjeta 4:5 de la página de citas). No se recorta a cuadrado para no
+  // perder el encuadre del retrato; cada vista la recorta con object-cover.
+  avatar: { maxWidth: 900, maxHeight: 1200, quality: 0.85 },
   logo: { maxWidth: 512, maxHeight: 512, quality: 0.9 },
   product: { maxWidth: 1280, maxHeight: 1280, quality: 0.82 },
   banner: { maxWidth: 1920, maxHeight: 1080, quality: 0.82 },

@@ -53,8 +53,9 @@ describe('formatImage · nombre y extensión', () => {
 });
 
 describe('formatImage · presets', () => {
-  it('avatar recorta a cuadrado 512', () => {
-    expect(IMAGE_PRESETS.avatar).toMatchObject({ square: true, maxWidth: 512 });
+  it('avatar es vertical (sin recorte cuadrado) para verse bien en la tarjeta de citas', () => {
+    expect(IMAGE_PRESETS.avatar.square).toBeFalsy();
+    expect(IMAGE_PRESETS.avatar.maxHeight).toBeGreaterThan(IMAGE_PRESETS.avatar.maxWidth);
   });
   it('overrides pisan el preset', () => {
     expect(resolvePreset('product', { quality: 0.5 })).toMatchObject({ maxWidth: 1280, quality: 0.5 });

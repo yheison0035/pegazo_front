@@ -568,6 +568,8 @@ export default function DinamicForm({
                   <AvatarUploader
                     label={label}
                     value={formData[name] || ''}
+                    shape="card"
+                    hint=""
                     onChange={(url) =>
                       setFormData((prev) => ({ ...prev, [name]: url }))
                     }
