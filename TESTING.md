@@ -80,7 +80,12 @@ Reglas:
    pedidos online (filtros, confirmar, envío, fallido, WhatsApp, cancelar,
    eliminar), cargos a empleados (registrar, saldar efectivo/comisión,
    reabrir, eliminar, vista del empleado) y banco (activar/desactivar,
-   configuración, enlace compartido, regenerar, copiar, historial). Un módulo
+   configuración, enlace compartido, regenerar, copiar, historial); **tanda 6**
+   catálogos simples con `describeSimpleCatalog` (`src/test/simpleCatalogBehavior.jsx`):
+   segmentos de cliente, tipos de cargo, tipos de gasto, medios de pago,
+   unidades de medida; además días de descanso (semanales, calendario,
+   puntuales), fidelización (acumulando/antiguos, buscar, sincronizar) y
+   notificaciones (sin leer, abrir, marcar todas, ir al detalle). Un módulo
    nuevo o una acción nueva en uno existente **no se da por terminada sin su
    test**.
 7. Los listados tipo catálogo (tabla genérica + filtros + ver + eliminar)
