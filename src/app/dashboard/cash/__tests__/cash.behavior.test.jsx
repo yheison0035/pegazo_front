@@ -38,8 +38,8 @@ const OPEN_CASH = {
   openedAt: new Date().toISOString(),
   openedBy: { name: 'Dueño Prueba' },
   status: 'ABIERTA',
-  totals: { ingresos: 50000, egresos: 20000, expected: 130000 },
-  movements: [{ id: 1, type: 'INGRESO', amount: 50000, concept: 'Venta mostrador' }],
+  totals: { ingresos: 50000, egresos: 0, gastos: 20000, expected: 130000 },
+  movements: [{ id: 1, type: 'INGRESO', amount: 50000, concept: 'Venta en efectivo' }],
 };
 const HISTORY = [
   { id: 2, openedAt: '2026-02-01T13:00:00.000Z', closedAt: '2026-02-01T23:00:00.000Z', openingAmount: 100000, expectedAmount: 120000, countedAmount: 120000, difference: 0, status: 'CERRADA' },
@@ -122,30 +122,28 @@ describe('Caja · con caja abierta', () => {
   });
   afterEach(() => vi.restoreAllMocks());
 
-  it('muestra base, ingresos, egresos, esperado y los movimientos', async () => {
+  it('muestra base, ingresos, gastos y esperado (los ingresos entran por ventas)', async () => {
     await renderPage(<CashPage />);
     await waitForCall(api, 'GET', /^\/cash\/current$/);
     expect(await screen.findByText('Base inicial')).toBeInTheDocument();
     expect(screen.getAllByText(money(100000)).length).toBeGreaterThan(0);
     expect(screen.getAllByText(money(130000)).length).toBeGreaterThan(0);
-    expect(screen.getByText('Venta mostrador')).toBeInTheDocument();
+    // El recuadro "Gastos" (antes "Egresos") suma los gastos en efectivo del día.
+    expect(screen.getByText('Gastos')).toBeInTheDocument();
+    expect(screen.queryByText('Egresos')).toBeNull();
+    expect(screen.getAllByText(money(20000)).length).toBeGreaterThan(0);
     expect(screen.queryByText(/No hay una caja abierta/)).toBeNull();
     // Con caja abierta no se puede reabrir otra.
     expect(screen.getByRole('button', { name: 'Reabrir' })).toBeDisabled();
   });
 
-  it('registra un egreso manual con monto y concepto', async () => {
+  it('ya no existe el registro de "otro movimiento de efectivo"', async () => {
     await renderPage(<CashPage />);
     await screen.findByText('Base inicial');
-    expect(button('Registrar')).toBeDisabled();
-    await click(screen.getByRole('button', { name: /Egreso/i }));
-    await typeInto(placeholder('Monto'), '20000');
-    await typeInto(placeholder('Concepto (ej: retiro, pago proveedor…)'), 'retiro para domicilios');
-    await click(button('Registrar'));
-    const call = await waitForCall(api, 'POST', /^\/cash\/5\/movement$/);
-    expect(call.body).toEqual({ type: 'EGRESO', amount: 20000, concept: 'retiro para domicilios' });
-    await waitForCall(api, 'GET', /^\/cash\/current$/, { count: 2 });
-    expect(placeholder('Monto').value).toBe('');
+    // El efectivo entra por ventas y sale por gastos: no hay movimiento manual.
+    expect(screen.queryByText(/Otro movimiento de efectivo/i)).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Registrar' })).toBeNull();
+    expect(screen.queryByPlaceholderText('Monto')).toBeNull();
   });
 
   it('cierra la caja con el efectivo contado y reporta si cuadra', async () => {

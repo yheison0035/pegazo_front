@@ -4,8 +4,6 @@ import { useCallback, useEffect, useState } from 'react';
 import useLiveRefresh from "@/hooks/useLiveRefresh";
 import {
   BanknotesIcon,
-  ArrowDownCircleIcon,
-  ArrowUpCircleIcon,
   LockClosedIcon,
   InformationCircleIcon,
   ChevronDownIcon,
@@ -33,7 +31,6 @@ export default function CashPage() {
     getCurrentCash,
     getCashHistory,
     openCash,
-    addCashMovement,
     closeCash,
     reopenCash,
     updateCashOpening,
@@ -66,7 +63,6 @@ export default function CashPage() {
 
   // formularios
   const [openingAmount, setOpeningAmount] = useState('');
-  const [mov, setMov] = useState({ type: 'INGRESO', amount: '', concept: '' });
   const [counted, setCounted] = useState('');
   const [showHelp, setShowHelp] = useState(false);
 
@@ -141,21 +137,6 @@ export default function CashPage() {
       refresh();
     } catch (err) {
       setAlert({ type: 'error', message: err.message || 'No se pudo abrir la caja' });
-    }
-  };
-
-  const handleMovement = async () => {
-    if (!mov.amount) return;
-    try {
-      await addCashMovement(current.id, {
-        type: mov.type,
-        amount: Number(mov.amount),
-        concept: mov.concept,
-      });
-      setMov({ type: 'INGRESO', amount: '', concept: '' });
-      refresh();
-    } catch (err) {
-      setAlert({ type: 'error', message: err.message || 'No se pudo registrar' });
     }
   };
 
@@ -240,16 +221,15 @@ export default function CashPage() {
                 Solo puede haber una caja abierta por sede a la vez.
               </p>
               <p>
-                <b>2. Automático (no lo registras a mano):</b> las{' '}
-                <b>ventas en efectivo</b> entran solas como ingreso y los{' '}
-                <b>gastos en efectivo</b> salen solos como egreso. Solo registra
-                un movimiento manual cuando <b>no</b> sea una venta ni un gasto:
-                un <b>retiro</b> (sacar plata para el banco), meter{' '}
-                <b>base/cambio</b> extra o un <b>ajuste</b>.
+                <b>2. Todo es automático (no registras nada a mano):</b> las{' '}
+                <b>ventas en efectivo</b> entran solas como <b>ingreso</b> y los{' '}
+                <b>gastos en efectivo</b> que registras en el módulo{' '}
+                <b>Gastos</b> salen solos y se descuentan de la caja.
               </p>
               <p>
                 <b>3. Esperado en caja:</b> es lo que debería haber físicamente ={' '}
-                <i>base + ingresos − egresos</i>. Se calcula solo.
+                <i>base + ventas en efectivo − gastos en efectivo</i>. Se calcula
+                solo.
               </p>
               <p>
                 <b>4. Cerrar caja (arqueo):</b> al terminar el turno,{' '}
@@ -308,7 +288,7 @@ export default function CashPage() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <Stat label="Base inicial" value={formatCOP(current.openingAmount)} />
                 <Stat label="Ingresos" value={formatCOP(t?.ingresos)} tone="green" />
-                <Stat label="Egresos" value={formatCOP(t?.egresos)} tone="red" />
+                <Stat label="Gastos" value={formatCOP(t?.gastos)} tone="red" />
                 <Stat
                   label="Esperado en caja"
                   value={formatCOP(t?.expected)}
@@ -371,86 +351,7 @@ export default function CashPage() {
                 </div>
               )}
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                {/* Movimientos */}
-                <div className="bg-white rounded-2xl shadow border border-gray-100 p-5">
-                  <h3 className="font-semibold text-gray-800">
-                    Otro movimiento de efectivo
-                  </h3>
-                  <p className="mb-3 text-xs text-gray-400">
-                    Solo para retiros, base/cambio o ajustes. Las ventas y los
-                    gastos en efectivo ya entran y salen solos.
-                  </p>
-                  <div className="flex gap-2 mb-3">
-                    <button
-                      onClick={() => setMov((m) => ({ ...m, type: 'INGRESO' }))}
-                      className={`flex-1 flex items-center justify-center gap-1 rounded-lg px-3 py-2 text-sm font-medium border ${
-                        mov.type === 'INGRESO'
-                          ? 'bg-green-50 border-green-300 text-green-700'
-                          : 'border-gray-200 text-gray-500'
-                      }`}
-                    >
-                      <ArrowDownCircleIcon className="w-4 h-4" /> Ingreso
-                    </button>
-                    <button
-                      onClick={() => setMov((m) => ({ ...m, type: 'EGRESO' }))}
-                      className={`flex-1 flex items-center justify-center gap-1 rounded-lg px-3 py-2 text-sm font-medium border ${
-                        mov.type === 'EGRESO'
-                          ? 'bg-red-50 border-red-300 text-red-700'
-                          : 'border-gray-200 text-gray-500'
-                      }`}
-                    >
-                      <ArrowUpCircleIcon className="w-4 h-4" /> Egreso
-                    </button>
-                  </div>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={fmtMoney(mov.amount)}
-                    onChange={(e) =>
-                      setMov((m) => ({ ...m, amount: parseMoney(e.target.value) }))
-                    }
-                    placeholder="Monto"
-                    className="w-full mb-2 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  />
-                  <input
-                    value={mov.concept}
-                    onChange={(e) => setMov((m) => ({ ...m, concept: e.target.value }))}
-                    placeholder="Concepto (ej: retiro, pago proveedor…)"
-                    className="w-full mb-3 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  />
-                  <button
-                    onClick={handleMovement}
-                    disabled={loading || !mov.amount}
-                    className="w-full rounded-lg bg-gray-800 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-900 disabled:opacity-50"
-                  >
-                    Registrar
-                  </button>
-
-                  <div className="mt-4 max-h-52 overflow-y-auto divide-y divide-gray-50">
-                    {current.movements?.length === 0 && (
-                      <p className="text-sm text-gray-400 py-3">Sin movimientos.</p>
-                    )}
-                    {current.movements?.map((m) => (
-                      <div key={m.id} className="flex items-center justify-between py-2 text-sm">
-                        <span className="text-gray-600">
-                          {m.concept || (m.type === 'INGRESO' ? 'Ingreso' : 'Egreso')}
-                        </span>
-                        <span
-                          className={
-                            m.type === 'INGRESO'
-                              ? 'text-green-600 font-medium'
-                              : 'text-red-600 font-medium'
-                          }
-                        >
-                          {m.type === 'INGRESO' ? '+' : '−'}
-                          {formatCOP(m.amount)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
+              <div className="grid grid-cols-1 gap-5">
                 {/* Cierre / arqueo */}
                 <div className="bg-white rounded-2xl shadow border border-gray-100 p-5">
                   <h3 className="font-semibold text-gray-800 mb-1 flex items-center gap-2">
