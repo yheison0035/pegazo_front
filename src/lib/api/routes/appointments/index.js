@@ -148,3 +148,21 @@ export async function createPublicBooking(slug, dto) {
     body: JSON.stringify(dto),
   });
 }
+
+// Citas recientes por confirmar (para el aviso por voz del panel).
+export async function getRecentPendingAppointments() {
+  return apiFetch('/appointments/recent-pending');
+}
+
+// Confirmar una cita: pasa a CONFIRMADA y le avisa al cliente por correo.
+export async function confirmAppointment(id) {
+  return apiFetch(`/appointments/${id}/confirm`, { method: 'PATCH' });
+}
+
+// Cambio rápido de estado desde el calendario (sin abrir el editor).
+export async function setAppointmentStatus(id, status) {
+  return apiFetch(`/appointments/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  });
+}
