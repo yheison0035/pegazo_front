@@ -17,6 +17,7 @@ import useLiveRefresh from '@/hooks/useLiveRefresh';
 import {
   getAppointmentsMonth,
   deleteAppointment,
+  setAppointmentStatus,
 } from '@/lib/api/routes/appointments';
 import {
   getMyRestDays,
@@ -39,6 +40,15 @@ const STATUS = {
   NO_ASISTIO: { dot: 'bg-red-500', chip: 'border-l-red-500', label: 'No asistió' },
 };
 const st = (s) => STATUS[s] || STATUS.PENDIENTE;
+// Orden de estados para el select rápido del calendario.
+const STATUS_OPTIONS = [
+  'PENDIENTE',
+  'CONFIRMADA',
+  'EN_PROCESO',
+  'COMPLETADA',
+  'CANCELADA',
+  'NO_ASISTIO',
+];
 
 function todayStr() {
   const d = new Date();
@@ -65,6 +75,18 @@ export default function AppointmentsCalendar() {
   const { can } = usePermissions();
   const canEdit = can('appointments', 'edit');
   const canDelete = can('appointments', 'delete');
+
+  // Cambio rápido de estado desde el calendario (confirmar, cancelar, no
+  // asistió…) sin abrir el editor. Confirmar también avisa al cliente por correo.
+  const changeStatus = async (id, status) => {
+    try {
+      await setAppointmentStatus(id, status);
+      load();
+    } catch (e) {
+      if (typeof window !== 'undefined')
+        window.alert(e?.message || 'No se pudo cambiar el estado.');
+    }
+  };
 
   // Eliminar una cita desde el calendario (mismas opciones que la vista lista).
   const removeAppointment = async (id) => {
@@ -370,14 +392,32 @@ export default function AppointmentsCalendar() {
                       key={a.id}
                       className={`rounded-xl border border-l-4 border-gray-100 bg-white p-3 ${st(a.status).chip}`}
                     >
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between gap-2">
                         <span className="font-semibold text-gray-800">
                           {a.startTime}
                         </span>
-                        <span className="flex items-center gap-1.5 text-xs text-gray-500">
-                          <span className={`h-2 w-2 rounded-full ${st(a.status).dot}`} />
-                          {st(a.status).label}
-                        </span>
+                        {canEdit ? (
+                          // Select rápido para cambiar el estado sin editar.
+                          <span className="flex items-center gap-1.5">
+                            <span className={`h-2 w-2 flex-none rounded-full ${st(a.status).dot}`} />
+                            <select
+                              value={a.status}
+                              onChange={(e) => changeStatus(a.id, e.target.value)}
+                              className="rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs font-medium text-gray-600 focus:border-orange-400 focus:outline-none"
+                            >
+                              {STATUS_OPTIONS.map((s) => (
+                                <option key={s} value={s}>
+                                  {st(s).label}
+                                </option>
+                              ))}
+                            </select>
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-1.5 text-xs text-gray-500">
+                            <span className={`h-2 w-2 rounded-full ${st(a.status).dot}`} />
+                            {st(a.status).label}
+                          </span>
+                        )}
                       </div>
                       <p className="mt-1 text-sm text-gray-700">
                         {a.customer?.name || 'Sin cliente'}

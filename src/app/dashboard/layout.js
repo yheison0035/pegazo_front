@@ -7,6 +7,7 @@ import { Roles } from '@/config/roles';
 import PlanUpgradeModal from '@/components/plan/PlanUpgradeModal';
 import AppointmentsHub from '@/components/appointments/AppointmentsHub';
 import BankDepositNotifier from '@/components/bank/BankDepositNotifier';
+import AppointmentNotifier from '@/components/appointments/AppointmentNotifier';
 import SplashScreen from '@/components/pwa/SplashScreen';
 import PushRegister from '@/components/pwa/PushRegister';
 import { useAuth } from '@/context/authContext';
@@ -108,6 +109,7 @@ export default function Layout({ children }) {
         <QuickSearch />
         <AppointmentsHub />
         <BankDepositNotifier />
+        <AppointmentNotifier />
         <PushRegister />
       </div>
     </RoleGuard>

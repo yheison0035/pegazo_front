@@ -27,6 +27,7 @@ vi.mock('next/link', () => ({
 const monthMock = vi.hoisted(() => ({
   getAppointmentsMonth: vi.fn(async () => ({ data: [] })),
   deleteAppointment: vi.fn(async () => ({ success: true })),
+  setAppointmentStatus: vi.fn(async () => ({ success: true })),
 }));
 vi.mock('@/lib/api/routes/appointments', () => monthMock);
 vi.mock('@/lib/api/routes/restDays', () => ({
@@ -97,5 +98,33 @@ describe('Calendario de citas · tiempo real', () => {
       fireEvent.click(eliminar);
     });
     await waitFor(() => expect(monthMock.deleteAppointment).toHaveBeenCalledWith(77));
+  });
+
+  it('el select cambia el estado rápido sin entrar a editar', async () => {
+    const d = new Date();
+    const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-16`;
+    const appt = {
+      id: 88,
+      date: `${iso}T10:00:00.000Z`,
+      startTime: '11:00 a. m.',
+      status: 'PENDIENTE',
+      customer: { name: 'Pedro Caja' },
+      service: { name: 'Corte' },
+      barber: { name: 'Luis' },
+      sales: [],
+    };
+    monthMock.getAppointmentsMonth.mockResolvedValue({ data: [appt] });
+    await act(async () => {
+      render(<AppointmentsCalendar />);
+    });
+    await waitFor(() => expect(screen.getAllByText(/Pedro/).length).toBeGreaterThan(0));
+    await act(async () => {
+      fireEvent.click(screen.getAllByText(/Pedro/)[0].closest('button'));
+    });
+    const select = await screen.findByDisplayValue('Pendiente');
+    await act(async () => {
+      fireEvent.change(select, { target: { value: 'CONFIRMADA' } });
+    });
+    await waitFor(() => expect(monthMock.setAppointmentStatus).toHaveBeenCalledWith(88, 'CONFIRMADA'));
   });
 });
