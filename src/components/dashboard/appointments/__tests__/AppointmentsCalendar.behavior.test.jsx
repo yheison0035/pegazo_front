@@ -16,6 +16,7 @@ vi.mock('@/lib/realtime', () => ({
 vi.mock('@/context/authContext', () => ({
   useAuth: () => ({ usuario: { role: 'SUPER_ADMIN', company: {} } }),
 }));
+vi.mock('@/context/toastContext', () => ({ useToast: () => ({ show: vi.fn() }) }));
 vi.mock('next/link', () => ({
   default: ({ href, children, ...r }) => (
     <a href={typeof href === 'string' ? href : '#'} {...r}>
@@ -93,9 +94,18 @@ describe('Calendario de citas · tiempo real', () => {
     // En el modal del día aparecen las mismas opciones que en la lista.
     const editar = await screen.findByRole('link', { name: /Editar/ });
     expect(editar).toHaveAttribute('href', '/dashboard/appointments/edit/77');
-    const eliminar = screen.getByRole('button', { name: /Eliminar/ });
+    // "Eliminar" en la fila abre el modal de confirmación con el diseño de la app.
     await act(async () => {
-      fireEvent.click(eliminar);
+      fireEvent.click(screen.getByRole('button', { name: /Eliminar/ }));
+    });
+    const modal = (await screen.findByText('¿Eliminar esta cita?')).closest('div');
+    expect(modal).toBeTruthy();
+    // Solo al confirmar en el modal se borra (no un diálogo nativo del navegador).
+    const confirmar = screen
+      .getAllByRole('button', { name: 'Eliminar' })
+      .pop();
+    await act(async () => {
+      fireEvent.click(confirmar);
     });
     await waitFor(() => expect(monthMock.deleteAppointment).toHaveBeenCalledWith(77));
   });

@@ -12,8 +12,10 @@ import {
   TrashIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/authContext';
+import { useToast } from '@/context/toastContext';
 import usePermissions from '@/hooks/usePermissions';
 import useLiveRefresh from '@/hooks/useLiveRefresh';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 import {
   getAppointmentsMonth,
   deleteAppointment,
@@ -71,10 +73,14 @@ const firstName = (n) => (n || '').split(' ')[0] || '—';
 
 export default function AppointmentsCalendar() {
   const { usuario } = useAuth();
+  const toast = useToast();
   const isBarber = ['BARBERO', 'PROFESIONAL'].includes(usuario?.role);
   const { can } = usePermissions();
   const canEdit = can('appointments', 'edit');
   const canDelete = can('appointments', 'delete');
+  // Cita pendiente de eliminar: abre el modal de confirmación propio de la app
+  // (no el diálogo nativo del navegador, que no respeta el diseño).
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   // Cambio rápido de estado desde el calendario (confirmar, cancelar, no
   // asistió…) sin abrir el editor. Confirmar también avisa al cliente por correo.
@@ -83,21 +89,28 @@ export default function AppointmentsCalendar() {
       await setAppointmentStatus(id, status);
       load();
     } catch (e) {
-      if (typeof window !== 'undefined')
-        window.alert(e?.message || 'No se pudo cambiar el estado.');
+      toast.show({
+        type: 'error',
+        message: e?.message || 'No se pudo cambiar el estado.',
+      });
     }
   };
 
-  // Eliminar una cita desde el calendario (mismas opciones que la vista lista).
-  const removeAppointment = async (id) => {
-    if (typeof window !== 'undefined' && !window.confirm('¿Eliminar esta cita?'))
-      return;
+  // Eliminar una cita: abre la confirmación con diseño propio (botón de peligro).
+  const confirmDelete = async () => {
+    const id = deleteTarget?.id;
+    if (!id) return;
     try {
       await deleteAppointment(id);
+      setDeleteTarget(null);
       load();
+      toast.show({ type: 'success', message: 'Cita eliminada.' });
     } catch (e) {
-      if (typeof window !== 'undefined')
-        window.alert(e?.message || 'No se pudo eliminar la cita.');
+      setDeleteTarget(null);
+      toast.show({
+        type: 'error',
+        message: e?.message || 'No se pudo eliminar la cita.',
+      });
     }
   };
 
@@ -451,7 +464,7 @@ export default function AppointmentsCalendar() {
                           {canDelete && (
                             <button
                               type="button"
-                              onClick={() => removeAppointment(a.id)}
+                              onClick={() => setDeleteTarget(a)}
                               className="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-2.5 py-1 text-xs font-semibold text-gray-600 hover:border-red-300 hover:text-red-600"
                             >
                               <TrashIcon className="h-3.5 w-3.5" /> Eliminar
@@ -480,6 +493,22 @@ export default function AppointmentsCalendar() {
           </div>
         </div>
       )}
+
+      {/* Confirmación de borrado con el diseño de la app (evita el diálogo
+          nativo y los borrados por error). */}
+      <ConfirmModal
+        open={!!deleteTarget}
+        title="¿Eliminar esta cita?"
+        message={
+          deleteTarget
+            ? `Se eliminará la cita de ${deleteTarget.customer?.name || 'este cliente'}${deleteTarget.startTime ? ` (${deleteTarget.startTime})` : ''}. Esta acción no se puede deshacer.`
+            : ''
+        }
+        confirmText="Eliminar"
+        tone="danger"
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 }
