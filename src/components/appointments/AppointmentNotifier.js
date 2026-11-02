@@ -4,22 +4,25 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   CalendarDaysIcon,
-  CheckIcon,
   EyeIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/authContext';
-import { useToast } from '@/context/toastContext';
 import { usesAppointments } from '@/lib/appointmentsAccess';
-import {
-  getRecentPendingAppointments,
-  confirmAppointment,
-} from '@/lib/api/routes/appointments';
+import { getRecentPendingAppointments } from '@/lib/api/routes/appointments';
 import { chime, speak, primeAudio } from '@/lib/bankSound';
 
-// Roles que gestionan/confirman citas (los que deben enterarse de una reserva
-// nueva). El barbero ya recibe su propio push de cita asignada.
-const MANAGER_ROLES = ['SUPER_ADMIN', 'ADMIN', 'RECEPCIONISTA', 'COORDINADOR'];
+// Roles que reciben el aviso de cita nueva. Gestores ven todas las de la
+// empresa; el profesional ve SOLO las suyas (el backend las filtra) y solo las
+// visualiza. La confirmación de la cita es automática, no hay botón "Confirmar".
+const NOTIFY_ROLES = [
+  'SUPER_ADMIN',
+  'ADMIN',
+  'RECEPCIONISTA',
+  'COORDINADOR',
+  'BARBERO',
+  'PROFESIONAL',
+];
 
 const SEEN_KEY = 'apptNotifSeen';
 const SEEN_WINDOW_MS = 20 * 60 * 1000; // recuerda lo anunciado por 20 min
@@ -50,13 +53,12 @@ function saveSeen(map) {
 // el correo de confirmación al cliente.
 export default function AppointmentNotifier() {
   const { usuario } = useAuth();
-  const toast = useToast();
   const router = useRouter();
   const [cards, setCards] = useState([]);
   const seen = useRef(null);
 
   const enabled =
-    usesAppointments(usuario) && MANAGER_ROLES.includes(usuario?.role);
+    usesAppointments(usuario) && NOTIFY_ROLES.includes(usuario?.role);
 
   // Desbloquea la voz en la primera interacción (política de autoplay).
   useEffect(() => {
@@ -118,29 +120,6 @@ export default function AppointmentNotifier() {
     };
   }, [enabled, check]);
 
-  const onConfirm = async (card) => {
-    setCards((list) =>
-      list.map((c) => (c.id === card.id ? { ...c, busy: true } : c)),
-    );
-    try {
-      await confirmAppointment(card.id);
-      toast.show({
-        type: 'success',
-        title: 'Cita confirmada',
-        message: 'Le avisamos al cliente por correo.',
-      });
-      dismiss(card.id);
-    } catch (e) {
-      toast.show({
-        type: 'error',
-        message: e?.message || 'No se pudo confirmar la cita.',
-      });
-      setCards((list) =>
-        list.map((c) => (c.id === card.id ? { ...c, busy: false } : c)),
-      );
-    }
-  };
-
   const onView = (card) => {
     dismiss(card.id);
     router.push('/dashboard/appointments');
@@ -190,21 +169,13 @@ export default function AppointmentNotifier() {
               <XMarkIcon className="h-5 w-5" />
             </button>
           </div>
-          <div className="mt-3 flex items-center gap-2">
+          <div className="mt-3">
             <button
               type="button"
               onClick={() => onView(card)}
-              className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 transition hover:border-orange-300 hover:text-orange-600"
+              className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-orange-500 px-3 py-2 text-sm font-semibold text-white transition hover:bg-orange-600"
             >
-              <EyeIcon className="h-4 w-4" /> Ver
-            </button>
-            <button
-              type="button"
-              onClick={() => onConfirm(card)}
-              disabled={card.busy}
-              className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-orange-500 px-3 py-2 text-sm font-semibold text-white transition hover:bg-orange-600 disabled:opacity-50"
-            >
-              <CheckIcon className="h-4 w-4" /> {card.busy ? 'Confirmando…' : 'Confirmar'}
+              <EyeIcon className="h-4 w-4" /> Ver más
             </button>
           </div>
         </div>

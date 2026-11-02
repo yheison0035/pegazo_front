@@ -5,8 +5,6 @@ import AppointmentNotifier from '../AppointmentNotifier';
 const sound = vi.hoisted(() => ({ chime: vi.fn(), speak: vi.fn(), primeAudio: vi.fn() }));
 vi.mock('@/lib/bankSound', () => sound);
 vi.mock('@/lib/appointmentsAccess', () => ({ usesAppointments: () => true }));
-const toastShow = vi.hoisted(() => vi.fn());
-vi.mock('@/context/toastContext', () => ({ useToast: () => ({ show: toastShow }) }));
 const routerPush = vi.hoisted(() => vi.fn());
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: routerPush }) }));
 vi.mock('@/context/authContext', () => ({
@@ -14,7 +12,6 @@ vi.mock('@/context/authContext', () => ({
 }));
 const api = vi.hoisted(() => ({
   getRecentPendingAppointments: vi.fn(async () => ({ data: [] })),
-  confirmAppointment: vi.fn(async () => ({ success: true })),
 }));
 vi.mock('@/lib/api/routes/appointments', () => api);
 
@@ -32,9 +29,7 @@ describe('AppointmentNotifier · aviso de nueva cita', () => {
   beforeEach(() => {
     try { localStorage.clear(); } catch { /* noop */ }
     api.getRecentPendingAppointments.mockResolvedValue({ data: [APPT] });
-    api.confirmAppointment.mockClear();
     sound.speak.mockClear();
-    toastShow.mockClear();
     routerPush.mockClear();
   });
   afterEach(() => vi.restoreAllMocks());
@@ -45,24 +40,12 @@ describe('AppointmentNotifier · aviso de nueva cita', () => {
     });
     expect(await screen.findByText('Nueva cita')).toBeInTheDocument();
     expect(screen.getByText('Carla Vendedora')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Ver/ })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Confirmar/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Ver más/ })).toBeInTheDocument();
+    // La confirmación es automática: no hay botón "Confirmar".
+    expect(screen.queryByRole('button', { name: /Confirmar/ })).toBeNull();
     // Voz + campana con el dato de la cita.
     await waitFor(() => expect(sound.speak).toHaveBeenCalledTimes(1));
     expect(sound.speak.mock.calls[0][0]).toMatch(/Carla Vendedora/);
-  });
-
-  it('Confirmar llama al backend, avisa y cierra la tarjeta', async () => {
-    await act(async () => {
-      render(<AppointmentNotifier />);
-    });
-    await screen.findByText('Nueva cita');
-    await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: /Confirmar/ }));
-    });
-    await waitFor(() => expect(api.confirmAppointment).toHaveBeenCalledWith(55));
-    expect(toastShow).toHaveBeenCalledWith(expect.objectContaining({ type: 'success' }));
-    await waitFor(() => expect(screen.queryByText('Nueva cita')).toBeNull());
   });
 
   it('Ver navega a la agenda de citas', async () => {
@@ -71,7 +54,7 @@ describe('AppointmentNotifier · aviso de nueva cita', () => {
     });
     await screen.findByText('Nueva cita');
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: /Ver/ }));
+      fireEvent.click(screen.getByRole('button', { name: /Ver más/ }));
     });
     expect(routerPush).toHaveBeenCalledWith('/dashboard/appointments');
   });
