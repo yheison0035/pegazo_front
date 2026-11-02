@@ -30,6 +30,7 @@ import {
   CalendarDaysIcon,
   ClockIcon,
   CheckIcon,
+  EnvelopeIcon,
   ChevronLeftIcon,
   ArrowRightIcon,
   SpeakerWaveIcon,
@@ -1083,30 +1084,70 @@ function Row({ icon: Icon, label, value, sub, last }) {
 }
 
 function SuccessScreen({ onReset, summary }) {
+  const fecha = summary.date
+    ? `${summary.date.dow} ${summary.date.day} ${summary.date.month}`
+    : '';
   return (
     <motion.div
       key="success"
-      initial={{ opacity: 0, scale: 0.96 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="rounded-2xl border border-green-500/30 bg-green-500/[0.06] p-8 text-center"
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+      className="overflow-hidden rounded-3xl border border-[var(--bk-border-strong)] bg-[var(--bk-surface)] shadow-xl"
     >
-      <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-green-500/15 text-green-400">
-        <CheckIcon className="h-8 w-8" strokeWidth={2.5} />
+      {/* Cabecera con el check sobre el color de la marca */}
+      <div className="relative bg-[var(--bk-accent-soft)] px-6 pb-6 pt-8 text-center">
+        <motion.div
+          initial={{ scale: 0.5, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.12, type: 'spring', stiffness: 220, damping: 16 }}
+          className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--bk-accent)] text-[var(--bk-accent-contrast)] shadow-lg"
+        >
+          <CheckIcon className="h-9 w-9" strokeWidth={2.5} />
+        </motion.div>
+        <h2 className="text-2xl font-extrabold leading-tight">¡Cita registrada!</h2>
+        <p className="mt-1 text-sm text-[var(--bk-text-muted)]">
+          Tu reserva quedó confirmada.
+        </p>
       </div>
-      <h2 className="text-xl font-bold">¡Cita registrada!</h2>
-      <p className="mt-1 text-sm text-[var(--bk-text-muted)]">
-        Tu cita con{' '}
-        <span className="text-[var(--bk-accent)]">{summary.barber?.name}</span>
-        {summary.date ? ` el ${summary.date.dow} ${summary.date.day} ${summary.date.month}` : ''}
-        {summary.time ? ` a las ${summary.time}` : ''} quedó registrada. Te
-        enviamos la confirmación a tu correo y te recordaremos antes de la cita.
-      </p>
-      <button
-        onClick={onReset}
-        className="mt-6 rounded-xl border border-[var(--bk-border)] px-5 py-2.5 text-sm font-semibold text-[var(--bk-text)] transition hover:border-[var(--bk-accent)] hover:text-[var(--bk-accent)]"
-      >
-        Agendar otra cita
-      </button>
+
+      {/* Ticket con los detalles */}
+      <div className="px-5 py-4">
+        <div className="rounded-2xl border border-[var(--bk-border)] bg-[var(--bk-bg)]/40 px-4">
+          <Row icon={UserIcon} label="Profesional" value={summary.barber?.name} />
+          <Row
+            icon={ScissorsIcon}
+            label="Servicio"
+            value={summary.service?.name}
+            sub={summary.service?.duration ? `${summary.service.duration} min` : null}
+          />
+          {summary.local && (
+            <Row
+              icon={BuildingStorefrontIcon}
+              label="Sede"
+              value={summary.local?.name}
+            />
+          )}
+          <Row icon={CalendarDaysIcon} label="Fecha" value={fecha} />
+          <Row icon={ClockIcon} label="Hora" value={summary.time} last />
+        </div>
+
+        {/* Nota de correo */}
+        <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-[var(--bk-border)] bg-[var(--bk-accent-soft)] px-3.5 py-3">
+          <EnvelopeIcon className="mt-0.5 h-5 w-5 flex-none text-[var(--bk-accent)]" />
+          <p className="text-xs leading-relaxed text-[var(--bk-text-muted)]">
+            Te enviamos la confirmación a tu correo y te recordaremos antes de la
+            cita.
+          </p>
+        </div>
+
+        <button
+          onClick={onReset}
+          className="mt-4 w-full rounded-xl bg-[var(--bk-accent)] px-5 py-3 text-sm font-bold text-[var(--bk-accent-contrast)] transition hover:brightness-110"
+        >
+          Agendar otra cita
+        </button>
+      </div>
     </motion.div>
   );
 }
