@@ -132,6 +132,14 @@ Reglas:
    del subidor (preview, subida, error, quitar). La conversión en canvas corre
    en el navegador; en jsdom el formateador devuelve el archivo original.
 
+   **Horario de atención por día.** La tarjeta de horario (`HoursCard` en
+   `src/app/dashboard/settings/page.js`) permite un horario distinto por cada día
+   (Lun-Dom) y cerrar días; guarda enviando `weekHours` (clave 0=Dom..6=Sáb). De
+   este horario depende la disponibilidad de citas. Pruebas: muestra los 7 días,
+   inicializa desde `weekHours`, deshabilita las horas al marcar "Cerrado" y
+   guarda el payload correcto (`HoursCard.behavior.test.jsx`); el test de ajustes
+   se alineó al nuevo payload por día.
+
    Un módulo nuevo o una acción nueva en uno existente **no se da por
    terminada sin su test**.
 8. `vitest.config.mjs` fija `testTimeout: 20000`: con la suite completa en
