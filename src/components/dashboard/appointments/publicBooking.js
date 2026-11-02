@@ -11,6 +11,7 @@ import {
   createPublicBooking,
 } from '@/lib/api/routes/appointments';
 import { formatPrice } from '@/lib/api/utils/utils';
+import { validateBookingContact } from '@/lib/appointments/bookingValidation';
 import { resolveSkin } from './bookingSkins';
 import {
   WARRIOR_CSS,
@@ -100,6 +101,7 @@ export default function PublicBooking({ slug = '' }) {
   const [restReason, setRestReason] = useState('');
   const [time, setTime] = useState('');
   const [custName, setCustName] = useState('');
+  const [custEmail, setCustEmail] = useState('');
   const [custPhone, setCustPhone] = useState('');
   const [booking, setBooking] = useState(false);
   const [bookError, setBookError] = useState('');
@@ -234,36 +236,28 @@ export default function PublicBooking({ slug = '' }) {
   const confirmar = async () => {
     if (!local || !service || !barber || !date || !time) return;
     setBookError('');
-    if (custName.trim().length < 2) return setBookError('Escribe tu nombre.');
-    if (custPhone.replace(/\D/g, '').length < 7)
-      return setBookError('Escribe un celular válido.');
+    // Nombre COMPLETO, correo válido y celular válido (misma regla que el backend).
+    const v = validateBookingContact({
+      name: custName,
+      email: custEmail,
+      phone: custPhone,
+    });
+    if (!v.ok) return setBookError(v.message);
 
     setBooking(true);
     try {
-      // Crea la reserva DIRECTO en el sistema (queda pendiente por confirmar).
+      // Crea la reserva DIRECTO en el sistema (queda registrada, por confirmar).
+      // La confirmación le llega al cliente por CORREO; ya no se abre WhatsApp.
       await createPublicBooking(slug, {
         date,
         startTime: time,
         serviceId: service.id,
         barberId: barber.id,
         localId: local.id,
-        customerName: custName.trim(),
-        customerPhone: custPhone.replace(/\D/g, ''),
+        customerName: v.name,
+        customerEmail: v.email,
+        customerPhone: v.phone,
       });
-
-      // Además, si el negocio tiene WhatsApp, abre el mensaje (confirmación rápida).
-      const wa = config?.whatsapp;
-      if (wa) {
-        const [y, m, d] = date.split('-');
-        const fechaTxt = `${d}/${m}/${y}`;
-        const negocio = config?.name || 'el negocio';
-        const msg = `Hola, acabo de reservar una cita en ${negocio}:\n\n📍 Sede: ${local.name}\n💈 Servicio: ${service.name}\n👤 Profesional: ${barber.name}\n📅 Fecha: ${fechaTxt}\n🕐 Hora: ${time}\n🙋 ${custName.trim()}`;
-        window.open(
-          `https://wa.me/${wa}?text=${encodeURIComponent(msg)}`,
-          '_blank',
-          'noopener,noreferrer',
-        );
-      }
       setSuccess(true);
     } catch (e) {
       setBookError(
@@ -756,7 +750,17 @@ export default function PublicBooking({ slug = '' }) {
                       <input
                         value={custName}
                         onChange={(e) => setCustName(e.target.value)}
-                        placeholder="Tu nombre"
+                        placeholder="Nombre completo"
+                        autoComplete="name"
+                        className="w-full rounded-xl border border-[var(--bk-border)] bg-[var(--bk-bg)]/60 px-4 py-3 text-sm text-[var(--bk-text)] outline-none placeholder:text-[var(--bk-text-muted)] focus:border-[var(--bk-accent)]"
+                      />
+                      <input
+                        value={custEmail}
+                        onChange={(e) => setCustEmail(e.target.value)}
+                        placeholder="Tu correo electrónico"
+                        type="email"
+                        inputMode="email"
+                        autoComplete="email"
                         className="w-full rounded-xl border border-[var(--bk-border)] bg-[var(--bk-bg)]/60 px-4 py-3 text-sm text-[var(--bk-text)] outline-none placeholder:text-[var(--bk-text-muted)] focus:border-[var(--bk-accent)]"
                       />
                       <input
@@ -764,8 +768,12 @@ export default function PublicBooking({ slug = '' }) {
                         onChange={(e) => setCustPhone(e.target.value)}
                         placeholder="Tu celular (WhatsApp)"
                         inputMode="numeric"
+                        autoComplete="tel"
                         className="w-full rounded-xl border border-[var(--bk-border)] bg-[var(--bk-bg)]/60 px-4 py-3 text-sm text-[var(--bk-text)] outline-none placeholder:text-[var(--bk-text-muted)] focus:border-[var(--bk-accent)]"
                       />
+                      <p className="text-[11px] text-[var(--bk-text-muted)]">
+                        Te enviaremos la confirmación y los recordatorios a tu correo.
+                      </p>
                       {bookError && (
                         <p className="text-xs font-medium text-red-400">
                           {bookError}
@@ -1085,13 +1093,13 @@ function SuccessScreen({ onReset, summary }) {
       <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-green-500/15 text-green-400">
         <CheckIcon className="h-8 w-8" strokeWidth={2.5} />
       </div>
-      <h2 className="text-xl font-bold">¡Reserva creada!</h2>
+      <h2 className="text-xl font-bold">¡Cita registrada!</h2>
       <p className="mt-1 text-sm text-[var(--bk-text-muted)]">
         Tu cita con{' '}
         <span className="text-[var(--bk-accent)]">{summary.barber?.name}</span>
         {summary.date ? ` el ${summary.date.dow} ${summary.date.day} ${summary.date.month}` : ''}
         {summary.time ? ` a las ${summary.time}` : ''} quedó registrada. Te
-        confirmaremos pronto.
+        enviamos la confirmación a tu correo y te recordaremos antes de la cita.
       </p>
       <button
         onClick={onReset}
