@@ -110,16 +110,20 @@ describe('Ajustes · Mi empresa', () => {
     await expectToast('success', 'Datos de la empresa actualizados');
   });
 
-  it('guarda el horario de atención (negocios de servicios, pestaña Citas)', async () => {
+  it('guarda el horario de atención por día (negocios de servicios, pestaña Citas)', async () => {
     resetBehavior({ type: 'BARBERIA' });
     api = settingsApi();
     await openSettings(api, 'Citas y fidelización');
-    const abre = (await screen.findAllByRole('combobox')).find((s) => s.value === '9');
-    await typeInto(abre, '8');
-    const card = abre.closest('div.rounded-2xl');
+    // El horario es por DÍA de la semana (de él dependen las citas): se cambia la
+    // apertura del lunes y se guarda como weekHours (clave 0=Dom..6=Sáb).
+    const lunAbre = await screen.findByLabelText('Lunes abre');
+    await typeInto(lunAbre, '8');
+    const card = lunAbre.closest('div.rounded-2xl');
     await click(within(card).getByRole('button', { name: /Guardar/ }));
     const call = await waitForCall(api, 'PATCH', /^\/company\/hours$/);
-    expect(call.body).toEqual({ openHour: 8, closeHour: 20 });
+    expect(call.body.weekHours).toBeTruthy();
+    expect(call.body.weekHours[1].open).toBe(8); // lunes abre a las 8
+    expect(call.body.weekHours[0]).toBeTruthy(); // domingo incluido
     await expectToast('success', 'Horario actualizado');
   });
 
