@@ -511,23 +511,59 @@ function MailCard({ initial }) {
   );
 }
 
-function HoursCard({ initial }) {
-  const [openH, setOpenH] = useState(9);
-  const [closeH, setCloseH] = useState(20);
+// Días de la semana en el orden visible (Lun→Dom). La clave es el índice JS
+// (0=Dom..6=Sáb), igual que usa la disponibilidad en el backend.
+const WEEK_DAYS = [
+  [1, 'Lunes'],
+  [2, 'Martes'],
+  [3, 'Miércoles'],
+  [4, 'Jueves'],
+  [5, 'Viernes'],
+  [6, 'Sábado'],
+  [0, 'Domingo'],
+];
+
+export function HoursCard({ initial }) {
+  const [days, setDays] = useState(() => {
+    const base = {};
+    for (const [idx] of WEEK_DAYS) base[idx] = { open: 9, close: 20, closed: false };
+    return base;
+  });
   const [saving, setSaving] = useState(false);
   const [alert, setAlert] = useState({});
 
   useEffect(() => {
-    if (initial) {
-      setOpenH(initial.openHour ?? 9);
-      setCloseH(initial.closeHour ?? 20);
+    if (!initial) return;
+    const wh = initial.weekHours;
+    const o = initial.openHour ?? 9;
+    const c = initial.closeHour ?? 20;
+    const next = {};
+    for (const [idx] of WEEK_DAYS) {
+      const d = wh && wh[idx];
+      next[idx] = d
+        ? { open: d.open ?? o, close: d.close ?? c, closed: !!d.closed }
+        : { open: o, close: c, closed: false };
     }
+    setDays(next);
   }, [initial]);
+
+  const setDay = (idx, patch) =>
+    setDays((prev) => ({ ...prev, [idx]: { ...prev[idx], ...patch } }));
+
+  // Copia el horario del lunes a todos los demás días (comodidad).
+  const applyToAll = () => {
+    const src = days[1];
+    setDays((prev) => {
+      const next = { ...prev };
+      for (const [idx] of WEEK_DAYS) next[idx] = { ...src };
+      return next;
+    });
+  };
 
   const save = async () => {
     setSaving(true);
     try {
-      await updateCompanyHours({ openHour: Number(openH), closeHour: Number(closeH) });
+      await updateCompanyHours({ weekHours: days });
       setAlert({ type: 'success', message: 'Horario actualizado.' });
     } catch (e) {
       setAlert({ type: 'error', message: e.message || 'No se pudo guardar.' });
@@ -537,6 +573,8 @@ function HoursCard({ initial }) {
   };
 
   const hours = Array.from({ length: 24 }, (_, i) => i);
+  const selCls =
+    'rounded-lg border border-gray-200 px-2 py-1.5 text-sm focus:border-orange-400 focus:outline-none disabled:bg-gray-50 disabled:text-gray-400';
 
   return (
     <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
@@ -544,43 +582,71 @@ function HoursCard({ initial }) {
         <div className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-orange-50 text-orange-600">
           <ClockIcon className="h-5 w-5" />
         </div>
-        <div>
+        <div className="min-w-0 flex-1">
           <h2 className="text-base font-bold text-gray-800">Horario de atención</h2>
           <p className="text-sm text-gray-500">
-            Define el rango de horas disponible para agendar citas.
+            Define el horario de cada día. Puedes tener horarios distintos o cerrar
+            un día. Solo se agendan citas dentro de estas horas.
           </p>
         </div>
+        <button
+          type="button"
+          onClick={applyToAll}
+          className="flex-none rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs font-semibold text-gray-600 hover:border-orange-300 hover:text-orange-600"
+        >
+          Copiar lunes a todos
+        </button>
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-4">
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Abre</label>
-          <select
-            value={openH}
-            onChange={(e) => setOpenH(e.target.value)}
-            className="w-full rounded-xl border border-gray-200 px-4 py-2 text-sm"
-          >
-            {hours.map((h) => (
-              <option key={h} value={h}>
-                {String(h).padStart(2, '0')}:00
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Cierra</label>
-          <select
-            value={closeH}
-            onChange={(e) => setCloseH(e.target.value)}
-            className="w-full rounded-xl border border-gray-200 px-4 py-2 text-sm"
-          >
-            {hours.map((h) => (
-              <option key={h} value={h}>
-                {String(h).padStart(2, '0')}:00
-              </option>
-            ))}
-          </select>
-        </div>
+      <div className="mt-4 divide-y divide-gray-100">
+        {WEEK_DAYS.map(([idx, label]) => {
+          const d = days[idx] || { open: 9, close: 20, closed: false };
+          return (
+            <div key={idx} className="flex flex-wrap items-center gap-3 py-2.5">
+              <span className="w-24 flex-none text-sm font-medium text-gray-700">
+                {label}
+              </span>
+              <div className="flex items-center gap-2">
+                <select
+                  aria-label={`${label} abre`}
+                  value={d.open}
+                  disabled={d.closed}
+                  onChange={(e) => setDay(idx, { open: Number(e.target.value) })}
+                  className={selCls}
+                >
+                  {hours.map((h) => (
+                    <option key={h} value={h}>
+                      {String(h).padStart(2, '0')}:00
+                    </option>
+                  ))}
+                </select>
+                <span className="text-gray-400">a</span>
+                <select
+                  aria-label={`${label} cierra`}
+                  value={d.close}
+                  disabled={d.closed}
+                  onChange={(e) => setDay(idx, { close: Number(e.target.value) })}
+                  className={selCls}
+                >
+                  {hours.map((h) => (
+                    <option key={h} value={h}>
+                      {String(h).padStart(2, '0')}:00
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <label className="ml-auto flex cursor-pointer items-center gap-1.5 text-sm text-gray-600">
+                <input
+                  type="checkbox"
+                  checked={d.closed}
+                  onChange={(e) => setDay(idx, { closed: e.target.checked })}
+                  className="h-4 w-4 accent-orange-500"
+                />
+                Cerrado
+              </label>
+            </div>
+          );
+        })}
       </div>
 
       <div className="mt-5">
