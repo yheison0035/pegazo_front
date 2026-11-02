@@ -8,9 +8,16 @@ import {
   XMarkIcon,
   MoonIcon,
   PlusIcon,
+  PencilSquareIcon,
+  TrashIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/authContext';
-import { getAppointmentsMonth } from '@/lib/api/routes/appointments';
+import usePermissions from '@/hooks/usePermissions';
+import useLiveRefresh from '@/hooks/useLiveRefresh';
+import {
+  getAppointmentsMonth,
+  deleteAppointment,
+} from '@/lib/api/routes/appointments';
 import {
   getMyRestDays,
   getRestDaysOverview,
@@ -55,6 +62,22 @@ const firstName = (n) => (n || '').split(' ')[0] || '—';
 export default function AppointmentsCalendar() {
   const { usuario } = useAuth();
   const isBarber = ['BARBERO', 'PROFESIONAL'].includes(usuario?.role);
+  const { can } = usePermissions();
+  const canEdit = can('appointments', 'edit');
+  const canDelete = can('appointments', 'delete');
+
+  // Eliminar una cita desde el calendario (mismas opciones que la vista lista).
+  const removeAppointment = async (id) => {
+    if (typeof window !== 'undefined' && !window.confirm('¿Eliminar esta cita?'))
+      return;
+    try {
+      await deleteAppointment(id);
+      load();
+    } catch (e) {
+      if (typeof window !== 'undefined')
+        window.alert(e?.message || 'No se pudo eliminar la cita.');
+    }
+  };
 
   const [cal, setCal] = useState(() => {
     const d = new Date();
@@ -86,6 +109,10 @@ export default function AppointmentsCalendar() {
   useEffect(() => {
     load();
   }, [load]);
+
+  // Tiempo real: el calendario se actualiza solo cuando cambia una cita (nueva
+  // reserva online, edición, cancelación…), igual que el inventario. Sin sondeo.
+  useLiveRefresh(load);
 
   // Descansos: el barbero ve los suyos; dueño/admin/recepción ven todo el equipo.
   useEffect(() => {
@@ -359,16 +386,39 @@ export default function AppointmentsCalendar() {
                         {a.service?.name}
                         {!isBarber && a.barber ? ` · ${a.barber.name}` : ''}
                       </p>
-                      {!isBarber &&
-                        !['CANCELADA', 'NO_ASISTIO'].includes(a.status) &&
-                        !(Array.isArray(a.sales) && a.sales.length) && (
-                          <Link
-                            href={`/dashboard/sales?appointment=${a.id}`}
-                            className="mt-2 inline-flex rounded-lg bg-orange-600 px-2.5 py-1 text-xs font-bold text-white hover:bg-orange-700"
-                          >
-                            Cobrar
-                          </Link>
-                        )}
+                      {/* Mismas opciones que en la vista de lista: cobrar,
+                          editar y eliminar (según permisos del rol). */}
+                      {(canEdit || canDelete || (!isBarber && !['CANCELADA', 'NO_ASISTIO'].includes(a.status) && !(Array.isArray(a.sales) && a.sales.length))) && (
+                        <div className="mt-2 flex flex-wrap items-center gap-2">
+                          {!isBarber &&
+                            !['CANCELADA', 'NO_ASISTIO'].includes(a.status) &&
+                            !(Array.isArray(a.sales) && a.sales.length) && (
+                              <Link
+                                href={`/dashboard/sales?appointment=${a.id}`}
+                                className="inline-flex rounded-lg bg-orange-600 px-2.5 py-1 text-xs font-bold text-white hover:bg-orange-700"
+                              >
+                                Cobrar
+                              </Link>
+                            )}
+                          {canEdit && (
+                            <Link
+                              href={`/dashboard/appointments/edit/${a.id}`}
+                              className="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-2.5 py-1 text-xs font-semibold text-gray-600 hover:border-orange-300 hover:text-orange-600"
+                            >
+                              <PencilSquareIcon className="h-3.5 w-3.5" /> Editar
+                            </Link>
+                          )}
+                          {canDelete && (
+                            <button
+                              type="button"
+                              onClick={() => removeAppointment(a.id)}
+                              className="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-2.5 py-1 text-xs font-semibold text-gray-600 hover:border-red-300 hover:text-red-600"
+                            >
+                              <TrashIcon className="h-3.5 w-3.5" /> Eliminar
+                            </button>
+                          )}
+                        </div>
+                      )}
                     </li>
                   ))}
                 </ul>
