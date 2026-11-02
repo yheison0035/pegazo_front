@@ -140,6 +140,14 @@ Reglas:
    guarda el payload correcto (`HoursCard.behavior.test.jsx`); el test de ajustes
    se alineó al nuevo payload por día.
 
+   **Caja (ingresos por ventas, salidas por gastos).** Se quitó el formulario de
+   "otro movimiento de efectivo": los ingresos entran por las ventas en efectivo
+   y las salidas son los gastos en efectivo del día. El recuadro de totales
+   "Egresos" pasó a llamarse "Gastos" y muestra `totals.gastos` (del backend).
+   Pruebas (`cash.behavior.test.jsx`): se ve el recuadro "Gastos" con su monto y
+   ya no existe "Egresos"; ya no hay registro de movimiento manual (sin tarjeta,
+   sin botón "Registrar" ni campo "Monto").
+
    Un módulo nuevo o una acción nueva en uno existente **no se da por
    terminada sin su test**.
 8. `vitest.config.mjs` fija `testTimeout: 20000`: con la suite completa en
