@@ -327,7 +327,8 @@ export default function DashboardHome() {
           Hola{usuario?.name ? `, ${firstName(usuario.name)}` : ''}
         </h1>
         <p className="text-sm text-gray-500">
-          {usuario?.company?.name || 'Tu negocio'} · Este es tu panel.
+          {usuario?.local?.name || usuario?.company?.name || 'Tu negocio'} · Este
+          es tu panel.
         </p>
       </div>
 
