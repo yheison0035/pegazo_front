@@ -50,32 +50,44 @@ describe('Diseño de la página de citas', () => {
     await waitForCall(api, 'GET', /^\/company\/booking-config$/);
     expect(await screen.findByText('Diseño de la página de citas')).toBeInTheDocument();
     expect(screen.getByText('Premium oscuro (guerrero)')).toBeInTheDocument();
+    expect(screen.getByText('Elegante (negro / gris / plateado)')).toBeInTheDocument();
     expect(screen.getByText('Claro suave')).toBeInTheDocument();
     expect(screen.getByText('Clásico neutro')).toBeInTheDocument();
-    await waitFor(() => expect(screen.getByPlaceholderText('Comienza tu leyenda').value).toBe('Reserva tu turno'));
+    await waitFor(() => expect(screen.getByDisplayValue('Barbería Prueba')).toBeInTheDocument());
   });
 
-  it('cambiar el estilo y los textos guarda con PATCH toda la configuración', async () => {
+  it('cambiar el título guarda con PATCH toda la configuración', async () => {
     await renderPage(<DesignPage />);
     await waitForCall(api, 'GET', /^\/company\/booking-config$/);
-    await waitFor(() => expect(screen.getByPlaceholderText('Comienza tu leyenda').value).toBe('Reserva tu turno'));
-    await typeInto(placeholder('Comienza tu leyenda'), 'Tu mejor corte');
-    await typeInto(placeholder('Disciplina · Estilo · Actitud'), 'Estilo · Actitud');
+    await waitFor(() => expect(screen.getByDisplayValue('Barbería Prueba')).toBeInTheDocument());
+    await typeInto(screen.getByDisplayValue('Barbería Prueba'), 'Tu mejor corte');
     await click(button('Guardar'));
     const call = await waitForCall(api, 'PATCH', /^\/company\/booking-config$/);
-    expect(call.body).toMatchObject({ skin: 'dark', tagline: 'Barbería Prueba', introCta: 'Tu mejor corte', introPills: 'Estilo · Actitud', whatsapp: '3001112233' });
+    expect(call.body).toMatchObject({ skin: 'dark', tagline: 'Tu mejor corte', whatsapp: '3001112233' });
     await expectToast('success', 'Diseño de la página guardado');
   });
 
   it('al elegir el estilo claro desaparecen los campos exclusivos del oscuro', async () => {
     await renderPage(<DesignPage />);
     await waitForCall(api, 'GET', /^\/company\/booking-config$/);
-    await waitFor(() => expect(screen.getByPlaceholderText('Comienza tu leyenda')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/Cuervo decorativo/)).toBeInTheDocument());
     await click(screen.getByText('Claro suave'));
-    expect(screen.queryByPlaceholderText('Comienza tu leyenda')).toBeNull();
+    expect(screen.queryByText(/Cuervo decorativo/)).toBeNull();
     await click(button('Guardar'));
     const call = await waitForCall(api, 'PATCH', /^\/company\/booking-config$/);
     expect(call.body.skin).toBe('light');
+  });
+
+  it('al elegir el estilo elegante se puede poner imagen de fondo pero no portada', async () => {
+    await renderPage(<DesignPage />);
+    await waitForCall(api, 'GET', /^\/company\/booking-config$/);
+    await click(screen.getByText('Elegante (negro / gris / plateado)'));
+    // La imagen de fondo está disponible, pero NO el cuervo (exclusivo oscuro).
+    expect(screen.getAllByText('Imagen de fondo').length).toBeGreaterThan(0);
+    expect(screen.queryByText(/Cuervo decorativo/)).toBeNull();
+    await click(button('Guardar'));
+    const call = await waitForCall(api, 'PATCH', /^\/company\/booking-config$/);
+    expect(call.body.skin).toBe('elegant');
   });
 
   it('un error del backend al guardar se avisa', async () => {

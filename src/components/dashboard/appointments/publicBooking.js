@@ -20,8 +20,6 @@ import {
   RuneDivider,
   AngleBrackets,
   Embers,
-  MountainsBackdrop,
-  CrossedAxes,
   groupServices,
 } from './bookingWarrior';
 import {
@@ -108,8 +106,6 @@ export default function PublicBooking({ slug = '' }) {
   const [booking, setBooking] = useState(false);
   const [bookError, setBookError] = useState('');
   const [success, setSuccess] = useState(false);
-  // Sin portada de bienvenida: la página entra directo al flujo de reserva.
-  const [started, setStarted] = useState(true);
 
   const { getPublicLocals } = useLocals();
   const { getAvailability, availabilityLoading } = useAppointments();
@@ -194,7 +190,7 @@ export default function PublicBooking({ slug = '' }) {
   useEffect(() => {
     if (typeof window !== 'undefined')
       window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [step, started, success]);
+  }, [step, success]);
 
   // ---- Selección (avanza al siguiente paso) ----
   const pickLocal = (l) => {
@@ -303,8 +299,6 @@ export default function PublicBooking({ slug = '' }) {
   const elegant = config.skin === 'elegant';
   // Skins que usan imagen de fondo fija detrás de todo el flujo (oscuro/elegante).
   const backdrop = skin.backdrop;
-  // Portada de bienvenida para TODOS los tipos (no solo el skin oscuro).
-  const showHero = !started && !success;
   // Servicios agrupados en categorías (estilo menú) si el negocio define reglas.
   const grouped = groupServices(services, config?.serviceGroups);
   // Panel del paso: se omite en Servicio cuando hay categorías (cada categoría
@@ -317,9 +311,7 @@ export default function PublicBooking({ slug = '' }) {
       data-skin={config.skin}
       className={`relative flex w-full flex-col overflow-x-hidden bg-[var(--bk-bg)] text-[var(--bk-text)] ${
         ornate ? 'bk-stone' : ''
-      } ${elegant ? 'bk-elegant' : ''} ${
-        showHero ? 'h-[100svh] overflow-hidden' : 'min-h-screen'
-      }`}
+      } ${elegant ? 'bk-elegant' : ''} min-h-screen`}
     >
       {ornate && <style>{WARRIOR_CSS}</style>}
       {elegant && <style>{ELEGANT_CSS}</style>}
@@ -335,17 +327,7 @@ export default function PublicBooking({ slug = '' }) {
       {/* Sin imagen de fondo: textura de piedra + marca de agua */}
       {ornate && !config.heroImage && <WarriorBackdrop logo={config.logo} />}
 
-      {showHero ? (
-        ornate ? (
-          <Hero
-            config={config}
-            displayStyle={displayStyle}
-            onEnter={() => setStarted(true)}
-          />
-        ) : (
-          <GenericWelcome config={config} onEnter={() => setStarted(true)} />
-        )
-      ) : (
+      {/* Sin portada de bienvenida: la página entra directo al flujo de reserva. */}
       <>
       {/* Encabezado */}
       <header className="relative z-10 px-4 pt-6 text-center sm:pt-8">
@@ -815,7 +797,6 @@ export default function PublicBooking({ slug = '' }) {
         </AnimatePresence>
       </main>
       </>
-      )}
 
       {/* Botón fijo de reservar (solo en confirmación) */}
       {step === 5 && !success && (
@@ -880,101 +861,6 @@ function SoundToggle({ src }) {
         )}
       </button>
     </>
-  );
-}
-
-// Bienvenida genérica para skins NO oscuros (servicios que no usan el estilo
-// "guerrero"). Usa los tokens del skin para mantener la marca.
-function GenericWelcome({ config, onEnter }) {
-  return (
-    <div className="relative z-10 flex min-h-[100svh] flex-col items-center justify-center gap-5 px-6 text-center">
-      {config.logo ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={config.logo}
-          alt={config.name}
-          className="h-24 w-24 rounded-3xl object-contain ring-1 ring-[var(--bk-border)]"
-        />
-      ) : null}
-      <div>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-[var(--bk-text-muted)]">
-          Bienvenido a
-        </p>
-        <h1 className="mt-1 text-3xl font-extrabold text-[var(--bk-text)] sm:text-4xl">
-          {config.name}
-        </h1>
-        {config.subtitle && (
-          <p className="mt-2 text-sm text-[var(--bk-text-muted)]">
-            {config.subtitle}
-          </p>
-        )}
-      </div>
-      <button
-        onClick={onEnter}
-        className="rounded-full bg-[var(--bk-accent)] px-8 py-3 text-sm font-bold text-white shadow-lg transition hover:brightness-110"
-      >
-        {config.intro?.cta || 'Agendar cita'}
-      </button>
-      <p className="text-[11px] text-[var(--bk-text-muted)]">
-        Reserva en 60 segundos
-      </p>
-    </div>
-  );
-}
-
-function Hero({ config, displayStyle, onEnter }) {
-  const intro = config.intro || {};
-  return (
-    <div className="bk-hero relative z-10 px-4">
-      {/* Sin imagen: montañas + hachas. Con imagen: el guerrero va de fondo fijo. */}
-      {!config.heroImage && (
-        <>
-          <div className="bk-mts">
-            <MountainsBackdrop />
-          </div>
-          <CrossedAxes />
-        </>
-      )}
-      {config.logo ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={config.logo} alt={config.name} className="bk-hero-logo" />
-      ) : (
-        <div
-          style={displayStyle}
-          className="bk-gold text-4xl font-black uppercase sm:text-5xl"
-        >
-          {config.name}
-        </div>
-      )}
-      <p
-        style={displayStyle}
-        className="bk-gold mt-3 text-sm italic sm:text-base"
-      >
-        {config.subtitle || 'Más que un corte, es actitud'}
-      </p>
-      <h1
-        style={displayStyle}
-        className="bk-gold mt-2 text-4xl font-black uppercase leading-none sm:text-6xl"
-      >
-        {config.name}
-      </h1>
-      <div className="bk-legible mt-3 text-[11px] uppercase tracking-[0.4em] text-[var(--bk-text-muted)]">
-        {intro.pills || 'Disciplina · Estilo · Actitud'}
-      </div>
-      <RuneDivider />
-      <button className="bk-enter mt-4" onClick={onEnter}>
-        {intro.cta || 'Comienza tu leyenda'}
-        {config.ravenImage ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={config.ravenImage} alt="" className="bk-btn-raven ml-2" />
-        ) : (
-          ' ⚔'
-        )}
-      </button>
-      <div className="bk-legible mt-5 text-[11px] uppercase tracking-[0.25em] text-[var(--bk-text-muted)]/80">
-        Reserva en 60 segundos
-      </div>
-    </div>
   );
 }
 
