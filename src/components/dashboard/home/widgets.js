@@ -333,15 +333,25 @@ export const WIDGETS = [
       const items = data.lowStock || [];
       const agotados = items.filter((i) => (i.stock || 0) <= 0).length;
       const porAgotarse = items.length - agotados;
+      // Conteo real de productos: distingue "aún no hay productos" de "todo con
+      // stock suficiente".
+      const totalProducts = data.home?.setup?.products ?? null;
+      const sinProductos = items.length === 0 && totalProducts === 0;
       const inner = (
         <>
           <Label icon={ExclamationTriangleIcon} accent="text-gray-500">
             Inventario
           </Label>
           {items.length === 0 ? (
-            <p className="py-3 text-center text-xs text-gray-400">
-              Todo con stock suficiente. 🎉
-            </p>
+            sinProductos ? (
+              <p className="py-3 text-center text-xs text-gray-400">
+                Aún no tienes productos en el inventario.
+              </p>
+            ) : (
+              <p className="py-3 text-center text-xs text-gray-400">
+                Todo con stock suficiente. 🎉
+              </p>
+            )
           ) : (
             <div className="grid grid-cols-2 gap-2">
               <div className="rounded-xl bg-red-500/10 px-3 py-2">
