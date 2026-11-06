@@ -1,4 +1,5 @@
 import { formatCOP, formatDateTime } from '@/lib/api/utils/utils';
+import { resolveBranding } from '@/utils/resolveBranding';
 
 // Comprobante de custodia (guarda cascos) — MISMO diseño que la factura de venta
 // (logo, encabezado de empresa, régimen, QR y pie), pero con la información del
@@ -17,6 +18,9 @@ export function printCustodyTicket(ticket, usuario, settings) {
   const regimenText = responsableIVA
     ? 'Responsable de IVA'
     : 'No responsable de IVA';
+
+  // Marca por local (varias sedes) o de la empresa (una sola sede).
+  const brand = resolveBranding(usuario, ticket?.local);
 
   const tarifasHTML = `
     ${settings?.hourRate ? `<div class="right">Tarifa por hora: ${formatCOP(settings.hourRate)}</div>` : ''}
@@ -45,13 +49,14 @@ export function printCustodyTicket(ticket, usuario, settings) {
     </head>
     <body>
       <div class="logo">
-        <img src=${usuario?.company?.logo || '/images/no-image.png'} alt=${usuario?.company?.name || 'sin nombre'} referrerpolicy="no-referrer" />
+        <img src=${brand.logo || '/images/no-image.png'} alt=${brand.name || 'sin nombre'} referrerpolicy="no-referrer" />
       </div>
 
-      <div class="center bold">${usuario?.company?.name || ''}</div>
-      ${usuario?.company?.nit ? `<div class="center">NIT ${usuario.company.nit}</div>` : ''}
-      ${usuario?.company?.phone ? `<div class="center">+57 ${usuario.company.phone}</div>` : ''}
-      <div class="center">${usuario?.company?.email || ''}</div>
+      <div class="center bold">${brand.name || ''}</div>
+      ${brand.nit ? `<div class="center">NIT ${brand.nit}</div>` : ''}
+      ${brand.address ? `<div class="center">${brand.address}</div>` : ''}
+      ${brand.phone ? `<div class="center">+57 ${brand.phone}</div>` : ''}
+      <div class="center">${brand.email || ''}</div>
       <div class="center">Régimen: ${regimenText}</div>
 
       <hr />
@@ -179,6 +184,16 @@ export function printSaleInvoice(sale, usuario, opts = {}) {
   const regimenText = responsableIVA
     ? 'Responsable de IVA'
     : 'No responsable de IVA';
+  // Marca por local (varias sedes) o de la empresa (una sola sede). Si la venta
+  // viene de "verificar" (QR público) ya trae company/local resueltos; en el POS
+  // y "ventas realizadas" se resuelve aquí con usuario.company + sale.local.
+  const brand = resolveBranding(usuario, sale?.local);
+  const bizName = sale?.company?.name || brand.name || '';
+  const bizLogo = sale?.company?.logo || brand.logo;
+  const bizNit = sale?.company?.nit || brand.nit;
+  const bizPhone = sale?.company?.phone || brand.phone;
+  const bizEmail = sale?.company?.email || brand.email;
+  const bizAddress = sale?.local?.address || brand.address;
   // El pie legal (letra de cambio / centrales de riesgo) solo aplica a ventas a
   // crédito (fiado), no a las de contado.
   const isCredito = sale?.paymentStatus === 'FIADO';
@@ -405,19 +420,19 @@ export function printSaleInvoice(sale, usuario, opts = {}) {
 
       <!-- LOGO -->
       <div class="logo">
-        <img 
-          src=${usuario?.company?.logo || '/images/no-image.png'}
-          alt=${usuario?.company?.name || 'sin nombre'}
+        <img
+          src=${bizLogo || '/images/no-image.png'}
+          alt=${bizName || 'sin nombre'}
           referrerpolicy="no-referrer"
         />
       </div>
 
       <!-- ENCABEZADO -->
-      <div class="center biz-name">${usuario?.company?.name || ''}</div>
-      ${usuario?.company?.nit ? `<div class="center muted sm">NIT ${usuario.company.nit}</div>` : ''}
-      ${sale?.local?.address ? `<div class="center muted sm">${sale.local.address}</div>` : ''}
-      ${usuario?.company?.phone ? `<div class="center muted sm">+57 ${usuario.company.phone}</div>` : ''}
-      ${usuario?.company?.email ? `<div class="center muted sm">${usuario.company.email}</div>` : ''}
+      <div class="center biz-name">${bizName || ''}</div>
+      ${bizNit ? `<div class="center muted sm">NIT ${bizNit}</div>` : ''}
+      ${bizAddress ? `<div class="center muted sm">${bizAddress}</div>` : ''}
+      ${bizPhone ? `<div class="center muted sm">+57 ${bizPhone}</div>` : ''}
+      ${bizEmail ? `<div class="center muted sm">${bizEmail}</div>` : ''}
       <div class="center muted sm">${regimenText}</div>
 
       <hr />
