@@ -1,8 +1,12 @@
 import apiFetch from '../../auth/client';
 
-// Configuración self-service de la empresa (dueño/admin).
-export async function getCompanySettings() {
-  return apiFetch('/company/settings');
+// Configuración self-service de la empresa (dueño/admin). Acepta { localId }
+// para leer la configuración por sede (horario, apariencia).
+export async function getCompanySettings(params = {}) {
+  const qs = new URLSearchParams(
+    Object.entries(params).filter(([, v]) => v !== '' && v != null),
+  ).toString();
+  return apiFetch(`/company/settings${qs ? `?${qs}` : ''}`);
 }
 
 // Facturación del dueño: estado de la suscripción + historial de pagos.
@@ -120,17 +124,19 @@ export async function testCompanyMail(to) {
   });
 }
 
-export async function updateCrmTheme(theme) {
+// Apariencia por local: si se pasa localId, se guarda en esa sede; si no, en el
+// valor por defecto de la empresa (solo el dueño, desde "General").
+export async function updateCrmTheme(theme, localId) {
   return apiFetch('/company/theme', {
     method: 'PATCH',
-    body: JSON.stringify({ theme }),
+    body: JSON.stringify({ theme, ...(localId ? { localId: Number(localId) } : {}) }),
   });
 }
 
-export async function updateCrmFont(font) {
+export async function updateCrmFont(font, localId) {
   return apiFetch('/company/font', {
     method: 'PATCH',
-    body: JSON.stringify({ font }),
+    body: JSON.stringify({ font, ...(localId ? { localId: Number(localId) } : {}) }),
   });
 }
 

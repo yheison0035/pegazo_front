@@ -782,9 +782,15 @@ function FontSettings() {
   const auth = useAuth();
   const usuario = auth?.usuario;
   const setUsuario = auth?.setUsuario;
-  const [current, setCurrent] = useState(usuario?.company?.crmFont || 'system');
+  const [current, setCurrent] = useState(
+    usuario?.local?.crmFont || usuario?.company?.crmFont || 'system',
+  );
   const [saving, setSaving] = useState(false);
   const [alert, setAlert] = useState({});
+  // La apariencia es POR LOCAL. El admin edita la suya (el backend la resuelve);
+  // el dueño elige la sede con el desplegable ('' = valor por defecto/empresa).
+  const [viewLocal, setViewLocal] = useState('');
+  const myLocalId = usuario?.localId ?? usuario?.local?.id ?? null;
 
   // Carga todas las fuentes para poder previsualizarlas en las tarjetas.
   useEffect(() => {
@@ -802,28 +808,39 @@ function FontSettings() {
     }
   }, []);
 
-  const setSessionFont = (fontId) => {
-    if (setUsuario && usuario) {
-      const merged = {
-        ...usuario,
-        company: { ...usuario.company, crmFont: fontId },
-      };
-      setUsuario(merged);
-      localStorage.setItem('usuario', JSON.stringify(merged));
+  // Lee la fuente de la sede en contexto (al montar y al cambiar de sede).
+  useEffect(() => {
+    getCompanySettings({ localId: viewLocal })
+      .then((r) => setCurrent(r?.data?.crmFont || 'system'))
+      .catch(() => {});
+  }, [viewLocal]);
+
+  // Refleja en la sesión lo que el backend GUARDÓ (data.localId): si fue el
+  // valor de empresa, actualiza company; si fue MI sede, actualiza mi local;
+  // si fue otra sede, no toca mi panel.
+  const setSessionFont = (fontId, savedLocal) => {
+    if (!setUsuario || !usuario) return;
+    let merged = null;
+    if (savedLocal == null) {
+      merged = { ...usuario, company: { ...usuario.company, crmFont: fontId } };
+    } else if (String(savedLocal) === String(myLocalId)) {
+      merged = { ...usuario, local: { ...(usuario.local || {}), crmFont: fontId } };
     }
+    if (!merged) return;
+    setUsuario(merged);
+    localStorage.setItem('usuario', JSON.stringify(merged));
   };
 
   const apply = async (fontId) => {
     const prev = current;
     setCurrent(fontId);
-    setSessionFont(fontId); // aplica en vivo
     setSaving(true);
     try {
-      await updateCrmFont(fontId);
+      const res = await updateCrmFont(fontId, viewLocal);
+      setSessionFont(fontId, res?.data?.localId ?? null);
       setAlert({ type: 'success', message: 'Fuente actualizada.' });
     } catch (e) {
       setCurrent(prev);
-      setSessionFont(prev);
       setAlert({ type: 'error', message: e.message || 'No se pudo guardar.' });
     } finally {
       setSaving(false);
@@ -836,13 +853,18 @@ function FontSettings() {
         <div className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-orange-50 text-orange-600 text-lg font-bold">
           Aa
         </div>
-        <div>
+        <div className="min-w-0 flex-1">
           <h2 className="text-base font-bold text-gray-800">Tipografía</h2>
           <p className="text-sm text-gray-500">
-            Elige la fuente del panel. El cambio se aplica al instante para toda
-            tu empresa.
+            Elige la fuente del panel. Cada sede tiene la suya; el cambio se
+            aplica al instante.
           </p>
         </div>
+        <LocalFilter
+          value={viewLocal}
+          onChange={setViewLocal}
+          allLabel="General"
+        />
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
@@ -889,36 +911,48 @@ function ThemeSettings() {
   const auth = useAuth();
   const usuario = auth?.usuario;
   const setUsuario = auth?.setUsuario;
-  const [current, setCurrent] = useState(usuario?.company?.crmTheme || 'orange');
+  const [current, setCurrent] = useState(
+    usuario?.local?.crmTheme || usuario?.company?.crmTheme || 'orange',
+  );
   const [saving, setSaving] = useState(false);
   const [alert, setAlert] = useState({});
+  // La apariencia es POR LOCAL. El admin edita la suya; el dueño elige la sede
+  // ('' = valor por defecto de la empresa).
+  const [viewLocal, setViewLocal] = useState('');
+  const myLocalId = usuario?.localId ?? usuario?.local?.id ?? null;
 
-  // Actualiza la sesión (empresa) para que el panel cambie al instante; el
-  // contenedor del dashboard lee company.crmTheme y aplica el tema en su
-  // subárbol (no toca el <html>, así el login no se ve afectado).
-  const setSessionTheme = (themeId) => {
-    if (setUsuario && usuario) {
-      const merged = {
-        ...usuario,
-        company: { ...usuario.company, crmTheme: themeId },
-      };
-      setUsuario(merged);
-      localStorage.setItem('usuario', JSON.stringify(merged));
+  // Lee el tema de la sede en contexto (al montar y al cambiar de sede).
+  useEffect(() => {
+    getCompanySettings({ localId: viewLocal })
+      .then((r) => setCurrent(r?.data?.crmTheme || 'orange'))
+      .catch(() => {});
+  }, [viewLocal]);
+
+  // Refleja en la sesión lo que el backend GUARDÓ (data.localId): empresa → company;
+  // mi sede → mi local; otra sede → no toca mi panel.
+  const setSessionTheme = (themeId, savedLocal) => {
+    if (!setUsuario || !usuario) return;
+    let merged = null;
+    if (savedLocal == null) {
+      merged = { ...usuario, company: { ...usuario.company, crmTheme: themeId } };
+    } else if (String(savedLocal) === String(myLocalId)) {
+      merged = { ...usuario, local: { ...(usuario.local || {}), crmTheme: themeId } };
     }
+    if (!merged) return;
+    setUsuario(merged);
+    localStorage.setItem('usuario', JSON.stringify(merged));
   };
 
   const apply = async (themeId) => {
     const prev = current;
     setCurrent(themeId);
-    setSessionTheme(themeId); // aplica en vivo (optimista)
     setSaving(true);
     try {
-      await updateCrmTheme(themeId);
+      const res = await updateCrmTheme(themeId, viewLocal);
+      setSessionTheme(themeId, res?.data?.localId ?? null);
       setAlert({ type: 'success', message: 'Tema actualizado.' });
     } catch (e) {
-      // revierte si falla
       setCurrent(prev);
-      setSessionTheme(prev);
       setAlert({ type: 'error', message: e.message || 'No se pudo guardar.' });
     } finally {
       setSaving(false);
@@ -931,13 +965,18 @@ function ThemeSettings() {
         <div className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-orange-50 text-orange-600">
           <SwatchIcon className="h-5 w-5" />
         </div>
-        <div>
+        <div className="min-w-0 flex-1">
           <h2 className="text-base font-bold text-gray-800">Tema de diseño</h2>
           <p className="text-sm text-gray-500">
-            Elige los colores de tu panel. El cambio se aplica al instante para
-            toda tu empresa.
+            Elige los colores de tu panel. Cada sede tiene el suyo; el cambio se
+            aplica al instante.
           </p>
         </div>
+        <LocalFilter
+          value={viewLocal}
+          onChange={setViewLocal}
+          allLabel="General"
+        />
       </div>
 
       <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
