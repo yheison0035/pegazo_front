@@ -10,6 +10,7 @@ import {
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
+import LocalFilter from '@/components/ui/LocalFilter';
 import TaxObligationsPanel from '@/components/tax/TaxObligationsPanel';
 import RentaDraftPanel from '@/components/tax/RentaDraftPanel';
 import TaxAlertPrefs from '@/components/tax/TaxAlertPrefs';
@@ -72,24 +73,38 @@ export default function CalendarioTributarioPage() {
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(false);
   const [checkMsg, setCheckMsg] = useState('');
+  // Sede elegida por el dueño (vacío = toda la empresa). Alimenta el calendario
+  // y las finanzas tributarias por local. El selector se oculta con una sede.
+  const [viewLocal, setViewLocal] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await getTaxCalendar();
+      const res = await getTaxCalendar({ localId: viewLocal });
       setData(res?.data || null);
     } catch {
       /* noop */
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [viewLocal]);
 
   useEffect(() => {
     load();
   }, [load]);
 
   useLiveRefresh(load);
+
+  // Loaders acotados a la sede elegida (identidad estable por sede para que los
+  // paneles solo recarguen al cambiar de local, no en cada render).
+  const loadObligationsLocal = useCallback(
+    (p = {}) => getTaxObligations({ ...p, localId: viewLocal }),
+    [viewLocal],
+  );
+  const loadRentaLocal = useCallback(
+    (p = {}) => getTaxRenta({ ...p, localId: viewLocal }),
+    [viewLocal],
+  );
 
   const checkNow = useCallback(async () => {
     setChecking(true);
@@ -174,6 +189,11 @@ export default function CalendarioTributarioPage() {
             </p>
           </div>
           <div className="flex flex-none flex-wrap items-center gap-2">
+            <LocalFilter
+              value={viewLocal}
+              onChange={setViewLocal}
+              allLabel="Toda la empresa"
+            />
             <ExportCsvButton data={data} filename="calendario-tributario.csv" />
             <button
               onClick={checkNow}
@@ -207,7 +227,7 @@ export default function CalendarioTributarioPage() {
         {/* Obligaciones DIAN: ¿debe declarar renta? + qué debe presentar */}
         <div className="mb-5">
           <TaxObligationsPanel
-            loadObligations={getTaxObligations}
+            loadObligations={loadObligationsLocal}
             loadProfile={getTaxProfile}
             saveProfile={updateTaxProfile}
             loadYear={getTaxYear}
@@ -222,7 +242,7 @@ export default function CalendarioTributarioPage() {
 
         {/* Declaración de renta: consolidado anual + impuesto estimado */}
         <div className="mb-5">
-          <RentaDraftPanel load={getTaxRenta} />
+          <RentaDraftPanel load={loadRentaLocal} />
         </div>
 
         {/* Aviso */}
