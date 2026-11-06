@@ -54,8 +54,6 @@ function DesignInner() {
     tagline: '',
     subtitle: '',
     whatsapp: '',
-    introCta: '',
-    introPills: '',
     heroImage: '',
     ravenImage: '',
     musicUrl: '',
@@ -73,8 +71,6 @@ function DesignInner() {
         tagline: data?.tagline || '',
         subtitle: data?.subtitle || '',
         whatsapp: data?.whatsapp || data?.phone || '',
-        introCta: data?.introCta || '',
-        introPills: data?.introPills || '',
         heroImage: data?.heroImage || '',
         ravenImage: data?.ravenImage || '',
         musicUrl: data?.musicUrl || '',
@@ -211,32 +207,8 @@ function DesignInner() {
           {hasBackground && (
             <div className="space-y-4 rounded-xl border border-gray-100 bg-gray-50 p-4">
               <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                {elegant ? 'Imagen de fondo' : 'Portada (estilo oscuro)'}
+                {elegant ? 'Imagen de fondo' : 'Fondo e imagen (estilo oscuro)'}
               </p>
-
-              {/* Portada con botón/etiquetas: solo el estilo oscuro (guerrero). */}
-              {dark && (
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className={labelCls}>Botón de entrada</label>
-                    <input
-                      value={form.introCta}
-                      onChange={set('introCta')}
-                      placeholder="Comienza tu leyenda"
-                      className={inputCls}
-                    />
-                  </div>
-                  <div>
-                    <label className={labelCls}>Etiquetas (separadas por ·)</label>
-                    <input
-                      value={form.introPills}
-                      onChange={set('introPills')}
-                      placeholder="Disciplina · Estilo · Actitud"
-                      className={inputCls}
-                    />
-                  </div>
-                </div>
-              )}
 
               <div>
                 <label className={labelCls}>Imagen de fondo</label>

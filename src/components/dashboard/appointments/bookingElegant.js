@@ -19,10 +19,15 @@ export const ELEGANT_CSS = `
 }
 
 /* Imagen de fondo fija (foto real del negocio) tras todo el flujo, tratada en
-   escala sobria con degradado para legibilidad. */
+   escala sobria con degradado para legibilidad. Se adapta a CUALQUIER pantalla:
+   'cover' rellena siempre el viewport (recorta lo que sobra) y queda centrada,
+   tanto en móvil vertical como en escritorio. */
 [data-skin="elegant"] .bk-fixed-bg {
   position: fixed; inset: 0; z-index: 0;
-  background-size: cover; background-position: center 20%;
+  width: 100%; height: 100%;
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
   filter: grayscale(0.35) contrast(1.02) brightness(0.9);
 }
 [data-skin="elegant"] .bk-fixed-bg::after {
