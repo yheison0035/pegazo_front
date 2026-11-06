@@ -15,7 +15,7 @@ export const ROLE_PERMISSIONS = {
     inventory: ['view', 'create', 'edit', 'delete', 'export', 'import'],
     customers: ['view', 'create', 'edit', 'delete', 'export', 'import'],
     sales: ['view', 'create', 'edit', 'delete', 'export'],
-    delivered_sales: ['view', 'delete', 'export'],
+    delivered_sales: ['view', 'edit', 'delete', 'export'],
     expenses: ['view', 'create', 'edit', 'delete', 'export'],
     providers: ['view', 'create', 'edit', 'delete', 'export', 'import'],
     categories: ['view', 'create', 'edit', 'delete'],
