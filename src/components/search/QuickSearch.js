@@ -12,6 +12,9 @@ import {
   ShoppingCartIcon,
   ClockIcon,
   DocumentTextIcon,
+  SparklesIcon,
+  TruckIcon,
+  CalendarDaysIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/authContext';
 import usePermissions from '@/hooks/usePermissions';
@@ -20,6 +23,15 @@ import { quickSearch } from '@/lib/api/routes/search';
 import { formatCOP, formatDateSafe } from '@/lib/api/utils/utils';
 
 const MAX_RECENTS = 6;
+
+const EMPTY = {
+  products: [],
+  customers: [],
+  sales: [],
+  services: [],
+  providers: [],
+  appointments: [],
+};
 
 // Buscador global del CRM (command palette, ⌘K / Ctrl+K, o la tecla "/").
 // Productos, clientes y facturas con su info clave; "Ir allá" abre el detalle,
@@ -35,17 +47,27 @@ export default function QuickSearch() {
   const canProducts = can('inventory', 'view');
   const canCustomers = can('customers', 'view');
   const canSales = can('delivered_sales', 'view');
+  const canServices = can('services', 'view');
+  const canProviders = can('providers', 'view');
+  const canAppointments = can('appointments', 'view');
   const canEditProduct = can('inventory', 'edit');
   const canEditCustomer = can('customers', 'edit');
   const canSell = can('sales', 'create');
-  const enabled = !!usuario?.id && (canProducts || canCustomers || canSales);
+  const enabled =
+    !!usuario?.id &&
+    (canProducts ||
+      canCustomers ||
+      canSales ||
+      canServices ||
+      canProviders ||
+      canAppointments);
 
   const recentsKey = `pegazo:qsearch:recents:${usuario?.company?.id || 0}:${usuario?.id || 0}`;
 
   const [open, setOpen] = useState(false);
   const [term, setTerm] = useState('');
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState({ products: [], customers: [], sales: [] });
+  const [data, setData] = useState(EMPTY);
   const [recents, setRecents] = useState([]);
   const [active, setActive] = useState(0);
 
@@ -58,12 +80,26 @@ export default function QuickSearch() {
     const products = canProducts ? data.products || [] : [];
     const customers = canCustomers ? data.customers || [] : [];
     const sales = canSales ? data.sales || [] : [];
+    const services = canServices ? data.services || [] : [];
+    const providers = canProviders ? data.providers || [] : [];
+    const appointments = canAppointments ? data.appointments || [] : [];
     return [
       ...products.map((p) => ({ type: 'product', item: p })),
       ...customers.map((c) => ({ type: 'customer', item: c })),
       ...sales.map((s) => ({ type: 'sale', item: s })),
+      ...services.map((s) => ({ type: 'service', item: s })),
+      ...providers.map((p) => ({ type: 'provider', item: p })),
+      ...appointments.map((a) => ({ type: 'appointment', item: a })),
     ];
-  }, [data, canProducts, canCustomers, canSales]);
+  }, [
+    data,
+    canProducts,
+    canCustomers,
+    canSales,
+    canServices,
+    canProviders,
+    canAppointments,
+  ]);
 
   const loadRecents = useCallback(() => {
     try {
@@ -95,7 +131,7 @@ export default function QuickSearch() {
   const close = useCallback(() => {
     setOpen(false);
     setTerm('');
-    setData({ products: [], customers: [], sales: [] });
+    setData(EMPTY);
     setActive(0);
   }, []);
 
@@ -104,6 +140,9 @@ export default function QuickSearch() {
       return `/dashboard/inventory?open=${entry.item.id}`;
     if (entry.type === 'customer')
       return `/dashboard/customers?open=${entry.item.id}`;
+    if (entry.type === 'service') return `/dashboard/services`;
+    if (entry.type === 'provider') return `/dashboard/providers`;
+    if (entry.type === 'appointment') return `/dashboard/appointments`;
     return `/dashboard/delivered_sales?open=${entry.item.id}`;
   };
 
@@ -212,7 +251,7 @@ export default function QuickSearch() {
     if (!open) return;
     const q = term.trim();
     if (q.length < 1) {
-      setData({ products: [], customers: [], sales: [] });
+      setData(EMPTY);
       setLoading(false);
       return;
     }
@@ -227,6 +266,9 @@ export default function QuickSearch() {
           products,
           customers: res?.customers || [],
           sales: res?.sales || [],
+          services: res?.services || [],
+          providers: res?.providers || [],
+          appointments: res?.appointments || [],
         });
         setActive(0);
         // Salto directo tras escanear: si hay un único producto (o varios), abre
@@ -238,8 +280,7 @@ export default function QuickSearch() {
           }
         }
       } catch {
-        if (my === reqId.current)
-          setData({ products: [], customers: [], sales: [] });
+        if (my === reqId.current) setData(EMPTY);
       } finally {
         if (my === reqId.current) setLoading(false);
       }
@@ -424,10 +465,94 @@ export default function QuickSearch() {
     </div>
   );
 
+  const ServiceRow = ({ s, isActive }) => (
+    <div
+      onClick={() => openDetail({ type: 'service', item: s })}
+      className={`flex cursor-pointer items-start gap-3 px-4 py-2.5 ${
+        isActive ? 'bg-orange-50' : 'hover:bg-gray-50'
+      }`}
+    >
+      <span className="mt-0.5 flex h-9 w-9 flex-none items-center justify-center rounded-lg bg-gray-100">
+        <SparklesIcon className="h-5 w-5 text-gray-400" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block break-words text-sm font-medium leading-snug text-gray-800">
+          {s.name}
+        </span>
+        {s.duration != null && (
+          <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500">
+            <span className="text-gray-400">{s.duration} min</span>
+          </span>
+        )}
+      </span>
+      <GoThere isActive={isActive} />
+    </div>
+  );
+
+  const ProviderRow = ({ p, isActive }) => (
+    <div
+      onClick={() => openDetail({ type: 'provider', item: p })}
+      className={`flex cursor-pointer items-start gap-3 px-4 py-2.5 ${
+        isActive ? 'bg-orange-50' : 'hover:bg-gray-50'
+      }`}
+    >
+      <span className="mt-0.5 flex h-9 w-9 flex-none items-center justify-center rounded-lg bg-gray-100">
+        <TruckIcon className="h-5 w-5 text-gray-400" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block break-words text-sm font-medium leading-snug text-gray-800">
+          {p.name}
+        </span>
+        <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500">
+          {p.docNumber && <span>{p.docNumber}</span>}
+          {p.phone && <span className="text-gray-400">{p.phone}</span>}
+        </span>
+      </span>
+      <GoThere isActive={isActive} />
+    </div>
+  );
+
+  const AppointmentRow = ({ a, isActive }) => (
+    <div
+      onClick={() => openDetail({ type: 'appointment', item: a })}
+      className={`flex cursor-pointer items-start gap-3 px-4 py-2.5 ${
+        isActive ? 'bg-orange-50' : 'hover:bg-gray-50'
+      }`}
+    >
+      <span className="mt-0.5 flex h-9 w-9 flex-none items-center justify-center rounded-lg bg-gray-100">
+        <CalendarDaysIcon className="h-5 w-5 text-gray-400" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block break-words text-sm font-medium leading-snug text-gray-800">
+          {a.customerName || 'Cita'}
+          {a.serviceName ? ` · ${a.serviceName}` : ''}
+        </span>
+        <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500">
+          {a.date && (
+            <span className="font-semibold text-gray-700">
+              {formatDateSafe(a.date)}
+            </span>
+          )}
+          {a.startTime && <span className="text-gray-400">{a.startTime}</span>}
+          {a.barberName && (
+            <span className="text-gray-400">{a.barberName}</span>
+          )}
+        </span>
+      </span>
+      <GoThere isActive={isActive} />
+    </div>
+  );
+
   const RecentRow = ({ r }) => {
     if (r.type === 'product') return <ProductRow p={r.item} isActive={false} />;
     if (r.type === 'customer')
       return <CustomerRow c={r.item} isActive={false} />;
+    if (r.type === 'service')
+      return <ServiceRow s={r.item} isActive={false} />;
+    if (r.type === 'provider')
+      return <ProviderRow p={r.item} isActive={false} />;
+    if (r.type === 'appointment')
+      return <AppointmentRow a={r.item} isActive={false} />;
     return <SaleRow s={r.item} isActive={false} />;
   };
 
@@ -530,6 +655,55 @@ export default function QuickSearch() {
               {data.sales.map((s) => {
                 idx++;
                 return <SaleRow key={`s-${s.id}`} s={s} isActive={idx === active} />;
+              })}
+            </div>
+          )}
+
+          {/* SERVICIOS */}
+          {canServices && (data.services?.length || 0) > 0 && (
+            <div className="py-1">
+              <p className="px-4 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                {t.servicePlural || 'Servicios'}
+              </p>
+              {data.services.map((s) => {
+                idx++;
+                return (
+                  <ServiceRow key={`sv-${s.id}`} s={s} isActive={idx === active} />
+                );
+              })}
+            </div>
+          )}
+
+          {/* PROVEEDORES */}
+          {canProviders && (data.providers?.length || 0) > 0 && (
+            <div className="py-1">
+              <p className="px-4 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                Proveedores
+              </p>
+              {data.providers.map((p) => {
+                idx++;
+                return (
+                  <ProviderRow key={`pv-${p.id}`} p={p} isActive={idx === active} />
+                );
+              })}
+            </div>
+          )}
+
+          {/* CITAS */}
+          {canAppointments && (data.appointments?.length || 0) > 0 && (
+            <div className="py-1">
+              <p className="px-4 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                Citas
+              </p>
+              {data.appointments.map((a) => {
+                idx++;
+                return (
+                  <AppointmentRow
+                    key={`ap-${a.id}`}
+                    a={a}
+                    isActive={idx === active}
+                  />
+                );
               })}
             </div>
           )}
