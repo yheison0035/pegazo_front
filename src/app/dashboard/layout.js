@@ -28,13 +28,18 @@ export default function Layout({ children }) {
   // El tema de diseño se aplica SOLO al panel (este contenedor), no al <html>,
   // para que el login y las páginas públicas queden siempre en el tema por
   // defecto. Los overrides de color en globals.css usan [data-crm-theme].
-  const theme = usuario?.company?.crmTheme || 'orange';
+  // Apariencia POR LOCAL: cada usuario ve el tema/fuente de SU sede; si la sede
+  // no tiene uno propio, hereda el de la empresa. El dueño (sin sede asignada)
+  // ve el valor por defecto de la empresa.
+  const theme =
+    usuario?.local?.crmTheme || usuario?.company?.crmTheme || 'orange';
   // Logo del negocio como marca de agua sutil de fondo en cada módulo.
   const logo = usuario?.company?.logo;
   const [imp, setImp] = useState(false);
   useEffect(() => setImp(isImpersonating()), []);
-  // Fuente del panel elegida por el negocio.
-  const fontId = usuario?.company?.crmFont || 'system';
+  // Fuente del panel: la de la sede del usuario o, si no tiene, la de la empresa.
+  const fontId =
+    usuario?.local?.crmFont || usuario?.company?.crmFont || 'system';
   const fontStack = (CRM_FONTS_BY_ID[fontId] || CRM_FONTS_BY_ID.system).stack;
 
   // Carga la fuente de Google elegida (una sola vez por fuente).
