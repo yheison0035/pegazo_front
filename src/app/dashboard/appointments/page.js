@@ -9,6 +9,7 @@ import {
   PaintBrushIcon,
 } from '@heroicons/react/24/outline';
 import AppointmentsCalendar from '@/components/dashboard/appointments/AppointmentsCalendar';
+import LocalFilter from '@/components/ui/LocalFilter';
 import Button from '@/components/ui/Button';
 
 import RoleGuard from '@/auth/roleGuard';
@@ -61,16 +62,21 @@ export default function Appointments() {
 
   const debouncedFilters = useDebounce(filters, 400);
 
+  // Sede elegida por el dueño (vacío = todas sus sedes). Un empleado no ve el
+  // selector: siempre es su local.
+  const [viewLocal, setViewLocal] = useState('');
+
   const fetchAppointments = useCallback(async () => {
     const res = await getAppointments({
       page,
       limit,
       ...debouncedFilters,
+      ...(viewLocal ? { localId: viewLocal } : {}),
     });
 
     setAppointments(res.data);
     setMeta(res.meta);
-  }, [getAppointments, page, limit, debouncedFilters]);
+  }, [getAppointments, page, limit, debouncedFilters, viewLocal]);
 
   useEffect(() => {
     fetchAppointments();
@@ -134,6 +140,8 @@ export default function Appointments() {
               </button>
             </div>
 
+            <LocalFilter value={viewLocal} onChange={setViewLocal} />
+
             {/* Solo dueño/admin: editar el diseño de la página pública de citas. */}
             {['SUPER_ADMIN', 'ADMIN'].includes(usuario?.role) && (
               <Button
@@ -158,7 +166,7 @@ export default function Appointments() {
           </div>
         </div>
 
-        {view === 'calendar' && <AppointmentsCalendar />}
+        {view === 'calendar' && <AppointmentsCalendar localId={viewLocal} />}
 
         {view === 'list' && (
         <div className="bg-white rounded-lg shadow relative">

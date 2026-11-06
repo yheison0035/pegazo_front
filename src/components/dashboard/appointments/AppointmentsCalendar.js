@@ -71,7 +71,7 @@ function grid(y, m) {
 }
 const firstName = (n) => (n || '').split(' ')[0] || '—';
 
-export default function AppointmentsCalendar() {
+export default function AppointmentsCalendar({ localId = '' } = {}) {
   const { usuario } = useAuth();
   const toast = useToast();
   const isBarber = ['BARBERO', 'PROFESIONAL'].includes(usuario?.role);
@@ -132,6 +132,7 @@ export default function AppointmentsCalendar() {
         year: cal.y,
         month: cal.m,
         ...(barberId ? { barberId } : {}),
+        ...(localId ? { localId } : {}),
       });
       setAppts(r?.data || []);
     } catch {
@@ -139,7 +140,7 @@ export default function AppointmentsCalendar() {
     } finally {
       setLoading(false);
     }
-  }, [cal, barberId]);
+  }, [cal, barberId, localId]);
 
   useEffect(() => {
     load();
