@@ -142,8 +142,9 @@ export default function Appointments() {
 
             <LocalFilter value={viewLocal} onChange={setViewLocal} />
 
-            {/* Solo dueño/admin: editar el diseño de la página pública de citas. */}
-            {['SUPER_ADMIN', 'ADMIN'].includes(usuario?.role) && (
+            {/* Solo el DUEÑO: el diseño de la página de citas es lo único
+                compartido entre sedes. */}
+            {usuario?.role === 'SUPER_ADMIN' && (
               <Button
                 variant="secondary"
                 icon={PaintBrushIcon}
