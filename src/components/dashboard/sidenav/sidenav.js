@@ -106,7 +106,10 @@ export default function SideNavigation() {
             }`}
           >
             <span className="text-sm font-semibold tracking-wide truncate">
-              {isPlatform ? 'Pegazo' : usuario?.company?.name || 'Pegazo'}
+              {isPlatform
+                ? 'Pegazo'
+                : // Nombre de la SEDE asignada; el dueño sin sede ve la empresa.
+                  usuario?.local?.name || usuario?.company?.name || 'Pegazo'}
             </span>
             <span className="text-[11px] text-[color:var(--sb-fg-faint)]">
               {isPlatform ? 'Plataforma' : 'Workspace'}
