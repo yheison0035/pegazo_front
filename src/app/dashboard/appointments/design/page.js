@@ -38,6 +38,41 @@ const SKINS = [
   { value: 'classic', label: 'Clásico neutro', desc: 'Neutro para cualquier negocio.' },
 ];
 
+// Selector de color reutilizable (muestra color + hex + reset).
+function ColorField({ label, value, fallback, onChange }) {
+  return (
+    <div>
+      <label className="mb-1 block text-xs font-semibold text-gray-600">
+        {label}
+      </label>
+      <div className="flex items-center gap-2">
+        <input
+          type="color"
+          value={value || fallback}
+          onChange={(e) => onChange(e.target.value)}
+          className="h-10 w-12 flex-none cursor-pointer rounded-lg border border-gray-300"
+        />
+        <input
+          type="text"
+          value={value || ''}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={fallback}
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-1 focus:ring-orange-400"
+        />
+        {value && (
+          <button
+            type="button"
+            onClick={() => onChange('')}
+            className="flex-none text-xs text-gray-400 hover:text-gray-600"
+          >
+            Reset
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function DesignInner() {
   const toast = useToast();
   const fileRef = useRef(null);
@@ -57,6 +92,9 @@ function DesignInner() {
     heroImage: '',
     ravenImage: '',
     musicUrl: '',
+    // Colores del skin elegante (negro, gris; el plateado es el acento).
+    elegantBlack: '',
+    elegantGray: '',
   });
 
   const load = useCallback(async () => {
@@ -74,6 +112,8 @@ function DesignInner() {
         heroImage: data?.heroImage || '',
         ravenImage: data?.ravenImage || '',
         musicUrl: data?.musicUrl || '',
+        elegantBlack: data?.elegantBlack || '',
+        elegantGray: data?.elegantGray || '',
       });
     } catch (e) {
       toast.show({ type: 'error', message: e.message || 'Error al cargar' });
@@ -178,15 +218,45 @@ function DesignInner() {
             </div>
           </div>
 
-          {/* Marca y datos (compartidos con el catálogo web) */}
+          {/* Marca y datos (compartidos con el catálogo web). En el skin
+              elegante, el "Color de acento" es el PLATEADO. */}
           <BrandFields
             form={form}
             setForm={setForm}
             showSubtitle
-            accentFallback={defaultAccent}
+            accentFallback={elegant ? '#c9ccd1' : defaultAccent}
             taglinePlaceholder="Agenda tu cita"
             whatsappPlaceholder="573001234567 (con indicativo del país)"
           />
+
+          {/* Colores del skin elegante: negro, gris y plateado configurables. */}
+          {elegant && (
+            <div className="space-y-3 rounded-xl border border-gray-100 bg-gray-50 p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                Colores del estilo (negro · gris · plateado)
+              </p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <ColorField
+                  label="Negro (fondos)"
+                  value={form.elegantBlack}
+                  fallback="#0a0a0b"
+                  onChange={(v) => setForm((f) => ({ ...f, elegantBlack: v }))}
+                />
+                <ColorField
+                  label="Gris (líneas y recuadros)"
+                  value={form.elegantGray}
+                  fallback="#8b8b92"
+                  onChange={(v) => setForm((f) => ({ ...f, elegantGray: v }))}
+                />
+              </div>
+              <p className="text-[11px] text-gray-400">
+                El <strong>plateado</strong> es el <em>Color de acento</em> de
+                arriba: lo usan los botones, títulos e iconos. El{' '}
+                <strong>negro</strong> pinta los fondos y el <strong>gris</strong>{' '}
+                las líneas y los recuadros.
+              </p>
+            </div>
+          )}
 
           <div>
             <label className={labelCls}>Música de fondo (URL de un MP3, opcional)</label>
