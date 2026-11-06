@@ -263,14 +263,15 @@ describe('Inventario · permisos', () => {
     expect(queryRowButton('CAMISETA BÁSICA', 'Eliminar')).toBeNull();
   });
 
-  it('el administrador crea y edita pero no elimina', async () => {
+  it('el administrador gestiona todo en su local: crea, edita y elimina', async () => {
     resetBehavior({ role: 'ADMIN' });
     const api = inventoryApi();
     await renderPage(<InventoryPage />);
     await waitForCall(api, 'GET', /^\/inventory$/);
     expect(screen.getByText('Agregar producto')).toBeInTheDocument();
     expect(rowButton('CAMISETA BÁSICA', 'Editar')).toBeTruthy();
-    expect(queryRowButton('CAMISETA BÁSICA', 'Eliminar')).toBeNull();
+    // El ADMIN es el dueño de su local: ahora también puede eliminar.
+    expect(queryRowButton('CAMISETA BÁSICA', 'Eliminar')).toBeTruthy();
   });
 });
 

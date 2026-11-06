@@ -53,7 +53,8 @@ describeCatalogList({
   newHref: '/dashboard/services/new',
   addText: 'Agregar servicio',
   user: { type: 'BARBERIA' },
-  readOnlyRoles: ['ADMIN', 'RECEPCIONISTA'],
+  // El ADMIN es el dueño de su local: puede eliminar servicios. RECEPCIONISTA no.
+  readOnlyRoles: ['RECEPCIONISTA'],
   blockedRoles: ['BARBERO'],
 });
 

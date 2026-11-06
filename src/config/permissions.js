@@ -7,19 +7,23 @@ export const ROLE_PERMISSIONS = {
     '*': ['view', 'create', 'edit', 'delete', 'export', 'import'],
   },
 
+  // El ADMIN es el "dueño de SU local": hace de todo en su sede (el backend ya
+  // aísla los datos por local). Solo se le reservan al dueño las cosas de la
+  // EMPRESA: crear/eliminar sedes, la tienda online y la suscripción.
   ADMIN: {
-    locals: ['view', 'create', 'edit'],
-    inventory: ['view', 'create', 'edit'],
-    customers: ['view', 'create', 'edit', 'delete'],
-    sales: ['view', 'create'],
-    delivered_sales: ['view'],
-    expenses: ['view', 'create', 'edit'],
-    providers: ['view', 'create', 'edit', 'delete'],
+    locals: ['view', 'edit'],
+    inventory: ['view', 'create', 'edit', 'delete', 'export', 'import'],
+    customers: ['view', 'create', 'edit', 'delete', 'export', 'import'],
+    sales: ['view', 'create', 'edit', 'delete', 'export'],
+    delivered_sales: ['view', 'delete', 'export'],
+    expenses: ['view', 'create', 'edit', 'delete', 'export'],
+    providers: ['view', 'create', 'edit', 'delete', 'export', 'import'],
     categories: ['view', 'create', 'edit', 'delete'],
     brands: ['view', 'create', 'edit', 'delete'],
-    statistics: ['view'],
-    services: ['view'],
+    statistics: ['view', 'export'],
+    services: ['view', 'create', 'edit', 'delete'],
     appointments: ['view', 'create', 'edit', 'delete'],
+    users: ['view', 'create', 'edit', 'delete'],
   },
 
   ASESOR: {
