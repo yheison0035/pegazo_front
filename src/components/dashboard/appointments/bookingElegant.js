@@ -65,6 +65,59 @@ export const ELEGANT_CSS = `
   box-shadow: 0 0 0 1px var(--bk-accent-ring), 0 10px 30px rgba(0,0,0,0.45);
 }
 
+/* ---- Menú de servicios por categoría (recuadros con borde fino) ---- */
+
+/* Separación entre categorías. */
+[data-skin="elegant"] .bk-cat + .bk-cat { margin-top: 18px; }
+
+/* Cabecera de la categoría: insignia + título alineados. */
+[data-skin="elegant"] .bk-cathead {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+}
+[data-skin="elegant"] .bk-badge {
+  background: var(--bk-surface);
+  border: 1px solid var(--bk-border);
+}
+/* Título de la categoría en plateado (reusa el degradado de --bk-silver-*). */
+[data-skin="elegant"] .bk-gold {
+  background: linear-gradient(180deg,
+    var(--bk-silver-1) 0%, var(--bk-silver-2) 55%, var(--bk-silver-3) 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+}
+/* Etiqueta "Recomendado". */
+[data-skin="elegant"] .bk-hi-tag {
+  display: inline-flex; align-items: center; gap: 4px; margin-left: auto;
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase; font-weight: 700;
+  color: var(--bk-accent-contrast);
+  background: var(--bk-accent);
+  padding: 3px 9px; border-radius: 20px;
+}
+
+/* El RECUADRO de cada categoría: borde fino, fondo sutil, esquinas suaves. */
+[data-skin="elegant"] .bk-panel {
+  background: var(--bk-surface);
+  border: 1px solid var(--bk-border);
+  border-radius: calc(var(--bk-radius) + 4px);
+  overflow: hidden;
+  padding: 0 !important;
+}
+/* Categoría destacada: borde plateado. */
+[data-skin="elegant"] .bk-cat-hi .bk-panel {
+  border-color: var(--bk-border-strong);
+}
+
+/* Cada servicio es una fila con divisor fino; la última sin divisor. */
+[data-skin="elegant"] .bk-svc {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--bk-border);
+  transition: background-color .16s ease;
+}
+[data-skin="elegant"] .bk-svc:last-child { border-bottom: 0; }
+[data-skin="elegant"] .bk-svc:hover { background: var(--bk-surface-2); }
+[data-skin="elegant"] .bk-svc .go { color: var(--bk-accent); line-height: 1; }
+
 /* Respeta la preferencia de menos movimiento. */
 @media (prefers-reduced-motion: reduce) {
   [data-skin="elegant"] * { animation: none !important; }
