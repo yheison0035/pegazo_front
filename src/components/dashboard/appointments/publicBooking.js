@@ -113,8 +113,12 @@ export default function PublicBooking({ slug = '' }) {
 
   const days = useMemo(() => buildDays(21), []);
   const skin = useMemo(
-    () => resolveSkin(config?.skin, config?.accent),
-    [config?.skin, config?.accent],
+    () =>
+      resolveSkin(config?.skin, config?.accent, {
+        black: config?.elegantBlack,
+        gray: config?.elegantGray,
+      }),
+    [config?.skin, config?.accent, config?.elegantBlack, config?.elegantGray],
   );
   const companyId = config?.companyId;
   const displayStyle = skin.display
@@ -331,14 +335,14 @@ export default function PublicBooking({ slug = '' }) {
       <>
       {/* Encabezado */}
       <header className="relative z-10 px-4 pt-6 text-center sm:pt-8">
-        {config.logo ? (
+        {/* El skin elegante NO muestra logo: es minimalista y genérico, solo el
+            nombre en plateado. Los demás skins sí muestran el logo configurado. */}
+        {config.logo && !elegant ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={config.logo}
             alt={config.name}
-            className={`mx-auto h-14 w-auto sm:h-20 ${
-              elegant ? 'bk-head-logo' : ''
-            }`}
+            className="mx-auto h-14 w-auto sm:h-20"
           />
         ) : (
           <div

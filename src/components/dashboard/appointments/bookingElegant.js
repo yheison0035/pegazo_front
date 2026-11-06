@@ -12,10 +12,12 @@ export const ELEGANT_CSS = `
   letter-spacing: 0.01em;
 }
 
-/* Fondo base: negro con una sutil viñeta gris desde arriba. */
+/* Fondo base: el NEGRO configurado con una sutil viñeta (negro levantado con
+   algo de gris) desde arriba. Todo sale de los 3 colores del skin. */
 [data-skin="elegant"].bk-elegant {
   background:
-    radial-gradient(120% 80% at 50% -10%, #17171a 0%, #0d0d0f 48%, #0a0a0b 100%);
+    radial-gradient(120% 80% at 50% -10%,
+      var(--bk-elev-2) 0%, var(--bk-elev-1) 48%, var(--bk-bg) 100%);
 }
 
 /* Imagen de fondo fija (foto real del negocio) tras todo el flujo, tratada en
@@ -33,9 +35,9 @@ export const ELEGANT_CSS = `
 [data-skin="elegant"] .bk-fixed-bg::after {
   content: ""; position: absolute; inset: 0;
   background: linear-gradient(180deg,
-    rgba(10,10,11,0.55) 0%,
-    rgba(10,10,11,0.68) 40%,
-    rgba(10,10,11,0.88) 78%,
+    rgba(var(--bk-bg-rgb), 0.55) 0%,
+    rgba(var(--bk-bg-rgb), 0.68) 40%,
+    rgba(var(--bk-bg-rgb), 0.88) 78%,
     var(--bk-bg) 100%);
 }
 
@@ -61,11 +63,6 @@ export const ELEGANT_CSS = `
 }
 [data-skin="elegant"] .bk-card.is-active {
   box-shadow: 0 0 0 1px var(--bk-accent-ring), 0 10px 30px rgba(0,0,0,0.45);
-}
-
-/* El logo del encabezado, discreto y nítido. */
-[data-skin="elegant"] .bk-head-logo {
-  filter: drop-shadow(0 6px 20px rgba(0,0,0,0.55));
 }
 
 /* Respeta la preferencia de menos movimiento. */
