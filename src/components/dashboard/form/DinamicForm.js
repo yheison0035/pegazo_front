@@ -270,8 +270,18 @@ export default function DinamicForm({
         // Se ofrecen los roles de la vertical. El rol que ya trae el usuario
         // (al editar) se conserva aunque sea heredado, para no vaciar el select.
         const current = formData?.role;
+        // Un ADMINISTRADOR no puede crear/asignar su mismo rol ni uno superior
+        // (solo el dueño crea administradores).
+        const blockedForAdmin =
+          usuario?.role === 'ADMIN'
+            ? ['ADMIN', 'SUPER_ADMIN', 'SUPER_PLATFORM_ADMIN']
+            : [];
         const list = data
-          .filter((r) => allowed.includes(r.id) || r.id === current)
+          .filter(
+            (r) =>
+              (allowed.includes(r.id) || r.id === current) &&
+              !(blockedForAdmin.includes(r.id) && r.id !== current),
+          )
           .map((r) => ({ id: r.id, name: roleLabel(r.id, company) }));
         // El rol ACTUAL siempre debe ser una opción para que el select lo muestre
         // seleccionado, aunque no sea asignable (p. ej. SUPER_ADMIN/dueño, que el
