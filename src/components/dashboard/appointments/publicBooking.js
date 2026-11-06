@@ -107,7 +107,8 @@ export default function PublicBooking({ slug = '' }) {
   const [booking, setBooking] = useState(false);
   const [bookError, setBookError] = useState('');
   const [success, setSuccess] = useState(false);
-  const [started, setStarted] = useState(false); // portada (intro) del skin oscuro
+  // Sin portada de bienvenida: la página entra directo al flujo de reserva.
+  const [started, setStarted] = useState(true);
 
   const { getPublicLocals } = useLocals();
   const { getAvailability, availabilityLoading } = useAppointments();
