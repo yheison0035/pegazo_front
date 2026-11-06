@@ -28,6 +28,7 @@ import { getTerms } from '@/config/terminology';
 import Button from '@/components/ui/Button';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import LogoUploader from '@/components/ui/LogoUploader';
+import LocalFilter from '@/components/ui/LocalFilter';
 import { useAuth } from '@/context/authContext';
 import { isServicesBusiness, effectiveModules } from '@/lib/appointmentsAccess';
 import {
@@ -531,12 +532,11 @@ export function HoursCard({ initial }) {
   });
   const [saving, setSaving] = useState(false);
   const [alert, setAlert] = useState({});
+  // Cada local maneja su propio horario. El administrador queda en su local (el
+  // backend lo resuelve). El dueño elige la sede con el desplegable.
+  const [viewLocal, setViewLocal] = useState('');
 
-  useEffect(() => {
-    if (!initial) return;
-    const wh = initial.weekHours;
-    const o = initial.openHour ?? 9;
-    const c = initial.closeHour ?? 20;
+  const applyWeek = (wh, o = 9, c = 20) => {
     const next = {};
     for (const [idx] of WEEK_DAYS) {
       const d = wh && wh[idx];
@@ -545,7 +545,23 @@ export function HoursCard({ initial }) {
         : { open: o, close: c, closed: false };
     }
     setDays(next);
+  };
+
+  useEffect(() => {
+    if (!initial) return;
+    applyWeek(initial.weekHours, initial.openHour ?? 9, initial.closeHour ?? 20);
   }, [initial]);
+
+  // El dueño cambia de sede: recarga el horario de ESE local.
+  useEffect(() => {
+    if (!viewLocal) return;
+    getCompanySettings({ localId: viewLocal })
+      .then((r) => {
+        const d = r?.data || {};
+        applyWeek(d.weekHours, d.openHour ?? 9, d.closeHour ?? 20);
+      })
+      .catch(() => {});
+  }, [viewLocal]);
 
   const setDay = (idx, patch) =>
     setDays((prev) => ({ ...prev, [idx]: { ...prev[idx], ...patch } }));
@@ -563,7 +579,10 @@ export function HoursCard({ initial }) {
   const save = async () => {
     setSaving(true);
     try {
-      await updateCompanyHours({ weekHours: days });
+      await updateCompanyHours({
+        weekHours: days,
+        ...(viewLocal ? { localId: Number(viewLocal) } : {}),
+      });
       setAlert({ type: 'success', message: 'Horario actualizado.' });
     } catch (e) {
       setAlert({ type: 'error', message: e.message || 'No se pudo guardar.' });
@@ -585,17 +604,24 @@ export function HoursCard({ initial }) {
         <div className="min-w-0 flex-1">
           <h2 className="text-base font-bold text-gray-800">Horario de atención</h2>
           <p className="text-sm text-gray-500">
-            Define el horario de cada día. Puedes tener horarios distintos o cerrar
-            un día. Solo se agendan citas dentro de estas horas.
+            Cada sede maneja su propio horario. Define el de cada día (o cierra un
+            día); solo se agendan citas dentro de estas horas.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={applyToAll}
-          className="flex-none rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs font-semibold text-gray-600 hover:border-orange-300 hover:text-orange-600"
-        >
-          Copiar lunes a todos
-        </button>
+        <div className="flex flex-none items-center gap-2">
+          <LocalFilter
+            value={viewLocal}
+            onChange={setViewLocal}
+            allLabel="General"
+          />
+          <button
+            type="button"
+            onClick={applyToAll}
+            className="rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs font-semibold text-gray-600 hover:border-orange-300 hover:text-orange-600"
+          >
+            Copiar lunes a todos
+          </button>
+        </div>
       </div>
 
       <div className="mt-4 divide-y divide-gray-100">
@@ -1785,7 +1811,10 @@ export default function Settings() {
   const showLoyaltyTab = hasLoyalty && !isServices;
   // La configuración del CRM solo la maneja el dueño o el administrador.
   const canConfig = ['SUPER_ADMIN', 'ADMIN'].includes(usuario?.role);
-  const [tab, setTab] = useState('empresa');
+  // El DUEÑO ve toda la configuración de la empresa. El ADMINISTRADOR solo puede
+  // tocar lo de SU local: Apariencia y Citas y fidelización (incluye su horario).
+  const isOwner = usuario?.role === 'SUPER_ADMIN';
+  const [tab, setTab] = useState(isOwner ? 'empresa' : 'apariencia');
 
   useEffect(() => {
     if (!canConfig) return;
@@ -1829,7 +1858,14 @@ export default function Settings() {
                 ['contabilidad', 'Contabilidad'],
                 ...(isServices ? [['citas', 'Citas y fidelización']] : []),
                 ...(showLoyaltyTab ? [['fidelizacion', 'Fidelización']] : []),
-              ].map(([id, label]) => (
+              ]
+                // El administrador solo ve Apariencia y Citas y fidelización.
+                .filter(
+                  ([id]) =>
+                    isOwner ||
+                    ['apariencia', 'citas', 'fidelizacion'].includes(id),
+                )
+                .map(([id, label]) => (
                 <button
                   key={id}
                   type="button"
