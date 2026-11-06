@@ -172,7 +172,13 @@ export default function PublicBooking({ slug = '' }) {
     setSlots([]);
     setRestOff(false);
     setRestReason('');
-    getAvailability({ barberId: barber.id, date, serviceId: service.id })
+    getAvailability({
+      barberId: barber.id,
+      date,
+      serviceId: service.id,
+      // El horario de ESTA sede manda (cada local el suyo).
+      ...(local?.id ? { localId: local.id } : {}),
+    })
       .then((res) => {
         setRestOff(!!res?.off);
         setRestReason(res?.reason || '');
