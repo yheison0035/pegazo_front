@@ -378,6 +378,20 @@ export default function AppointmentsCalendar({ localId = '' } = {}) {
                 <p className="text-xs text-gray-500">
                   {dayList.length} cita(s)
                 </p>
+                {(() => {
+                  // Nombre del local: si todas las citas del día son de una sola
+                  // sede, se muestra en la cabecera (caso del administrador).
+                  const localNames = [
+                    ...new Set(
+                      dayList.map((a) => a.local?.name).filter(Boolean),
+                    ),
+                  ];
+                  return localNames.length === 1 ? (
+                    <p className="text-xs font-semibold text-orange-600">
+                      {localNames[0]}
+                    </p>
+                  ) : null;
+                })()}
               </div>
               <button
                 onClick={() => setDayOpen(null)}
@@ -439,6 +453,7 @@ export default function AppointmentsCalendar({ localId = '' } = {}) {
                       <p className="text-xs text-gray-400">
                         {a.service?.name}
                         {!isBarber && a.barber ? ` · ${a.barber.name}` : ''}
+                        {a.local?.name ? ` · ${a.local.name}` : ''}
                       </p>
                       {/* Mismas opciones que en la vista de lista: cobrar,
                           editar y eliminar (según permisos del rol). */}

@@ -77,6 +77,7 @@ describe('Calendario de citas · tiempo real', () => {
       customer: { name: 'Carla Vendedora' },
       service: { name: 'Corte' },
       barber: { name: 'Luis' },
+      local: { id: 1, name: 'Sede Centro' },
       sales: [],
     };
     monthMock.getAppointmentsMonth.mockResolvedValue({ data: [appt] });
@@ -91,6 +92,8 @@ describe('Calendario de citas · tiempo real', () => {
     await act(async () => {
       fireEvent.click(cell);
     });
+    // Al abrir el día aparece el nombre del local.
+    expect(await screen.findByText('Sede Centro')).toBeInTheDocument();
     // En el modal del día aparecen las mismas opciones que en la lista.
     const editar = await screen.findByRole('link', { name: /Editar/ });
     expect(editar).toHaveAttribute('href', '/dashboard/appointments/edit/77');
