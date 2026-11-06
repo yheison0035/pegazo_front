@@ -24,6 +24,7 @@ const SKINS = {
   // Barbería / guerrero: negro piedra + dorado + ornamentos.
   dark: {
     defaultAccent: '#d4af37',
+    backdrop: true,
     vars: (accent, rgb) => ({
       '--bk-bg': '#08070a',
       '--bk-bg-2': '#0e0d12',
@@ -72,6 +73,36 @@ const SKINS = {
     ornaments: false,
     display: false,
   },
+  // Elegante / alta gama: negro + gris + plateado. Minimalista, hairlines finas,
+  // tipografía fina con tracking, acento plateado. Usa imagen de fondo (como el
+  // oscuro) pero SIN ornamentos ni portada. Pensado para barbería/estética premium.
+  elegant: {
+    defaultAccent: '#c9ccd1', // plateado
+    backdrop: true,
+    vars: (accent, rgb) => ({
+      '--bk-bg': '#0a0a0b',
+      '--bk-bg-2': '#121214',
+      '--bk-surface': 'rgba(255,255,255,0.04)',
+      '--bk-surface-2': 'rgba(255,255,255,0.07)',
+      '--bk-border': 'rgba(255,255,255,0.1)',
+      '--bk-border-strong': `rgba(${rgb}, 0.5)`,
+      '--bk-text': '#ececed',
+      '--bk-text-muted': '#9b9ba2',
+      '--bk-accent': accent,
+      '--bk-accent-2': accent,
+      '--bk-accent-contrast': contrastOn(accent),
+      '--bk-accent-soft': `rgba(${rgb}, 0.1)`,
+      '--bk-accent-ring': `rgba(${rgb}, 0.3)`,
+      '--bk-radius': '0.6rem',
+      // Degradado plateado para títulos (claro -> plata -> grafito).
+      '--bk-silver-1': '#f6f7f9',
+      '--bk-silver-2': accent,
+      '--bk-silver-3': '#6f737a',
+      '--bk-panel': 'rgba(13,13,15,0.66)',
+    }),
+    ornaments: false,
+    display: true,
+  },
   // Neutro por defecto (cualquier negocio).
   classic: {
     defaultAccent: '#ea580c',
@@ -105,12 +136,15 @@ export function resolveSkin(skinName, accentHex) {
     style: skin.vars(accent, rgb),
     ornaments: skin.ornaments,
     display: skin.display,
+    // ¿Usa imagen de fondo fija detrás de todo el flujo? (oscuro y elegante).
+    backdrop: !!skin.backdrop,
     isLight: skinName === 'light',
   };
 }
 
 export const SKIN_OPTIONS = [
   { value: 'dark', label: 'Premium oscuro (guerrero)' },
+  { value: 'elegant', label: 'Elegante (negro / gris / plateado)' },
   { value: 'light', label: 'Claro suave (spa / salud)' },
   { value: 'classic', label: 'Clásico neutro' },
 ];

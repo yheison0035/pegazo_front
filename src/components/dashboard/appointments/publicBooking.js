@@ -13,6 +13,7 @@ import {
 import { formatPrice } from '@/lib/api/utils/utils';
 import { validateBookingContact } from '@/lib/appointments/bookingValidation';
 import { resolveSkin } from './bookingSkins';
+import { ELEGANT_CSS } from './bookingElegant';
 import {
   WARRIOR_CSS,
   Corners,
@@ -299,6 +300,9 @@ export default function PublicBooking({ slug = '' }) {
   }
 
   const ornate = skin.ornaments;
+  const elegant = config.skin === 'elegant';
+  // Skins que usan imagen de fondo fija detrás de todo el flujo (oscuro/elegante).
+  const backdrop = skin.backdrop;
   // Portada de bienvenida para TODOS los tipos (no solo el skin oscuro).
   const showHero = !started && !success;
   // Servicios agrupados en categorías (estilo menú) si el negocio define reglas.
@@ -313,12 +317,15 @@ export default function PublicBooking({ slug = '' }) {
       data-skin={config.skin}
       className={`relative flex w-full flex-col overflow-x-hidden bg-[var(--bk-bg)] text-[var(--bk-text)] ${
         ornate ? 'bk-stone' : ''
-      } ${showHero ? 'h-[100svh] overflow-hidden' : 'min-h-screen'}`}
+      } ${elegant ? 'bk-elegant' : ''} ${
+        showHero ? 'h-[100svh] overflow-hidden' : 'min-h-screen'
+      }`}
     >
       {ornate && <style>{WARRIOR_CSS}</style>}
+      {elegant && <style>{ELEGANT_CSS}</style>}
       {config.musicUrl && <SoundToggle src={config.musicUrl} />}
-      {/* Guerrero SIEMPRE de fondo (todo el flujo) */}
-      {ornate && config.heroImage && (
+      {/* Imagen de fondo fija (todo el flujo) en los skins que la usan. */}
+      {backdrop && config.heroImage && (
         <div
           className="bk-fixed-bg"
           style={{ backgroundImage: `url("${config.heroImage}")` }}
@@ -347,12 +354,18 @@ export default function PublicBooking({ slug = '' }) {
           <img
             src={config.logo}
             alt={config.name}
-            className="mx-auto h-14 w-auto sm:h-20"
+            className={`mx-auto h-14 w-auto sm:h-20 ${
+              elegant ? 'bk-head-logo' : ''
+            }`}
           />
         ) : (
           <div
             style={displayStyle}
-            className="text-2xl font-black uppercase tracking-wide text-[var(--bk-accent)] sm:text-3xl"
+            className={`text-2xl font-black uppercase tracking-wide sm:text-3xl ${
+              elegant
+                ? 'bk-silver font-semibold tracking-[0.18em]'
+                : 'text-[var(--bk-accent)]'
+            }`}
           >
             {config.name}
           </div>
@@ -360,7 +373,11 @@ export default function PublicBooking({ slug = '' }) {
         <h1
           style={displayStyle}
           className={`mt-3 text-2xl font-bold tracking-tight sm:text-4xl ${
-            ornate ? 'bk-gold uppercase' : ''
+            ornate
+              ? 'bk-gold uppercase'
+              : elegant
+                ? 'bk-silver font-light uppercase tracking-[0.14em] sm:tracking-[0.18em]'
+                : ''
           }`}
         >
           {ornate ? (
@@ -371,7 +388,7 @@ export default function PublicBooking({ slug = '' }) {
         </h1>
         <p
           className={`mt-1 text-xs sm:text-sm ${
-            ornate
+            ornate || elegant
               ? 'uppercase tracking-[0.25em] text-[var(--bk-text-muted)]'
               : 'text-[var(--bk-accent)]/90'
           }`}
@@ -379,6 +396,7 @@ export default function PublicBooking({ slug = '' }) {
           {config.subtitle || 'Reserva en segundos'}
         </p>
         {ornate && <RuneDivider />}
+        {elegant && <div className="bk-hairline" />}
       </header>
 
       {/* Stepper */}
