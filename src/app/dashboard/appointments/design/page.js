@@ -26,6 +26,11 @@ const SKINS = [
     desc: 'Negro + dorado, portada con imagen, animado. Ideal barbería/gym.',
   },
   {
+    value: 'elegant',
+    label: 'Elegante (negro / gris / plateado)',
+    desc: 'Minimalista y de alta gama, con imagen de fondo. Sin portada.',
+  },
+  {
     value: 'light',
     label: 'Claro suave',
     desc: 'Fondo claro y aireado. Ideal spa, estética, salud.',
@@ -120,6 +125,9 @@ function DesignInner() {
     'w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-1 focus:ring-orange-400';
   const labelCls = 'mb-1 block text-xs font-semibold text-gray-600';
   const dark = form.skin === 'dark';
+  const elegant = form.skin === 'elegant';
+  // Skins con imagen de fondo (oscuro y elegante).
+  const hasBackground = dark || elegant;
   const publicUrl = slug ? `https://pegazo.co/booking/${slug}` : null;
 
   return (
@@ -199,35 +207,39 @@ function DesignInner() {
             </p>
           </div>
 
-          {/* Solo skin oscuro: portada */}
-          {dark && (
+          {/* Imagen de fondo (skins oscuro y elegante) */}
+          {hasBackground && (
             <div className="space-y-4 rounded-xl border border-gray-100 bg-gray-50 p-4">
               <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                Portada (solo estilo oscuro)
+                {elegant ? 'Imagen de fondo' : 'Portada (estilo oscuro)'}
               </p>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className={labelCls}>Botón de entrada</label>
-                  <input
-                    value={form.introCta}
-                    onChange={set('introCta')}
-                    placeholder="Comienza tu leyenda"
-                    className={inputCls}
-                  />
+
+              {/* Portada con botón/etiquetas: solo el estilo oscuro (guerrero). */}
+              {dark && (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className={labelCls}>Botón de entrada</label>
+                    <input
+                      value={form.introCta}
+                      onChange={set('introCta')}
+                      placeholder="Comienza tu leyenda"
+                      className={inputCls}
+                    />
+                  </div>
+                  <div>
+                    <label className={labelCls}>Etiquetas (separadas por ·)</label>
+                    <input
+                      value={form.introPills}
+                      onChange={set('introPills')}
+                      placeholder="Disciplina · Estilo · Actitud"
+                      className={inputCls}
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className={labelCls}>Etiquetas (separadas por ·)</label>
-                  <input
-                    value={form.introPills}
-                    onChange={set('introPills')}
-                    placeholder="Disciplina · Estilo · Actitud"
-                    className={inputCls}
-                  />
-                </div>
-              </div>
+              )}
 
               <div>
-                <label className={labelCls}>Imagen de fondo de la portada</label>
+                <label className={labelCls}>Imagen de fondo</label>
                 {form.heroImage ? (
                   <div className="relative inline-block">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -271,6 +283,7 @@ function DesignInner() {
                 </p>
               </div>
 
+              {dark && (
               <div>
                 <label className={labelCls}>Cuervo decorativo (PNG con fondo transparente)</label>
                 {form.ravenImage ? (
@@ -315,6 +328,7 @@ function DesignInner() {
                   PNG recortado con fondo transparente.
                 </p>
               </div>
+              )}
             </div>
           )}
 
