@@ -331,7 +331,7 @@ function DesignInner() {
 
 export default function BookingDesignPage() {
   return (
-    <RoleGuard allowedRoles={['SUPER_ADMIN', 'ADMIN']}>
+    <RoleGuard allowedRoles={['SUPER_ADMIN']}>
       <DesignInner />
     </RoleGuard>
   );
