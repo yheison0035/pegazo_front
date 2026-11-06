@@ -2,8 +2,13 @@ import apiFetch from '../../auth/client';
 
 // Membresías / mensualidades recurrentes por cliente.
 
-export async function getMemberships() {
-  return apiFetch('/memberships');
+export async function getMemberships(params = {}) {
+  const q = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== '' && v !== null && v !== undefined) q.set(k, String(v));
+  });
+  const qs = q.toString();
+  return apiFetch(`/memberships${qs ? `?${qs}` : ''}`);
 }
 
 export async function createMembership(dto) {

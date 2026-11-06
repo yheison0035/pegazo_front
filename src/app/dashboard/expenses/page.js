@@ -11,6 +11,7 @@ import AlertModal from '@/components/dashboard/modals/alertModal';
 import ViewModal from '../../viewModal';
 import ConfirmDeleteModal from '@/components/dashboard/tables/segments/confirmDeleteModal';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
+import LocalFilter from '@/components/ui/LocalFilter';
 import useColumnFilters from '@/components/dashboard/tables/hooks/useColumnFilters';
 import { useDebounce } from '@/components/dashboard/tables/hooks/useDebounce';
 import {
@@ -50,16 +51,20 @@ export default function Expenses() {
 
   const debouncedFilters = useDebounce(filters, 400);
 
+  // Sede elegida por el dueño (vacío = todas). Un empleado no ve el selector.
+  const [viewLocal, setViewLocal] = useState('');
+
   const fetchExpenses = useCallback(async () => {
     const res = await getExpenses({
       page,
       limit,
       ...debouncedFilters,
+      ...(viewLocal ? { localId: viewLocal } : {}),
     });
 
     setExpenses(res.data);
     setMeta(res.meta);
-  }, [getExpenses, page, limit, debouncedFilters]);
+  }, [getExpenses, page, limit, debouncedFilters, viewLocal]);
 
   useEffect(() => {
     fetchExpenses();
@@ -100,8 +105,13 @@ export default function Expenses() {
         <h1 className="text-2xl font-semibold">
           {tab === 'fijos' ? 'Gastos fijos' : 'Listado de Gastos'}
         </h1>
-        {tab === 'movimientos' && can('expenses', 'create') && (
-          <Header type="Gastos" typeUrl="expenses" />
+        {tab === 'movimientos' && (
+          <div className="flex items-center gap-2">
+            <LocalFilter value={viewLocal} onChange={setViewLocal} />
+            {can('expenses', 'create') && (
+              <Header type="Gastos" typeUrl="expenses" />
+            )}
+          </div>
         )}
       </div>
 

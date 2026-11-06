@@ -22,6 +22,7 @@ import AlertModal from '@/components/dashboard/modals/alertModal';
 import ViewModal from '../../viewModal';
 import ConfirmDeleteModal from '@/components/dashboard/tables/segments/confirmDeleteModal';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
+import LocalFilter from '@/components/ui/LocalFilter';
 import {
   getHeaderTableInventory,
   viewModalConfig,
@@ -121,6 +122,9 @@ export default function Inventory() {
 
   const debouncedFilters = useDebounce(filters, 400);
 
+  // Sede elegida por el dueño (vacío = todas). Un empleado no ve el selector.
+  const [viewLocal, setViewLocal] = useState('');
+
   // Solo la PRIMERA carga muestra el overlay a pantalla completa. Los refetch
   // por filtro/búsqueda/paginación se marcan como refresco en segundo plano:
   // así el overlay (fixed inset-0) NO tapa ni le roba el foco a los inputs de
@@ -136,6 +140,7 @@ export default function Inventory() {
         page,
         limit,
         ...debouncedFilters,
+        ...(viewLocal ? { localId: viewLocal } : {}),
       });
 
       setProducts(res.data);
@@ -144,7 +149,7 @@ export default function Inventory() {
       initialLoad.current = false;
       if (background) setTimeout(endBackgroundRefresh, 300);
     }
-  }, [getProducts, page, limit, debouncedFilters]);
+  }, [getProducts, page, limit, debouncedFilters, viewLocal]);
 
   useEffect(() => {
     fetchProducts();
@@ -222,6 +227,8 @@ export default function Inventory() {
         <h1 className="text-xl font-semibold sm:text-2xl">
           Listado de {t.productPlural}
         </h1>
+        <div className="flex flex-wrap items-center gap-2">
+          <LocalFilter value={viewLocal} onChange={setViewLocal} />
         {can('inventory', 'create') && (
           <div className="flex flex-wrap items-center gap-2">
             <button
@@ -243,6 +250,7 @@ export default function Inventory() {
             <Header type={t.product.toLowerCase()} typeUrl="inventory" />
           </div>
         )}
+        </div>
       </div>
 
       <ExpiringBanner refreshKey={products} />

@@ -10,6 +10,7 @@ import {
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
+import LocalFilter from '@/components/ui/LocalFilter';
 import { getFinancials } from '@/lib/api/routes/accounting';
 
 function cop(n) {
@@ -79,18 +80,25 @@ export default function EstadosFinancierosPage() {
   const [end, setEnd] = useState(today());
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
+  // Sede elegida por el dueño (vacío = toda la empresa). Un rol de sede queda
+  // limitado a su local por el backend.
+  const [viewLocal, setViewLocal] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await getFinancials({ startDate: start, endDate: end });
+      const res = await getFinancials({
+        startDate: start,
+        endDate: end,
+        ...(viewLocal ? { localId: viewLocal } : {}),
+      });
       setData(res?.data || null);
     } catch {
       /* noop */
     } finally {
       setLoading(false);
     }
-  }, [start, end]);
+  }, [start, end, viewLocal]);
 
   useEffect(() => {
     load();
@@ -201,6 +209,11 @@ export default function EstadosFinancierosPage() {
               className="rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none"
             />
           </div>
+          <LocalFilter
+            value={viewLocal}
+            onChange={setViewLocal}
+            allLabel="Toda la empresa"
+          />
           <button
             onClick={load}
             className="inline-flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50"
