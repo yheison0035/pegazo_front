@@ -20,6 +20,7 @@ import {
 import ConfirmDeleteModal from '@/components/dashboard/tables/segments/confirmDeleteModal';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
+import LocalFilter from '@/components/ui/LocalFilter';
 import useColumnFilters from '@/components/dashboard/tables/hooks/useColumnFilters';
 import { useDebounce } from '@/components/dashboard/tables/hooks/useDebounce';
 
@@ -56,16 +57,21 @@ export default function Customers() {
 
   const debouncedFilters = useDebounce(filters, 400);
 
+  // Sede elegida por el dueño (vacío = todas). Tiene prioridad sobre el filtro
+  // de columna. Un empleado no ve el selector: siempre es su local.
+  const [viewLocal, setViewLocal] = useState('');
+
   const fetchCustomers = useCallback(async () => {
     const res = await getCustomers({
       page,
       limit,
       ...debouncedFilters,
+      ...(viewLocal ? { localId: viewLocal } : {}),
     });
 
     setCustomers(res.data);
     setMeta(res.meta);
-  }, [getCustomers, page, limit, debouncedFilters]);
+  }, [getCustomers, page, limit, debouncedFilters, viewLocal]);
 
   useEffect(() => {
     fetchCustomers();
@@ -125,13 +131,16 @@ export default function Customers() {
             Listado de {t.customerPlural}
           </h1>
 
-          <Button
-            variant="add"
-            icon={PlusIcon}
-            href="/dashboard/customers/new"
-          >
-            Agregar {t.customer.toLowerCase()}
-          </Button>
+          <div className="flex items-center gap-2">
+            <LocalFilter value={viewLocal} onChange={setViewLocal} />
+            <Button
+              variant="add"
+              icon={PlusIcon}
+              href="/dashboard/customers/new"
+            >
+              Agregar {t.customer.toLowerCase()}
+            </Button>
+          </div>
         </div>
 
         <div className="bg-white rounded-lg shadow relative">
