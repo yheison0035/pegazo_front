@@ -90,7 +90,11 @@ export default function SideNavigation() {
             src={
               isPlatform
                 ? '/images/logo_pegazo_icon.png'
-                : usuario?.company?.logo || '/images/no-image.png'
+                : // Logo de la SEDE asignada del usuario; si la sede no tiene
+                  // uno propio (o es el dueño sin sede), el de la empresa.
+                  usuario?.local?.logo ||
+                  usuario?.company?.logo ||
+                  '/images/no-image.png'
             }
             alt={isPlatform ? 'Pegazo' : 'Company'}
             className="w-12 h-12 rounded-xl object-contain border border-[var(--sb-border)] bg-[var(--sb-bg)] shadow-sm flex-none"
