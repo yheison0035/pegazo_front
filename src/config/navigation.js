@@ -449,7 +449,9 @@ export const NAVIGATION = [
         name: 'Usuarios',
         href: '/dashboard/users',
         icon: UserGroupIcon,
-        roles: ['SUPER_ADMIN'],
+        // El administrador gestiona el personal de SU local (el backend lo
+        // limita a su sede). El dueño ve/gestiona los de todas.
+        roles: ['SUPER_ADMIN', 'ADMIN'],
       },
       {
         name: 'Locales',
