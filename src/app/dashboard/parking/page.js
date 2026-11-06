@@ -15,6 +15,7 @@ import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
 import Button from '@/components/ui/Button';
 import MoneyInput from '@/components/ui/MoneyInput';
+import LocalFilter from '@/components/ui/LocalFilter';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import { useAuth } from '@/context/authContext';
 import { formatCOP } from '@/lib/api/utils/utils';
@@ -81,10 +82,15 @@ function ParkingInner() {
   // Salida (checkout)
   const [co, setCo] = useState(null); // ticket objetivo
   const [coForm, setCoForm] = useState({ paymentMethod: 'EFECTIVO', cashReceived: '' });
+  // Sede elegida por el dueño (vacío = todas). Un empleado no ve el selector.
+  const [viewLocal, setViewLocal] = useState('');
 
   const load = useCallback(async () => {
     try {
-      const [p, t] = await Promise.all([getParking(), getVehicleTypes()]);
+      const [p, t] = await Promise.all([
+        getParking(viewLocal ? { localId: viewLocal } : {}),
+        getVehicleTypes(),
+      ]);
       setTickets(p?.data || []);
       setSettings(p?.settings || null);
       setSummary(p?.summary || { inside: 0, byType: {} });
@@ -94,7 +100,7 @@ function ParkingInner() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [viewLocal]);
 
   useEffect(() => {
     load();
@@ -194,10 +200,13 @@ function ParkingInner() {
 
   return (
     <div className="w-full max-w-5xl p-4">
-      <h1 className="flex items-center gap-2 text-xl font-semibold text-gray-800 sm:text-2xl">
-        <TruckIcon className="h-6 w-6 text-orange-500" />
-        Parqueadero
-      </h1>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h1 className="flex items-center gap-2 text-xl font-semibold text-gray-800 sm:text-2xl">
+          <TruckIcon className="h-6 w-6 text-orange-500" />
+          Parqueadero
+        </h1>
+        <LocalFilter value={viewLocal} onChange={setViewLocal} />
+      </div>
       <p className="mb-4 mt-1 text-sm text-gray-500">
         Controla el ingreso y la salida de vehículos. El cobro se calcula por
         tiempo según la tarifa del tipo de vehículo.

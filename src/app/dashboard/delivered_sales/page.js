@@ -11,6 +11,7 @@ import { getSaleById } from '@/lib/api/routes/sales';
 import Table from '@/components/dashboard/tables/table';
 import Pagination from '@/components/dashboard/tables/segments/pagination';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
+import LocalFilter from '@/components/ui/LocalFilter';
 import Button from '@/components/ui/Button';
 import { useAuth } from '@/context/authContext';
 import {
@@ -112,6 +113,9 @@ export default function Delivered_Sales() {
 
   const debouncedFilters = useDebounce(filters, 400);
 
+  // Sede elegida por el dueño (vacío = todas). Un empleado no ve el selector.
+  const [viewLocal, setViewLocal] = useState('');
+
   // Solo la PRIMERA carga muestra el overlay a pantalla completa. Los refetch por
   // filtro/búsqueda/paginación se marcan como refresco en segundo plano: la tabla
   // se actualiza sola, sin el parpadeo del loader (antes: "cargue horrible").
@@ -125,6 +129,7 @@ export default function Delivered_Sales() {
         page,
         limit,
         ...debouncedFilters,
+        ...(viewLocal ? { localId: viewLocal } : {}),
       });
 
       setSales(res.data);
@@ -133,7 +138,7 @@ export default function Delivered_Sales() {
       initialLoad.current = false;
       if (background) setTimeout(endBackgroundRefresh, 300);
     }
-  }, [getDeliveredSales, page, limit, debouncedFilters]);
+  }, [getDeliveredSales, page, limit, debouncedFilters, viewLocal]);
 
   useEffect(() => {
     fetchSales();
@@ -205,7 +210,8 @@ export default function Delivered_Sales() {
       <div className="flex flex-col md:flex-row justify-between mb-6 gap-4">
         <h1 className="text-2xl font-semibold">Listado de Ventas Realizadas</h1>
 
-        <div className="flex flex-wrap gap-2 sm:gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <LocalFilter value={viewLocal} onChange={setViewLocal} />
           {isServices ? (
             <Button
               variant="info"

@@ -1,7 +1,14 @@
 import apiFetch from '../../auth/client';
 
 // PARQUEADERO — operación (ingreso/salida) + tarifas por tipo de vehículo.
-export const getParking = () => apiFetch('/parking');
+export const getParking = (params = {}) => {
+  const q = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== '' && v !== null && v !== undefined) q.set(k, String(v));
+  });
+  const qs = q.toString();
+  return apiFetch(`/parking${qs ? `?${qs}` : ''}`);
+};
 export const getParkingHistory = (limit = 30) =>
   apiFetch(`/parking/history?limit=${limit}`);
 

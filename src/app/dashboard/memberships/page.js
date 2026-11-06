@@ -18,6 +18,7 @@ import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
 import { useAuth } from '@/context/authContext';
 import Button from '@/components/ui/Button';
+import LocalFilter from '@/components/ui/LocalFilter';
 import MoneyInput from '@/components/ui/MoneyInput';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import { formatCOP } from '@/lib/api/utils/utils';
@@ -80,11 +81,13 @@ export default function MembershipsPage() {
     paymentMethod: '',
     notes: '',
   });
+  // Sede elegida por el dueño (vacío = todas). Un empleado no ve el selector.
+  const [viewLocal, setViewLocal] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await getMemberships();
+      const res = await getMemberships(viewLocal ? { localId: viewLocal } : {});
       setItems(res?.data || []);
       setSummary(res?.summary || null);
     } catch {
@@ -93,7 +96,7 @@ export default function MembershipsPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [viewLocal]);
 
   useEffect(() => {
     load();
@@ -224,11 +227,14 @@ export default function MembershipsPage() {
       <div className="w-full p-4">
         <div className="mb-1 flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-2xl font-semibold text-gray-800">Membresías</h1>
-          {isOwner && (
-            <Button variant="add" icon={PlusIcon} onClick={openNew}>
-              Nueva membresía
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            <LocalFilter value={viewLocal} onChange={setViewLocal} />
+            {isOwner && (
+              <Button variant="add" icon={PlusIcon} onClick={openNew}>
+                Nueva membresía
+              </Button>
+            )}
+          </div>
         </div>
         <p className="mb-5 text-sm text-gray-500">
           Mensualidades recurrentes de tus {terms.customerPlural?.toLowerCase() || 'clientes'}
