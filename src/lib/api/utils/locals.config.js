@@ -4,6 +4,9 @@ export const getEmptyLocal = () => ({
   department: '',
   city: '',
   phone: '',
+  logo: '',
+  nit: '',
+  email: '',
   managerId: '',
   status: '',
 });
@@ -14,6 +17,25 @@ export const getFormFieldsLocals = () => [
   { name: 'department', label: 'Departamento', type: 'text', required: true },
   { name: 'city', label: 'Ciudad', type: 'text', required: true },
   { name: 'phone', label: 'Celular', type: 'text', required: true },
+  {
+    name: 'logo',
+    label:
+      'Logo del local (para facturas y correos; si lo dejas vacío usa el de la empresa)',
+    type: 'logo',
+    required: false,
+  },
+  {
+    name: 'nit',
+    label: 'NIT del local (opcional; vacío = NIT de la empresa)',
+    type: 'text',
+    required: false,
+  },
+  {
+    name: 'email',
+    label: 'Correo del local (opcional; vacío = correo de la empresa)',
+    type: 'text',
+    required: false,
+  },
   {
     name: 'managerId',
     label: 'Encargado',
@@ -67,6 +89,8 @@ export const viewModalConfig = {
         { name: 'createdAt', label: 'Fecha de Registro', type: 'date' },
         { name: 'manager.name', label: 'Encargado' },
         { name: 'manager.email', label: 'Correo Encargado' },
+        { name: 'nit', label: 'NIT del local' },
+        { name: 'email', label: 'Correo del local' },
       ],
     },
   ],
