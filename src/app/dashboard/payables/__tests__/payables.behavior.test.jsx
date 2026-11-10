@@ -76,7 +76,7 @@ describe('Cuentas por pagar', () => {
     expect(all.query.status ?? '').toBe('');
   });
 
-  it('crea una cuenta por pagar con concepto, categoría, valor, vencimiento y sede', async () => {
+  it('crea una cuenta por pagar con concepto, categoría, valor y vencimiento', async () => {
     await renderPage(<PayablesPage />);
     await waitForCall(api, 'GET', /^\/locals$/);
     await settle();
@@ -85,12 +85,12 @@ describe('Cuentas por pagar', () => {
     await typeInto(within(modal).getByPlaceholderText('Ej: Arriendo local, pedido proveedor X'), 'Plan celular marzo');
     const selects = within(modal).getAllByRole('combobox');
     await typeInto(selects[0], 'PLAN_CELULAR');
-    await typeInto(within(modal).getByDisplayValue('Sede Centro'), '2');
+    // La sede ya no se elige aquí: la define el selector global (usa la del usuario).
     await typeInto(modal.querySelector('input[inputmode="numeric"]'), '65000');
     await typeInto(modal.querySelector('input[type="date"]'), '2026-03-05');
     await click(within(modal).getByRole('button', { name: 'Guardar' }));
     const call = await waitForCall(api, 'POST', /^\/payables$/);
-    expect(call.body).toEqual({ concept: 'Plan celular marzo', type: 'PLAN_CELULAR', amount: 65000, dueDate: '2026-03-05', localId: 2 });
+    expect(call.body).toEqual({ concept: 'Plan celular marzo', type: 'PLAN_CELULAR', amount: 65000, dueDate: '2026-03-05', localId: 1 });
     await expectToast('success', 'Guardada correctamente');
     await waitForCall(api, 'GET', /^\/payables$/, { count: 2 });
   });

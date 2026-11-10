@@ -164,9 +164,9 @@ describe('Compras · nueva compra', () => {
   });
   afterEach(() => vi.restoreAllMocks());
 
-  it('abre el formulario con la sede del usuario y proveedores cargados; sin ítems no deja registrar', async () => {
+  it('abre el formulario con proveedores cargados; sin ítems no deja registrar', async () => {
     await openNewPurchase(api);
-    expect(screen.getByDisplayValue('Sede Centro')).toBeInTheDocument();
+    // La sede ya no se elige aquí: la controla el selector global del panel.
     expect(screen.getByDisplayValue('Sin proveedor')).toBeInTheDocument();
     expect(button('Registrar compra')).toBeDisabled();
   });

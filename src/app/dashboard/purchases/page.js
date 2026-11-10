@@ -61,7 +61,6 @@ export default function PurchasesPage() {
   const [showForm, setShowForm] = useState(false);
   const [detail, setDetail] = useState(null);
 
-  const [locals, setLocals] = useState([]);
   const [providers, setProviders] = useState([]);
   const [fiscal, setFiscal] = useState(null);
 
@@ -79,14 +78,15 @@ export default function PurchasesPage() {
   const [results, setResults] = useState([]);
 
   const fetchPurchases = useCallback(async () => {
+    const scope = activeLocal ? { localId: activeLocal } : {};
     try {
-      const res = await getPurchases({ page, limit });
+      const res = await getPurchases({ page, limit, ...scope });
       setPurchases(res.data || []);
       setMeta(res.meta || null);
     } catch (err) {
       setAlert({ type: 'error', message: err.message || 'Error al cargar' });
     }
-  }, [getPurchases, page, limit]);
+  }, [getPurchases, page, limit, activeLocal]);
 
   useEffect(() => {
     fetchPurchases();
@@ -100,7 +100,6 @@ export default function PurchasesPage() {
       try {
         const l = await getLocals({ all: true });
         const list = l?.data || [];
-        setLocals(list);
         if (!localId && list.length) setLocalId(String(list[0].id));
       } catch (_) {}
       try {
@@ -279,22 +278,6 @@ export default function PurchasesPage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-              {locals.length > 1 && (
-                <div>
-                  <label className="text-xs font-medium text-gray-600">Sede</label>
-                  <select
-                    value={localId}
-                    onChange={(e) => setLocalId(e.target.value)}
-                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  >
-                    {locals.map((l) => (
-                      <option key={l.id} value={l.id}>
-                        {l.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
               <div>
                 <label className="text-xs font-medium text-gray-600">
                   Proveedor (opcional)

@@ -77,18 +77,18 @@ describe('Estadísticas', () => {
     expect(screen.getAllByText(money(350000)).length).toBeGreaterThan(0);
   });
 
-  it('cambiar fechas, sede y "Aplicar" vuelve a consultar con esos filtros', async () => {
+  it('cambiar fechas y "Aplicar" vuelve a consultar con esos filtros', async () => {
+    // La sede ahora la controla el selector GLOBAL del panel (no hay select
+    // propio en Estadísticas); aquí se valida el filtro de fechas.
     await renderPage(<StatisticsPage />);
     await waitForCall(api, 'POST', /^\/statistics\/dashboard$/);
-    await waitForCall(api, 'GET', /^\/locals$/);
     const dates = document.querySelectorAll('input[type="date"]');
     await typeInto(dates[0], '2026-01-01');
     await typeInto(dates[1], '2026-01-31');
-    await typeInto(await screen.findByDisplayValue('Todas las sedes'), '2');
     await click(button('Aplicar'));
     await waitFor(() => {
       const last = api.last('POST', /^\/statistics\/dashboard$/);
-      expect(last.body).toMatchObject({ startDate: '2026-01-01', endDate: '2026-01-31', localId: '2' });
+      expect(last.body).toMatchObject({ startDate: '2026-01-01', endDate: '2026-01-31' });
     });
   });
 

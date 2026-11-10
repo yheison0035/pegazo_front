@@ -262,13 +262,45 @@ export default function PosSale({
         setLocals(list);
         if (!localId && list.length) setLocalId(String(list[0].id));
       } catch (_) {}
-      try {
-        const u = await getUsers({ status: 'ACTIVO', limit: 1000 });
-        setSellers(u?.data || []);
-      } catch (_) {}
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Sigue al selector global de sede (solo al crear; en edición la sede es la
+  // de la venta y no cambia).
+  useEffect(() => {
+    if (mode !== 'edit' && activeLocal) setLocalId(Number(activeLocal));
+  }, [activeLocal, mode]);
+
+  // Vendedores/barberos SOLO de la sede seleccionada (igual que lo ve el admin
+  // de ese local). Se recarga al cambiar de sede.
+  useEffect(() => {
+    if (!localId) {
+      setSellers([]);
+      return;
+    }
+    let alive = true;
+    getUsers({ status: 'ACTIVO', limit: 1000, localId })
+      .then((u) => {
+        if (!alive) return;
+        const list = u?.data || [];
+        setSellers(list);
+        // Si el "atendido por" ya no es de esta sede, se limpia para re-elegir.
+        setSellerId((cur) =>
+          cur && !list.some((s) => String(s.id) === String(cur))
+            ? isServiceVertical
+              ? ''
+              : usuario?.id ?? ''
+            : cur,
+        );
+      })
+      .catch(() => {
+        if (alive) setSellers([]);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [localId, getUsers, isServiceVertical, usuario?.id]);
 
   // Buscador de productos/servicios (debounced).
   useEffect(() => {
@@ -735,20 +767,6 @@ export default function PosSale({
           <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">
             {title}
           </h1>
-          {locals.length > 1 && (
-            <select
-              value={localId}
-              onChange={(e) => setLocalId(e.target.value)}
-              disabled={mode === 'edit'}
-              className="rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:bg-gray-100"
-            >
-              {locals.map((l) => (
-                <option key={l.id} value={l.id}>
-                  {l.name}
-                </option>
-              ))}
-            </select>
-          )}
         </div>
 
         <div className="flex flex-col lg:flex-row gap-4">

@@ -58,7 +58,6 @@ export default function CashPage() {
   const [editBase, setEditBase] = useState(null); // string en edición o null
   const [deleteTarget, setDeleteTarget] = useState(null); // id de caja a eliminar
 
-  const [locals, setLocals] = useState([]);
   const [localId, setLocalId] = useState(
     usuario?.localId || (activeLocal ? String(activeLocal) : ''),
   );
@@ -76,7 +75,6 @@ export default function CashPage() {
       try {
         const res = await getLocals({ all: true });
         const list = res?.data || [];
-        setLocals(list);
         if (!localId && list.length) setLocalId(String(list[0].id));
       } catch (_) {}
     })();
@@ -192,19 +190,6 @@ export default function CashPage() {
               Apertura, movimientos y arqueo (cierre) de caja.
             </p>
           </div>
-          {locals.length > 1 && (
-            <select
-              value={localId}
-              onChange={(e) => setLocalId(e.target.value)}
-              className="rounded-xl border border-gray-200 px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-            >
-              {locals.map((l) => (
-                <option key={l.id} value={l.id}>
-                  {l.name}
-                </option>
-              ))}
-            </select>
-          )}
         </div>
 
         {/* Instructivo: cómo funciona la caja */}

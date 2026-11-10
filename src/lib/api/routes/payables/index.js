@@ -10,8 +10,8 @@ function qs(params = {}) {
 export async function getPayables(params = {}) {
   return apiFetch(`/payables${qs(params)}`);
 }
-export async function getPayablesSummary() {
-  return apiFetch('/payables/summary');
+export async function getPayablesSummary(params = {}) {
+  return apiFetch(`/payables/summary${qs(params)}`);
 }
 export async function createPayable(dto) {
   return apiFetch('/payables', { method: 'POST', body: JSON.stringify(dto) });

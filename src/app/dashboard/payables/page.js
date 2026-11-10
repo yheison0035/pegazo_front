@@ -121,16 +121,17 @@ export default function PayablesPage() {
 
   const load = useCallback(async () => {
     try {
+      const scope = activeLocal ? { localId: activeLocal } : {};
       const [l, s] = await Promise.all([
-        getPayables({ status: tab, limit: 100 }),
-        getPayablesSummary(),
+        getPayables({ status: tab, limit: 100, ...scope }),
+        getPayablesSummary(scope),
       ]);
       setItems(l?.data || []);
       setSummary(s?.data || null);
     } catch {
       setItems([]);
     }
-  }, [tab]);
+  }, [tab, activeLocal]);
 
   useEffect(() => {
     load();
@@ -585,22 +586,6 @@ export default function PayablesPage() {
                   />
                 </Field>
               </div>
-              <Field label="Sede *">
-                <select
-                  value={form.localId}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, localId: e.target.value }))
-                  }
-                  className={inputCls}
-                >
-                  <option value="">Selecciona…</option>
-                  {locals.map((l) => (
-                    <option key={l.id} value={l.id}>
-                      {l.name}
-                    </option>
-                  ))}
-                </select>
-              </Field>
               <Field label="Notas (opcional)">
                 <textarea
                   rows={2}

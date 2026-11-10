@@ -102,16 +102,8 @@ describe('Caja · sin caja abierta', () => {
     await expectToast('success', 'Caja reabierta');
   });
 
-  it('con varias sedes, cambiar la sede consulta la caja de esa sede', async () => {
-    resetBehavior();
-    const api = cashApi({ locals: [{ id: 1, name: 'Sede Centro' }, { id: 2, name: 'Sede Norte' }] });
-    await renderPage(<CashPage />);
-    await waitForCall(api, 'GET', /^\/cash\/current$/);
-    const select = await screen.findByDisplayValue('Sede Centro');
-    await typeInto(select, '2');
-    const call = await waitForCall(api, 'GET', /^\/cash\/current$/, { count: 2 });
-    expect(call.query.localId).toBe('2');
-  });
+  // La sede ahora la controla el selector GLOBAL del panel (ya no hay select
+  // propio en Caja); la caja opera sobre la sede asignada/activa del usuario.
 });
 
 describe('Caja · con caja abierta', () => {

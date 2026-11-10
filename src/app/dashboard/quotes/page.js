@@ -55,7 +55,6 @@ export default function QuotesPage() {
 
   const [showForm, setShowForm] = useState(false);
   const [detail, setDetail] = useState(null);
-  const [locals, setLocals] = useState([]);
 
   // formulario
   const [localId, setLocalId] = useState(
@@ -72,14 +71,15 @@ export default function QuotesPage() {
   const [custResults, setCustResults] = useState([]);
 
   const fetchQuotes = useCallback(async () => {
+    const scope = activeLocal ? { localId: activeLocal } : {};
     try {
-      const res = await getQuotes({ page, limit });
+      const res = await getQuotes({ page, limit, ...scope });
       setQuotes(res.data || []);
       setMeta(res.meta || null);
     } catch (err) {
       setAlert({ type: 'error', message: err.message || 'Error al cargar' });
     }
-  }, [getQuotes, page, limit]);
+  }, [getQuotes, page, limit, activeLocal]);
 
   useEffect(() => {
     fetchQuotes();
@@ -93,7 +93,6 @@ export default function QuotesPage() {
       try {
         const l = await getLocals({ all: true });
         const list = l?.data || [];
-        setLocals(list);
         if (!localId && list.length) setLocalId(String(list[0].id));
       } catch (_) {}
     })();
@@ -274,22 +273,6 @@ export default function QuotesPage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-              {locals.length > 1 && (
-                <div>
-                  <label className="text-xs font-medium text-gray-600">Sede</label>
-                  <select
-                    value={localId}
-                    onChange={(e) => setLocalId(e.target.value)}
-                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  >
-                    {locals.map((l) => (
-                      <option key={l.id} value={l.id}>
-                        {l.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
               {/* Cliente */}
               <div className="relative">
                 <label className="text-xs font-medium text-gray-600">

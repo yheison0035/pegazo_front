@@ -23,7 +23,6 @@ import { Roles } from '@/config/roles';
 import { useAuth } from '@/context/authContext';
 import { useLocalScope } from '@/context/localScopeContext';
 import { cycleMonthRange, cycleStartOf } from '@/lib/cycle';
-import useLocals from '@/lib/api/hooks/useLocals';
 import { getDashboardStats, getMovements } from '@/lib/api/routes/statistics';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import Button from '@/components/ui/Button';
@@ -104,14 +103,12 @@ function EmptyChart({ height = 260 }) {
 
 export default function Statistics() {
   const t = useTerms();
-  const { getLocals } = useLocals();
   const { usuario } = useAuth();
   // Sede activa del selector global: las estadísticas se acotan a esa sede.
   const { activeLocal } = useLocalScope();
   // Día de inicio del ciclo de cierre de la empresa (default 1 = mes calendario).
   const cycleDay = usuario?.company?.cycleStartDay || 1;
 
-  const [locals, setLocals] = useState([]);
   const [localId, setLocalId] = useState(activeLocal || '');
   // Base contable del reporte (por defecto la que el dueño eligió en Config).
   const [basis, setBasis] = useState(
@@ -127,12 +124,6 @@ export default function Statistics() {
   const [tab, setTab] = useState('resumen');
   // Modal de detalle al hacer clic en una tarjeta del Resumen ('sales'|'expenses').
   const [resumenDrill, setResumenDrill] = useState(null);
-
-  useEffect(() => {
-    getLocals()
-      .then((res) => setLocals(res?.data || []))
-      .catch(() => {});
-  }, [getLocals]);
 
   // Sigue al selector global de sede ('' = todas).
   useEffect(() => {
@@ -444,23 +435,6 @@ export default function Statistics() {
               onChange={(e) => setEndDate(e.target.value)}
               className="rounded-xl border border-gray-200 px-3 py-2 text-sm"
             />
-          </div>
-          <div className="flex flex-col">
-            <label className="mb-1 text-xs font-semibold uppercase text-gray-500">
-              Sede
-            </label>
-            <select
-              value={localId}
-              onChange={(e) => setLocalId(e.target.value)}
-              className="rounded-xl border border-gray-200 px-3 py-2 text-sm"
-            >
-              <option value="">Todas las sedes</option>
-              {locals.map((l) => (
-                <option key={l.id} value={l.id}>
-                  {l.name}
-                </option>
-              ))}
-            </select>
           </div>
           <div className="flex flex-col">
             <label className="mb-1 text-xs font-semibold uppercase text-gray-500">
