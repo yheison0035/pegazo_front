@@ -1,15 +1,13 @@
-import { Cinzel } from 'next/font/google';
 import PublicBooking from '@/components/dashboard/appointments/publicBooking';
 import PublicCatalog from '@/components/public/PublicCatalog';
 
-// Fuente display para el skin "guerrero" (grabada tipo Norse). Se expone como
-// variable CSS; solo el skin oscuro la usa.
-const display = Cinzel({
-  subsets: ['latin'],
-  weight: ['600', '700', '800'],
-  variable: '--bk-font-display',
-  display: 'swap',
-});
+// Fuente display del skin "guerrero" (Cinzel, grabada tipo Norse). Se carga por
+// <link> de Google Fonts (no por next/font) para evitar el bug intermitente de
+// Turbopack al tener más de una fuente de next/font/google ("queries have
+// exactly one entry"), que rompía el build de Vercel. Solo el skin oscuro la usa
+// vía la variable --bk-font-display.
+const CINZEL_HREF =
+  'https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&display=swap';
 
 export const dynamic = 'force-dynamic';
 
@@ -103,7 +101,12 @@ export default async function Page({ params }) {
 
   // Negocio de SERVICIOS → agenda de citas (igual que RAGNOR, sin cambios).
   return (
-    <div className={`${display.variable} min-h-screen w-full bg-black`}>
+    <div
+      style={{ '--bk-font-display': "'Cinzel', Georgia, serif" }}
+      className="min-h-screen w-full bg-black"
+    >
+      {/* Fuente display del skin oscuro (React 19 la sube al <head>). */}
+      <link rel="stylesheet" href={CINZEL_HREF} />
       {/* El documento en negro: evita el fondo blanco del overscroll en móvil. */}
       <style>{`html,body{background:#08070a !important;overscroll-behavior:none}`}</style>
       <PublicBooking slug={slug} />
