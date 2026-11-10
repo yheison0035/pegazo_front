@@ -319,60 +319,13 @@ export const WIDGETS = [
     },
   },
   {
-    // Solo para el dueño con varias sedes: cuánto vendió HOY cada local.
-    id: 'ventas-hoy-por-local',
-    name: 'Ventas de hoy por sede',
-    wide: true,
-    applies: (data) => (data.home?.todayByLocal?.length || 0) > 1,
-    Render: ({ data }) => {
-      const rows = data.home?.todayByLocal || [];
-      const todayCol = new Date().toLocaleDateString('en-CA', {
-        timeZone: 'America/Bogota',
-      });
-      const grand = rows.reduce((a, r) => a + (r.total || 0), 0);
-      return (
-        <Card>
-          <Label icon={BanknotesIcon} accent="text-emerald-600">
-            Ventas de hoy por sede
-          </Label>
-          <ul className="space-y-1">
-            {rows.map((r) => (
-              <li key={r.localId}>
-                <Link
-                  href={`/dashboard/delivered_sales?date=${todayCol}&localId=${r.localId}`}
-                  className="flex items-center justify-between gap-2 rounded-lg px-1.5 py-1 hover:bg-gray-50"
-                >
-                  <span className="min-w-0 flex-1 truncate text-sm font-medium text-gray-700">
-                    {r.name}
-                  </span>
-                  <span className="flex-none whitespace-nowrap text-[11px] text-gray-400">
-                    {r.count} vta{r.count === 1 ? '' : 's'}
-                  </span>
-                  <span className="flex-none whitespace-nowrap text-sm font-bold tabular-nums text-emerald-600">
-                    {formatCOP(r.total)}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-          <div className="mt-2 flex items-center justify-between border-t border-gray-100 pt-2">
-            <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
-              Total de hoy
-            </span>
-            <span className="text-base font-bold tabular-nums text-gray-800">
-              {formatCOP(grand)}
-            </span>
-          </div>
-        </Card>
-      );
-    },
-  },
-  {
     id: 'grafica',
     name: 'Gráfica de ventas',
     wide: true,
     applies: () => true,
-    Render: ({ data }) => <SalesTrendChart title={data.t.salePlural} />,
+    Render: ({ data }) => (
+      <SalesTrendChart title={data.t.salePlural} localId={data.activeLocal} />
+    ),
   },
   {
     id: 'inventario',
@@ -953,7 +906,6 @@ export const WIDGET_AUDIENCE = {
   'mis-citas-hoy': 'barber',
   'mis-descansos': 'barber',
   hoy: 'owner',
-  'ventas-hoy-por-local': 'owner',
   grafica: 'owner',
   inventario: 'owner',
   consignaciones: 'owner',
@@ -984,7 +936,6 @@ export const DEFAULT_LAYOUT = [
   'mis-descansos',
   // Dueño / staff
   'hoy',
-  'ventas-hoy-por-local',
   'grafica',
   'inventario',
   'consignaciones',

@@ -45,8 +45,9 @@ export async function restockProduct(id, amount) {
     body: JSON.stringify({ amount }),
   });
 }
-export async function getLowStock() {
-  return apiFetch('/inventory/low-stock');
+export async function getLowStock(localId) {
+  const qs = localId ? `?localId=${Number(localId)}` : '';
+  return apiFetch(`/inventory/low-stock${qs}`);
 }
 
 // Productos por vencer (próximos 30 días o ya vencidos).

@@ -17,6 +17,8 @@ import SubscriptionDueModal from '@/components/billing/SubscriptionDueModal';
 import PaymentWall from '@/components/billing/PaymentWall';
 import SupportWidget from '@/components/support/SupportWidget';
 import QuickSearch from '@/components/search/QuickSearch';
+import { LocalScopeProvider } from '@/context/localScopeContext';
+import GlobalLocalSelect from '@/components/dashboard/GlobalLocalSelect';
 import { isDark, DARK_EVENT } from '@/lib/darkMode';
 import { CRM_FONTS_BY_ID, googleFontHref } from '@/config/crmFonts';
 import ImpersonationBanner from '@/components/platform/ImpersonationBanner';
@@ -66,6 +68,7 @@ export default function Layout({ children }) {
 
   return (
     <RoleGuard allowedRoles={Object.values(Roles)}>
+      <LocalScopeProvider>
       <SplashScreen />
       <ImpersonationBanner />
       {/* Muro de pago: si la empresa venció, bloquea todo el CRM. */}
@@ -104,6 +107,7 @@ export default function Layout({ children }) {
               <RenewalBanner />
               <DayBanner />
               <AnnouncementsFeed />
+              <GlobalLocalSelect />
               {children}
             </div>
           </div>
@@ -117,6 +121,7 @@ export default function Layout({ children }) {
         <AppointmentNotifier />
         <PushRegister />
       </div>
+      </LocalScopeProvider>
     </RoleGuard>
   );
 }

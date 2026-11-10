@@ -31,8 +31,10 @@ export async function getAppointmentById(id) {
 }
 
 // Agenda de hoy y mañana (para el modal de inicio y los recordatorios).
-export async function getAppointmentsAgenda() {
-  return apiFetch('/appointments/agenda');
+// localId: sede activa del selector global (opcional).
+export async function getAppointmentsAgenda(localId) {
+  const qs = localId ? `?localId=${Number(localId)}` : '';
+  return apiFetch(`/appointments/agenda${qs}`);
 }
 
 // Mis citas por rango: 'today' | 'tomorrow' | 'week' | 'month'.

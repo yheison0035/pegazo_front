@@ -45,7 +45,10 @@ function TrendTooltip({ active, payload, label, showValues }) {
 
 // Gráfica de ventas con selector Semana/Mes/Año y navegación atrás/adelante en
 // el tiempo. Autónoma (trae sus propios datos) y memoizada.
-const SalesTrendChart = memo(function SalesTrendChart({ title = 'Ventas' }) {
+const SalesTrendChart = memo(function SalesTrendChart({
+  title = 'Ventas',
+  localId = '',
+}) {
   const [period, setPeriod] = useState('week');
   const [offset, setOffset] = useState(0); // 0 = actual, +1 = periodo anterior
   const [rows, setRows] = useState([]);
@@ -57,7 +60,7 @@ const SalesTrendChart = memo(function SalesTrendChart({ title = 'Ventas' }) {
   useEffect(() => {
     let alive = true;
     setLoading(true);
-    getSalesTrend(period, offset)
+    getSalesTrend(period, offset, localId)
       .then((r) => {
         if (!alive) return;
         setRows(r?.data || []);
@@ -74,7 +77,7 @@ const SalesTrendChart = memo(function SalesTrendChart({ title = 'Ventas' }) {
     return () => {
       alive = false;
     };
-  }, [period, offset]);
+  }, [period, offset, localId]);
 
   const total = rows.reduce((a, b) => a + (b.total || 0), 0);
   const hasData = rows.some((r) => (r.total || 0) > 0);

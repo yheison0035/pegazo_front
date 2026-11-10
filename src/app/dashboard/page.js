@@ -13,6 +13,7 @@ import {
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/authContext';
+import { useLocalScope } from '@/context/localScopeContext';
 import usePermissions from '@/hooks/usePermissions';
 import useTerms from '@/hooks/useTerms';
 import Button from '@/components/ui/Button';
@@ -49,6 +50,8 @@ export default function DashboardHome() {
   const usuario = auth?.usuario;
   const t = useTerms();
   const { can } = usePermissions();
+  // Sede activa del selector global: el Inicio muestra solo esa sede.
+  const { activeLocal } = useLocalScope();
   // La barra del buscador global solo se muestra en el Inicio (el atajo ⌘K y el
   // escáner de código de barras siguen disponibles en todo el CRM).
   const canQuickSearch = can('inventory', 'view') || can('customers', 'view');
@@ -125,10 +128,10 @@ export default function DashboardHome() {
       getMyRestDays()
         .then((r) => setMyRest(r?.data || null))
         .catch(() => setMyRest(null));
-      getHomeSummary()
+      getHomeSummary(activeLocal)
         .then((r) => setHome(r?.data || null))
         .catch(() => setHome(null));
-      getAppointmentsAgenda()
+      getAppointmentsAgenda(activeLocal)
         .then((r) => {
           setTodayAppts(r?.data?.today || []);
           setMyAgenda(r?.data || { today: [], tomorrow: [], week: [] });
@@ -140,21 +143,21 @@ export default function DashboardHome() {
       return;
     }
 
-    getHomeSummary()
+    getHomeSummary(activeLocal)
       .then((r) => setHome(r?.data || null))
       .catch(() => setHome(null));
     if (hasInventory) {
-      getLowStock()
+      getLowStock(activeLocal)
         .then((r) => setLowStock(r?.data || []))
         .catch(() => setLowStock([]));
     }
     if (hasCartera) {
-      getReceivables()
+      getReceivables({ localId: activeLocal })
         .then((r) => setReceivable(r?.data?.totalSaldo || 0))
         .catch(() => setReceivable(0));
     }
     if (isServices) {
-      getAppointmentsAgenda()
+      getAppointmentsAgenda(activeLocal)
         .then((r) => {
           setTodayAppts(r?.data?.today || []);
           setMyAgenda(r?.data || { today: [], tomorrow: [], week: [] });
@@ -165,7 +168,7 @@ export default function DashboardHome() {
         });
     }
     if (showBank) {
-      getBankDeposits({ limit: 6 })
+      getBankDeposits({ limit: 6, localId: activeLocal })
         .then((r) => setBankDeposits(r?.data || []))
         .catch(() => {});
     }
@@ -177,6 +180,7 @@ export default function DashboardHome() {
     isBarber,
     hasInventory,
     hasCartera,
+    activeLocal,
   ]);
 
   useEffect(() => {
@@ -190,12 +194,12 @@ export default function DashboardHome() {
   useEffect(() => {
     if (!showBank) return;
     const bt = setInterval(() => {
-      getBankDeposits({ limit: 6 })
+      getBankDeposits({ limit: 6, localId: activeLocal })
         .then((r) => setBankDeposits(r?.data || []))
         .catch(() => {});
     }, 10000);
     return () => clearInterval(bt);
-  }, [showBank]);
+  }, [showBank, activeLocal]);
 
   // ---- Checklist de primeros pasos ----
   const setup = home?.setup;
@@ -277,6 +281,7 @@ export default function DashboardHome() {
       myRest,
       t,
       usuario,
+      activeLocal,
     }),
     [
       home,
@@ -299,6 +304,7 @@ export default function DashboardHome() {
       ownerCharges,
       t,
       usuario,
+      activeLocal,
     ],
   );
   const actions = useMemo(
@@ -460,7 +466,7 @@ export default function DashboardHome() {
           items={lowStock}
           onClose={() => {
             setShowLowStock(false);
-            getLowStock()
+            getLowStock(activeLocal)
               .then((r) => setLowStock(r?.data || []))
               .catch(() => {});
           }}

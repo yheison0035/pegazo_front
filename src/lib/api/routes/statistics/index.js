@@ -1,14 +1,17 @@
 import apiFetch from '../../auth/client';
 
 // Resumen ligero para el Home (ventas de hoy + estado de configuración).
-export async function getHomeSummary() {
-  return apiFetch('/statistics/home');
+// localId: sede activa del selector global (opcional).
+export async function getHomeSummary(localId) {
+  const qs = localId ? `?localId=${Number(localId)}` : '';
+  return apiFetch(`/statistics/home${qs}`);
 }
 
 // Serie de ventas para la gráfica del Home: period = 'week' | 'month' | 'year'.
-// offset = cuántos periodos hacia atrás (0 = actual).
-export async function getSalesTrend(period = 'week', offset = 0) {
-  return apiFetch(`/statistics/sales-trend?period=${period}&offset=${offset}`);
+// offset = cuántos periodos hacia atrás (0 = actual). localId = sede activa.
+export async function getSalesTrend(period = 'week', offset = 0, localId) {
+  const loc = localId ? `&localId=${Number(localId)}` : '';
+  return apiFetch(`/statistics/sales-trend?period=${period}&offset=${offset}${loc}`);
 }
 
 // "Mi rendimiento" del empleado que consulta (solo lo suyo).
