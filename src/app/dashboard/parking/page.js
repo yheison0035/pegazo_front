@@ -15,7 +15,7 @@ import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
 import Button from '@/components/ui/Button';
 import MoneyInput from '@/components/ui/MoneyInput';
-import LocalFilter from '@/components/ui/LocalFilter';
+import { useLocalScope } from '@/context/localScopeContext';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import { useAuth } from '@/context/authContext';
 import { formatCOP } from '@/lib/api/utils/utils';
@@ -83,7 +83,8 @@ function ParkingInner() {
   const [co, setCo] = useState(null); // ticket objetivo
   const [coForm, setCoForm] = useState({ paymentMethod: 'EFECTIVO', cashReceived: '' });
   // Sede elegida por el dueño (vacío = todas). Un empleado no ve el selector.
-  const [viewLocal, setViewLocal] = useState('');
+  // Sede activa del selector global (reemplaza el desplegable por módulo).
+  const { activeLocal: viewLocal } = useLocalScope();
 
   const load = useCallback(async () => {
     try {
@@ -205,7 +206,6 @@ function ParkingInner() {
           <TruckIcon className="h-6 w-6 text-orange-500" />
           Parqueadero
         </h1>
-        <LocalFilter value={viewLocal} onChange={setViewLocal} />
       </div>
       <p className="mb-4 mt-1 text-sm text-gray-500">
         Controla el ingreso y la salida de vehículos. El cobro se calcula por

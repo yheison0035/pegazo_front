@@ -21,6 +21,7 @@ import {
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
 import { useAuth } from '@/context/authContext';
+import { useLocalScope } from '@/context/localScopeContext';
 import { cycleMonthRange, cycleStartOf } from '@/lib/cycle';
 import useLocals from '@/lib/api/hooks/useLocals';
 import { getDashboardStats, getMovements } from '@/lib/api/routes/statistics';
@@ -105,11 +106,13 @@ export default function Statistics() {
   const t = useTerms();
   const { getLocals } = useLocals();
   const { usuario } = useAuth();
+  // Sede activa del selector global: las estadísticas se acotan a esa sede.
+  const { activeLocal } = useLocalScope();
   // Día de inicio del ciclo de cierre de la empresa (default 1 = mes calendario).
   const cycleDay = usuario?.company?.cycleStartDay || 1;
 
   const [locals, setLocals] = useState([]);
-  const [localId, setLocalId] = useState('');
+  const [localId, setLocalId] = useState(activeLocal || '');
   // Base contable del reporte (por defecto la que el dueño eligió en Config).
   const [basis, setBasis] = useState(
     usuario?.company?.accountingBasis || 'CASH',
@@ -130,6 +133,11 @@ export default function Statistics() {
       .then((res) => setLocals(res?.data || []))
       .catch(() => {});
   }, [getLocals]);
+
+  // Sigue al selector global de sede ('' = todas).
+  useEffect(() => {
+    setLocalId(activeLocal || '');
+  }, [activeLocal]);
 
   const fetchStats = useCallback(async () => {
     setLoading(true);

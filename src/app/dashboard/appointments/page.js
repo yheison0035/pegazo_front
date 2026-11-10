@@ -9,7 +9,7 @@ import {
   PaintBrushIcon,
 } from '@heroicons/react/24/outline';
 import AppointmentsCalendar from '@/components/dashboard/appointments/AppointmentsCalendar';
-import LocalFilter from '@/components/ui/LocalFilter';
+import { useLocalScope } from '@/context/localScopeContext';
 import Button from '@/components/ui/Button';
 
 import RoleGuard from '@/auth/roleGuard';
@@ -64,7 +64,8 @@ export default function Appointments() {
 
   // Sede elegida por el dueño (vacío = todas sus sedes). Un empleado no ve el
   // selector: siempre es su local.
-  const [viewLocal, setViewLocal] = useState('');
+  // Sede activa del selector global (reemplaza el desplegable por módulo).
+  const { activeLocal: viewLocal } = useLocalScope();
 
   const fetchAppointments = useCallback(async () => {
     const res = await getAppointments({
@@ -140,7 +141,6 @@ export default function Appointments() {
               </button>
             </div>
 
-            <LocalFilter value={viewLocal} onChange={setViewLocal} />
 
             {/* Solo el DUEÑO: el diseño de la página de citas es lo único
                 compartido entre sedes. */}

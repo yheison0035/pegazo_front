@@ -12,6 +12,7 @@ import RoleGuard from '@/auth/roleGuard';
 import Button from '@/components/ui/Button';
 import { Roles, ALL_EXCEPT_BARBER } from '@/config/roles';
 import { useAuth } from '@/context/authContext';
+import { useLocalScope } from '@/context/localScopeContext';
 import useCash from '@/lib/api/hooks/useCash';
 import useLocals from '@/lib/api/hooks/useLocals';
 import { formatCOP, formatDateTime } from '@/lib/api/utils/utils';
@@ -38,6 +39,8 @@ export default function CashPage() {
     loading,
   } = useCash();
   const { getLocals } = useLocals();
+  // Sede activa del selector global: la caja opera en esa sede.
+  const { activeLocal } = useLocalScope();
 
   // Reabrir o eliminar/reiniciar una caja: solo dueño/admin.
   const canReopen = ['SUPER_ADMIN', 'ADMIN'].includes(usuario?.role);
@@ -56,7 +59,9 @@ export default function CashPage() {
   const [deleteTarget, setDeleteTarget] = useState(null); // id de caja a eliminar
 
   const [locals, setLocals] = useState([]);
-  const [localId, setLocalId] = useState(usuario?.localId || '');
+  const [localId, setLocalId] = useState(
+    usuario?.localId || (activeLocal ? String(activeLocal) : ''),
+  );
   const [current, setCurrent] = useState(null);
   const [history, setHistory] = useState([]);
   const [alert, setAlert] = useState({ type: '', message: '' });
@@ -77,6 +82,11 @@ export default function CashPage() {
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Sigue al selector global de sede: al elegir una sede arriba, la caja cambia.
+  useEffect(() => {
+    if (activeLocal) setLocalId(String(activeLocal));
+  }, [activeLocal]);
 
   const refresh = useCallback(async () => {
     if (!localId) return;

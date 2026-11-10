@@ -18,7 +18,7 @@ import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
 import { useAuth } from '@/context/authContext';
 import Button from '@/components/ui/Button';
-import LocalFilter from '@/components/ui/LocalFilter';
+import { useLocalScope } from '@/context/localScopeContext';
 import MoneyInput from '@/components/ui/MoneyInput';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import { formatCOP } from '@/lib/api/utils/utils';
@@ -82,7 +82,8 @@ export default function MembershipsPage() {
     notes: '',
   });
   // Sede elegida por el dueño (vacío = todas). Un empleado no ve el selector.
-  const [viewLocal, setViewLocal] = useState('');
+  // Sede activa del selector global (reemplaza el desplegable por módulo).
+  const { activeLocal: viewLocal } = useLocalScope();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -228,7 +229,6 @@ export default function MembershipsPage() {
         <div className="mb-1 flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-2xl font-semibold text-gray-800">Membresías</h1>
           <div className="flex items-center gap-2">
-            <LocalFilter value={viewLocal} onChange={setViewLocal} />
             {isOwner && (
               <Button variant="add" icon={PlusIcon} onClick={openNew}>
                 Nueva membresía

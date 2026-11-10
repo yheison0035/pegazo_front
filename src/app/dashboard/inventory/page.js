@@ -22,7 +22,7 @@ import AlertModal from '@/components/dashboard/modals/alertModal';
 import ViewModal from '../../viewModal';
 import ConfirmDeleteModal from '@/components/dashboard/tables/segments/confirmDeleteModal';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
-import LocalFilter from '@/components/ui/LocalFilter';
+import { useLocalScope } from '@/context/localScopeContext';
 import {
   getHeaderTableInventory,
   viewModalConfig,
@@ -123,7 +123,8 @@ export default function Inventory() {
   const debouncedFilters = useDebounce(filters, 400);
 
   // Sede elegida por el dueño (vacío = todas). Un empleado no ve el selector.
-  const [viewLocal, setViewLocal] = useState('');
+  // Sede activa del selector global (reemplaza el desplegable por módulo).
+  const { activeLocal: viewLocal } = useLocalScope();
 
   // Solo la PRIMERA carga muestra el overlay a pantalla completa. Los refetch
   // por filtro/búsqueda/paginación se marcan como refresco en segundo plano:
@@ -228,7 +229,6 @@ export default function Inventory() {
           Listado de {t.productPlural}
         </h1>
         <div className="flex flex-wrap items-center gap-2">
-          <LocalFilter value={viewLocal} onChange={setViewLocal} />
         {can('inventory', 'create') && (
           <div className="flex flex-wrap items-center gap-2">
             <button

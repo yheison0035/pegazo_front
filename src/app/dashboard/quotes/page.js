@@ -17,6 +17,7 @@ import MoneyInput from '@/components/ui/MoneyInput';
 import EmptyState from '@/components/ui/EmptyState';
 import { Roles, ALL_EXCEPT_BARBER } from '@/config/roles';
 import { useAuth } from '@/context/authContext';
+import { useLocalScope } from '@/context/localScopeContext';
 import useQuotes from '@/lib/api/hooks/useQuotes';
 import useSales from '@/lib/api/hooks/useSales';
 import useLocals from '@/lib/api/hooks/useLocals';
@@ -43,6 +44,8 @@ export default function QuotesPage() {
   } = useQuotes();
   const { searchProducts } = useSales();
   const { getLocals } = useLocals();
+  // Sede activa del selector global: la cotización se registra en esa sede.
+  const { activeLocal } = useLocalScope();
 
   const [quotes, setQuotes] = useState([]);
   const [meta, setMeta] = useState(null);
@@ -55,7 +58,9 @@ export default function QuotesPage() {
   const [locals, setLocals] = useState([]);
 
   // formulario
-  const [localId, setLocalId] = useState(usuario?.localId || '');
+  const [localId, setLocalId] = useState(
+    usuario?.localId || (activeLocal ? String(activeLocal) : ''),
+  );
   const [notes, setNotes] = useState('');
   const [validUntil, setValidUntil] = useState('');
   const [items, setItems] = useState([]);
@@ -94,6 +99,11 @@ export default function QuotesPage() {
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Sigue al selector global de sede.
+  useEffect(() => {
+    if (activeLocal) setLocalId(String(activeLocal));
+  }, [activeLocal]);
 
   // buscador de productos/servicios
   useEffect(() => {

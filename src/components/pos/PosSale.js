@@ -22,6 +22,7 @@ import { dayStateFromRegister } from '@/lib/dayStatus';
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
 import { useAuth } from '@/context/authContext';
+import { useLocalScope } from '@/context/localScopeContext';
 import useTerms from '@/hooks/useTerms';
 import { isByWeightItem } from '@/lib/pos/weight';
 import useSales from '@/lib/api/hooks/useSales';
@@ -77,6 +78,7 @@ export default function PosSale({
   appointmentId = null,
 }) {
   const { usuario } = useAuth();
+  const { activeLocal } = useLocalScope();
   const t = useTerms();
   const showColor =
     getProductFields(usuario?.company?.type, usuario?.company?.typeProductFields).variantType === 'color';
@@ -154,8 +156,10 @@ export default function PosSale({
   );
   const [showNewCustomer, setShowNewCustomer] = useState(false);
   const [locals, setLocals] = useState([]);
+  // Sede de la venta: la de la venta en edición > la asignada del usuario > la
+  // sede ACTIVA del selector global del dueño > vacío (se elige abajo).
   const [localId, setLocalId] = useState(
-    initial?.localId ?? usuario?.localId ?? ''
+    initial?.localId ?? usuario?.localId ?? (activeLocal ? Number(activeLocal) : '')
   );
   const [sellers, setSellers] = useState([]);
   // En negocios de servicios (barbería, spa, odontología) hay dos grupos de

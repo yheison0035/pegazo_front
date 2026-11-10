@@ -7,6 +7,7 @@ import {
   CalculatorIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/authContext';
+import { useLocalScope } from '@/context/localScopeContext';
 import { getCurrentCash, CASH_CHANGED_EVENT } from '@/lib/api/routes/cash';
 import { getLocals } from '@/lib/api/routes/locals';
 import { dayStateFromRegister } from '@/lib/dayStatus';
@@ -17,15 +18,26 @@ import { dayStateFromRegister } from '@/lib/dayStatus';
 // primera sede para saber el estado del día.
 export default function DayBanner() {
   const { usuario } = useAuth();
+  // Sede activa del selector global: el dueño ve el estado de caja de ESA sede.
+  const { activeLocal } = useLocalScope();
   // El barbero/profesional no vende: no le mostramos "Abrir el día".
   const isSelfOnly = ['BARBERO', 'PROFESIONAL'].includes(usuario?.role);
   const require = !!usuario?.company?.requireCashOpen && !isSelfOnly;
   const [localId, setLocalId] = useState(usuario?.localId || null);
   const [state, setState] = useState('ok');
 
-  // Resolver la sede: la del usuario o, si no tiene, la primera de la empresa.
+  // Resolver la sede a vigilar, en orden: la sede ACTIVA del selector global >
+  // la sede asignada del usuario > la primera de la empresa (dueño sin sede).
   useEffect(() => {
-    if (!require || usuario?.localId) return;
+    if (!require) return;
+    if (activeLocal) {
+      setLocalId(Number(activeLocal));
+      return;
+    }
+    if (usuario?.localId) {
+      setLocalId(usuario.localId);
+      return;
+    }
     let active = true;
     getLocals({ all: true })
       .then((r) => {
@@ -36,7 +48,7 @@ export default function DayBanner() {
     return () => {
       active = false;
     };
-  }, [require, usuario?.localId]);
+  }, [require, activeLocal, usuario?.localId]);
 
   const check = useCallback(async () => {
     if (!require || !localId) return;

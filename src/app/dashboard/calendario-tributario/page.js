@@ -10,7 +10,7 @@ import {
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
-import LocalFilter from '@/components/ui/LocalFilter';
+import { useLocalScope } from '@/context/localScopeContext';
 import TaxObligationsPanel from '@/components/tax/TaxObligationsPanel';
 import RentaDraftPanel from '@/components/tax/RentaDraftPanel';
 import TaxAlertPrefs from '@/components/tax/TaxAlertPrefs';
@@ -75,7 +75,8 @@ export default function CalendarioTributarioPage() {
   const [checkMsg, setCheckMsg] = useState('');
   // Sede elegida por el dueño (vacío = toda la empresa). Alimenta el calendario
   // y las finanzas tributarias por local. El selector se oculta con una sede.
-  const [viewLocal, setViewLocal] = useState('');
+  // Sede activa del selector global (reemplaza el desplegable por módulo).
+  const { activeLocal: viewLocal } = useLocalScope();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -189,11 +190,6 @@ export default function CalendarioTributarioPage() {
             </p>
           </div>
           <div className="flex flex-none flex-wrap items-center gap-2">
-            <LocalFilter
-              value={viewLocal}
-              onChange={setViewLocal}
-              allLabel="Toda la empresa"
-            />
             <ExportCsvButton data={data} filename="calendario-tributario.csv" />
             <button
               onClick={checkNow}

@@ -18,6 +18,7 @@ import MoneyInput from '@/components/ui/MoneyInput';
 import TableActionButton from '@/components/ui/TableActionButton';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import { useAuth } from '@/context/authContext';
+import { useLocalScope } from '@/context/localScopeContext';
 import { formatCOP } from '@/lib/api/utils/utils';
 import { getLocals } from '@/lib/api/routes/locals';
 import {
@@ -96,6 +97,8 @@ const inputCls =
 
 export default function PayablesPage() {
   const { usuario } = useAuth();
+  // Sede activa del selector global: la cuenta por pagar se registra en esa sede.
+  const { activeLocal } = useLocalScope();
   const [tab, setTab] = useState('PENDIENTE');
   const [items, setItems] = useState([]);
   const [summary, setSummary] = useState(null);
@@ -143,7 +146,7 @@ export default function PayablesPage() {
       type: 'PEDIDOS',
       amount: '',
       dueDate: '',
-      localId: String(usuario?.localId || locals[0]?.id || ''),
+      localId: String(usuario?.localId || activeLocal || locals[0]?.id || ''),
       notes: '',
     });
 

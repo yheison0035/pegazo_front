@@ -20,7 +20,7 @@ import {
 import ConfirmDeleteModal from '@/components/dashboard/tables/segments/confirmDeleteModal';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
-import LocalFilter from '@/components/ui/LocalFilter';
+import { useLocalScope } from '@/context/localScopeContext';
 import useColumnFilters from '@/components/dashboard/tables/hooks/useColumnFilters';
 import { useDebounce } from '@/components/dashboard/tables/hooks/useDebounce';
 
@@ -59,7 +59,8 @@ export default function Customers() {
 
   // Sede elegida por el dueño (vacío = todas). Tiene prioridad sobre el filtro
   // de columna. Un empleado no ve el selector: siempre es su local.
-  const [viewLocal, setViewLocal] = useState('');
+  // Sede activa del selector global (reemplaza el desplegable por módulo).
+  const { activeLocal: viewLocal } = useLocalScope();
 
   const fetchCustomers = useCallback(async () => {
     const res = await getCustomers({
@@ -132,7 +133,6 @@ export default function Customers() {
           </h1>
 
           <div className="flex items-center gap-2">
-            <LocalFilter value={viewLocal} onChange={setViewLocal} />
             <Button
               variant="add"
               icon={PlusIcon}

@@ -15,6 +15,7 @@ import MoneyInput from '@/components/ui/MoneyInput';
 import EmptyState from '@/components/ui/EmptyState';
 import { Roles, ALL_EXCEPT_BARBER } from '@/config/roles';
 import { useAuth } from '@/context/authContext';
+import { useLocalScope } from '@/context/localScopeContext';
 import { getProductFields } from '@/config/verticalProfiles';
 import usePurchases from '@/lib/api/hooks/usePurchases';
 import useSales from '@/lib/api/hooks/useSales';
@@ -48,6 +49,8 @@ export default function PurchasesPage() {
   } = usePurchases();
   const { searchProducts } = useSales();
   const { getLocals } = useLocals();
+  // Sede activa del selector global: la compra se registra en esa sede.
+  const { activeLocal } = useLocalScope();
 
   const [purchases, setPurchases] = useState([]);
   const [meta, setMeta] = useState(null);
@@ -63,7 +66,9 @@ export default function PurchasesPage() {
   const [fiscal, setFiscal] = useState(null);
 
   // formulario de nueva compra
-  const [localId, setLocalId] = useState(usuario?.localId || '');
+  const [localId, setLocalId] = useState(
+    usuario?.localId || (activeLocal ? String(activeLocal) : ''),
+  );
   const [providerId, setProviderId] = useState('');
   const [notes, setNotes] = useState('');
   // Retenciones que le practicas al proveedor en esta compra (opcional).
@@ -109,6 +114,11 @@ export default function PurchasesPage() {
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Sigue al selector global de sede.
+  useEffect(() => {
+    if (activeLocal) setLocalId(String(activeLocal));
+  }, [activeLocal]);
 
   // buscador de productos
   useEffect(() => {

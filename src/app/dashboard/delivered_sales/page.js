@@ -11,7 +11,7 @@ import { getSaleById } from '@/lib/api/routes/sales';
 import Table from '@/components/dashboard/tables/table';
 import Pagination from '@/components/dashboard/tables/segments/pagination';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
-import LocalFilter from '@/components/ui/LocalFilter';
+import { useLocalScope } from '@/context/localScopeContext';
 import Button from '@/components/ui/Button';
 import { useAuth } from '@/context/authContext';
 import {
@@ -99,21 +99,17 @@ export default function Delivered_Sales() {
     invoiceType: '',
   });
 
-  // Sede elegida por el dueño (vacío = todas). Un empleado no ve el selector.
-  const [viewLocal, setViewLocal] = useState('');
+  // Sede activa del selector global (reemplaza el desplegable por módulo).
+  const { activeLocal: viewLocal } = useLocalScope();
 
-  // Si llega ?date=YYYY-MM-DD y/o ?localId=N (p. ej. desde el widget "Hoy" o
-  // "Ventas de hoy por sede" del inicio), prefiltrar el listado.
+  // Si llega ?date=YYYY-MM-DD (p. ej. desde el widget "Hoy" del inicio),
+  // prefiltrar el listado por esa fecha.
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const sp = new URLSearchParams(window.location.search);
     const qsDate = sp.get('date');
     if (qsDate && /^\d{4}-\d{2}-\d{2}$/.test(qsDate)) {
       setFilters((prev) => ({ ...prev, saleDate: qsDate }));
-    }
-    const qsLocal = sp.get('localId');
-    if (qsLocal && /^\d+$/.test(qsLocal)) {
-      setViewLocal(qsLocal);
     }
     // solo al montar
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -216,7 +212,6 @@ export default function Delivered_Sales() {
         <h1 className="text-2xl font-semibold">Listado de Ventas Realizadas</h1>
 
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-          <LocalFilter value={viewLocal} onChange={setViewLocal} />
           {isServices ? (
             <Button
               variant="info"

@@ -10,7 +10,7 @@ import {
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
-import LocalFilter from '@/components/ui/LocalFilter';
+import { useLocalScope } from '@/context/localScopeContext';
 import { getFinancials } from '@/lib/api/routes/accounting';
 
 function cop(n) {
@@ -82,7 +82,8 @@ export default function EstadosFinancierosPage() {
   const [loading, setLoading] = useState(false);
   // Sede elegida por el dueño (vacío = toda la empresa). Un rol de sede queda
   // limitado a su local por el backend.
-  const [viewLocal, setViewLocal] = useState('');
+  // Sede activa del selector global (reemplaza el desplegable por módulo).
+  const { activeLocal: viewLocal } = useLocalScope();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -209,11 +210,6 @@ export default function EstadosFinancierosPage() {
               className="rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none"
             />
           </div>
-          <LocalFilter
-            value={viewLocal}
-            onChange={setViewLocal}
-            allLabel="Toda la empresa"
-          />
           <button
             onClick={load}
             className="inline-flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50"
