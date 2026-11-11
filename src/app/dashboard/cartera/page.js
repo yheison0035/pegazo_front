@@ -541,6 +541,12 @@ export default function CarteraPage() {
             sale={abonoSale}
             onClose={() => setAbonoSale(null)}
             onSaved={() => load()}
+            // Eliminar el crédito: solo el dueño (igual que el backend/UI).
+            canDelete={usuario?.role === 'SUPER_ADMIN'}
+            onDelete={(s) => {
+              setAbonoSale(null);
+              setConfirmDel(s);
+            }}
           />
         )}
 

@@ -113,6 +113,40 @@ describe('Cartera (fiado) · por cobrar', () => {
     await waitForCall(api, 'GET', /^\/sales\/receivables\/list$/, { count: 2 });
   });
 
+  it('con plan de cuotas, Abonar toma el valor de la cuota y ofrece pagar 1 ó 2 cuotas', async () => {
+    const CREDIT_PAYMENTS = {
+      ...PAYMENTS,
+      credit: {
+        frequency: 'MENSUAL',
+        installmentsCount: 3,
+        interestPercent: 0,
+        interestAmount: 0,
+        downPayment: 0,
+        nextDueDate: '2026-03-10T00:00:00.000Z',
+        overdueDays: 0,
+        installments: [
+          { number: 1, dueDate: '2026-02-10T00:00:00.000Z', amount: 40000, paid: 40000, pending: 0, status: 'PAGADA' },
+          { number: 2, dueDate: '2026-03-10T00:00:00.000Z', amount: 30000, paid: 0, pending: 30000, status: 'PENDIENTE' },
+          { number: 3, dueDate: '2026-04-10T00:00:00.000Z', amount: 30000, paid: 0, pending: 30000, status: 'PENDIENTE' },
+        ],
+      },
+    };
+    api.set('GET', /^\/sales\/\d+\/payments$/, ok(CREDIT_PAYMENTS));
+    await renderPage(<CarteraPage />);
+    await screen.findByText('FV-0001');
+    await click(screen.getAllByRole('button', { name: 'Abonar' })[0]);
+    await waitForCall(api, 'GET', /^\/sales\/1\/payments$/);
+    // El monto arranca en la próxima cuota con saldo (cuota 2 = 30.000).
+    expect(await screen.findByDisplayValue(money(30000))).toBeInTheDocument();
+    // Atajos de 1 y 2 cuotas; pagar 2 cuotas llena 60.000.
+    expect(screen.getByRole('button', { name: /1 cuota/ })).toBeInTheDocument();
+    await click(screen.getByRole('button', { name: /2 cuotas/ }));
+    expect(screen.getByDisplayValue(money(60000))).toBeInTheDocument();
+    await click(button('Registrar abono'));
+    const call = await waitForCall(api, 'POST', /^\/sales\/1\/payments$/);
+    expect(call.body).toMatchObject({ amount: 60000, method: 'EFECTIVO' });
+  });
+
   it('un abono parcial deja el modal abierto y recarga los abonos', async () => {
     await renderPage(<CarteraPage />);
     await screen.findByText('FV-0001');
