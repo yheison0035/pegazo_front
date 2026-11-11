@@ -24,6 +24,10 @@ const LocalScopeContext = createContext({
 
 export function LocalScopeProvider({ children }) {
   const { usuario } = useAuth();
+  // El selector global de sede es SOLO para el dueño (SUPER_ADMIN). Los demás
+  // roles ven su local asignado (admin) o ya ven todo (coordinador/auxiliar),
+  // así que ni ven el selector ni acotan por sede activa.
+  const isOwner = usuario?.role === 'SUPER_ADMIN';
   const storageKey = `pegazo:activeLocal:${usuario?.company?.id || 0}:${usuario?.id || 0}`;
 
   const [locals, setLocals] = useState([]);
@@ -82,12 +86,14 @@ export function LocalScopeProvider({ children }) {
 
   const value = useMemo(
     () => ({
-      activeLocal,
+      // Solo el dueño acota por sede activa; para el resto es '' (ven lo suyo).
+      activeLocal: isOwner ? activeLocal : '',
       setActiveLocal,
       locals,
-      multi: locals.length > 1,
+      // El selector solo aparece para el dueño con 2+ sedes.
+      multi: isOwner && locals.length > 1,
     }),
-    [activeLocal, setActiveLocal, locals],
+    [isOwner, activeLocal, setActiveLocal, locals],
   );
 
   return (
