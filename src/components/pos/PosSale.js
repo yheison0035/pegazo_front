@@ -1655,30 +1655,72 @@ export default function PosSale({
                     </div>
 
                     {creditPlanPreview ? (
-                      <div className="rounded-md border border-orange-100 bg-white p-2">
-                        <div className="flex justify-between text-[11px] text-gray-500">
-                          <span>Recargo</span>
-                          <span className="font-semibold text-gray-700">
-                            {formatCOP(creditPlanPreview.interestAmount)}
-                          </span>
+                      <div className="rounded-md border border-orange-100 bg-white p-2.5 text-[11px]">
+                        {/* Desglose del crédito */}
+                        <div className="space-y-1">
+                          <div className="flex justify-between text-gray-500">
+                            <span>Total de la venta</span>
+                            <span className="tabular-nums text-gray-700">
+                              {formatCOP(total)}
+                            </span>
+                          </div>
+                          {creditPlanPreview.down > 0 && (
+                            <div className="flex justify-between text-gray-500">
+                              <span>Cuota inicial{' '}
+                                <span className="text-gray-400">
+                                  ({creditDownMethod.toLowerCase()})
+                                </span>
+                              </span>
+                              <span className="tabular-nums font-medium text-emerald-600">
+                                − {formatCOP(creditPlanPreview.down)}
+                              </span>
+                            </div>
+                          )}
+                          <div className="flex justify-between text-gray-500">
+                            <span>Saldo a financiar</span>
+                            <span className="tabular-nums text-gray-700">
+                              {formatCOP(creditPlanPreview.financedBase)}
+                            </span>
+                          </div>
+                          {creditPlanPreview.interestAmount > 0 && (
+                            <div className="flex justify-between text-gray-500">
+                              <span>Recargo ({Number(creditInterest) || 0}%)</span>
+                              <span className="tabular-nums font-medium text-orange-600">
+                                + {formatCOP(creditPlanPreview.interestAmount)}
+                              </span>
+                            </div>
+                          )}
+                          <div className="flex justify-between border-t border-gray-100 pt-1 font-semibold text-gray-800">
+                            <span>Total a crédito</span>
+                            <span className="tabular-nums">
+                              {formatCOP(creditPlanPreview.financedTotal)}
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex justify-between text-[11px] text-gray-500">
-                          <span>Total con recargo</span>
-                          <span className="font-semibold text-gray-800">
-                            {formatCOP(creditPlanPreview.obligation)}
-                          </span>
+
+                        {/* Resumen de cuotas */}
+                        <div className="mt-2 rounded bg-orange-50 px-2 py-1 text-center font-medium text-orange-700">
+                          {creditCountNum}{' '}
+                          {creditCountNum === 1 ? 'cuota' : 'cuotas'}{' '}
+                          {(
+                            FREQUENCIES.find((f) => f.id === creditFrequency)
+                              ?.label || ''
+                          ).toLowerCase()}{' '}
+                          de {formatCOP(creditPlanPreview.installments[0].amount)}
                         </div>
+
+                        {/* Cronograma */}
                         <div className="mt-1.5 max-h-28 divide-y divide-gray-50 overflow-y-auto">
                           {creditPlanPreview.installments.map((it) => (
                             <div
                               key={it.number}
-                              className="flex items-center justify-between py-1 text-[11px]"
+                              className="flex items-center justify-between py-1"
                             >
                               <span className="text-gray-500">
                                 Cuota {it.number} ·{' '}
                                 {it.dueDate.toLocaleDateString('es-CO')}
                               </span>
-                              <span className="font-semibold text-gray-800">
+                              <span className="tabular-nums font-semibold text-gray-800">
                                 {formatCOP(it.amount)}
                               </span>
                             </div>

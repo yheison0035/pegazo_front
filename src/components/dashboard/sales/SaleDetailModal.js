@@ -281,15 +281,25 @@ export default function SaleDetailModal({
                         credit.credit.frequency}{' '}
                       · {credit.credit.installmentsCount} cuotas
                     </span>
-                    {credit.credit.interestAmount > 0 && (
-                      <span>
-                        Recargo{' '}
-                        <b className="text-gray-700">
-                          {credit.credit.interestPercent}% ·{' '}
-                          {formatCOP(credit.credit.interestAmount)}
-                        </b>
-                      </span>
-                    )}
+                    <span className="flex flex-wrap gap-x-3 gap-y-0.5">
+                      {credit.credit.downPayment > 0 && (
+                        <span>
+                          Cuota inicial{' '}
+                          <b className="text-emerald-600">
+                            {formatCOP(credit.credit.downPayment)}
+                          </b>
+                        </span>
+                      )}
+                      {credit.credit.interestAmount > 0 && (
+                        <span>
+                          Recargo{' '}
+                          <b className="text-gray-700">
+                            {credit.credit.interestPercent}% ·{' '}
+                            {formatCOP(credit.credit.interestAmount)}
+                          </b>
+                        </span>
+                      )}
+                    </span>
                   </div>
                   <ul className="space-y-1">
                     {credit.credit.installments.map((it) => (
