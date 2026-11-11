@@ -6,6 +6,7 @@ import {
   CreditCardIcon,
   MagnifyingGlassIcon,
   BanknotesIcon,
+  BellAlertIcon,
 } from '@heroicons/react/24/outline';
 import RoleGuard from '@/auth/roleGuard';
 import { Roles, ALL_EXCEPT_BARBER } from '@/config/roles';
@@ -16,9 +17,11 @@ import {
   getSaleById,
   getSalePayments,
   deleteSale,
+  sendCreditReminder,
   SALES_CHANGED_EVENT,
 } from '@/lib/api/routes/sales';
 import { useAuth } from '@/context/authContext';
+import { useToast } from '@/context/toastContext';
 import { useLocalScope } from '@/context/localScopeContext';
 import { formatCOP, formatDateOnly, formatDateTime } from '@/lib/api/utils/utils';
 import Button from '@/components/ui/Button';
@@ -28,6 +31,35 @@ import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import AbonoModal from '@/components/cartera/AbonoModal';
 import SaleDetailModal from '@/components/dashboard/sales/SaleDetailModal';
 import ConfirmDeleteModal from '@/components/dashboard/tables/segments/confirmDeleteModal';
+
+// Botón "Recordar ahora": envía al cliente el recordatorio de pago por correo.
+// Si el cliente no tiene correo, se ve atenuado pero sigue clickeable para
+// explicar por qué no se puede enviar.
+function RemindButton({ row, busy, onClick }) {
+  const noEmail = !row.hasEmail;
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick(row);
+      }}
+      disabled={busy}
+      title={
+        noEmail
+          ? 'El cliente no tiene correo registrado'
+          : 'Enviar recordatorio de pago por correo'
+      }
+      className={`inline-flex items-center justify-center rounded-lg border px-2 py-1.5 transition ${
+        noEmail
+          ? 'cursor-not-allowed border-gray-200 text-gray-300'
+          : 'border-orange-200 text-orange-600 hover:bg-orange-50'
+      } ${busy ? 'opacity-60' : ''}`}
+    >
+      <BellAlertIcon className="h-4 w-4" />
+    </button>
+  );
+}
 
 // Semáforo de mora por días de vencimiento.
 function OverdueBadge({ days, dueDate }) {
@@ -56,7 +88,9 @@ function OverdueBadge({ days, dueDate }) {
 export default function CarteraPage() {
   const auth = useAuth();
   const usuario = auth?.usuario;
+  const toast = useToast();
   const { activeLocal } = useLocalScope();
+  const [remindingId, setRemindingId] = useState(null);
   const [tab, setTab] = useState('por_cobrar');
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState({ totalSaldo: 0, count: 0, rows: [] });
@@ -160,6 +194,42 @@ export default function CarteraPage() {
 
   // Datos en vivo: refresca al volver a la pestana/foco y cada 20s.
   useLiveRefresh(load);
+
+  // "Recordar ahora": envía el correo al cliente al instante.
+  const handleRemind = useCallback(
+    async (row) => {
+      if (!row?.hasEmail) {
+        toast.show({
+          type: 'warning',
+          title: 'Sin correo',
+          message:
+            'Este cliente no tiene correo registrado. Agrégaselo en su ficha para enviarle el recordatorio.',
+        });
+        return;
+      }
+      setRemindingId(row.id);
+      try {
+        const res = await sendCreditReminder(row.id);
+        toast.show({
+          type: 'success',
+          title: 'Recordatorio enviado',
+          message:
+            res?.message || 'El cliente recibió el recordatorio de pago.',
+        });
+        load();
+      } catch (e) {
+        toast.show({
+          type: 'error',
+          title: 'No se pudo enviar',
+          message:
+            e?.message || 'Revisa la configuración de correo del negocio.',
+        });
+      } finally {
+        setRemindingId(null);
+      }
+    },
+    [toast, load],
+  );
 
   const rows = data.rows.filter((r) => {
     const t = search.trim().toLowerCase();
@@ -313,16 +383,23 @@ export default function CarteraPage() {
                       {formatCOP(r.saldo)}
                     </td>
                     <td className="px-5 py-3 text-center whitespace-nowrap">
-                      <Button
-                        size="sm"
-                        variant="primary"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setAbonoSale(r);
-                        }}
-                      >
-                        Abonar
-                      </Button>
+                      <div className="flex items-center justify-center gap-2">
+                        <RemindButton
+                          row={r}
+                          busy={remindingId === r.id}
+                          onClick={handleRemind}
+                        />
+                        <Button
+                          size="sm"
+                          variant="primary"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setAbonoSale(r);
+                          }}
+                        >
+                          Abonar
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}
