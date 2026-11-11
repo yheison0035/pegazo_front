@@ -14,6 +14,7 @@ import RoleGuard from '@/auth/roleGuard';
 import Button from '@/components/ui/Button';
 import { Roles, ALL_EXCEPT_BARBER } from '@/config/roles';
 import { useAuth } from '@/context/authContext';
+import { useLocalScope } from '@/context/localScopeContext';
 import useTerms from '@/hooks/useTerms';
 import { getLoyaltyCustomers } from '@/lib/api/routes/customers';
 import { syncLoyaltyFromSales } from '@/lib/api/routes/company';
@@ -26,6 +27,7 @@ import { loyaltyWhatsappMessage } from '@/lib/loyaltyMessage';
 
 export default function LoyaltyPage() {
   const { usuario } = useAuth();
+  const { activeLocal } = useLocalScope();
   const t = useTerms();
   const isOwnerAdmin = ['SUPER_ADMIN', 'ADMIN'].includes(usuario?.role);
   const [syncing, setSyncing] = useState(false);
@@ -47,6 +49,7 @@ export default function LoyaltyPage() {
         limit,
         search,
         completed: tab === 'completed',
+        ...(activeLocal ? { localId: activeLocal } : {}),
       });
       setData(res.data || []);
       setConfig(res.config || null);
@@ -56,7 +59,7 @@ export default function LoyaltyPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, limit, search, tab]);
+  }, [page, limit, search, tab, activeLocal]);
 
   useEffect(() => {
     const t = setTimeout(fetch, 300);
