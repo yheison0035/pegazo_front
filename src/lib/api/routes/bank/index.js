@@ -1,7 +1,8 @@
 import apiFetch from '../../auth/client';
 
-export async function getBankStatus() {
-  return apiFetch('/bank/status');
+export async function getBankStatus(localId) {
+  const qs = localId ? `?localId=${Number(localId)}` : '';
+  return apiFetch(`/bank/status${qs}`);
 }
 export async function enableBank(dto = {}) {
   return apiFetch('/bank/enable', {
@@ -15,11 +16,17 @@ export async function setBankConfig(dto = {}) {
     body: JSON.stringify(dto),
   });
 }
-export async function disableBank() {
-  return apiFetch('/bank/disable', { method: 'POST' });
+export async function disableBank(localId) {
+  return apiFetch('/bank/disable', {
+    method: 'POST',
+    body: JSON.stringify(localId ? { localId: Number(localId) } : {}),
+  });
 }
-export async function regenerateBankToken() {
-  return apiFetch('/bank/regenerate', { method: 'POST' });
+export async function regenerateBankToken(localId) {
+  return apiFetch('/bank/regenerate', {
+    method: 'POST',
+    body: JSON.stringify(localId ? { localId: Number(localId) } : {}),
+  });
 }
 export async function testBankDeposit() {
   return apiFetch('/bank/test', { method: 'POST' });

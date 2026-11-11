@@ -10,6 +10,7 @@ import RoleGuard from '@/auth/roleGuard';
 import { useAuth } from '@/context/authContext';
 import { Roles, ALL_EXCEPT_BARBER } from '@/config/roles';
 import useUsers from '@/lib/api/hooks/useUsers';
+import { useLocalScope } from '@/context/localScopeContext';
 import {
   getHeaderTableUsers,
   viewModalConfig,
@@ -26,6 +27,7 @@ export default function Users() {
   const auth = useAuth();
   const usuario = auth?.usuario;
   const { getUsers, deleteUser, loading } = useUsers();
+  const { activeLocal } = useLocalScope();
 
   const [users, setUsers] = useState([]);
   const [meta, setMeta] = useState(null);
@@ -71,11 +73,12 @@ export default function Users() {
       page,
       limit,
       ...debouncedFilters,
+      ...(activeLocal ? { localId: activeLocal } : {}),
     });
 
     setUsers(res.data);
     setMeta(res.meta);
-  }, [getUsers, page, limit, debouncedFilters]);
+  }, [getUsers, page, limit, debouncedFilters, activeLocal]);
 
   useEffect(() => {
     fetchUsers();

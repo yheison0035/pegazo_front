@@ -11,6 +11,7 @@ import RoleGuard from '@/auth/roleGuard';
 import { useAuth } from '@/context/authContext';
 import { Roles, ALL_EXCEPT_BARBER } from '@/config/roles';
 import useCategories from '@/lib/api/hooks/useCategories';
+import { useLocalScope } from '@/context/localScopeContext';
 import {
   getHeaderTableCategories,
   viewModalConfig,
@@ -27,6 +28,7 @@ export default function Categories() {
   const auth = useAuth();
   const usuario = auth?.usuario;
   const { getCategories, deleteCategory, loading } = useCategories();
+  const { activeLocal } = useLocalScope();
 
   const [categories, setCategories] = useState([]);
   const [meta, setMeta] = useState(null);
@@ -52,11 +54,12 @@ export default function Categories() {
       page,
       limit,
       ...debouncedFilters,
+      ...(activeLocal ? { localId: activeLocal } : {}),
     });
 
     setCategories(res.data);
     setMeta(res.meta);
-  }, [getCategories, page, limit, debouncedFilters]);
+  }, [getCategories, page, limit, debouncedFilters, activeLocal]);
 
   useEffect(() => {
     fetchCategories();

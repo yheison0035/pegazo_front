@@ -11,6 +11,7 @@ import RoleGuard from '@/auth/roleGuard';
 import { useAuth } from '@/context/authContext';
 import { Roles, ALL_EXCEPT_BARBER } from '@/config/roles';
 import useBrands from '@/lib/api/hooks/useBrands';
+import { useLocalScope } from '@/context/localScopeContext';
 import {
   getHeaderTableBrands,
   viewModalConfig,
@@ -27,6 +28,7 @@ export default function Brands() {
   const auth = useAuth();
   const usuario = auth?.usuario;
   const { getBrands, deleteBrand, loading } = useBrands();
+  const { activeLocal } = useLocalScope();
 
   const [brands, setBrands] = useState([]);
   const [meta, setMeta] = useState(null);
@@ -52,11 +54,12 @@ export default function Brands() {
       page,
       limit,
       ...debouncedFilters,
+      ...(activeLocal ? { localId: activeLocal } : {}),
     });
 
     setBrands(res.data);
     setMeta(res.meta);
-  }, [getBrands, page, limit, debouncedFilters]);
+  }, [getBrands, page, limit, debouncedFilters, activeLocal]);
 
   useEffect(() => {
     fetchBrands();

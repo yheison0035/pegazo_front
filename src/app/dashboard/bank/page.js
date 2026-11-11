@@ -18,6 +18,7 @@ import ConfirmModal from '@/components/ui/ConfirmModal';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import BankSetupModal from '@/components/bank/BankSetupModal';
 import { useAuth } from '@/context/authContext';
+import { useLocalScope } from '@/context/localScopeContext';
 import { formatCOP, formatDateTime } from '@/lib/api/utils/utils';
 import { announceDeposit } from '@/lib/bankSound';
 import {
@@ -35,6 +36,7 @@ const API = process.env.NEXT_PUBLIC_API_URL || '';
 
 export default function BankPage() {
   const { usuario, setUsuario } = useAuth();
+  const { activeLocal } = useLocalScope();
   const isOwner = ['SUPER_ADMIN', 'ADMIN'].includes(usuario?.role);
 
   // Refleja al instante el activar/desactivar en la sesión (y en localStorage),
@@ -71,19 +73,22 @@ export default function BankPage() {
   // que el dueño esté escribiendo).
   const loadDeposits = useCallback(async () => {
     try {
-      const dep = await getBankDeposits({ limit: 100 });
+      const dep = await getBankDeposits({
+        limit: 100,
+        ...(activeLocal ? { localId: activeLocal } : {}),
+      });
       setDeposits(dep?.data || []);
     } catch (e) {
       setAlert({ type: 'error', message: e.message || 'Error al cargar' });
     }
-  }, []);
+  }, [activeLocal]);
 
   // Carga la configuración UNA sola vez (al entrar). No se re-consulta en
   // intervalo para no pisar lo que el dueño esté escribiendo.
   const loadStatus = useCallback(async () => {
     if (!isOwner) return;
     try {
-      const st = await getBankStatus();
+      const st = await getBankStatus(activeLocal);
       if (st) {
         setStatus(st.data);
         setIdent(st.data?.identifier || '');
@@ -92,7 +97,7 @@ export default function BankPage() {
     } catch {
       /* ignora: la config se puede reintentar recargando la página */
     }
-  }, [isOwner]);
+  }, [isOwner, activeLocal]);
 
   useEffect(() => {
     (async () => {
@@ -107,7 +112,9 @@ export default function BankPage() {
   const toggle = async () => {
     setBusy(true);
     try {
-      const res = status?.enabled ? await disableBank() : await enableBank();
+      const res = status?.enabled
+        ? await disableBank(activeLocal)
+        : await enableBank(activeLocal ? { localId: activeLocal } : {});
       setStatus((s) => ({ ...(s || {}), ...res.data }));
       syncSession(!!res.data?.enabled);
     } catch (e) {
@@ -122,7 +129,7 @@ export default function BankPage() {
       return;
     setBusy(true);
     try {
-      const res = await regenerateBankToken();
+      const res = await regenerateBankToken(activeLocal);
       setStatus((s) => ({ ...(s || {}), ...res.data }));
     } catch (e) {
       setAlert({ type: 'error', message: e.message });
@@ -139,7 +146,11 @@ export default function BankPage() {
   const saveConfig = async () => {
     setBusy(true);
     try {
-      await setBankConfig({ identifier: ident, email });
+      await setBankConfig({
+        identifier: ident,
+        email,
+        ...(activeLocal ? { localId: activeLocal } : {}),
+      });
       setAlert({ type: 'success', message: 'Configuración guardada.' });
     } catch (e) {
       setAlert({ type: 'error', message: e.message || 'No se pudo guardar' });
@@ -154,7 +165,11 @@ export default function BankPage() {
     if (!tk) return;
     setBusy(true);
     try {
-      const res = await enableBank({ token: tk, identifier: ident });
+      const res = await enableBank({
+        token: tk,
+        identifier: ident,
+        ...(activeLocal ? { localId: activeLocal } : {}),
+      });
       setStatus((s) => ({ ...(s || {}), ...res.data }));
       syncSession(true);
       setShareToken('');
