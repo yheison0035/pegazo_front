@@ -94,6 +94,10 @@ export default function CarteraPage() {
           dueDate: pay.dueDate ?? row.dueDate,
           overdueDays: row.overdueDays || 0,
           payments: pay.payments || [],
+          // Plan de crédito por cuotas (si la venta lo tiene).
+          credit: pay.credit || null,
+          goodsTotal: pay.goodsTotal,
+          interestAmount: pay.interestAmount,
         },
       });
     } catch (_) {

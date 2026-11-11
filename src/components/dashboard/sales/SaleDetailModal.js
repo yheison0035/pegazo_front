@@ -13,7 +13,26 @@ import {
   BuildingStorefrontIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import { formatCOP, formatDateTime } from '@/lib/api/utils/utils';
+import { formatCOP, formatDateTime, formatDateOnly } from '@/lib/api/utils/utils';
+import { FREQ_LABEL } from '@/lib/creditPlan';
+
+// Estado de cada cuota del plan de crédito.
+const INSTALLMENT_STATUS = {
+  PAGADA: { label: 'Pagada', cls: 'bg-emerald-100 text-emerald-700' },
+  PARCIAL: { label: 'Parcial', cls: 'bg-amber-100 text-amber-700' },
+  VENCIDA: { label: 'Vencida', cls: 'bg-red-100 text-red-700' },
+  PENDIENTE: { label: 'Pendiente', cls: 'bg-gray-100 text-gray-500' },
+};
+function InstallmentBadge({ status }) {
+  const s = INSTALLMENT_STATUS[status] || INSTALLMENT_STATUS.PENDIENTE;
+  return (
+    <span
+      className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${s.cls}`}
+    >
+      {s.label}
+    </span>
+  );
+}
 
 const STATUS = {
   PAGADA: { label: 'Pagada', cls: 'bg-emerald-50 text-emerald-700 ring-emerald-200' },
@@ -251,6 +270,48 @@ export default function SaleDetailModal({
                   </span>
                 )}
               </div>
+
+              {/* Cronograma de cuotas (si la venta se pactó a cuotas). */}
+              {credit.credit?.installments?.length > 0 && (
+                <div className="mt-3 rounded-xl border border-orange-100 bg-orange-50/40 p-3">
+                  <div className="mb-2 flex flex-wrap items-center justify-between gap-1 text-[11px] text-gray-500">
+                    <span className="font-semibold uppercase tracking-wide text-orange-700">
+                      Plan ·{' '}
+                      {FREQ_LABEL[credit.credit.frequency] ||
+                        credit.credit.frequency}{' '}
+                      · {credit.credit.installmentsCount} cuotas
+                    </span>
+                    {credit.credit.interestAmount > 0 && (
+                      <span>
+                        Recargo{' '}
+                        <b className="text-gray-700">
+                          {credit.credit.interestPercent}% ·{' '}
+                          {formatCOP(credit.credit.interestAmount)}
+                        </b>
+                      </span>
+                    )}
+                  </div>
+                  <ul className="space-y-1">
+                    {credit.credit.installments.map((it) => (
+                      <li
+                        key={it.number}
+                        className="flex items-center justify-between rounded-lg bg-white px-3 py-1.5 text-xs"
+                      >
+                        <span className="text-gray-500">
+                          Cuota {it.number} ·{' '}
+                          {formatDateOnly(it.dueDate)}
+                        </span>
+                        <span className="flex items-center gap-2">
+                          <span className="font-semibold text-gray-800 tabular-nums">
+                            {formatCOP(it.amount)}
+                          </span>
+                          <InstallmentBadge status={it.status} />
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
               {Array.isArray(credit.payments) && credit.payments.length > 0 && (
                 <ul className="mt-3 space-y-1.5">
