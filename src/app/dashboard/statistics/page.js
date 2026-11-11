@@ -153,10 +153,12 @@ export default function Statistics() {
     }
   }, [startDate, endDate, localId, basis]);
 
+  // Carga inicial y RECARGA al cambiar la sede del selector global: así el
+  // Resumen/Gastos reflejan de inmediato la sede elegida (no espera al refresco).
   useEffect(() => {
     fetchStats();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [localId]);
 
   // Estadísticas en vivo: al volver a la pestaña/foco y cada 20s.
   useLiveRefresh(fetchStats);
@@ -401,10 +403,10 @@ export default function Statistics() {
         )}
 
         {tab === 'impuestos' && (
-          <TaxReport startDate={startDate} endDate={endDate} />
+          <TaxReport startDate={startDate} endDate={endDate} localId={localId} />
         )}
 
-        {tab === 'inventario' && <InventoryValuation />}
+        {tab === 'inventario' && <InventoryValuation localId={localId} />}
 
         {/* Filtros (Resumen y Gastos comparten el rango de fechas) */}
         <div

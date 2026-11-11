@@ -6,21 +6,25 @@ import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import { ChartCard, formatMoney } from './statsUI';
 
 // Reporte de IVA del periodo: generado (ventas) vs descontable (compras) → neto.
-export default function TaxReport({ startDate, endDate }) {
+export default function TaxReport({ startDate, endDate, localId }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const fetchTax = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await getTaxReport({ startDate, endDate });
+      const res = await getTaxReport({
+        startDate,
+        endDate,
+        ...(localId ? { localId: String(localId) } : {}),
+      });
       if (res?.success) setData(res.data);
     } catch (e) {
       console.error(e);
     } finally {
       setLoading(false);
     }
-  }, [startDate, endDate]);
+  }, [startDate, endDate, localId]);
 
   useEffect(() => {
     fetchTax();

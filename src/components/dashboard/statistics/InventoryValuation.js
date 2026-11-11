@@ -21,21 +21,23 @@ function Card({ label, value, color = 'text-gray-900', sub }) {
   );
 }
 
-export default function InventoryValuation() {
+export default function InventoryValuation({ localId }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await getInventoryValuation({});
+      const res = await getInventoryValuation(
+        localId ? { localId: String(localId) } : {},
+      );
       if (res?.success) setData(res.data);
     } catch (e) {
       console.error(e);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [localId]);
 
   useEffect(() => {
     load();
