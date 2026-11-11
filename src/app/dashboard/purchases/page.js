@@ -128,7 +128,7 @@ export default function PurchasesPage() {
     }
     const t = setTimeout(async () => {
       try {
-        const res = await searchProducts(term);
+        const res = await searchProducts(term, localId);
         const data = (res?.data || res || []).filter(
           (r) => r.type === 'product'
         );
@@ -138,7 +138,7 @@ export default function PurchasesPage() {
       }
     }, 300);
     return () => clearTimeout(t);
-  }, [search, searchProducts]);
+  }, [search, searchProducts, localId]);
 
   const addItem = (r) => {
     if (items.some((i) => i.inventoryVariantId === r.id)) return;

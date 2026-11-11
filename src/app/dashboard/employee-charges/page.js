@@ -74,7 +74,7 @@ export default function EmployeeChargesPage() {
 
   useEffect(() => {
     if (!isOwner) return;
-    getUsers({ limit: 200 })
+    getUsers({ limit: 200, ...(activeLocal ? { localId: activeLocal } : {}) })
       .then((r) => setEmployees(r?.data || []))
       .catch(() => setEmployees([]));
     getChargeCategories()
@@ -86,7 +86,7 @@ export default function EmployeeChargesPage() {
         if (otro) setForm((f) => ({ ...f, chargeCategoryId: String(otro.id) }));
       })
       .catch(() => setCategories([]));
-  }, [isOwner]);
+  }, [isOwner, activeLocal]);
 
   const load = useCallback(async () => {
     try {

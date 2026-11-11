@@ -76,7 +76,11 @@ export default function ReturnsPage() {
     }
     const t = setTimeout(async () => {
       try {
-        const res = await getSales({ code: term, limit: 6 });
+        const res = await getSales({
+          code: term,
+          limit: 6,
+          ...(activeLocal ? { localId: activeLocal } : {}),
+        });
         setSaleResults(res?.data || []);
       } catch (_) {
         setSaleResults([]);

@@ -113,14 +113,14 @@ export default function QuotesPage() {
     }
     const t = setTimeout(async () => {
       try {
-        const res = await searchProducts(term);
+        const res = await searchProducts(term, localId);
         setResults(res?.data || res || []);
       } catch (_) {
         setResults([]);
       }
     }, 300);
     return () => clearTimeout(t);
-  }, [search, searchProducts]);
+  }, [search, searchProducts, localId]);
 
   // buscador de clientes
   useEffect(() => {
@@ -131,14 +131,18 @@ export default function QuotesPage() {
     }
     const t = setTimeout(async () => {
       try {
-        const res = await getCustomers({ name: term, limit: 8 });
+        const res = await getCustomers({
+          name: term,
+          limit: 8,
+          ...(activeLocal ? { localId: activeLocal } : {}),
+        });
         setCustResults(res?.data || []);
       } catch (_) {
         setCustResults([]);
       }
     }, 300);
     return () => clearTimeout(t);
-  }, [custSearch]);
+  }, [custSearch, activeLocal]);
 
   const addItem = (r) => {
     const key = r.type === 'service' ? `s${r.id}` : `p${r.id}`;

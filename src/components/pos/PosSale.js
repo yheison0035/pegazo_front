@@ -312,7 +312,7 @@ export default function PosSale({
     setSearching(true);
     const to = setTimeout(async () => {
       try {
-        const res = await searchProducts(term);
+        const res = await searchProducts(term, localId);
         setResults(res?.data || res || []);
       } catch (_) {
         setResults([]);
@@ -321,7 +321,7 @@ export default function PosSale({
       }
     }, 250);
     return () => clearTimeout(to);
-  }, [query, searchProducts]);
+  }, [query, searchProducts, localId]);
 
   // Buscador de clientes.
   useEffect(() => {
@@ -332,14 +332,18 @@ export default function PosSale({
     }
     const to = setTimeout(async () => {
       try {
-        const res = await getCustomers({ name: term, limit: 6 });
+        const res = await getCustomers({
+          name: term,
+          limit: 6,
+          ...(localId ? { localId } : {}),
+        });
         setCustResults(res?.data || []);
       } catch (_) {
         setCustResults([]);
       }
     }, 250);
     return () => clearTimeout(to);
-  }, [custSearch, customer]);
+  }, [custSearch, customer, localId]);
 
   // Tope de cantidad: servicios y elaborados (sin control de stock) son
   // ilimitados; el resto no puede pasar de las existencias. Al EDITAR, la
@@ -797,7 +801,7 @@ export default function PosSale({
                     const term = query.trim();
                     if (term.length >= 2) {
                       try {
-                        const res = await searchProducts(term);
+                        const res = await searchProducts(term, localId);
                         const list = (res?.data || res || []).filter(
                           (r) => !r.localId || String(r.localId) === String(localId)
                         );

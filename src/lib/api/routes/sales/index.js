@@ -22,9 +22,10 @@ export async function getSales(params = {}) {
   return apiFetch(`/sales?${query.toString()}`);
 }
 
-export async function searchProducts(term) {
+export async function searchProducts(term, localId) {
   if (!term || term.length < 2) return { data: [] };
-  return apiFetch(`/inventory/search/${term}`);
+  const qs = localId ? `?localId=${Number(localId)}` : '';
+  return apiFetch(`/inventory/search/${term}${qs}`);
 }
 
 // Detalle de una venta por id (para abrirla desde el buscador global).

@@ -101,10 +101,10 @@ export default function MembershipsPage() {
 
   useEffect(() => {
     load();
-    getCustomers({ limit: 500 })
+    getCustomers({ limit: 500, ...(viewLocal ? { localId: viewLocal } : {}) })
       .then((r) => setCustomers(r?.data || []))
       .catch(() => setCustomers([]));
-  }, [load]);
+  }, [load, viewLocal]);
 
   // Datos en vivo: refresca al volver a la pestana/foco y cada 20s.
   useLiveRefresh(load);

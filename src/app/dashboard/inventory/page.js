@@ -62,7 +62,7 @@ export default function Inventory() {
   const handleExport = async () => {
     setExporting(true);
     try {
-      const res = await exportInventory();
+      const res = await exportInventory(viewLocal);
       const rows = res?.data || res || [];
       if (!rows.length) {
         setAlert({ type: 'warning', message: 'No hay productos para exportar.' });

@@ -177,6 +177,7 @@ export default function Delivered_Sales() {
         page: 1,
         limit: 5000,
         ...debouncedFilters,
+        ...(viewLocal ? { localId: viewLocal } : {}),
       });
       const rows = (res.data || []).map((s) => ({
         Fecha: formatDateSafe(s.saleDate),

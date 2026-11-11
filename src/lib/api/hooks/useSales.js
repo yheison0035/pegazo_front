@@ -21,7 +21,7 @@ export default function useSales() {
   }, []);
 
   const searchProductsFn = useCallback(
-    (term) => wrap(searchProducts, term),
+    (term, localId) => wrap(searchProducts, term, localId),
     [wrap]
   );
   const createSaleFn = useCallback((dto) => wrap(createSale, dto), [wrap]);

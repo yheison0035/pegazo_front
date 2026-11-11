@@ -271,7 +271,7 @@ export default function StoragePage() {
 
   useEffect(() => {
     load();
-    getProducts({ limit: 500 })
+    getProducts({ limit: 500, ...(activeLocal ? { localId: activeLocal } : {}) })
       .then((r) => {
         const list = (r?.data || [])
           .map((p) => {
@@ -285,7 +285,7 @@ export default function StoragePage() {
     // Usuarios registrados (para elegir quién recibe el casco). Se garantiza que
     // el usuario actual siempre esté disponible aunque no pueda listar usuarios.
     const meOption = usuario?.id ? [{ id: usuario.id, name: usuario.name || 'Yo' }] : [];
-    getUsers({ limit: 200 })
+    getUsers({ limit: 200, ...(activeLocal ? { localId: activeLocal } : {}) })
       .then((r) => {
         const list = r?.data || [];
         const withMe =
@@ -295,7 +295,7 @@ export default function StoragePage() {
         setUsers(withMe);
       })
       .catch(() => setUsers(meOption));
-  }, [load, usuario?.id, usuario?.name]);
+  }, [load, usuario?.id, usuario?.name, activeLocal]);
 
   // Reloj en vivo (cada 30s) para el cobro que corre con el tiempo.
   useEffect(() => {
