@@ -27,6 +27,7 @@ import {
   deleteAsset,
   importAssets,
 } from '@/lib/api/routes/assets';
+import { useLocalScope } from '@/context/localScopeContext';
 import ImportSheetButtons from '@/components/accounting/ImportSheetButtons';
 import { assetsTemplateSheets, toAssetRows } from '@/lib/accounting/importSheets';
 
@@ -74,6 +75,7 @@ const CATEGORY_SUGGESTIONS = [
 ];
 
 export default function AssetsPage() {
+  const { activeLocal } = useLocalScope();
   const [rows, setRows] = useState([]);
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -89,7 +91,7 @@ export default function AssetsPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await getAssets();
+      const res = await getAssets(activeLocal ? { localId: activeLocal } : {});
       const data = res?.data || [];
       setRows(data);
       setSummary(res?.summary || null);
@@ -101,7 +103,7 @@ export default function AssetsPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [activeLocal]);
 
   useEffect(() => {
     load();

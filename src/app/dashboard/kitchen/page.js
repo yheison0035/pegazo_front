@@ -10,6 +10,7 @@ import {
 } from '@heroicons/react/24/outline';
 import Button from '@/components/ui/Button';
 import { useAuth } from '@/context/authContext';
+import { useLocalScope } from '@/context/localScopeContext';
 import { getKitchen, setComandaStatus } from '@/lib/api/routes/comandas';
 import {
   getMenuAvailability,
@@ -42,6 +43,7 @@ function elapsedLabel(min) {
 
 export default function Kitchen() {
   const auth = useAuth();
+  const { activeLocal } = useLocalScope();
   // La cocina marca Preparando/Listo; "Entregar" es acción del mesero.
   const isCocinero = auth?.usuario?.role === 'COCINERO';
   const [comandas, setComandas] = useState([]);
@@ -55,14 +57,14 @@ export default function Kitchen() {
 
   const load = useCallback(async () => {
     try {
-      const res = await getKitchen();
+      const res = await getKitchen(activeLocal);
       setComandas(res?.data || []);
     } catch {
       setComandas([]);
     } finally {
       setLoaded(true);
     }
-  }, []);
+  }, [activeLocal]);
 
   const loadMenu = useCallback(async () => {
     try {

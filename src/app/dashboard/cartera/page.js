@@ -19,6 +19,7 @@ import {
   SALES_CHANGED_EVENT,
 } from '@/lib/api/routes/sales';
 import { useAuth } from '@/context/authContext';
+import { useLocalScope } from '@/context/localScopeContext';
 import { formatCOP, formatDateOnly, formatDateTime } from '@/lib/api/utils/utils';
 import Button from '@/components/ui/Button';
 import StatusBadge from '@/components/ui/StatusBadge';
@@ -55,6 +56,7 @@ function OverdueBadge({ days, dueDate }) {
 export default function CarteraPage() {
   const auth = useAuth();
   const usuario = auth?.usuario;
+  const { activeLocal } = useLocalScope();
   const [tab, setTab] = useState('por_cobrar');
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState({ totalSaldo: 0, count: 0, rows: [] });
@@ -120,10 +122,11 @@ export default function CarteraPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
+      const scope = activeLocal ? { localId: activeLocal } : {};
       const [rec, cred, hist] = await Promise.all([
-        getReceivables(),
-        getCreditsHistory(),
-        getPaymentsHistory(),
+        getReceivables(scope),
+        getCreditsHistory(scope),
+        getPaymentsHistory(scope),
       ]);
       setData(rec?.data || { totalSaldo: 0, count: 0, rows: [] });
       setCredits(
@@ -137,7 +140,7 @@ export default function CarteraPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [activeLocal]);
 
   useEffect(() => {
     load();

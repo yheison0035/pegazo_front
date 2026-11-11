@@ -14,6 +14,7 @@ import MoneyInput from '@/components/ui/MoneyInput';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import { useAuth } from '@/context/authContext';
+import { useLocalScope } from '@/context/localScopeContext';
 import { formatCOP } from '@/lib/api/utils/utils';
 import {
   getSupplies,
@@ -45,6 +46,7 @@ const MANAGE_ROLES = ['SUPER_ADMIN', 'ADMIN'];
 export default function Supplies() {
   const auth = useAuth();
   const usuario = auth?.usuario;
+  const { activeLocal } = useLocalScope();
   const canManage = MANAGE_ROLES.includes(usuario?.role);
 
   const [supplies, setSupplies] = useState([]);
@@ -60,14 +62,14 @@ export default function Supplies() {
 
   const load = useCallback(async () => {
     try {
-      const res = await getSupplies();
+      const res = await getSupplies(activeLocal ? { localId: activeLocal } : {});
       setSupplies(res?.data || []);
     } catch {
       setSupplies([]);
     } finally {
       setLoaded(true);
     }
-  }, []);
+  }, [activeLocal]);
 
   useEffect(() => {
     load();

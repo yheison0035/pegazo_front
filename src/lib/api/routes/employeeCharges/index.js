@@ -7,9 +7,12 @@ export async function getEmployeeCharges(params = {}) {
   return apiFetch(`/employee-charges${q ? `?${q}` : ''}`);
 }
 
-export async function getEmployeeChargesSummary(userId) {
-  const q = userId ? `?userId=${userId}` : '';
-  return apiFetch(`/employee-charges/summary${q}`);
+export async function getEmployeeChargesSummary(userId, localId) {
+  const p = new URLSearchParams();
+  if (userId) p.set('userId', String(userId));
+  if (localId) p.set('localId', String(localId));
+  const q = p.toString();
+  return apiFetch(`/employee-charges/summary${q ? `?${q}` : ''}`);
 }
 
 export async function createEmployeeCharge(dto) {

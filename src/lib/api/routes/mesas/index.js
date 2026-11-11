@@ -1,7 +1,8 @@
 import apiFetch from '../../auth/client';
 
-export async function getMesas() {
-  return apiFetch('/mesas');
+export async function getMesas(localId) {
+  const qs = localId ? `?localId=${Number(localId)}` : '';
+  return apiFetch(`/mesas${qs}`);
 }
 
 export async function createMesa(dto) {

@@ -17,6 +17,7 @@ import {
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
 import { useAuth } from '@/context/authContext';
+import { useLocalScope } from '@/context/localScopeContext';
 import { formatCOP, formatDateSafe } from '@/lib/api/utils/utils';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import useLiveRefresh from '@/hooks/useLiveRefresh';
@@ -41,6 +42,7 @@ const inputCls =
 
 export default function LayawayPage() {
   const { usuario } = useAuth();
+  const { activeLocal } = useLocalScope();
   const { getDeliveredSaleById } = useDeliveredSales();
   const isOwner = ['SUPER_ADMIN', 'ADMIN'].includes(usuario?.role);
 
@@ -69,8 +71,9 @@ export default function LayawayPage() {
         customer: search.trim() || undefined,
         from: from || undefined,
         to: to || undefined,
+        ...(activeLocal ? { localId: activeLocal } : {}),
       }),
-    [search, from, to],
+    [search, from, to, activeLocal],
   );
 
   const load = useCallback(async () => {

@@ -18,6 +18,7 @@ import {
 import RoleGuard from '@/auth/roleGuard';
 import { Roles } from '@/config/roles';
 import { useAuth } from '@/context/authContext';
+import { useLocalScope } from '@/context/localScopeContext';
 import Button from '@/components/ui/Button';
 import MoneyInput from '@/components/ui/MoneyInput';
 import AlertModal from '@/components/dashboard/modals/alertModal';
@@ -224,6 +225,7 @@ const EMPTY_CHECKIN = {
 
 export default function StoragePage() {
   const { usuario } = useAuth();
+  const { activeLocal } = useLocalScope();
   const isOwner = ['SUPER_ADMIN', 'ADMIN'].includes(usuario?.role);
   const company = usuario?.company || {};
   const businessName = company.name || 'Guarda cascos';
@@ -256,7 +258,7 @@ export default function StoragePage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await getStorage();
+      const res = await getStorage(activeLocal);
       setActive(res?.data || []);
       setSettings(res?.settings || null);
       setSummary(res?.summary || null);
@@ -265,7 +267,7 @@ export default function StoragePage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [activeLocal]);
 
   useEffect(() => {
     load();

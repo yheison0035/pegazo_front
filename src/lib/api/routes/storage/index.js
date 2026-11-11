@@ -2,8 +2,9 @@ import apiFetch from '../../auth/client';
 
 // Guarda cascos — custodia de cascos (exclusivo de este tipo de negocio).
 
-export async function getStorage() {
-  return apiFetch('/storage');
+export async function getStorage(localId) {
+  const qs = localId ? `?localId=${Number(localId)}` : '';
+  return apiFetch(`/storage${qs}`);
 }
 export async function getStorageHistory(limit = 30) {
   return apiFetch(`/storage/history?limit=${limit}`);

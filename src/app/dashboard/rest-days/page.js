@@ -22,6 +22,7 @@ import {
   addTimeOff,
   removeTimeOff,
 } from '@/lib/api/routes/restDays';
+import { useLocalScope } from '@/context/localScopeContext';
 
 const WEEKDAYS = [
   { n: 1, label: 'Lun' },
@@ -73,6 +74,7 @@ function weekdayOf(dateStr) {
 }
 
 export default function RestDaysPage() {
+  const { activeLocal } = useLocalScope();
   const [pros, setPros] = useState([]);
   const [selected, setSelected] = useState(null);
   const [config, setConfig] = useState(null); // {restWeekdays, timeOff}
@@ -106,14 +108,16 @@ export default function RestDaysPage() {
   };
 
   useEffect(() => {
-    getRestDaysProfessionals()
+    getRestDaysProfessionals(activeLocal)
       .then((r) => {
         const list = r?.data || [];
         setPros(list);
-        if (list.length) setSelected(list[0].id);
+        setSelected((cur) =>
+          cur && list.some((p) => p.id === cur) ? cur : list[0]?.id || null,
+        );
       })
       .catch(() => setPros([]));
-  }, []);
+  }, [activeLocal]);
 
   const loadConfig = useCallback(async (userId) => {
     if (!userId) return;

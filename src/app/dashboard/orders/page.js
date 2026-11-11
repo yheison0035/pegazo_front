@@ -9,6 +9,7 @@ import Pagination from '@/components/dashboard/tables/segments/pagination';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import useOrders from '@/lib/api/hooks/useOrders';
+import { useLocalScope } from '@/context/localScopeContext';
 import { formatCOP, formatDateTime } from '@/lib/api/utils/utils';
 import OrderDetailModal from '@/components/dashboard/orders/OrderDetailModal';
 import {
@@ -24,6 +25,7 @@ import {
 
 export default function Orders() {
   const { getOrders, loading } = useOrders();
+  const { activeLocal } = useLocalScope();
 
   const [orders, setOrders] = useState([]);
   const [meta, setMeta] = useState(null);
@@ -39,13 +41,18 @@ export default function Orders() {
 
   const fetchOrders = useCallback(async () => {
     try {
-      const res = await getOrders({ page, limit, ...filters });
+      const res = await getOrders({
+        page,
+        limit,
+        ...filters,
+        ...(activeLocal ? { localId: activeLocal } : {}),
+      });
       setOrders(res.data || []);
       setMeta(res.meta || null);
     } catch (err) {
       setAlert({ type: 'error', message: err.message || 'Error al cargar pedidos' });
     }
-  }, [getOrders, page, limit, filters]);
+  }, [getOrders, page, limit, filters, activeLocal]);
 
   useEffect(() => {
     const t = setTimeout(fetchOrders, 300);

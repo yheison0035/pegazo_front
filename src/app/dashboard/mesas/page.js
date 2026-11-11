@@ -19,6 +19,7 @@ import Button from '@/components/ui/Button';
 import ProductSelector from '@/components/dashboard/form/fields/ProductSelectField/productSelector';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import { useAuth } from '@/context/authContext';
+import { useLocalScope } from '@/context/localScopeContext';
 import { formatCOP } from '@/lib/api/utils/utils';
 import { printComanda } from '@/utils/printComanda';
 import {
@@ -67,6 +68,7 @@ function toComandaItems(items) {
 export default function Mesas() {
   const auth = useAuth();
   const usuario = auth?.usuario;
+  const { activeLocal } = useLocalScope();
   const canCharge = CHARGE_ROLES.includes(usuario?.role);
   const canOrder = ORDER_ROLES.includes(usuario?.role);
   // Crear/eliminar mesas es solo del dueño/admin (el backend lo restringe igual).
@@ -160,12 +162,12 @@ export default function Mesas() {
 
   const load = useCallback(async () => {
     try {
-      const res = await getMesas();
+      const res = await getMesas(activeLocal);
       setMesas(res?.data || []);
     } catch {
       setMesas([]);
     }
-  }, []);
+  }, [activeLocal]);
 
   useEffect(() => {
     load();

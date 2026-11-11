@@ -11,6 +11,7 @@ import {
 import RoleGuard from '@/auth/roleGuard';
 import { Roles, ALL_EXCEPT_BARBER } from '@/config/roles';
 import useReturns from '@/lib/api/hooks/useReturns';
+import { useLocalScope } from '@/context/localScopeContext';
 import { getSales } from '@/lib/api/routes/sales';
 import { formatCOP, formatDateTime } from '@/lib/api/utils/utils';
 import Pagination from '@/components/dashboard/tables/segments/pagination';
@@ -27,6 +28,8 @@ export default function ReturnsPage() {
     createReturn,
     loading,
   } = useReturns();
+  // Sede activa del selector global (solo el dueño).
+  const { activeLocal } = useLocalScope();
 
   const [returns, setReturns] = useState([]);
   const [meta, setMeta] = useState(null);
@@ -45,13 +48,17 @@ export default function ReturnsPage() {
 
   const fetchReturns = useCallback(async () => {
     try {
-      const res = await getReturns({ page, limit });
+      const res = await getReturns({
+        page,
+        limit,
+        ...(activeLocal ? { localId: activeLocal } : {}),
+      });
       setReturns(res.data || []);
       setMeta(res.meta || null);
     } catch (err) {
       setAlert({ type: 'error', message: err.message || 'Error al cargar' });
     }
-  }, [getReturns, page, limit]);
+  }, [getReturns, page, limit, activeLocal]);
 
   useEffect(() => {
     fetchReturns();

@@ -22,6 +22,7 @@ import {
 import useColumnFilters from '@/components/dashboard/tables/hooks/useColumnFilters';
 import { useDebounce } from '@/components/dashboard/tables/hooks/useDebounce';
 import useServices from '@/lib/api/hooks/useServices';
+import { useLocalScope } from '@/context/localScopeContext';
 import usePermissions from '@/hooks/usePermissions';
 
 export default function Services() {
@@ -29,6 +30,7 @@ export default function Services() {
   const t = useTerms();
   const usuario = auth?.usuario;
   const { getServices, deleteService, loading } = useServices();
+  const { activeLocal } = useLocalScope();
 
   const [services, setServices] = useState([]);
   const [meta, setMeta] = useState(null);
@@ -57,11 +59,12 @@ export default function Services() {
       page,
       limit,
       ...debouncedFilters,
+      ...(activeLocal ? { localId: activeLocal } : {}),
     });
 
     setServices(res.data);
     setMeta(res.meta);
-  }, [getServices, page, limit, debouncedFilters]);
+  }, [getServices, page, limit, debouncedFilters, activeLocal]);
 
   useEffect(() => {
     fetchServices();

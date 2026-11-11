@@ -1,7 +1,8 @@
 import apiFetch from '../../auth/client';
 
-export async function getRestDaysProfessionals() {
-  return apiFetch('/rest-days/professionals');
+export async function getRestDaysProfessionals(localId) {
+  const qs = localId ? `?localId=${Number(localId)}` : '';
+  return apiFetch(`/rest-days/professionals${qs}`);
 }
 
 export async function getRestDays(userId) {

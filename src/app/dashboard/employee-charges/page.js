@@ -17,6 +17,7 @@ import MoneyInput from '@/components/ui/MoneyInput';
 import TableActionButton from '@/components/ui/TableActionButton';
 import AlertModal from '@/components/dashboard/modals/alertModal';
 import { useAuth } from '@/context/authContext';
+import { useLocalScope } from '@/context/localScopeContext';
 import { formatCOP } from '@/lib/api/utils/utils';
 import { getUsers } from '@/lib/api/routes/users';
 import { getChargeCategories } from '@/lib/api/routes/chargeCategories';
@@ -47,6 +48,7 @@ const OWNER_ROLES = ['SUPER_ADMIN', 'ADMIN'];
 
 export default function EmployeeChargesPage() {
   const { usuario } = useAuth();
+  const { activeLocal } = useLocalScope();
   const isOwner = OWNER_ROLES.includes(usuario?.role);
 
   const [employees, setEmployees] = useState([]);
@@ -89,8 +91,14 @@ export default function EmployeeChargesPage() {
   const load = useCallback(async () => {
     try {
       const [c, s] = await Promise.all([
-        getEmployeeCharges(effectiveUserId ? { userId: effectiveUserId } : {}),
-        getEmployeeChargesSummary(isOwner ? effectiveUserId : undefined),
+        getEmployeeCharges({
+          ...(effectiveUserId ? { userId: effectiveUserId } : {}),
+          ...(activeLocal ? { localId: activeLocal } : {}),
+        }),
+        getEmployeeChargesSummary(
+          isOwner ? effectiveUserId : undefined,
+          activeLocal || undefined,
+        ),
       ]);
       setCharges(c?.data || []);
       setSummary(s?.data || null);
@@ -98,7 +106,7 @@ export default function EmployeeChargesPage() {
       setCharges([]);
       setSummary(null);
     }
-  }, [effectiveUserId, isOwner]);
+  }, [effectiveUserId, isOwner, activeLocal]);
 
   useEffect(() => {
     load();

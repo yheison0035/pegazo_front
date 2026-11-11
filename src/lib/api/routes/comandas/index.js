@@ -11,8 +11,9 @@ export async function addComandaItems(id, items) {
   });
 }
 
-export async function getKitchen() {
-  return apiFetch('/comandas/kitchen');
+export async function getKitchen(localId) {
+  const qs = localId ? `?localId=${Number(localId)}` : '';
+  return apiFetch(`/comandas/kitchen${qs}`);
 }
 
 export async function getComandasByMesa(mesaId) {
