@@ -82,6 +82,12 @@ export async function addSalePayment(saleId, dto) {
 
 // Elimina una venta (solo SUPER_ADMIN). El backend restaura el stock, borra los
 // abonos y baja los ingresos de caja asociados. Irreversible.
+// "Recordar ahora": envía al cliente el recordatorio de pago de su crédito al
+// instante (independiente del envío automático diario).
+export async function sendCreditReminder(saleId) {
+  return apiFetch(`/sales/${saleId}/credit-reminder`, { method: 'POST' });
+}
+
 export async function deleteSale(id) {
   const res = await apiFetch(`/sales/${id}`, { method: 'DELETE' });
   notifySalesChanged();

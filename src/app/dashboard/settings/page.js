@@ -18,6 +18,7 @@ import {
   KeyIcon,
   TrashIcon,
   BanknotesIcon,
+  BellAlertIcon,
 } from '@heroicons/react/24/outline';
 import {
   linkAccountant,
@@ -46,6 +47,7 @@ import {
   updateTerminology,
   updateCompanyMail,
   testCompanyMail,
+  updateCreditReminders,
 } from '@/lib/api/routes/company';
 import { CRM_FONTS, googleFontHref } from '@/config/crmFonts';
 
@@ -1166,6 +1168,122 @@ function FiscalCard({ initial }) {
   );
 }
 
+// Recordatorios de crédito (fiado): interruptor global + días de antelación.
+// El aviso le llega al CLIENTE por correo; el botón "Recordar ahora" del módulo
+// Créditos funciona aunque esto esté apagado.
+function CreditRemindersCard({ initial }) {
+  const [enabled, setEnabled] = useState(false);
+  const [days, setDays] = useState(1);
+  const [saving, setSaving] = useState(false);
+  const [alert, setAlert] = useState({});
+
+  useEffect(() => {
+    if (initial) {
+      setEnabled(!!initial.creditRemindersEnabled);
+      setDays(
+        initial.creditReminderDaysBefore != null
+          ? Number(initial.creditReminderDaysBefore)
+          : 1,
+      );
+    }
+  }, [initial]);
+
+  const save = async (patch) => {
+    setSaving(true);
+    try {
+      const res = await updateCreditReminders(patch);
+      const d = res?.data || {};
+      if (d.creditRemindersEnabled != null)
+        setEnabled(!!d.creditRemindersEnabled);
+      if (d.creditReminderDaysBefore != null)
+        setDays(Number(d.creditReminderDaysBefore));
+      setAlert({ type: 'success', message: 'Preferencia guardada.' });
+    } catch (e) {
+      setAlert({ type: 'error', message: e.message || 'No se pudo guardar.' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const toggle = (val) => {
+    setEnabled(val);
+    save({ creditRemindersEnabled: val });
+  };
+
+  const saveDays = () => {
+    const v = Math.min(60, Math.max(0, Math.floor(Number(days) || 0)));
+    setDays(v);
+    save({ creditReminderDaysBefore: v });
+  };
+
+  return (
+    <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+      <div className="flex items-start gap-3">
+        <div className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-orange-50 text-orange-600">
+          <BellAlertIcon className="h-5 w-5" />
+        </div>
+        <div>
+          <h2 className="text-base font-bold text-gray-800">
+            Recordatorios de crédito
+          </h2>
+          <p className="text-sm text-gray-500">
+            Si lo activas, a tus clientes con <b>ventas a crédito (fiado)</b> les
+            llega un <b>correo recordándoles la cuota</b> por vencer y, si se
+            atrasan, otro avisando que está <b>vencida</b>. El recordatorio sale
+            con el nombre y el color de tu negocio. Solo se envía a clientes que
+            tengan correo registrado.
+          </p>
+        </div>
+      </div>
+
+      <label className="mt-4 flex cursor-pointer items-center justify-between rounded-xl border border-gray-100 bg-gray-50 px-4 py-3">
+        <span className="text-sm font-medium text-gray-700">
+          Enviar recordatorios automáticos por correo
+        </span>
+        <input
+          type="checkbox"
+          checked={enabled}
+          disabled={saving}
+          onChange={(e) => toggle(e.target.checked)}
+          className="h-5 w-5 accent-orange-500"
+        />
+      </label>
+
+      {enabled && (
+        <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-gray-100 bg-white px-4 py-3">
+          <span className="text-sm text-gray-600">Avisar</span>
+          <input
+            type="number"
+            min={0}
+            max={60}
+            value={days}
+            disabled={saving}
+            onChange={(e) => setDays(e.target.value)}
+            onBlur={saveDays}
+            className="w-16 rounded-lg border border-gray-200 px-2 py-1 text-center text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+          />
+          <span className="text-sm text-gray-600">
+            {Number(days) === 1 ? 'día antes' : 'días antes'} del vencimiento de
+            cada cuota.
+          </span>
+        </div>
+      )}
+
+      <p className="mt-2 text-xs text-gray-400">
+        {enabled
+          ? 'Activado: el envío se hace una vez al día de forma automática. También puedes usar “Recordar ahora” en el módulo Créditos.'
+          : 'Desactivado: no se envían correos automáticos. Aun así puedes enviar recordatorios manuales desde el módulo Créditos.'}
+      </p>
+
+      <AlertModal
+        type={alert.type}
+        message={alert.message}
+        onClose={() => setAlert({})}
+      />
+    </div>
+  );
+}
+
 function CashPolicyCard({ initial }) {
   const auth = useAuth();
   const usuario = auth?.usuario;
@@ -1960,6 +2078,7 @@ export default function Settings() {
                   subtitle="Reglas para vender y manejar la caja."
                 >
                   <CashPolicyCard initial={settings} />
+                  <CreditRemindersCard initial={settings} />
                 </SettingsSection>
               )}
 

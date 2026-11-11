@@ -78,6 +78,15 @@ export async function updateTerminology(dto) {
 }
 
 // Política de caja: exigir abrir el día (caja) para poder vender.
+// Recordatorios de crédito (fiado) por correo al cliente: interruptor global
+// de la empresa + días de antelación del aviso.
+export async function updateCreditReminders(dto) {
+  return apiFetch('/company/credit-reminders', {
+    method: 'PATCH',
+    body: JSON.stringify(dto),
+  });
+}
+
 export async function updateCashPolicy(requireCashOpen) {
   return apiFetch('/company/cash-policy', {
     method: 'PATCH',
