@@ -183,7 +183,7 @@ export default function CarteraPage() {
         <div className="mb-5">
           <h1 className="flex items-center gap-2 text-2xl font-semibold text-gray-800">
             <CreditCardIcon className="h-7 w-7 text-orange-500" />
-            Cartera
+            Créditos
           </h1>
           <p className="text-sm text-gray-500">
             Ventas a crédito (fiado) con saldo pendiente. Registra abonos y

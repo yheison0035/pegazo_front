@@ -206,7 +206,7 @@ export const NAVIGATION = [
         roles: ['SUPER_ADMIN', 'ADMIN'],
       },
       {
-        name: 'Cartera',
+        name: 'Créditos',
         href: '/dashboard/cartera',
         icon: CreditCardIcon,
         roles: ['SUPER_ADMIN', 'ADMIN', 'ASESOR', 'RECEPCIONISTA', 'CAJA'],
