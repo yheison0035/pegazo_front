@@ -205,6 +205,22 @@ describe('Ventas (POS) · cobrar', () => {
     expect(call.body).toMatchObject({ paymentMethod: 'CREDITO', paymentStatus: 'FIADO' });
   });
 
+  it('a crédito por cuotas envía el plan (nº de cuotas, frecuencia, cuota inicial)', async () => {
+    await openPos(api);
+    await addItem(api, 'cami', 'CAMISETA BÁSICA');
+    await click(screen.getByRole('button', { name: 'Crédito (fiado)' }));
+    // Aparece el plan de crédito: nº de cuotas + frecuencia.
+    await typeInto(screen.getByPlaceholderText('Ej: 6'), '6');
+    await click(submitButton());
+    const call = await waitForCall(api, 'POST', /^\/sales$/);
+    expect(call.body).toMatchObject({
+      paymentMethod: 'CREDITO',
+      paymentStatus: 'FIADO',
+      creditInstallmentsCount: 6,
+      creditFrequency: 'MENSUAL',
+    });
+  });
+
   it('busca y asigna un cliente identificado a la factura', async () => {
     await openPos(api);
     await addItem(api, 'cami', 'CAMISETA BÁSICA');

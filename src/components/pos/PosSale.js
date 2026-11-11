@@ -25,6 +25,7 @@ import { useAuth } from '@/context/authContext';
 import { useLocalScope } from '@/context/localScopeContext';
 import useTerms from '@/hooks/useTerms';
 import { isByWeightItem } from '@/lib/pos/weight';
+import { buildCreditPlan, FREQUENCIES } from '@/lib/creditPlan';
 import useSales from '@/lib/api/hooks/useSales';
 import useUsers from '@/lib/api/hooks/useUsers';
 import useLocals from '@/lib/api/hooks/useLocals';
@@ -143,6 +144,15 @@ export default function PosSale({
   const [showMore, setShowMore] = useState(false);
   // Vencimiento del fiado (solo cuando el pago es a crédito).
   const [dueDate, setDueDate] = useState(initial?.dueDate || '');
+  // Plan de crédito por cuotas (solo cuando el pago es a crédito). Si el número
+  // de cuotas queda vacío, la venta se comporta como fiado simple (un solo
+  // vencimiento, el campo de fecha de arriba).
+  const [creditCount, setCreditCount] = useState('');
+  const [creditFrequency, setCreditFrequency] = useState('MENSUAL');
+  const [creditInterest, setCreditInterest] = useState('');
+  const [creditDown, setCreditDown] = useState('');
+  const [creditDownMethod, setCreditDownMethod] = useState('EFECTIVO');
+  const [creditStart, setCreditStart] = useState('');
   // Efectivo recibido (para calcular el vuelto). Solo ayuda al cajero.
   const [cashReceived, setCashReceived] = useState('');
   // Tipo de venta: 'contado' (normal) o 'layaway' (plan separe / apartado). En
@@ -540,6 +550,26 @@ export default function PosSale({
     total
   );
 
+  // Crédito por cuotas: cuota inicial, nº de cuotas y plan previsualizado.
+  const creditDownNum = Math.min(
+    Number(String(creditDown).replace(/[^\d]/g, '')) || 0,
+    total
+  );
+  const creditCountNum = Math.max(0, parseInt(creditCount, 10) || 0);
+  const isCreditPlan =
+    paymentMethod === 'CREDITO' && !isLayaway && creditCountNum >= 1;
+  const creditPlanPreview = isCreditPlan
+    ? buildCreditPlan({
+        total,
+        downPayment: creditDownNum,
+        interestPercent: Number(creditInterest) || 0,
+        count: creditCountNum,
+        frequency: creditFrequency,
+        startDate: creditStart || null,
+        saleDate,
+      })
+    : null;
+
   const clearAll = () => {
     setCart([]);
     setCustomer(null);
@@ -554,6 +584,13 @@ export default function PosSale({
     setSaleDate(nowLocalDatetime());
     setDueDate('');
     setCashReceived('');
+    // Plan de crédito: vuelve a los valores por defecto.
+    setCreditCount('');
+    setCreditFrequency('MENSUAL');
+    setCreditInterest('');
+    setCreditDown('');
+    setCreditDownMethod('EFECTIVO');
+    setCreditStart('');
   };
 
   const submit = async () => {
@@ -618,6 +655,17 @@ export default function PosSale({
             : 'PAGADA',
         dueDate:
           !isLayaway && paymentMethod === 'CREDITO' && dueDate ? dueDate : null,
+        // Crédito por cuotas: términos del plan (el backend arma el cronograma).
+        ...(isCreditPlan
+          ? {
+              creditInstallmentsCount: creditCountNum,
+              creditFrequency,
+              creditInterestPercent: Number(creditInterest) || 0,
+              creditDownPayment: creditDownNum,
+              creditDownPaymentMethod: creditDownMethod,
+              creditStartDate: creditStart || null,
+            }
+          : {}),
         localId: Number(localId),
         userId: Number(sellerId) || usuario?.id,
         customerId: customer?.id,
@@ -1497,16 +1545,163 @@ export default function PosSale({
                 )}
 
                 {paymentMethod === 'CREDITO' && !isLayaway && (
-                  <div>
-                    <label className="text-[11px] font-medium text-gray-500">
-                      Fecha de vencimiento (opcional)
-                    </label>
-                    <input
-                      type="date"
-                      value={dueDate}
-                      onChange={(e) => setDueDate(e.target.value)}
-                      className="mt-0.5 w-full rounded-lg border border-gray-200 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    />
+                  <div className="space-y-2 rounded-lg border border-orange-100 bg-orange-50/50 p-2.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-semibold uppercase tracking-wide text-orange-700">
+                        Plan de crédito
+                      </span>
+                      <span className="text-[11px] text-gray-500">
+                        A financiar:{' '}
+                        <b className="text-gray-700">
+                          {formatCOP(Math.max(0, total - creditDownNum))}
+                        </b>
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-[11px] font-medium text-gray-500">
+                          N° de cuotas
+                        </label>
+                        <input
+                          inputMode="numeric"
+                          value={creditCount}
+                          onChange={(e) =>
+                            setCreditCount(e.target.value.replace(/[^\d]/g, ''))
+                          }
+                          placeholder="Ej: 6"
+                          className="mt-0.5 w-full rounded-lg border border-gray-200 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-medium text-gray-500">
+                          Frecuencia
+                        </label>
+                        <select
+                          value={creditFrequency}
+                          onChange={(e) => setCreditFrequency(e.target.value)}
+                          className="mt-0.5 w-full rounded-lg border border-gray-200 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        >
+                          {FREQUENCIES.map((f) => (
+                            <option key={f.id} value={f.id}>
+                              {f.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-[11px] font-medium text-gray-500">
+                          Cuota inicial (opcional)
+                        </label>
+                        <input
+                          inputMode="numeric"
+                          value={creditDownNum ? formatCOP(creditDownNum) : ''}
+                          onChange={(e) => setCreditDown(e.target.value)}
+                          placeholder="$ 0"
+                          className="mt-0.5 w-full rounded-lg border border-gray-200 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-medium text-gray-500">
+                          Método cuota inicial
+                        </label>
+                        <select
+                          value={creditDownMethod}
+                          onChange={(e) => setCreditDownMethod(e.target.value)}
+                          className="mt-0.5 w-full rounded-lg border border-gray-200 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        >
+                          {PAYMENT_METHODS.filter((m) => m.id !== 'CREDITO').map(
+                            (m) => (
+                              <option key={m.id} value={m.id}>
+                                {m.name}
+                              </option>
+                            ),
+                          )}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-[11px] font-medium text-gray-500">
+                          Recargo % (opcional)
+                        </label>
+                        <input
+                          inputMode="decimal"
+                          value={creditInterest}
+                          onChange={(e) =>
+                            setCreditInterest(
+                              e.target.value.replace(/[^\d.]/g, ''),
+                            )
+                          }
+                          placeholder="0"
+                          className="mt-0.5 w-full rounded-lg border border-gray-200 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-medium text-gray-500">
+                          Primera cuota
+                        </label>
+                        <input
+                          type="date"
+                          value={creditStart}
+                          onChange={(e) => setCreditStart(e.target.value)}
+                          className="mt-0.5 w-full rounded-lg border border-gray-200 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        />
+                      </div>
+                    </div>
+
+                    {creditPlanPreview ? (
+                      <div className="rounded-md border border-orange-100 bg-white p-2">
+                        <div className="flex justify-between text-[11px] text-gray-500">
+                          <span>Recargo</span>
+                          <span className="font-semibold text-gray-700">
+                            {formatCOP(creditPlanPreview.interestAmount)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-[11px] text-gray-500">
+                          <span>Total con recargo</span>
+                          <span className="font-semibold text-gray-800">
+                            {formatCOP(creditPlanPreview.obligation)}
+                          </span>
+                        </div>
+                        <div className="mt-1.5 max-h-28 divide-y divide-gray-50 overflow-y-auto">
+                          {creditPlanPreview.installments.map((it) => (
+                            <div
+                              key={it.number}
+                              className="flex items-center justify-between py-1 text-[11px]"
+                            >
+                              <span className="text-gray-500">
+                                Cuota {it.number} ·{' '}
+                                {it.dueDate.toLocaleDateString('es-CO')}
+                              </span>
+                              <span className="font-semibold text-gray-800">
+                                {formatCOP(it.amount)}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        <label className="text-[11px] font-medium text-gray-500">
+                          Fecha de vencimiento (opcional)
+                        </label>
+                        <input
+                          type="date"
+                          value={dueDate}
+                          onChange={(e) => setDueDate(e.target.value)}
+                          className="mt-0.5 w-full rounded-lg border border-gray-200 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        />
+                        <p className="mt-1 text-[10px] text-gray-400">
+                          Sin cuotas es fiado simple (un solo vencimiento).
+                          Escribe un n° de cuotas para generar el plan de pagos.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
 
