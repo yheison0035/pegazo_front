@@ -2,8 +2,9 @@ import apiFetch from '../../auth/client';
 
 // Gastos fijos / recurrentes (arriendo, servicios, internet…).
 
-export async function getFixedExpenses() {
-  return apiFetch('/fixed-expenses');
+export async function getFixedExpenses(localId) {
+  const qs = localId ? `?localId=${Number(localId)}` : '';
+  return apiFetch(`/fixed-expenses${qs}`);
 }
 
 export async function createFixedExpense(dto) {

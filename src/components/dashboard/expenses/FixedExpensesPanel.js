@@ -13,6 +13,7 @@ import {
   ClockIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/authContext';
+import { useLocalScope } from '@/context/localScopeContext';
 import Button from '@/components/ui/Button';
 import MoneyInput from '@/components/ui/MoneyInput';
 import AlertModal from '@/components/dashboard/modals/alertModal';
@@ -53,6 +54,7 @@ const EMPTY_FORM = {
 
 export default function FixedExpensesPanel() {
   const { usuario } = useAuth();
+  const { activeLocal } = useLocalScope();
   const isOwner = ['SUPER_ADMIN', 'ADMIN'].includes(usuario?.role);
 
   const [items, setItems] = useState([]);
@@ -77,7 +79,7 @@ export default function FixedExpensesPanel() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await getFixedExpenses();
+      const res = await getFixedExpenses(activeLocal || undefined);
       setItems(res?.data || []);
       setSummary(res?.summary || null);
     } catch {
@@ -86,7 +88,7 @@ export default function FixedExpensesPanel() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [activeLocal]);
 
   useEffect(() => {
     load();
@@ -134,6 +136,9 @@ export default function FixedExpensesPanel() {
           : undefined,
         paidTo: form.paidTo.trim() || undefined,
         notes: form.notes.trim() || undefined,
+        // Si hay una sede activa en el selector global, el gasto fijo se crea
+        // (o se mantiene) en esa sede; si no, el backend usa la primera.
+        ...(activeLocal ? { localId: Number(activeLocal) } : {}),
       };
       if (editId) await updateFixedExpense(editId, dto);
       else await createFixedExpense(dto);
