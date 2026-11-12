@@ -21,6 +21,11 @@ const nextConfig = {
       },
       { source: '/CRM', destination: '/login', permanent: true },
       { source: '/CRM/:path*', destination: '/:path*', permanent: true },
+      // Auto-registro de empresas CERRADO (por ahora el alta la hace solo la
+      // plataforma). La página pública de registro redirige al login. Es 307
+      // (no permanente) para poder reabrirla sin problemas de caché: basta con
+      // quitar esta línea y reactivar PUBLIC_REGISTRATION_ENABLED en el backend.
+      { source: '/register', destination: '/login', permanent: false },
     ];
   },
 };
