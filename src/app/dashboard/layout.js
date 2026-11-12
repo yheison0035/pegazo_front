@@ -22,7 +22,6 @@ import GlobalLocalSelect from '@/components/dashboard/GlobalLocalSelect';
 import { isDark, DARK_EVENT } from '@/lib/darkMode';
 import { CRM_FONTS_BY_ID, googleFontHref } from '@/config/crmFonts';
 import ImpersonationBanner from '@/components/platform/ImpersonationBanner';
-import { isImpersonating } from '@/lib/impersonation';
 import AnnouncementsFeed from '@/components/dashboard/AnnouncementsFeed';
 
 export default function Layout({ children }) {
@@ -37,8 +36,6 @@ export default function Layout({ children }) {
     usuario?.local?.crmTheme || usuario?.company?.crmTheme || 'orange';
   // Logo del negocio como marca de agua sutil de fondo en cada módulo.
   const logo = usuario?.company?.logo;
-  const [imp, setImp] = useState(false);
-  useEffect(() => setImp(isImpersonating()), []);
   // Fuente del panel: la de la sede del usuario o, si no tiene, la de la empresa.
   const fontId =
     usuario?.local?.crmFont || usuario?.company?.crmFont || 'system';
@@ -78,10 +75,15 @@ export default function Layout({ children }) {
         data-theme={dark ? 'dark' : undefined}
         style={{ fontFamily: fontStack }}
       >
+        {/* Deja sitio arriba al banner de "modo soporte" por su altura REAL
+            (--support-banner-h = 0 cuando no hay banner). Así nada queda tapado,
+            también si el aviso se parte en dos líneas en móvil. */}
         <div
-          className={`flex flex-col bg-gray-50 md:flex-row md:overflow-hidden ${
-            imp ? 'mt-9 h-[calc(100vh-2.25rem)]' : 'h-screen'
-          }`}
+          className="flex flex-col bg-gray-50 md:flex-row md:overflow-hidden"
+          style={{
+            marginTop: 'var(--support-banner-h, 0px)',
+            height: 'calc(100vh - var(--support-banner-h, 0px))',
+          }}
         >
           {/* El sidebar vive fijo y colapsado (solo iconos); aquí reservamos el
               ancho del rail para que el contenido ocupe el resto. Al hacer hover

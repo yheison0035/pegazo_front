@@ -43,11 +43,14 @@ export default function SideNavigation() {
 
   return (
     <>
-      {/* Botón hamburguesa (solo móvil) */}
+      {/* Botón hamburguesa (solo móvil). El top se desplaza por la altura del
+          banner de "modo soporte" (--support-banner-h = 0 si no hay banner)
+          para que nunca quede tapado. */}
       <button
         onClick={() => setIsOpen(true)}
         aria-label="Abrir menú"
-        className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-xl bg-[var(--color-white)] backdrop-blur border border-[var(--color-gray-200)] shadow-lg"
+        style={{ top: 'calc(1rem + var(--support-banner-h, 0px))' }}
+        className="md:hidden fixed left-4 z-50 p-2 rounded-xl bg-[var(--color-white)] backdrop-blur border border-[var(--color-gray-200)] shadow-lg"
       >
         <Bars3Icon className="w-6 h-6 text-[color:var(--color-orange-500)]" />
       </button>
@@ -69,9 +72,13 @@ export default function SideNavigation() {
         onBlurCapture={(e) => {
           if (!e.currentTarget.contains(e.relatedTarget)) setHovered(false);
         }}
+        style={{
+          top: 'var(--support-banner-h, 0px)',
+          height: 'calc(100% - var(--support-banner-h, 0px))',
+        }}
         className={`
           pos-sidenav
-          fixed top-0 left-0 z-50 h-full
+          fixed left-0 z-50
           w-72 ${expanded ? 'md:w-72' : 'md:w-20'}
           overflow-hidden
           bg-gradient-to-b from-[var(--sb-bg)] to-[var(--sb-bg-2)]
