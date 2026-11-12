@@ -19,6 +19,29 @@ import {
 
 const OWNER_ROLES = new Set(['SUPER_ADMIN', 'ADMIN']);
 
+// Día(s) de gracia (calendario) después del vencimiento antes de bloquear.
+// DEBE coincidir con GRACE_DAYS del backend (SubscriptionInterceptor): el día de
+// vencimiento y la gracia siguen trabajando (solo ven el aviso de renovación);
+// el muro aparece al día siguiente de la gracia. Comparación por FECHA en zona
+// Colombia (paidUntil se guarda a medianoche UTC del día de vencimiento).
+const GRACE_DAYS = 1;
+function isBlockedByOverdue(paidUntil) {
+  if (!paidUntil) return false;
+  const base = new Date(paidUntil);
+  if (Number.isNaN(base.getTime())) return false;
+  base.setUTCDate(base.getUTCDate() + GRACE_DAYS);
+  const deadlineYmd = base.toISOString().slice(0, 10);
+  let todayYmd;
+  try {
+    todayYmd = new Date().toLocaleDateString('en-CA', {
+      timeZone: 'America/Bogota',
+    });
+  } catch {
+    todayYmd = new Date().toISOString().slice(0, 10);
+  }
+  return todayYmd > deadlineYmd;
+}
+
 function fmtDate(d) {
   if (!d) return '';
   const date = new Date(d);
@@ -43,8 +66,7 @@ export default function PaymentWall() {
   const company = usuario?.company;
   const paidUntil = company?.paidUntil;
   const isPlatform = usuario?.role === 'SUPER_PLATFORM_ADMIN';
-  const overdue =
-    !isPlatform && paidUntil && new Date(paidUntil).getTime() < Date.now();
+  const overdue = !isPlatform && isBlockedByOverdue(paidUntil);
 
   useEffect(() => {
     if (!overdue) return;

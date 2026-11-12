@@ -14,6 +14,7 @@ import {
   MapPinIcon,
   ArrowLeftIcon,
   PlusIcon,
+  GiftIcon,
 } from '@heroicons/react/24/outline';
 
 import RoleGuard from '@/auth/roleGuard';
@@ -116,6 +117,35 @@ export default function CompanyDetail() {
     await fetchData();
     setPayOpen(false);
     flash('success', `Pago registrado: +${payload.months} mes(es).`);
+  };
+
+  // Días gratis (cortesía): extiende la suscripción N días SIN cobrar, para que
+  // la empresa pueda arrancar. Queda en el historial como cortesía (monto $0).
+  const giveFreeDays = async () => {
+    const input = prompt(
+      `¿Cuántos días gratis (cortesía) le das a ${c?.name || 'esta empresa'}?`,
+      '7',
+    );
+    if (input == null) return; // canceló
+    const days = Math.floor(Number(input));
+    if (!Number.isFinite(days) || days < 1) {
+      flash('error', 'Indica un número de días válido (mínimo 1).');
+      return;
+    }
+    setBusy('free');
+    try {
+      await renewCompany(Number(id), {
+        days,
+        amount: 0,
+        note: 'Días gratis (cortesía)',
+      });
+      await fetchData();
+      flash('success', `Se agregaron ${days} día(s) gratis.`);
+    } catch (e) {
+      flash('error', e?.message || 'No se pudieron agregar los días.');
+    } finally {
+      setBusy('');
+    }
   };
 
   const doToggle = async () => {
@@ -238,6 +268,14 @@ export default function CompanyDetail() {
                     onClick={() => setPayOpen(true)}
                   >
                     <ArrowPathIcon className="mr-1 h-4 w-4" /> Registrar pago
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    loading={busy === 'free'}
+                    onClick={giveFreeDays}
+                  >
+                    <GiftIcon className="mr-1 h-4 w-4" /> Días gratis
                   </Button>
                   {isActive && (
                     <Button
