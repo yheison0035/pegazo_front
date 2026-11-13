@@ -64,6 +64,14 @@ const TERMS_BY_TYPE = {
     sale: 'Pedido',
     salePlural: 'Pedidos',
   },
+  // Distribuidora (mayorista por peso): quien atiende/entrega es el Repartidor;
+  // la venta B2B es un Pedido.
+  DISTRIBUIDORA: {
+    attendant: 'Repartidor',
+    attendantPlural: 'Repartidores',
+    sale: 'Pedido',
+    salePlural: 'Pedidos',
+  },
 
   // ---- Verticales específicas ----
   ODONTOLOGIA: {
