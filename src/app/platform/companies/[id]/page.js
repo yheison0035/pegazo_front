@@ -15,6 +15,7 @@ import {
   ArrowLeftIcon,
   PlusIcon,
   GiftIcon,
+  SparklesIcon,
 } from '@heroicons/react/24/outline';
 
 import RoleGuard from '@/auth/roleGuard';
@@ -28,6 +29,7 @@ import {
   getCompanyDetail,
   renewCompany,
   setCompanyStatus,
+  updateCompany,
 } from '@/lib/api/routes/companies';
 import {
   platformCreateUser,
@@ -148,6 +150,28 @@ export default function CompanyDetail() {
     }
   };
 
+  // Activar (dejar entrar) una empresa AUTO-REGISTRADA de forma permanente:
+  // le quita la marca selfRegistered, así entra directo sin el muro de
+  // adaptación (como si la hubiéramos creado nosotros).
+  const activateCompany = async () => {
+    if (
+      !confirm(
+        `¿Activar a ${c?.name || 'esta empresa'}? Entrará directo al CRM, sin el muro de adaptación.`,
+      )
+    )
+      return;
+    setBusy('activate');
+    try {
+      await updateCompany(Number(id), { selfRegistered: false });
+      await fetchData();
+      flash('success', 'Empresa activada: ya entra directo al CRM.');
+    } catch (e) {
+      flash('error', e?.message || 'No se pudo activar la empresa.');
+    } finally {
+      setBusy('');
+    }
+  };
+
   const doToggle = async () => {
     const next = isActive ? 'INACTIVO' : 'ACTIVO';
     if (!confirm(`¿${isActive ? 'Suspender' : 'Reactivar'} a ${c?.name}?`)) return;
@@ -256,6 +280,11 @@ export default function CompanyDetail() {
                       <span className="rounded-full bg-orange-50 px-2.5 py-0.5 font-medium text-orange-600">
                         Plan {c.plan || 'sin definir'}
                       </span>
+                      {c.selfRegistered && (
+                        <span className="rounded-full bg-indigo-50 px-2.5 py-0.5 font-medium text-indigo-600">
+                          Auto-registrada · sin activar
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -277,6 +306,16 @@ export default function CompanyDetail() {
                   >
                     <GiftIcon className="mr-1 h-4 w-4" /> Días gratis
                   </Button>
+                  {c.selfRegistered && (
+                    <Button
+                      variant="success"
+                      size="sm"
+                      loading={busy === 'activate'}
+                      onClick={activateCompany}
+                    >
+                      <SparklesIcon className="mr-1 h-4 w-4" /> Activar
+                    </Button>
+                  )}
                   {isActive && (
                     <Button
                       variant="secondary"

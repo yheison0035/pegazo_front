@@ -66,11 +66,12 @@ export default function PaymentWall() {
   const company = usuario?.company;
   const paidUntil = company?.paidUntil;
   const isPlatform = usuario?.role === 'SUPER_PLATFORM_ADMIN';
-  // El muro de pago aplica SOLO a empresas en ORBITA (único plan de cobro por
-  // ahora). Los demás planes los gestiona PlanWall (adaptación / días gratis).
-  // El modo soporte (impersonación) SÍ lo ve: debe reflejar lo que ve el dueño.
+  // El muro de pago aplica a empresas GESTIONADAS (creadas/activadas por la
+  // plataforma) cuyo pago venció. Las AUTO-REGISTRADAS sin activar las gestiona
+  // PlanWall (adaptación / días gratis). El modo soporte (impersonación) SÍ lo
+  // ve: debe reflejar lo que ve el dueño.
   const overdue =
-    !isPlatform && company?.plan === 'ORBITA' && isBlockedByOverdue(paidUntil);
+    !isPlatform && !company?.selfRegistered && isBlockedByOverdue(paidUntil);
 
   useEffect(() => {
     if (!overdue) return;

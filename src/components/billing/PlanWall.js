@@ -1,13 +1,15 @@
 'use client';
 
-// Muro de BIENVENIDA / adaptación. Mientras solo ORBITA esté disponible, toda
-// empresa con un plan distinto (o sin plan) ve ÚNICAMENTE esta pantalla al
-// entrar: ningún módulo. El mensaje deja claro que nuestro objetivo es que
-// Pegazo se adapte al negocio (no al revés) y ofrece unos días gratis de prueba
-// —que la plataforma concede con el botón "Días gratis" (fija paidUntil a
-// futuro)— para que el negocio funcione con normalidad mientras lo adaptamos.
-// Se quita solo cuando la empresa pasa a ORBITA o tiene días gratis vigentes.
-// El backend refuerza el bloqueo (SubscriptionInterceptor → PLAN_LOCKED).
+// Muro de BIENVENIDA / adaptación para empresas AUTO-REGISTRADAS. Toda empresa
+// que se registró sola por /register (selfRegistered) ve ÚNICAMENTE esta pantalla
+// al entrar: ningún módulo. Las creadas por la plataforma NO lo ven (entran
+// directo). El mensaje deja claro que nuestro objetivo es que Pegazo se adapte al
+// negocio (no al revés) y ofrece unos días gratis de prueba —que la plataforma
+// concede con el botón "Días gratis" (fija paidUntil a futuro)— para que el
+// negocio funcione con normalidad mientras lo adaptamos. Se quita cuando la
+// plataforma ACTIVA la empresa (le quita la marca) o mientras tenga días gratis
+// vigentes. El backend refuerza el bloqueo (SubscriptionInterceptor →
+// REGISTRATION_PENDING).
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/authContext';
@@ -18,10 +20,6 @@ import {
   ChatBubbleLeftRightIcon,
   WrenchScrewdriverIcon,
 } from '@heroicons/react/24/outline';
-
-// Único plan disponible hoy. Debe coincidir con el backend (ACTIVE_PLAN) y con
-// lib/plans.js (el único sin `comingSoon`).
-const ACTIVE_PLAN = 'ORBITA';
 
 // WhatsApp de respaldo si la plataforma aún no configuró su número.
 const FALLBACK_WA = '573186356609';
@@ -54,15 +52,16 @@ export default function PlanWall() {
   const company = usuario?.company;
   const isPlatform = usuario?.role === 'SUPER_PLATFORM_ADMIN';
   // IMPORTANTE: el modo soporte (impersonación) NO se exime: debe ver EXACTAMENTE
-  // lo mismo que el dueño. Para configurar una empresa bloqueada, primero se le
-  // dan días gratis desde la plataforma y luego se entra en soporte (ya sin muro).
-  // Solo evaluamos con el perfil completo (/auth/me trae la clave `plan`); el
-  // shape del login no la incluye y no debe disparar el muro por un instante.
-  const hasProfile = !!company && 'plan' in company;
+  // lo mismo que el dueño. Para configurar una empresa bloqueada, primero se la
+  // activa (o se le dan días gratis) desde la plataforma y luego se entra en
+  // soporte (ya sin muro). Solo evaluamos con el perfil completo (/auth/me trae
+  // la clave `selfRegistered`); el shape del login no la incluye y no debe
+  // disparar el muro por un instante.
+  const hasProfile = !!company && 'selfRegistered' in company;
   const blocked =
     !isPlatform &&
     hasProfile &&
-    company.plan !== ACTIVE_PLAN &&
+    company.selfRegistered === true &&
     !hasActiveFreeWindow(company.paidUntil);
 
   useEffect(() => {
