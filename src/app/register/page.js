@@ -35,6 +35,7 @@ const TYPE_LABELS = {
   TELEVENTAS: 'Televentas / Call center',
   ECOMMERCE: 'Tienda online',
   DISTRIBUCION: 'Distribución / Mayorista',
+  DISTRIBUIDORA: 'Distribuidora',
   LAVADO_VEHICULOS: 'Lavado de vehículos',
   CANCHAS_SINTETICAS: 'Canchas sintéticas',
   GUARDA_CASCOS: 'Guarda cascos',
