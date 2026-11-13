@@ -32,6 +32,10 @@ const PRODUCT_FIELDS_BY_TYPE = {
   COMERCIO: {},
   TELEVENTAS: { variantType: 'color' },
   DISTRIBUCION: {},
+  // Distribuidora (masa/alimentos y mayorista por peso): venta por peso con
+  // unidad kg / libra / arroba y cantidades con decimales (ej. 2.5 arrobas de
+  // masa). Conserva marca/proveedor/código por si distribuye productos de marca.
+  DISTRIBUIDORA: { variantType: 'weight' },
   ECOMMERCE: { variantType: 'color' },
   FERIA: {},
 
