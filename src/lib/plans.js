@@ -6,6 +6,8 @@ export const PLANS = [
   {
     id: 'DESPEGUE',
     name: 'Despegue',
+    // Bloqueado por ahora: solo Órbita está disponible hasta tener ~100 clientes.
+    comingSoon: true,
     emoji: '🛫',
     tagline: 'Para el que arranca',
     priceLabel: 'Gratis',
@@ -25,6 +27,7 @@ export const PLANS = [
   {
     id: 'IMPULSO',
     name: 'Impulso',
+    comingSoon: true,
     emoji: '🚀',
     tagline: 'Negocio en marcha',
     priceLabel: '$39.900',
@@ -49,6 +52,7 @@ export const PLANS = [
   {
     id: 'ALTURA',
     name: 'Altura',
+    comingSoon: true,
     emoji: '📈',
     tagline: 'Crece con varias sedes',
     priceLabel: '$89.900',
@@ -70,6 +74,8 @@ export const PLANS = [
   {
     id: 'ORBITA',
     name: 'Órbita',
+    // Único plan disponible por ahora.
+    comingSoon: false,
     emoji: '🪐',
     tagline: 'Cadena o empresa',
     priceLabel: '$179.900',
@@ -89,8 +95,21 @@ export const PLANS = [
   },
 ];
 
-// Opciones para selects (panel de administración de la plataforma).
-export const PLAN_OPTIONS = PLANS.map((p) => ({ id: p.id, name: p.name }));
+// Planes contratables hoy (los que NO están marcados como "próximamente").
+// Por ahora solo Órbita; los demás quedan bloqueados hasta tener ~100 clientes.
+export const AVAILABLE_PLANS = PLANS.filter((p) => !p.comingSoon);
+export const AVAILABLE_PLAN_IDS = AVAILABLE_PLANS.map((p) => p.id);
+export function isPlanAvailable(planId) {
+  return AVAILABLE_PLAN_IDS.includes(planId);
+}
+
+// Opciones para selects (panel de administración de la plataforma). Los planes
+// no disponibles se muestran marcados para no asignarlos por error (se dejan en
+// la lista para no romper empresas existentes que ya los tengan).
+export const PLAN_OPTIONS = PLANS.map((p) => ({
+  id: p.id,
+  name: p.comingSoon ? `${p.name} — no disponible` : p.name,
+}));
 
 // Gating de funciones por plan. Plan mínimo requerido por cada módulo del menú.
 // Los módulos que no aparecen aquí son base (todos los planes). Debe coincidir

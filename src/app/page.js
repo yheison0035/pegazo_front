@@ -384,7 +384,7 @@ const FAQ = [
   },
   {
     q: '¿Cuánto cuesta y hay permanencia?',
-    a: 'Puedes empezar gratis y subir de plan cuando crezcas. Los planes son en pesos colombianos, sin permanencia, con prueba gratis en los planes pagos. Cancela cuando quieras.',
+    a: 'El plan es a la medida de tu negocio: escríbenos por WhatsApp y te cotizamos. En pesos colombianos, sin permanencia. Cancela cuando quieras.',
   },
   {
     q: '¿Pegazo factura electrónicamente ante la DIAN?',

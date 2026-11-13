@@ -156,6 +156,14 @@ export const BUSINESS_TYPES = {
     'returns', 'expenses', 'payables', 'statistics',
   ],
 
+  // Distribuidora (mayorista genérico: masa/alimentos y cualquier distribuidor):
+  // pedidos B2B con cotización y venta a crédito. Mismos módulos que DISTRIBUCION.
+  DISTRIBUIDORA: [
+    'locals', 'users', 'categories', 'brands', 'providers', 'inventory',
+    'purchases', 'customers', 'cartera', 'impuestos', 'quotes', 'sales', 'delivered_sales',
+    'returns', 'expenses', 'payables', 'statistics',
+  ],
+
   // ---------- SERVICIOS CON AGENDA / RECURSO ----------
   // Lavado de vehículos: turnos, comisión al lavador, fidelización y productos.
   LAVADO_VEHICULOS: [
