@@ -11,7 +11,6 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/authContext';
-import { isImpersonating } from '@/lib/impersonation';
 import { getPlatformPaymentSettings } from '@/lib/api/routes/platformPayment';
 import {
   SparklesIcon,
@@ -54,12 +53,14 @@ export default function PlanWall() {
 
   const company = usuario?.company;
   const isPlatform = usuario?.role === 'SUPER_PLATFORM_ADMIN';
+  // IMPORTANTE: el modo soporte (impersonación) NO se exime: debe ver EXACTAMENTE
+  // lo mismo que el dueño. Para configurar una empresa bloqueada, primero se le
+  // dan días gratis desde la plataforma y luego se entra en soporte (ya sin muro).
   // Solo evaluamos con el perfil completo (/auth/me trae la clave `plan`); el
   // shape del login no la incluye y no debe disparar el muro por un instante.
   const hasProfile = !!company && 'plan' in company;
   const blocked =
     !isPlatform &&
-    !isImpersonating() &&
     hasProfile &&
     company.plan !== ACTIVE_PLAN &&
     !hasActiveFreeWindow(company.paidUntil);
