@@ -9,6 +9,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@/context/authContext';
 import apiFetch from '@/lib/api/auth/client';
+import { isImpersonating } from '@/lib/impersonation';
 import { getPlatformPaymentSettings } from '@/lib/api/routes/platformPayment';
 import {
   LockClosedIcon,
@@ -66,7 +67,14 @@ export default function PaymentWall() {
   const company = usuario?.company;
   const paidUntil = company?.paidUntil;
   const isPlatform = usuario?.role === 'SUPER_PLATFORM_ADMIN';
-  const overdue = !isPlatform && isBlockedByOverdue(paidUntil);
+  // El muro de pago aplica SOLO a empresas en ORBITA (único plan de cobro por
+  // ahora). Los demás planes los gestiona PlanWall (adaptación / días gratis).
+  // La plataforma y el modo soporte (impersonación) nunca se bloquean.
+  const overdue =
+    !isPlatform &&
+    !isImpersonating() &&
+    company?.plan === 'ORBITA' &&
+    isBlockedByOverdue(paidUntil);
 
   useEffect(() => {
     if (!overdue) return;

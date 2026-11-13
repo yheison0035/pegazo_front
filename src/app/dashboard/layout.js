@@ -15,6 +15,7 @@ import DayBanner from '@/components/pos/DayBanner';
 import RenewalBanner from '@/components/billing/RenewalBanner';
 import SubscriptionDueModal from '@/components/billing/SubscriptionDueModal';
 import PaymentWall from '@/components/billing/PaymentWall';
+import PlanWall from '@/components/billing/PlanWall';
 import SupportWidget from '@/components/support/SupportWidget';
 import QuickSearch from '@/components/search/QuickSearch';
 import { LocalScopeProvider } from '@/context/localScopeContext';
@@ -68,8 +69,11 @@ export default function Layout({ children }) {
       <LocalScopeProvider>
       <SplashScreen />
       <ImpersonationBanner />
-      {/* Muro de pago: si la empresa venció, bloquea todo el CRM. */}
+      {/* Muro de pago: si la empresa ORBITA venció, bloquea todo el CRM. */}
       <PaymentWall />
+      {/* Muro de plan: mientras solo ORBITA esté disponible, toda empresa con
+          otro plan ve solo el mensaje de adaptación / días gratis. */}
+      <PlanWall />
       <div
         data-crm-theme={theme}
         data-theme={dark ? 'dark' : undefined}
