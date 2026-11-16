@@ -96,6 +96,14 @@ describe('Roles por tipo de negocio', () => {
       expect(assignableRolesForType(t)).toEqual(expect.arrayContaining(['MESERO', 'COCINERO']));
     }
   });
+  it('barbería ofrece SOLO Administrador, Recepcionista, Barbero (PROFESIONAL) y Contador — sin Cajero ni Auxiliar', () => {
+    const r = assignableRolesForType('BARBERIA');
+    expect([...r].sort()).toEqual(
+      ['ADMIN', 'CONTADOR', 'PROFESIONAL', 'RECEPCIONISTA'].sort(),
+    );
+    expect(r).not.toContain('CAJA');
+    expect(r).not.toContain('AUXILIAR');
+  });
 });
 
 describe('Verticales completadas 28/10/2026', () => {
