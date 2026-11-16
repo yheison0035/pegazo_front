@@ -584,7 +584,7 @@ export default function PublicBooking({ slug = '' }) {
                             )}`
                           }
                           alt={b.name}
-                          className="aspect-[4/3] w-full object-cover object-top sm:aspect-[4/5]"
+                          className="aspect-[4/5] w-full object-cover object-top"
                         />
                         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent px-3 pb-3 pt-12 text-center">
                           <p
