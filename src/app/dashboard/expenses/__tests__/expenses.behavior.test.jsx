@@ -36,6 +36,20 @@ vi.mock('next/navigation', async () => (await import('@/test/behaviorHarness')).
 vi.mock('next/link', async () => (await import('@/test/behaviorHarness')).mocks.link());
 vi.mock('@/hooks/useLiveRefresh', () => ({ default: () => {} }));
 vi.mock('@/lib/realtime', () => ({ subscribeRealtime: () => () => {} }));
+// Sede activa seleccionada (el dueño ve todo separado por sede): el atajo de
+// salida de efectivo debe cargarla a esta sede.
+vi.mock('@/context/localScopeContext', () => {
+  // Referencia ESTABLE (como el provider real, que usa useState): evita que el
+  // efecto del modal se re-ejecute y borre los campos entre renders.
+  const locals = [
+    { id: 1, name: 'Sede Centro' },
+    { id: 2, name: 'Sede Norte' },
+  ];
+  return {
+    useLocalScope: () => ({ activeLocal: '1', locals, setActiveLocal: () => {}, multi: true }),
+    LocalScopeProvider: ({ children }) => children,
+  };
+});
 
 const EXPENSES = [
   {
@@ -270,6 +284,45 @@ describe('Gastos · crear', () => {
     await waitForCall(api, 'POST', /^\/expenses$/);
     const t = await expectToast('error', 'periodo cerrado');
     expect(t.url).toBeFalsy();
+  });
+});
+
+describe('Gastos · salida de efectivo (atajo)', () => {
+  let api;
+  beforeEach(() => {
+    resetBehavior();
+    api = expensesApi();
+  });
+  afterEach(() => vi.restoreAllMocks());
+
+  it('registra la salida en EFECTIVO con solo valor y descripción, en la sede seleccionada', async () => {
+    await renderPage(<ExpensesPage />);
+    await waitForCall(api, 'GET', /^\/expenses$/);
+
+    await click(button('Salida de efectivo'));
+    // La sede ya viene seleccionada (activeLocal = 1); solo valor y descripción.
+    setField('salida_amount', '50000');
+    setField('salida_concept', 'almuerzo equipo');
+    await click(button('Registrar salida'));
+
+    const call = await waitForCall(api, 'POST', /^\/expenses$/);
+    expect(call.body).toMatchObject({
+      concept: 'almuerzo equipo',
+      amount: 50000,
+      paymentMethod: 'EFECTIVO', // descuenta de la caja de esa sede
+      type: 'OTROS',
+      localId: 1, // la sede seleccionada
+    });
+    // Tras registrar, la lista se recarga.
+    await waitForCall(api, 'GET', /^\/expenses$/, { count: 2 });
+  });
+
+  it('exige el valor (no envía si falta)', async () => {
+    await renderPage(<ExpensesPage />);
+    await waitForCall(api, 'GET', /^\/expenses$/);
+    await click(button('Salida de efectivo'));
+    await click(button('Registrar salida'));
+    expect(screen.getByText('Ingresa el valor gastado.')).toBeInTheDocument();
   });
 });
 

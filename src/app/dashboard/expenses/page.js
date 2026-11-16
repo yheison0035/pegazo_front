@@ -20,12 +20,18 @@ import {
 } from '@/lib/api/utils/expenses.config';
 import usePermissions from '@/hooks/usePermissions';
 import FixedExpensesPanel from '@/components/dashboard/expenses/FixedExpensesPanel';
-import { ArrowsRightLeftIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import CashOutModal from '@/components/dashboard/expenses/CashOutModal';
+import {
+  ArrowsRightLeftIcon,
+  ArrowPathIcon,
+  BanknotesIcon,
+} from '@heroicons/react/24/outline';
 
 export default function Expenses() {
   const auth = useAuth();
   const usuario = auth?.usuario;
-  const { getExpenses, deleteExpenses, loading } = useExpenses();
+  const { getExpenses, createExpenses, deleteExpenses, loading } = useExpenses();
+  const [cashOutOpen, setCashOutOpen] = useState(false);
 
   const [expenses, setExpenses] = useState([]);
   const [meta, setMeta] = useState(null);
@@ -53,7 +59,7 @@ export default function Expenses() {
 
   // Sede elegida por el dueño (vacío = todas). Un empleado no ve el selector.
   // Sede activa del selector global (reemplaza el desplegable por módulo).
-  const { activeLocal: viewLocal } = useLocalScope();
+  const { activeLocal: viewLocal, locals } = useLocalScope();
 
   const fetchExpenses = useCallback(async () => {
     const res = await getExpenses({
@@ -70,6 +76,26 @@ export default function Expenses() {
   useEffect(() => {
     fetchExpenses();
   }, [fetchExpenses]);
+
+  // Atajo "Salida de efectivo": crea un gasto en EFECTIVO (solo valor +
+  // descripción) en la sede elegida. Al ser efectivo descuenta de la caja de esa
+  // sede y queda en la lista de Gastos. Conserva el formulario completo de Gastos.
+  const handleCashOut = useCallback(
+    async ({ localId, amount, concept }) => {
+      await createExpenses({
+        concept,
+        amount,
+        paymentMethod: 'EFECTIVO',
+        type: 'OTROS',
+        localId,
+        expenseDate: new Date().toISOString(),
+        notes: 'Salida de efectivo',
+      });
+      await fetchExpenses();
+      setAlert({ type: 'success', message: 'Salida de efectivo registrada.' });
+    },
+    [createExpenses, fetchExpenses],
+  );
 
   // Datos en vivo: refresca al volver a la pestana/foco y cada 20s.
   useLiveRefresh(fetchExpenses);
@@ -109,7 +135,17 @@ export default function Expenses() {
         {tab === 'movimientos' && (
           <div className="flex items-center gap-2">
             {can('expenses', 'create') && (
-              <Header type="Gastos" typeUrl="expenses" />
+              <>
+                <button
+                  type="button"
+                  onClick={() => setCashOutOpen(true)}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-100"
+                >
+                  <BanknotesIcon className="h-4 w-4" />
+                  Salida de efectivo
+                </button>
+                <Header type="Gastos" typeUrl="expenses" />
+              </>
             )}
           </div>
         )}
@@ -197,6 +233,14 @@ export default function Expenses() {
           loading={loading}
         />
       )}
+
+      <CashOutModal
+        open={cashOutOpen}
+        onClose={() => setCashOutOpen(false)}
+        onSubmit={handleCashOut}
+        locals={locals}
+        defaultLocalId={viewLocal}
+      />
 
       <AlertModal
         type={alert.type}
