@@ -139,7 +139,7 @@ export default function Expenses() {
                 <button
                   type="button"
                   onClick={() => setCashOutOpen(true)}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-100"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-orange-200 bg-orange-50 px-3 py-2 text-sm font-semibold text-orange-700 transition hover:bg-orange-100"
                 >
                   <BanknotesIcon className="h-4 w-4" />
                   Salida de efectivo

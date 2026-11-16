@@ -69,7 +69,7 @@ export default function CashOutModal({
         onSubmit={submit}
         className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl"
       >
-        <div className="flex items-center justify-between bg-rose-600 px-5 py-4 text-white">
+        <div className="flex items-center justify-between bg-orange-600 px-5 py-4 text-white">
           <div className="flex items-center gap-2">
             <BanknotesIcon className="h-6 w-6" />
             <h2 className="text-lg font-bold">Salida de efectivo</h2>
@@ -97,7 +97,7 @@ export default function CashOutModal({
                 name="salida_localId"
                 value={localId}
                 onChange={(e) => setLocalId(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-rose-500 focus:outline-none"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-orange-500 focus:outline-none"
               >
                 <option value="">Selecciona la sede…</option>
                 {locals.map((l) => (
@@ -116,7 +116,7 @@ export default function CashOutModal({
               value={amount}
               onChange={setAmount}
               placeholder="$ 0"
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-rose-500 focus:outline-none"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-orange-500 focus:outline-none"
             />
           </div>
 
@@ -129,11 +129,11 @@ export default function CashOutModal({
               value={concept}
               onChange={(e) => setConcept(e.target.value)}
               placeholder="Ej: almuerzo, taxi, insumos de aseo…"
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-rose-500 focus:outline-none"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-orange-500 focus:outline-none"
             />
           </div>
 
-          {error && <p className="text-sm font-medium text-rose-600">{error}</p>}
+          {error && <p className="text-sm font-medium text-red-600">{error}</p>}
 
           <div className="flex justify-end gap-2 pt-1">
             <Button type="button" variant="secondary" size="sm" onClick={onClose}>
