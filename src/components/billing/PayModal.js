@@ -9,7 +9,7 @@ import {
   ChatBubbleLeftRightIcon,
 } from '@heroicons/react/24/outline';
 import { getPlatformPaymentSettings } from '@/lib/api/routes/platformPayment';
-import { formatCOP } from '@/lib/api/utils/utils';
+import { formatCOP, effectiveNextPaymentDate } from '@/lib/api/utils/utils';
 
 function fmtDate(d) {
   if (!d) return '—';
@@ -138,8 +138,13 @@ export default function PayModal({ open, onClose, company }) {
                     </span>
                   </Field>
                 </div>
-                <Field label="Fecha de pago (vence)">
-                  {fmtDate(company?.paidUntil)}
+                <Field label="Próximo pago (vence)">
+                  {fmtDate(
+                    effectiveNextPaymentDate(company?.paidUntil, {
+                      startDate: company?.startDate,
+                      paymentDay: company?.paymentDay,
+                    }) || company?.paidUntil,
+                  )}
                 </Field>
                 {company?.paymentDay ? (
                   <Field label="Día de pago">

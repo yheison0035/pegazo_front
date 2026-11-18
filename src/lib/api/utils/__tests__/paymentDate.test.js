@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { nextMonthlyPaymentDate } from '../utils';
+import { nextMonthlyPaymentDate, effectiveNextPaymentDate } from '../utils';
+
+const ymd = (d) => new Date(d).toISOString().slice(0, 10);
 
 const todayISO = () => {
   const n = new Date();
@@ -37,5 +39,25 @@ describe('nextMonthlyPaymentDate · ancla al día del ciclo', () => {
   it('fecha de inicio inválida → vacío', () => {
     expect(nextMonthlyPaymentDate('', '')).toBe('');
     expect(nextMonthlyPaymentDate('no-fecha', '')).toBe('');
+  });
+});
+
+// La fecha efectiva (PayModal / próximo pago) alinea paidUntil al día de cobro.
+describe('effectiveNextPaymentDate · alinea al día de cobro', () => {
+  it('usa el día de "Cliente desde" (divas: 11/12 con inicio día 19 → 19/12)', () => {
+    const r = effectiveNextPaymentDate('2026-12-11T00:00:00Z', {
+      startDate: '2026-11-19T00:00:00Z',
+      paymentDay: 11,
+    });
+    expect(ymd(r)).toBe('2026-12-19');
+  });
+
+  it('si no hay inicio, usa el paymentDay', () => {
+    const r = effectiveNextPaymentDate('2026-12-11T00:00:00Z', { paymentDay: 19 });
+    expect(ymd(r)).toBe('2026-12-19');
+  });
+
+  it('sin fecha pagada → null', () => {
+    expect(effectiveNextPaymentDate(null, { paymentDay: 19 })).toBeNull();
   });
 });

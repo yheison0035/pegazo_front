@@ -114,6 +114,39 @@ export function monthsBetweenISO(startValue, endValue) {
 // (mismo día cada mes, anclado). Si ya hay un "pago hasta" vigente (registró
 // pagos), esa ES la próxima fecha; si no, se toma la siguiente ocurrencia del
 // día de cobro que caiga de hoy en adelante. Devuelve YYYY-MM-DD.
+// Alinea una fecha al DÍA DE COBRO del ciclo: primer día con ese día-del-mes
+// que caiga EN o DESPUÉS de `base` (UTC). Igual que el backend (billing-date).
+export function anchorToBillingDay(base, day) {
+  const b = new Date(base);
+  if (Number.isNaN(b.getTime())) return null;
+  const d = day && day >= 1 && day <= 31 ? Math.floor(day) : b.getUTCDate();
+  const y = b.getUTCFullYear();
+  const m = b.getUTCMonth();
+  const lastThis = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+  let cand = new Date(Date.UTC(y, m, Math.min(d, lastThis)));
+  if (cand.getTime() < Date.UTC(y, m, b.getUTCDate())) {
+    const lastNext = new Date(Date.UTC(y, m + 2, 0)).getUTCDate();
+    cand = new Date(Date.UTC(y, m + 1, Math.min(d, lastNext)));
+  }
+  return cand;
+}
+
+// Próxima fecha de pago EFECTIVA: la fecha pagada (paidUntil) alineada al día de
+// cobro (el día de "Cliente desde" o, si no hay, el paymentDay). Es dinámica y
+// coincide con lo que calcula el backend. Devuelve Date o null.
+export function effectiveNextPaymentDate(paidUntil, { startDate, paymentDay } = {}) {
+  if (!paidUntil) return null;
+  let day = null;
+  if (startDate) {
+    const sd = new Date(startDate);
+    if (!Number.isNaN(sd.getTime())) day = sd.getUTCDate();
+  }
+  if (day == null && paymentDay && paymentDay >= 1 && paymentDay <= 31) {
+    day = Math.floor(paymentDay);
+  }
+  return anchorToBillingDay(paidUntil, day);
+}
+
 export function nextMonthlyPaymentDate(startValue, paidUntil) {
   const start = normalizeDateForInput(startValue);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(start)) return '';
