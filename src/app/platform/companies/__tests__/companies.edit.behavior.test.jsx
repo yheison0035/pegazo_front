@@ -76,6 +76,13 @@ describe('Plataforma · Editar empresa', () => {
     expect(field('paymentDay')).toBeDisabled();
   });
 
+  it('el botón "Volver" regresa al listado de empresas (no a locales)', async () => {
+    await renderPage(<EditCompanyPage />);
+    await waitFor(() => expect(field('name').value).toBe('NEGOCIO UNO'));
+    const volver = screen.getByRole('link', { name: 'Volver' });
+    expect(volver).toHaveAttribute('href', '/platform/companies');
+  });
+
   it('guardar el formulario envía solo los campos editables (sin los del panel de módulos)', async () => {
     await renderPage(<EditCompanyPage />);
     await waitFor(() => expect(field('name').value).toBe('NEGOCIO UNO'));

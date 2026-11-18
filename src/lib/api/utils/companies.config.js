@@ -103,7 +103,7 @@ export const getFormFieldsCompanies = (includeAdmin = false) => [
     required: false,
     disabled: true,
     helperText: 'Se toma automáticamente del día de "Cliente desde".',
-    hideWhen: (fd) => fd.billingMode !== 'mensual',
+    hideWhen: (fd) => fd.billingMode === 'paquete',
   },
   {
     // Solo MENSUAL y CALCULADO: próxima fecha de pago según el día de "Cliente
@@ -114,7 +114,7 @@ export const getFormFieldsCompanies = (includeAdmin = false) => [
     required: false,
     disabled: true,
     helperText: 'Se calcula desde "Cliente desde"; sirve para verificar el ciclo.',
-    hideWhen: (fd) => fd.billingMode !== 'mensual',
+    hideWhen: (fd) => fd.billingMode === 'paquete',
   },
   {
     // Solo PAQUETE: el admin indica cuántos meses pagó por adelantado; con eso

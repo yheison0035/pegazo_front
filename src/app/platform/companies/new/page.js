@@ -58,6 +58,7 @@ export default function NewCompany() {
         mode="new"
         usuario={usuario}
         module="locals"
+        backRoute="/platform/companies"
       />
 
       <AlertModal

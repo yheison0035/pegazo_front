@@ -273,6 +273,9 @@ export default function EditCompany() {
       //  - día de pago: del día de "Cliente desde" si no viene.
       //  - meses del paquete: calculados desde "Cliente desde" → "Pago hasta".
       const patched = { ...data };
+      // Modo de cobro por defecto: mensual (así se muestran "día de pago" y
+      // "próxima fecha de pago" aunque la empresa no tenga el modo guardado).
+      if (!patched.billingMode) patched.billingMode = 'mensual';
       // El día de pago SIEMPRE sale del día de "Cliente desde" (campo bloqueado
       // y derivado). Se recalcula aunque ya venga un valor guardado, para corregir
       // datos viejos que quedaron desincronizados (p. ej. day distinto al inicio).
@@ -358,6 +361,7 @@ export default function EditCompany() {
         mode="edit"
         usuario={usuario}
         module="locals"
+        backRoute="/platform/companies"
       />
 
       {/* Panel de plataforma: módulos + precio */}

@@ -115,21 +115,26 @@ export function monthsBetweenISO(startValue, endValue) {
 // pagos), esa ES la próxima fecha; si no, se toma la siguiente ocurrencia del
 // día de cobro que caiga de hoy en adelante. Devuelve YYYY-MM-DD.
 export function nextMonthlyPaymentDate(startValue, paidUntil) {
+  const start = normalizeDateForInput(startValue);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(start)) return '';
+
   const pad = (n) => String(n).padStart(2, '0');
   const now = new Date();
   const todayISO = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 
-  // Si "pago hasta" está vigente, esa es la próxima fecha de pago.
+  // La fecha SIEMPRE se ancla al día de "Cliente desde" (el día del ciclo), así
+  // se actualiza al cambiar esa fecha (antes se quedaba pegada al "pago hasta").
   const paid = normalizeDateForInput(paidUntil);
-  if (/^\d{4}-\d{2}-\d{2}$/.test(paid) && paid >= todayISO) return paid;
+  const paidVigente = /^\d{4}-\d{2}-\d{2}$/.test(paid) && paid >= todayISO;
 
-  const start = normalizeDateForInput(startValue);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(start)) return '';
-
-  // Avanza mes a mes (anclado al día de inicio) hasta caer de hoy en adelante.
+  // Avanza mes a mes anclado al día de inicio hasta la próxima fecha válida:
+  //  - si el pago está vigente (paidUntil futuro), la próxima es la primera del
+  //    ciclo DESPUÉS de lo ya pagado;
+  //  - si no, la primera del ciclo de hoy en adelante.
   for (let k = 0; k <= 1200; k++) {
     const d = k === 0 ? start : addMonthsToISO(start, k);
-    if (d && d >= todayISO) return d;
+    if (!d) continue;
+    if (paidVigente ? d > paid : d >= todayISO) return d;
   }
   return '';
 }

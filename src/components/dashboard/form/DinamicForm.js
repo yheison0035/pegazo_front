@@ -64,6 +64,11 @@ export default function DinamicForm({
   loading,
   mode = 'edit',
   module = 'inventory',
+  // Ruta del botón "Volver". Por defecto vuelve al listado del módulo
+  // (/dashboard/<module>); se puede sobreescribir (p. ej. el alta/edición de
+  // empresas de la plataforma usa module="locals" para cargar opciones, pero
+  // debe volver a /platform/companies, no al listado de locales).
+  backRoute,
   images,
   setImages,
   showImages,
@@ -935,7 +940,10 @@ export default function DinamicForm({
 
       <div className="sticky bottom-0 z-10 mt-6 flex justify-end gap-3 border-t border-gray-200 bg-white/95 py-3 backdrop-blur">
         {module !== 'sales' && (
-          <BtnReturn route={`/dashboard/${module}`} disabled={loading} />
+          <BtnReturn
+            route={backRoute || `/dashboard/${module}`}
+            disabled={loading}
+          />
         )}
         {mode !== 'edit' && handleReset && (
           <button
