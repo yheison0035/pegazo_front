@@ -104,6 +104,13 @@ export const metadata = {
     shortcut: '/favicon.ico',
     apple: '/icons/apple-touch-icon.png',
   },
+  // Verificación de propiedad en Google Search Console (y otros). Se activa con
+  // la variable de entorno NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION (token que da
+  // Search Console). Si no está, no se imprime nada. También se puede verificar
+  // por DNS (TXT), que no requiere desplegar.
+  verification: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+    ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
+    : undefined,
 };
 
 export const viewport = {

@@ -401,9 +401,18 @@ const JSON_LD = {
       name: 'Pegazo',
       url: 'https://pegazo.co',
       logo: 'https://pegazo.co/images/logo_pegazo.png',
+      image: 'https://pegazo.co/images/logo_pegazo.png',
       slogan: 'Todo tu negocio, en un solo lugar',
       description:
         'Software en la nube para gestionar negocios: ventas, inventario, clientes, gastos, citas, reportes y tienda online.',
+      areaServed: { '@type': 'Country', name: 'Colombia' },
+      contactPoint: {
+        '@type': 'ContactPoint',
+        contactType: 'customer support',
+        telephone: '+573186356609',
+        availableLanguage: ['es'],
+        url: 'https://wa.me/573186356609',
+      },
     },
     {
       '@type': 'WebSite',
@@ -421,6 +430,9 @@ const JSON_LD = {
       operatingSystem: 'Web, iOS, Android',
       url: 'https://pegazo.co',
       inLanguage: 'es-CO',
+      image: 'https://pegazo.co/images/logo_pegazo.png',
+      screenshot: 'https://pegazo.co/images/logo_pegazo.png',
+      publisher: { '@id': 'https://pegazo.co/#organization' },
       description:
         'Plataforma todo en uno para gestionar y hacer despegar tu negocio, con tienda online conectada al inventario.',
       featureList: [
