@@ -24,7 +24,11 @@ async function apiFetch(path, opts = {}) {
     headers['Content-Type'] = headers['Content-Type'] ?? 'application/json';
   }
 
-  const res = await fetch(full, { ...opts, headers });
+  // La API nunca se sirve de la caché del navegador: el panel siempre pide datos
+  // frescos. Evita que respuestas GET viejas (p. ej. la próxima fecha de pago, o
+  // funciones con datos obsoletos) se muestren desde caché mientras en incógnito
+  // —sin caché— se ve bien. Se puede sobrescribir con opts.cache si hiciera falta.
+  const res = await fetch(full, { cache: 'no-store', ...opts, headers });
 
   if (opts.responseType === 'blob') {
     if (!res.ok) {
