@@ -354,7 +354,11 @@ export default function CompanyDetail() {
                 {c.billingMode === 'paquete' ? (
                   <span>
                     Pago hasta:{' '}
-                    <b>{b?.paidUntil ? formatDateOnly(b.paidUntil) : '—'}</b>{' '}
+                    <b>
+                      {b?.nextPaymentDate || b?.paidUntil
+                        ? formatDateOnly(b.nextPaymentDate || b.paidUntil)
+                        : '—'}
+                    </b>{' '}
                     ({daysBadge()})
                   </span>
                 ) : (

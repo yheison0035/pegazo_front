@@ -112,7 +112,9 @@ function BillingInner() {
               <div>
                 <p className="text-xs text-gray-400">Próximo pago</p>
                 <p className="font-semibold text-gray-800">
-                  {d.paidUntil ? formatDateOnly(d.paidUntil) : '—'}
+                  {d.nextPaymentDate || d.paidUntil
+                    ? formatDateOnly(d.nextPaymentDate || d.paidUntil)
+                    : '—'}
                 </p>
               </div>
               <div>
