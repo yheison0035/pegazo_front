@@ -6,9 +6,14 @@ import { monserrat } from '@/styles/fonts';
 import '@/styles/globals.css';
 
 // Google Tag Manager. El ID se puede sobreescribir con NEXT_PUBLIC_GTM_ID en
-// Vercel; si no, usa el contenedor de Pegazo. Desde GTM se gestiona GA4 y otras
+// Vercel; si no, usa el contenedor de Pegazo. Desde GTM se gestionan otras
 // etiquetas sin volver a tocar código.
 const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID || 'GTM-P88J458M';
+
+// Google Analytics 4 (gtag directo). Mide desde el primer momento. IMPORTANTE:
+// como GA4 ya está aquí, NO se debe volver a añadir una etiqueta de GA4 dentro
+// de GTM, para no contar dos veces las visitas.
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID || 'G-X5S84B0SWZ';
 
 export const metadata = {
   metadataBase: new URL('https://pegazo.co'),
@@ -134,6 +139,17 @@ new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
 })(window,document,'script','dataLayer','${GTM_ID}');`}
+          </Script>
+          {/* Google Analytics 4 */}
+          <Script
+            src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+            strategy="afterInteractive"
+          />
+          <Script id="ga4-init" strategy="afterInteractive">
+            {`window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '${GA_ID}');`}
           </Script>
         </head>
         <body className={`${monserrat.className} antialiased`}>
