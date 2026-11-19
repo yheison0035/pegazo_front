@@ -1,23 +1,9 @@
-'use client';
+// Layout SERVIDOR de la plataforma: render dinámico para todo /platform; la UI
+// la maneja el shell de cliente.
+export const dynamic = 'force-dynamic';
 
-import SideNavigation from '@/components/dashboard/sidenav/sidenav';
-import RoleGuard from '@/auth/roleGuard';
-import { Roles } from '@/config/roles';
-import PlatformSupportNotifier from '@/components/support/PlatformSupportNotifier';
+import PlatformShell from './PlatformShell';
 
 export default function Layout({ children }) {
-  return (
-    <RoleGuard allowedRoles={Object.values(Roles)}>
-      <div className="flex h-screen flex-col md:flex-row md:overflow-hidden">
-        {/* Rail colapsado: reservamos solo su ancho; se expande al hover. */}
-        <div className="w-full flex-none md:w-20">
-          <SideNavigation />
-        </div>
-        <div className="grow bg-gray-50 p-6 pt-16 text-gray-800 md:overflow-y-auto md:p-10 md:pt-10">
-          {children}
-        </div>
-      </div>
-      <PlatformSupportNotifier />
-    </RoleGuard>
-  );
+  return <PlatformShell>{children}</PlatformShell>;
 }

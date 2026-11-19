@@ -1,4 +1,5 @@
 // La página /register es un componente de cliente y no puede exportar metadata;
+export const dynamic = 'force-dynamic';
 // este layout (servidor) le da su propio SEO como página de conversión.
 export const metadata = {
   title: 'Crea tu cuenta y registra tu negocio',

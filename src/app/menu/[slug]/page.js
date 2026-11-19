@@ -9,3 +9,5 @@ export async function generateMetadata({ params }) {
   const { slug } = await params;
   return buildPublicMetadata(slug, 'menu');
 }
+
+export const dynamic = 'force-dynamic';

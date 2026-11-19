@@ -119,7 +119,9 @@ export const viewport = {
   initialScale: 1,
 };
 
-export const dynamic = 'force-dynamic';
+// Sin render dinámico global: la landing y el blog quedan ESTÁTICOS (CDN, más
+// rápido y mejor SEO). Las áreas dinámicas (panel, plataforma, portal contador,
+// login/registro y páginas públicas por slug) declaran su propio force-dynamic.
 
 export default function RootLayout({ children }) {
   return (
