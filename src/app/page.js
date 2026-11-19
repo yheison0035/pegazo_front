@@ -775,7 +775,7 @@ export default function Landing() {
       <section
         id="diferencia"
         data-reveal
-        className="mx-auto max-w-6xl px-5 py-20"
+        className="mx-auto max-w-7xl px-5 py-20"
       >
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-sm font-semibold uppercase tracking-wider text-orange-600">
@@ -812,7 +812,7 @@ export default function Landing() {
         data-reveal
         className="bg-gradient-to-b from-neutral-50 to-white py-20"
       >
-        <div className="mx-auto max-w-6xl px-5">
+        <div className="mx-auto max-w-7xl px-5">
           <div className="mx-auto max-w-2xl text-center">
             <span className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-600">
               <SparklesIcon className="h-3.5 w-3.5" /> Demo en vivo
@@ -836,7 +836,7 @@ export default function Landing() {
 
       {/* SHOWCASE / MÍRALO POR DENTRO */}
       <section className="bg-neutral-950 py-20 text-white">
-        <div className="mx-auto max-w-6xl px-5">
+        <div className="mx-auto max-w-7xl px-5">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold">Míralo por dentro</h2>
             <p className="mt-3 text-neutral-400">
@@ -894,7 +894,7 @@ export default function Landing() {
       <section
         id="funciones"
         data-reveal
-        className="mx-auto max-w-6xl px-5 py-20"
+        className="mx-auto max-w-7xl px-5 py-20"
       >
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold text-neutral-900">
@@ -930,7 +930,7 @@ export default function Landing() {
 
       {/* POR VERTICAL (individual) */}
       <section id="negocios" data-reveal className="bg-neutral-50 py-20">
-        <div className="mx-auto max-w-6xl px-5">
+        <div className="mx-auto max-w-7xl px-5">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold text-neutral-900">
               Hecho para tu tipo de negocio
@@ -972,7 +972,7 @@ export default function Landing() {
       </section>
 
       {/* PÁGINA PÚBLICA / DEMOS EN VIVO */}
-      <section id="demos" data-reveal className="mx-auto max-w-6xl px-5 py-20">
+      <section id="demos" data-reveal className="mx-auto max-w-7xl px-5 py-20">
         <div className="mx-auto max-w-2xl text-center">
           <span className="inline-block rounded-full bg-orange-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-orange-700">
             Nuevo
@@ -1057,7 +1057,7 @@ export default function Landing() {
 
       {/* TODOS LOS TIPOS DE NEGOCIO */}
       <section data-reveal className="bg-neutral-50 py-20">
-        <div className="mx-auto max-w-6xl px-5">
+        <div className="mx-auto max-w-7xl px-5">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold text-neutral-900">
               Funciona para tu negocio, sea cual sea
@@ -1103,7 +1103,7 @@ export default function Landing() {
       </section>
 
       {/* BENEFICIOS */}
-      <section data-reveal className="mx-auto max-w-6xl px-5 py-20">
+      <section data-reveal className="mx-auto max-w-7xl px-5 py-20">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold text-neutral-900">
             Por qué te conviene
@@ -1165,7 +1165,7 @@ export default function Landing() {
 
       {/* PRÓXIMAMENTE */}
       <section className="bg-neutral-950 py-20 text-white">
-        <div className="mx-auto max-w-6xl px-5">
+        <div className="mx-auto max-w-7xl px-5">
           <div className="mx-auto max-w-2xl text-center">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-orange-500/40 bg-orange-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-orange-400">
               <RocketLaunchIcon className="h-3.5 w-3.5" /> Próximamente
@@ -1199,7 +1199,7 @@ export default function Landing() {
 
       {/* PLAN A TU MEDIDA (cotización por WhatsApp) */}
       {/* COMPARATIVA */}
-      <section className="mx-auto max-w-5xl px-5 py-20">
+      <section className="mx-auto max-w-7xl px-5 py-20">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold text-neutral-900">
             ¿Por qué Pegazo y no otro?
@@ -1279,7 +1279,7 @@ export default function Landing() {
         </p>
       </section>
 
-      <section id="planes" className="mx-auto max-w-6xl px-5 py-20">
+      <section id="planes" className="mx-auto max-w-7xl px-5 py-20">
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-sm font-semibold uppercase tracking-wider text-orange-600">
             Un solo plan
@@ -1378,7 +1378,7 @@ export default function Landing() {
         className="relative overflow-hidden bg-gradient-to-br from-[#0b0f19] via-neutral-950 to-black py-20 text-white"
       >
         <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-orange-600/20 blur-[120px]" />
-        <div className="relative mx-auto max-w-6xl px-5">
+        <div className="relative mx-auto max-w-7xl px-5">
           {/* Enfoque Empresa | Contador */}
           <div className="mx-auto mb-6 flex w-fit items-center gap-1 rounded-full border border-white/10 bg-white/5 p-1 text-sm">
             <a href="#negocios" className="rounded-full px-4 py-1.5 text-white/60 transition hover:text-white">
@@ -1468,9 +1468,10 @@ export default function Landing() {
             Preguntas frecuentes
           </h2>
           <div className="mt-10 space-y-3">
-            {FAQ.map((f) => (
+            {FAQ.map((f, i) => (
               <details
                 key={f.q}
+                open={i === 0}
                 className="group rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm"
               >
                 <summary className="flex cursor-pointer items-center justify-between font-semibold text-neutral-900">

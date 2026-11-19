@@ -99,12 +99,13 @@ export default function ClientsMarquee() {
 
       <div className="mx-auto mt-10 max-w-5xl px-5">
         <div
-          className="group overflow-hidden rounded-3xl border border-neutral-100 bg-neutral-50/60 py-8"
+          className="pg-scroll group overflow-x-auto rounded-3xl border border-neutral-100 bg-neutral-50/60 py-8 md:overflow-hidden"
           style={{
             maskImage:
               'linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent)',
             WebkitMaskImage:
               'linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent)',
+            WebkitOverflowScrolling: 'touch',
           }}
         >
           <div
@@ -122,7 +123,12 @@ export default function ClientsMarquee() {
         @keyframes pgMarquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
         .pg-marquee { animation-name: pgMarquee; animation-timing-function: linear; animation-iteration-count: infinite; }
         .group:hover .pg-marquee { animation-play-state: paused; }
-        @media (prefers-reduced-motion: reduce) { .pg-marquee { animation: none; flex-wrap: wrap; justify-content: center; } }
+        /* Ocultar la barra de scroll (en móvil el carril se desliza con el dedo). */
+        .pg-scroll { scrollbar-width: none; }
+        .pg-scroll::-webkit-scrollbar { display: none; }
+        /* En móvil/tablet: sin animación automática, el usuario lo mueve con el dedo. */
+        @media (max-width: 767px) { .pg-marquee { animation: none !important; } }
+        @media (prefers-reduced-motion: reduce) { .pg-marquee { animation: none; } }
       `}</style>
     </section>
   );
