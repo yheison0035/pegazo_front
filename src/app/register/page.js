@@ -60,6 +60,71 @@ const BUSINESS_TYPES = Object.keys(BT).map((id) => ({
 // Solo se ofrece el plan disponible (Órbita). Si llega ?plan=otro, se ignora.
 const PLAN_IDS = AVAILABLE_PLANS.map((p) => p.id);
 const DEFAULT_PLAN = AVAILABLE_PLANS[0]?.id || '';
+
+// Todo lo que incluye el plan Órbita, agrupado por área (para mostrarlo bonito
+// y organizado debajo del plan en el registro).
+const ORBITA_INCLUYE = [
+  {
+    emoji: '💳',
+    title: 'Ventas y caja',
+    items: [
+      'Punto de venta rápido e impresión de factura',
+      'Efectivo, transferencia, datáfono y fiado',
+      'Apertura y cierre de caja con arqueo',
+      'Cotizaciones, devoluciones y plan separe',
+    ],
+  },
+  {
+    emoji: '📦',
+    title: 'Inventario y productos',
+    items: [
+      'Control de inventario en tiempo real',
+      'Variantes (color, talla) y código de barras',
+      'Alertas de productos por agotarse',
+      'Traslados de stock entre sedes',
+    ],
+  },
+  {
+    emoji: '👥',
+    title: 'Clientes, fiado y fidelización',
+    items: [
+      'Clientes (CRM), historial y notas',
+      'Cartera y fiado con recordatorios',
+      'Fidelización por visitas y membresías',
+      'WhatsApp a tus clientes',
+    ],
+  },
+  {
+    emoji: '🛒',
+    title: 'Citas, catálogo y tienda online',
+    items: [
+      'Citas y agenda por profesional',
+      'Reservas online desde tu propio enlace',
+      'Catálogo web para mostrar y enviar productos',
+      'Tienda online conectada al inventario (Wompi)',
+    ],
+  },
+  {
+    emoji: '📈',
+    title: 'Reportes y contabilidad',
+    items: [
+      'Estadísticas y reportes completos',
+      'Gastos, cuentas por pagar y utilidad',
+      'Contabilidad: plan de cuentas y libros',
+      'Calendario tributario e IVA (Colombia)',
+    ],
+  },
+  {
+    emoji: '🚀',
+    title: 'Para crecer, sin límites',
+    items: [
+      'Varios locales (multi-sede) ilimitados',
+      'Usuarios ilimitados, roles y permisos',
+      'Aviso de transferencias en tiempo real',
+      'App en el celular e importación por Excel',
+    ],
+  },
+];
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function formatCOP(n) {
@@ -288,6 +353,53 @@ export default function Register() {
                 {errors.plan}
               </p>
             )}
+
+            {/* Todo lo que incluye el plan Órbita */}
+            <div className="mt-5 overflow-hidden rounded-2xl border border-orange-200 bg-gradient-to-br from-orange-50 to-amber-50">
+              <div className="flex flex-wrap items-end justify-between gap-3 border-b border-orange-200/70 px-5 py-4">
+                <div>
+                  <p className="text-sm font-bold text-orange-700">
+                    🪐 Todo lo que incluye tu plan Órbita
+                  </p>
+                  <p className="text-xs text-neutral-500">
+                    Usuarios, sedes y productos ilimitados · sin permanencia
+                  </p>
+                </div>
+                <p className="text-2xl font-extrabold leading-none text-neutral-900">
+                  $150.000
+                  <span className="text-sm font-medium text-neutral-500">
+                    {' '}
+                    /mes
+                  </span>
+                </p>
+              </div>
+
+              <div className="grid gap-x-6 gap-y-5 p-5 sm:grid-cols-2">
+                {ORBITA_INCLUYE.map((g) => (
+                  <div key={g.title}>
+                    <p className="mb-2 text-sm font-bold text-neutral-800">
+                      {g.emoji} {g.title}
+                    </p>
+                    <ul className="space-y-1.5">
+                      {g.items.map((it) => (
+                        <li
+                          key={it}
+                          className="flex items-start gap-2 text-sm text-neutral-600"
+                        >
+                          <CheckCircleIcon className="mt-0.5 h-4 w-4 flex-none text-orange-500" />
+                          <span>{it}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+
+              <p className="border-t border-orange-200/70 px-5 py-3 text-xs text-neutral-500">
+                Facturación y nómina electrónica DIAN muy pronto, sin costo por
+                documento.
+              </p>
+            </div>
           </section>
 
           {/* 2. Datos del negocio */}

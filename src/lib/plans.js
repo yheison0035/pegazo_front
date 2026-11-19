@@ -77,12 +77,12 @@ export const PLANS = [
     // Único plan disponible por ahora.
     comingSoon: false,
     emoji: '🪐',
-    tagline: 'Cadena o empresa',
-    priceLabel: '$179.900',
-    priceMonthly: 179900,
+    tagline: 'Todo tu negocio, sin límites',
+    priceLabel: '$150.000',
+    priceMonthly: 150000,
     priceSuffix: '/mes',
-    yearLabel: '$1.799.000/año · 2 meses gratis',
-    highlight: false,
+    yearLabel: '',
+    highlight: true,
     limits: ['Usuarios ilimitados', 'Sedes ilimitadas', 'Productos ilimitados', 'Clientes ilimitados'],
     features: [
       'Todo lo de Altura',
