@@ -627,6 +627,9 @@ export default function Landing() {
             <a href="#planes" className="hover:text-white">
               Planes
             </a>
+            <Link href="/blog" className="hover:text-white">
+              Blog
+            </Link>
           </nav>
           <div className="hidden items-center gap-2 md:flex">
             <Link
