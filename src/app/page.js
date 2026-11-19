@@ -315,7 +315,7 @@ const BENEFITS = [
   {
     icon: CreditCardIcon,
     title: 'Sin permanencia',
-    desc: 'Planes flexibles en pesos, con prueba gratis. Cancela cuando quieras.',
+    desc: 'Plan Órbita en pesos colombianos, sin permanencia. Cancela cuando quieras.',
   },
 ];
 
@@ -565,7 +565,7 @@ function PhoneStoreMockup() {
         {/* banner */}
         <div className="bg-gradient-to-r from-orange-600 to-amber-500 px-3 py-4 text-white">
           <p className="text-[11px] font-bold leading-tight">
-            Envío gratis por compras hoy
+            Envíos a todo el país
           </p>
           <p className="text-[9px] text-white/80">Con tu marca y tus colores</p>
         </div>
@@ -722,7 +722,7 @@ export default function Landing() {
                 href="/register"
                 className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 px-7 py-3 font-semibold text-white shadow-lg transition-transform hover:-translate-y-0.5 hover:opacity-95 sm:w-auto"
               >
-                <RocketLaunchIcon className="h-5 w-5" /> Crear cuenta gratis
+                <RocketLaunchIcon className="h-5 w-5" /> Crear mi cuenta
               </Link>
               <a
                 href={WHATSAPP}
@@ -1281,12 +1281,16 @@ export default function Landing() {
 
       <section id="planes" className="mx-auto max-w-6xl px-5 py-20">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold text-neutral-900">
-            Un plan a la medida de tu negocio
+          <p className="text-sm font-semibold uppercase tracking-wider text-orange-600">
+            Un solo plan
+          </p>
+          <h2 className="mt-2 text-3xl font-bold text-neutral-900">
+            Plan Órbita: todo tu negocio, sin límites
           </h2>
           <p className="mt-3 text-neutral-500">
-            Nosotros te asesoramos y armamos el plan según lo que necesitas. Sin
-            permanencia. Escríbenos y te cotizamos al instante.
+            Un único plan con acceso a TODA la plataforma: usuarios, sedes y
+            productos ilimitados. Crea tu cuenta y empieza; si tienes dudas, te
+            asesoramos.
           </p>
         </div>
 
@@ -1295,34 +1299,55 @@ export default function Landing() {
             {/* Lado marca / CTA */}
             <div className="relative flex flex-col justify-center overflow-hidden bg-gradient-to-br from-neutral-900 via-neutral-950 to-black p-8 text-white sm:p-10">
               <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-orange-500 opacity-20 blur-3xl" />
-              <p className="text-sm font-semibold uppercase tracking-wider text-orange-400">
-                Plan a tu medida
+              <p className="inline-flex w-fit items-center gap-1.5 rounded-full bg-orange-500/15 px-3 py-1 text-sm font-semibold text-orange-400">
+                🪐 Plan Órbita
               </p>
-              <h3 className="mt-2 text-2xl font-bold">
-                Todo Pegazo, ajustado a tu negocio
+              <h3 className="mt-3 text-2xl font-bold">
+                Todo Pegazo, sin límites
               </h3>
               <p className="mt-3 text-neutral-300">
-                Pagas por lo que tu negocio necesita. Te asesoramos según tu
-                tipo de negocio, tus sedes y tu equipo.
+                Usuarios, sedes y productos ilimitados. Tienes acceso a todo lo
+                que hace Pegazo desde el primer día.
               </p>
+
+              {/* Accesos destacados */}
+              <ul className="mt-5 space-y-2 text-sm text-neutral-200">
+                {[
+                  'Confirmación de transferencias en tiempo real',
+                  'Catálogo web y tienda online conectada al inventario',
+                  'Estadísticas y reportes completos',
+                  'Varios locales (multi-sede) con su inventario',
+                  'Citas, cartera/fiado, contabilidad y más',
+                ].map((f) => (
+                  <li key={f} className="flex items-start gap-2">
+                    <CheckCircleIcon className="mt-0.5 h-4 w-4 flex-none text-orange-400" />
+                    <span>{f}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <Link
+                href="/register"
+                className="mt-7 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 px-6 py-3.5 font-semibold text-white shadow-lg transition hover:opacity-90"
+              >
+                <RocketLaunchIcon className="h-5 w-5" />
+                Crear mi cuenta
+              </Link>
               <a
                 href={WHATSAPP}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 px-6 py-3.5 font-semibold text-white shadow-lg transition hover:opacity-90"
+                className="mt-3 inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 px-6 py-3 text-sm font-semibold text-white/80 transition hover:bg-white/10 hover:text-white"
               >
                 <ChatBubbleLeftRightIcon className="h-5 w-5" />
-                Cotizar por WhatsApp
+                ¿Dudas? Escríbenos por WhatsApp
               </a>
-              <p className="mt-3 text-xs text-neutral-400">
-                Respuesta rápida · Sin compromiso
-              </p>
             </div>
 
             {/* Lado incluido */}
             <div className="p-8 sm:p-10">
               <p className="mb-4 font-semibold text-neutral-900">
-                Incluye todo lo que ofrece Pegazo:
+                Con Órbita tienes acceso a TODO:
               </p>
               <ul className="grid gap-x-4 gap-y-2 sm:grid-cols-2">
                 {INCLUDED.map((f) => (
@@ -1333,10 +1358,8 @@ export default function Landing() {
                 ))}
               </ul>
               <p className="mt-4 text-xs text-neutral-400">
-                Algunas funciones avanzadas (tienda online, avisos de banco,
-                historia clínica, contabilidad) se activan según el plan. Te
-                asesoramos cuál te conviene. La facturación y nómina electrónica
-                DIAN llegan muy pronto.
+                La facturación y nómina electrónica DIAN llegan muy pronto, sin
+                costo por documento.
               </p>
             </div>
           </div>
@@ -1482,7 +1505,7 @@ export default function Landing() {
               href="/register"
               className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-neutral-950 px-8 py-3.5 font-semibold text-white shadow-lg hover:bg-neutral-800 sm:w-auto"
             >
-              <RocketLaunchIcon className="h-5 w-5" /> Crear cuenta gratis
+              <RocketLaunchIcon className="h-5 w-5" /> Crear mi cuenta
             </Link>
             <a
               href={WHATSAPP}

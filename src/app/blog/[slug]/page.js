@@ -117,7 +117,7 @@ export default async function BlogArticle({ params }) {
             href="/register"
             className="rounded-lg bg-gradient-to-r from-orange-600 to-amber-500 px-4 py-2 text-sm font-bold text-white"
           >
-            Empieza gratis
+            Crear mi cuenta
           </Link>
         </div>
       </header>

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
 import { useAuth } from '@/context/authContext';
 import { validateCoupon } from '@/lib/api/auth/auth';
-import { PLANS } from '@/lib/plans';
+import { PLANS, AVAILABLE_PLANS } from '@/lib/plans';
 import LogoUploader from '@/components/ui/LogoUploader';
 import Button from '@/components/ui/Button';
 import { BUSINESS_TYPES as BT } from '@/config/businessTypes';
@@ -57,7 +57,9 @@ const BUSINESS_TYPES = Object.keys(BT).map((id) => ({
   name: TYPE_LABELS[id] || prettifyType(id),
 }));
 
-const PLAN_IDS = PLANS.map((p) => p.id);
+// Solo se ofrece el plan disponible (Órbita). Si llega ?plan=otro, se ignora.
+const PLAN_IDS = AVAILABLE_PLANS.map((p) => p.id);
+const DEFAULT_PLAN = AVAILABLE_PLANS[0]?.id || '';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function formatCOP(n) {
@@ -114,7 +116,7 @@ export default function Register() {
     phone: '',
   });
   const [logo, setLogo] = useState('');
-  const [plan, setPlan] = useState('');
+  const [plan, setPlan] = useState(DEFAULT_PLAN);
   const [coupon, setCoupon] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [couponMsg, setCouponMsg] = useState(null);
@@ -244,13 +246,14 @@ export default function Register() {
           {/* 1. Plan */}
           <section>
             <h2 className="text-lg font-bold text-neutral-900">
-              1. Elige tu plan <span className="text-orange-600">*</span>
+              1. Tu plan
             </h2>
             <p className="mb-4 text-sm text-neutral-500">
-              Puedes empezar gratis y cambiar de plan cuando quieras.
+              Plan Órbita: acceso completo a toda la plataforma, con usuarios,
+              sedes y productos ilimitados.
             </p>
             <div className="grid gap-3 sm:grid-cols-2">
-              {PLANS.map((p) => {
+              {AVAILABLE_PLANS.map((p) => {
                 const active = plan === p.id;
                 return (
                   <button
@@ -415,7 +418,7 @@ export default function Register() {
               <div className="flex items-center justify-between text-sm">
                 <span className="text-neutral-600">Plan {selected.name}</span>
                 <span className="font-semibold text-neutral-900">
-                  {base > 0 ? formatCOP(base) + '/mes' : 'Gratis'}
+                  {base > 0 ? formatCOP(base) + '/mes' : 'Incluido'}
                 </span>
               </div>
               {appliedCoupon && base > 0 && (

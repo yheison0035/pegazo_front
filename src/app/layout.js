@@ -11,7 +11,7 @@ export const metadata = {
     template: '%s · Pegazo',
   },
   description:
-    'Pegazo es el software en la nube para gestionar tu negocio: ventas y facturación, inventario, clientes, gastos, citas, reportes y tu tienda online conectada al inventario. Empieza gratis.',
+    'Pegazo es el software en la nube para gestionar tu negocio: ventas y facturación, inventario, clientes, gastos, citas, reportes y tu tienda online conectada al inventario.',
   applicationName: 'Pegazo',
   keywords: [
     'software de gestión',
@@ -64,7 +64,7 @@ export const metadata = {
     siteName: 'Pegazo',
     title: 'Pegazo — Todo tu negocio, en un solo lugar',
     description:
-      'Gestiona ventas, inventario, clientes, gastos, citas y reportes desde una sola plataforma en la nube. Con tu tienda online conectada al inventario. Empieza gratis.',
+      'Gestiona ventas, inventario, clientes, gastos, citas y reportes desde una sola plataforma en la nube. Con tu tienda online conectada al inventario.',
     images: [
       {
         url: '/images/logo_pegazo.png',
@@ -78,7 +78,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'Pegazo — Todo tu negocio, en un solo lugar',
     description:
-      'Software en la nube para vender, controlar tu inventario y hacer crecer tu negocio. Con tienda online. Empieza gratis.',
+      'Software en la nube para vender, controlar tu inventario y hacer crecer tu negocio. Con tienda online.',
     images: ['/images/logo_pegazo.png'],
   },
   robots: {
