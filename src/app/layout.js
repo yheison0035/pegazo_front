@@ -65,21 +65,14 @@ export const metadata = {
     title: 'Pegazo — Todo tu negocio, en un solo lugar',
     description:
       'Gestiona ventas, inventario, clientes, gastos, citas y reportes desde una sola plataforma en la nube. Con tu tienda online conectada al inventario.',
-    images: [
-      {
-        url: '/images/logo_pegazo.png',
-        width: 1536,
-        height: 1024,
-        alt: 'Pegazo — plataforma para gestionar tu negocio',
-      },
-    ],
+    // La imagen para compartir la genera src/app/opengraph-image.js (1200x630).
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Pegazo — Todo tu negocio, en un solo lugar',
     description:
       'Software en la nube para vender, controlar tu inventario y hacer crecer tu negocio. Con tienda online.',
-    images: ['/images/logo_pegazo.png'],
+    // Usa la misma imagen generada por src/app/opengraph-image.js (1200x630).
   },
   robots: {
     index: true,

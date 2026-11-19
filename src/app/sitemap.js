@@ -1,4 +1,5 @@
 import { getAllPosts } from '@/content/blog/posts';
+import { getAllSolutions } from '@/content/landings/solutions';
 
 export default function sitemap() {
   const base = 'https://pegazo.co';
@@ -12,8 +13,22 @@ export default function sitemap() {
     priority: 0.7,
   }));
 
+  // Páginas de solución por vertical / keyword (alta intención comercial).
+  const solutions = getAllSolutions().map((s) => ({
+    url: `${base}/soluciones/${s.slug}`,
+    lastModified: now,
+    changeFrequency: 'monthly',
+    priority: 0.8,
+  }));
+
   return [
     { url: base, lastModified: now, changeFrequency: 'weekly', priority: 1 },
+    {
+      url: `${base}/soluciones`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
     { url: `${base}/blog`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
     {
       url: `${base}/register`,
@@ -21,6 +36,7 @@ export default function sitemap() {
       changeFrequency: 'monthly',
       priority: 0.8,
     },
+    ...solutions,
     ...posts,
   ];
 }

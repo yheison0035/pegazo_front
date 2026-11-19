@@ -37,6 +37,7 @@ import {
 import VerticalShowcase from '@/components/landing/VerticalShowcase';
 import ClientsMarquee from '@/components/landing/ClientsMarquee';
 import ScrollReveal from '@/components/landing/ScrollReveal';
+import { getAllSolutions } from '@/content/landings/solutions';
 
 // Cotización directa por WhatsApp (venta punto a punto; los precios se acuerdan
 // con cada cliente). Los planes y sus límites siguen aplicados en el CRM.
@@ -645,6 +646,9 @@ export default function Landing() {
             <a href="#negocios" className="hover:text-white">
               Para tu negocio
             </a>
+            <Link href="/soluciones" className="hover:text-white">
+              Soluciones
+            </Link>
             <a href="#contadores" className="hover:text-white">
               Contadores
             </a>
@@ -1647,6 +1651,30 @@ export default function Landing() {
 
       {/* FOOTER */}
       <footer className="bg-neutral-950 py-10 text-neutral-400">
+        {/* Soluciones por tipo de negocio (enlazado interno SEO) */}
+        <div className="mx-auto mb-8 max-w-6xl px-5">
+          <p className="text-sm font-semibold text-neutral-300">
+            Soluciones por tipo de negocio
+          </p>
+          <div className="mt-3 grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-3 lg:grid-cols-4">
+            {getAllSolutions().map((s) => (
+              <Link
+                key={s.slug}
+                href={`/soluciones/${s.slug}`}
+                className="text-neutral-400 hover:text-white"
+              >
+                {s.eyebrow}
+              </Link>
+            ))}
+          </div>
+          <Link
+            href="/soluciones"
+            className="mt-3 inline-block text-sm font-semibold text-orange-400 hover:text-orange-300"
+          >
+            Ver todas las soluciones →
+          </Link>
+        </div>
+        <div className="mx-auto mb-8 h-px max-w-6xl bg-white/10" />
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-5 sm:flex-row">
           <div className="flex flex-col items-center gap-1 sm:items-start">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -1669,9 +1697,9 @@ export default function Landing() {
             <a href="#funciones" className="hover:text-white">
               Funciones
             </a>
-            <a href="#negocios" className="hover:text-white">
-              Para tu negocio
-            </a>
+            <Link href="/soluciones" className="hover:text-white">
+              Soluciones
+            </Link>
             <a href="#contadores" className="hover:text-white">
               Contadores
             </a>
