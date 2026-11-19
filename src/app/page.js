@@ -753,21 +753,44 @@ export default function Landing() {
       </section>
 
       {/* ¿QUÉ ES PEGAZO? (contenido para SEO) */}
-      <section data-reveal className="mx-auto max-w-4xl px-5 pt-16 text-center">
-        <h2 className="text-2xl font-bold text-neutral-900 sm:text-3xl">
+      <section data-reveal className="mx-auto max-w-5xl px-5 pt-16 text-center">
+        <p className="text-sm font-semibold uppercase tracking-wider text-orange-600">
           ¿Qué es Pegazo?
+        </p>
+        <h2 className="mt-2 text-2xl font-bold text-neutral-900 sm:text-3xl">
+          Todo tu negocio en un solo software, en la nube
         </h2>
         <p className="mx-auto mt-4 max-w-3xl text-neutral-600">
-          <b>Pegazo</b> es un software de gestión en la nube (punto de venta y
-          CRM) para administrar tu negocio desde un solo lugar: ventas y
-          facturación, control de inventario, clientes, cartera y fiado, gastos,
-          cierre de caja, citas, reportes y estadísticas, fidelización y tu
-          propia tienda online conectada al inventario. Funciona en cualquier
-          navegador y como app en tu celular, y se adapta a tu tipo de negocio:
-          barberías, consultorios, restaurantes, supermercados, tiendas de ropa,
-          distribución y servicios. Ideal para negocios y pymes en Colombia que
-          quieren vender más y controlar mejor, sin planillas de Excel ni pagar
-          varias herramientas.
+          <b>Pegazo</b> es un software de gestión (punto de venta y CRM) para
+          administrar tu negocio desde un solo lugar: ventas y facturación,
+          control de inventario, clientes, <b>cartera y fiado</b>, cierre de
+          caja, citas, reportes y tu propia <b>tienda online</b> conectada al
+          inventario. Funciona en cualquier navegador y como app en tu celular.
+        </p>
+
+        {/* Beneficios en pills (escaneable) */}
+        <div className="mt-6 flex flex-wrap justify-center gap-2">
+          {[
+            '🧩 Todo en uno',
+            '🔧 Se adapta a tu negocio',
+            '☁️ En la nube + app',
+            '📵 Sin Excel ni varias apps',
+            '🇨🇴 Hecho para Colombia',
+          ].map((t) => (
+            <span
+              key={t}
+              className="rounded-full border border-neutral-200 bg-neutral-50 px-3.5 py-1.5 text-sm font-medium text-neutral-700"
+            >
+              {t}
+            </span>
+          ))}
+        </div>
+
+        {/* Tipos de negocio (contenido para SEO) */}
+        <p className="mx-auto mt-6 max-w-2xl text-sm text-neutral-500">
+          Ideal para <b>barberías, consultorios, restaurantes, supermercados,
+          tiendas de ropa, distribuidoras y servicios</b> — negocios y pymes en
+          Colombia que quieren vender más y controlar mejor.
         </p>
       </section>
 
@@ -1201,12 +1224,17 @@ export default function Landing() {
       {/* COMPARATIVA */}
       <section className="mx-auto max-w-7xl px-5 py-20">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold text-neutral-900">
+          <p className="text-sm font-semibold uppercase tracking-wider text-orange-600">
+            Comparación
+          </p>
+          <h2 className="mt-2 text-3xl font-bold text-neutral-900">
             ¿Por qué Pegazo y no otro?
           </h2>
           <p className="mt-3 text-neutral-500">
-            Otros llevan la contabilidad. Pegazo hace vender: se adapta a tu
-            negocio y trae tu tienda online conectada al inventario.
+            Los demás se enfocan en la contabilidad. Pegazo está hecho para{' '}
+            <b className="text-neutral-700">vender</b>: se adapta a tu tipo de
+            negocio y trae tu tienda online conectada al inventario. Compara y
+            decide.
           </p>
         </div>
 
