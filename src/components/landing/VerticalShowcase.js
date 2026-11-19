@@ -542,6 +542,7 @@ export default function VerticalShowcase() {
           <div className="relative h-[560px] overflow-hidden rounded-[1.8rem] bg-gray-50">
             <button
               type="button"
+              aria-label="Abrir menú"
               onClick={() => setMenuOpen(true)}
               className="absolute left-3 top-3 z-20 rounded-xl border border-orange-500/20 bg-[#0B0F19]/90 p-2 shadow-lg backdrop-blur"
             >
@@ -589,6 +590,7 @@ export default function VerticalShowcase() {
                 </div>
                 <button
                   type="button"
+                  aria-label="Cerrar menú"
                   onClick={() => setMenuOpen(false)}
                   className="text-white/60 hover:text-white"
                 >

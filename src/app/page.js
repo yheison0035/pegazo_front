@@ -672,7 +672,10 @@ export default function Landing() {
 
           {/* Menú móvil (nativo, sin JS) */}
           <details className="relative md:hidden">
-            <summary className="flex cursor-pointer list-none items-center rounded-lg border border-white/15 p-2 text-neutral-200 [&::-webkit-details-marker]:hidden">
+            <summary
+              aria-label="Abrir menú de navegación"
+              className="flex cursor-pointer list-none items-center rounded-lg border border-white/15 p-2 text-neutral-200 [&::-webkit-details-marker]:hidden"
+            >
               <Bars3Icon className="h-6 w-6" />
             </summary>
             <div className="absolute right-0 z-50 mt-2 w-60 rounded-xl border border-white/10 bg-neutral-900 p-2 shadow-2xl">
@@ -717,6 +720,7 @@ export default function Landing() {
         </div>
       </header>
 
+      <main>
       {/* HERO */}
       <section className="relative overflow-hidden bg-gradient-to-br from-neutral-900 via-neutral-950 to-black text-white">
         <div className="pz-float absolute -top-24 -left-24 h-96 w-96 rounded-full bg-orange-500 opacity-20 blur-3xl" />
@@ -1639,6 +1643,7 @@ export default function Landing() {
           </div>
         </div>
       </section>
+      </main>
 
       {/* FOOTER */}
       <footer className="bg-neutral-950 py-10 text-neutral-400">
