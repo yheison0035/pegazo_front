@@ -626,9 +626,13 @@ export default function Landing() {
       {/* HEADER */}
       <header className="sticky top-0 z-50 border-b border-white/10 bg-neutral-950/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-5">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/images/logo_pegazo.png"
+            src="/images/logo_pegazo_sm.png"
             alt="Pegazo"
+            width={240}
+            height={160}
+            fetchPriority="high"
             className="h-9 w-auto sm:h-11"
           />
           <nav className="hidden items-center gap-8 text-sm text-neutral-300 md:flex">
@@ -1640,9 +1644,13 @@ export default function Landing() {
       <footer className="bg-neutral-950 py-10 text-neutral-400">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-5 sm:flex-row">
           <div className="flex flex-col items-center gap-1 sm:items-start">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/images/logo_pegazo.png"
+              src="/images/logo_pegazo_sm.png"
               alt="Pegazo"
+              width={240}
+              height={160}
+              loading="lazy"
               className="h-10 w-auto"
             />
             <p className="text-xs text-neutral-500">

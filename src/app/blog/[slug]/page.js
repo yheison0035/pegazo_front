@@ -110,7 +110,7 @@ export default async function BlogArticle({ params }) {
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-4 sm:px-6">
           <Link href="/" className="flex items-center gap-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/logo_pegazo.png" alt="Pegazo" className="h-7 w-auto" />
+            <img src="/images/logo_pegazo_sm.png" alt="Pegazo" width={240} height={160} className="h-7 w-auto" />
             <span className="text-lg font-extrabold">Pegazo</span>
           </Link>
           <Link
