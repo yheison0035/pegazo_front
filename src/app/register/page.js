@@ -61,67 +61,69 @@ const BUSINESS_TYPES = Object.keys(BT).map((id) => ({
 const PLAN_IDS = AVAILABLE_PLANS.map((p) => p.id);
 const DEFAULT_PLAN = AVAILABLE_PLANS[0]?.id || '';
 
-// Todo lo que incluye el plan Órbita, agrupado por área (para mostrarlo bonito
-// y organizado debajo del plan en el registro).
+// Todo lo que incluye el plan Órbita, agrupado por área. Ítems CORTOS (para que
+// se escanee rápido, sin textos largos) que cubren todo lo que hace el CRM.
 const ORBITA_INCLUYE = [
   {
     emoji: '💳',
     title: 'Ventas y caja',
     items: [
-      'Punto de venta rápido e impresión de factura',
+      'Punto de venta y factura',
       'Efectivo, transferencia, datáfono y fiado',
-      'Apertura y cierre de caja con arqueo',
-      'Cotizaciones, devoluciones y plan separe',
+      'Cierre de caja (arqueo)',
+      'Cotizaciones y devoluciones',
+      'Impuestos / IVA (Colombia)',
     ],
   },
   {
     emoji: '📦',
-    title: 'Inventario y productos',
+    title: 'Inventario',
     items: [
-      'Control de inventario en tiempo real',
-      'Variantes (color, talla) y código de barras',
-      'Alertas de productos por agotarse',
-      'Traslados de stock entre sedes',
+      'En tiempo real',
+      'Variantes y código de barras',
+      'Alertas de agotados',
+      'Venta por peso o unidad',
+      'Traslados entre sedes',
     ],
   },
   {
-    emoji: '👥',
-    title: 'Clientes, fiado y fidelización',
+    emoji: '💰',
+    title: 'Crédito y cartera',
     items: [
-      'Clientes (CRM), historial y notas',
-      'Cartera y fiado con recordatorios',
-      'Fidelización por visitas y membresías',
-      'WhatsApp a tus clientes',
+      'Fiado por cuotas',
+      'Quién te debe, cuánto y desde cuándo',
+      'Recordatorios automáticos',
+      'Clientes (CRM) y fidelización',
     ],
   },
   {
     emoji: '🛒',
-    title: 'Citas, catálogo y tienda online',
+    title: 'Citas y tienda online',
     items: [
-      'Citas y agenda por profesional',
-      'Reservas online desde tu propio enlace',
-      'Catálogo web para mostrar y enviar productos',
-      'Tienda online conectada al inventario (Wompi)',
+      'Agenda y reservas online',
+      'Comisiones por empleado',
+      'Catálogo web',
+      'Tienda online (cobros Wompi)',
     ],
   },
   {
     emoji: '📈',
     title: 'Reportes y contabilidad',
     items: [
-      'Estadísticas y reportes completos',
-      'Gastos, cuentas por pagar y utilidad',
-      'Contabilidad: plan de cuentas y libros',
-      'Calendario tributario e IVA (Colombia)',
+      'Estadísticas y utilidad',
+      'Gastos y cuentas por pagar',
+      'Libros y plan de cuentas',
+      'Calendario tributario',
     ],
   },
   {
-    emoji: '🚀',
-    title: 'Para crecer, sin límites',
+    emoji: '🏪',
+    title: 'Administra varios negocios',
     items: [
-      'Varios locales (multi-sede) ilimitados',
-      'Usuarios ilimitados, roles y permisos',
-      'Aviso de transferencias en tiempo real',
-      'App en el celular e importación por Excel',
+      'Varios locales al tiempo',
+      'Usuarios ilimitados',
+      'Roles y permisos',
+      'App en el celular',
     ],
   },
 ];
@@ -372,6 +374,19 @@ export default function Register() {
                     /mes
                   </span>
                 </p>
+              </div>
+
+              {/* Exclusivo: aviso de transferencias en tiempo real */}
+              <div className="mx-5 mt-4 flex items-center gap-3 rounded-xl border border-orange-200 bg-white px-4 py-3">
+                <span className="text-xl">🔔</span>
+                <div>
+                  <p className="text-sm font-bold text-neutral-900">
+                    Notificaciones en tiempo real de transferencias bancarias
+                  </p>
+                  <p className="text-xs text-neutral-500">
+                    Te avisamos al instante cuando te transfieren o consignan.
+                  </p>
+                </div>
               </div>
 
               <div className="grid gap-x-6 gap-y-5 p-5 sm:grid-cols-2">
