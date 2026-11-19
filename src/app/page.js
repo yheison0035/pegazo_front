@@ -887,15 +887,21 @@ export default function Landing() {
       <section className="bg-neutral-950 py-20 text-white">
         <div className="mx-auto max-w-7xl px-5">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold">Míralo por dentro</h2>
+            <p className="text-sm font-semibold uppercase tracking-wider text-orange-400">
+              Así se ve
+            </p>
+            <h2 className="mt-2 text-3xl font-bold">Míralo por dentro</h2>
             <p className="mt-3 text-neutral-400">
-              Un panel claro con tus números en tiempo real, y una tienda online
-              con tu marca.
+              Un panel claro con tus números en tiempo real y una tienda online
+              con tu marca. Desde el navegador o como app en tu celular.
             </p>
           </div>
           <div className="mt-12 grid items-center gap-10 lg:grid-cols-2">
             <div>
-              <h3 className="text-xl font-bold">
+              <p className="text-xs font-bold uppercase tracking-wider text-orange-400">
+                Panel · Inicio
+              </p>
+              <h3 className="mt-1.5 text-xl font-bold">
                 Tu negocio en una sola pantalla
               </h3>
               <ul className="mt-4 space-y-2.5">
@@ -920,7 +926,12 @@ export default function Landing() {
               <PhoneStoreMockup />
             </div>
             <div className="order-3 lg:order-4">
-              <h3 className="text-xl font-bold">Tu tienda online lista</h3>
+              <p className="text-xs font-bold uppercase tracking-wider text-orange-400">
+                Tienda online
+              </p>
+              <h3 className="mt-1.5 text-xl font-bold">
+                Tu tienda online, con tu marca
+              </h3>
               <ul className="mt-4 space-y-2.5">
                 {[
                   'Con tu logo, colores y productos',
@@ -935,6 +946,18 @@ export default function Landing() {
                 ))}
               </ul>
             </div>
+          </div>
+
+          <div className="mt-12 text-center">
+            <Link
+              href="/register"
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 px-7 py-3 font-semibold text-white shadow-lg transition hover:opacity-90"
+            >
+              <RocketLaunchIcon className="h-5 w-5" /> Crear mi cuenta
+            </Link>
+            <p className="mt-3 text-sm text-neutral-500">
+              Pruébalo con tu propio negocio en minutos.
+            </p>
           </div>
         </div>
       </section>
