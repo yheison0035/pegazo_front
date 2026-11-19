@@ -298,6 +298,11 @@ const VERTICALS = [
 // ── Beneficios (por qué te conviene) ──
 const BENEFITS = [
   {
+    icon: SparklesIcon,
+    title: 'Se adapta a tu negocio',
+    desc: 'El sistema se amolda a ti, no al revés: cada tipo de negocio ve el vocabulario y las funciones que necesita.',
+  },
+  {
     icon: BoltIcon,
     title: 'Deja de pagar varias herramientas',
     desc: 'POS, inventario, CRM, citas, reportes y tienda online en un solo lugar y una sola cuenta.',
@@ -312,29 +317,24 @@ const BENEFITS = [
     title: 'Empieza en minutos',
     desc: 'Sin instalaciones ni técnicos. Crea tu cuenta, carga tus productos y a vender.',
   },
-  {
-    icon: CreditCardIcon,
-    title: 'Sin permanencia',
-    desc: 'Plan Órbita en pesos colombianos, sin permanencia. Cancela cuando quieras.',
-  },
 ];
 
 // ── Cómo funciona (3 pasos) ──
 const HOW_STEPS = [
   {
     n: '1',
-    title: 'Cotiza tu plan',
-    desc: 'Escríbenos por WhatsApp y te asesoramos según tu tipo de negocio, tus sedes y tu equipo.',
+    title: 'Crea tu cuenta',
+    desc: 'Regístrate y elige tu tipo de negocio. El sistema se adapta solo a lo que vendes.',
   },
   {
     n: '2',
-    title: 'Montamos tu negocio',
-    desc: 'Te configuramos la cuenta y te ayudamos a cargar tu inventario, servicios y colaboradores.',
+    title: 'Carga tus productos o servicios',
+    desc: 'Sube tu inventario, servicios y colaboradores. Si quieres, te ayudamos a montarlo.',
   },
   {
     n: '3',
     title: 'Empieza a vender',
-    desc: 'Factura, gestiona citas, cobra, mira tus reportes y activa tu tienda online desde el primer día.',
+    desc: 'Factura, cobra, gestiona citas, mira tus reportes y activa tu tienda online desde el primer día.',
   },
 ];
 
@@ -367,6 +367,10 @@ const FAQ = [
     a: 'Sí. Pegazo se adapta a barberías y salones, consultorios y clínicas (odontología, estética), restaurantes y bares, supermercados y minimercados, tiendas de ropa, distribución y servicios. El vocabulario y las funciones cambian según lo que vendes.',
   },
   {
+    q: '¿Pegazo se adapta a mi negocio o yo me adapto a él?',
+    a: 'Pegazo se adapta a TU negocio, no al revés. A diferencia de otros sistemas genéricos a los que te toca amoldarte, aquí eliges tu tipo de negocio y el sistema ajusta el vocabulario (barbero, mesero, paciente…), las funciones y lo que ve cada rol. Trabajas como ya trabajas, pero ordenado.',
+  },
+  {
     q: '¿Puedo manejar varios locales o sedes?',
     a: 'Sí. Puedes tener varias sedes desde una sola cuenta, y cada local con su propio inventario, ventas, caja y reportes, con control de roles para tu equipo.',
   },
@@ -375,16 +379,32 @@ const FAQ = [
     a: 'No. Pegazo funciona en la nube desde cualquier navegador y se instala como app en tu celular (PWA). Creas tu cuenta, cargas tus productos y empiezas a vender en minutos.',
   },
   {
+    q: '¿Me ayudan a montar mi negocio en el sistema?',
+    a: 'Sí. Te acompañamos para configurar tu negocio y cargar tu inventario, servicios y colaboradores. Además puedes importar tus productos y clientes desde Excel para arrancar rápido.',
+  },
+  {
     q: '¿Incluye tienda online?',
-    a: 'Sí. Tu tienda online se conecta a tu inventario en tiempo real y usa tu marca (logo y colores). Tú eliges qué productos publicar y tus clientes crean su cuenta y siguen sus pedidos. Se activa según tu plan, sin montar otra plataforma.',
+    a: 'Sí. Tu tienda online se conecta a tu inventario en tiempo real y usa tu marca (logo y colores). Tú eliges qué productos publicar y tus clientes crean su cuenta y siguen sus pedidos. También tienes un catálogo web para mostrar o enviar tus productos sin montar otra plataforma.',
   },
   {
     q: '¿Puedo controlar el fiado y la cartera?',
-    a: 'Sí. Registras ventas a crédito (fiado), controlas cuánto te deben, los abonos y el saldo de cada cliente, y haces el cierre de caja con arqueo cada día.',
+    a: 'Sí. Registras ventas a crédito (fiado) por cuotas, ves cuánto te debe cada cliente y desde cuándo, los abonos y el saldo, con recordatorios automáticos al cliente. Y haces el cierre de caja con arqueo cada día.',
+  },
+  {
+    q: '¿Maneja comisiones y permisos por empleado?',
+    a: 'Sí. Calcula comisiones por empleado (por ejemplo, cortes y productos de un barbero) automáticamente, y defines roles y permisos para que cada persona vea y haga solo lo que le corresponde, con auditoría de acciones.',
+  },
+  {
+    q: '¿Qué medios de pago acepta?',
+    a: 'Efectivo, transferencia, datáfono (tarjeta) y fiado. En la tienda online, además, cobros en línea con Wompi a tu propio banco. Y te avisa en tiempo real cuando te transfieren o consignan.',
+  },
+  {
+    q: '¿Mis datos están seguros y respaldados?',
+    a: 'Sí. Tu información vive en la nube, cifrada y respaldada, accesible solo para ti y tu equipo con sus permisos. No dependes de un computador: si se daña o lo cambias, tus datos siguen ahí.',
   },
   {
     q: '¿Cuánto cuesta y hay permanencia?',
-    a: 'El plan es a la medida de tu negocio: escríbenos por WhatsApp y te cotizamos. En pesos colombianos, sin permanencia. Cancela cuando quieras.',
+    a: 'Un solo plan, Órbita, con acceso a toda la plataforma y usuarios, sedes y productos ilimitados. Escríbenos por WhatsApp para conocer el valor y activarte. En pesos colombianos, sin permanencia. Cancela cuando quieras.',
   },
   {
     q: '¿Pegazo factura electrónicamente ante la DIAN?',
@@ -701,8 +721,8 @@ export default function Landing() {
         <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-5 py-16 sm:py-20 lg:grid-cols-2">
           <div className="text-center lg:text-left">
             <span className="pz-hero-in mb-5 inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-neutral-300">
-              <BoltIcon className="h-3.5 w-3.5 text-orange-400" /> Un solo
-              sistema para cualquier negocio
+              <BoltIcon className="h-3.5 w-3.5 text-orange-400" /> El sistema que
+              se adapta a TU negocio
             </span>
             <h1 className="pz-hero-in pz-hero-in-2 text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl">
               Todo tu negocio,{' '}
@@ -713,8 +733,14 @@ export default function Landing() {
             <p className="pz-hero-in pz-hero-in-2 mx-auto mt-5 max-w-xl text-lg text-neutral-300 lg:mx-0">
               Ventas, inventario, clientes, citas, cartera, contabilidad,
               reportes y tu propia <span className="font-semibold text-white">tienda
-              online</span>. Pegazo se adapta a lo que vendes y hace despegar tu
-              negocio, todo desde la nube.
+              online</span>, todo desde la nube.
+            </p>
+            <p className="pz-hero-in pz-hero-in-2 mx-auto mt-3 max-w-xl text-base text-neutral-300 lg:mx-0">
+              Y lo más importante:{' '}
+              <span className="font-semibold text-white">
+                Pegazo se adapta a tu negocio, no tu negocio a Pegazo
+              </span>{' '}
+              — como sí te obligan otros sistemas.
             </p>
 
             <div className="pz-hero-in pz-hero-in-3 mt-8 flex flex-col items-center gap-3 sm:flex-row lg:justify-start">
@@ -920,12 +946,15 @@ export default function Landing() {
         className="mx-auto max-w-7xl px-5 py-20"
       >
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold text-neutral-900">
+          <p className="text-sm font-semibold uppercase tracking-wider text-orange-600">
+            Funciones
+          </p>
+          <h2 className="mt-2 text-3xl font-bold text-neutral-900">
             Todo lo que tu negocio necesita
           </h2>
           <p className="mt-3 text-neutral-500">
-            Un solo sistema para vender, controlar y crecer. Deja de pagar
-            varias herramientas.
+            Un solo sistema para vender, controlar y crecer — en lugar de pagar y
+            aprender varias herramientas sueltas.
           </p>
         </div>
         <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -955,12 +984,18 @@ export default function Landing() {
       <section id="negocios" data-reveal className="bg-neutral-50 py-20">
         <div className="mx-auto max-w-7xl px-5">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold text-neutral-900">
+            <p className="text-sm font-semibold uppercase tracking-wider text-orange-600">
+              Tu tipo de negocio
+            </p>
+            <h2 className="mt-2 text-3xl font-bold text-neutral-900">
               Hecho para tu tipo de negocio
             </h2>
-            <p className="mx-auto mt-3 max-w-2xl text-neutral-500">
-              No es genérico: cada negocio tiene sus propias funciones. Elige el
-              tuyo.
+            <p className="mx-auto mt-3 max-w-2xl text-neutral-600">
+              <b className="text-neutral-800">
+                Pegazo se adapta a tu negocio, no tu negocio a Pegazo.
+              </b>{' '}
+              Cada tipo ve el vocabulario y las funciones que necesita — no un
+              sistema genérico al que te toca amoldarte. Elige el tuyo:
             </p>
           </div>
           <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -1128,9 +1163,16 @@ export default function Landing() {
       {/* BENEFICIOS */}
       <section data-reveal className="mx-auto max-w-7xl px-5 py-20">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold text-neutral-900">
+          <p className="text-sm font-semibold uppercase tracking-wider text-orange-600">
+            Ventajas
+          </p>
+          <h2 className="mt-2 text-3xl font-bold text-neutral-900">
             Por qué te conviene
           </h2>
+          <p className="mt-3 text-neutral-500">
+            Menos herramientas, menos complicaciones y un sistema que trabaja
+            como trabaja tu negocio.
+          </p>
         </div>
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {BENEFITS.map((b) => (
@@ -1149,7 +1191,10 @@ export default function Landing() {
       <section data-reveal className="bg-neutral-50 py-20">
         <div className="mx-auto max-w-5xl px-5">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold text-neutral-900">
+            <p className="text-sm font-semibold uppercase tracking-wider text-orange-600">
+              Cómo empezar
+            </p>
+            <h2 className="mt-2 text-3xl font-bold text-neutral-900">
               Empieza en 3 pasos
             </h2>
             <p className="mt-3 text-neutral-500">
@@ -1172,15 +1217,20 @@ export default function Landing() {
               </div>
             ))}
           </div>
-          <div className="mt-10 text-center">
+          <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Link
+              href="/register"
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 px-7 py-3 font-semibold text-white shadow-lg hover:opacity-90"
+            >
+              <RocketLaunchIcon className="h-5 w-5" /> Crear mi cuenta
+            </Link>
             <a
               href={WHATSAPP}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 px-7 py-3 font-semibold text-white shadow-lg hover:opacity-90"
+              className="inline-flex items-center gap-2 rounded-xl border border-neutral-300 px-7 py-3 font-semibold text-neutral-700 hover:bg-neutral-50"
             >
-              <ChatBubbleLeftRightIcon className="h-5 w-5" /> Cotizar por
-              WhatsApp
+              <ChatBubbleLeftRightIcon className="h-5 w-5" /> Cotizar por WhatsApp
             </a>
           </div>
         </div>
@@ -1583,6 +1633,9 @@ export default function Landing() {
             <a href="#planes" className="hover:text-white">
               Planes
             </a>
+            <Link href="/blog" className="hover:text-white">
+              Blog
+            </Link>
             <Link href="/login" className="hover:text-white">
               Iniciar sesión
             </Link>
