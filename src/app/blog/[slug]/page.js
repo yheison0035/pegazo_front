@@ -5,6 +5,7 @@ import {
   getPostBySlug,
   BLOG_BASE,
 } from '@/content/blog/posts';
+import { getSolutionBySlug } from '@/content/landings/solutions';
 
 export function generateStaticParams() {
   return getAllPosts().map((p) => ({ slug: p.slug }));
@@ -61,6 +62,9 @@ export default async function BlogArticle({ params }) {
   const others = getAllPosts()
     .filter((p) => p.slug !== post.slug)
     .slice(0, 2);
+  const relatedSolutions = (post.solutions || [])
+    .map((s) => getSolutionBySlug(s))
+    .filter(Boolean);
 
   const graph = [
     {
@@ -184,6 +188,29 @@ export default async function BlogArticle({ params }) {
             </section>
           ) : null}
         </article>
+
+        {/* Soluciones relacionadas (enlaces internos a verticales) */}
+        {relatedSolutions.length ? (
+          <div className="mt-12">
+            <h2 className="text-lg font-bold text-neutral-900">
+              Soluciones relacionadas
+            </h2>
+            <div className="mt-4 grid gap-4 sm:grid-cols-3">
+              {relatedSolutions.map((s) => (
+                <Link
+                  key={s.slug}
+                  href={`/soluciones/${s.slug}`}
+                  className="rounded-xl border border-neutral-200 p-4 transition hover:border-orange-300 hover:shadow-sm"
+                >
+                  <p className="text-xs font-semibold text-orange-600">
+                    {s.eyebrow}
+                  </p>
+                  <p className="mt-1 font-semibold text-neutral-900">{s.h1}</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        ) : null}
 
         {/* CTA */}
         <div className="mt-12 rounded-2xl bg-neutral-950 p-8 text-center text-white">

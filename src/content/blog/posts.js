@@ -16,6 +16,7 @@ const DEFAULT_COVER = '/images/logo_pegazo.png';
 export const POSTS = [
   {
     slug: 'software-pos-punto-de-venta-colombia',
+    solutions: ['software-punto-de-venta', 'software-de-inventario', 'software-para-tiendas-y-minimercados'],
     title:
       'Software POS en Colombia: cómo elegir el punto de venta para tu negocio',
     description:
@@ -103,6 +104,7 @@ export const POSTS = [
 
   {
     slug: 'controlar-fiado-cartera-tienda',
+    solutions: ['crm-para-negocios', 'software-para-tiendas-y-minimercados', 'software-de-facturacion'],
     title: 'Fiado y cartera: cómo controlarlos sin perder plata en tu tienda',
     description:
       'El fiado bien manejado fideliza; mal manejado te quiebra. Aprende a controlar la cartera de tu tienda o negocio en Colombia: registro, límites, recordatorios y cómo cobrar sin pelear.',
@@ -174,6 +176,7 @@ export const POSTS = [
 
   {
     slug: 'software-para-barberias-peluquerias',
+    solutions: ['software-para-barberias-y-peluquerias', 'crm-para-negocios', 'software-para-odontologia-y-consultorios'],
     title: 'Software para barberías y peluquerías: agenda, comisiones y caja',
     description:
       'Qué debe tener un software para barberías y peluquerías: agenda de citas, comisiones por barbero, control de caja, fidelización y página de reservas. Guía para elegir bien en Colombia.',
@@ -238,6 +241,232 @@ export const POSTS = [
       {
         q: '¿Sirve igual para una peluquería o un spa?',
         a: 'Sí. La lógica es la misma: agenda por profesional, servicios, comisiones, caja y fidelización. Solo cambia el vocabulario y los servicios, que se configuran según tu negocio.',
+      },
+    ],
+  },
+
+  {
+    slug: 'software-contable-pymes-colombia',
+    solutions: ['software-contable', 'software-de-facturacion', 'software-de-inventario'],
+    title: 'Software contable para pymes en Colombia: qué necesitas de verdad',
+    description:
+      'No necesitas un software contable complejo para controlar tu negocio. Aprende a llevar ingresos, gastos, utilidad y reportes de tu pyme en Colombia, y qué entregarle a tu contador.',
+    keywords: [
+      'software contable Colombia',
+      'software contable pymes',
+      'control de ingresos y gastos',
+      'software administrativo negocio',
+      'reportes de utilidad',
+    ],
+    date: '2026-11-19',
+    updated: '2026-11-19',
+    readingMinutes: 7,
+    cover: DEFAULT_COVER,
+    excerpt:
+      'Ingresos, gastos, utilidad y reportes claros: lo que de verdad necesita una pyme para controlar su plata, sin volverse experta en contabilidad.',
+    intro:
+      'Cuando un dueño de negocio busca “software contable”, casi siempre quiere una cosa: saber si está ganando plata y tener todo ordenado para su contador. No necesita un sistema gigante lleno de cuentas que no entiende. En esta guía separamos lo que de verdad importa de lo que sobra, para una pyme en Colombia.',
+    sections: [
+      {
+        h2: '¿Qué resuelve un “software contable” para una pyme?',
+        body: [
+          'La contabilidad formal (balances, declaraciones, NIIF) es trabajo de tu contador. Lo que tú necesitas día a día es distinto: registrar cada venta y cada gasto, saber cuánto te queda y tener los números listos cuando tu contador los pida.',
+          'Por eso, más que un “software contable” pesado, la mayoría de pymes necesita una herramienta de gestión que capture el movimiento real del negocio y lo convierta en reportes claros.',
+        ],
+      },
+      {
+        h2: 'Lo que sí debe hacer',
+        body: ['Antes de pagar por algo complejo, asegúrate de tener resuelto esto:'],
+        list: [
+          'Ingresos automáticos: que cada venta quede registrada sin volver a digitarla.',
+          'Gastos por categoría: arriendo, proveedores, nómina, servicios, para saber en qué se va la plata.',
+          'Utilidad real: cuánto deja el negocio después de costos, no solo cuánto vendiste.',
+          'Cierre de caja: cuadrar el efectivo del día y detectar diferencias.',
+          'Reportes listos: ventas, gastos y utilidad por día, semana o mes.',
+          'Información exportable: entregarle a tu contador datos ordenados, no cuadernos.',
+        ],
+      },
+      {
+        h2: 'El error de llevar la plata en cuadernos y Excel',
+        body: [
+          'El cuaderno y el Excel suelto fallan por lo mismo: dependen de que alguien anote todo, a tiempo y sin errores. Un día de descuido y ya no sabes cuánto vendiste ni a quién le fiaste. Cuando el negocio crece, ese desorden cuesta plata y noches de cuadre.',
+          'Conectar las ventas con los gastos en un solo lugar elimina la doble digitación: lo que vendes ya queda contabilizado, y solo registras los gastos.',
+        ],
+      },
+      {
+        h2: 'Factura electrónica: lo que viene',
+        body: [
+          'La facturación electrónica ante la DIAN es cada vez más necesaria. En Pegazo estamos integrando la factura y la nómina electrónica directo ante la DIAN, sin costo por documento y con el certificado incluido. Mientras llega, ya facturas y gestionas tu negocio con normalidad.',
+          'Si quieres ver cómo quedaría la facturación de tu negocio, revisa nuestra página de software de facturación.',
+        ],
+      },
+      {
+        h2: 'Cómo lo resuelve Pegazo',
+        body: [
+          'Pegazo registra cada venta, controla tus gastos, calcula la utilidad y te muestra reportes sin que tengas que exportar nada a Excel. Y como se adapta a tu tipo de negocio, solo ves lo que necesitas. Puedes profundizar en la página de software contable o verlo todo junto creando tu cuenta.',
+        ],
+      },
+    ],
+    faq: [
+      {
+        q: '¿Pegazo reemplaza a mi contador?',
+        a: 'No. Pegazo te da el control diario de tu plata (ingresos, gastos, utilidad, caja y reportes) y le entrega a tu contador datos ordenados. El trabajo contable formal lo sigue haciendo tu contador, pero con mejor información.',
+      },
+      {
+        q: '¿Necesito saber de contabilidad para usarlo?',
+        a: 'No. La idea es justamente esa: registras ventas y gastos de forma sencilla y el sistema te muestra cuánto estás ganando, sin que tengas que entender de partidas ni cuentas contables.',
+      },
+      {
+        q: '¿Puedo ver cuánto gana realmente mi negocio?',
+        a: 'Sí. Al registrar ventas y gastos, Pegazo calcula tu utilidad y te muestra reportes por día, semana o mes, para que sepas qué productos y días dejan más.',
+      },
+    ],
+  },
+
+  {
+    slug: 'crm-para-pequenos-negocios',
+    solutions: ['crm-para-negocios', 'software-punto-de-venta', 'software-para-barberias-y-peluquerias'],
+    title: 'CRM para pequeños negocios: para qué sirve y cómo empezar',
+    description:
+      'Un CRM no es solo para grandes empresas. Descubre cómo un CRM sencillo te ayuda a conocer a tus clientes, controlar el fiado y hacer que vuelvan, sin complicarte ni gastar de más.',
+    keywords: [
+      'CRM para pequeños negocios',
+      'CRM para pymes',
+      'software de clientes',
+      'fidelización de clientes',
+      'control de cartera',
+    ],
+    date: '2026-11-19',
+    updated: '2026-11-19',
+    readingMinutes: 6,
+    cover: DEFAULT_COVER,
+    excerpt:
+      'Conocer a tus clientes, controlar el fiado y lograr que vuelvan: para eso sirve un CRM en un negocio pequeño, sin volverlo complicado.',
+    intro:
+      'Cuando oyes “CRM” piensas en una multinacional con mil vendedores. Pero el concepto es simple y sirve igual para una tienda, una barbería o una distribuidora: es el lugar donde guardas a tus clientes y gestionas la relación con ellos. Bien usado, un CRM hace que vendas más a quienes ya te compran.',
+    sections: [
+      {
+        h2: '¿Qué es un CRM, en palabras simples?',
+        body: [
+          'CRM significa “gestión de la relación con el cliente”. En la práctica es una libreta inteligente: sabe quién te compra, qué compra, cuánto te debe y cuándo conviene volver a buscarlo.',
+          'La diferencia con un cuaderno es que el CRM conecta esa información con tus ventas y tu fiado, y te ayuda a actuar: recordar una cuota, premiar a un cliente fiel o avisar de una promo.',
+        ],
+      },
+      {
+        h2: 'Por qué un negocio pequeño lo necesita',
+        body: [
+          'Conseguir un cliente nuevo cuesta varias veces más que venderle otra vez a uno que ya te conoce. Si no sabes quiénes son tus mejores clientes, estás dejando plata sobre la mesa.',
+          'Además, en Colombia el fiado es parte del día a día. Sin un control, la cartera se desordena y la plata “se pierde” en cuadernos. Un CRM te dice exactamente quién te debe, cuánto y desde cuándo.',
+        ],
+      },
+      {
+        h2: 'Lo que debes buscar (y lo que no)',
+        body: ['Para un negocio pequeño, un CRM útil tiene esto:'],
+        list: [
+          'Ficha de cliente simple: datos y compras, sin formularios eternos.',
+          'Control de fiado: saldos, plazos y recordatorios de cuotas.',
+          'Fidelización: sellos o premios para que vuelvan.',
+          'WhatsApp a un clic: cobros, promos y recordatorios al chat.',
+          'Integrado con las ventas: que no sea otro programa aparte.',
+        ],
+      },
+      {
+        h2: 'Cómo empezar sin complicarte',
+        body: [
+          'No necesitas migrar mil contactos el primer día. Empieza registrando a los clientes a quienes les fías y a los que más vuelven. Con eso ya controlas la cartera y puedes fidelizar.',
+          'En Pegazo el CRM viene integrado con las ventas y el fiado: cada crédito queda asociado al cliente, con recordatorios, y puedes premiar a los frecuentes sin apps extra. Míralo en la página de CRM para negocios o creando tu cuenta.',
+        ],
+      },
+    ],
+    faq: [
+      {
+        q: '¿Un CRM sirve para un negocio pequeño?',
+        a: 'Sí. No importa el tamaño: si tienes clientes que vuelven o a quienes les fías, un CRM te ayuda a conocerlos, controlar la cartera y lograr que compren más veces.',
+      },
+      {
+        q: '¿El CRM me ayuda con el fiado?',
+        a: 'Sí. En Pegazo cada crédito queda asociado al cliente, con su saldo y recordatorios de cuotas, para que la cartera no se te desordene.',
+      },
+      {
+        q: '¿Tengo que pagar aparte por el CRM?',
+        a: 'En Pegazo el CRM está integrado con las ventas y el fiado dentro del plan, no es un programa aparte que debas contratar por separado.',
+      },
+    ],
+  },
+
+  {
+    slug: 'facturacion-electronica-dian-guia',
+    solutions: ['software-de-facturacion', 'software-contable', 'software-punto-de-venta'],
+    title: 'Facturación electrónica DIAN: guía simple para tu negocio',
+    description:
+      'Qué es la facturación electrónica de la DIAN, para quién es obligatoria y cómo prepararte sin estrés. Guía clara para negocios y pymes en Colombia.',
+    keywords: [
+      'facturación electrónica DIAN',
+      'factura electrónica Colombia',
+      'obligados a facturar electrónicamente',
+      'software de facturación DIAN',
+      'cómo facturar electrónicamente',
+    ],
+    date: '2026-11-19',
+    updated: '2026-11-19',
+    readingMinutes: 7,
+    cover: DEFAULT_COVER,
+    excerpt:
+      'Qué es la factura electrónica DIAN, quién debe emitirla y cómo prepararte sin complicarte, explicado para dueños de negocio.',
+    intro:
+      'La facturación electrónica dejó de ser cosa solo de grandes empresas. Cada vez más negocios en Colombia deben emitir factura electrónica ante la DIAN. La buena noticia: entenderla no es tan complicado como suena. Aquí te lo explicamos en simple, sin tecnicismos.',
+    sections: [
+      {
+        h2: '¿Qué es la facturación electrónica?',
+        body: [
+          'Es una factura que, en vez de hacerse en papel o en un Word, se genera en un formato digital validado por la DIAN. Queda con un código único, se envía al cliente y la DIAN la reconoce como válida para efectos tributarios.',
+          'Para ti, el cambio es que la factura ya no es un papel suelto: es un documento electrónico que se emite desde un software autorizado.',
+        ],
+      },
+      {
+        h2: '¿Quién está obligado?',
+        body: [
+          'La obligación de facturar electrónicamente se ha ido ampliando por etapas según el tipo de contribuyente y la actividad. Como las fechas y los grupos cambian, lo más seguro es confirmar tu caso en el portal de la DIAN o con tu contador.',
+          'La recomendación práctica: si ya facturas o vas a crecer, prepárate desde ya. Llegar tarde a un requisito tributario siempre cuesta más que anticiparse.',
+        ],
+      },
+      {
+        h2: 'Cómo prepararte sin estrés',
+        body: ['Estos pasos te dejan listo para dar el salto:'],
+        list: [
+          'Ten tus datos tributarios al día (RUT, responsabilidades).',
+          'Ordena tu catálogo de productos y precios.',
+          'Lleva tus ventas en un sistema, no en cuadernos: migrar es mucho más fácil así.',
+          'Confirma con tu contador en qué grupo y fecha quedas obligado.',
+          'Elige un software que vaya a emitir factura electrónica ante la DIAN.',
+        ],
+      },
+      {
+        h2: 'El rol de tu software',
+        body: [
+          'La factura electrónica se emite desde un software habilitado. Lo ideal es que sea el mismo donde ya vendes, para que facturar sea parte de la venta y no un trámite aparte en otra plataforma.',
+          'En Pegazo estamos integrando la factura y la nómina electrónica directo ante la DIAN, sin costo por documento y con el certificado incluido: al vender podrás elegir tiquete o factura electrónica, generar notas crédito y enviarla por correo o WhatsApp con su QR. Mientras llega, ya facturas y gestionas todo tu negocio con normalidad.',
+        ],
+      },
+      {
+        h2: 'Mientras tanto, ordena tu facturación',
+        body: [
+          'No esperes a la obligación para poner orden. Si hoy facturas desde un sistema que descuenta inventario y guarda el historial, el día que debas emitir factura electrónica el cambio será mínimo. Puedes ver cómo funciona en la página de software de facturación.',
+        ],
+      },
+    ],
+    faq: [
+      {
+        q: '¿Pegazo ya emite factura electrónica DIAN?',
+        a: 'Estamos integrando la factura y la nómina electrónica directo ante la DIAN, sin costo por documento y con el certificado incluido. Mientras tanto, facturas y gestionas tu negocio con normalidad desde la plataforma.',
+      },
+      {
+        q: '¿Cómo sé si estoy obligado a facturar electrónicamente?',
+        a: 'La obligación depende de tu tipo de contribuyente y actividad, y se ha ido aplicando por etapas. Lo más seguro es confirmar tu caso en el portal de la DIAN o con tu contador.',
+      },
+      {
+        q: '¿Qué pasa si aún no estoy obligado?',
+        a: 'Puedes ir ordenando tu facturación en un sistema desde ya. Así, cuando llegue la obligación, el paso a la factura electrónica será mínimo en vez de un cambio brusco.',
       },
     ],
   },
