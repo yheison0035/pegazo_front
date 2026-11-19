@@ -1372,74 +1372,83 @@ export default function Landing() {
           </p>
         </div>
 
-        <div className="mx-auto mt-12 max-w-4xl overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-sm">
-          <div className="grid md:grid-cols-2">
-            {/* Lado marca / CTA */}
-            <div className="relative flex flex-col justify-center overflow-hidden bg-gradient-to-br from-neutral-900 via-neutral-950 to-black p-8 text-white sm:p-10">
-              <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-orange-500 opacity-20 blur-3xl" />
-              <p className="inline-flex w-fit items-center gap-1.5 rounded-full bg-orange-500/15 px-3 py-1 text-sm font-semibold text-orange-400">
-                🪐 Plan Órbita
-              </p>
-              <h3 className="mt-3 text-2xl font-bold">
-                Todo Pegazo, sin límites
-              </h3>
-              <p className="mt-3 text-neutral-300">
-                Usuarios, sedes y productos ilimitados. Tienes acceso a todo lo
-                que hace Pegazo desde el primer día.
-              </p>
+        <div className="mx-auto mt-12 max-w-6xl overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-sm">
+          {/* Cabecera: marca + accesos destacados + CTA (fondo oscuro) */}
+          <div className="relative overflow-hidden bg-gradient-to-br from-neutral-900 via-neutral-950 to-black p-8 text-white sm:p-10">
+            <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-orange-500 opacity-20 blur-3xl" />
+            <div className="relative grid gap-8 lg:grid-cols-2 lg:items-center">
+              <div>
+                <p className="inline-flex w-fit items-center gap-1.5 rounded-full bg-orange-500/15 px-3 py-1 text-sm font-semibold text-orange-400">
+                  🪐 Plan Órbita
+                </p>
+                <h3 className="mt-3 text-3xl font-bold">
+                  Todo Pegazo, sin límites
+                </h3>
+                <p className="mt-3 max-w-md text-neutral-300">
+                  Usuarios, sedes y productos ilimitados. Acceso a todo lo que
+                  hace Pegazo desde el primer día, sin permanencia.
+                </p>
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                  <Link
+                    href="/register"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 px-6 py-3.5 font-semibold text-white shadow-lg transition hover:opacity-90"
+                  >
+                    <RocketLaunchIcon className="h-5 w-5" />
+                    Crear mi cuenta
+                  </Link>
+                  <a
+                    href={WHATSAPP}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 px-6 py-3.5 text-sm font-semibold text-white/80 transition hover:bg-white/10 hover:text-white"
+                  >
+                    <ChatBubbleLeftRightIcon className="h-5 w-5" />
+                    ¿Dudas? Escríbenos
+                  </a>
+                </div>
+              </div>
 
               {/* Accesos destacados */}
-              <ul className="mt-5 space-y-2 text-sm text-neutral-200">
-                {[
-                  'Confirmación de transferencias en tiempo real',
-                  'Catálogo web y tienda online conectada al inventario',
-                  'Estadísticas y reportes completos',
-                  'Varios locales (multi-sede) con su inventario',
-                  'Citas, cartera/fiado, contabilidad y más',
-                ].map((f) => (
-                  <li key={f} className="flex items-start gap-2">
-                    <CheckCircleIcon className="mt-0.5 h-4 w-4 flex-none text-orange-400" />
-                    <span>{f}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <Link
-                href="/register"
-                className="mt-7 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 px-6 py-3.5 font-semibold text-white shadow-lg transition hover:opacity-90"
-              >
-                <RocketLaunchIcon className="h-5 w-5" />
-                Crear mi cuenta
-              </Link>
-              <a
-                href={WHATSAPP}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-3 inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 px-6 py-3 text-sm font-semibold text-white/80 transition hover:bg-white/10 hover:text-white"
-              >
-                <ChatBubbleLeftRightIcon className="h-5 w-5" />
-                ¿Dudas? Escríbenos por WhatsApp
-              </a>
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+                <p className="mb-3 text-xs font-bold uppercase tracking-wider text-orange-400">
+                  Lo más destacado
+                </p>
+                <ul className="grid gap-x-5 gap-y-2.5 text-sm text-neutral-200 sm:grid-cols-2">
+                  {[
+                    'Transferencias en tiempo real',
+                    'Catálogo web y tienda online',
+                    'Estadísticas y reportes',
+                    'Varios locales (multi-sede)',
+                    'Crédito/fiado y cartera',
+                    'Citas y contabilidad',
+                  ].map((f) => (
+                    <li key={f} className="flex items-start gap-2">
+                      <CheckCircleIcon className="mt-0.5 h-4 w-4 flex-none text-orange-400" />
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
+          </div>
 
-            {/* Lado incluido */}
-            <div className="p-8 sm:p-10">
-              <p className="mb-4 font-semibold text-neutral-900">
-                Con Órbita tienes acceso a TODO:
-              </p>
-              <ul className="grid gap-x-4 gap-y-2 sm:grid-cols-2">
-                {INCLUDED.map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-sm">
-                    <CheckCircleIcon className="mt-0.5 h-4 w-4 flex-none text-orange-500" />
-                    <span className="text-neutral-600">{f}</span>
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-4 text-xs text-neutral-400">
-                La facturación y nómina electrónica DIAN llegan muy pronto, sin
-                costo por documento.
-              </p>
-            </div>
+          {/* Cuerpo: todo lo que incluye, en 3 columnas (con aire) */}
+          <div className="p-8 sm:p-10">
+            <p className="mb-5 font-semibold text-neutral-900">
+              Con Órbita tienes acceso a TODO:
+            </p>
+            <ul className="grid gap-x-8 gap-y-2.5 sm:grid-cols-2 lg:grid-cols-3">
+              {INCLUDED.map((f) => (
+                <li key={f} className="flex items-start gap-2 text-sm">
+                  <CheckCircleIcon className="mt-0.5 h-4 w-4 flex-none text-orange-500" />
+                  <span className="text-neutral-600">{f}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-6 text-xs text-neutral-400">
+              La facturación y nómina electrónica DIAN llegan muy pronto, sin
+              costo por documento.
+            </p>
           </div>
         </div>
 
