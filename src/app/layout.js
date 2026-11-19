@@ -1,8 +1,14 @@
+import Script from 'next/script';
 import { AuthProvider } from '@/context/authContext';
 import { ToastProvider } from '@/context/toastContext';
 import ServiceWorkerRegister from '@/components/pwa/ServiceWorkerRegister';
 import { monserrat } from '@/styles/fonts';
 import '@/styles/globals.css';
+
+// Google Tag Manager. El ID se puede sobreescribir con NEXT_PUBLIC_GTM_ID en
+// Vercel; si no, usa el contenedor de Pegazo. Desde GTM se gestiona GA4 y otras
+// etiquetas sin volver a tocar código.
+const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID || 'GTM-P88J458M';
 
 export const metadata = {
   metadataBase: new URL('https://pegazo.co'),
@@ -120,7 +126,28 @@ export default function RootLayout({ children }) {
   return (
     <AuthProvider>
       <html lang="es">
+        <head>
+          {/* Google Tag Manager */}
+          <Script id="gtm-init" strategy="afterInteractive">
+            {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','${GTM_ID}');`}
+          </Script>
+        </head>
         <body className={`${monserrat.className} antialiased`}>
+          {/* Google Tag Manager (noscript) */}
+          <noscript>
+            {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+            <iframe
+              src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
+              height="0"
+              width="0"
+              style={{ display: 'none', visibility: 'hidden' }}
+              title="gtm"
+            />
+          </noscript>
           <ServiceWorkerRegister />
           <ToastProvider>{children}</ToastProvider>
         </body>
