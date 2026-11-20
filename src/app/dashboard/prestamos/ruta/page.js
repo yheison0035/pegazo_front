@@ -15,6 +15,7 @@ import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import WhatsappLink from '@/components/dashboard/tables/segments/contentData/whatsappLink';
 import LoanPaymentModal from '@/components/prestamos/LoanPaymentModal';
 import LoanDetailModal from '@/components/prestamos/LoanDetailModal';
+import LoanReceiptModal from '@/components/prestamos/LoanReceiptModal';
 
 const ROLES = ['SUPER_ADMIN', 'ADMIN', 'COORDINADOR', 'COBRADOR'];
 const todayISO = () => {
@@ -72,6 +73,7 @@ export default function RutaPage() {
   const [loading, setLoading] = useState(true);
   const [pay, setPay] = useState(null);
   const [detail, setDetail] = useState(null);
+  const [receipt, setReceipt] = useState(null);
 
   useEffect(() => {
     if (isCollector || !enabled) return undefined;
@@ -176,7 +178,17 @@ export default function RutaPage() {
         )}
       </div>
 
-      {pay && <LoanPaymentModal loan={pay} onClose={() => setPay(null)} onSaved={load} />}
+      {pay && (
+        <LoanPaymentModal
+          loan={pay}
+          onClose={() => setPay(null)}
+          onSaved={(data) => {
+            load();
+            if (data?.payment) setReceipt({ payment: data.payment, loan: data.loan || pay });
+          }}
+        />
+      )}
+      {receipt && <LoanReceiptModal payment={receipt.payment} loan={receipt.loan} onClose={() => setReceipt(null)} />}
       {detail && <LoanDetailModal loanId={detail.id} initial={detail} onClose={() => setDetail(null)} onChanged={load} />}
     </LoanGuard>
   );

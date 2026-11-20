@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { XMarkIcon, BanknotesIcon, CheckCircleIcon, XCircleIcon, ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, BanknotesIcon, CheckCircleIcon, XCircleIcon, ArrowUturnLeftIcon, ReceiptPercentIcon, BellAlertIcon } from '@heroicons/react/24/outline';
 import {
   getLoanById,
   approveLoan,
@@ -9,6 +9,7 @@ import {
   disburseLoan,
   cancelLoan,
   annulLoanPayment,
+  sendLoanReminder,
   emitLoansChanged,
 } from '@/lib/api/routes/loans';
 import { formatCOP, formatDateOnly, formatDateTime } from '@/lib/api/utils/utils';
@@ -21,6 +22,8 @@ import ConfirmModal from '@/components/ui/ConfirmModal';
 import WhatsappLink from '@/components/dashboard/tables/segments/contentData/whatsappLink';
 import AmortizationTable from './AmortizationTable';
 import LoanPaymentModal from './LoanPaymentModal';
+import LoanReceiptModal from './LoanReceiptModal';
+import { ExtraCapitalModal, SettleModal, RefinanceModal } from './LoanActionsModals';
 
 const OWNER = ['SUPER_ADMIN', 'ADMIN'];
 const CAN_PAY = ['SUPER_ADMIN', 'ADMIN', 'CAJA', 'COBRADOR'];
@@ -45,6 +48,9 @@ export default function LoanDetailModal({ loanId, initial = null, onClose, onCha
   const [loading, setLoading] = useState(!initial);
   const [busy, setBusy] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
+  const [action, setAction] = useState(null); // 'capital' | 'settle' | 'refinance'
+  const [receipt, setReceipt] = useState(null); // { payment, loan }
+  const [reminding, setReminding] = useState(false);
   const [confirm, setConfirm] = useState(null); // { kind, paymentId?, title, message }
   const [reason, setReason] = useState('');
 
@@ -159,6 +165,36 @@ export default function LoanDetailModal({ loanId, initial = null, onClose, onCha
                 {active && CAN_PAY.includes(role) && (
                   <Button variant="primary" icon={BanknotesIcon} onClick={() => setPayOpen(true)}>Registrar abono</Button>
                 )}
+                {active && ['SUPER_ADMIN', 'ADMIN', 'CAJA'].includes(role) && (
+                  <>
+                    <Button variant="outline" onClick={() => setAction('capital')}>Abono a capital</Button>
+                    <Button variant="success" onClick={() => setAction('settle')}>Liquidar hoy</Button>
+                  </>
+                )}
+                {active && isOwner && (
+                  <Button variant="secondary" onClick={() => setAction('refinance')}>Refinanciar</Button>
+                )}
+                {active && CAN_PAY.includes(role) && (
+                  <Button
+                    variant="secondary"
+                    icon={BellAlertIcon}
+                    loading={reminding}
+                    title={loan.customer?.email ? 'Enviar recordatorio de cuota por correo' : 'El cliente no tiene correo'}
+                    onClick={async () => {
+                      setReminding(true);
+                      try {
+                        const r = await sendLoanReminder(loan.id);
+                        toast.show({ type: 'success', message: `Recordatorio enviado a ${r?.data?.to || 'su correo'}` });
+                      } catch (err) {
+                        toast.show({ type: 'error', message: err?.message || 'No se pudo enviar el recordatorio.' });
+                      } finally {
+                        setReminding(false);
+                      }
+                    }}
+                  >
+                    Recordar por correo
+                  </Button>
+                )}
                 {loan.status === 'SOLICITADO' && isOwner && (
                   <>
                     <Button variant="add" icon={CheckCircleIcon} onClick={() => setConfirm({ kind: 'approve', title: 'Aprobar préstamo', message: `Aprobar ${loan.code} por ${formatCOP(loan.principal)} para ${loan.customer?.name}.` })}>Aprobar</Button>
@@ -212,6 +248,17 @@ export default function LoanDetailModal({ loanId, initial = null, onClose, onCha
                           <td className="px-3 py-1.5 text-right">{formatCOP(p.moraApplied)}</td>
                           <td className="px-3 py-1.5">{p.createdBy?.name || '—'}{p.note ? <span className="block text-xs text-gray-400">{p.note}</span> : null}</td>
                           <td className="px-3 py-1.5 text-right">
+                            {p.status === 'ACTIVO' && (
+                              <button
+                                type="button"
+                                aria-label={`Recibo abono ${p.id}`}
+                                title="Ver recibo"
+                                onClick={() => setReceipt({ payment: p, loan })}
+                                className="mr-1 rounded-lg border border-gray-200 p-1 text-gray-600 hover:bg-gray-50"
+                              >
+                                <ReceiptPercentIcon className="h-4 w-4" />
+                              </button>
+                            )}
                             {p.status === 'ACTIVO' && isOwner ? (
                               <button
                                 type="button"
@@ -240,8 +287,34 @@ export default function LoanDetailModal({ loanId, initial = null, onClose, onCha
       </div>
 
       {payOpen && loan && (
-        <LoanPaymentModal loan={loan} onClose={() => setPayOpen(false)} onSaved={() => changed()} />
+        <LoanPaymentModal
+          loan={loan}
+          onClose={() => setPayOpen(false)}
+          onSaved={(data) => {
+            changed();
+            if (data?.payment) setReceipt({ payment: data.payment, loan: data.loan || loan });
+          }}
+        />
       )}
+
+      {action === 'capital' && loan && (
+        <ExtraCapitalModal loan={loan} onClose={() => setAction(null)} onSaved={() => changed()} />
+      )}
+      {action === 'settle' && loan && (
+        <SettleModal loan={loan} onClose={() => setAction(null)} onSaved={() => changed()} />
+      )}
+      {action === 'refinance' && loan && (
+        <RefinanceModal
+          loan={loan}
+          onClose={() => setAction(null)}
+          onSaved={() => {
+            emitLoansChanged();
+            onChanged?.();
+            onClose?.();
+          }}
+        />
+      )}
+      {receipt && <LoanReceiptModal payment={receipt.payment} loan={receipt.loan} onClose={() => setReceipt(null)} />}
 
       <ConfirmModal
         open={!!confirm}

@@ -534,6 +534,55 @@ export const WIDGETS = [
     ),
   },
   {
+    id: 'prestamos',
+    name: 'Cartera de préstamos',
+    applies: (data) => data.hasPrestamos && !data.isCollector,
+    Render: ({ data }) => {
+      const s = data.loans || {};
+      return (
+        <ShortcutCard href="/dashboard/prestamos" hint="Ver préstamos">
+          <Label icon={BanknotesIcon} accent="text-orange-600">
+            Cartera de préstamos
+          </Label>
+          <p className="truncate text-2xl font-bold tabular-nums text-gray-900">
+            {formatCOP(s.portfolio || 0)}
+          </p>
+          <div className="mt-2 grid grid-cols-3 gap-2">
+            <Stat label="En mora" value={formatCOP(s.overdueAmount || 0)} accent={s.overdueAmount ? 'text-red-600' : 'text-gray-800'} />
+            <Stat label="Recaudo hoy" value={formatCOP(s.collectedToday?.amount || 0)} accent="text-emerald-600" />
+            <Stat label="Vencen 7 días" value={formatCOP(s.upcoming7?.amount || 0)} />
+          </div>
+          {s.pendingApproval > 0 && (
+            <p className="mt-2 text-xs font-medium text-blue-700">{s.pendingApproval} solicitud(es) por aprobar</p>
+          )}
+        </ShortcutCard>
+      );
+    },
+  },
+  {
+    id: 'mi-ruta',
+    name: 'Mi ruta de cobro',
+    applies: (data) => data.hasPrestamos && data.isCollector,
+    Render: ({ data }) => {
+      const s = data.loans || {};
+      return (
+        <ShortcutCard href="/dashboard/prestamos/ruta" hint="Abrir mi ruta">
+          <Label icon={BanknotesIcon} accent="text-orange-600">
+            Mi ruta de cobro
+          </Label>
+          <p className="truncate text-2xl font-bold tabular-nums text-gray-900">
+            {formatCOP(s.overdueAmount || 0)}
+          </p>
+          <p className="text-xs text-gray-500">en mora en mi cartera · {s.overdueLoans || 0} préstamos</p>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            <Stat label="Recaudado hoy" value={formatCOP(s.collectedToday?.amount || 0)} accent="text-emerald-600" />
+            <Stat label="Mi cartera" value={formatCOP(s.portfolio || 0)} />
+          </div>
+        </ShortcutCard>
+      );
+    },
+  },
+  {
     id: 'cumpleanos',
     name: 'Cumpleaños del equipo',
     applies: () => true,
@@ -913,6 +962,8 @@ export const WIDGET_AUDIENCE = {
   'proximas-citas': 'owner',
   mes: 'owner',
   'por-cobrar': 'owner',
+  prestamos: 'owner',
+  'mi-ruta': 'all',
   // Cumpleaños del equipo: lo ve TODO el equipo (incluido el barbero), para
   // celebrar juntos.
   cumpleanos: 'all',
@@ -943,6 +994,8 @@ export const DEFAULT_LAYOUT = [
   'proximas-citas',
   'mes',
   'por-cobrar',
+  'prestamos',
+  'mi-ruta',
   'cargos-empleados',
   // Común
   'cumpleanos',

@@ -53,3 +53,13 @@ export const getLoanPaymentsHistory = (params = {}) => apiFetch(`/loans/payments
 // Cobrador y resumen
 export const getCollectorRoute = (params = {}) => apiFetch(`/loans/collector/route${qs(params)}`);
 export const getLoansSummary = (params = {}) => apiFetch(`/loans/summary${qs(params)}`);
+
+// --- Fase 2: abono a capital, liquidación, refinanciación, recordatorio, reportes ---
+export const getExtraCapitalQuote = (id, amount, mode) =>
+  apiFetch(`/loans/${id}/extra-capital/quote${qs({ amount, mode })}`);
+export const addExtraCapital = (id, dto) => apiFetch(`/loans/${id}/extra-capital`, json('POST', dto));
+export const getSettlementQuote = (id) => apiFetch(`/loans/${id}/settlement/quote`);
+export const settleLoan = (id, dto = {}) => apiFetch(`/loans/${id}/settle`, json('POST', dto));
+export const refinanceLoan = (id, dto) => apiFetch(`/loans/${id}/refinance`, json('POST', dto));
+export const sendLoanReminder = (id) => apiFetch(`/loans/${id}/reminder`, json('POST'));
+export const getLoansMonthlyReport = (params = {}) => apiFetch(`/loans/reports/monthly${qs(params)}`);

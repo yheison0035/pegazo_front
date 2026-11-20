@@ -28,6 +28,7 @@ export default function NewUser() {
       ...formData,
       commissionServiceRate: rate(formData.commissionServiceRate),
       commissionProductRate: rate(formData.commissionProductRate),
+      commissionCollectionRate: rate(formData.commissionCollectionRate),
     };
     try {
       await createUser(payload);

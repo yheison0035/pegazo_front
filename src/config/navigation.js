@@ -166,6 +166,12 @@ export const NAVIGATION = [
         roles: ['SUPER_ADMIN', 'ADMIN', 'COORDINADOR', 'CAJA', 'COBRADOR', 'CONTADOR'],
       },
       {
+        name: 'Reportes de cartera',
+        href: '/dashboard/prestamos/reportes',
+        icon: ChartBarSquareIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN', 'COORDINADOR', 'CONTADOR'],
+      },
+      {
         name: 'Productos de crédito',
         href: '/dashboard/prestamos/productos',
         icon: RectangleStackIcon,

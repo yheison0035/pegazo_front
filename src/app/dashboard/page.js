@@ -24,6 +24,7 @@ import {
 } from '@/lib/api/routes/employeeCharges';
 import { getLowStock } from '@/lib/api/routes/inventory';
 import { getReceivables } from '@/lib/api/routes/sales';
+import { getLoansSummary } from '@/lib/api/routes/loans';
 import { getAppointmentsAgenda } from '@/lib/api/routes/appointments';
 import { getMyRestDays } from '@/lib/api/routes/restDays';
 import { getBankDeposits } from '@/lib/api/routes/bank';
@@ -61,6 +62,9 @@ export default function DashboardHome() {
   const modules = useMemo(() => effectiveModules(usuario), [usuario]);
   const hasInventory = modules.includes('inventory');
   const hasCartera = modules.includes('cartera');
+  // Préstamos (tipo FINANCIERA): resumen de cartera en el Inicio.
+  const hasPrestamos = modules.includes('prestamos');
+  const isCollector = usuario?.role === 'COBRADOR';
   // Datos financieros (utilidad, IVA) solo para dueño/administrador.
   const isAdmin = ['SUPER_ADMIN', 'ADMIN'].includes(usuario?.role);
   // El barbero/profesional solo ve SU información (nada del negocio).
@@ -76,6 +80,7 @@ export default function DashboardHome() {
   const [myAgenda, setMyAgenda] = useState(null);
   const [lowStock, setLowStock] = useState([]);
   const [receivable, setReceivable] = useState(0);
+  const [loans, setLoans] = useState(null);
   const [bankDeposits, setBankDeposits] = useState([]);
   const [showReactivate, setShowReactivate] = useState(false);
   const [showLowStock, setShowLowStock] = useState(false);
@@ -151,6 +156,11 @@ export default function DashboardHome() {
         .then((r) => setLowStock(r?.data || []))
         .catch(() => setLowStock([]));
     }
+    if (hasPrestamos) {
+      getLoansSummary(activeLocal ? { localId: activeLocal } : {})
+        .then((r) => setLoans(r?.data && !Array.isArray(r.data) ? r.data : null))
+        .catch(() => setLoans(null));
+    }
     if (hasCartera) {
       getReceivables({ localId: activeLocal })
         .then((r) => setReceivable(r?.data?.totalSaldo || 0))
@@ -180,6 +190,7 @@ export default function DashboardHome() {
     isBarber,
     hasInventory,
     hasCartera,
+    hasPrestamos,
     activeLocal,
   ]);
 
@@ -268,6 +279,9 @@ export default function DashboardHome() {
       myAgenda,
       lowStock,
       receivable,
+      loans,
+      hasPrestamos,
+      isCollector,
       bankDeposits,
       isServices,
       modules,
@@ -291,6 +305,9 @@ export default function DashboardHome() {
       myAgenda,
       lowStock,
       receivable,
+      loans,
+      hasPrestamos,
+      isCollector,
       bankDeposits,
       isServices,
       modules,

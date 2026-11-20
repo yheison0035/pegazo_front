@@ -17,6 +17,7 @@ export const getEmptyUser = () => {
     salary: '',
     commissionServiceRate: '',
     commissionProductRate: '',
+    commissionCollectionRate: '',
   };
 };
 
@@ -152,6 +153,21 @@ export const getFormFieldsUsers = (type) => {
   // productos sí aplica). El resto de negocios ve ambas.
   if (type === 'GUARDA_CASCOS')
     return fields.filter((f) => f.name !== 'commissionServiceRate');
+  // Financiera: no vende servicios ni productos; el cobrador gana sobre lo que
+  // recauda (comisión de recaudo).
+  if (type === 'FINANCIERA')
+    return [
+      ...fields.filter(
+        (f) => f.name !== 'commissionServiceRate' && f.name !== 'commissionProductRate',
+      ),
+      {
+        name: 'commissionCollectionRate',
+        label: 'Comisión del cobrador sobre recaudo (%) — opcional',
+        type: 'number',
+        source: null,
+        required: false,
+      },
+    ];
   return fields;
 };
 

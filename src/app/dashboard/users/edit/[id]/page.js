@@ -40,7 +40,9 @@ export default function EditUser() {
   // datos y el cambio de contraseña.
   const isManager = ['SUPER_ADMIN', 'ADMIN'].includes(usuario?.role);
   const isCommissionField = (name) =>
-    name === 'commissionServiceRate' || name === 'commissionProductRate';
+    name === 'commissionServiceRate' ||
+    name === 'commissionProductRate' ||
+    name === 'commissionCollectionRate';
 
   const formFields = useMemo(() => {
     const withCommission = getFormFieldsUsers(usuario?.company?.type).map((f) =>
@@ -100,6 +102,10 @@ export default function EditUser() {
           data?.commissionProductRate == null
             ? ''
             : String(data.commissionProductRate),
+        commissionCollectionRate:
+          data?.commissionCollectionRate == null
+            ? ''
+            : String(data.commissionCollectionRate),
       });
     } catch (err) {
       setAlert({
@@ -139,10 +145,12 @@ export default function EditUser() {
     if (canEditCommission) {
       payload.commissionServiceRate = rate(payload.commissionServiceRate);
       payload.commissionProductRate = rate(payload.commissionProductRate);
+      payload.commissionCollectionRate = rate(payload.commissionCollectionRate);
     } else {
       // Sin permiso: nunca enviamos la comisión (no la puede cambiar).
       delete payload.commissionServiceRate;
       delete payload.commissionProductRate;
+      delete payload.commissionCollectionRate;
     }
 
     try {

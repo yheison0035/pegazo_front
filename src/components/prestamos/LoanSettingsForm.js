@@ -55,6 +55,9 @@ export default function LoanSettingsForm({ onSaved }) {
         maxTerm: s.maxTerm ? Number(s.maxTerm) : null,
         minAmount: s.minAmount ? Number(s.minAmount) : null,
         maxAmount: s.maxAmount ? Number(s.maxAmount) : null,
+        remindersEnabled: s.remindersEnabled !== false,
+        reminderDaysBefore: Number(s.reminderDaysBefore) || 0,
+        alertsEnabled: s.alertsEnabled !== false,
       };
       const res = await updateLoanSettings(dto);
       setS(res?.data || dto);
@@ -146,6 +149,21 @@ export default function LoanSettingsForm({ onSaved }) {
         <label className="flex items-center gap-2 rounded-xl border border-gray-200 p-3 text-sm">
           <input type="checkbox" name="requireCashForDisbursement" checked={!!s.requireCashForDisbursement} onChange={(e) => set('requireCashForDisbursement', e.target.checked)} />
           <span><span className="font-medium">Exigir caja abierta</span><span className="block text-xs text-gray-500">Para desembolsar en efectivo</span></span>
+        </label>
+      </div>
+
+      <div className="grid gap-2 sm:grid-cols-3">
+        <label className="flex items-center gap-2 rounded-xl border border-gray-200 p-3 text-sm">
+          <input type="checkbox" name="remindersEnabled" checked={s.remindersEnabled !== false} onChange={(e) => set('remindersEnabled', e.target.checked)} />
+          <span><span className="font-medium">Recordar cuotas por correo</span><span className="block text-xs text-gray-500">Al cliente, cada mañana (si tiene correo)</span></span>
+        </label>
+        <label className="block text-sm">
+          <span className="text-xs font-medium text-gray-500">Avisar con días de anticipación</span>
+          <input name="reminderDaysBefore" type="number" min="0" max="60" value={s.reminderDaysBefore ?? 1} onChange={(e) => set('reminderDaysBefore', e.target.value)} className={inputCls} />
+        </label>
+        <label className="flex items-center gap-2 rounded-xl border border-gray-200 p-3 text-sm">
+          <input type="checkbox" name="alertsEnabled" checked={s.alertsEnabled !== false} onChange={(e) => set('alertsEnabled', e.target.checked)} />
+          <span><span className="font-medium">Alertas de mora al equipo</span><span className="block text-xs text-gray-500">Aviso diario al dueño y a cada cobrador</span></span>
         </label>
       </div>
 
