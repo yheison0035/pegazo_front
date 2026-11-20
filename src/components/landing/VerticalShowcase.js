@@ -48,6 +48,7 @@ const MODULE_META = {
   delivered_sales: ['Ventas realizadas', ShoppingBagIcon],
   cash: ['Caja', BanknotesIcon],
   cartera: ['Cartera y fiado', CreditCardIcon],
+  prestamos: ['Préstamos', BanknotesIcon],
   returns: ['Devoluciones', ArrowUturnLeftIcon],
   quotes: ['Cotizaciones', ClipboardDocumentListIcon],
   impuestos: ['Impuestos (IVA)', ReceiptPercentIcon],
@@ -93,7 +94,7 @@ function menuModules(type, modules) {
 }
 
 const TYPE_EMOJI = {
-  SERVICIOS: '🧰', BARBERIA: '💈', VETERINARIA: '🐾', ODONTOLOGIA: '🦷', GIMNASIO: '🏋️',
+  FINANCIERA: '💸', SERVICIOS: '🧰', BARBERIA: '💈', VETERINARIA: '🐾', ODONTOLOGIA: '🦷', GIMNASIO: '🏋️',
   LAVADO_VEHICULOS: '🚗', LAVANDERIA: '🧺', TALLER_MECANICO: '🔩',
   CANCHAS_SINTETICAS: '⚽', GUARDA_CASCOS: '🪖', PARQUEADERO: '🅿️', RESTAURANTE: '🍽️',
   COMIDA_RAPIDA: '🍔', CAFETERIA: '☕', PIZZERIA: '🍕', BAR: '🍻',
@@ -144,6 +145,7 @@ const PRESETS = {
   ECOMMERCE: { biz: 'ShopNow', catalog: 'Inventario', accent: 'Tienda online, pedidos y despachos integrados.', items: [['Producto estrella', '$79.000'], ['Combo del mes', '$120.000'], ['Accesorio', '$29.000']], kpis: [['Ventas de hoy', '$2.980.000', E], ['Pedidos hoy', '61', O]] },
   COMERCIO: { biz: 'Tienda La 15', catalog: 'Inventario', accent: 'Inventario, ventas, cartera y proveedores.', items: [['Producto A', '$12.000'], ['Producto B', '$25.000'], ['Producto C', '$8.000']], kpis: [['Ventas de hoy', '$1.240.000', E], ['Productos', '740', O]] },
   DISTRIBUCION: { biz: 'Distrimax', catalog: 'Inventario', accent: 'Ventas al por mayor, rutas, cartera y despachos.', items: [['Caja x24', '$96.000'], ['Pallet (unidad)', '$1.200.000'], ['Producto mayorista', '$18.000']], kpis: [['Ventas de hoy', '$8.600.000', E], ['Clientes', '320', O]] },
+  FINANCIERA: { biz: 'Créditos La Confianza', catalog: 'Préstamos', accent: 'Cartera de créditos: cuotas, mora, ruta del cobrador y recibo por WhatsApp.', items: [['Microcrédito · 12 quincenas', '$147.500/cuota'], ['Paga diario · 30 días', '$24.000/día'], ['Cliente VIP · 6 meses', '$178.300/cuota']], kpis: [['Recaudo de hoy', '$1.840.000', E], ['En mora', '3', O]] },
   FERIA: { biz: 'Puesto 12', catalog: 'Inventario', accent: 'Venta rápida con caja y reportes diarios.', items: [['Artesanía', '$25.000'], ['Snack', '$5.000'], ['Souvenir', '$12.000']], kpis: [['Ventas de hoy', '$280.000', E], ['Productos', '60', O]] },
 };
 

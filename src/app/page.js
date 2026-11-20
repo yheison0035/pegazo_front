@@ -123,6 +123,17 @@ const FEATURE_GROUPS = [
     ],
   },
   {
+    icon: CreditCardIcon,
+    title: 'Préstamos y cobranza (financieras)',
+    items: [
+      'Préstamos con capital, tasa, plazo y plan de cuotas',
+      'Tasa en cascada: por cliente, por producto o por defecto',
+      'Mora con días de gracia, abono a capital y liquidación anticipada',
+      'Cobradores con su ruta del día y comisión sobre recaudo',
+      'Recordatorios al cliente y reportes de cartera por edades',
+    ],
+  },
+  {
     icon: DocumentChartBarIcon,
     title: 'Contabilidad y control financiero',
     items: [
@@ -292,6 +303,18 @@ const VERTICALS = [
       'Guarda cascos y objetos',
       'Reserva de canchas por horas',
       'Caja y reportes por sede',
+    ],
+  },
+  {
+    icon: BanknotesIcon,
+    name: 'Financieras y prestamistas',
+    tag: 'Créditos y cobranza',
+    perks: [
+      'Préstamos con tasa por cliente, producto o empresa',
+      'Cuotas diarias, semanales, quincenales o mensuales',
+      'Mora automática, abono a capital y refinanciación',
+      'Ruta del cobrador con recibo por WhatsApp',
+      'Simulador de crédito y reportes de cartera',
     ],
   },
 ];

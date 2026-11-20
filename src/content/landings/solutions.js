@@ -1154,6 +1154,39 @@ export const SOLUTIONS = [
     related: ['software-de-inventario', 'software-para-ropa-y-calzado', 'crm-para-negocios'],
   },
   {
+    slug: 'software-para-prestamistas-y-financieras',
+    eyebrow: 'Financieras y prestamistas',
+    metaTitle: 'Software para prestamistas, financieras y créditos',
+    h1: 'Software para tu negocio de préstamos y créditos',
+    metaDescription:
+      'Pegazo es el software para prestamistas y financieras en Colombia: préstamos con tasa por cliente, cuotas diarias o mensuales, mora automática, ruta del cobrador, abonos con recibo por WhatsApp y reportes de cartera.',
+    keywords: [
+      'software para prestamistas',
+      'software para financieras',
+      'software de créditos y cobranza',
+      'app para cobro diario',
+      'control de cartera de préstamos',
+    ],
+    intro:
+      'Prestar plata sin control es perder plata. Pegazo lleva cada préstamo con su plan de cuotas, calcula la mora sola, le da al cobrador su ruta del día y te muestra cuánto tienes en la calle, cuánto está en mora y cuánto recaudaste hoy.',
+    features: [
+      ['Préstamos con plan de cuotas', 'Capital, tasa, plazo y frecuencia (diaria, semanal, quincenal o mensual).'],
+      ['Tasa por cliente', 'Se resuelve en cascada: la del cliente, la de su producto de crédito o la de la empresa.'],
+      ['Mora automática', 'Con días de gracia; los abonos se aplican a mora, interés y capital.'],
+      ['Ruta del cobrador', 'Cada cobrador ve solo su cartera, lo que vence hoy y lo vencido, y abona en un toque.'],
+      ['Abono a capital, liquidación y refinanciación', 'Recalcula intereses y cierra o reestructura la deuda sin cuentas a mano.'],
+      ['Recibos y reportes', 'Recibo por WhatsApp, recordatorios al cliente y cartera por edades.'],
+    ],
+    closing:
+      'Pegazo se adapta a tu financiera: tus productos de crédito, tus tasas, tus días de cobro y tus cobradores, sin obligarte a cambiar cómo trabajas.',
+    faq: [
+      ['¿Puedo manejar cobro diario (paga diario)?', 'Sí. Defines la frecuencia diaria, los días sin cobro (por ejemplo domingos) y el redondeo de la cuota; el cobrador ve su ruta cada mañana.'],
+      ['¿Cada cliente puede tener una tasa distinta?', 'Sí. La tasa se resuelve en cascada: la propia del cliente, la de su producto de crédito o la tasa por defecto de la empresa.'],
+      ['¿Cómo se calcula la mora?', 'Con una tasa de mora mensual sobre el capital vencido y días de gracia configurables. Los abonos se aplican primero a mora, luego a interés y después a capital.'],
+    ],
+    related: ['crm-para-negocios', 'software-contable', 'software-punto-de-venta'],
+  },
+  {
     slug: 'software-para-tienda-online',
     eyebrow: 'Tienda online / ecommerce',
     metaTitle: 'Software para crear tu tienda online conectada al inventario',
