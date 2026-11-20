@@ -146,19 +146,4 @@ describe('Productos de crédito y configuración', () => {
     await waitForCall(api, 'DELETE', /^\/loans\/products\/3$/);
     await expectToast('success', 'Producto eliminado');
   });
-
-  it('guarda la configuración de préstamos (tasa por defecto y aprobación)', async () => {
-    await renderPage(<ProductosPage />);
-    await screen.findByText('MICROCRÉDITO');
-    await click(button('Configuración de préstamos'));
-    await waitForCall(api, 'GET', /^\/loans\/settings$/);
-    const rate = await screen.findByDisplayValue('3');
-    await typeInto(rate, '5');
-    const approval = document.querySelector('input[name="requireApproval"]');
-    await click(approval);
-    await click(button('Guardar configuración'));
-    const call = await waitForCall(api, 'PATCH', /^\/loans\/settings$/);
-    expect(call.body).toMatchObject({ defaultInterestRate: 5, requireApproval: true, defaultFrequency: 'MENSUAL' });
-    await expectToast('success', 'Configuración de préstamos guardada');
-  });
 });

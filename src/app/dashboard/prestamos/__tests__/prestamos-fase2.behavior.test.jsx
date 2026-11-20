@@ -5,7 +5,6 @@ import {
 } from '@/test/behaviorHarness';
 import PrestamosPage from '../page';
 import ReportesPage from '../reportes/page';
-import ProductosPage from '../productos/page';
 
 vi.mock('@/context/authContext', async () => (await import('@/test/behaviorHarness')).mocks.authContext());
 vi.mock('@/context/toastContext', async () => (await import('@/test/behaviorHarness')).mocks.toastContext());
@@ -162,17 +161,5 @@ describe('Préstamos · fase 2', () => {
     await settle();
     const again = await waitForCall(a, 'GET', /^\/loans\/reports\/monthly$/, { count: 2 });
     expect(again.query.months).toBe('12');
-  });
-
-  it('configuración: guarda recordatorios y alertas', async () => {
-    await renderPage(<ProductosPage />);
-    await screen.findByText('MICROCRÉDITO');
-    await click(button('Configuración de préstamos'));
-    await waitForCall(a, 'GET', /^\/loans\/settings$/);
-    await screen.findByDisplayValue('3');
-    await click(document.querySelector('input[name="alertsEnabled"]'));
-    await click(button('Guardar configuración'));
-    const call = await waitForCall(a, 'PATCH', /^\/loans\/settings$/);
-    expect(call.body).toMatchObject({ remindersEnabled: true, reminderDaysBefore: 1, alertsEnabled: false });
   });
 });

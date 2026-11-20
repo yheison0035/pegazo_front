@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { RectangleStackIcon, PlusIcon, PencilSquareIcon, TrashIcon, Cog6ToothIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import LoanGuard, { LOAN_OWNER_ROLES, hasLoansModule } from '@/components/prestamos/LoanGuard';
 import { useAuth } from '@/context/authContext';
-import LoanSettingsForm from '@/components/prestamos/LoanSettingsForm';
 import { getLoanProducts, createLoanProduct, updateLoanProduct, deleteLoanProduct } from '@/lib/api/routes/loans';
 import { LOAN_FREQUENCIES, LOAN_AMORTIZATIONS, FREQ_LABEL, AMORT_LABEL } from '@/lib/loanPlan';
 import { formatCOP } from '@/lib/api/utils/utils';
@@ -98,7 +97,6 @@ export default function ProductosCreditoPage() {
   const [modal, setModal] = useState(null); // null | {} | item
   const [del, setDel] = useState(null);
   const [deleting, setDeleting] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
 
   const load = useCallback(async () => {
     if (!enabled) {
@@ -146,17 +144,10 @@ export default function ProductosCreditoPage() {
             <p className="text-sm text-gray-500">Define tus líneas de crédito (tasa, mora, frecuencia, plazos y montos). Cada cliente puede tener la suya.</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="secondary" icon={Cog6ToothIcon} onClick={() => setShowSettings((v) => !v)}>{showSettings ? 'Ocultar configuración' : 'Configuración de préstamos'}</Button>
+            <Button variant="secondary" icon={Cog6ToothIcon} href="/dashboard/settings#prestamos">Configuración de préstamos</Button>
             <Button variant="primary" icon={PlusIcon} onClick={() => setModal({})}>Nuevo producto</Button>
           </div>
         </div>
-
-        {showSettings && (
-          <div className="mb-5 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-            <h2 className="mb-3 text-base font-semibold text-gray-800">Reglas de crédito de la empresa</h2>
-            <LoanSettingsForm />
-          </div>
-        )}
 
         {!loading && items.length === 0 ? (
           <EmptyState icon={RectangleStackIcon} title="Aún no tienes productos de crédito" subtitle="Crea uno (ej. “Microcrédito 3% mensual”) para asignarlo a tus clientes. Sin productos, se usa la tasa por defecto de la empresa." action={<Button variant="primary" icon={PlusIcon} onClick={() => setModal({})}>Nuevo producto</Button>} />

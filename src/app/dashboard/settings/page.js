@@ -32,6 +32,8 @@ import LogoUploader from '@/components/ui/LogoUploader';
 import LocalFilter from '@/components/ui/LocalFilter';
 import { useAuth } from '@/context/authContext';
 import { isServicesBusiness, effectiveModules } from '@/lib/appointmentsAccess';
+import Link from 'next/link';
+import LoanSettingsForm from '@/components/prestamos/LoanSettingsForm';
 import {
   getCompanySettings,
   updateLoyalty,
@@ -1966,12 +1968,21 @@ export default function Settings() {
   // servicios. Si es de servicios, la config va dentro de "Citas y fidelización".
   const hasLoyalty = effectiveModules(usuario).includes('loyalty');
   const showLoyaltyTab = hasLoyalty && !isServices;
+  // Préstamos (tipo FINANCIERA): toda su configuración vive aquí, en una sola
+  // pestaña, para que el cliente no tenga que buscarla en varios módulos.
+  const hasPrestamos = effectiveModules(usuario).includes('prestamos');
+  const isLender = hasPrestamos && !effectiveModules(usuario).includes('sales');
   // La configuración del CRM solo la maneja el dueño o el administrador.
   const canConfig = ['SUPER_ADMIN', 'ADMIN'].includes(usuario?.role);
   // El DUEÑO ve toda la configuración de la empresa. El ADMINISTRADOR solo puede
   // tocar lo de SU local: Apariencia y Citas y fidelización (incluye su horario).
   const isOwner = usuario?.role === 'SUPER_ADMIN';
   const [tab, setTab] = useState(isOwner ? 'empresa' : 'apariencia');
+
+  useEffect(() => {
+    const h = typeof window !== 'undefined' ? window.location.hash.replace('#', '') : '';
+    if (h && ['empresa', 'apariencia', 'ventas', 'prestamos', 'impuestos', 'contabilidad', 'citas', 'fidelizacion'].includes(h)) setTab(h);
+  }, []);
 
   useEffect(() => {
     if (!canConfig) return;
@@ -2010,7 +2021,8 @@ export default function Settings() {
               {[
                 ['empresa', 'Mi empresa'],
                 ['apariencia', 'Apariencia'],
-                ['ventas', 'Ventas y caja'],
+                ['ventas', isLender ? 'Caja' : 'Ventas y caja'],
+                ...(hasPrestamos ? [['prestamos', 'Préstamos y cobranza']] : []),
                 ['impuestos', 'Impuestos'],
                 ['contabilidad', 'Contabilidad'],
                 ...(isServices ? [['citas', 'Citas y fidelización']] : []),
@@ -2078,7 +2090,39 @@ export default function Settings() {
                   subtitle="Reglas para vender y manejar la caja."
                 >
                   <CashPolicyCard initial={settings} />
-                  <CreditRemindersCard initial={settings} />
+                  {!isLender && <CreditRemindersCard initial={settings} />}
+                </SettingsSection>
+              )}
+
+              {/* ── Préstamos y cobranza (tipo FINANCIERA) ── */}
+              {tab === 'prestamos' && hasPrestamos && (
+                <SettingsSection
+                  id="prestamos"
+                  icon={BanknotesIcon}
+                  title="Préstamos y cobranza"
+                  subtitle="Tasa y mora por defecto, gracia, aprobación, días sin cobro, recordatorios al cliente y alertas al equipo."
+                >
+                  <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm lg:col-span-2">
+                    <LoanSettingsForm />
+                  </div>
+                  <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+                    <h3 className="text-sm font-bold text-gray-800">Productos de crédito</h3>
+                    <p className="mt-1 text-xs text-gray-500">
+                      Tus líneas de crédito (ej. Microcrédito 3 % mensual, Paga diario): cada una con su tasa, mora, frecuencia, plazos y montos. Un cliente puede tener una tasa propia por encima del producto.
+                    </p>
+                    <Link href="/dashboard/prestamos/productos" className="mt-3 inline-block text-sm font-semibold text-orange-600 hover:underline">
+                      Administrar productos de crédito →
+                    </Link>
+                  </div>
+                  <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+                    <h3 className="text-sm font-bold text-gray-800">Cobradores y comisiones</h3>
+                    <p className="mt-1 text-xs text-gray-500">
+                      Crea usuarios con rol <b>Cobrador</b> y define su % de comisión sobre lo que recauda. Asigna la cartera desde cada préstamo o desde el perfil crediticio del cliente.
+                    </p>
+                    <Link href="/dashboard/users" className="mt-3 inline-block text-sm font-semibold text-orange-600 hover:underline">
+                      Ir a usuarios y roles →
+                    </Link>
+                  </div>
                 </SettingsSection>
               )}
 
