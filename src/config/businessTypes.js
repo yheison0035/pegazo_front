@@ -279,4 +279,12 @@ export const BUSINESS_TYPES = {
     'customers', 'cartera', 'impuestos', 'loyalty', 'services', 'sales',
     'delivered_sales', 'cash', 'expenses', 'payables', 'statistics',
   ],
+
+  // Financiera / créditos: TODO gira alrededor del préstamo ('prestamos'). Sin
+  // 'sales', 'inventory' ni 'cartera' (el fiado de ventas no aplica): la plata
+  // entra por abonos y sale por desembolsos, ambos registrados en caja.
+  FINANCIERA: [
+    'locals', 'users', 'customers', 'prestamos', 'cash', 'expenses', 'payables',
+    'employee-charges', 'impuestos', 'statistics',
+  ],
 };

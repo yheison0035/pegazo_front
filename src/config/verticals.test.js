@@ -17,10 +17,10 @@ describe('Módulos por tipo de negocio', () => {
       expect({ tipo: t, huerfanos }).toEqual({ tipo: t, huerfanos: [] });
     }
   });
-  it('un solo punto de cobro: POS (sales) o módulo propio (parking/storage), nunca ambos', () => {
+  it('un solo punto de cobro: POS (sales) o módulo propio (parking/storage/prestamos), nunca ambos', () => {
     for (const t of TYPES) {
       const m = BUSINESS_TYPES[t];
-      const propio = m.includes('parking') || m.includes('storage');
+      const propio = m.includes('parking') || m.includes('storage') || m.includes('prestamos');
       expect({ tipo: t, ok: m.includes('sales') !== propio }).toEqual({ tipo: t, ok: true });
     }
   });

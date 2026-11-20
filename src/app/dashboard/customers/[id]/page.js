@@ -25,6 +25,7 @@ import { useAuth } from '@/context/authContext';
 import useTerms from '@/hooks/useTerms';
 import { effectiveModules } from '@/lib/appointmentsAccess';
 import ClinicalHistory from '@/components/dashboard/clinical/ClinicalHistory';
+import CreditProfileCard from '@/components/prestamos/CreditProfileCard';
 import { statusMeta } from '@/lib/appointmentStatus';
 
 function Kpi({ icon: Icon, label, value, accent = 'text-gray-900' }) {
@@ -52,6 +53,9 @@ export default function CustomerProfile() {
   const t = useTerms();
   // La historia clínica solo aparece en verticales de salud (módulo 'clinical').
   const showClinical = effectiveModules(usuario).includes('clinical');
+  // El perfil crediticio y los préstamos solo aparecen en negocios de créditos
+  // (módulo 'prestamos', tipo FINANCIERA).
+  const showLoans = effectiveModules(usuario).includes('prestamos');
   // El odontograma solo aplica a odontología.
   const isDental = usuario?.company?.type === 'ODONTOLOGIA';
   const [data, setData] = useState(null);
@@ -383,6 +387,10 @@ export default function CustomerProfile() {
           </div>
         )}
       </div>
+
+      {showLoans && (
+        <CreditProfileCard customerId={id} customer={data} />
+      )}
 
       {showClinical && (
         <ClinicalHistory

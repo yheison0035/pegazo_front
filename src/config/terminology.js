@@ -214,6 +214,18 @@ const TERMS_BY_TYPE = {
     service: 'Servicio', servicePlural: 'Servicios',
     sale: 'Orden', salePlural: 'Órdenes',
   },
+
+  // Financiera / créditos: quien atiende es el cobrador; lo que se "vende" es un préstamo.
+  FINANCIERA: {
+    attendant: 'Cobrador',
+    attendantPlural: 'Cobradores',
+    service: 'Préstamo',
+    servicePlural: 'Préstamos',
+    sale: 'Préstamo',
+    salePlural: 'Préstamos',
+    customer: 'Cliente',
+    customerPlural: 'Clientes',
+  },
 };
 
 // Devuelve los términos para una empresa: DEFAULT + por tipo + overrides propios.

@@ -49,6 +49,7 @@ const TYPE_LABELS = {
   TALLER_MECANICO: 'Taller mecánico',
   VETERINARIA: 'Veterinaria',
   LAVANDERIA: 'Lavandería',
+  FINANCIERA: 'Financiera / Créditos y préstamos',
 };
 const prettifyType = (k) =>
   k.charAt(0) + k.slice(1).toLowerCase().replace(/_/g, ' ');

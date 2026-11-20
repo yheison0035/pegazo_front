@@ -104,6 +104,8 @@ const TYPE_ROLES = [
   'PROFESIONAL',
   'MESERO',
   'COCINERO',
+  'ANALISTA',
+  'COBRADOR',
 ];
 
 function Editor({ item, onClose, onSaved }) {

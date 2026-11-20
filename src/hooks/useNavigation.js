@@ -130,6 +130,10 @@ export default function useNavigation() {
   // Gating: cada catálogo hereda la visibilidad (vertical + plan) de su módulo
   // padre. Así nunca aparece en una vertical que no usa el módulo.
   const GATING_PARENT = {
+    simulador: 'prestamos',
+    ruta: 'prestamos',
+    abonos: 'prestamos',
+    productos: 'prestamos',
     'expense-categories': 'expenses',
     'charge-categories': 'employee-charges',
     'payment-methods': 'sales',
@@ -141,6 +145,10 @@ export default function useNavigation() {
   // del gating (ej: métodos de pago se agrupan bajo Caja, pero se muestran
   // siempre que haya ventas; si no hay Caja en la vertical, quedan sueltos).
   const NEST_PARENT = {
+    simulador: 'prestamos',
+    ruta: 'prestamos',
+    abonos: 'prestamos',
+    productos: 'prestamos',
     'expense-categories': 'expenses',
     'charge-categories': 'employee-charges',
     'payment-methods': 'cash',
@@ -150,6 +158,7 @@ export default function useNavigation() {
   };
   // Etiqueta del sub-ítem que abre la vista propia del módulo padre.
   const SELF_LABEL = {
+    prestamos: 'Lista de préstamos',
     expenses: 'Lista de gastos',
     'employee-charges': 'Lista de cargos',
     cash: 'Ver caja',

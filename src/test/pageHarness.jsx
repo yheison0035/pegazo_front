@@ -12,6 +12,7 @@ export const BUSINESS_TYPES_SMOKE = [
   'ODONTOLOGIA',
   'TECNOLOGIA',
   'LAVADO_VEHICULOS',
+  'FINANCIERA',
 ];
 
 export function fakeUser(type = 'COMERCIO', role = 'SUPER_ADMIN') {
@@ -77,6 +78,16 @@ const financials = {
 // Fixtures específicos (regex de la ruta → cuerpo). Lo que no esté aquí
 // recibe la forma genérica de lista o de detalle.
 export const FIXTURES = [
+  // Préstamos (tipo FINANCIERA): formas reales de /loans para la prueba de humo.
+  [/^\/loans\/settings/, { success: true, data: { defaultInterestRate: 3, defaultMoraRate: null, graceDays: 0, defaultFrequency: 'MENSUAL', defaultAmortization: 'SIMPLE', rateConversion: 'PROPORCIONAL', roundTo: 1, requireApproval: false, excludeWeekdays: [], allocationOrder: ['MORA', 'INTERES', 'CAPITAL'], usuryRateMonthly: null, collectorCanRegisterPayments: true, requireCashForDisbursement: false, maxTerm: null, minAmount: null, maxAmount: null } }],
+  [/^\/loans\/summary/, { success: true, data: { portfolio: 0, pendingCapital: 0, pendingInterest: 0, moraAccrued: 0, activeLoans: 0, pendingApproval: 0, approvedNotDisbursed: 0, overdueLoans: 0, overdueAmount: 0, moraIndex: 0, aging: { d0_30: 0, d31_60: 0, d61_90: 0, d90p: 0 }, placedMonth: { amount: 0, count: 0 }, collectedToday: { amount: 0, count: 0, capital: 0, interest: 0, mora: 0 }, collectedMonth: { amount: 0, count: 0, capital: 0, interest: 0, mora: 0 }, upcoming7: { count: 0, amount: 0 }, byCollector: [], topOverdue: [] } }],
+  [/^\/loans\/collector\/route/, { success: true, data: { date: '2026-01-01', collectorId: 1, dueToday: [], overdue: [], upcoming: [], totals: { loans: 0, toCollectToday: 0, overdueAmount: 0, collectedToday: 0, collectedCashToday: 0, collectedCount: 0, portfolio: 0 } } }],
+  [/^\/loans\/payments\/history/, { success: true, data: { items: [], totals: { amount: 0, capital: 0, interest: 0, mora: 0, count: 0 } } }],
+  [/^\/loans\/products/, { success: true, data: [] }],
+  [/^\/loans\/customers\/\d+\/profile/, { success: true, data: { customer: { id: 1, name: 'Cliente Prueba' }, profile: null, outstandingCapital: 0, availableCredit: null, effectiveRate: { rate: 3, source: 'COMPANY' } } }],
+  [/^\/loans\/simulate/, { success: true, data: { terms: { principal: 0, termCount: 1, interestRate: 3, rateSource: 'COMPANY', moraRate: 3, graceDays: 0, frequency: 'MENSUAL', amortization: 'SIMPLE', roundTo: 1 }, plan: { principal: 0, totalInterest: 0, totalAmount: 0, installmentAmount: 0, installments: [], firstDueDate: '2026-01-01', lastDueDate: '2026-01-01', periodicRatePercent: 3, effectiveAnnualRatePercent: 42.58 }, warnings: [], availableCredit: null, product: null, effectiveAnnualRatePercent: 42.58 } }],
+  [/^\/loans\/\d+$/, { success: true, data: { id: 1, code: 'PR-000001', status: 'DESEMBOLSADO', principal: 0, interestRate: 0, moraRate: 0, graceDays: 0, frequency: 'MENSUAL', amortization: 'SIMPLE', termCount: 1, totalInterest: 0, totalAmount: 0, customer: { id: 1, name: 'Cliente Prueba' }, collector: null, product: null, local: null, installments: [], payments: [], summary: { pendingCapital: 0, pendingInterest: 0, moraAccrued: 0, pendingTotal: 0, paidTotal: 0, paidCapital: 0, paidInterest: 0, paidMora: 0, overdueDays: 0, overdueAmount: 0, overdueInstallments: 0, nextDueDate: null, nextInstallmentAmount: 0, progressPercent: 0, status: 'AL_DIA', principal: 0, totalInterest: 0, totalAmount: 0 } } }],
+  [/^\/loans(\?|$)/, { success: true, data: { items: [], kpis: { count: 0, activeCount: 0, portfolio: 0, pendingCapital: 0, pendingInterest: 0, moraAccrued: 0, overdueCount: 0, overdueAmount: 0, pendingTotal: 0 } } }],
   [/^\/accounting\/financials/, { success: true, data: financials }],
   [/^\/accounting\/journal/, { success: true, data: { entries: [], totals: { debit: 0, credit: 0 } } }],
   [/^\/accounting\/ledger/, { success: true, data: { accounts: [] } }],

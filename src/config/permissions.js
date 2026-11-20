@@ -24,6 +24,7 @@ export const ROLE_PERMISSIONS = {
     services: ['view', 'create', 'edit', 'delete'],
     appointments: ['view', 'create', 'edit', 'delete'],
     users: ['view', 'create', 'edit', 'delete'],
+    prestamos: ['view', 'create', 'edit', 'delete', 'export'],
   },
 
   ASESOR: {
@@ -115,5 +116,15 @@ export const ROLE_PERMISSIONS = {
     brands: ['view', 'create', 'edit'],
     services: ['view', 'create', 'edit'],
     appointments: ['view', 'create', 'edit'],
+  },
+
+  // Préstamos (FINANCIERA). Analista: estudia y crea solicitudes (no desembolsa
+  // ni anula). Cobrador: solo su cartera, registra abonos.
+  ANALISTA: {
+    customers: ['view', 'create', 'edit', 'export'],
+    prestamos: ['view', 'create', 'export'],
+  },
+  COBRADOR: {
+    prestamos: ['view', 'create'],
   },
 };

@@ -19,6 +19,8 @@ const BASE_LABELS = {
   PROFESIONAL: 'Profesional',
   BARBERO: 'Profesional',
   CONTADOR: 'Contador',
+  ANALISTA: 'Analista de crédito',
+  COBRADOR: 'Cobrador',
 };
 
 // Roles cuyo nombre visible se toma de la terminología del negocio (attendant):
@@ -70,6 +72,9 @@ const ROLES_BY_TYPE = {
   ASADERO: ['ADMIN', 'CAJA', 'MESERO', 'COCINERO'],
   BAR: ['ADMIN', 'CAJA', 'MESERO', 'COCINERO'],
   PIZZERIA: ['ADMIN', 'CAJA', 'MESERO', 'COCINERO'],
+  // Financiera / créditos: analista (estudia y solicita), cobrador (su cartera)
+  // y caja (desembolsos y abonos en oficina).
+  FINANCIERA: ['ADMIN', 'ANALISTA', 'COBRADOR', 'CAJA'],
 };
 
 // Retail de mostrador: comparten el mismo set.

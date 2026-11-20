@@ -31,6 +31,9 @@ import {
   CreditCardIcon,
   ReceiptPercentIcon,
   BeakerIcon,
+  MapPinIcon,
+  RectangleStackIcon,
+  ClipboardDocumentListIcon,
 } from '@heroicons/react/24/outline';
 
 // El menú sigue un PASO A PASO de arriba hacia abajo, pensado para que cualquier
@@ -132,6 +135,45 @@ export const NAVIGATION = [
     ],
   },
 
+  // 2b. CRÉDITOS (tipo FINANCIERA): préstamos, simulador, ruta del cobrador,
+  // productos de crédito y abonos. Solo aparece si el tipo tiene 'prestamos'
+  // (los sub-ítems heredan de 'prestamos' en useNavigation).
+  {
+    section: 'Créditos',
+    items: [
+      {
+        name: 'Préstamos',
+        href: '/dashboard/prestamos',
+        icon: BanknotesIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN', 'COORDINADOR', 'ANALISTA', 'CAJA', 'COBRADOR', 'CONTADOR'],
+      },
+      {
+        name: 'Simulador de crédito',
+        href: '/dashboard/prestamos/simulador',
+        icon: CalculatorIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN', 'COORDINADOR', 'ANALISTA', 'CAJA', 'COBRADOR'],
+      },
+      {
+        name: 'Mi ruta de cobro',
+        href: '/dashboard/prestamos/ruta',
+        icon: MapPinIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN', 'COORDINADOR', 'COBRADOR'],
+      },
+      {
+        name: 'Abonos recibidos',
+        href: '/dashboard/prestamos/abonos',
+        icon: ClipboardDocumentListIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN', 'COORDINADOR', 'CAJA', 'COBRADOR', 'CONTADOR'],
+      },
+      {
+        name: 'Productos de crédito',
+        href: '/dashboard/prestamos/productos',
+        icon: RectangleStackIcon,
+        roles: ['SUPER_ADMIN', 'ADMIN'],
+      },
+    ],
+  },
+
   // 3. VENTAS — facturar y cobrar.
   {
     section: 'Ventas',
@@ -229,6 +271,7 @@ export const NAVIGATION = [
           'RECEPCIONISTA',
           'VENTAS',
           'CAJA',
+          'ANALISTA',
         ],
       },
       {
