@@ -40,6 +40,7 @@ const common = () => [
   on('GET', /^\/loans\/settings$/, { success: true, data: SETTINGS }),
   on('GET', /^\/loans\/products$/, { success: true, data: [] }),
   on('POST', /^\/loans\/simulate$/, { success: true, data: { terms: { interestRate: 3, rateSource: 'COMPANY', frequency: 'MENSUAL', amortization: 'SIMPLE' }, warnings: [{ code: 'USURY', message: 'La tasa supera la de referencia.' }], availableCredit: null } }),
+  on('GET', /^\/loans\/collectors$/, { success: true, data: [{ id: 7, name: 'CARLOS COBRA', phone: '', localId: 1, commissionCollectionRate: 5 }] }),
   on('GET', /^\/users$/, list([{ id: 7, name: 'CARLOS COBRA', role: 'COBRADOR', status: 'ACTIVO' }])),
   ...baseRoutes(),
 ];

@@ -56,6 +56,7 @@ function loansApi() {
     on('POST', /^\/loans$/, ok({ id: 9, code: 'PR-000009', status: 'DESEMBOLSADO' })),
     on('POST', /^\/loans\/1\/payments$/, { success: true, data: { payment: { id: 51, amount: 110500 }, settled: false, loan: LOAN } }),
     on('GET', /^\/customers$/, list([{ id: 1, name: 'ANA PÉREZ', document: '123', phone: '3001112233' }, { id: 2, name: 'LUIS GÓMEZ' }])),
+    on('GET', /^\/loans\/collectors$/, { success: true, data: [{ id: 7, name: 'CARLOS COBRA', phone: '', localId: 1, commissionCollectionRate: 5 }] }),
     on('GET', /^\/users$/, list([{ id: 1, name: 'Dueño Prueba', role: 'SUPER_ADMIN', status: 'ACTIVO' }, { id: 7, name: 'CARLOS COBRA', role: 'COBRADOR', status: 'ACTIVO' }])),
     ...baseRoutes(),
   ]);

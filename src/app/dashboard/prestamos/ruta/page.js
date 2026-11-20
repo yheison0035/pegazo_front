@@ -4,8 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import useLiveRefresh from '@/hooks/useLiveRefresh';
 import { MapPinIcon, BanknotesIcon, PhoneIcon } from '@heroicons/react/24/outline';
 import LoanGuard, { hasLoansModule } from '@/components/prestamos/LoanGuard';
-import { getCollectorRoute, LOANS_CHANGED_EVENT } from '@/lib/api/routes/loans';
-import { getUsers } from '@/lib/api/routes/users';
+import { getCollectorRoute, getLoanCollectors, LOANS_CHANGED_EVENT } from '@/lib/api/routes/loans';
 import { formatCOP, formatDateOnly } from '@/lib/api/utils/utils';
 import { overdueTone } from '@/lib/loanPlan';
 import { useAuth } from '@/context/authContext';
@@ -79,9 +78,8 @@ export default function RutaPage() {
     if (isCollector || !enabled) return undefined;
     (async () => {
       try {
-        const u = await getUsers({ status: 'ACTIVO', limit: 1000 });
-        const users = Array.isArray(u?.data) ? u.data : [];
-        const cob = users.filter((x) => x.role === 'COBRADOR');
+        const u = await getLoanCollectors();
+        const cob = Array.isArray(u?.data) ? u.data : [];
         setCollectors(cob);
         if (cob[0] && !collectorId) setCollectorId(String(cob[0].id));
       } catch {

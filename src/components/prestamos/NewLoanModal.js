@@ -3,11 +3,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { XMarkIcon, MagnifyingGlassIcon, UserPlusIcon } from '@heroicons/react/24/outline';
 import { getCustomers } from '@/lib/api/routes/customers';
-import { getUsers } from '@/lib/api/routes/users';
 import {
   createLoan,
   getLoanProducts,
   getLoanSettings,
+  getLoanCollectors,
   simulateLoan,
   emitLoansChanged,
 } from '@/lib/api/routes/loans';
@@ -72,12 +72,10 @@ export default function NewLoanModal({ open, onClose, onCreated, initial = {} })
     if (!open) return;
     (async () => {
       try {
-        const [s, p, u] = await Promise.all([getLoanSettings(), getLoanProducts(), getUsers({ status: 'ACTIVO', limit: 1000 })]);
+        const [s, p, u] = await Promise.all([getLoanSettings(), getLoanProducts(), getLoanCollectors()]);
         setSettings(s?.data || null);
         setProducts(Array.isArray(p?.data) ? p.data : []);
-        const users = Array.isArray(u?.data) ? u.data : Array.isArray(u) ? u : [];
-        const cobradores = users.filter((x) => x.role === 'COBRADOR');
-        setCollectors(cobradores.length ? cobradores : users);
+        setCollectors(Array.isArray(u?.data) ? u.data : []);
       } catch {
         /* los selects quedan vacíos; el backend valida */
       }

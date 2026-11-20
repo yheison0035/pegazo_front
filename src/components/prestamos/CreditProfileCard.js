@@ -2,8 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { BanknotesIcon, PencilSquareIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { getCreditProfile, saveCreditProfile, getLoanProducts, getLoans } from '@/lib/api/routes/loans';
-import { getUsers } from '@/lib/api/routes/users';
+import { getCreditProfile, saveCreditProfile, getLoanProducts, getLoans, getLoanCollectors } from '@/lib/api/routes/loans';
 import { formatCOP, formatDateOnly } from '@/lib/api/utils/utils';
 import { LOAN_STATUS_LABEL } from '@/lib/loanPlan';
 import { useAuth } from '@/context/authContext';
@@ -69,11 +68,9 @@ export default function CreditProfileCard({ customerId, customer }) {
     });
     setEdit(true);
     try {
-      const [p, u] = await Promise.all([getLoanProducts(), getUsers({ status: 'ACTIVO', limit: 1000 })]);
+      const [p, u] = await Promise.all([getLoanProducts(), getLoanCollectors()]);
       setProducts(Array.isArray(p?.data) ? p.data : []);
-      const users = Array.isArray(u?.data) ? u.data : [];
-      const cob = users.filter((x) => x.role === 'COBRADOR');
-      setCollectors(cob.length ? cob : users);
+      setCollectors(Array.isArray(u?.data) ? u.data : []);
     } catch {
       /* selects vacíos */
     }

@@ -53,6 +53,7 @@ function api() {
     on('POST', /^\/loans\/1\/refinance$/, ok({ id: 9, code: 'PR-000009' })),
     on('POST', /^\/loans\/1\/reminder$/, ok({ sent: true, to: 'ana@x.com' })),
     on('POST', /^\/loans\/1\/payments$/, { success: true, data: { payment: { id: 51, amount: 110500, method: 'EFECTIVO', paidAt: '2026-02-15T15:00:00.000Z', capitalApplied: 100000, interestApplied: 10000, moraApplied: 500 }, settled: false, loan: { ...LOAN_MORA, summary: { ...LOAN_MORA.summary, pendingTotal: 110000, nextDueDate: '2026-03-10', nextInstallmentAmount: 110000 } } } }),
+    on('GET', /^\/loans\/collectors$/, { success: true, data: [{ id: 7, name: 'CARLOS COBRA', phone: '', localId: 1, commissionCollectionRate: 5 }] }),
     on('GET', /^\/users$/, list([{ id: 7, name: 'CARLOS COBRA', role: 'COBRADOR', status: 'ACTIVO' }])),
     on('GET', /^\/customers$/, list([])),
     ...baseRoutes(),

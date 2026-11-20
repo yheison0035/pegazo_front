@@ -63,3 +63,6 @@ export const settleLoan = (id, dto = {}) => apiFetch(`/loans/${id}/settle`, json
 export const refinanceLoan = (id, dto) => apiFetch(`/loans/${id}/refinance`, json('POST', dto));
 export const sendLoanReminder = (id) => apiFetch(`/loans/${id}/reminder`, json('POST'));
 export const getLoansMonthlyReport = (params = {}) => apiFetch(`/loans/reports/monthly${qs(params)}`);
+
+// Cobradores activos de la empresa (para asignar cartera / filtrar).
+export const getLoanCollectors = () => apiFetch('/loans/collectors');

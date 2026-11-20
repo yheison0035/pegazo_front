@@ -79,6 +79,7 @@ const financials = {
 // recibe la forma genérica de lista o de detalle.
 export const FIXTURES = [
   // Préstamos (tipo FINANCIERA): formas reales de /loans para la prueba de humo.
+  [/^\/loans\/collectors/, { success: true, data: [{ id: 7, name: 'Cobrador Prueba', phone: '', localId: 1, commissionCollectionRate: null }] }],
   [/^\/loans\/reports\/monthly/, { success: true, data: { months: [{ month: '2026-01', placed: 0, placedCount: 0, collected: 0, capital: 0, interest: 0, mora: 0, paymentsCount: 0 }], totals: { placed: 0, collected: 0, interest: 0, mora: 0 } } }],
   [/^\/loans\/\d+\/settlement\/quote/, { success: true, data: { capital: 0, interest: 0, mora: 0, total: 0, forgivenInterest: 0, installmentNumbersDue: [], pendingTotalNormal: 0 } }],
   [/^\/loans\/\d+\/extra-capital\/quote/, { success: true, data: { settled: false, remainingCapital: 0, removedNumbers: [], newInstallments: [], newTermCount: 0, interestBefore: 0, interestAfter: 0, installmentBefore: 0, installmentAfter: 0, pendingCapitalBefore: 0 } }],

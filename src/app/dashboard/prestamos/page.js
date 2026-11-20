@@ -11,8 +11,7 @@ import {
   CalculatorIcon,
 } from '@heroicons/react/24/outline';
 import LoanGuard, { LOAN_ROLES, hasLoansModule } from '@/components/prestamos/LoanGuard';
-import { getLoans, getLoansSummary, LOANS_CHANGED_EVENT } from '@/lib/api/routes/loans';
-import { getUsers } from '@/lib/api/routes/users';
+import { getLoans, getLoansSummary, getLoanCollectors, LOANS_CHANGED_EVENT } from '@/lib/api/routes/loans';
 import { formatCOP, formatDateOnly } from '@/lib/api/utils/utils';
 import { FREQ_LABEL, overdueTone } from '@/lib/loanPlan';
 import { useAuth } from '@/context/authContext';
@@ -97,9 +96,8 @@ export default function PrestamosPage() {
     if (role === 'COBRADOR' || !enabled) return undefined;
     (async () => {
       try {
-        const u = await getUsers({ status: 'ACTIVO', limit: 1000 });
-        const users = Array.isArray(u?.data) ? u.data : [];
-        setCollectors(users.filter((x) => x.role === 'COBRADOR'));
+        const u = await getLoanCollectors();
+        setCollectors(Array.isArray(u?.data) ? u.data : []);
       } catch {
         setCollectors([]);
       }
@@ -217,7 +215,11 @@ export default function PrestamosPage() {
                     <tr key={l.id} onClick={() => setDetail(l)} className="cursor-pointer hover:bg-orange-50/40">
                       <td className="px-3 py-2 font-medium text-gray-900">{l.code}</td>
                       <td className="px-3 py-2">
-                        <Link href={`/dashboard/customers/${l.customer?.id}`} onClick={(e) => e.stopPropagation()} className="font-medium text-gray-800 hover:text-orange-600">{l.customer?.name}</Link>
+                        {role === 'COBRADOR' ? (
+                          <span className="font-medium text-gray-800">{l.customer?.name}</span>
+                        ) : (
+                          <Link href={`/dashboard/customers/${l.customer?.id}`} onClick={(e) => e.stopPropagation()} className="font-medium text-gray-800 hover:text-orange-600">{l.customer?.name}</Link>
+                        )}
                         <span className="block text-xs text-gray-400">{l.customer?.document || ''}{l.customer?.phone ? ` · ${l.customer.phone}` : ''}</span>
                       </td>
                       <td className="px-3 py-2 text-gray-600">{l.termCount} × {FREQ_LABEL[l.frequency] || l.frequency}<span className="block text-xs text-gray-400">{l.interestRate}% mensual</span></td>

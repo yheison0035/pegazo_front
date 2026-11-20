@@ -65,6 +65,8 @@ export default function DashboardHome() {
   // Préstamos (tipo FINANCIERA): resumen de cartera en el Inicio.
   const hasPrestamos = modules.includes('prestamos');
   const isCollector = usuario?.role === 'COBRADOR';
+  // Negocio de créditos sin POS: los widgets de ventas no aplican.
+  const isLender = hasPrestamos && !modules.includes('sales');
   // Datos financieros (utilidad, IVA) solo para dueño/administrador.
   const isAdmin = ['SUPER_ADMIN', 'ADMIN'].includes(usuario?.role);
   // El barbero/profesional solo ve SU información (nada del negocio).
@@ -148,9 +150,12 @@ export default function DashboardHome() {
       return;
     }
 
-    getHomeSummary(activeLocal)
-      .then((r) => setHome(r?.data || null))
-      .catch(() => setHome(null));
+    // El cobrador (préstamos) no consulta el resumen de ventas del negocio.
+    if (!isCollector) {
+      getHomeSummary(activeLocal)
+        .then((r) => setHome(r?.data || null))
+        .catch(() => setHome(null));
+    }
     if (hasInventory) {
       getLowStock(activeLocal)
         .then((r) => setLowStock(r?.data || []))
@@ -191,6 +196,7 @@ export default function DashboardHome() {
     hasInventory,
     hasCartera,
     hasPrestamos,
+    isCollector,
     activeLocal,
   ]);
 
@@ -282,6 +288,7 @@ export default function DashboardHome() {
       loans,
       hasPrestamos,
       isCollector,
+      isLender,
       bankDeposits,
       isServices,
       modules,
@@ -308,6 +315,7 @@ export default function DashboardHome() {
       loans,
       hasPrestamos,
       isCollector,
+      isLender,
       bankDeposits,
       isServices,
       modules,

@@ -4,8 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import useLiveRefresh from '@/hooks/useLiveRefresh';
 import { ClipboardDocumentListIcon } from '@heroicons/react/24/outline';
 import LoanGuard, { hasLoansModule } from '@/components/prestamos/LoanGuard';
-import { getLoanPaymentsHistory, LOANS_CHANGED_EVENT } from '@/lib/api/routes/loans';
-import { getUsers } from '@/lib/api/routes/users';
+import { getLoanPaymentsHistory, getLoanCollectors, LOANS_CHANGED_EVENT } from '@/lib/api/routes/loans';
 import { formatCOP, formatDateTime } from '@/lib/api/utils/utils';
 import { useAuth } from '@/context/authContext';
 import { useLocalScope } from '@/context/localScopeContext';
@@ -41,8 +40,8 @@ export default function AbonosPage() {
     if (role === 'COBRADOR' || !enabled) return undefined;
     (async () => {
       try {
-        const u = await getUsers({ status: 'ACTIVO', limit: 1000 });
-        setCollectors((Array.isArray(u?.data) ? u.data : []).filter((x) => x.role === 'COBRADOR'));
+        const u = await getLoanCollectors();
+        setCollectors(Array.isArray(u?.data) ? u.data : []);
       } catch {
         setCollectors([]);
       }

@@ -261,7 +261,7 @@ export const WIDGETS = [
   {
     id: 'hoy',
     name: 'Resumen de hoy',
-    applies: () => true,
+    applies: (data) => !data.isLender,
     Render: ({ data }) => {
       const { home } = data;
       const byMethod = home?.today?.byMethod || [];
@@ -322,7 +322,7 @@ export const WIDGETS = [
     id: 'grafica',
     name: 'Gráfica de ventas',
     wide: true,
-    applies: () => true,
+    applies: (data) => !data.isLender,
     Render: ({ data }) => (
       <SalesTrendChart title={data.t.salePlural} localId={data.activeLocal} />
     ),
@@ -488,7 +488,7 @@ export const WIDGETS = [
   {
     id: 'mes',
     name: 'Resumen del mes',
-    applies: (data) => data.isAdmin,
+    applies: (data) => data.isAdmin && !data.isLender,
     Render: ({ data }) => {
       const mth = data.home?.month;
       const profitAccent =
